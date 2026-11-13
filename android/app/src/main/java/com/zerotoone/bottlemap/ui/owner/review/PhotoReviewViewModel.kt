@@ -3,6 +3,7 @@ package com.zerotoone.bottlemap.ui.owner.review
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.zerotoone.bottlemap.network.BottleMapApiException
 import com.zerotoone.bottlemap.network.menuWriteErrorText
 import com.zerotoone.bottlemap.data.owner.review.PhotoReviewRepository
 import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewRules.OptionField
@@ -19,6 +20,33 @@ sealed interface PhotoReviewLoad {
     data object Loading : PhotoReviewLoad
     data class Error(val message: String) : PhotoReviewLoad
     data class Ready(val review: PhotoReviewState) : PhotoReviewLoad
+}
+
+enum class PublishFailure { NETWORK, SERVER, FORBIDDEN, VALIDATION, CONFLICT, AUTH, UNKNOWN }
+
+sealed interface PublishOutcome {
+    data class Submitting(val summary: ReviewStats, val newWhisky: Boolean) : PublishOutcome
+    data class Checking(val summary: ReviewStats, val newWhisky: Boolean) : PublishOutcome
+    data class Success(val summary: ReviewStats, val newWhisky: Boolean) : PublishOutcome
+    data class Failed(
+        val summary: ReviewStats,
+        val newWhisky: Boolean,
+        val reason: PublishFailure,
+    ) : PublishOutcome
+}
+
+internal fun classifyPublishFailure(error: Throwable): PublishFailure {
+    val api = error as? BottleMapApiException
+    return when {
+        api?.httpStatus == 401 || api?.code == "UNAUTHORIZED" -> PublishFailure.AUTH
+        api?.httpStatus == 403 -> PublishFailure.FORBIDDEN
+        api?.httpStatus == 409 -> PublishFailure.CONFLICT
+        api?.httpStatus == 422 || error is IllegalArgumentException ->
+            PublishFailure.VALIDATION
+        api?.code == "NETWORK_ERROR" -> PublishFailure.NETWORK
+        api?.httpStatus != null && api.httpStatus >= 500 -> PublishFailure.SERVER
+        else -> PublishFailure.UNKNOWN
+    }
 }
 
 sealed interface PhotoReviewEvent {
@@ -39,6 +67,8 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
     val load: StateFlow<PhotoReviewLoad> = _load.asStateFlow()
     private val _publishing = MutableStateFlow(false)
     val publishing: StateFlow<Boolean> = _publishing.asStateFlow()
+    private val _publishOutcome = MutableStateFlow<PublishOutcome?>(null)
+    val publishOutcome: StateFlow<PublishOutcome?> = _publishOutcome.asStateFlow()
 
     private val _events = Channel<PhotoReviewEvent>(Channel.BUFFERED)
     val events = _events.receiveAsFlow()
@@ -118,7 +148,7 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
 
     fun leave() {
         if (_publishing.value) return
-        review?.let { set(it.copy(modal = null)) }
+        if (_publishOutcome.value == null) review?.let { set(it.copy(modal = null)) }
         _events.trySend(PhotoReviewEvent.Leave)
     }
 
@@ -165,27 +195,85 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
         if (PhotoReviewRules.stats(s).canPublish) set(s.copy(modal = ReviewModal(ReviewModalType.PUBLISH)))
     }
 
-    fun confirmPublish() {
+    private fun summaryFor(state: PhotoReviewState) =
+        PhotoReviewRules.stats(state) to state.items.any {
+            !it.excluded && it.mergedInto == null && it.type == ReviewItemType.WHISKY &&
+                it.linkedProductId == null && it.match == ReviewMatch.NEW
+        }
+
+    private fun submit(state: PhotoReviewState, summary: ReviewStats, newWhisky: Boolean) {
         if (_publishing.value) return
-        val s = review ?: return
-        if (s.modal?.type != ReviewModalType.PUBLISH) return
-        if (!PhotoReviewRules.stats(s).canPublish) return
-        // Guard before launching: rapid taps must never submit two atomic
-        // review-and-apply calls for the same server reviewVersion.
         _publishing.value = true
+        _publishOutcome.value = PublishOutcome.Submitting(summary, newWhisky)
         viewModelScope.launch {
             try {
-                repository.publish(s)
-                _publishing.value = false
-                leave()
+                repository.publish(state)
+                _publishOutcome.value = PublishOutcome.Success(summary, newWhisky)
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (error: Exception) {
-                set(s.copy(modal = null))
-                toast(menuWriteErrorText(error))
+                _publishOutcome.value = PublishOutcome.Failed(
+                    summary, newWhisky, classifyPublishFailure(error))
             } finally {
                 _publishing.value = false
             }
+        }
+    }
+
+    fun confirmPublish() {
+        if (_publishing.value || _publishOutcome.value != null) return
+        val state = review ?: return
+        if (state.modal?.type != ReviewModalType.PUBLISH ||
+            !PhotoReviewRules.stats(state).canPublish) return
+        val (summary, newWhisky) = summaryFor(state)
+        set(state.copy(modal = null))
+        submit(state, summary, newWhisky)
+    }
+
+    /** Unknown responses can already be committed. Never resubmit before GET. */
+    fun checkPublishStatus(retryWhenReady: Boolean = false) {
+        if (_publishing.value) return
+        val result = _publishOutcome.value as? PublishOutcome.Failed ?: return
+        _publishing.value = true
+        _publishOutcome.value = PublishOutcome.Checking(result.summary, result.newWhisky)
+        viewModelScope.launch {
+            try {
+                when (repository.checkPublishedStatus()) {
+                    true -> _publishOutcome.value =
+                        PublishOutcome.Success(result.summary, result.newWhisky)
+                    false -> if (retryWhenReady && result.reason == PublishFailure.NETWORK &&
+                        review?.let { PhotoReviewRules.stats(it).canPublish } == true) {
+                        _publishing.value = false
+                        submit(requireNotNull(review), result.summary, result.newWhisky)
+                        return@launch
+                    } else {
+                        _publishOutcome.value = null
+                        toast("게시되지 않았어요. 검수 내용을 확인한 뒤 다시 게시해 주세요.")
+                    }
+                    null -> _publishOutcome.value = PublishOutcome.Failed(
+                        result.summary, result.newWhisky, PublishFailure.UNKNOWN)
+                }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                _publishOutcome.value = PublishOutcome.Failed(
+                    result.summary, result.newWhisky, PublishFailure.UNKNOWN)
+            } finally {
+                if (_publishOutcome.value !is PublishOutcome.Submitting)
+                    _publishing.value = false
+            }
+        }
+    }
+
+    fun returnToReview() {
+        if (_publishing.value) return
+        when ((_publishOutcome.value as? PublishOutcome.Failed)?.reason) {
+            PublishFailure.NETWORK, PublishFailure.VALIDATION, PublishFailure.CONFLICT,
+            PublishFailure.AUTH -> {
+                _publishOutcome.value = null
+                review?.let { set(it.copy(modal = null)) }
+            }
+            else -> Unit
         }
     }
 

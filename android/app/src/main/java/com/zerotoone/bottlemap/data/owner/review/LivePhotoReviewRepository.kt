@@ -157,6 +157,19 @@ class LivePhotoReviewRepository(
         }?.imageUrl
     }
 
+    override suspend fun checkPublishedStatus(): Boolean? {
+        val id = activeImportId ?: return null
+        val current = remote.getMenuImport(id)
+        if (current.menuImportId != id) return null
+        if (isAppliedReviewImport(current, id)) {
+            runCatching { owner.pollPhotoImportLive(id) }
+            finishPublishedDraft(id)
+            return true
+        }
+        return if (current.status == "ready_for_review" &&
+            current.reviewVersion == loaded?.reviewVersion) false else null
+    }
+
     /** Durable device-local draft; never claims a server-side write. */
     override suspend fun saveDraft(state: PhotoReviewState) {
         val id = activeImportId ?: return

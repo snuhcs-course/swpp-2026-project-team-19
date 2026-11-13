@@ -95,9 +95,11 @@ fun PhotoReviewScreen(
     vm: PhotoReviewViewModel,
     onLeave: () -> Unit,
     initialFocusItemId: String? = null,
+    onReauthenticate: () -> Unit = onLeave,
 ) {
     val load by vm.load.collectAsStateWithLifecycle()
     val publishing by vm.publishing.collectAsStateWithLifecycle()
+    val publishOutcome by vm.publishOutcome.collectAsStateWithLifecycle()
     var toast by remember { mutableStateOf<Pair<Long, String>?>(null) }
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
@@ -147,12 +149,38 @@ fun PhotoReviewScreen(
 
     BackHandler {
         if (!publishing) {
-            if (state?.modal != null) vm.dismissModal() else vm.leave()
+            when (val outcome = publishOutcome) {
+                null -> if (state?.modal != null) vm.dismissModal() else vm.leave()
+                is PublishOutcome.Success -> vm.leave()
+                is PublishOutcome.Failed -> when (outcome.reason) {
+                    PublishFailure.UNKNOWN, PublishFailure.SERVER ->
+                        toast = System.nanoTime() to "게시 상태를 먼저 확인해 주세요."
+                    PublishFailure.FORBIDDEN -> vm.leave()
+                    else -> vm.returnToReview()
+                }
+                else -> Unit
+            }
         }
     }
 
     Box(Modifier.fillMaxSize().background(UxColor.bg).testTag("photo-review-screen")) {
-        when (val current = load) {
+        val result = publishOutcome
+        if (result != null) {
+            PublicationResultScreen(
+                result, onBack = {
+                    when (result) {
+                        is PublishOutcome.Success -> vm.leave()
+                        is PublishOutcome.Failed -> vm.returnToReview()
+                        else -> Unit
+                    }
+                },
+                onLeave = vm::leave,
+                onReturn = vm::returnToReview,
+                onRetry = { vm.checkPublishStatus(retryWhenReady = true) },
+                onCheck = { vm.checkPublishStatus() },
+                onLogin = onReauthenticate,
+            )
+        } else when (val current = load) {
             PhotoReviewLoad.Loading -> Column(Modifier.fillMaxSize()) {
                 ReviewAppBar(vm::leave)
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -244,12 +272,12 @@ private fun buildRows(s: PhotoReviewState): List<ReviewRow> {
  * Only the highlighted step changes to "확인" (step 2).
  */
 @Composable
-private fun ReviewAppBar(onBack: () -> Unit) {
+private fun ReviewAppBar(onBack: () -> Unit, step: Int = 2) {
     Column(Modifier.fillMaxWidth().background(UxColor.bg)) {
         Box(Modifier.testTag("review-back")) { V4Toolbar(null, onBack) }
         Column(Modifier.fillMaxWidth().padding(horizontal = 18.dp)
             .testTag("review-steps")) {
-            MenuPhotoSteps(step = 2)
+            MenuPhotoSteps(step = step)
         }
     }
 }
@@ -477,6 +505,190 @@ private fun SourcePhotoModal(s: PhotoReviewState, modal: ReviewModal, vm: PhotoR
                 refreshSourceUrl = { vm.refreshSourcePhotoUrl(merged?.sourceItemId ?: original.id) })
             if (!hasBox) Text("사진에서 메뉴 위치를 특정하지 못했어요.", style = uxText(11f, 400, UxColor.sub),
                 modifier = Modifier.padding(top = 10.dp))
+        }
+    }
+}
+
+
+/** v22 in-flow result states. The three figures are frozen from the submitted review,
+ * not recalculated from the refreshed owner menu or the excluded OCR children.
+ */
+@Composable
+private fun PublicationResultScreen(
+    result: PublishOutcome,
+    onBack: () -> Unit,
+    onLeave: () -> Unit,
+    onReturn: () -> Unit,
+    onRetry: () -> Unit,
+    onCheck: () -> Unit,
+    onLogin: () -> Unit,
+) {
+    val success = result is PublishOutcome.Success
+    val busy = result is PublishOutcome.Submitting || result is PublishOutcome.Checking
+    val failure = (result as? PublishOutcome.Failed)?.reason
+    val summary = when (result) {
+        is PublishOutcome.Submitting -> result.summary
+        is PublishOutcome.Checking -> result.summary
+        is PublishOutcome.Success -> result.summary
+        is PublishOutcome.Failed -> result.summary
+    }
+    val newWhisky = when (result) {
+        is PublishOutcome.Submitting -> result.newWhisky
+        is PublishOutcome.Checking -> result.newWhisky
+        is PublishOutcome.Success -> result.newWhisky
+        is PublishOutcome.Failed -> result.newWhisky
+    }
+    val title = when {
+        success -> "메뉴를 추가했어요."
+        result is PublishOutcome.Submitting -> "메뉴를 게시하고 있어요."
+        result is PublishOutcome.Checking -> "게시 상태를 확인하고 있어요."
+        else -> when (failure) {
+            PublishFailure.NETWORK -> "메뉴를 게시하지 못했어요."
+            PublishFailure.SERVER, PublishFailure.UNKNOWN -> "게시 결과를 확인하지 못했어요."
+            PublishFailure.FORBIDDEN -> "메뉴 게시 권한이 없어요."
+            PublishFailure.VALIDATION -> "검수 내용을 다시 확인해 주세요."
+            PublishFailure.CONFLICT -> "메뉴 정보가 변경되었어요."
+            PublishFailure.AUTH -> "다시 로그인이 필요해요."
+            null -> ""
+        }
+    }
+    val description = when {
+        success -> "확인한 메뉴가 매장 메뉴에 반영됐어요."
+        result is PublishOutcome.Submitting -> "메뉴가 반영되는 동안 잠시만 기다려 주세요."
+        result is PublishOutcome.Checking -> "게시 요청이 처리되었는지 확인하고 있어요."
+        else -> when (failure) {
+            PublishFailure.NETWORK -> "인터넷 연결을 확인한 뒤 다시 시도해 주세요."
+            PublishFailure.SERVER -> "서버에서 문제가 발생했어요. 이미 반영되었을 수 있으니 게시 상태를 먼저 확인해 주세요."
+            PublishFailure.UNKNOWN -> "요청이 이미 처리되었을 수 있어요. 다시 게시하기 전에 게시 상태를 확인해 주세요."
+            PublishFailure.FORBIDDEN -> "이 매장의 메뉴를 게시할 권한이 없어요. 매장 관리에서 권한 상태를 확인해 주세요."
+            PublishFailure.VALIDATION -> "게시할 수 없는 항목이 있어요. 검수 내용을 확인해 주세요."
+            PublishFailure.CONFLICT -> "다른 곳에서 메뉴 정보가 바뀌었을 수 있어요. 최신 내용을 확인한 뒤 다시 검수해 주세요."
+            PublishFailure.AUTH -> "로그인이 만료되었어요. 다시 로그인한 뒤 게시해 주세요."
+            null -> ""
+        }
+    }
+    val iconColor = when {
+        success -> UxColor.success
+        busy || failure == PublishFailure.UNKNOWN -> UxColor.gold
+        else -> UxColor.error
+    }
+    val iconBg = when {
+        success -> androidx.compose.ui.graphics.Color(0xFF263A30)
+        busy -> UxColor.elevated
+        failure == PublishFailure.UNKNOWN -> androidx.compose.ui.graphics.Color(0xFF3F3225)
+        else -> androidx.compose.ui.graphics.Color(0xFF3E2928)
+    }
+    val iconBorder = when {
+        success -> androidx.compose.ui.graphics.Color(0xFF456D55)
+        failure == PublishFailure.UNKNOWN -> androidx.compose.ui.graphics.Color(0xFF725638)
+        busy -> UxColor.outline
+        else -> androidx.compose.ui.graphics.Color(0xFF78514D)
+    }
+    Column(Modifier.fillMaxSize().testTag("review-publish-result")) {
+        ReviewAppBar(if (busy) ({}) else onBack, step = 3)
+        Column(
+            Modifier.fillMaxSize().padding(horizontal = 20.dp, vertical = 10.dp),
+            verticalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Column(Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState())
+                .padding(top = 35.dp), verticalArrangement = Arrangement.spacedBy(13.dp),
+                horizontalAlignment = Alignment.CenterHorizontally) {
+                Box(Modifier.size(72.dp).background(iconBg, RoundedCornerShape(22.dp))
+                    .border(1.dp, iconBorder, RoundedCornerShape(22.dp)),
+                    contentAlignment = Alignment.Center) {
+                    if (busy) CircularProgressIndicator(color = UxColor.gold,
+                        modifier = Modifier.size(37.dp), strokeWidth = 3.dp)
+                    else BmLineIcon(if (success) BmLineIconId.CHECK_CIRCLE else BmLineIconId.ALERT,
+                        38.dp, iconColor)
+                }
+                Spacer(Modifier.height(10.dp))
+                Text(title, style = uxText(25f, 760, lineHeight = 1.4f),
+                    textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+                Text(description, style = uxText(14f, 400, UxColor.sub, lineHeight = 1.7f),
+                    modifier = Modifier.fillMaxWidth())
+                if (success) {
+                    val names = listOf("위스키", "그 외 메뉴", "합계")
+                    val values = listOf(summary.ready.size, summary.other.size,
+                        summary.ready.size + summary.other.size)
+                    Row(Modifier.fillMaxWidth().padding(top = 10.dp)
+                        .background(UxColor.surface, RoundedCornerShape(13.dp))
+                        .border(1.dp, UxColor.line, RoundedCornerShape(13.dp))
+                        .padding(vertical = 17.dp, horizontal = 4.dp)) {
+                        names.forEachIndexed { index, name ->
+                            Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(name, style = uxText(11f, 400, UxColor.sub))
+                                Spacer(Modifier.height(3.dp))
+                                Text(values[index].toString(), style = uxText(22f, 750))
+                            }
+                        }
+                    }
+                    if (newWhisky) PublicationNote("새로운 위스키 안내",
+                        "새로 등록한 위스키는 다음 날부터 검색에 나와요.", critical = false)
+                }
+                if (busy) androidx.compose.material3.LinearProgressIndicator(
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                    color = UxColor.gold, trackColor = UxColor.line)
+                if (failure == PublishFailure.UNKNOWN || failure == PublishFailure.SERVER)
+                    PublicationNote(null,
+                        "중복 등록을 막기 위해 지금은 다시 게시할 수 없어요. 먼저 게시 상태를 확인해 주세요.",
+                        critical = true)
+                if (failure == PublishFailure.CONFLICT)
+                    PublicationNote(null,
+                        "현재 검수 내용은 유지돼요. 최신 메뉴 정보와 비교한 뒤 다시 게시할 수 있어요.",
+                        critical = true)
+            }
+            Column(Modifier.fillMaxWidth().padding(top = 12.dp, bottom = 14.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                when {
+                    success -> UxMainButton("메뉴 관리로", onLeave,
+                        Modifier.fillMaxWidth().testTag("review-result-leave"))
+                    busy -> Unit
+                    failure == PublishFailure.NETWORK -> {
+                        UxMainButton("다시 시도", onRetry, Modifier.fillMaxWidth())
+                        UxSecondaryButton("검수로 돌아가기", onReturn, Modifier.fillMaxWidth())
+                    }
+                    failure == PublishFailure.SERVER || failure == PublishFailure.UNKNOWN -> {
+                        UxMainButton("게시 상태 확인", onCheck,
+                            Modifier.fillMaxWidth().testTag("review-result-check"))
+                        UxSecondaryButton("메뉴 관리로", onLeave, Modifier.fillMaxWidth())
+                    }
+                    failure == PublishFailure.FORBIDDEN ->
+                        UxMainButton("메뉴 관리로", onLeave, Modifier.fillMaxWidth())
+                    failure == PublishFailure.AUTH -> {
+                        UxMainButton("다시 로그인하기", onLogin, Modifier.fillMaxWidth())
+                        UxSecondaryButton("검수로 돌아가기", onReturn, Modifier.fillMaxWidth())
+                    }
+                    failure == PublishFailure.VALIDATION ->
+                        UxMainButton("검수로 돌아가기", onReturn, Modifier.fillMaxWidth())
+                    else -> {
+                        UxMainButton("검수로 돌아가기", onReturn, Modifier.fillMaxWidth())
+                        UxSecondaryButton("메뉴 관리로", onLeave, Modifier.fillMaxWidth())
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun PublicationNote(title: String?, content: String, critical: Boolean) {
+    val shape = RoundedCornerShape(12.dp)
+    val background = if (critical) androidx.compose.ui.graphics.Color(0xFF3A2926)
+        else androidx.compose.ui.graphics.Color(0xFF362B21)
+    val outline = if (critical) androidx.compose.ui.graphics.Color(0xFF80514C)
+        else androidx.compose.ui.graphics.Color(0xFF6C5136)
+    Row(Modifier.fillMaxWidth().background(background, shape).border(1.dp, outline, shape)
+        .padding(horizontal = 15.dp, vertical = 14.dp),
+        horizontalArrangement = Arrangement.spacedBy(11.dp),
+        verticalAlignment = Alignment.Top) {
+        BmLineIcon(BmLineIconId.ALERT, 18.dp,
+            if (critical) UxColor.error else UxColor.gold)
+        Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
+            if (title != null) Text(title, style = uxText(12f, 760,
+                if (critical) UxColor.error else androidx.compose.ui.graphics.Color(0xFFF3D4AF)))
+            Text(content, style = uxText(12f, 400,
+                if (critical) androidx.compose.ui.graphics.Color(0xFFFFD7D1)
+                else androidx.compose.ui.graphics.Color(0xFFF1D5B3), lineHeight = 1.7f))
         }
     }
 }

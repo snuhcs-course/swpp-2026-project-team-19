@@ -211,10 +211,9 @@ internal fun NavGraphBuilder.registerVariantRoutes(
                                 PhotoReviewScreen(
                                     vm = reviewVm,
                                     onLeave = {
-                                // A successful publish can require operator linking
-                                // before whisky search. Show this only once via
-                                // the same app-level top notice as other Owner actions.
-                                data.consumePhotoPublishWarning()?.let(onNotice)
+                                // The v22 result page already confirms publication;
+                                // do not show a second popup on menu management.
+                                data.consumePhotoPublishWarning()
                                 if (!navController.popBackStack(
                                         OwnerPage.MGR_MENU.route, inclusive = false
                                     )) {
@@ -225,6 +224,11 @@ internal fun NavGraphBuilder.registerVariantRoutes(
                                         launchSingleTop = true
                                     }
                                 }
+                                    },
+                                    onReauthenticate = {
+                                        navController.navigate("customer/login") {
+                                            launchSingleTop = true
+                                        }
                                     },
                                 )
                             }

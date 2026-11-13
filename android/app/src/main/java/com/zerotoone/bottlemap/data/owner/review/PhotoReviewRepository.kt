@@ -42,6 +42,9 @@ interface PhotoReviewRepository {
      */
     suspend fun refreshSourcePhotoUrl(itemId: String): String? = null
 
+    /** True only for this import's applied state; false only if review can safely resume. */
+    suspend fun checkPublishedStatus(): Boolean? = null
+
     /** Publishes reviewed decisions through the backend's single 8.1 submit. */
     suspend fun publish(state: PhotoReviewState)
 }
