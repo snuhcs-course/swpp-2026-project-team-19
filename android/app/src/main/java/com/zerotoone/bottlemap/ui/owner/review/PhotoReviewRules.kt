@@ -1,7 +1,6 @@
 package com.zerotoone.bottlemap.ui.owner.review
 
 import com.zerotoone.bottlemap.data.owner.isBottleServingLabel
-import com.zerotoone.bottlemap.data.owner.canonicalServingLabel
 import com.zerotoone.bottlemap.data.owner.servingIdentityKey
 
 /**
@@ -83,15 +82,13 @@ object PhotoReviewRules {
             it.type == ReviewItemType.WHISKY && it.linkedProductId != null
         }.forEach { item ->
             optionSummary(item).forEach { option ->
+                val bottle = option.bottle || isBottleServingLabel(option.label)
                 if (!validPrice(option.price) ||
-                    (!option.bottle && !validVolume(option.volume))) return@forEach
-                val normalizedLabel = canonicalServingLabel(
-                    option.label ?: if (option.bottle) "Bottle" else null
-                ).orEmpty().lowercase()
-                val serving = if (option.bottle || isBottleServingLabel(normalizedLabel))
-                    "Bottle" else "${option.volume.toInt()}ml"
+                    (!bottle && !validVolume(option.volume))) return@forEach
+                val serving = if (bottle) "Bottle" else "${option.volume.toInt()}ml"
                 val key = "${item.linkedProductId}|" +
-                    servingIdentityKey(if (option.bottle) null else option.volume.toInt(), normalizedLabel)
+                    servingIdentityKey(if (bottle) null else option.volume.toInt(),
+                        option.label ?: if (bottle) "Bottle" else null)
                 buckets.getOrPut(key) { mutableListOf() }
                     .add(Entry(item.id, option.price, serving))
             }
@@ -129,8 +126,8 @@ object PhotoReviewRules {
                 if (entries.any { !it.bottle && !validVolume(it.volume) }) p += ReviewIssue.VOLUME
                 if (entries.any { !validPrice(it.price) }) p += ReviewIssue.PRICE
                 if (entries.size > MAX_OPTIONS) p += ReviewIssue.OPTION
-                // Backend validates a serving by (optionLabel, pourMl), not
-                // pourMl alone: '잔 30ml' and '샷 30ml' are distinct.
+                // Owner defines a serving by pour size only:
+                // '잔 30ml' and '샷 30ml' are duplicate options.
                 val keys = entries.map {
                     servingIdentityKey(
                         if (it.bottle) null else it.volume.toInt(),
@@ -145,9 +142,8 @@ object PhotoReviewRules {
             val entries = optionSummary(x)
             if (entries.isEmpty() || entries.any { !validPrice(it.price) }) p += ReviewIssue.PRICE
             if (entries.size > MAX_OPTIONS) p += ReviewIssue.OPTION
-            // The server considers (optionLabel, pourMl) the stable serving
-            // identity even for 'other'. Detect duplicate OCR labels before
-            // submitting; the owner can remove an unsupported duplicate.
+            // Price-only (unsized) non-whisky has one unspecified serving.
+            // Different words do not make duplicate ml options independent.
             val keys = entries.map {
                 servingIdentityKey(
                     if (validVolume(it.volume)) it.volume.toInt() else null, it.label
