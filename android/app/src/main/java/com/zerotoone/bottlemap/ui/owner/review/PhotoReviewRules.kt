@@ -11,9 +11,20 @@ object PhotoReviewRules {
 
     fun optionSummary(x: ReviewItem): List<ReviewOption> =
         (if (x.primaryHasOption) listOf(ReviewOption(x.volume, x.price, x.bottle,
-            x.primarySourceOptionId, x.primaryOptionLabel)) else emptyList()) + x.options
+            x.primarySourceOptionId, x.primaryOptionLabel,
+            x.volumeSource == VolumeSource.DEFAULT)) else emptyList()) + x.options
 
     fun countOptions(x: ReviewItem): Int = (if (x.primaryHasOption) 1 else 0) + x.options.size
+
+    /** Rebind every OCR/default-derived glass, including already valid volumes. */
+    fun applyDefaultPour(x: ReviewItem, defaultPour: Double): ReviewItem = x.copy(
+        volume = if (x.primaryHasOption && !x.bottle &&
+            x.volumeSource == VolumeSource.DEFAULT) defaultPour else x.volume,
+        options = x.options.map { option ->
+            if (option.volumeFromDefault && !option.bottle)
+                option.copy(volume = defaultPour) else option
+        },
+    )
 
     /**
      * The Backend #164 post-review preflight disallows two selected catalog
@@ -121,7 +132,7 @@ object PhotoReviewRules {
             if (keys.distinct().size != keys.size) p += ReviewIssue.OPTION
         }
         if (x.typo && !x.nameSaved) p += ReviewIssue.NAME
-        if (x.name.isBlank() && ReviewIssue.NAME !in p) p += ReviewIssue.NAME
+        if (x.name.trim().length !in 1..200 && ReviewIssue.NAME !in p) p += ReviewIssue.NAME
         if (state != null) {
             if (x.id in duplicatePhotoPriceConflicts(state))
                 p += ReviewIssue.DUPLICATE_PRICE
@@ -421,7 +432,8 @@ object PhotoReviewRules {
             index == null -> edited.copy(volume = n, volumeSource = VolumeSource.MANUAL)
             else -> {
                 val option = x.options.getOrNull(index) ?: return edited
-                val updated = if (field == OptionField.PRICE) option.copy(price = n) else option.copy(volume = n)
+                val updated = if (field == OptionField.PRICE) option.copy(price = n)
+                    else option.copy(volume = n, volumeFromDefault = false)
                 edited.copy(options = x.options.toMutableList().also { it[index] = updated })
             }
         }
@@ -442,13 +454,18 @@ object PhotoReviewRules {
     fun toggleBottle(x: ReviewItem, index: Int?, defaultPour: Double): ReviewItem {
         if (index == null) {
             val bottle = !x.bottle
-            return if (bottle) x.copy(bottle = true, volume = 0.0, rawOptionEdits = x.rawOptionEdits - "volume:main")
-            else x.copy(bottle = false, volume = if (x.volume > 0) x.volume else defaultPour)
+            return if (bottle) x.copy(bottle = true, volume = 0.0,
+                volumeSource = VolumeSource.MANUAL,
+                rawOptionEdits = x.rawOptionEdits - "volume:main")
+            else x.copy(bottle = false, volume = if (x.volume > 0) x.volume else defaultPour,
+                volumeSource = if (x.volume > 0) x.volumeSource else VolumeSource.DEFAULT)
         }
         val op = x.options.getOrNull(index) ?: return x
         val bottle = !op.bottle
-        val updated = if (bottle) op.copy(bottle = true, volume = 0.0) else op.copy(bottle = false,
-            volume = if (op.volume > 0) op.volume else 0.0)
+        val updated = if (bottle) op.copy(bottle = true, volume = 0.0,
+            volumeFromDefault = false) else op.copy(bottle = false,
+            volume = if (op.volume > 0) op.volume else defaultPour,
+            volumeFromDefault = op.volume <= 0)
         val raw = if (bottle) x.rawOptionEdits - "option-volume:$index" else x.rawOptionEdits
         return x.copy(options = x.options.toMutableList().also { it[index] = updated }, rawOptionEdits = raw)
     }
@@ -464,7 +481,8 @@ object PhotoReviewRules {
         } else x.copy(options = x.options + ReviewOption(), expanded = true)
 
     fun removeOption(x: ReviewItem, index: Int?): ReviewItem =
-        if (index == null) x.copy(primaryHasOption = false, primarySourceOptionId = null, expanded = true)
+        if (index == null) x.copy(primaryHasOption = false, primarySourceOptionId = null,
+            primaryOptionLabel = null, expanded = true)
         else x.copy(options = x.options.filterIndexed { i, _ -> i != index }, expanded = true)
 
     // ---- Publish summary ----
