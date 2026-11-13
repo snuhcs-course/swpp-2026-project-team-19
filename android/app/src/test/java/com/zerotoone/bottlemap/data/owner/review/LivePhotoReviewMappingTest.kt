@@ -107,23 +107,24 @@ class LivePhotoReviewMappingTest {
         assertEquals(12000,decision.correctedOptions!!.single().priceKrw)
     }
 
-    @Test fun largeOptionSetShowsAllAndBlocksPublishUntilThreeRemain() {
+    @Test fun fourWhiskyOptionsRemainPublishableAndAreNeverSilentlyDropped() {
         val options=(1..4).map { option("opt-$it",it*15,10000+it*1000)
             .copy(optionOrder=it) }
         val dto = item(options=options)
         val review = mapServerPhotoReview(response(dto),fixture())
         val card = review.items.single()
         assertEquals(4,PhotoReviewRules.countOptions(card))
-        assertFalse(PhotoReviewRules.stats(review).canPublish)
-        assertTrue(com.zerotoone.bottlemap.ui.owner.review.ReviewIssue.OPTION in
-            PhotoReviewRules.problems(card))
-        val trimmed = PhotoReviewRules.removeOption(card,0)
-        assertEquals(3,PhotoReviewRules.countOptions(trimmed))
-        val decision = mapConfirmedReviewDecision(
-            trimmed.copy(priceChoice=PriceChoice.PHOTO),dto,30.0,emptyMap())
-        assertEquals(listOf("opt-2"),decision.excludedOptionIds)
-        assertEquals(listOf("opt-1","opt-3","opt-4"),
+        // This fixture has a separate old-vs-photo price choice; resolving it
+        // is sufficient, without discarding the valid fourth OCR serving.
+        val confirmed = card.copy(priceChoice=PriceChoice.PHOTO)
+        assertTrue(PhotoReviewRules.problems(confirmed).isEmpty())
+        val decision = mapConfirmedReviewDecision(confirmed,dto,30.0,emptyMap())
+        assertTrue(decision.excludedOptionIds.isEmpty())
+        assertEquals(listOf("opt-1","opt-2","opt-3","opt-4"),
             decision.correctedOptions!!.map { it.optionId })
+        val trimmed = PhotoReviewRules.removeOption(confirmed,0)
+        val trimmedDecision=mapConfirmedReviewDecision(trimmed,dto,30.0,emptyMap())
+        assertEquals(listOf("opt-2"),trimmedDecision.excludedOptionIds)
     }
 
     @Test fun replacingOcrServingWithManualOneKeepsExclusionAndNewIdentity() {
