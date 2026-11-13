@@ -63,8 +63,11 @@ class OwnerLiveSafetyRulesTest {
 
     @Test fun unsupportedOptionFieldClearingIsRejected() {
         val extracted = MockMenuOption("opt", label = "잔", pourMl = 30, priceKrw = 17000)
-        rejects { validateReviewOptionClearing(extracted.copy(label = null), extracted) }
+        // Label is presentation only when the ml survives.
+        validateReviewOptionClearing(extracted.copy(label = null), extracted)
         rejects { validateReviewOptionClearing(extracted.copy(pourMl = null), extracted) }
+        // Glass -> Bottle intentionally removes extracted ml.
+        validateReviewOptionClearing(extracted.copy(label = "Bottle", pourMl = null), extracted)
         validateReviewOptionClearing(extracted.copy(priceKrw = 18000), extracted)
         validateReviewOptionClearing(extracted.copy(pourMl = 60, label = "더블"), extracted)
     }
