@@ -315,23 +315,18 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                     it.menuImportId == historical.menuImportId
                 }
                 val serverStatus = menuImportStatus(historical.status)
-                // List responses omit extracted items. A recovered ready import must
-                // open the polling screen once to fetch complete Stage 8 review data,
-                // not show a 0-line publish screen after process recreation.
+                // Never disguise a ready-for-review server state as PROCESSING after
+                // process death. The dedicated review repository fetches full details
+                // using menuImportId; the job-list response need only carry the status.
                 val changedReviewVersion = previous != null &&
                     previous.reviewVersion != maxOf(1, historical.reviewVersion)
-                val requiresDetails = needsReviewDetailReload(
-                    previous, maxOf(1, historical.reviewVersion))
-                val displayStatus = if(serverStatus == MockImportStatus.READY_FOR_REVIEW &&
-                    requiresDetails) MockImportStatus.PROCESSING
-                    else serverStatus
                 (previous ?: MockMenuImport(
                     menuImportId = historical.menuImportId, barId = bar.barId,
-                    status = displayStatus,
+                    status = serverStatus,
                     reviewVersion = maxOf(1,historical.reviewVersion),
                     images = emptyList(),
                 )).copy(
-                    status = displayStatus,
+                    status = serverStatus,
                     // Never retain decisions made against a stale server review diff.
                     images = if(changedReviewVersion) emptyList() else previous?.images.orEmpty(),
                     reviewVersion = maxOf(1,historical.reviewVersion),
