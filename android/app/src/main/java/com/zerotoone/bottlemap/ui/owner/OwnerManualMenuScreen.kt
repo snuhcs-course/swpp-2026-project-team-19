@@ -171,8 +171,6 @@ internal fun OwnerManualMenuScreen(
     onNewPhoto: () -> Unit,
     onExistingJob: (MockImportStatus) -> Unit,
     nowEpochMs: Long = rememberOwnerNow(),
-    // Available only from the DEBUG nav graph. Never substitutes live OCR data.
-    onReviewPreview: (() -> Unit)? = null,
 ) {
     val snapshot = when (state) {
         is MockOwnerLoadState.Ready -> state.snapshot
@@ -604,17 +602,6 @@ internal fun OwnerManualMenuScreen(
                             }
                         }
                         Text("›",color=V4Color.sub,fontSize=20.sp)
-                    }
-                    // The v20 review is a Mock-only UX prototype. Provide a
-                    // clearly labeled in-app DEBUG entry without replacing the
-                    // production OwnerPhotoStage8Screen and its live publish API.
-                    onReviewPreview?.let { openMockReview ->
-                        Text("v20 메뉴 검수 시안 보기 · Mock",
-                            Modifier.fillMaxWidth().manualTap(onClick = openMockReview)
-                                .testTag("owner-review-v20-preview")
-                                .padding(vertical = 12.dp),
-                            color = V4Color.primary, fontWeight = FontWeight.SemiBold,
-                            fontSize = 12.sp)
                     }
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically) {
