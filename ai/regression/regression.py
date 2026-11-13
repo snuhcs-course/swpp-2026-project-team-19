@@ -217,8 +217,10 @@ def load_seed() -> dict:
 
 
 def match_lines(fixtures: list[dict], seed: dict | None = None) -> dict:
-    """condition -> photo_id -> [{name, gold, kind, outcome, status, rank1}] for every expected line."""
+    """condition -> photo_id -> [{name, gold, kind, outcome, status, state, rank1}] for every expected line.
+    `state` is the review state (app.matching.review_state): confirmed, or what the owner has to do."""
     be = harness.Backend(REPO_ROOT)
+    from app.matching.review_state import review_state
     seed = seed or load_seed()
     out = {}
     for condition in CONDITIONS:
@@ -240,7 +242,7 @@ def match_lines(fixtures: list[dict], seed: dict | None = None) -> dict:
                 rank1 = r.proposed_product_id if r.status == "exact_match" else (
                     r.candidates[0].product_id if r.candidates else None)
                 rows.append({"name": name, "gold": g, "kind": kind, "outcome": outcome, "status": r.status,
-                             "rank1": keys.get(rank1)})
+                             "state": str(review_state(r)), "rank1": keys.get(rank1)})
             out[condition][fx["photo_id"]] = rows
     return out
 
