@@ -1,5 +1,9 @@
 package com.zerotoone.bottlemap.ui.owner.review
 
+import com.zerotoone.bottlemap.data.owner.isBottleServingLabel
+import com.zerotoone.bottlemap.data.owner.canonicalServingLabel
+import com.zerotoone.bottlemap.data.owner.servingIdentityKey
+
 /**
  * Pure review rules ported from BottleMap_Minimal_UX_v18.html (problems(), itemGroup(),
  * stats(), optionSummary() and the card actions). No Android or repository code here,
@@ -81,10 +85,13 @@ object PhotoReviewRules {
             optionSummary(item).forEach { option ->
                 if (!validPrice(option.price) ||
                     (!option.bottle && !validVolume(option.volume))) return@forEach
-                val normalizedLabel = (option.label ?: if (option.bottle) "Bottle" else "")
-                    .trim().lowercase()
-                val serving = if (option.bottle) normalizedLabel else "${option.volume.toInt()}ml"
-                val key = "${item.linkedProductId}|$normalizedLabel|${if (option.bottle) "none" else option.volume.toInt()}"
+                val normalizedLabel = canonicalServingLabel(
+                    option.label ?: if (option.bottle) "Bottle" else null
+                ).orEmpty().lowercase()
+                val serving = if (option.bottle || isBottleServingLabel(normalizedLabel))
+                    "Bottle" else "${option.volume.toInt()}ml"
+                val key = "${item.linkedProductId}|" +
+                    servingIdentityKey(if (option.bottle) null else option.volume.toInt(), normalizedLabel)
                 buckets.getOrPut(key) { mutableListOf() }
                     .add(Entry(item.id, option.price, serving))
             }
@@ -125,11 +132,10 @@ object PhotoReviewRules {
                 // Backend validates a serving by (optionLabel, pourMl), not
                 // pourMl alone: '잔 30ml' and '샷 30ml' are distinct.
                 val keys = entries.map {
-                    // For bottle pours, the original OCR label (병 vs Bottle)
-                    // is part of the same backend serving identity.
-                    val label = (it.label ?: if (it.bottle) "Bottle" else "")
-                        .trim().lowercase()
-                    "$label:${if (it.bottle) "none" else numberText(it.volume)}"
+                    servingIdentityKey(
+                        if (it.bottle) null else it.volume.toInt(),
+                        it.label ?: if (it.bottle) "Bottle" else null
+                    )
                 }
                 if (keys.size != keys.toSet().size) p += ReviewIssue.OPTION
             }
@@ -143,7 +149,9 @@ object PhotoReviewRules {
             // identity even for 'other'. Detect duplicate OCR labels before
             // submitting; the owner can remove an unsupported duplicate.
             val keys = entries.map {
-                "${it.label.orEmpty().trim().lowercase()}:${if (validVolume(it.volume)) it.volume.toInt() else "none"}"
+                servingIdentityKey(
+                    if (validVolume(it.volume)) it.volume.toInt() else null, it.label
+                )
             }
             if (keys.distinct().size != keys.size) p += ReviewIssue.OPTION
         }
