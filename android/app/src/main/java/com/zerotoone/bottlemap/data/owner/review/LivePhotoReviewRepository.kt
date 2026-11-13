@@ -136,7 +136,8 @@ class LivePhotoReviewRepository(
                     else fresh.mergeSources,
                 // Existing prices are refreshed from the server; the OCR
                 // candidates are retained even after a late product relink.
-                priceCandidates = old.priceCandidates.filterNot { it.existing },
+                priceCandidates = old.priceCandidates.filterNot { it.existing } +
+                    fresh.priceCandidates.filter { it.existing },
                 chosenServingPrices = if (old.existingServingPricesByProductId ==
                     fresh.existingServingPricesByProductId) old.chosenServingPrices
                     else emptyMap(),
