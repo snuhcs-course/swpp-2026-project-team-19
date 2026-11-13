@@ -240,7 +240,10 @@ private fun buildRows(s: PhotoReviewState): List<ReviewRow> {
 private fun ReviewAppBar(onBack: () -> Unit) {
     Column(Modifier.fillMaxWidth().background(UxColor.bg)) {
         Row(
-            Modifier.fillMaxWidth().height(59.dp).padding(horizontal = 20.dp),
+            // HTML back button uses 20dp container padding + -8dp margin.
+            // With Android's 48dp touch target, 10dp start padding places
+            // the 30dp icon at the same x=19dp as the 390px prototype.
+            Modifier.fillMaxWidth().height(59.dp).padding(start = 10.dp, end = 20.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Box(
