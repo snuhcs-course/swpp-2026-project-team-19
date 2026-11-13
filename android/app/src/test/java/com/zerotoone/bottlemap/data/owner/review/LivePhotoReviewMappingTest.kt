@@ -69,6 +69,30 @@ class LivePhotoReviewMappingTest {
         assertEquals(30.0,state.defaultPour,0.0)
     }
 
+    @Test fun firstOcrOptionIdentitySurvivesReviewAndCanPublishWithoutFalseNewOptionError() {
+        val dto = item()
+        val card = mapServerPhotoReview(response(dto), fixture()).items.single()
+        assertEquals("opt-1", PhotoReviewRules.optionSummary(card).single().sourceOptionId)
+        val confirmed = card.copy(priceChoice = PriceChoice.PHOTO)
+        val decision = mapConfirmedReviewDecision(confirmed, dto, 30.0, emptyMap())
+        assertEquals(listOf("opt-1"), decision.correctedOptions!!.map { it.optionId })
+    }
+
+    @Test fun linkingAmbiguousCatalogProductPromptsForExistingBarPriceDifference() {
+        val dto = item(status = "ambiguous", proposedId = null)
+        val card = mapServerPhotoReview(response(dto), fixture()).items.single()
+        assertNull(card.oldPrice)
+        val linked = PhotoReviewRules.markLinked(
+            card, com.zerotoone.bottlemap.ui.owner.review.CatalogProduct("product-1", "Whisky 12")
+        )
+        assertEquals(PriceChoice.NONE, linked.priceChoice)
+        assertEquals(12000.0, linked.oldPrice!!, 0.0)
+        assertTrue(
+            com.zerotoone.bottlemap.ui.owner.review.ReviewIssue.PRICE_CHOICE in
+                PhotoReviewRules.problems(linked)
+        )
+    }
+
     @Test fun publicationUsesCorrectOptionIdAndSelectedPriceWithoutFakeFields() {
         val dto=item()
         val card=mapServerPhotoReview(response(dto),fixture()).items.single()
