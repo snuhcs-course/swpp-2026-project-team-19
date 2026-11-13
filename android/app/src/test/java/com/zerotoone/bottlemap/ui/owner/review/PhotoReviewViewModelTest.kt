@@ -530,4 +530,71 @@ class PhotoReviewViewModelTest {
         ) in events)
     }
 
+
+    @Test fun latestNameEditWinsWhenOldCatalogRequestFinishesLast() = runTest(dispatcher) {
+        val first = CompletableDeferred<List<CatalogProduct>>()
+        val second = CompletableDeferred<List<CatalogProduct>>()
+        val mock = MockPhotoReviewRepository(MockPhotoReviewScenario.BASIC)
+        val repo = object : PhotoReviewRepository by mock {
+            override suspend fun exactMatches(name: String): List<CatalogProduct> =
+                when (name) {
+                    "첫 번째 이름" -> first.await()
+                    "두 번째 이름" -> second.await()
+                    else -> emptyList()
+                }
+        }
+        val vm = PhotoReviewViewModel(repo)
+        vm.editDetailName("glen12")
+        vm.typeDetailName("glen12", "첫 번째 이름")
+        vm.saveDetailName("glen12")
+        vm.typeDetailName("glen12", "두 번째 이름")
+        vm.saveDetailName("glen12")
+        second.complete(emptyList())
+        first.complete(listOf(CatalogProduct("wrong-product", "첫 번째 이름")))
+        assertEquals("두 번째 이름", vm.item("glen12").name)
+        assertFalse(vm.item("glen12").linkedProductId == "wrong-product")
+    }
+
+    @Test fun staleReviewVersionTriggersReloadAndPreservesErrorExplanation() = runTest(dispatcher) {
+        val mock = MockPhotoReviewRepository(MockPhotoReviewScenario.READY)
+        var loads = 0
+        val repo = object : PhotoReviewRepository by mock {
+            override suspend fun loadReview(): PhotoReviewState {
+                loads++
+                return mock.loadReview()
+            }
+            override suspend fun publish(state: PhotoReviewState) {
+                throw BottleMapApiException(httpStatus = 409,
+                    code = "REVIEW_OUTDATED", message = "REVIEW_OUTDATED")
+            }
+        }
+        val vm = PhotoReviewViewModel(repo)
+        vm.requestPublish()
+        vm.confirmPublish()
+        assertEquals(PublishFailure.CONFLICT,
+            (vm.publishOutcome.value as PublishOutcome.Failed).reason)
+        vm.returnToReview()
+        assertEquals(2, loads)
+        assertNull(vm.publishOutcome.value)
+        assertTrue(vm.load.value is PhotoReviewLoad.Ready)
+        assertEquals(PublishFailure.CONFLICT,
+            classifyPublishFailure(IllegalArgumentException("REVIEW_OUTDATED")))
+    }
+
+    @Test fun publishValidationFailureRetainsTheActionableMessage() = runTest(dispatcher) {
+        val mock = MockPhotoReviewRepository(MockPhotoReviewScenario.READY)
+        val repo = object : PhotoReviewRepository by mock {
+            override suspend fun publish(state: PhotoReviewState) {
+                throw BottleMapApiException(httpStatus = 422,
+                    code = "VALIDATION_FAILED", message = "검수 옵션 오류")
+            }
+        }
+        val vm = PhotoReviewViewModel(repo)
+        vm.requestPublish()
+        vm.confirmPublish()
+        val result = vm.publishOutcome.value as PublishOutcome.Failed
+        assertEquals(PublishFailure.VALIDATION, result.reason)
+        assertTrue(result.detail!!.contains("입력값을 확인해 주세요."))
+    }
+
 }
