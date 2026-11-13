@@ -1,5 +1,6 @@
 package com.zerotoone.bottlemap.ui.owner
 
+import com.zerotoone.bottlemap.ui.auth.AccountHeader
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -86,13 +87,13 @@ internal fun V4FormField(
             keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
             modifier = Modifier.fillMaxWidth()
                 .then(if (testTag == null) Modifier else Modifier.testTag(testTag))
-                .height(if (singleLine) 43.dp else 75.dp)
+                .heightIn(min = if (singleLine) 48.dp else 75.dp)
                 .background(V4Color.elevated, RoundedCornerShape(9.dp))
                 .border(1.dp, V4Color.line, RoundedCornerShape(9.dp))
                 .padding(horizontal = 12.dp, vertical = if (singleLine) 0.dp else 11.dp),
             textStyle = TextStyle(fontSize = 14.sp, color = V4Color.text, lineHeight = 20.sp),
             decorationBox = { inner ->
-                Box(Modifier.fillMaxWidth().then(if (singleLine) Modifier.height(43.dp)
+                Box(Modifier.fillMaxWidth().then(if (singleLine) Modifier.heightIn(min = 48.dp)
                     else Modifier), contentAlignment = if (singleLine) Alignment.CenterStart else Alignment.TopStart) {
                     if (value.isEmpty() && placeholder.isNotEmpty()) {
                         Text(placeholder, color = Color(0xFFA69B91), fontSize = 13.sp)
@@ -110,7 +111,7 @@ internal fun V4CompactCheck(label: String, checked: Boolean, onChange: (Boolean)
     val keyboard = LocalSoftwareKeyboardController.current
     val interaction = remember { MutableInteractionSource() }
     Row(verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.clickable(interactionSource = interaction, indication = null) {
+        modifier = Modifier.heightIn(min = 48.dp).clickable(interactionSource = interaction, indication = null) {
             focus.clearFocus()
             keyboard?.hide()
             onChange(!checked)
@@ -130,17 +131,17 @@ internal fun V4CompactCheck(label: String, checked: Boolean, onChange: (Boolean)
                     width = 2.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round))
             }
         }
-        Text(label, color = V4Color.sub, fontSize = 11.sp, maxLines = 1)
+        Text(label, color = V4Color.sub, fontSize = 11.sp, maxLines = 2)
     }
 }
 
 @Composable
 internal fun V4HourButton(text: String, onClick: ()->Unit, modifier: Modifier = Modifier) {
-    Box(modifier.width(75.dp).height(35.dp)
+    Box(modifier.width(75.dp).heightIn(min = 48.dp)
         .background(V4Color.elevated, RoundedCornerShape(6.dp))
         .border(1.dp, V4Color.line, RoundedCornerShape(6.dp))
         .ownerQuietClick(onClick = onClick), contentAlignment = Alignment.Center) {
-        Text(text, color = V4Color.text, fontSize = 11.sp, maxLines = 1,
+        Text(text, color = V4Color.text, fontSize = 11.sp, maxLines = 2,
             textAlign = TextAlign.Center)
     }
 }
@@ -148,24 +149,10 @@ internal fun V4HourButton(text: String, onClick: ()->Unit, modifier: Modifier = 
 /** HTML top bar: small section caption next to a standalone back arrow. */
 @Composable
 internal fun V4Toolbar(title: String?, onBack: () -> Unit) {
-    Row(Modifier.fillMaxWidth().height(52.dp).background(V4Color.background)
-        .padding(horizontal = 16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        val focus = LocalFocusManager.current
-        val keyboard = LocalSoftwareKeyboardController.current
-        val backInteraction = remember { MutableInteractionSource() }
-        Box(Modifier.size(40.dp).clickable(interactionSource = backInteraction,
-            indication = null) {
-                focus.clearFocus()
-                keyboard?.hide()
-                onBack()
-            }.semantics { contentDescription = "뒤로가기" },
-            contentAlignment = Alignment.Center) {
-            Text("←", color = V4Color.text, fontSize = 26.sp, lineHeight = 28.sp)
-        }
-        if (title != null) Text(title, color = V4Color.sub,
-            fontSize = 12.sp, fontWeight = FontWeight.Medium)
+    // All owner back arrows use the same x/y, 48dp touch target and title style
+    // as the account '내 정보' header. A blank title preserves back-only screens.
+    Box(Modifier.fillMaxWidth().background(V4Color.background)) {
+        AccountHeader(title.orEmpty(), onBack)
     }
 }
 
@@ -180,7 +167,7 @@ internal fun V4SearchField(value: String, onChange: (String) -> Unit, tag: Strin
         Text("⌕", color = V4Color.sub, fontSize = 21.sp, lineHeight = 22.sp)
         BasicTextField(
             value = value, onValueChange = onChange, singleLine = true,
-            modifier = Modifier.weight(1f).height(26.dp).testTag(tag),
+            modifier = Modifier.weight(1f).heightIn(min = 26.dp).testTag(tag),
             textStyle = TextStyle(fontSize = 13.sp, color = V4Color.text,
                 lineHeight = 19.sp),
             decorationBox = { inner ->
@@ -203,6 +190,7 @@ internal fun V4TagChip(label: String, selected: Boolean = false, onClick: ()->Un
             RoundedCornerShape(7.dp))
             .border(1.dp, if (selected) V4Color.primary else V4Color.line,
                 RoundedCornerShape(7.dp))
+            .heightIn(min = 48.dp)
             .ownerQuietClick(onClick = onClick)
             .padding(horizontal = 10.dp, vertical = 7.dp)
     ) {

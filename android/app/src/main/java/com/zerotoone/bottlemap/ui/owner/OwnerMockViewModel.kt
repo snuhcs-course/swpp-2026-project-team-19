@@ -133,10 +133,11 @@ class OwnerMockViewModel(private val repository: OwnerMockRepository) : ViewMode
             repository.searchCatalogBrandsLive(query)
     }
 
-    suspend fun searchCatalogLive(query: String) {
+    suspend fun searchCatalogLive(query: String):
+        List<com.zerotoone.bottlemap.network.OwnerCatalogProductDto> =
         if(repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
             repository.searchCatalogLive(query)
-    }
+        else emptyList()
 
     fun usesProductionOwnerApi(): Boolean =
         repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository
@@ -157,6 +158,10 @@ class OwnerMockViewModel(private val repository: OwnerMockRepository) : ViewMode
     fun photoPublishWarning(): String? =
         (repository as? com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
             ?.lastPublishWarning
+
+    fun consumePhotoPublishWarning(): String? =
+        (repository as? com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
+            ?.consumePhotoPublishWarning()
 
     suspend fun publishPhotoImportLive(importId: String, version: Int): Int =
         if(repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)

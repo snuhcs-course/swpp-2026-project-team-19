@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
+import com.zerotoone.bottlemap.ui.common.OwnerBottomConfirmSheet
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
@@ -46,6 +46,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zerotoone.bottlemap.network.menuWriteErrorText
 import com.zerotoone.bottlemap.data.owner.*
 import com.zerotoone.bottlemap.ui.common.BmIcon
 import com.zerotoone.bottlemap.ui.common.BmIconId
@@ -171,6 +172,7 @@ internal fun OwnerManualMenuScreen(
     onNewPhoto: () -> Unit,
     onExistingJob: (MockImportStatus) -> Unit,
     nowEpochMs: Long = rememberOwnerNow(),
+    onNotice: (String) -> Unit = {},
 ) {
     val snapshot = when (state) {
         is MockOwnerLoadState.Ready -> state.snapshot
@@ -205,7 +207,11 @@ internal fun OwnerManualMenuScreen(
     val activeLocalCandidates = products.filter { product ->
         !product.catalogMatched && items.any { it.productId == product.productId }
     }
-    val candidates = (products.filter { it.catalogMatched } +
+    // The shared canonical catalog is whisky-only in PR #164. Legacy catalog
+    // beer rows are not valid link targets for new owner additions.
+    val candidates = (products.filter {
+        it.catalogMatched && (!viewModel.usesProductionOwnerApi() || it.category == "whisky")
+    } +
         (if(viewModel.usesProductionOwnerApi()) emptyList() else htmlCatalog) +
         deletedLocalCandidates + activeLocalCandidates).distinctBy { it.productId }
 
@@ -222,8 +228,10 @@ internal fun OwnerManualMenuScreen(
     var linkedId by rememberSaveable(bar?.barId) { mutableStateOf<String?>(null) }
     var rejectedId by rememberSaveable(bar?.barId) { mutableStateOf<String?>(null) }
     var itemName by rememberSaveable(bar?.barId) { mutableStateOf("") }
-    LaunchedEffect(screen, itemName) {
-        if(screen=="item" && itemName.trim().length>=2 && viewModel.usesProductionOwnerApi()) {
+    var category by rememberSaveable(bar?.barId) { mutableStateOf("위스키") }
+    LaunchedEffect(screen, itemName, category) {
+        if(screen=="item" && category=="위스키" && itemName.trim().length>=2 &&
+            viewModel.usesProductionOwnerApi()) {
             kotlinx.coroutines.delay(300)
             runCatching { viewModel.searchCatalogLive(itemName) }
         }
@@ -231,17 +239,18 @@ internal fun OwnerManualMenuScreen(
     var brandName by rememberSaveable(bar?.barId) { mutableStateOf("") }
     var confirmedBrandId by rememberSaveable(bar?.barId) { mutableStateOf<String?>(null) }
     var rejectedBrandId by rememberSaveable(bar?.barId) { mutableStateOf<String?>(null) }
-    LaunchedEffect(screen,itemName,brandName,editId,linkedId) {
-        if(screen=="item" && editId==null && linkedId==null &&
+    LaunchedEffect(screen,itemName,editId,linkedId,category) {
+        if(screen=="item" && category=="위스키" && editId==null && linkedId==null &&
             viewModel.usesProductionOwnerApi()) {
-            val lookup=manualBrandSearchQuery(itemName,brandName)
+            // The name itself identifies the brand; never ask for a second
+            // manual brand field. Search canonical names and aliases.
+            val lookup=manualBrandSearchQuery(itemName,"")
             if(lookup.length>=2) {
                 kotlinx.coroutines.delay(300)
                 runCatching { viewModel.searchCatalogBrandsLive(lookup) }
             }
         }
     }
-    var category by rememberSaveable(bar?.barId) { mutableStateOf("위스키") }
     var alcoholKind by rememberSaveable(bar?.barId) { mutableStateOf("") }
     var categoryMenuExpanded by rememberSaveable(bar?.barId) { mutableStateOf(false) }
     var optionText by rememberSaveable(bar?.barId) {
@@ -269,8 +278,8 @@ internal fun OwnerManualMenuScreen(
         brandName = brands.firstOrNull { it.brandId == p?.brandId }?.name.orEmpty()
         confirmedBrandId = if(item!=null) p?.brandId else null
         rejectedBrandId = null
-        category = p?.let { manualMenuCategoryLabel(it.category) } ?: "위스키"
-        alcoholKind = p?.otherAlcoholKind.orEmpty()
+        category = p?.let(::manualEditorCategory) ?: "위스키"
+        alcoholKind = p?.let(::manualEditorAlcoholKind).orEmpty()
         // Photo-imported listings may contain more than three options. Allow editing
         // the first three without silently dropping any additional persisted ones.
         val editableLimit = if (category == "위스키") MANUAL_MENU_MAX_OPTIONS else 1
@@ -298,7 +307,7 @@ internal fun OwnerManualMenuScreen(
     fun save() {
         if (bar == null || saving) return
         try {
-            if(editId == null) {
+            if(editId == null && category == "위스키") {
                 require(inactiveOwnerCatalogMatch(candidates, itemName) == null) {
                     "운영이 중지된 카탈로그 상품이에요. 운영자에게 문의해 주세요."
                 }
@@ -309,27 +318,23 @@ internal fun OwnerManualMenuScreen(
             val persisted = products.firstOrNull { it.productId == old?.productId }
             val linked = if (old != null) persisted
                 else candidates.firstOrNull { it.productId == linkedId }
-            if(old==null && linked==null && category=="위스키" &&
-                viewModel.usesProductionOwnerApi()) {
-                val suggestedBrand=manualBrandProposal(
-                    brands,name,brandName,rejectedBrandId)
-                require(suggestedBrand==null || confirmedBrandId!=null) {
-                    "기존 브랜드가 있어요. '맞아요'를 눌러 선택해 주세요."
-                }
-                require(confirmedBrandId!=null || brandName.isNotBlank()) {
-                    "브랜드를 입력하고 기존 브랜드가 있는지 확인해 주세요."
-                }
-            }
+            // Product/brand matching is inferred from the typed menu name.
+            // A brand match is never gated on a second manual text field.
             val savedName = old?.displayNameOverride ?: persisted?.displayName
             val confirmedExistingName = old == null && candidates.any {
                 it.productId == linkedId && it.displayName == name &&
-                    manualMenuCategoryLabel(it.category) == category
+                    manualEditorCategory(it) == category
             }
             require(name.isNotEmpty() && (name.length <= 80 ||
                 (name.length <= 200 && (name == savedName || confirmedExistingName)))) {
                 "메뉴 이름을 확인해 주세요."
             }
-            val sameCategory = linked?.let { manualMenuCategoryLabel(it.category) } == category
+            val sameCategory = linked?.let { manualEditorCategory(it) } == category
+            // §3.14.4 has no kind/category field; silently allowing a category
+            // change would leave the server item unchanged while the UI claims success.
+            require(old == null || sameCategory) {
+                "종류를 바꾸려면 기존 메뉴를 삭제한 뒤 새 종류로 추가해 주세요."
+            }
             val sharedLocal = linked?.takeIf { !it.catalogMatched }?.let { product ->
                 snapshot?.menuItems.orEmpty().any {
                     it.barId != bar.barId && it.productId == product.productId
@@ -337,14 +342,14 @@ internal fun OwnerManualMenuScreen(
             } == true
             require(!sharedLocal || (sameCategory &&
                 alcoholKind.trim().takeIf { category == "기타 주류" && it.isNotEmpty() } ==
-                    linked?.otherAlcoholKind?.takeIf { it.isNotBlank() })) {
+                    linked?.let(::manualEditorAlcoholKind)?.takeIf { it.isNotBlank() })) {
                 "다른 매장에서도 사용하는 상품의 종류는 변경할 수 없어요."
             }
             // Check the immutable catalog subtype for both new links and edits.
             val linkedCatalog = linked?.takeIf { it.catalogMatched }
             if (linkedCatalog != null && category == "기타 주류") {
                 require(alcoholKind.trim().takeIf { it.isNotBlank() } ==
-                    linkedCatalog.otherAlcoholKind?.trim()?.takeIf { it.isNotBlank() }) {
+                    manualEditorAlcoholKind(linkedCatalog).trim().takeIf { it.isNotBlank() }) {
                     "카탈로그 상품의 주류 종류는 변경할 수 없어요."
                 }
             }
@@ -357,10 +362,19 @@ internal fun OwnerManualMenuScreen(
                 }
             }
             val whisky = category == "위스키"
-            val effectiveCategoryCode = if (category in MANUAL_MENU_CATEGORIES)
-                manualMenuCategoryCode(category) else {
-                require(sameCategory && persisted != null) { "지원하지 않는 종류로 변경할 수 없어요." }
-                persisted.category
+            // A custom other-alcohol kind IS the category on the menu board:
+            // entering "맥주" produces a "맥주" group instead of "기타 주류".
+            // A linked canonical product's category remains immutable.
+            val effectiveCategoryCode = when {
+                category == "기타 주류" && linked?.catalogMatched == true ->
+                    requireNotNull(linked).category
+                category == "기타 주류" ->
+                    alcoholKind.trim().ifEmpty { "otherAlcohol" }
+                category in MANUAL_MENU_CATEGORIES -> manualMenuCategoryCode(category)
+                else -> {
+                    require(sameCategory && persisted != null) { "지원하지 않는 종류로 변경할 수 없어요." }
+                    persisted.category
+                }
             }
             require(old == null || sameCategory || old.options.size <= 1) {
                 "기존 용량 옵션을 삭제하지 않고 종류를 바꿀 수 없어요."
@@ -383,14 +397,14 @@ internal fun OwnerManualMenuScreen(
             }
             val editableLimit = if (whisky) MANUAL_MENU_MAX_OPTIONS else 1
             val legacyTail = if (old != null && old.options.size > editableLimit) {
-                require(persisted?.let { manualMenuCategoryLabel(it.category) } == category) {
+                require(persisted?.let(::manualEditorCategory) == category) {
                     "기존 추가 옵션을 보존하려면 원래 종류로 수정해 주세요."
                 }
                 old.options.drop(editableLimit)
             } else emptyList()
             val options = editedOptions + legacyTail
             if (old != null && persisted?.catalogMatched == true) {
-                require(manualMenuCategoryLabel(persisted.category) == category) {
+                require(manualEditorCategory(persisted) == category) {
                     "제품 종류를 변경하려면 새 메뉴를 추가해 주세요."
                 }
             }
@@ -399,7 +413,7 @@ internal fun OwnerManualMenuScreen(
             if (old == null && linked == null) {
                 val existingLocal = products.firstOrNull { product ->
                     !product.catalogMatched && product.productId != rejectedId &&
-                        manualMenuCategoryLabel(product.category) == category &&
+                        manualEditorCategory(product) == category &&
                         existingBarProductMenu(items, bar.barId, product.productId)?.let { row ->
                             listOfNotNull(product.displayName, row.displayNameOverride).any {
                                 it.replace(" ", "").equals(
@@ -418,12 +432,13 @@ internal fun OwnerManualMenuScreen(
                         category == "기타 주류" && it.isNotEmpty() })
                 linked != null -> linked
                 else -> {
-                    val fallbackBrand = brandName.trim().ifEmpty {
-                        if (whisky) "기타 브랜드" else category
-                    }
+                    val brandFromName = manualBrandProposal(brands,name,"",null)
+                    val fallbackBrand = brandFromName?.name
+                        ?: if (whisky) "기타 브랜드"
+                           else alcoholKind.trim().ifEmpty { category }
                     val reusedBrandId = confirmedBrandId?.takeIf { id ->
                         brands.any { it.brandId==id }
-                    } ?: brands.firstOrNull {
+                    } ?: brandFromName?.brandId ?: brands.firstOrNull {
                         normalizeOwnerCatalogName(it.name)==
                             normalizeOwnerCatalogName(fallbackBrand)
                     }?.brandId ?: manualId("local-brand-")
@@ -439,25 +454,46 @@ internal fun OwnerManualMenuScreen(
                 "이미 등록한 상품이에요. 기존 메뉴에서 용량·가격을 수정해 주세요."
             }
             val brand = brands.firstOrNull { it.brandId == p.brandId }
-                ?: MockBrand(p.brandId, brandName.trim().ifEmpty {
-                    if (whisky) "기타 브랜드" else category
-                })
+                ?: MockBrand(p.brandId, manualBrandProposal(brands,name,"",null)?.name
+                    ?: if (whisky) "기타 브랜드" else alcoholKind.trim().ifEmpty { category })
             val stagedItem = MockBarMenuItem(old?.barMenuItemId ?: manualId("local-menu-"),
                 bar.barId, p.productId, options, soldOut = old?.soldOut ?: false,
                 displayNameOverride = if ((p.catalogMatched || sharedLocal) &&
                     name != p.displayName) name else null)
             val stagedProduct = if (products.none { it.productId == p.productId } ||
                 (linked != null && !linked.catalogMatched && !sharedLocal)) p else null
+            // Unmatched items now publish to this bar only via kind (PR #164).
+            // The production adapter must never send an owner's newProduct.
             if(viewModel.usesProductionOwnerApi()) {
                 saving = true
                 saveScope.launch {
                     try {
+                        if (old == null && category == "위스키" && linkedId == null && name.length >= 2) {
+                            // Await a fresh server lookup before creating any product.
+                            // A deleted menu is NOT a deleted catalog product: offer
+                            // the original product again with "맞아요 / 아니에요".
+                            val fresh = viewModel.searchCatalogLive(name)
+                            val exact = fresh.firstOrNull {
+                                it.isActive && it.productId != rejectedId &&
+                                    (manualMenuCategoryLabel(it.category).takeIf { label ->
+                                        label in MANUAL_MENU_CATEGORIES
+                                    } ?: "기타 주류") == category &&
+                                    (normalizeOwnerCatalogName(it.displayName) ==
+                                        normalizeOwnerCatalogName(name) ||
+                                     normalizeOwnerCatalogName(it.matchedAlias.orEmpty()) ==
+                                        normalizeOwnerCatalogName(name))
+                            }
+                            if (exact != null) {
+                                error = "“${exact.displayName}”이 맞나요? 맞아요 또는 아니에요를 선택해 주세요."
+                                return@launch
+                            }
+                        }
                         viewModel.saveManualMenuItemLive(stagedItem, stagedProduct, brand)
                         screen = "list"; selectedId = null; editId = null; error = null
                     } catch(cancelled: CancellationException) {
                         throw cancelled
                     } catch(e: Exception) {
-                        error = e.message ?: "메뉴를 저장하지 못했어요. 다시 시도해 주세요."
+                        error = menuWriteErrorText(e)
                     } finally { saving = false }
                 }
             } else {
@@ -468,59 +504,69 @@ internal fun OwnerManualMenuScreen(
     }
 
     if(cancelPhotoConfirm && activeJob!=null) {
-        AlertDialog(
-            onDismissRequest={cancelPhotoConfirm=false},
-            title={Text("메뉴판 사진 등록을 취소할까요?")},
-            text={Text("선택한 사진과 검수한 내용이 모두 삭제돼요.")},
-            confirmButton={TextButton(onClick={
+        OwnerBottomConfirmSheet(
+            title = "메뉴판 사진 등록을 취소할까요?",
+            message = "선택한 사진과 검수한 내용이 모두 삭제돼요.",
+            confirmLabel = "작업 취소하기",
+            cancelLabel = "돌아가기",
+            tag = "owner-cancel-photo-sheet",
+            enabled = !saving,
+            onDismiss = { cancelPhotoConfirm = false },
+            onConfirm = {
                 // Never erase a photo still referenced by any published job.
-                val removedIds=unpublishedRetryChainIds(
-                    requireNotNull(snapshot),activeJob.menuImportId)
-                val removed=snapshot.imports.filter {it.menuImportId in removedIds}
-                val retainedUris=snapshot?.imports.orEmpty().filterNot {
-                    it in removed
-                }.flatMap{it.images.map {image->image.sourceUri}}.toSet()
-                val photoCopies=removed.flatMap{it.images}.distinctBy{it.sourceUri}
-                    .filter {it.sourceUri !in retainedUris}
-                    .map {MockPhoto(it.imageId,it.sourceUri,MockPhotoKind.MENU_CAPTURE)}
-                if(!saving) {
-                    saving=true
+                val removedIds = unpublishedRetryChainIds(
+                    requireNotNull(snapshot), activeJob.menuImportId)
+                val removed = snapshot.imports.filter { it.menuImportId in removedIds }
+                val retainedUris = snapshot.imports.filterNot { it in removed }
+                    .flatMap { it.images.map { image -> image.sourceUri } }.toSet()
+                val photoCopies = removed.flatMap { it.images }.distinctBy { it.sourceUri }
+                    .filter { it.sourceUri !in retainedUris }
+                    .map { MockPhoto(it.imageId, it.sourceUri, MockPhotoKind.MENU_CAPTURE) }
+                if (!saving) {
+                    saving = true
                     saveScope.launch {
                         try {
                             viewModel.cancelPhotoImportLive(activeJob.menuImportId)
-                            cancelPhotoConfirm=false
-                            error=null
-                            screen="list"
-                            // Only delete local photos after server confirmed the cancellation.
+                            cancelPhotoConfirm = false
+                            error = null
+                            screen = "list"
                             photoCopies.forEach(photoStore::delete)
-                        } catch(cancelled: CancellationException) {
+                        } catch (cancelled: CancellationException) {
                             throw cancelled
-                        } catch(e: Exception) {
-                            error=e.message ?: "사진 등록 작업을 취소하지 못했어요."
-                        } finally { saving=false }
+                        } catch (e: Exception) {
+                            error = e.message ?: "사진 등록 작업을 취소하지 못했어요."
+                        } finally { saving = false }
                     }
                 }
-            }){Text("작업 취소하기",color=Color(0xFFFFB4AB))}},
-            dismissButton={TextButton(onClick={cancelPhotoConfirm=false}){Text("돌아가기")}}
+            },
         )
     }
     if (confirm != null) {
         val action = requireNotNull(confirm)
         val target = items.firstOrNull { it.barMenuItemId == action.removePrefix("stock:") }
-        AlertDialog(onDismissRequest = { confirm = null; error = null },
-            title = { Text(when(action) {
+        OwnerBottomConfirmSheet(
+            title = when(action) {
                 "delete" -> "메뉴를 삭제할까요?"
                 "reset" -> "전체 메뉴를 초기화할까요?"
                 else -> if (target?.soldOut == true) "판매를 재개할까요?" else "품절 처리할까요?"
-            }) },
-            text = { Column { Text(when(action) {
+            },
+            message = when(action) {
                 "delete" -> "삭제하면 고객 메뉴에서도 바로 사라집니다."
                 "reset" -> "모든 메뉴와 용량·가격 정보가 삭제됩니다."
                 else -> "품절 메뉴는 고객에게 숨겨지며 판매 재개 시 다시 공개됩니다."
-            }); error?.let { Text(it, color = Color(0xFFFFB4AB)) } } },
-            confirmButton = { TextButton(onClick = {
-                if(!saving) {
-                    saving=true
+            },
+            confirmLabel = when(action) {
+                "delete" -> "삭제하기"
+                "reset" -> "초기화"
+                else -> "상태 변경"
+            },
+            tag = "owner-menu-action-sheet",
+            error = error,
+            enabled = !saving,
+            onDismiss = { confirm = null; error = null },
+            onConfirm = {
+                if (!saving) {
+                    saving = true
                     saveScope.launch {
                         try {
                             when(action) {
@@ -530,21 +576,18 @@ internal fun OwnerManualMenuScreen(
                                     viewModel.setSoldOutLive(it.barMenuItemId, !it.soldOut)
                                 }
                             }
-                            confirm=null
-                            error=null
-                            selectedId=null
-                            screen="list"
-                        } catch(cancelled: CancellationException) {
+                            confirm = null
+                            error = null
+                            selectedId = null
+                            screen = "list"
+                        } catch (cancelled: CancellationException) {
                             throw cancelled
-                        } catch(e: Exception) {
-                            error=e.message ?: "서버 변경에 실패했어요."
-                        } finally { saving=false }
+                        } catch (e: Exception) {
+                            error = e.message ?: "서버 변경에 실패했어요."
+                        } finally { saving = false }
                     }
                 }
-            }, enabled = !saving) { Text(when(action) {
-                "delete" -> "삭제하기"; "reset" -> "초기화"; else -> "상태 변경"
-            }) } },
-            dismissButton = { TextButton(onClick = { confirm = null; error = null }) { Text("취소") } }
+            },
         )
     }
     Column(Modifier.fillMaxSize().background(V4Color.background)
@@ -582,10 +625,7 @@ internal fun OwnerManualMenuScreen(
                             MockImportStatus.PROCESSING,MockImportStatus.UPLOADED ->
                                 "메뉴판 분석 중 · 작업 확인하기"
                             MockImportStatus.READY_FOR_REVIEW ->
-                                if(activeJob.images.flatMap { it.lines }
-                                        .filter {it.kind==MockLineKind.PRODUCT}
-                                        .all {it.decision!=null}) "메뉴 게시 이어서 하기"
-                                else "추가할 메뉴 확인하기"
+                                "메뉴 검수 이어서 하기"
                             MockImportStatus.FAILED -> "메뉴판 분석 실패 · 다시 확인하기"
                             else -> "메뉴판 사진으로 추가하기"
                         },color=V4Color.text,
@@ -608,14 +648,11 @@ internal fun OwnerManualMenuScreen(
                         Text("현재 게시 메뉴", color = V4Color.text, fontWeight = FontWeight.Bold,
                             fontSize = 16.sp)
                         Text("+ 직접 추가", Modifier.manualTap {
-                            if (activePhotoImport) error = "사진 등록 작업이 끝난 뒤 수정할 수 있어요."
+                            if (activePhotoImport) onNotice("사진으로 메뉴 등록 작업 중에는 메뉴를 수정할 수 없어요.")
                             else edit(null)
                         }
                             .testTag("manual-menu-add"), color = V4Color.primary, fontSize = 12.sp)
                     }
-                    if (activePhotoImport) Text(
-                        "메뉴판 사진 등록 작업 중에는 메뉴를 수정할 수 없어요.",
-                        color = V4Color.primary, fontSize = 12.sp)
                     error?.let { Text(it, color = Color(0xFFFFB4AB), fontSize = 12.sp) }
                     V4SearchField(query, { query = it }, "manual-menu-search", "메뉴명·브랜드 검색")
                     val entries = items.map { item ->
@@ -681,12 +718,12 @@ internal fun OwnerManualMenuScreen(
                                                     null else item.barMenuItemId },
                                                 onEdit = {
                                                      if (activePhotoImport)
-                                                         error = "사진 등록 작업이 끝난 뒤 수정할 수 있어요."
+                                                         onNotice("사진으로 메뉴 등록 작업 중에는 메뉴를 수정할 수 없어요.")
                                                      else edit(item)
                                                  },
                                                 onStock = {
                                                      if (activePhotoImport)
-                                                         error = "사진 등록 작업이 끝난 뒤 수정할 수 있어요."
+                                                         onNotice("사진으로 메뉴 등록 작업 중에는 메뉴를 수정할 수 없어요.")
                                                      else confirm = "stock:" + item.barMenuItemId
                                                  })
                                             if (index < entry.value.lastIndex)
@@ -707,7 +744,7 @@ internal fun OwnerManualMenuScreen(
                         .background(Color(0xFF693630),RoundedCornerShape(7.dp))
                         .border(1.dp, Color(0xFF7B453E), RoundedCornerShape(7.dp))
                         .manualTap {
-                            if (activePhotoImport) error = "사진 등록 작업이 끝난 뒤 수정할 수 있어요."
+                            if (activePhotoImport) onNotice("사진으로 메뉴 등록 작업 중에는 메뉴를 수정할 수 없어요.")
                             else confirm = "reset"
                         }
                         .testTag("manual-menu-reset"), contentAlignment = Alignment.Center) {
@@ -734,7 +771,7 @@ internal fun OwnerManualMenuScreen(
                             }
                             if (editId != null) ManualTopButton("삭제", true) {
                                 if (activePhotoImport)
-                                    error = "사진 등록 작업이 끝난 뒤 수정할 수 있어요."
+                                    onNotice("사진으로 메뉴 등록 작업 중에는 메뉴를 수정할 수 없어요.")
                                 else confirm = "delete"
                             }
                         }
@@ -745,9 +782,11 @@ internal fun OwnerManualMenuScreen(
                         // display name is customized. Category changes still clear it.
                         if (editId == null) rejectedId = null
                     }, placeholder = "예: 라가불린 10년", testTag = "manual-menu-name")
-                    if (editId == null) {
+                    if (editId == null && category == "위스키") {
+                        val matchedBrandId = confirmedBrandId
+                            ?: manualBrandProposal(brands,itemName,"",null)?.brandId
                         val suggested=manualProductProposal(
-                            candidates,itemName,category,confirmedBrandId,rejectedId)
+                            candidates,itemName,category,matchedBrandId,rejectedId)
                         val inactiveMatch = inactiveOwnerCatalogMatch(candidates, itemName)
                         if(inactiveMatch != null) {
                             Text("“" + inactiveMatch.displayName +
@@ -765,52 +804,17 @@ internal fun OwnerManualMenuScreen(
                                     brandName = brands.firstOrNull {
                                         it.brandId == suggested.brandId }?.name.orEmpty()
                                     if (category == "기타 주류")
-                                        alcoholKind = suggested.otherAlcoholKind.orEmpty()
+                                        alcoholKind = manualEditorAlcoholKind(suggested)
                                 }, modifier = Modifier.weight(1f))
                                 ManualButton("아니에요", { rejectedId = suggested.productId },
                                     modifier = Modifier.weight(1f), secondary = true)
                             }
                         }
-                        if(linkedId == null) {
-                            V4FormField("브랜드",brandName,{
-                                brandName=it.take(100)
-                                confirmedBrandId=null
-                                rejectedBrandId=null
-                            },placeholder="예: 글렌피딕",testTag="manual-menu-brand")
-                            val suggestedBrand=manualBrandProposal(
-                                brands,itemName,brandName,rejectedBrandId)
-                            // A confirmed product suggestion already includes its brand:
-                            // never display two indistinguishable '맞아요' buttons.
-                            if(suggestedBrand!=null && (suggested==null || inactiveMatch!=null) &&
-                                confirmedBrandId!=suggestedBrand.brandId) {
-                                Text("“" + suggestedBrand.name + "” 브랜드가 맞나요?",
-                                    color=V4Color.text)
-                                Row(horizontalArrangement=Arrangement.spacedBy(8.dp)) {
-                                    ManualButton("맞아요",{
-                                        confirmedBrandId=suggestedBrand.brandId
-                                        brandName=suggestedBrand.name
-                                        saveScope.launch {
-                                            runCatching {
-                                                if(viewModel.usesProductionOwnerApi())
-                                                    viewModel.searchCatalogLive(suggestedBrand.name)
-                                            }
-                                        }
-                                    },modifier=Modifier.weight(1f))
-                                    ManualButton("아니에요",{
-                                        rejectedBrandId=suggestedBrand.brandId
-                                    },modifier=Modifier.weight(1f),secondary=true)
-                                }
-                            }
-                            if(confirmedBrandId!=null)
-                                Text("기존 브랜드를 선택했어요.",color=V4Color.primary,
-                                    fontSize=12.sp)
-                        }
                         if (linkedId != null) {
                             val old = existingBarProductMenu(items, bar.barId, requireNotNull(linkedId))
                             if (old != null) ManualButton("기존 메뉴에서 용량·가격 수정", {
                                 edit(old)
-                            }, secondary = true) else Text(
-                                "카탈로그 상품 ID: " + linkedId, color = V4Color.primary, fontSize = 11.sp)
+                            }, secondary = false)
                         }
                     }
                     Text("종류", color = V4Color.text, fontSize = 13.sp)
@@ -843,10 +847,11 @@ internal fun OwnerManualMenuScreen(
                             }
                         }
                     }
-                    if (category == "기타 주류")
-                        V4FormField("주류 종류", alcoholKind, { alcoholKind = it.take(60) },
+                    if (category == "기타 주류") {
+                        V4FormField("주류 종류", alcoholKind, { alcoholKind = it.take(30) },
                             placeholder = "예: 하이볼, 맥주",
                             testTag = "manual-menu-alcohol-kind")
+                    }
                     HorizontalDivider(color = V4Color.line, thickness = 1.dp)
                     if (category == "위스키") {
                         Row(Modifier.fillMaxWidth(), horizontalArrangement =

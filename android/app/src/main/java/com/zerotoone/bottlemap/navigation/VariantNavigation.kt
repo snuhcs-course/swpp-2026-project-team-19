@@ -18,6 +18,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import androidx.navigation.navArgument
 import com.zerotoone.bottlemap.BuildConfig
+import com.zerotoone.bottlemap.data.owner.review.MockPhotoReviewScenario
+import com.zerotoone.bottlemap.data.owner.review.LivePhotoReviewRepository
+import com.zerotoone.bottlemap.data.owner.review.PreviewOnlyPhotoReviewRepository
+import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewScreen
+import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewViewModel
 import com.zerotoone.bottlemap.ui.owner.ExtractionReviewScreen
 import com.zerotoone.bottlemap.ui.owner.MenuUploadScreen
 import com.zerotoone.bottlemap.ui.owner.OwnerOnboardingScreen
@@ -39,7 +44,10 @@ import com.zerotoone.bottlemap.ui.owner.OwnerSkeletonScreen
 internal const val variantStartDestination = "customer"
 
 @OptIn(ExperimentalMaterial3Api::class)
-internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostController) {
+internal fun NavGraphBuilder.registerVariantRoutes(
+    navController: NavHostController,
+    onNotice: (String) -> Unit = {},
+) {
     // Shared by both ends of the Owner manage <-> preview round trip.
     val previewSwitchCooldown = OwnerPreviewSwitchCooldown()
     navigation(route = OwnerRoutes.GRAPH, startDestination = OwnerRoutes.ENTRY) {
@@ -50,25 +58,11 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
             val ownerViewModel: OwnerMockViewModel = viewModel(factory = OwnerMockViewModel.Factory(
                 OwnerMockRuntime.repository(LocalContext.current)))
             LaunchedEffect(ownerViewModel) { ownerViewModel.retry() }
-            val mockState = ownerViewModel.state.collectAsStateWithLifecycle().value
-            val snapshot = when (mockState) {
-                is MockOwnerLoadState.Ready -> mockState.snapshot
-                is MockOwnerLoadState.Empty -> mockState.snapshot
-                else -> null
-            }
             // Always show the owned-bar list. One or many bars use the same flow;
             // the user explicitly selects which bar to manage.
             OwnerOnboardingScreen(
                 viewModel = ownerViewModel,
                 onBack = { navController.popBackStack() },
-                onFirstReview = { status ->
-                    val next=when(status) {
-                        MockImportStatus.READY_FOR_REVIEW -> OwnerPage.MGR_REVIEW
-                        MockImportStatus.UPLOADED, MockImportStatus.PROCESSING -> OwnerPage.MGR_JOB
-                        else -> OwnerPage.MGR_PHOTO
-                    }
-                    navController.navigate(next.route)
-                },
                 onManagerPreview = { navController.navigate(OwnerPage.MGR_HOME.route) },
             )
             }
@@ -81,14 +75,6 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                 viewModel = viewModel(factory = OwnerMockViewModel.Factory(
                     OwnerMockRuntime.repository(LocalContext.current))),
                 onBack = { navController.popBackStack() },
-                onFirstReview = { status ->
-                    val next=when(status) {
-                        MockImportStatus.READY_FOR_REVIEW -> OwnerPage.MGR_REVIEW
-                        MockImportStatus.UPLOADED, MockImportStatus.PROCESSING -> OwnerPage.MGR_JOB
-                        else -> OwnerPage.MGR_PHOTO
-                    }
-                    navController.navigate(next.route)
-                },
                 onManagerPreview = { navController.navigate(OwnerPage.MGR_HOME.route) },
                 startRegistration = true,
             )
@@ -155,6 +141,7 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                         onRetry = data::retry,
                         onBack = { navController.popBackStack() },
                         onNewPhoto = { navController.navigate(OwnerPage.MGR_PHOTO.route) },
+                        onNotice = onNotice,
                         onExistingJob = { status ->
                             navController.currentBackStackEntry?.savedStateHandle
                                 ?.set("resumeOwnerImport",status==MockImportStatus.READY_FOR_REVIEW)
@@ -183,16 +170,54 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                             }
                         }
                     )
-                    OwnerPage.MGR_REVIEW -> OwnerPhotoStage8Screen(
-                        state = mockState, vm = data,
-                        resumeFromMenu = navController.previousBackStackEntry?.savedStateHandle
-                            ?.get<Boolean>("resumeOwnerImport") == true,
-                        onBack = { navController.popBackStack() },
-                        onHome = { navController.navigate(OwnerPage.MGR_MENU.route) {
-                            popUpTo(OwnerPage.MGR_HOME.route) { inclusive = false }
-                            launchSingleTop = true
-                        } }
-                    )
+                    OwnerPage.MGR_REVIEW -> {
+                        val snapshot = when (mockState) {
+                            is MockOwnerLoadState.Ready -> mockState.snapshot
+                            is MockOwnerLoadState.Empty -> mockState.snapshot
+                            else -> null
+                        }
+                        val activeBar = snapshot?.selectedBarId
+                            ?: snapshot?.bars?.firstOrNull()?.barId
+                        val latestJob = snapshot?.imports?.lastOrNull {
+                            it.barId == activeBar && it.status == MockImportStatus.READY_FOR_REVIEW
+                        }
+                        // Show every OCR option in the v20 UI. The visual
+                        // workflow currently limits editing to 3 even though
+                        // server PR #164 accepts 1-10 final options; no OCR
+                        // option is silently removed from a request.
+                        val repository = if (data.usesProductionOwnerApi()) {
+                            LivePhotoReviewRepository(
+                                owner = data,
+                                importId = latestJob?.menuImportId,
+                                context = LocalContext.current.applicationContext,
+                            )
+                        } else {
+                            PreviewOnlyPhotoReviewRepository(MockPhotoReviewScenario.BASIC)
+                        }
+                        val reviewVm: PhotoReviewViewModel = viewModel(
+                            key = "owner-review-${latestJob?.menuImportId ?: "fixture"}",
+                            factory = PhotoReviewViewModel.Factory(repository),
+                        )
+                        PhotoReviewScreen(
+                            vm = reviewVm,
+                            onLeave = {
+                                // A successful publish can require operator linking
+                                // before whisky search. Show this only once via
+                                // the same app-level top notice as other Owner actions.
+                                data.consumePhotoPublishWarning()?.let(onNotice)
+                                if (!navController.popBackStack(
+                                        OwnerPage.MGR_MENU.route, inclusive = false
+                                    )) {
+                                    navController.navigate(OwnerPage.MGR_MENU.route) {
+                                        popUpTo(OwnerPage.MGR_REVIEW.route) {
+                                            inclusive = true
+                                        }
+                                        launchSingleTop = true
+                                    }
+                                }
+                            },
+                        )
+                    }
                     else -> OwnerSkeletonScreen(
                         page = page,
                         mockState = mockState,

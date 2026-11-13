@@ -178,6 +178,8 @@ data class MockReviewDecision(
     val correctedOptions: List<MockMenuOption>? = null,
     val newProduct: MockNewProductDraft? = null,
     val displayNameOverride: String? = null,
+    // API §8.1 option exclusion: OCR keeps originals; only selected IDs publish.
+    val excludedOptionIds: List<String> = emptyList(),
 )
 
 data class MockExtractedLine(
