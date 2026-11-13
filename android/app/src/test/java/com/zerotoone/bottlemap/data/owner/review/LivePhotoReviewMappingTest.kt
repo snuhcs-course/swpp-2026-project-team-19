@@ -438,4 +438,11 @@ class LivePhotoReviewMappingTest {
             fail("Must reject incomplete OCR status")
         } catch (_: IllegalArgumentException) { }
     }
+    @Test fun structuredCandidateAgeOrEditionMismatchMustNotAutoLink() {
+        assertTrue(reviewerCandidateConflicts(12,"Sherry Cask",15,"Sherry Cask"))
+        assertTrue(reviewerCandidateConflicts(12,"Sherry Cask",12,"Port Cask"))
+        assertFalse(reviewerCandidateConflicts(12,"SHERRY CASK",12,"sherry cask"))
+        assertFalse(reviewerCandidateConflicts(12,null,12,"Sherry Cask"))
+    }
+
 }

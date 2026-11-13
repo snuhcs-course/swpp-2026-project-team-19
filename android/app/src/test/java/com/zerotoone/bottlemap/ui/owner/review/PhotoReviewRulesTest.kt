@@ -239,7 +239,9 @@ class PhotoReviewRulesTest {
         val linked = PhotoReviewRules.linkChosenProduct(item(MockPhotoReviewScenario.BASIC, "arran"),
             MockPhotoReviewRepository.product("arran-port"), operatorCheck = true)
         assertEquals(OperatorReason.SELECTED_PRODUCT_CONFLICT, linked.operatorReason)
-        assertTrue(PhotoReviewRules.problems(linked).isEmpty())
+        assertNull(linked.linkedProductId)
+        assertTrue(linked.operatorPending)
+        assertTrue(ReviewIssue.NEW in PhotoReviewRules.problems(linked))
     }
 
     @Test fun ocrPriceSummaryUsesDefaultPourOnlyWhenPhotoHasNoSize() {

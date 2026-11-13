@@ -396,7 +396,9 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                 return@launch
             }
             mutateItem(x.id) { PhotoReviewRules.linkChosenProduct(it, product, operatorCheck) }
-            if (operatorCheck) toast("위스키를 연결했어요. 운영자 확인 대상으로 전달돼요.")
+            if (operatorCheck) toast(
+                "연수·에디션이 달라 상품 연결 없이 등록해요. 메뉴 이름을 다시 확인해 주세요."
+            )
         }
     }
 

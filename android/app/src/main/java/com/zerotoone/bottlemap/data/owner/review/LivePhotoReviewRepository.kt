@@ -32,6 +32,19 @@ import java.text.Normalizer
 /** Only GET for this exact import may establish that publishing already completed. */
 class ReviewAlreadyAppliedException : IllegalStateException("이미 게시된 메뉴판 작업이에요.")
 
+internal fun reviewerCandidateConflicts(
+    extractedAge: Int?, extractedEdition: String?,
+    candidateAge: Int?, candidateEdition: String?,
+): Boolean {
+    if (extractedAge != null && candidateAge != null &&
+        extractedAge != candidateAge) return true
+    val original = extractedEdition?.trim()?.takeIf { it.isNotBlank() }
+    val selected = candidateEdition?.trim()?.takeIf { it.isNotBlank() }
+    return original != null && selected != null &&
+        Normalizer.normalize(original, Normalizer.Form.NFKC).lowercase() !=
+        Normalizer.normalize(selected, Normalizer.Form.NFKC).lowercase()
+}
+
 class LivePhotoReviewRepository(
     private val owner: OwnerMockViewModel,
     private val importId: String?,
@@ -150,10 +163,23 @@ class LivePhotoReviewRepository(
             .distinctBy { it.productId }
     }
 
-    /** The server validates age and edition when review-and-apply commits. */
+    /** The current API verifies that a selected product is active, but does
+     * not compare OCR age/edition. For explicit structured contradictions,
+     * publish the owner's original menu name without a catalog link.
+     */
     override suspend fun needsOperatorCheck(
         item: ReviewItem, product: CatalogProduct,
-    ): Boolean = false
+    ): Boolean {
+        val dto = loaded?.images?.flatMap { it.items }
+            ?.firstOrNull { it.extractedItemId == item.id } ?: return false
+        val candidate = dto.candidates.firstOrNull {
+            it.productId == product.productId
+        } ?: return false
+        return reviewerCandidateConflicts(
+            dto.extractedAgeYears, dto.extractedEditionName,
+            candidate.ageYears, candidate.editionName,
+        )
+    }
 
     override suspend fun saveDefaultPour(ml: Int) {
         require(ml in 1..999)

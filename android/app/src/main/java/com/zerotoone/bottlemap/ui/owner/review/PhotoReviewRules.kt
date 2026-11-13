@@ -441,12 +441,18 @@ object PhotoReviewRules {
         ) to RematchOutcome.OPERATOR
     }
 
-    /** Decision 7: a chosen product whose age or edition differs goes to the operator. */
+    /** The server has no deferred catalog-link approval in review-and-apply.
+     * A contradictory age/edition must NOT be sent as SELECT_PRODUCT. Keep it
+     * bar-local and require explicit name confirmation for operator follow-up.
+     */
     fun linkChosenProduct(x: ReviewItem, product: CatalogProduct, operatorCheck: Boolean): ReviewItem {
-        val linked = markLinked(x, product)
-        return if (operatorCheck) {
-            linked.copy(operatorPending = true, operatorReason = OperatorReason.SELECTED_PRODUCT_CONFLICT)
-        } else linked
+        if (!operatorCheck) return markLinked(x, product)
+        return markAsNewForOperator(x, x.name).copy(
+            operatorPending = true,
+            operatorReason = OperatorReason.SELECTED_PRODUCT_CONFLICT,
+            priceCandidates = x.priceCandidates.filterNot { it.existing },
+            chosenServingPrices = emptyMap(),
+        )
     }
 
     // ---- Classification ----

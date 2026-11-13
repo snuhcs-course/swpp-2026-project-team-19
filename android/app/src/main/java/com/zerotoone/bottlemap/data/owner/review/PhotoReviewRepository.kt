@@ -26,8 +26,8 @@ interface PhotoReviewRepository {
     suspend fun exactMatches(name: String): List<CatalogProduct>
 
     /**
-     * Whether a product the owner picked conflicts with the age or edition read from the
-     * photo (decision 7). Mock only: the server compares at submit time.
+     * Whether structured OCR age/edition contradicts the selected candidate.
+     * A conflict is published bar-locally, not linked under the wrong product.
      */
     suspend fun needsOperatorCheck(item: ReviewItem, product: CatalogProduct): Boolean
 
