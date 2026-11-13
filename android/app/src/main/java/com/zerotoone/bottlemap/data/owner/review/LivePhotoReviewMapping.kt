@@ -171,7 +171,7 @@ internal fun mapConfirmedReviewDecision(
         validPrice(it.price) &&
             (it.bottle || (card.type == ReviewItemType.OTHER || validVolume(it.volume)))
     }) { "${card.name}: 가격과 용량을 확인해 주세요." }
-    require(choices.size <= if (card.type == ReviewItemType.OTHER) 10 else PhotoReviewRules.MAX_OPTIONS) {
+    require(choices.size <= (if (card.type == ReviewItemType.OTHER) 10 else PhotoReviewRules.MAX_OPTIONS)) {
         "${card.name}: 검수 옵션 개수를 확인해 주세요."
     }
     val byId = raw.associateBy { it.extractedOptionId }
