@@ -2,7 +2,8 @@
 
 from app.models.bar import Bar, BarOperatingException, BarPhoto, BarStatus, BarWeeklyHours, OperatingExceptionKind
 from app.models.catalog import Brand, BrandAlias, Product, ProductAlias
-from app.models.menu import BarMenuItem, MenuBoard, MenuBoardEntry, MenuEntryOption
+from app.models.menu import BarMenuItem, MenuBoard, MenuBoardEntry, MenuEntryOption, MenuItemKind
+from app.models.menu_check import CheckReason, CheckResolution, CheckStatus, MenuItemCheck, MenuItemCheckReason
 from app.models.menu_import import (
     ExtractedItem,
     ExtractedOption,
@@ -48,6 +49,9 @@ __all__ = [
     "BrandAlias",
     "BusinessStatus",
     "BusinessVerificationResult",
+    "CheckReason",
+    "CheckResolution",
+    "CheckStatus",
     "ExtractedItem",
     "ExtractedOption",
     "ExtractionApproach",
@@ -64,6 +68,9 @@ __all__ = [
     "MenuImage",
     "MenuImport",
     "MenuImportChange",
+    "MenuItemCheck",
+    "MenuItemCheckReason",
+    "MenuItemKind",
     "OperatingExceptionKind",
     "OwnerApplicationStatus",
     "OwnerApplicationType",

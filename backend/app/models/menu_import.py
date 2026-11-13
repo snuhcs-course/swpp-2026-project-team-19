@@ -29,6 +29,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import Uuid
 
 from app.db.base import Base
+from app.models.menu import MenuItemKind, menu_item_kind_enum
 
 
 class ImportStatus(str, Enum):
@@ -227,6 +228,12 @@ class ExtractedItem(Base):
     corrected_line_type: Mapped[LineType | None] = mapped_column(
         _pg_enum(LineType, "extracted_line_type"), nullable=True
     )
+    # The AI's first menu kind for product lines (whisky or other; whisky when the AI gives none), null for
+    # non-product lines. Only whisky lines are matched. Never changed by review.
+    extracted_kind: Mapped[MenuItemKind | None] = mapped_column(menu_item_kind_enum(), nullable=True)
+    # The kind the reviewer published when it differs from extracted_kind, like corrected_line_type; a line
+    # published with a product counts as whisky (API spec 8.10).
+    corrected_kind: Mapped[MenuItemKind | None] = mapped_column(menu_item_kind_enum(), nullable=True)
     extracted_product_name: Mapped[str | None] = mapped_column(String(200), nullable=True)
     extracted_brand_name: Mapped[str | None] = mapped_column(String(120), nullable=True)
     extracted_age_years: Mapped[int | None] = mapped_column(SmallInteger, nullable=True)
