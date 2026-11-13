@@ -124,7 +124,9 @@ data class MockMenuOption(
     val priceKrw: Int,
     val discount: MockDiscount? = null, // C10 unagreed
 ) {
-    fun identityKey(): String = servingIdentityKey(pourMl, label)
+    // Raw server identity remains label+pour for previously persisted rows.
+    // New Android menu validation uses servingIdentityKey(pourMl, label).
+    fun identityKey(): String = "${label.orEmpty().trim().lowercase()}|${pourMl ?: "-"}"
     fun displayPrice(nowEpochMs: Long): Int = discount?.effectivePrice(priceKrw, nowEpochMs) ?: priceKrw
 }
 
