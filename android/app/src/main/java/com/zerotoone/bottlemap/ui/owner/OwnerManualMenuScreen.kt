@@ -922,7 +922,7 @@ internal fun OwnerManualMenuScreen(
                                         verticalAlignment = Alignment.Bottom) {
                                         if (d.bottle) Column(Modifier.weight(1f),
                                             verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                                            Text("용량 (ml)", color = V4Color.text,
+                                            Text("용량", color = V4Color.text,
                                                 fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
                                             Box(Modifier.fillMaxWidth().heightIn(min = 48.dp)
                                                 .border(1.dp, V4Color.line, RoundedCornerShape(9.dp))

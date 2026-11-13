@@ -2,6 +2,9 @@ package com.zerotoone.bottlemap.ui.owner
 
 import androidx.activity.ComponentActivity
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
@@ -100,6 +103,10 @@ class OwnerUxConsistencyComposeTest {
         }
         compose.onNodeWithText("메뉴판 사진 등록 작업 중에는 메뉴를 수정할 수 없어요.")
             .assertDoesNotExist()
+        compose.onNodeWithTag("manual-menu-edit-guidance").assertIsDisplayed()
+        compose.onNodeWithText("사진으로 메뉴 추가 작업 진행 중에는 메뉴를 직접 수정할 수 없어요.")
+            .assertIsDisplayed()
+        compose.onNodeWithText("메뉴를 선택해서 편집하세요").assertDoesNotExist()
     }
 
     @Test fun destructiveConfirmUsesBottomSheetAndNeverMutatesWithoutConfirmation() {
@@ -123,4 +130,32 @@ class OwnerUxConsistencyComposeTest {
             assertEquals(false, dismissed)
         }
     }
+    @Test fun completedPhotoJobRestoresOriginalEditGuidance() {
+        val vm = jobState(MockImportStatus.APPLIED)
+        compose.setContent { MaterialTheme {
+            OwnerManualMenuScreen(vm.state.collectAsState().value, vm, {}, {}, {})
+        } }
+        compose.onNodeWithTag("manual-menu-edit-guidance").assertIsDisplayed()
+        compose.onNodeWithText("메뉴를 선택해서 편집하세요").assertIsDisplayed()
+        compose.onNodeWithText("사진으로 메뉴 추가 작업 진행 중에는 메뉴를 직접 수정할 수 없어요.")
+            .assertDoesNotExist()
+    }
+
+    @Test fun managerHomeKeepsReadableTitlesWhenSystemFontScaleIsDoubled() {
+        val original = OwnerMockFixtures.registeredBar()
+        val vm = OwnerMockViewModel(LocalOwnerMockRepository(
+            InMemoryMockOwnerStateStore(original)))
+        compose.setContent { MaterialTheme {
+            val density = LocalDensity.current
+            CompositionLocalProvider(LocalDensity provides Density(density.density, 2.0f)) {
+                OwnerManagementHomeScreen(vm.state.collectAsState().value,
+                    viewModel = vm,
+                    onRetry = {}, onBack = {}, onPreview = {}, onInfo = {},
+                    onStatus = {}, onMenu = {}, onAddBar = {}, onJob = {})
+            }
+        } }
+        compose.onNodeWithText("매장 정보 관리").assertExists()
+        compose.onNodeWithText("영업 상태 변경").assertExists()
+    }
+
 }
