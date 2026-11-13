@@ -3,6 +3,7 @@ package com.zerotoone.bottlemap.data.owner.review
 import com.zerotoone.bottlemap.ui.owner.review.CatalogProduct
 import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewState
 import com.zerotoone.bottlemap.ui.owner.review.ReviewItem
+import com.zerotoone.bottlemap.ui.owner.review.ReviewPriceCandidate
 
 /**
  * Data contract of the one-page photo-menu review screen.
@@ -24,6 +25,11 @@ interface PhotoReviewRepository {
      * Client-side search/reconfirmation is advisory; the server remains authoritative.
      */
     suspend fun exactMatches(name: String): List<CatalogProduct>
+
+    /** Bar-local saved price options keyed by the CURRENT corrected menu name.
+     * Default has no saved menu data; the Live adapter queries its owner state.
+     */
+    fun existingUnlinkedServingPrices(name: String): List<ReviewPriceCandidate> = emptyList()
 
     /**
      * Whether structured OCR age/edition contradicts the selected candidate.

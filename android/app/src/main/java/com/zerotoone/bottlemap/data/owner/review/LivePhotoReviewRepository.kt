@@ -6,12 +6,16 @@ import com.zerotoone.bottlemap.data.OwnerRepository
 import com.zerotoone.bottlemap.data.owner.MockImportStatus
 import com.zerotoone.bottlemap.data.owner.MockOwnerLoadState
 import com.zerotoone.bottlemap.data.owner.MockOwnerSnapshot
+import com.zerotoone.bottlemap.data.owner.ownerExistingUnlinkedOptions
+import com.zerotoone.bottlemap.data.owner.isBottleServingLabel
+import com.zerotoone.bottlemap.data.owner.servingIdentityKey
 import com.zerotoone.bottlemap.network.MenuImportStatusDto
 import com.zerotoone.bottlemap.ui.owner.OwnerMockViewModel
 import com.zerotoone.bottlemap.ui.owner.review.CatalogProduct
 import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewRules
 import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewState
 import com.zerotoone.bottlemap.ui.owner.review.ReviewItem
+import com.zerotoone.bottlemap.ui.owner.review.ReviewPriceCandidate
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Mutex
@@ -165,6 +169,20 @@ class LivePhotoReviewRepository(
                     normalized(it.matchedAlias.orEmpty()) == key) }
             .map { CatalogProduct(it.productId, it.displayName) }
             .distinctBy { it.productId }
+    }
+
+    override fun existingUnlinkedServingPrices(name: String): List<ReviewPriceCandidate> {
+        val barId = loaded?.barId ?: error("검수 정보를 먼저 불러와 주세요.")
+        return ownerExistingUnlinkedOptions(snapshot(), barId, name).map { saved ->
+            ReviewPriceCandidate(
+                servingKey = servingIdentityKey(saved.pourMl, saved.label),
+                volumeMl = saved.pourMl,
+                bottle = isBottleServingLabel(saved.label),
+                label = saved.label,
+                priceKrw = saved.priceKrw,
+                existing = true,
+            )
+        }
     }
 
     /** Contract §8.7 assigns attribute_conflict to the server. */

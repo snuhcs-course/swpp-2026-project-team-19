@@ -529,7 +529,13 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
     private fun renameAndRematch(id: String, name: String, operatorToast: String, rename: (ReviewItem) -> ReviewItem) {
         val x = item(id) ?: return
         if (x.type != ReviewItemType.WHISKY) {
-            mutateItem(id, rename)
+            val saved = try {
+                repository.existingUnlinkedServingPrices(name)
+            } catch (_: Exception) {
+                toast("기존 메뉴 가격을 확인하지 못했어요. 다시 시도해 주세요.")
+                return
+            }
+            mutateItem(id) { PhotoReviewRules.rebindUnlinkedPrices(rename(it), saved) }
             return
         }
         val sequence = (latestRematchRequest[id] ?: 0) + 1
@@ -551,11 +557,21 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
             val current = item(id) ?: return@launch
             if (current.reviewNameDraft?.trim()?.let { it != name } == true ||
                 current.detailNameDraft?.trim()?.let { it != name } == true) return@launch
+            // Only unlinked results are compared against the bar-local
+            // normalized name key. Linked results use their product ID.
+            val saved = if (matches.size == 1) emptyList() else try {
+                repository.existingUnlinkedServingPrices(name)
+            } catch (_: Exception) {
+                toast("기존 메뉴 가격을 확인하지 못했어요. 다시 시도해 주세요.")
+                return@launch
+            }
             var outcome = RematchOutcome.OTHER
             mutateItem(id) {
                 val (rematched, result) = PhotoReviewRules.applyRematch(rename(it), matches)
                 outcome = result
-                rematched
+                if (rematched.linkedProductId == null)
+                    PhotoReviewRules.rebindUnlinkedPrices(rematched, saved)
+                else rematched
             }
             if (outcome == RematchOutcome.OPERATOR) toast(operatorToast)
         }
@@ -592,8 +608,8 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
 
     fun chooseServingPrice(id: String, servingKey: String, price: Int) {
         val x = item(id) ?: return
-        if (x.priceCandidates.none {
-            it.servingKey == servingKey && it.priceKrw == price
+        if (PhotoReviewRules.priceCandidatesForServing(x, servingKey).none {
+            it.priceKrw == price
         }) return
         mutateItem(id) { PhotoReviewRules.chooseServingPrice(it, servingKey, price) }
     }

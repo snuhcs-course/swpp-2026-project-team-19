@@ -390,6 +390,26 @@ object PhotoReviewRules {
     )
     }
 
+    /** After a corrected menu name, saved unlinked prices must be rebound to
+     * that NEW name key (the same key the publish adapter uses). Never carry
+     * price candidates from the previous menu's saved options into the new
+     * identity, and require a fresh choice for any genuine price collision.
+     */
+    fun rebindUnlinkedPrices(
+        item: ReviewItem, saved: List<ReviewPriceCandidate>,
+    ): ReviewItem {
+        val active = optionSummary(item).map(::servingKey).toSet()
+        val fromPhoto = item.priceCandidates.filter { !it.existing && it.servingKey in active }
+        val updated = (saved.filter { it.servingKey in active } + fromPhoto)
+            .distinctBy { Triple(it.servingKey, it.priceKrw, it.existing) }
+        return item.copy(
+            priceCandidates = updated,
+            chosenServingPrices = emptyMap(),
+            oldPrice = null,
+            priceChoice = PriceChoice.PHOTO,
+        )
+    }
+
     /** "찾는 위스키가 없어요": publish without a product; an operator links it later. */
     fun markAsNewForOperator(x: ReviewItem, typed: String): ReviewItem {
         val name = typed.trim().ifBlank { x.newProductName ?: x.name }
