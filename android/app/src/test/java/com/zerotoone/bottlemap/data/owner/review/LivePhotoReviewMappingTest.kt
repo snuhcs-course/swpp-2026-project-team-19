@@ -156,17 +156,16 @@ class LivePhotoReviewMappingTest {
         } catch (_: IllegalArgumentException) { }
     }
 
-    @Test fun unsupportedOptionInsertionFailsBeforeServerWrite() {
-        val dto=item()
-        val card=mapServerPhotoReview(response(dto),fixture()).items.single()
-            .copy(options=listOf(
-                com.zerotoone.bottlemap.ui.owner.review.ReviewOption(60.0,22000.0)))
-        try {
-            mapConfirmedReviewDecision(card,dto,30.0,emptyMap())
-            fail("Cannot invent extractedOptionId")
-        } catch (error: IllegalArgumentException) {
-            assertTrue(error.message.orEmpty().contains("옵션"))
-        }
+    @Test fun ownerAddedOptionHasNoExtractedIdAndIsSentSeparately() {
+        val dto = item()
+        val card = mapServerPhotoReview(response(dto), fixture()).items.single()
+            .copy(options = listOf(
+                com.zerotoone.bottlemap.ui.owner.review.ReviewOption(60.0, 22000.0)
+            ), priceChoice = PriceChoice.PHOTO)
+        val decision = mapConfirmedReviewDecision(card, dto, 30.0, emptyMap())
+        assertEquals("opt-1", decision.correctedOptions!![0].optionId)
+        assertTrue(decision.correctedOptions!![1].optionId.startsWith("manual-"))
+        assertEquals(2, decision.correctedOptions!!.size)
     }
 
     @Test fun excludedLineMapsToRejectWithoutProductWrites() {
