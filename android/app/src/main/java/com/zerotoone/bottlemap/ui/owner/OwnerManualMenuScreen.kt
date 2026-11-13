@@ -170,9 +170,9 @@ internal fun OwnerManualMenuScreen(
     onBack: () -> Unit,
     onNewPhoto: () -> Unit,
     onExistingJob: (MockImportStatus) -> Unit,
+    nowEpochMs: Long = rememberOwnerNow(),
     // Available only from the DEBUG nav graph. Never substitutes live OCR data.
     onReviewPreview: (() -> Unit)? = null,
-    nowEpochMs: Long = rememberOwnerNow(),
 ) {
     val snapshot = when (state) {
         is MockOwnerLoadState.Ready -> state.snapshot
