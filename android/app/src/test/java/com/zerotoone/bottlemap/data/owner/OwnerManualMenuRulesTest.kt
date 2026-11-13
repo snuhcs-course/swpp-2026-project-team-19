@@ -39,7 +39,7 @@ class OwnerManualMenuRulesTest {
             MockMenuOption("over", pourMl = 30, priceKrw = 100_000_000)), "whisky"))
     }
 
-    @Test fun replacementLocalCategoryAcceptsSingleCocktailPriceAndRejectsWrongShape() {
+    @Test fun replacementLocalCategoryAcceptsUpToThreeCocktailServingsAndRejectsFourth() {
         val r = repo()
         val local = MockCatalogProduct("local-unverified-changing", "local-brand-category",
             "Original whisky", category = "whisky", catalogMatched = false)
@@ -51,9 +51,13 @@ class OwnerManualMenuRulesTest {
             listOf(option("single", null, 15000))), changed, brand)
         assertEquals("cocktail", snapshot(r).products.single().category)
         assertNull(snapshot(r).menuItems.single().options.single().pourMl)
+        r.saveManualMenuItem(MockBarMenuItem("change", "fixture-bar", local.productId,
+            listOf(option("ml99", 99, 15000), option("ml30-new", 30, 13000))),
+            changed, brand)
+        assertEquals(2, snapshot(r).menuItems.single().options.size)
         rejects {
             r.saveManualMenuItem(MockBarMenuItem("change", "fixture-bar", local.productId,
-                listOf(option("ml99", 99, 15000), option("ml30-new", 30, 13000))),
+                (1..4).map { option("ml-$it", it * 15, it * 10000) }),
                 changed, brand)
         }
         assertEquals("cocktail", snapshot(r).products.single().category)
