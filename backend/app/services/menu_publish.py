@@ -180,7 +180,8 @@ def proposals_from_review(session: Session, review: ValidatedReview, catalog: Ca
     )
     proposals = []
     for entry in review.items:
-        if not entry.is_product:
+        if entry.item.id not in catalog.product_ids:
+            # Owner-only items have no canonical Product yet.
             continue
         item = entry.item
         product_id = catalog.product_ids[item.id]
