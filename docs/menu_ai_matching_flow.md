@@ -1309,16 +1309,18 @@ POST /api/menu-imports/import-001/review-and-apply
       "action": "select_existing_product",
       "productId": "product-deanston-12",
       "correctedProductName": "딘스톤 12년",
-      "optionDecisions": [
+      "options": [
         {
           "extractedOptionId": "option-001",
-          "correctedPriceKrw": 8000,
-          "correctedPourMl": 15
+          "optionLabel": null,
+          "pourMl": 15,
+          "priceKrw": 8000
         },
         {
           "extractedOptionId": "option-002",
-          "correctedPriceKrw": 15000,
-          "correctedPourMl": 30
+          "optionLabel": null,
+          "pourMl": 30,
+          "priceKrw": 15000
         }
       ]
     }
@@ -1351,7 +1353,7 @@ corrected_product_name = 필요한 경우 수정값
 reviewed_at            = 현재 시각
 ```
 
-각 옵션의 수정값은 해당 `extracted_options` 행의 `corrected_option_label`, `corrected_price_krw`, `corrected_pour_ml`에 저장한다.
+검수 제출은 줄마다 최종 옵션 목록 전체(`options`)를 보낸다(API 명세 8.1). 추출 옵션을 가리키는 옵션(`extractedOptionId`)의 값이 추출값과 다르면 해당 `extracted_options` 행의 `corrected_option_label`, `corrected_price_krw`, `corrected_pour_ml`에 저장한다. 목록에서 빠진 추출 옵션은 게시하지 않고, `extractedOptionId`가 없는 옵션은 업주가 새로 더한 옵션으로 게시한다. 게시된 옵션의 `menu_entry_options.source_extracted_option_id`로 어떤 추출 옵션이 지워지거나 더해졌는지 알 수 있으므로, 추출 옵션 행에 따로 표시하지 않는다.
 
 AI 제안과 추출값을 그대로 승인하면 `confirmed`, 값을 수정하거나 다른 상품을 선택하면 `corrected`로 처리할 수 있다. `selected_match_method`는 운영자가 최종 확정했다는 사실 자체가 아니라 자동 1순위가 실제로 유지됐는지를 나타낸다. 따라서 모든 검수를 무조건 `manual`로 기록하지 않는다. 다른 후보를 선택하면 방법은 `manual`이지만 그 후보에 대해 시스템이 계산한 `score`는 `match_confidence`에 남긴다. 후보 목록에 없던 상품을 직접 검색하거나 신규 등록하면 대응 점수가 없으므로 null로 둔다.
 

@@ -4424,15 +4424,15 @@ Content-Type: application/json
 
 한 화면의 결정을 한 번에 제출하며 중간 항목 저장 API는 사용하지 않는다. operator와 작업 대상 업장의 현재 업주가 호출할 수 있다.
 
-모든 객체는 정의하지 않은 필드를 받지 않는다(`EXTRA_FORBIDDEN`). 예를 들어 `confirm_non_product`에 `optionDecisions`를 보내면 거부한다. 문자열 필드는 앞뒤 공백을 지운 뒤 길이를 검사한다.
+모든 객체는 정의하지 않은 필드를 받지 않는다(`EXTRA_FORBIDDEN`). 예를 들어 `confirm_non_product`에 `options`를 보내면 거부한다. 문자열 필드는 앞뒤 공백을 지운 뒤 길이를 검사한다.
 
 `itemDecisions[]`는 `action`에 따라 네 형식 중 하나다.
 
 | `action` | 용도 | `finalLineType` | 필드 |
 |---|---|---|---|
-| `select_existing_product` | 기존 상품에 연결 | `product` | `extractedItemId`, `productId` 필수. `correctedProductName`, `optionDecisions`, `aliasesToAdd` 선택 |
-| `create_product` | 새 상품(필요하면 새 브랜드)을 만들어 연결 | `product` | `extractedItemId`, `brand`, `product` 필수. `correctedProductName`, `optionDecisions`, `aliases` 선택 |
-| `publish_without_product` | 상품 없이 메뉴 항목으로 게시 (8.10) | `product` | `extractedItemId`, `kind` 필수. `correctedProductName`, `optionDecisions` 선택 |
+| `select_existing_product` | 기존 상품에 연결 | `product` | `extractedItemId`, `productId`, `options` 필수. `correctedProductName`, `aliasesToAdd` 선택 |
+| `create_product` | 새 상품(필요하면 새 브랜드)을 만들어 연결 | `product` | `extractedItemId`, `brand`, `product`, `options` 필수. `correctedProductName`, `aliases` 선택 |
+| `publish_without_product` | 상품 없이 메뉴 항목으로 게시 (8.10) | `product` | `extractedItemId`, `kind`, `options` 필수. `correctedProductName` 선택 |
 | `confirm_non_product` | 비상품 줄로 확정 | `section_header`, `description`, `unknown` | `extractedItemId`만 |
 | `reject` | 잡음·중복 등으로 제외 | 어떤 값이든 | `extractedItemId`만 |
 
@@ -4444,15 +4444,23 @@ Content-Type: application/json
 |---|---|---|
 | `extractedItemId` | 예 | 검수 응답의 항목 ID |
 | `correctedProductName` | 아니오 | 메뉴판에 보일 이름. 1~200자. 없거나 `null`이면 추출한 이름을 쓴다. 추출한 이름과 다르면 서버가 이 이름으로 다시 매칭한다(8.11) |
-| `optionDecisions` | 아니오 | 고칠 옵션만 보낸다. 보내지 않은 옵션은 추출값 그대로 반영한다. 기본 `[]` |
-| `optionDecisions[].extractedOptionId` | 예 | 그 항목의 옵션 ID |
-| `optionDecisions[].correctedOptionLabel` | 아니오 | 1~100자. 없거나 `null`이면 추출값 유지 |
-| `optionDecisions[].correctedPriceKrw` | 아니오 | 1~2,147,483,647 정수. 없거나 `null`이면 추출값 유지 |
-| `optionDecisions[].correctedPourMl` | 아니오 | 1~32767 정수. 없거나 `null`이면 추출값 유지 |
+| `options` | 예 | 그 줄의 최종 옵션 목록 전체. 1~10개이며, 빈 배열이면 `TOO_SHORT`, 10개를 넘으면 `TOO_LONG`이다. 배열 순서가 표시 순서다 |
+| `options[].extractedOptionId` | 아니오 | 이 옵션이 나온 추출 옵션의 ID. 업주가 새로 더한 옵션이면 없거나 `null`이다. 그 항목의 옵션이 아니면 `UNKNOWN_OPTION`, 한 줄에서 같은 ID를 두 번 쓰면 `DUPLICATE_OPTION`이다 |
+| `options[].optionLabel` | 아니오 | 메뉴판의 `잔`, `병` 같은 표기. 앞뒤 공백을 지운 뒤 1~100자. 없거나 `null`이면 표기 없음 |
+| `options[].pourMl` | 아니오 | 용량(ml). 1~32767 정수. 없거나 `null`이면 용량 없음 |
+| `options[].priceKrw` | 예 | 가격(원). 1~99,999,999 정수(3.14.2와 같다) |
 
-검수에서는 할인(3.14.2)을 정하지 않는다. `optionDecisions`에 할인 필드는 없으며, 보내면 `EXTRA_FORBIDDEN`이다. 할인은 메뉴를 반영한 뒤 직접 편집(3.14.4)으로 정한다. 메뉴판 사진에 할인이 적힌 경우가 드물고, 할인은 기간이 있어 사진에서 읽을 수 없기 때문이다. 반영할 때 기존 할인이 이어지는 규칙은 8.7을 따른다.
+`options`는 직접 편집(3.14.2)의 옵션과 같은 형식에 `extractedOptionId`를 더하고 할인을 뺀 것이다. 값은 고칠 부분만이 아니라 최종 값을 모두 보낸다.
 
-`optionDecisions`의 필드는 "없음 또는 `null` = 고치지 않음"이다. 따라서 추출된 값을 지워 `null`로 만들 수는 없다. 가격이 없는 옵션은 게시하지 않으며, 게시할 상품에는 가격 있는 옵션이 최소 하나 있어야 한다(`NO_PRICED_OPTION`).
+- **옵션 삭제**: 목록에 없는 추출 옵션은 게시하지 않는다. AI가 잘못 읽은 옵션(예: 연도를 가격으로 읽음)은 빼고 보낸다.
+- **옵션 추가**: `extractedOptionId`가 없는 옵션은 업주가 새로 더한 옵션이다. AI가 놓친 옵션과, 옵션이 하나도 추출되지 않은 줄의 가격이 여기에 들어간다.
+- **값 지우기**: `optionLabel`과 `pourMl`은 `null`로 보내면 지워진다. 예를 들어 병 옵션에 잘못 잡힌 용량을 지울 수 있다.
+- **가격**: 모든 옵션에 가격이 있어야 한다. 가격을 모르는 옵션은 보내지 않는다.
+- **같은 값**: 한 줄 안에서 `optionLabel`과 `pourMl`이 모두 같은 옵션이 둘 이상이면 `DUPLICATE_OPTION_VALUES`다(3.14.2와 같다).
+- **기본 잔 용량**: 서버는 `pourMl`을 받은 그대로 저장한다. 메뉴판에 용량이 없는 잔 옵션은 프론트엔드가 매장 기본 잔 용량(3.6의 `defaultPourMl`)을 `pourMl`에 채워 보낸다. 병 옵션에는 채우지 않는다.
+- **저장**: 게시된 옵션의 출처(`menu_entry_options.source_extracted_option_id`)에 `extractedOptionId`를 저장하고, 새로 더한 옵션은 `null`이다. 추출 옵션의 값과 다르게 보낸 값은 그 추출 옵션의 교정값(`corrected_*`)에도 기록한다. 삭제와 추가는 게시된 옵션의 출처와 비교해 알 수 있으므로 따로 저장하지 않는다.
+
+검수에서는 할인(3.14.2)을 정하지 않는다. `options`에 할인 필드는 없으며, 보내면 `EXTRA_FORBIDDEN`이다. 할인은 메뉴를 반영한 뒤 직접 편집(3.14.4)으로 정한다. 메뉴판 사진에 할인이 적힌 경우가 드물고, 할인은 기간이 있어 사진에서 읽을 수 없기 때문이다. 반영할 때 기존 할인이 이어지는 규칙은 8.7을 따른다.
 
 `select_existing_product`의 추가 필드:
 
@@ -4506,18 +4514,24 @@ Content-Type: application/json
           "isSearchable": true
         }
       ],
-      "optionDecisions": [
+      "options": [
         {
           "extractedOptionId": "20000000-0000-4000-8000-000000000001",
-          "correctedOptionLabel": null,
-          "correctedPriceKrw": 8000,
-          "correctedPourMl": 15
+          "optionLabel": null,
+          "pourMl": 15,
+          "priceKrw": 8000
         },
         {
           "extractedOptionId": "20000000-0000-4000-8000-000000000002",
-          "correctedOptionLabel": null,
-          "correctedPriceKrw": 15000,
-          "correctedPourMl": 30
+          "optionLabel": null,
+          "pourMl": 30,
+          "priceKrw": 15000
+        },
+        {
+          "extractedOptionId": null,
+          "optionLabel": "병",
+          "pourMl": null,
+          "priceKrw": 160000
         }
       ]
     }
@@ -4606,11 +4620,12 @@ OCR 잡음, 중복 인식 또는 사용할 수 없는 항목에 사용한다.
       "isSearchable": true
     }
   ],
-  "optionDecisions": [
+  "options": [
     {
       "extractedOptionId": "20000000-0000-4000-8000-000000000001",
-      "correctedPriceKrw": 12000,
-      "correctedPourMl": 15
+      "optionLabel": null,
+      "pourMl": 15,
+      "priceKrw": 12000
     }
   ]
 }
@@ -4656,11 +4671,12 @@ OCR 잡음, 중복 인식 또는 사용할 수 없는 항목에 사용한다.
       "isSearchable": true
     }
   ],
-  "optionDecisions": [
+  "options": [
     {
       "extractedOptionId": "20000000-0000-4000-8000-000000000003",
-      "correctedPriceKrw": 14000,
-      "correctedPourMl": 15
+      "optionLabel": null,
+      "pourMl": 15,
+      "priceKrw": 14000
     }
   ]
 }
@@ -4676,7 +4692,7 @@ OCR 잡음, 중복 인식 또는 사용할 수 없는 항목에 사용한다.
 - `changeDecisions`는 현재 `pending` 변경을 빠짐없이 한 번씩 포함해야 한다.
 - 변경의 `extractedItemId` 항목을 `confirm_non_product`나 `reject`로 결정했으면 그 변경은 `ignore`여야 한다. `apply`이면 `fieldErrors[].path = changeDecisions[i].decision`, `code = CHANGE_WITHOUT_PRODUCT`다. `extractedItemId`가 없는 변경(`remove`)에는 이 규칙이 없다.
 - `finalLineType = product`이면 `select_existing_product`, `create_product`, `publish_without_product` 중 하나여야 한다.
-- 게시할 메뉴 항목에는 가격이 있는 유효 옵션이 최소 하나 있어야 한다. 상품 없이 게시하는 항목도 같다.
+- 메뉴 항목으로 게시하는 줄은 `options`가 1~10개이고 모든 옵션에 가격이 있어야 한다(8.1). 상품 없이 게시하는 줄도 같다. `extractedOptionId`는 그 줄의 추출 옵션이어야 하고 한 줄에서 겹치지 않아야 한다.
 - 같은 상품(상품 없는 줄은 같은 이름 키)으로 게시하는 줄이 여럿이면 옵션을 합쳐 한 항목으로 게시한다(8.12). 업주가 제출한 대로 같은 상품인 줄끼리 표기와 용량이 같은 옵션의 가격이 다르면 `fieldErrors[].code = OPTION_PRICE_CONFLICT`다(8.12).
 - `publish_without_product`의 메뉴판 이름(`correctedProductName ?? extractedProductName`)이 없거나, 정규화한 이름 키(3.14.1)가 빈 값이면 `fieldErrors[].path = itemDecisions[i].correctedProductName`, `code = NOT_NORMALIZABLE`이다.
 - 기존 상품은 존재하고 연결 가능한 상태여야 한다.
@@ -4725,7 +4741,7 @@ HTTP/1.1 200 OK
 
 2.4의 방법으로 받은 응답이다. 5.8의 작업을 취소한 뒤 메뉴판 사진 한 장을 다시 올려(4장) 만든 작업으로, mock 추출 결과는 5.8의 첫째 사진과 같다.
 
-**요청**. 머리말과 설명 줄은 비상품으로 확정하고, 2번과 3번 줄은 같은 상품(Glenfiddich 12)에 연결하고, 후보가 없는 4번 줄은 제외했다. 변경은 2번 줄의 `add`를 적용하고 4번 줄의 `add`는 무시했다.
+**요청**. 머리말과 설명 줄은 비상품으로 확정하고, 2번과 3번 줄은 같은 상품(Glenfiddich 12)에 연결하고, 후보가 없는 4번 줄은 제외했다. 변경은 2번 줄의 `add`를 적용하고 4번 줄의 `add`는 무시했다. 이 요청은 옵션 목록 전체 제출(8.1의 `options`) 전의 형식이라 지금 규칙에서는 `options`가 없어 거부된다. 구현한 뒤 새 형식으로 다시 받아 바꾼다.
 
 ```json
 {
@@ -4886,13 +4902,13 @@ HTTP/1.1 200 OK
 
 | 언제 | 처리 |
 |---|---|
-| 업주가 제출한 대로 같은 상품인 줄끼리 부딪침 | 거부한다. `422 VALIDATION_FAILED`이고, 부딪친 옵션마다 `fieldErrors[].path`가 뒤에 오는 줄의 그 옵션(`itemDecisions[i].optionDecisions[j]`), `code = OPTION_PRICE_CONFLICT`다. 아무것도 반영하지 않는다 |
+| 업주가 제출한 대로 같은 상품인 줄끼리 부딪침 | 거부한다. `422 VALIDATION_FAILED`이고, 부딪친 옵션마다 `fieldErrors[].path`가 뒤에 오는 줄의 그 옵션(`itemDecisions[i].options[j]`), `code = OPTION_PRICE_CONFLICT`다. 아무것도 반영하지 않는다 |
 | 다시 매칭(8.11) 때문에 같은 상품이 된 줄끼리 부딪침 | 거부하지 않는다. 업주는 이 충돌을 화면에서 볼 수 없었기 때문이다. 이름을 고치지 않은 줄의 가격을 쓰고, 둘 다 고쳤으면 메뉴 순서가 앞선 줄의 가격을 쓴다. 합친 항목을 운영자 확인(3.18, 사유 `price_conflict`)에 올린다 |
 
 **프론트엔드 처리**: 업주가 제출한 충돌은 프론트엔드가 제출 전에 막는다는 전제다. 서버의 `OPTION_PRICE_CONFLICT`는 그 전제가 깨졌을 때의 안전장치다.
 
 - 검수 화면은 같은 상품(상품 없이 게시하는 줄은 같은 메뉴판 이름)으로 정해진 카드를 "같은 위스키가 두 줄 있어 하나로 합쳤어요"로 묶고, 합친 옵션을 보여 준다. 같은 상품의 줄은 임시 diff 변경의 `extractedItemIds`(5.4)로도 알 수 있다. 업주가 후보나 검색에서 상품을 고르면 그 결과로 다시 묶는다.
-- 같은 표기와 용량에 가격이 다른 옵션이 있으면 업주가 하나를 고르게 하고, 고르기 전에는 게시 버튼을 막는다. 고르지 않은 옵션은 그 줄에서 빼고 제출한다(옵션 목록을 제출하는 형식은 5번 항목에서 정의).
+- 같은 표기와 용량에 가격이 다른 옵션이 있으면 업주가 하나를 고르게 하고, 고르기 전에는 게시 버튼을 막는다. 고르지 않은 옵션은 그 줄의 `options`에서 빼고 제출한다(8.1).
 - 묶인 카드는 서로 다른 위스키가 같은 상품으로 잘못 매칭된 것을 업주가 알아챌 기회이기도 하다. 업주가 한 줄의 상품을 바꾸면 묶음에서 빠진다.
 - 그래도 `OPTION_PRICE_CONFLICT`를 받으면 해당 카드의 묶음을 열어 다시 고르게 한다.
 
@@ -4981,7 +4997,7 @@ API가 보내는 오류는 예상하지 못한 서버 오류(`500 INTERNAL_ERROR
     "details": null,
     "fieldErrors": [
       {
-        "path": "itemDecisions[0].optionDecisions[1].correctedPriceKrw",
+        "path": "itemDecisions[0].options[1].priceKrw",
         "code": "GREATER_THAN",
         "message": "Input should be greater than 0"
       }
@@ -4993,7 +5009,7 @@ API가 보내는 오류는 예상하지 못한 서버 오류(`500 INTERNAL_ERROR
 `fieldErrors`의 `code`와 `message`는 두 종류다.
 
 - **요청 형식 검증**(필수값, 길이, 숫자 범위, 허용 값 등): Pydantic 오류 종류를 대문자로 바꾼 값을 `code`로 쓴다. 예: `MISSING`, `STRING_TOO_LONG`, `STRING_TOO_SHORT`, `TOO_SHORT`, `TOO_LONG`, `GREATER_THAN`, `GREATER_THAN_EQUAL`, `LESS_THAN_EQUAL`, `LITERAL_ERROR`, `UUID_PARSING`, `INT_PARSING`, `FLOAT_PARSING`, `BOOL_TYPE`, `DATE_TYPE`, `DATE_FROM_DATETIME_PARSING`, `EXTRA_FORBIDDEN`, `UNION_TAG_NOT_FOUND`, `UNION_TAG_INVALID`, `TIMEZONE_AWARE`. `message`는 Pydantic의 영어 기본 문구다.
-- **업무 규칙 검증**: 백엔드가 정한 `code`와 한국어 `message`를 쓴다. 예: `BLANK`, `NOT_SEARCHABLE`, `LAT_LNG_REQUIRED_TOGETHER`, `INVALID_CURSOR`, `MISSING_ITEM`, `DUPLICATE_ITEM`, `UNKNOWN_ITEM`, `MISSING_CHANGE`, `DUPLICATE_CHANGE`, `UNKNOWN_CHANGE`, `UNKNOWN_OPTION`, `DUPLICATE_OPTION`, `DUPLICATE_OPTION_VALUES`, `EXACTLY_ONE_REQUIRED`, `NO_PRICED_OPTION`, `PRODUCT_NOT_FOUND`, `PRODUCT_INACTIVE`, `BRAND_NOT_FOUND`, `CHANGE_WITHOUT_PRODUCT`, `NOT_NORMALIZABLE`, `INVALID_BUSINESS_NUMBER`, `DATE_IN_FUTURE`, `COORDINATES_REQUIRED`, `BOUNDS_INVERTED`, `BOUNDS_TOO_LARGE`, `INVALID_CHARACTER`, `DUPLICATE_TAG`, `DUPLICATE_DAY`, `INVALID_TIME`, `SAME_OPEN_CLOSE`, `TIME_ON_CLOSED_DAY`, `DATE_IN_PAST`, `DATE_NOT_TODAY`, `END_BEFORE_START`, `IMAGE_DIMENSIONS_TOO_LARGE`, `DISCOUNT_NOT_LOWER`, `DISCOUNT_ENDED`, `RESOLUTION_NOT_ALLOWED`, `OPTION_PRICE_CONFLICT`.
+- **업무 규칙 검증**: 백엔드가 정한 `code`와 한국어 `message`를 쓴다. 예: `BLANK`, `NOT_SEARCHABLE`, `LAT_LNG_REQUIRED_TOGETHER`, `INVALID_CURSOR`, `MISSING_ITEM`, `DUPLICATE_ITEM`, `UNKNOWN_ITEM`, `MISSING_CHANGE`, `DUPLICATE_CHANGE`, `UNKNOWN_CHANGE`, `UNKNOWN_OPTION`, `DUPLICATE_OPTION`, `DUPLICATE_OPTION_VALUES`, `EXACTLY_ONE_REQUIRED`, `PRODUCT_NOT_FOUND`, `PRODUCT_INACTIVE`, `BRAND_NOT_FOUND`, `CHANGE_WITHOUT_PRODUCT`, `NOT_NORMALIZABLE`, `INVALID_BUSINESS_NUMBER`, `DATE_IN_FUTURE`, `COORDINATES_REQUIRED`, `BOUNDS_INVERTED`, `BOUNDS_TOO_LARGE`, `INVALID_CHARACTER`, `DUPLICATE_TAG`, `DUPLICATE_DAY`, `INVALID_TIME`, `SAME_OPEN_CLOSE`, `TIME_ON_CLOSED_DAY`, `DATE_IN_PAST`, `DATE_NOT_TODAY`, `END_BEFORE_START`, `IMAGE_DIMENSIONS_TOO_LARGE`, `DISCOUNT_NOT_LOWER`, `DISCOUNT_ENDED`, `RESOLUTION_NOT_ALLOWED`, `OPTION_PRICE_CONFLICT`.
 
 ### 9.4 검수 버전 충돌
 
