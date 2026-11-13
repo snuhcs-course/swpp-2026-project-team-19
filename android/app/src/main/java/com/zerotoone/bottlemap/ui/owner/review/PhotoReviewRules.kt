@@ -141,7 +141,15 @@ object PhotoReviewRules {
 
     // ---- Product link transitions (decisions 1, 2, 7) ----
 
-    fun markLinked(x: ReviewItem, product: CatalogProduct): ReviewItem = x.copy(
+    fun markLinked(x: ReviewItem, product: CatalogProduct): ReviewItem {
+        val old = x.existingPriceByProductId[product.productId]
+        val photo = x.photoPrice
+        val changed = old != null && photo != null && old != photo
+        return x.copy(
+        oldPrice = old,
+        priceChoice = if (x.priceChoice == PriceChoice.MANUAL) PriceChoice.MANUAL
+            else if (changed) PriceChoice.NONE else PriceChoice.PHOTO,
+        price = if (x.priceChoice == PriceChoice.MANUAL) x.price else photo ?: x.price,
         linkedProductId = product.productId,
         linkedProductName = product.name,
         match = ReviewMatch.EXACT,
@@ -158,6 +166,7 @@ object PhotoReviewRules {
         operatorReason = null,
         // The photo text and the menu-board name are never overwritten.
     )
+    }
 
     /** "찾는 위스키가 없어요": publish without a product; an operator links it later. */
     fun markAsNewForOperator(x: ReviewItem, typed: String): ReviewItem {
