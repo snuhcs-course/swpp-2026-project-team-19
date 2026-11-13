@@ -4096,7 +4096,7 @@ HTTP 요청 자체는 성공했지만 비동기 작업이 최종 실패한 경�
 - 서버에서 임베딩 후보 단계(I3-P40, 기본 꺼짐)를 켜면 규칙과 LLM 층 뒤에도 `unmatched`인 줄에 `matchMethod = embedding` 후보가 최대 5개 붙고 그 줄은 `ambiguous`가 된다. 임베딩 후보에는 `confirmRecommended`가 붙지 않으며 `exact_match`가 되지 않는다. `evidence.rule`은 `embedding`이고 `embeddingSimilarity`(0~1), `matchedText`, `model`은 설명·디버깅용이다. `confirmRecommended`가 없는 `ambiguous` 줄은 후보가 더해지지 않고 순서만 바뀔 수 있으며, 그 후보들의 `evidence`에 `rerankedBy: "embedding"`이 붙는다. 프론트엔드가 할 일은 없다(`matchMethod`의 `embedding`은 위 `MatchMethod` 값에 이미 있다).
 - `candidates`는 같은 상품을 중복하지 않으며 `candidateRank` 오름차순이다.
 - `proposedProductId`는 `candidateRank = 1`의 상품이거나 후보가 없으면 `null`이다.
-- `extractedBrandName`, `extractedAgeYears`, `extractedEditionName`은 추출 모델이 따로 읽은 값이 없으면, 확정되지 않은(`initialResolutionStatus`가 `exact_match`가 아닌) 상품 줄에 한해 서버가 줄 이름에서 읽은 값이다(I4-P18). 예: `글렌피딕(Glenfiddich) 21년 그란 레제르바` → `글렌피딕`, `21`, `그란 레제르바`. 이름을 규칙으로 나눈 값이라 틀릴 수 있다. `exact_match` 줄과 두 상품이 한 줄에 적힌 줄(`evidence.multiProduct`)은 `null`로 남는다. 8.1의 "선택한 상품의 연수·에디션이 추출값과 충돌"하는 경우의 확인 안내에 이 값을 쓰면, 이름에 적힌 연수와 다른 상품을 고를 때도 안내가 뜬다.
+- `extractedBrandName`, `extractedAgeYears`, `extractedEditionName`은 추출 모델이 읽은 값이다. 지금 추출은 이 세 값을 따로 내지 않으므로, 세 값이 모두 비어 있고 확정되지 않은(`initialResolutionStatus`가 `exact_match`가 아닌) 위스키 상품 줄은 서버가 줄 이름에서 읽은 값으로 채운다(I4-P18). 예: `글렌피딕(Glenfiddich) 21년 그란 레제르바` → `글렌피딕`, `21`, `그란 레제르바`. 이름을 규칙으로 나눈 값이라 틀릴 수 있다. 서버가 채우지 않는 줄(추출이 한 값이라도 준 줄, `exact_match` 줄, 두 상품이 한 줄에 적힌 `evidence.multiProduct` 줄)은 추출 모델이 준 값을 그대로 보여 주며, 없으면 `null`이다. 8.7의 연수·에디션 비교(운영자 확인)는 이렇게 채운 값도 추출값으로 쓴다. 이름에 적힌 연수와 다른 상품을 고르면 운영자 확인에 오른다.
 - `newProductDraft`는 화면 입력을 돕는 계산값이며 실제 카탈로그 행이 아니다.
 - `evidence`는 설명용 보조 정보다. 프론트엔드는 알 수 없는 키를 무시해야 한다.
 - `before`와 `after`가 최종 diff 비교의 구조화된 값이다.
