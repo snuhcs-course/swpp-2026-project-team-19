@@ -2,6 +2,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
+from app.models.menu import MenuItemKind
 from app.schemas.bar import BarPhotoResponse
 from app.schemas.bar_hours import OperatingException, WeeklyHours
 from app.schemas.common import Latitude, Longitude, UtcDateTime
@@ -28,11 +29,17 @@ class MenuOptionResponse(BaseModel):
 class MenuItemResponse(BaseModel):
     menuBoardEntryId: UUID
     barMenuItemId: UUID = Field(description="Stable id of the item; manual edits address items by it")
-    productId: UUID = Field(description="Canonical catalog product")
-    productName: str = Field(description="Canonical product name (products.display_name)")
-    brandId: UUID
-    brandName: str = Field(description="The brand's canonical name")
-    category: str = Field(description='Product category, e.g. "whisky"')
+    productId: UUID | None = Field(
+        description="Canonical catalog product; null for an item without one (spec 3.9): a whisky waiting for "
+        "an operator to link it, or a non-whisky menu. Such items are not in product search"
+    )
+    productName: str | None = Field(description="Canonical product name (products.display_name); null when unlinked")
+    brandId: UUID | None = Field(description="null when unlinked")
+    brandName: str | None = Field(description="The brand's canonical name; null when unlinked")
+    category: str | None = Field(description='Product category, e.g. "whisky"; null when unlinked')
+    kind: MenuItemKind = Field(
+        description="whisky, or other for a non-whisky menu (spec 2.3). An item with a product is always whisky"
+    )
     displayName: str = Field(description="Name as written on the bar's menu, not the canonical product name")
     sortOrder: int = Field(description="Items are returned in this order")
     soldOut: bool = Field(

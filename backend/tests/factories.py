@@ -21,6 +21,7 @@ from app.models import (
     MenuBoard,
     MenuBoardEntry,
     MenuEntryOption,
+    MenuItemKind,
     OwnerApplicationStatus,
     OwnerApplicationType,
     Product,
@@ -106,12 +107,16 @@ def publish_menu(
     version: int = 1,
 ) -> MenuBoard:
     """entries: (product, menu display name, [(option label, pour ml, price krw), ...]) in menu order.
-    An option may add a fourth value, its discount: (discounted price krw, starts at, ends at)."""
+    An option may add a fourth value, its discount: (discounted price krw, starts at, ends at).
+    A MenuItemKind in place of the product publishes an item without one, keyed by its normalized name."""
     board = MenuBoard(bar_id=bar.id, published_at=published_at or datetime.now(timezone.utc), version=version)
     session.add(board)
     session.flush()
     for entry_order, (product, display_name, options) in enumerate(entries, start=1):
-        item = BarMenuItem(bar_id=bar.id, product_id=product.id)
+        if isinstance(product, MenuItemKind):
+            item = BarMenuItem(bar_id=bar.id, kind=product, name_key=normalize(display_name))
+        else:
+            item = BarMenuItem(bar_id=bar.id, product_id=product.id)
         session.add(item)
         session.flush()
         entry = MenuBoardEntry(

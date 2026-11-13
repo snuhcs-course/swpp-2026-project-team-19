@@ -381,6 +381,7 @@ ITEM_FIELDS = {
     "brandId",
     "brandName",
     "category",
+    "kind",
     "displayName",
     "sortOrder",
     "soldOut",

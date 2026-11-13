@@ -28,6 +28,35 @@ def discount_response(option: MenuEntryOption, now: datetime) -> DiscountRespons
     )
 
 
+def _item_response(entry: MenuBoardEntry, now: datetime) -> MenuItemResponse:
+    """One board entry. An item without a product (spec 3.9) has no product, brand or category."""
+    item, product = entry.bar_menu_item, entry.bar_menu_item.product
+    return MenuItemResponse(
+        menuBoardEntryId=entry.id,
+        barMenuItemId=entry.bar_menu_item_id,
+        productId=item.product_id,
+        productName=product.display_name if product else None,
+        brandId=product.brand_id if product else None,
+        brandName=product.brand.canonical_name if product else None,
+        category=product.category if product else None,
+        kind=item.kind,
+        displayName=entry.display_name,
+        sortOrder=entry.sort_order,
+        soldOut=item.sold_out_at is not None,
+        options=[
+            MenuOptionResponse(
+                menuEntryOptionId=option.id,
+                optionLabel=option.option_label,
+                pourMl=option.pour_ml,
+                priceKrw=option.price_krw,
+                discount=discount_response(option, now),
+                sortOrder=option.sort_order,
+            )
+            for option in entry.options
+        ],
+    )
+
+
 def get_bar_menu(
     session: Session, bar_id: str, *, can_manage: Callable[[Bar], bool], base_url: str
 ) -> BarMenuResponse:
@@ -65,32 +94,7 @@ def get_bar_menu(
     if any(e.bar_menu_item.sold_out_at is not None for e in entries) and not is_manager():
         entries = [e for e in entries if e.bar_menu_item.sold_out_at is None]
     now = datetime.now(timezone.utc)
-    items = [
-        MenuItemResponse(
-            menuBoardEntryId=entry.id,
-            barMenuItemId=entry.bar_menu_item_id,
-            productId=entry.bar_menu_item.product_id,
-            productName=entry.bar_menu_item.product.display_name,
-            brandId=entry.bar_menu_item.product.brand_id,
-            brandName=entry.bar_menu_item.product.brand.canonical_name,
-            category=entry.bar_menu_item.product.category,
-            displayName=entry.display_name,
-            sortOrder=entry.sort_order,
-            soldOut=entry.bar_menu_item.sold_out_at is not None,
-            options=[
-                MenuOptionResponse(
-                    menuEntryOptionId=option.id,
-                    optionLabel=option.option_label,
-                    pourMl=option.pour_ml,
-                    priceKrw=option.price_krw,
-                    discount=discount_response(option, now),
-                    sortOrder=option.sort_order,
-                )
-                for option in entry.options
-            ],
-        )
-        for entry in entries
-    ]
+    items = [_item_response(entry, now) for entry in entries]
     return BarMenuResponse(
         barId=bar.id,
         name=bar.name,
