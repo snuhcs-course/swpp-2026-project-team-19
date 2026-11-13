@@ -22,6 +22,10 @@ import com.zerotoone.bottlemap.ui.owner.review.VolumeSource
 import com.zerotoone.bottlemap.ui.owner.review.validPrice
 import com.zerotoone.bottlemap.ui.owner.review.validVolume
 
+/** Recovery after an uncertain network response must use this exact import ID. */
+internal fun isAppliedReviewImport(status: MenuImportStatusDto, expectedId: String): Boolean =
+    status.menuImportId == expectedId && status.status == "applied"
+
 /** The agreed server DTO is the sole source of extracted IDs and option counts. */
 internal fun mapServerPhotoReview(
     response: MenuImportStatusDto, snapshot: MockOwnerSnapshot,
