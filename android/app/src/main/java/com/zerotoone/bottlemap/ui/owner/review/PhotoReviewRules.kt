@@ -10,7 +10,8 @@ object PhotoReviewRules {
     const val MAX_OPTIONS = 10
 
     fun optionSummary(x: ReviewItem): List<ReviewOption> =
-        (if (x.primaryHasOption) listOf(ReviewOption(x.volume, x.price, x.bottle, x.primarySourceOptionId)) else emptyList()) + x.options
+        (if (x.primaryHasOption) listOf(ReviewOption(x.volume, x.price, x.bottle,
+            x.primarySourceOptionId, x.primaryOptionLabel)) else emptyList()) + x.options
 
     fun countOptions(x: ReviewItem): Int = (if (x.primaryHasOption) 1 else 0) + x.options.size
 
@@ -82,7 +83,12 @@ object PhotoReviewRules {
                 if (entries.any { !it.bottle && !validVolume(it.volume) }) p += ReviewIssue.VOLUME
                 if (entries.any { !validPrice(it.price) }) p += ReviewIssue.PRICE
                 if (entries.size > MAX_OPTIONS) p += ReviewIssue.OPTION
-                val keys = entries.map { if (it.bottle) "Bottle" else numberText(it.volume) + "ml" }
+                // Backend validates a serving by (optionLabel, pourMl), not
+                // pourMl alone: '잔 30ml' and '샷 30ml' are distinct.
+                val keys = entries.map {
+                    if (it.bottle) "Bottle" else
+                        "${it.label.orEmpty().trim().lowercase()}:${numberText(it.volume)}ml"
+                }
                 if (keys.size != keys.toSet().size) p += ReviewIssue.OPTION
             }
         } else {
@@ -300,7 +306,8 @@ object PhotoReviewRules {
             x.copy(
                 volume = prev.volume, volumeSource = prev.volumeSource, bottle = prev.bottle,
                 primaryHasOption = prev.primaryHasOption, options = prev.options,
-                primarySourceOptionId = prev.primarySourceOptionId, match = prev.match,
+                primarySourceOptionId = prev.primarySourceOptionId,
+                primaryOptionLabel = prev.primaryOptionLabel, match = prev.match,
                 matchConfirmed = prev.matchConfirmed, nameSaved = prev.nameSaved,
                 newConfirmed = prev.newConfirmed, linkedProductId = prev.linkedProductId,
                 linkedProductName = prev.linkedProductName, newProductName = prev.newProductName,
@@ -316,6 +323,7 @@ object PhotoReviewRules {
                 newProductName = x.newProductName, candidates = x.candidates,
                 rawOptionEdits = x.rawOptionEdits,
                 primarySourceOptionId = x.primarySourceOptionId,
+                primaryOptionLabel = x.primaryOptionLabel,
             )
             if (target == ReviewItemType.OTHER) {
                 x.copy(
@@ -323,6 +331,7 @@ object PhotoReviewRules {
                     // Keep OCR option identities and all prices when changing type.
                     // No extra pour-size input is required for non-whisky.
                     options = x.options, primarySourceOptionId = x.primarySourceOptionId,
+                    primaryOptionLabel = x.primaryOptionLabel,
                     primaryHasOption = x.primaryHasOption, bottle = false,
                     // A non-whisky is never linked to the canonical whisky catalog.
                     // The classification snapshot restores the prior link on undo.
@@ -331,10 +340,25 @@ object PhotoReviewRules {
                     nameSaved = true, operatorPending = false, operatorReason = null,
                 )
             } else {
-                x.copy(classificationSnapshot = snapshot, volume = defaultPour, volumeSource = VolumeSource.DEFAULT,
-                    options = emptyList(), primaryHasOption = true, primarySourceOptionId = null,
-                    bottle = false, match = ReviewMatch.NEW,
-                    newConfirmed = false, nameSaved = false, matchConfirmed = false, newProductName = x.name)
+                // OTHER -> WHISKY must retain the original OCR option IDs and
+                // prices, even when the owner still needs to supply volumes.
+                val sourceOptions = x.options.map { option ->
+                    if (option.bottle || validVolume(option.volume)) option
+                    else option.copy(volume = defaultPour)
+                }
+                x.copy(classificationSnapshot = snapshot,
+                    volume = if (x.bottle) 0.0 else
+                        x.volume.takeIf(::validVolume) ?: defaultPour,
+                    volumeSource = if (validVolume(x.volume)) x.volumeSource
+                        else VolumeSource.DEFAULT,
+                    options = sourceOptions,
+                    primaryHasOption = x.primaryHasOption,
+                    primarySourceOptionId = x.primarySourceOptionId,
+                    primaryOptionLabel = x.primaryOptionLabel,
+                    bottle = x.bottle, match = ReviewMatch.NEW,
+                    newConfirmed = false, nameSaved = false, matchConfirmed = false,
+                    linkedProductId = null, linkedProductName = null,
+                    newProductName = x.name)
             }
         }
         return changed.copy(type = target, expanded = false)
