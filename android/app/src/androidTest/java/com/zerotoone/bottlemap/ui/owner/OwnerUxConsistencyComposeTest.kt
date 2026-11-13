@@ -104,7 +104,7 @@ class OwnerUxConsistencyComposeTest {
         compose.onNodeWithText("메뉴판 사진 등록 작업 중에는 메뉴를 수정할 수 없어요.")
             .assertDoesNotExist()
         compose.onNodeWithTag("manual-menu-edit-guidance").assertIsDisplayed()
-        compose.onNodeWithText("사진으로 메뉴 추가 작업 진행 중에는 메뉴를 직접 수정할 수 없어요.")
+        compose.onNodeWithText("사진 등록 중 · 편집 불가")
             .assertIsDisplayed()
         compose.onNodeWithText("메뉴를 선택해서 편집하세요").assertDoesNotExist()
     }
@@ -137,7 +137,7 @@ class OwnerUxConsistencyComposeTest {
         } }
         compose.onNodeWithTag("manual-menu-edit-guidance").assertIsDisplayed()
         compose.onNodeWithText("메뉴를 선택해서 편집하세요").assertIsDisplayed()
-        compose.onNodeWithText("사진으로 메뉴 추가 작업 진행 중에는 메뉴를 직접 수정할 수 없어요.")
+        compose.onNodeWithText("사진 등록 중 · 편집 불가")
             .assertDoesNotExist()
     }
 
@@ -154,8 +154,21 @@ class OwnerUxConsistencyComposeTest {
                     onStatus = {}, onMenu = {}, onAddBar = {}, onJob = {})
             }
         } }
-        compose.onNodeWithText("매장 정보 관리").assertExists()
-        compose.onNodeWithText("영업 상태 변경").assertExists()
+        compose.onNodeWithText("매장 정보 관리").assertIsDisplayed()
+        compose.onNodeWithText("영업 상태 변경").assertIsDisplayed()
+    }
+
+    @Test fun hourButtonKeepsTouchTargetButDrawsCompactFrame() {
+        compose.setContent { MaterialTheme {
+            V4HourButton("18:30", onClick = {},
+                modifier = androidx.compose.ui.Modifier.testTag("owner-hour-touch"))
+        } }
+        val touch = compose.onNodeWithTag("owner-hour-touch").getUnclippedBoundsInRoot()
+        val visible = compose.onNodeWithTag("owner-hour-visual").getUnclippedBoundsInRoot()
+        org.junit.Assert.assertTrue(touch.height.value >= 47.5f)
+        org.junit.Assert.assertTrue(touch.width.value >= 47.5f)
+        org.junit.Assert.assertTrue(visible.height < touch.height)
+        org.junit.Assert.assertTrue(visible.width <= touch.width)
     }
 
 }

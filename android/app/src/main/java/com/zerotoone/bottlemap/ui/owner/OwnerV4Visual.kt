@@ -138,14 +138,20 @@ internal fun V4CompactCheck(label: String, checked: Boolean, onChange: (Boolean)
 
 @Composable
 internal fun V4HourButton(text: String, onClick: ()->Unit, modifier: Modifier = Modifier) {
+    // Preserve a 48dp tap target but draw the frame close to the text.
+    // With larger system fonts, the inner frame can grow naturally.
     Box(modifier.widthIn(min = 48.dp).heightIn(min = 48.dp)
-        .background(V4Color.elevated, RoundedCornerShape(6.dp))
-        .border(1.dp, V4Color.line, RoundedCornerShape(6.dp))
-        .ownerQuietClick(onClick = onClick)
-        .padding(horizontal = 3.dp, vertical = 2.dp),
+        .ownerQuietClick(onClick = onClick),
         contentAlignment = Alignment.Center) {
-        Text(text, color = V4Color.text, fontSize = 11.sp,
-            textAlign = TextAlign.Center)
+        Box(Modifier
+            .background(V4Color.elevated, RoundedCornerShape(6.dp))
+            .border(1.dp, V4Color.line, RoundedCornerShape(6.dp))
+            .padding(horizontal = 5.dp, vertical = 4.dp)
+            .testTag("owner-hour-visual"),
+            contentAlignment = Alignment.Center) {
+            Text(text, color = V4Color.text, fontSize = 11.sp,
+                textAlign = TextAlign.Center)
+        }
     }
 }
 

@@ -687,7 +687,7 @@ internal fun OwnerManualMenuScreen(
                         }
                         Text(
                             if (activePhotoImport)
-                                "사진으로 메뉴 추가 작업 진행 중에는 메뉴를 직접 수정할 수 없어요."
+                                "사진 등록 중 · 편집 불가"
                             else "메뉴를 선택해서 편집하세요",
                             color = if (activePhotoImport) V4Color.primary else V4Color.sub,
                             fontSize = 11.sp,
