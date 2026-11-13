@@ -173,9 +173,8 @@ internal fun mapConfirmedReviewDecision(
     require(choices.all { choice ->
         choice.sourceOptionId == null || choice.sourceOptionId in byId
     }) { "${card.name}: 검수 옵션이 서버와 일치하지 않아요." }
-    require(raw.isEmpty() || choices.all { it.sourceOptionId != null }) {
-        "${card.name}: 새로운 용량 옵션은 사진 검수에서 추가할 수 없어요. 게시 후 직접 수정해 주세요."
-    }
+    // A manually added option has no OCR ID. The agreed API field
+    // addedOptions publishes it without inventing an extractedOptionId.
     val retainedIds = choices.mapNotNull { it.sourceOptionId }.toSet()
     val excludedOptionIds = raw.map { it.extractedOptionId }
         .filterNot { it in retainedIds }
