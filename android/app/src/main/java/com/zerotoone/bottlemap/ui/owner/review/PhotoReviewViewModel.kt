@@ -69,6 +69,9 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
     /** Replaces the state without regrouping (typing, opening a modal). */
     private fun set(state: PhotoReviewState) {
         _load.value = PhotoReviewLoad.Ready(state)
+        // Persist every field change, including unfinished typing, so a
+        // process kill never discards the current owner review draft.
+        saveDraft(state)
     }
 
     /**
@@ -91,7 +94,6 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
         }
         val next = changed.copy(items = items, show = show, typingSnapshots = emptyMap())
         set(next)
-        saveDraft(next)
         if (PhotoReviewRules.stats(next).pending.size < pendingBefore) toast("확인 완료")
     }
 
