@@ -952,6 +952,22 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         }
     }
 
+    /** The backend accepts owner-added options separately from OCR corrections. */
+    private fun addedReviewOptions(
+        item: com.zerotoone.bottlemap.network.ReviewItemDto,
+        decision: MockReviewDecision,
+    ): List<Map<String, Any?>> {
+        val extractedIds = item.options.mapTo(mutableSetOf()) { it.extractedOptionId }
+        return decision.correctedOptions.orEmpty().filterNot { it.optionId in extractedIds }
+            .map { option ->
+                mapOf(
+                    "optionLabel" to option.label,
+                    "pourMl" to option.pourMl,
+                    "priceKrw" to option.priceKrw,
+                )
+            }
+    }
+
     /**
      * Stage 8 can collect a price for a product without extracted options, but the
      * backend review API cannot create a new extractedOptionId. Preserve that UI
@@ -1140,8 +1156,12 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
             "같은 메뉴·용량에 다른 가격을 입력했어요. 가격을 하나로 맞춘 후 게시해 주세요."
         }
         val decisions = job.images.flatMap { it.lines }.associateBy { it.extractedItemId }
+        // Owner-added servings are now supported by the native review API.
+        // Keep only rows without ANY publishable option in the legacy fallback.
         val missingOptionLineIds = original.images.flatMap { it.items }
-            .filter { it.options.isEmpty() }.mapTo(mutableSetOf()) { it.extractedItemId }
+            .filter { it.options.isEmpty() &&
+                decisions[it.extractedItemId]?.decision?.correctedOptions.isNullOrEmpty() }
+            .mapTo(mutableSetOf()) { it.extractedItemId }
         val itemDecisions = original.images.flatMap { it.items }.map { item ->
             val chosen = decisions[item.extractedItemId]?.decision
                 ?: error("확인하지 않은 메뉴가 있어요.")
@@ -1164,6 +1184,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                         "correctedProductName" to chosen.displayNameOverride,
                         "optionDecisions" to reviewOptions(item, chosen),
                         "excludedOptionIds" to chosen.excludedOptionIds,
+                        "addedOptions" to addedReviewOptions(item, chosen),
                     )
                 }
                 MockDecisionKind.CREATE_PRODUCT -> {
@@ -1195,6 +1216,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                         ),
                         "optionDecisions" to reviewOptions(item, chosen),
                         "excludedOptionIds" to chosen.excludedOptionIds,
+                        "addedOptions" to addedReviewOptions(item, chosen),
                     )
                     }
                 }
