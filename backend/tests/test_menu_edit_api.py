@@ -784,6 +784,22 @@ def test_repeated_conflicts_are_503_and_roll_everything_back(client, db_session,
     assert menu_of(client, bar, operator)["menuVersion"] == 4
 
 
+def test_operator_cannot_create_nonwhisky_in_global_catalog(client, db_session, operator, bar):
+    catalog_count = db_session.scalar(select(func.count()).select_from(Product))
+    response = add(client, bar.id, {
+        "menuVersion": 4,
+        "newProduct": {
+            "brand": {"type": "new", "canonicalName": "Unapproved Beer"},
+            "product": {"displayName": "맥주 1", "category": "맥주"},
+        },
+        "displayName": "맥주 1",
+        "options": [option(price=9000, pour=None)],
+    }, operator)
+    assert error(response) == (422, "VALIDATION_FAILED")
+    assert ("newProduct.product.category", "WHISKY_ONLY") in field_errors(response)
+    assert db_session.scalar(select(func.count()).select_from(Product)) == catalog_count
+
+
 # ---- Bar-only entries / operator moderation (#152) ----
 
 @pytest.mark.parametrize(
