@@ -15,6 +15,28 @@ class MenuWriteErrorsTest {
         assertTrue(menuWriteErrorText(error).contains("localItem"))
     }
 
+    @Test fun kindRejectedByOldDeployedSchemaExplainsDeploymentWithoutRetry() {
+        val oldServer = BottleMapApiException(
+            httpStatus = 422, code = "VALIDATION_FAILED",
+            message = "입력값을 확인해 주세요.",
+            fieldErrors = listOf(FieldErrorDto("kind", "EXTRA_FORBIDDEN",
+                "Extra inputs are not permitted")),
+        )
+        val text = menuWriteErrorText(oldServer)
+        assertTrue(text.contains("서버"))
+        assertTrue(text.contains("kind"))
+        assertTrue(text.contains("저장되지 않았"))
+        val nested = oldServer.copyForField("body.kind")
+        assertTrue(menuWriteErrorText(nested).contains("서버"))
+    }
+
+    private fun BottleMapApiException.copyForField(path: String) =
+        BottleMapApiException(
+            httpStatus = httpStatus, code = code, message = message,
+            fieldErrors = listOf(FieldErrorDto(path,"EXTRA_FORBIDDEN",
+                "Extra inputs are not permitted")),
+        )
+
     @Test fun photoReviewUnionMismatchExplainsVersionMismatch() {
         val error = BottleMapApiException(
             httpStatus = 422, code = "VALIDATION_FAILED",
