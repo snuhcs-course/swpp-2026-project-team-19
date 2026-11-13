@@ -431,6 +431,21 @@ private fun IssueRowFor(x: ReviewItem, issue: ReviewIssue, vm: PhotoReviewViewMo
             ReviewChoice("가격 수정", { vm.toggleExpanded(id) },
                 testTag = "review-duplicate-price-edit-$id")
         }
+        ReviewIssue.DUPLICATE_PRODUCT -> Column(
+            Modifier.fillMaxWidth().padding(vertical = 6.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Text("동일한 위스키가 다른 사진에도 있어요. 서버는 첫 줄의 가격만 남기므로, 남길 줄에 모든 용량·가격을 추가한 뒤 나머지 줄을 게시에서 제외해 주세요.",
+                style = uxText(11f, 450, UxColor.sub, lineHeight = 1.5f))
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                ReviewChoice("가격 옵션 확인", { vm.toggleExpanded(id) },
+                    modifier = Modifier.weight(1f),
+                    testTag = "review-duplicate-view-$id")
+                ReviewChoice("이 줄 제외", { vm.requestExclude(id) },
+                    modifier = Modifier.weight(1f),
+                    testTag = "review-duplicate-exclude-$id")
+            }
+        }
     }
 }
 
