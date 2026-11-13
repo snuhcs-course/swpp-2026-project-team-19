@@ -52,7 +52,15 @@ class UxV18ComposeTest {
     @Test fun welcomeButtonsReportEachChoice() {
         val calls = mutableListOf<String>()
         rule.setContent { BottleMapTheme { WelcomeScreen({ calls += "guest" }, { calls += "google" }, { calls += "owner" }) } }
-        rule.onNodeWithText("마시고 싶은 위스키, 어디에서 만날까요?").assertIsDisplayed()
+        rule.onNodeWithText("Find the bottle first,\nthen the bar.").assertIsDisplayed()
+        rule.onNodeWithTag("welcome-pin").assertIsDisplayed()
+        rule.onNodeWithText("사장님이신가요?").assertIsDisplayed()
+        rule.onNodeWithText("매장 등록하기").assertIsDisplayed()
+        rule.onNodeWithText("BottleMap").assertDoesNotExist()
+        rule.onNodeWithText("마시고 싶은 위스키, 어디에서 만날까요?").assertDoesNotExist()
+        val first = rule.onNodeWithTag("welcome-google").fetchSemanticsNode().boundsInRoot
+        val second = rule.onNodeWithTag("welcome-guest").fetchSemanticsNode().boundsInRoot
+        assertTrue("Google must be above guest in v20", first.bottom < second.top)
         rule.onNodeWithTag("welcome-google").performClick()
         rule.onNodeWithTag("welcome-guest").performClick()
         rule.onNodeWithTag("welcome-owner").performClick()
@@ -78,6 +86,16 @@ class UxV18ComposeTest {
         rule.onNodeWithTag("bottom-tab-search").assertIsSelected()
         rule.onNodeWithTag("bottom-tab-account").assertIsNotSelected().performClick()
         assertEquals(MainTab.ACCOUNT, selected)
+    }
+
+    @Test fun v20ReviewHasBackOnlyToolbarStepperAndHeader() {
+        review()
+        rule.onNodeWithTag("review-steps").assertIsDisplayed()
+        rule.onNodeWithText("사진 올리기").assertIsDisplayed()
+        rule.onNodeWithText("읽기").assertIsDisplayed()
+        rule.onNodeWithText("확인").assertIsDisplayed()
+        rule.onNodeWithText("더하기").assertIsDisplayed()
+        rule.onNodeWithText("메뉴 검수").assertIsDisplayed()
     }
 
     @Test fun cardsStartFoldedAndOpenOnlyByToggle() {
