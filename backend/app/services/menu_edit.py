@@ -223,6 +223,9 @@ def _product_for(session: Session, body: MenuItemAddRequest, principal: Principa
             errors.add("productId", "PRODUCT_NOT_FOUND", "상품을 찾을 수 없습니다.")
         elif not product.is_active:
             errors.add("productId", "PRODUCT_INACTIVE", "비활성 상품은 메뉴에 연결할 수 없습니다.")
+        elif product.category != "whisky" and not is_operator(session, principal):
+            errors.add("productId", "PRODUCT_NOT_APPROVED",
+                "비위스키 상품은 공용 카탈로그와 연결할 수 없어요. 매장 메뉴로 등록해 주세요.")
         errors.raise_any()
         return product
     # A bar owner may publish an existing, approved catalog product, but not
