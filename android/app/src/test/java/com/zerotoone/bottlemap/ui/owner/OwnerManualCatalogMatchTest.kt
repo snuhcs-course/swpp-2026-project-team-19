@@ -2,6 +2,7 @@ package com.zerotoone.bottlemap.ui.owner
 
 import com.zerotoone.bottlemap.data.owner.MockBrand
 import com.zerotoone.bottlemap.data.owner.MockCatalogProduct
+import com.zerotoone.bottlemap.network.OwnerCatalogProductDto
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
@@ -91,6 +92,25 @@ class OwnerManualCatalogMatchTest {
             "글렌피딕 12년", "위스키", null))
         assertNull(manualFreshCatalogExactMatch(listOf(approved),
             "글렌피딕 12년", "위스키", approved.productId))
+    }
+
+    @Test fun freshHttpCatalogDtoMatchesOnlyApprovedWhiskyWithoutUsingMockFields() {
+        fun dto(id: String, title: String, kind: String, active: Boolean = true) =
+            OwnerCatalogProductDto(
+                productId = id, displayName = title, brandId = "brand",
+                brandName = "브랜드", category = kind, isActive = active,
+            )
+        val beer = dto("beer", "맥주 1", "맥주")
+        val whisky = dto("whisky", "오반 14", "whisky")
+        val inactive = dto("inactive", "오반 16", "whisky", false)
+        assertNull(manualFreshServerCatalogExactMatch(listOf(beer), "맥주 1", "기타 주류", null))
+        assertNull(manualFreshServerCatalogExactMatch(listOf(beer), "맥주 1", "위스키", null))
+        assertEquals(whisky, manualFreshServerCatalogExactMatch(
+            listOf(whisky), "오반14", "위스키", null))
+        assertNull(manualFreshServerCatalogExactMatch(
+            listOf(inactive), "오반 16", "위스키", null))
+        assertNull(manualFreshServerCatalogExactMatch(
+            listOf(whisky), "오반 14", "위스키", "whisky"))
     }
 
     @Test fun missingBrandConfirmationDoesNotInferEnglishProductId() {
