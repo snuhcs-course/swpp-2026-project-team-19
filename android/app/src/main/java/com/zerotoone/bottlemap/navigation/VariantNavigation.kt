@@ -8,7 +8,7 @@ import com.zerotoone.bottlemap.data.owner.MockOwnerLoadState
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.zerotoone.bottlemap.data.owner.OwnerMockRuntime
+import com.zerotoone.bottlemap.data.owner.OwnerRuntime
 import com.zerotoone.bottlemap.ui.owner.OwnerMockViewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
@@ -48,7 +48,7 @@ internal fun NavGraphBuilder.registerVariantRoutes(
                     LocalRippleConfiguration provides null,
                 ) {
             val ownerViewModel: OwnerMockViewModel = viewModel(factory = OwnerMockViewModel.Factory(
-                OwnerMockRuntime.repository(LocalContext.current)))
+                OwnerRuntime.repository(LocalContext.current)))
             LaunchedEffect(ownerViewModel) { ownerViewModel.retry() }
             // Always show the owned-bar list. One or many bars use the same flow;
             // the user explicitly selects which bar to manage.
@@ -65,7 +65,7 @@ internal fun NavGraphBuilder.registerVariantRoutes(
                 ) {
             OwnerOnboardingScreen(
                 viewModel = viewModel(factory = OwnerMockViewModel.Factory(
-                    OwnerMockRuntime.repository(LocalContext.current))),
+                    OwnerRuntime.repository(LocalContext.current))),
                 onBack = { navController.popBackStack() },
                 onManagerPreview = { navController.navigate(OwnerPage.MGR_HOME.route) },
                 startRegistration = true,
@@ -75,7 +75,7 @@ internal fun NavGraphBuilder.registerVariantRoutes(
         OwnerPage.entries.forEach { page ->
             composable(page.route) {
                 val data: OwnerMockViewModel = viewModel(factory = OwnerMockViewModel.Factory(
-                    OwnerMockRuntime.repository(LocalContext.current)))
+                    OwnerRuntime.repository(LocalContext.current)))
                 val mockState = data.state.collectAsStateWithLifecycle().value
                 // Owner-wide policy: no transient bright/ripple feedback on press.
                 // Stateful selected/checked indicators are intentionally preserved.
