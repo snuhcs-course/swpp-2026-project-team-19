@@ -16,9 +16,11 @@ class OwnerNavigationContractTest {
         assertTrue(pages.all { it.route.startsWith("owner/ux/") && it.title.isNotBlank() })
     }
 
-    @Test fun legacyMenuUploadIsAccessibleOnlyFromDebugOwnerEntry() {
-        assertEquals(OwnerRoutes.LEGACY_UPLOAD, OwnerRoutes.legacyDebugEntryRoute(true))
-        assertEquals(null, OwnerRoutes.legacyDebugEntryRoute(false))
+    @Test fun obsoleteMockUploadRoutesAreNotInTheActiveNavigationContract() {
+        assertTrue(routesWithoutTabs.none {
+            it.contains("menu-upload") || it.contains("extraction-review") ||
+                it.contains("dev/photo-review")
+        })
         assertEquals("customer", variantStartDestination)
     }
 
