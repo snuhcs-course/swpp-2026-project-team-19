@@ -1,0 +1,215 @@
+package com.zerotoone.bottlemap.data.owner.review
+
+import com.zerotoone.bottlemap.data.owner.MockBar
+import com.zerotoone.bottlemap.data.owner.MockMenuOption
+import com.zerotoone.bottlemap.data.owner.MockNewProductDraft
+import com.zerotoone.bottlemap.data.owner.MockOwnerSnapshot
+import com.zerotoone.bottlemap.data.owner.MockReviewDecision
+import com.zerotoone.bottlemap.data.owner.MockDecisionKind
+import com.zerotoone.bottlemap.data.owner.reviewServingKey
+import com.zerotoone.bottlemap.network.MenuImportStatusDto
+import com.zerotoone.bottlemap.network.ReviewItemDto
+import com.zerotoone.bottlemap.ui.owner.review.CatalogProduct
+import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewRules
+import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewState
+import com.zerotoone.bottlemap.ui.owner.review.PriceChoice
+import com.zerotoone.bottlemap.ui.owner.review.RecognizedOffer
+import com.zerotoone.bottlemap.ui.owner.review.ReviewItem
+import com.zerotoone.bottlemap.ui.owner.review.ReviewItemType
+import com.zerotoone.bottlemap.ui.owner.review.ReviewMatch
+import com.zerotoone.bottlemap.ui.owner.review.ReviewOption
+import com.zerotoone.bottlemap.ui.owner.review.VolumeSource
+import com.zerotoone.bottlemap.ui.owner.review.validPrice
+import com.zerotoone.bottlemap.ui.owner.review.validVolume
+
+/** The agreed server DTO is the sole source of extracted IDs and option counts. */
+internal fun mapServerPhotoReview(
+    response: MenuImportStatusDto, snapshot: MockOwnerSnapshot,
+): PhotoReviewState {
+    require(response.status == "ready_for_review" && response.reviewVersion != null) {
+        "검수할 수 없는 메뉴판 작업이에요."
+    }
+    val bar = snapshot.bars.firstOrNull { it.barId == response.barId }
+        ?: error("검수할 매장 정보를 불러오지 못했어요.")
+    val defaultPour = bar.defaultPourMl ?: 30
+    val lines = response.images.sortedBy { it.imageOrder }.flatMap { image ->
+        image.items.sortedBy { it.itemOrder }.map { dto ->
+            mapServerReviewItem(dto, image.imageOrder, bar, snapshot, defaultPour)
+        }
+    }
+    require(lines.map { it.id }.distinct().size == lines.size) {
+        "서버에서 중복된 메뉴 검수 항목을 받았어요."
+    }
+    return PhotoReviewState(items = lines, defaultPour = defaultPour.toDouble())
+}
+
+private fun isBottle(label: String?): Boolean =
+    label?.trim()?.lowercase() in setOf("bottle", "병")
+
+private fun mapServerReviewItem(
+    dto: ReviewItemDto, photoOrder: Int, bar: MockBar,
+    snapshot: MockOwnerSnapshot, defaultPour: Int,
+): ReviewItem {
+    val recognized = dto.options.sortedBy { it.optionOrder }
+    // The existing one-page HTML controls at most three options. Fail visibly
+    // instead of silently dropping prices from a larger server response.
+    require(recognized.size <= PhotoReviewRules.MAX_OPTIONS) {
+        "용량 옵션이 3개를 초과해요. 기존 메뉴 관리 화면에서 확인해 주세요."
+    }
+    val selectedCandidate = dto.candidates.firstOrNull {
+        it.productId == dto.proposedProductId
+    }
+    val category = selectedCandidate?.category ?: dto.newProductDraft?.category ?: "whisky"
+    val nonProduct = dto.effectiveLineType !in setOf("product", "unknown")
+    val other = nonProduct || !category.equals("whisky", ignoreCase = true)
+    val match = when {
+        dto.initialResolutionStatus == "exact_match" && dto.proposedProductId != null ->
+            ReviewMatch.EXACT
+        dto.candidates.size > 1 -> ReviewMatch.CANDIDATE
+        dto.candidates.size == 1 -> ReviewMatch.AMBIGUOUS
+        else -> ReviewMatch.NEW
+    }
+    val linkedId = dto.proposedProductId.takeIf {
+        match == ReviewMatch.EXACT && !nonProduct
+    }
+    val existing = snapshot.menuItems.firstOrNull {
+        it.barId == bar.barId && it.productId == linkedId
+    }
+    val options = recognized.map { option ->
+        val bottle = isBottle(option.extractedOptionLabel)
+        ReviewOption(
+            volume = if (bottle) 0.0
+                else (option.extractedPourMl ?: defaultPour).toDouble(),
+            price = (option.extractedPriceKrw ?: 0).toDouble(),
+            bottle = bottle,
+        )
+    }
+    val first = options.firstOrNull()
+    val firstServerOption = recognized.firstOrNull()
+    val retained = existing?.options?.firstOrNull { saved ->
+        reviewServingKey(saved.pourMl, saved.label) ==
+            reviewServingKey(firstServerOption?.extractedPourMl,
+                firstServerOption?.extractedOptionLabel)
+    }
+    val oldPrice = retained?.priceKrw?.toDouble()
+    val photoPrice = firstServerOption?.extractedPriceKrw?.toDouble()
+    val displayName = dto.extractedProductName?.trim()?.ifBlank { null }
+        ?: dto.newProductDraft?.displayName?.trim()?.ifBlank { null }
+        ?: dto.rawText.trim().take(200)
+    return ReviewItem(
+        id = dto.extractedItemId,
+        name = displayName,
+        type = if (other) ReviewItemType.OTHER else ReviewItemType.WHISKY,
+        match = match,
+        matchConfirmed = linkedId != null,
+        newConfirmed = linkedId != null,
+        linkedProductId = linkedId,
+        linkedProductName = selectedCandidate?.displayName.takeIf { linkedId != null },
+        newProductName = dto.newProductDraft?.displayName ?: displayName,
+        price = first?.price ?: 0.0,
+        volume = first?.volume ?: defaultPour.toDouble(),
+        bottle = first?.bottle ?: false,
+        volumeSource = if (firstServerOption?.extractedPourMl == null)
+            VolumeSource.DEFAULT else VolumeSource.PHOTO,
+        primaryHasOption = first != null,
+        options = if (other) emptyList() else options.drop(1),
+        oldPrice = oldPrice,
+        photoPrice = photoPrice,
+        priceChoice = if (oldPrice != null && photoPrice != null &&
+            oldPrice != photoPrice) PriceChoice.NONE else PriceChoice.PHOTO,
+        nameSaved = linkedId != null || nonProduct,
+        excluded = nonProduct,
+        raw = dto.rawText,
+        photoIndex = photoOrder,
+        hasSourceBox = dto.sourceBox?.size == 4,
+        required = !nonProduct,
+        recognizedName = displayName,
+        recognizedOffers = recognized.map {
+            RecognizedOffer(volumeMl = it.extractedPourMl,
+                bottle = isBottle(it.extractedOptionLabel),
+                priceKrw = it.extractedPriceKrw)
+        },
+        candidates = dto.candidates.sortedBy { it.candidateRank }
+            .map { CatalogProduct(it.productId, it.displayName) },
+    )
+}
+
+/**
+ * Convert an owner-confirmed v20 card to an existing Stage-8 decision.
+ * The existing production adapter owns the single 8.1 transaction,
+ * add-only policy, discount preservation, and post-publish warnings.
+ */
+internal fun mapConfirmedReviewDecision(
+    card: ReviewItem, extracted: ReviewItemDto, defaultPour: Double,
+    existingBrands: Map<String, String>,
+): MockReviewDecision {
+    if (card.excluded) return MockReviewDecision(MockDecisionKind.EXCLUDE)
+    val choices = if (card.type == ReviewItemType.OTHER) {
+        listOf(ReviewOption(price = card.price))
+    } else PhotoReviewRules.optionSummary(card)
+    require(choices.isNotEmpty() && choices.all {
+        validPrice(it.price) &&
+            (it.bottle || (card.type == ReviewItemType.OTHER || validVolume(it.volume)))
+    }) { "${card.name}: 가격과 용량을 확인해 주세요." }
+    val raw = extracted.options.sortedBy { it.optionOrder }
+    require(raw.isEmpty() || choices.size == raw.size) {
+        "${card.name}: 추출된 옵션의 개수 변경은 현재 API에서 지원하지 않아요."
+    }
+    require(choices.size <= PhotoReviewRules.MAX_OPTIONS) {
+        "${card.name}: 용량 옵션은 3개까지만 게시할 수 있어요."
+    }
+    val mapped = choices.mapIndexed { index, chosen ->
+        val source = raw.getOrNull(index)
+        val bottle = card.type == ReviewItemType.WHISKY && chosen.bottle
+        val label = if (bottle) "Bottle" else source?.extractedOptionLabel
+        require(source?.extractedOptionLabel == null || label != null) {
+            "${card.name}: 기존 옵션 이름은 삭제할 수 없어요."
+        }
+        MockMenuOption(
+            optionId = source?.extractedOptionId ?: "manual-${card.id}-$index",
+            label = label,
+            pourMl = if (bottle) null else if (card.type == ReviewItemType.OTHER)
+                source?.extractedPourMl
+            else chosen.volume.toInt(),
+            priceKrw = chosen.price.toInt(),
+        )
+    }
+    val override = card.name.trim().takeIf {
+        it.isNotEmpty() && it != extracted.extractedProductName
+    }
+    if (card.linkedProductId != null) {
+        return MockReviewDecision(
+            MockDecisionKind.SELECT_PRODUCT,
+            productId = card.linkedProductId,
+            correctedOptions = mapped,
+            displayNameOverride = override,
+        )
+    }
+    require(card.newConfirmed && card.nameSaved) {
+        "${card.name}: 신규 상품 정보를 확인해 주세요."
+    }
+    val sourceDraft = extracted.newProductDraft
+    val brandText = (extracted.extractedBrandName
+        ?: sourceDraft?.brandText)?.trim().orEmpty()
+    require(brandText.isNotBlank()) {
+        "${card.name}: 브랜드 정보가 없어 자동 등록할 수 없어요."
+    }
+    val category = sourceDraft?.category?.takeIf { it.isNotBlank() }
+        ?: if (card.type == ReviewItemType.WHISKY) "whisky" else
+            error("${card.name}: 상품 분류를 확인해 주세요.")
+    val brandId = existingBrands[brandText.lowercase()]
+    return MockReviewDecision(
+        MockDecisionKind.CREATE_PRODUCT,
+        correctedOptions = mapped,
+        displayNameOverride = override,
+        newProduct = MockNewProductDraft(
+            name = card.newProductName?.trim()?.ifBlank { null } ?: card.name.trim(),
+            brandId = brandId,
+            brandName = if (brandId == null) brandText else null,
+            category = category,
+            ageYears = sourceDraft?.ageYears,
+            editionName = sourceDraft?.editionName,
+            abvPercent = sourceDraft?.abv,
+        ),
+    )
+}
