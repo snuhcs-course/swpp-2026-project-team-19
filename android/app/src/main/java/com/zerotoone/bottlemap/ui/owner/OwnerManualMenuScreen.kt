@@ -1,5 +1,7 @@
 package com.zerotoone.bottlemap.ui.owner
 
+import com.zerotoone.bottlemap.data.owner.isBottleServingLabel
+
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -97,7 +99,7 @@ private fun localDiscountEndDay(endAtEpochMs: Long): LocalDate {
         local.toLocalDate().minusDays(1) else local.toLocalDate()
 }
 private fun fromSaved(o: MockMenuOption) = DraftOption(
-    o.optionId, o.pourMl == null && o.label?.trim()?.lowercase() in listOf("bottle", "병"),
+    o.optionId, isBottleServingLabel(o.label),
     o.pourMl?.toString().orEmpty(), o.priceKrw.toString(),
     o.discount?.discountedPriceKrw?.toString().orEmpty(),
     o.discount?.startAtEpochMs?.let {
@@ -147,8 +149,7 @@ private fun toOption(d: DraftOption, whisky: Boolean,
     val keepOriginal = preserveOriginalServing &&
         original != null && original.optionId == d.id &&
         (if (whisky) {
-            if (d.bottle) original.pourMl == null &&
-                original.label?.trim()?.lowercase() in listOf("bottle", "병")
+            if (d.bottle) isBottleServingLabel(original.label)
             else original.pourMl?.toString().orEmpty() == d.ml
         } else true)
     return MockMenuOption(d.id,
