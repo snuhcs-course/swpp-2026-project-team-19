@@ -85,6 +85,22 @@ class LivePhotoReviewMappingTest {
         assertEquals(PriceChoice.NONE,sameServing.priceChoice)
     }
 
+    @Test fun bottleAndKoreanBottleDoNotBorrowEachOthersExistingPrices() {
+        val saved=fixture().copy(menuItems=listOf(MockBarMenuItem(
+            "row-1","bar-1","product-1",
+            listOf(MockMenuOption("saved-bottle",label="Bottle",priceKrw=120000)))))
+        val korean=item(options=listOf(ReviewOptionDto(
+            "ocr-korean-bottle",1,"병",null,150000)))
+        val noMatch=mapServerPhotoReview(response(korean),saved).items.single()
+        assertNull(noMatch.oldPrice)
+        assertEquals(PriceChoice.PHOTO,noMatch.priceChoice)
+        val english=korean.copy(options=listOf(ReviewOptionDto(
+            "ocr-english-bottle",1,"Bottle",null,150000)))
+        val matched=mapServerPhotoReview(response(english),saved).items.single()
+        assertEquals(120000.0,matched.oldPrice!!,0.0)
+        assertEquals(PriceChoice.NONE,matched.priceChoice)
+    }
+
     @Test fun firstOcrOptionIdentitySurvivesReviewAndCanPublishWithoutFalseNewOptionError() {
         val dto = item()
         val card = mapServerPhotoReview(response(dto), fixture()).items.single()
