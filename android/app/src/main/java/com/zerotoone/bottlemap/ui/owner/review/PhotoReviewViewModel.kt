@@ -135,14 +135,24 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
             toast("1 ~ 999 사이의 숫자를 입력해주세요.")
             return
         }
-        mutate { s ->
-            s.copy(defaultPour = n, draftDefaultPourText = "", items = s.items.map {
-                if (it.type == ReviewItemType.WHISKY && !it.bottle && it.volumeSource == VolumeSource.DEFAULT &&
-                    !(it.volume > 0)
-                ) it.copy(volume = n) else it
-            })
+        viewModelScope.launch {
+            // Claim a saved default only after the real bar API succeeds. A
+            // failed request must not silently unlock the Publish button.
+            try {
+                repository.saveDefaultPour(n.toInt())
+                mutate { s ->
+                    s.copy(defaultPour = n, draftDefaultPourText = "", items = s.items.map {
+                        if (it.type == ReviewItemType.WHISKY && !it.bottle &&
+                            it.volumeSource == VolumeSource.DEFAULT && !(it.volume > 0)
+                        ) it.copy(volume = n) else it
+                    })
+                }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: Exception) {
+                toast(error.message ?: "기본 잔 용량을 저장하지 못했어요. 다시 시도해 주세요.")
+            }
         }
-        viewModelScope.launch { runCatching { repository.saveDefaultPour(n.toInt()) } }
     }
 
     fun requestPublish() {
