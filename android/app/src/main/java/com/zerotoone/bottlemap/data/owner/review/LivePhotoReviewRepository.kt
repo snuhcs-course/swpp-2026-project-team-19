@@ -80,11 +80,16 @@ class LivePhotoReviewRepository(
         return restored
     }
 
-    override suspend fun searchCatalog(query: String): List<CatalogProduct> =
-        remote.searchCatalogProducts(query).filter { it.isActive }
+    override suspend fun searchCatalog(query: String): List<CatalogProduct> {
+        // The existing publish adapter validates selected IDs against its
+        // current catalog snapshot, so keep it in sync with the server search.
+        owner.searchCatalogLive(query)
+        return remote.searchCatalogProducts(query).filter { it.isActive }
             .map { CatalogProduct(it.productId, it.displayName) }
+    }
 
     override suspend fun exactMatches(name: String): List<CatalogProduct> {
+        owner.searchCatalogLive(name)
         val key = normalized(name)
         return remote.searchCatalogProducts(name)
             .filter { it.isActive && (
@@ -140,8 +145,9 @@ class LivePhotoReviewRepository(
             val brand = (item.extractedBrandName ?: item.newProductDraft?.brandText)
                 ?.trim().orEmpty()
             if (brand.isNotBlank() && normalized(brand) !in brands) {
-                val match = remote.searchCatalogBrands(brand).firstOrNull {
-                    normalized(it.canonicalName) == normalized(brand)
+                owner.searchCatalogBrandsLive(brand)
+                val match = snapshot().brands.firstOrNull {
+                    normalized(it.name) == normalized(brand)
                 }
                 if (match != null) brands[normalized(brand)] = match.brandId
             }
