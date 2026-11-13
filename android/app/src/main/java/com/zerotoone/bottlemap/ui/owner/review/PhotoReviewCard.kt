@@ -347,7 +347,7 @@ private fun IssueRowFor(x: ReviewItem, issue: ReviewIssue, vm: PhotoReviewViewMo
             "메뉴를 확인해 주세요", x.candidates.firstOrNull()?.name ?: "추천 상품 없음",
             "맞아요" to { vm.confirmMatch(id) }, "아니에요" to { vm.startCatalogSearch(id) }, "review-match-$id",
         )
-        ReviewIssue.NAME -> if (x.nameEditMode) NameEditorRow("메뉴 이름을 수정해 주세요", x, vm, focus)
+        ReviewIssue.NAME -> if (x.nameEditMode || x.name.isBlank()) NameEditorRow("메뉴 이름을 입력해 주세요", x, vm, focus)
         else MenuConfirmRow("메뉴를 확인해 주세요", x.name.ifBlank { "이름 입력 필요" },
             "맞아요" to { vm.confirmName(id) }, "아니에요" to { vm.editReviewName(id) }, "review-name-$id")
         ReviewIssue.NEW -> if (x.nameEditMode) NameEditorRow("새로운 메뉴예요", x, vm, focus)
