@@ -44,7 +44,10 @@ import com.zerotoone.bottlemap.ui.owner.OwnerSkeletonScreen
 internal const val variantStartDestination = "customer"
 
 @OptIn(ExperimentalMaterial3Api::class)
-internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostController) {
+internal fun NavGraphBuilder.registerVariantRoutes(
+    navController: NavHostController,
+    onNotice: (String) -> Unit = {},
+) {
     // Shared by both ends of the Owner manage <-> preview round trip.
     val previewSwitchCooldown = OwnerPreviewSwitchCooldown()
     navigation(route = OwnerRoutes.GRAPH, startDestination = OwnerRoutes.ENTRY) {
@@ -160,6 +163,7 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                         onRetry = data::retry,
                         onBack = { navController.popBackStack() },
                         onNewPhoto = { navController.navigate(OwnerPage.MGR_PHOTO.route) },
+                        onNotice = onNotice,
                         onExistingJob = { status ->
                             navController.currentBackStackEntry?.savedStateHandle
                                 ?.set("resumeOwnerImport",status==MockImportStatus.READY_FOR_REVIEW)
