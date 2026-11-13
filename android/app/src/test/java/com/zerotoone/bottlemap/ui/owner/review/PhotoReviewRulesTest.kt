@@ -232,4 +232,42 @@ class PhotoReviewRulesTest {
             assertEquals(scenario, MockPhotoReviewScenario.fromId(scenario.id))
         }
     }
+    @Test fun crossPhotoDuplicateProductServingNeedsExplicitPriceCorrection() {
+        val first=ReviewItem(id="photo1",name="동일 위스키",linkedProductId="shared-product",
+            volume=30.0,price=18000.0)
+        val second=ReviewItem(id="photo2",name="동일 위스키",linkedProductId="shared-product",
+            volume=30.0,price=21000.0)
+        val review=PhotoReviewState(items=listOf(first,second),defaultPour=30.0)
+        assertEquals(setOf("30ml"),PhotoReviewRules.duplicatePhotoPriceConflicts(review)["photo1"])
+        assertTrue(ReviewIssue.DUPLICATE_PRICE in PhotoReviewRules.problems(first,review))
+        assertFalse(PhotoReviewRules.stats(review).canPublish)
+        val chosen=PhotoReviewRules.editOption(second,PhotoReviewRules.OptionField.PRICE,null,"18000")
+        val resolved=review.copy(items=listOf(first,chosen))
+        assertTrue(PhotoReviewRules.duplicatePhotoPriceConflicts(resolved).isEmpty())
+        assertTrue(PhotoReviewRules.stats(resolved).canPublish)
+    }
+
+    @Test fun differentProductOrDifferentServingDoesNotCauseFalsePhotoPriceConflict() {
+        val a=ReviewItem(id="line1",name="위스키",linkedProductId="product-1",volume=30.0,price=15000.0)
+        val b=ReviewItem(id="line2",name="위스키",linkedProductId="product-1",volume=60.0,price=25000.0)
+        val c=ReviewItem(id="line3",name="다른 위스키",linkedProductId="product-2",volume=30.0,price=29000.0)
+        assertTrue(PhotoReviewRules.duplicatePhotoPriceConflicts(
+            PhotoReviewState(items=listOf(a,b,c))).isEmpty())
+        assertTrue(PhotoReviewRules.duplicatePhotoPriceConflicts(
+            PhotoReviewState(items=listOf(a,a.copy(id="line4",price=18000.0,excluded=true)))).isEmpty())
+    }
+
+    @Test fun otherMultiPriceLineRequiresEveryPriceAndSupportsPerOptionEdit() {
+        val other=ReviewItem(id="beer",name="맥주",type=ReviewItemType.OTHER,
+            price=8000.0,volume=Double.NaN,
+            options=listOf(ReviewOption(volume=Double.NaN,price=0.0,sourceOptionId="ocr-2")))
+        assertTrue(ReviewIssue.PRICE in PhotoReviewRules.problems(other))
+        val fixed=PhotoReviewRules.editOption(other,PhotoReviewRules.OptionField.PRICE,0,"12000")
+        assertEquals(12000.0,fixed.options.single().price,0.0)
+        assertTrue(PhotoReviewRules.problems(fixed).isEmpty())
+        val removed=PhotoReviewRules.removeOption(fixed,0)
+        assertEquals(1,PhotoReviewRules.countOptions(removed))
+        assertTrue(PhotoReviewRules.problems(removed).isEmpty())
+    }
+
 }
