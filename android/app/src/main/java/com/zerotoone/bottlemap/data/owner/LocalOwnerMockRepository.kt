@@ -775,6 +775,40 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             nextLocalId = nextSequence) to nextId
     }
 
+    /**
+     * Production review staging only: these DTO-adapter decisions are later
+     * validated atomically by POST review-and-apply (Backend #164).
+     * The legacy mock decideLine() validates CREATE_PRODUCT as a *catalog*
+     * creation requiring a brand; that is deliberately not the Owner API
+     * contract, where the same internal enum means publish_without_product.
+     *
+     * Stage EXACTLY this OCR line. Never cascade EXCLUDE to other lines:
+     * the owner sees and confirms every line independently in the review UI.
+     */
+    internal fun stageLiveReviewDecision(
+        importId: String, extractedItemId: String, expectedVersion: Int,
+        decision: MockReviewDecision,
+    ) {
+        change { state ->
+            val job = state.imports.firstOrNull { it.menuImportId == importId }
+                ?: error("검수 작업을 찾지 못했어요.")
+            require(job.status == MockImportStatus.READY_FOR_REVIEW &&
+                job.reviewVersion == expectedVersion) { "REVIEW_OUTDATED" }
+            require(job.images.any { image ->
+                image.lines.any { it.extractedItemId == extractedItemId }
+            }) { "검수 항목이 변경됐어요. 다시 불러와 주세요." }
+            val next = job.copy(images = job.images.map { image ->
+                image.copy(lines = image.lines.map { line ->
+                    if (line.extractedItemId == extractedItemId)
+                        line.copy(decision = decision) else line
+                })
+            })
+            state.copy(imports = state.imports.map {
+                if (it.menuImportId == importId) next else it
+            }) to Unit
+        }
+    }
+
     override fun decideLine(
         importId: String, extractedItemId: String, expectedVersion: Int, decision: MockReviewDecision,
     ) {
