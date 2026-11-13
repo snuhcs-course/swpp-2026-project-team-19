@@ -291,6 +291,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                 brandId = item.brandId ?: "",
                 displayName = item.productName ?: item.displayName,
                 category = item.category,
+                catalogMatched = item.catalogMatched,
             )
         }.distinctBy { it.productId }
         val mappedBars = barsWithCovers.map(::toBar)
@@ -515,62 +516,35 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                 },
             )
         }
-            val version = versionByBar[item.barId]
-            val display = item.displayNameOverride
-                ?: (newProduct ?: before.products.firstOrNull { it.productId == item.productId })?.displayName
-                ?: error("메뉴 이름이 없어요.")
-            if(old != null) {
-                remote.updateMenuItem(item.barId, item.barMenuItemId,
-                    mapOf("menuVersion" to version, "displayName" to display,
-                        "options" to optionBodies))
+        val version = versionByBar[item.barId]
+        val display = item.displayNameOverride
+            ?: (newProduct ?: before.products.firstOrNull { it.productId == item.productId })?.displayName
+            ?: error("메뉴 이름이 없어요.")
+        if (old != null) {
+            val body = mutableMapOf<String, Any?>(
+                "menuVersion" to version, "displayName" to display,
+                "options" to optionBodies,
+            )
+            // Editing category is per-bar only. Backend detaches a canonical
+            // listing into a local row instead of altering Product.category.
+            newProduct?.let { body["category"] = it.category }
+            remote.updateMenuItem(item.barId, item.barMenuItemId, body)
+        } else {
+            val body = mutableMapOf<String, Any?>(
+                "menuVersion" to version, "displayName" to display,
+                "options" to optionBodies,
+            )
+            if (newProduct != null) {
+                // Unmatched whisky stays pending; beer/other items stay local.
+                // Never transmit newProduct here: that would write the global
+                // products/brands tables without an operator's approval.
+                body["localItem"] = mapOf("category" to newProduct.category)
             } else {
-                val body = mutableMapOf<String, Any?>(
-                    "menuVersion" to version, "displayName" to display,
-                    "options" to optionBodies,
-                )
-                if(newProduct == null) {
-                    body["productId"] = item.productId
-                } else {
-                    val knownBrandId = before.brands.firstOrNull {
-                    it.brandId == newProduct.brandId &&
-                        runCatching { java.util.UUID.fromString(it.brandId) }.isSuccess
-                }?.brandId
-                // Deleted menu rows keep their canonical catalog identities.
-                // Before creating a new brand, resolve an existing canonical
-                // name/alias from the *server* to avoid DUPLICATE_BRAND_FOUND.
-                val brandLabel = newBrand?.name?.trim().orEmpty()
-                val existingBrandId = knownBrandId ?: brandLabel.takeIf {
-                    it.length in 2..100
-                }?.let { requested ->
-                    fun norm(value: String) =
-                        java.text.Normalizer.normalize(value, java.text.Normalizer.Form.NFKC)
-                            .filter(Char::isLetterOrDigit).lowercase()
-                    remote.searchCatalogBrands(requested).firstOrNull { found ->
-                        norm(found.canonicalName) == norm(requested) ||
-                            norm(found.matchedAlias) == norm(requested)
-                    }?.brandId
-                }
-                val brand = if(existingBrandId != null)
-                    mapOf("type" to "existing", "brandId" to existingBrandId)
-                else mapOf("type" to "new",
-                    "canonicalName" to (brandLabel.ifBlank {
-                        error("상품 이름으로 브랜드를 확인하지 못했어요.")
-                    }),
-                    "aliases" to emptyList<Any>())
-                    body["newProduct"] = mapOf(
-                        "brand" to brand,
-                        "product" to mapOf(
-                            "category" to newProduct.category,
-                            "displayName" to newProduct.displayName,
-                            "ageYears" to newProduct.ageYears,
-                            "editionName" to newProduct.editionName,
-                            "abv" to newProduct.abvPercent,
-                        ),
-                        "aliases" to emptyList<Any>(),
-                    )
-                }
-                remote.addMenuItem(item.barId, body)
-            }    }
+                body["productId"] = item.productId
+            }
+            remote.addMenuItem(item.barId, body)
+        }
+    }
 
     /** Manual menu screen awaits the HTTP response before claiming success or closing the editor. */
     suspend fun saveManualMenuItemLive(
@@ -1196,24 +1170,14 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                         )
                     } else {
                     val draft = requireNotNull(chosen.newProduct)
-                    val brand = if(draft.brandId != null)
-                        mapOf("type" to "existing", "brandId" to draft.brandId)
-                    else mapOf("type" to "new",
-                        "canonicalName" to requireNotNull(draft.brandName),
-                        "aliases" to emptyList<Any>())
+                    // Owner photo review publishes to the bar-local menu first.
+                    // Canonical approval is a separate operator-only action.
                     mapOf(
-                        "action" to "create_product",
+                        "action" to "create_local_menu_item",
                         "extractedItemId" to item.extractedItemId,
                         "finalLineType" to "product",
-                        "brand" to brand,
-                        "correctedProductName" to chosen.displayNameOverride,
-                        "product" to mapOf(
-                            "category" to draft.category,
-                            "displayName" to draft.name,
-                            "ageYears" to draft.ageYears,
-                            "editionName" to draft.editionName,
-                            "abv" to draft.abvPercent,
-                        ),
+                        "category" to draft.category,
+                        "correctedProductName" to (chosen.displayNameOverride ?: draft.name),
                         "optionDecisions" to reviewOptions(item, chosen),
                         "excludedOptionIds" to chosen.excludedOptionIds,
                         "addedOptions" to addedReviewOptions(item, chosen),
