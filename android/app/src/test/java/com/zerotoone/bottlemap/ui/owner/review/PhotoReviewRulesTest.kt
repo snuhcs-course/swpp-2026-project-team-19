@@ -147,6 +147,27 @@ class PhotoReviewRulesTest {
         assertEquals(listOf(ReviewIssue.NEW), PhotoReviewRules.problems(x))
     }
 
+    @Test fun switchingCatalogWhiskyToOtherNeverLeavesAProductLink() {
+        val linked = ReviewItem(
+            id = "changed-to-other", name = "맥주 1",
+            type = ReviewItemType.WHISKY,
+            match = ReviewMatch.EXACT, linkedProductId = "old-whisky-product",
+            linkedProductName = "Old Whisky",
+            options = listOf(ReviewOption(60.0, 25000.0)),
+            operatorPending = true, operatorReason = OperatorReason.CHANGED,
+        )
+        val other = PhotoReviewRules.reclassify(linked,30.0)
+        assertEquals(ReviewItemType.OTHER,other.type)
+        assertNull(other.linkedProductId)
+        assertNull(other.linkedProductName)
+        assertFalse(other.operatorPending)
+        assertEquals(ReviewMatch.NEW,other.match)
+        val restored = PhotoReviewRules.reclassify(other,30.0)
+        assertEquals(ReviewItemType.WHISKY,restored.type)
+        assertEquals("old-whisky-product",restored.linkedProductId)
+        assertEquals(linked.options,restored.options)
+    }
+
     @Test fun reclassifyingBackRestoresTheOptions() {
         val x = item(MockPhotoReviewScenario.RECLASSIFY, "glen12")
         val other = PhotoReviewRules.reclassify(x, 30.0)
