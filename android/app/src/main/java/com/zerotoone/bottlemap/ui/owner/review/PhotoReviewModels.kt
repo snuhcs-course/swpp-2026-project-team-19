@@ -206,16 +206,6 @@ fun validPrice(n: Double): Boolean = !n.isNaN() && n == Math.floor(n) && n >= 1 
 
 fun validVolume(n: Double): Boolean = !n.isNaN() && n == Math.floor(n) && n >= 1 && n <= 999
 
-/** Price-choice button includes the verified serving: OCR size or bar default. */
-fun reviewPriceChoiceLabel(item: ReviewItem, price: Double?): String {
-    val size = when {
-        item.bottle -> "Bottle"
-        validVolume(item.volume) -> "${item.volume.toInt()}ml"
-        else -> null
-    }
-    return listOfNotNull(size, won(price)).joinToString(" · ")
-}
-
 /** "15,000원", or "—" when there is no price. */
 fun won(n: Double?): String =
     if (n != null && n > 0) NumberFormat.getNumberInstance(Locale.KOREA).format(n.toLong()) + "원" else "—"
