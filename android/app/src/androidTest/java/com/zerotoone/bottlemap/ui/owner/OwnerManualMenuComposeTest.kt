@@ -971,7 +971,7 @@ class OwnerManualMenuComposeTest {
 
     @Test fun deletedNonWhiskyReaddedAsNewBarOnlyIdentityWithoutOldLink() {
         val r=LocalOwnerMockRepository(InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
-        val p=MockCatalogProduct("deleted-liqueur","deleted-brand","직접 등록한 리큐르",
+        val p=MockCatalogProduct("local-unverified-deleted-liqueur","deleted-brand","직접 등록한 리큐르",
             category="otherAlcohol",catalogMatched=false,otherAlcoholKind="리큐르")
         r.saveManualMenuItem(MockBarMenuItem("deleted-row","fixture-bar",p.productId,
             listOf(MockMenuOption("deleted-option",priceKrw=18000))),p,MockBrand(p.brandId,"기타 브랜드"))
@@ -1001,7 +1001,7 @@ class OwnerManualMenuComposeTest {
         val fixture=OwnerMockFixtures.registeredBar()
         val r=LocalOwnerMockRepository(InMemoryMockOwnerStateStore(fixture.copy(
             bars=fixture.bars+MockBar("other-bar","다른 매장","서울"))))
-        val p=MockCatalogProduct("shared-liqueur","shared-brand","공유 수제 리큐르",
+        val p=MockCatalogProduct("local-unverified-shared-liqueur","shared-brand","공유 수제 리큐르",
             category="otherAlcohol",catalogMatched=false,otherAlcoholKind="리큐르")
         r.saveManualMenuItem(MockBarMenuItem("deleted-shared","fixture-bar",p.productId,
             listOf(MockMenuOption("own-old",priceKrw=18000))),p,MockBrand(p.brandId,"기타 브랜드"))
