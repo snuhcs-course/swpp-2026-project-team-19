@@ -314,11 +314,29 @@ object PhotoReviewRules {
 
     fun markLinked(x: ReviewItem, product: CatalogProduct): ReviewItem {
         val old = x.existingPriceByProductId[product.productId]
-        val photo = x.photoPrice
+        val photo = x.photoPrice ?: optionSummary(x).firstOrNull()?.price
         val changed = old != null && photo != null && old != photo
+        // The grouped Live review has candidate prices rather than the old
+        // two-button PriceChoice. Add the chosen catalog product's stored 30ml
+        // price to that SAME serving's inline chooser after manual linking.
+        val first = optionSummary(x).firstOrNull()
+        val serving = first?.let(::servingKey)
+        val existingCandidate = if (x.priceCandidates.isNotEmpty() &&
+            old != null && serving != null &&
+            x.priceCandidates.none { it.existing && it.servingKey == serving }) {
+            ReviewPriceCandidate(
+                servingKey = serving,
+                volumeMl = first.volume.takeIf(::validVolume)?.toInt(),
+                bottle = first.bottle,
+                priceKrw = old.toInt(),
+                existing = true,
+            )
+        } else null
         return x.copy(
+        priceCandidates = x.priceCandidates + listOfNotNull(existingCandidate),
         oldPrice = old,
         priceChoice = if (x.priceChoice == PriceChoice.MANUAL) PriceChoice.MANUAL
+            else if (x.priceCandidates.isNotEmpty()) PriceChoice.PHOTO
             else if (changed) PriceChoice.NONE else PriceChoice.PHOTO,
         price = if (x.priceChoice == PriceChoice.MANUAL) x.price else photo ?: x.price,
         linkedProductId = product.productId,
