@@ -42,6 +42,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.rememberDatePickerState
+import com.zerotoone.bottlemap.ui.auth.AccountHeader
 import com.zerotoone.bottlemap.ui.theme.BottleMapShapes
 import com.zerotoone.bottlemap.ui.theme.BottleMapSizes
 import com.zerotoone.bottlemap.ui.theme.BottleMapSpacing
