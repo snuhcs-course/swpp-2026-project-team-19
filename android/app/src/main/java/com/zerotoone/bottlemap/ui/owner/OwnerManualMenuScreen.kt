@@ -471,7 +471,7 @@ internal fun OwnerManualMenuScreen(
                             // A deleted menu is NOT a deleted catalog product: offer
                             // the original product again with "맞아요 / 아니에요".
                             val fresh = viewModel.searchCatalogLive(name)
-                            val exact = manualFreshCatalogExactMatch(
+                            val exact = manualFreshServerCatalogExactMatch(
                                 fresh, name, category, rejectedId)
                             if (exact != null) {
                                 error = "“${exact.displayName}”이 맞나요? 맞아요 또는 아니에요를 선택해 주세요."
