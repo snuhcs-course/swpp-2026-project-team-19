@@ -88,6 +88,24 @@ def test_owner_added_servings_obey_three_total_options(db_session, review, glenf
     )
 
 
+def test_photo_review_global_catalog_rejects_nonwhisky_product_and_legacy_nonwhisky_link(
+    db_session, review, glenfiddich
+):
+    body = valid_body(review, glenfiddich)
+    new = next((i, d) for i, d in enumerate(body["itemDecisions"])
+               if d["action"] == "create_product")
+    new[1]["product"]["category"] = "맥주"
+    assert (f"itemDecisions[{new[0]}].product.category", "WHISKY_ONLY") in field_errors(
+        db_session, review, body
+    )
+    body = valid_body(review, glenfiddich)
+    glenfiddich[12].category = "beer"
+    db_session.flush()
+    assert ("itemDecisions[1].productId", "WHISKY_ONLY") in field_errors(
+        db_session, review, body
+    )
+
+
 def test_excluding_a_reviewed_option_retains_only_selected_prices(db_session, review, glenfiddich):
     body = valid_body(review, glenfiddich)
     extracted = review[1][1]
