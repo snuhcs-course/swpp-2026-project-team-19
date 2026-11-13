@@ -21,7 +21,7 @@ A serialization failure reruns everything from step 1, up to three attempts in t
 (app.services.serializable).
 """
 
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
@@ -31,6 +31,7 @@ from app.core.security import Principal
 from app.models import (
     Bar,
     BarStatus,
+    BarLocalMenuItem,
     Brand,
     ExtractedItem,
     ExtractionRun,
@@ -46,6 +47,7 @@ from app.models import (
     ReviewStatus,
 )
 from app.schemas.menu_review import (
+    CreateLocalMenuItem,
     CreateProduct,
     ConfirmNonProduct,
     Reject,
@@ -104,6 +106,27 @@ def _record_item(entry: ReviewedItem, catalog: CatalogResult) -> None:
             item.review_status = ReviewStatus.REJECTED
         else:
             item.review_status = ReviewStatus.CONFIRMED if item.corrected_line_type is None else ReviewStatus.CORRECTED
+        return
+
+    if isinstance(decision, CreateLocalMenuItem):
+        item.selected_product_id = None
+        item.selected_match_method = None
+        item.match_confidence = None
+        item.corrected_product_name = decision.correctedProductName
+        for final in entry.options:
+            if final.option is None:
+                continue
+            option = final.option
+            option.corrected_option_label = (
+                final.label if final.label != option.extracted_option_label else None
+            )
+            option.corrected_pour_ml = (
+                final.pour_ml if final.pour_ml != option.extracted_pour_ml else None
+            )
+            option.corrected_price_krw = (
+                final.price_krw if final.price_krw != option.extracted_price_krw else None
+            )
+        item.review_status = ReviewStatus.CORRECTED
         return
 
     product_id = catalog.product_ids[item.id]
@@ -273,6 +296,36 @@ def _apply_once(
         _record_item(entry, catalog)
     board, plan = review_plan(session, menu_import.bar_id, menu_import.mode, review, catalog)
     write_board(session, board, menu_import.bar_id, menu_import.id, plan.entries, published_at=published_at)
+    ignored = {
+        row.extracted_item_id for row in review.changes
+        if row.extracted_item_id is not None and
+            review.change_decisions.get(row.id) == MenuChangeDecision.IGNORE
+    }
+    for entry in review.items:
+        if not isinstance(entry.decision, CreateLocalMenuItem) or entry.item.id in ignored:
+            continue
+        decision = entry.decision
+        name = (decision.correctedProductName or entry.item.extracted_product_name or
+            entry.item.raw_text).strip()
+        session.add(BarLocalMenuItem(
+            bar_id=menu_import.bar_id,
+            display_name=name,
+            category=decision.category,
+            options=[
+                {
+                    "menuEntryOptionId": str(uuid4()),
+                    "optionLabel": option.label,
+                    "pourMl": option.pour_ml,
+                    "priceKrw": option.price_krw,
+                    "discount": None,
+                    "sortOrder": i,
+                }
+                for i, option in enumerate(entry.priced_options, start=1)
+            ],
+        ))
+        plan.changes.append(AppliedChange(
+            MenuChangeType.ADD, extracted_item_id=entry.item.id))
+    session.flush()
     _record_changes(session, menu_import, review, plan.changes)
     menu_import.status = ImportStatus.APPLIED
     menu_import.review_confirmed_at = published_at
