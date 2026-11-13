@@ -90,7 +90,11 @@ internal fun groupLiveWhiskyReview(
                 priceKrw = option.priceKrw,
                 existing = true,
             )
-        }
+        } + batch.flatMap { (_, card) ->
+            // Grouping recomputes OCR candidates; preserve the saved local
+            // prices that the mapper matched by bar + normalized name.
+            card.priceCandidates.filter { it.existing }
+        }.distinctBy { listOf(it.servingKey, it.priceKrw, it.existing, it.sourceItemId) }
         // Keep every OCR candidate (including nonconflicting sizes) so a
         // product linked later can compare its EXISTING bar price without
         // losing the original 잔/샷 source labels. Only differing prices

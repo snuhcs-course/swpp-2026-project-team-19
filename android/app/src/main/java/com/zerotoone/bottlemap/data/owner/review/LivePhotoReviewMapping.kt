@@ -11,6 +11,7 @@ import com.zerotoone.bottlemap.data.owner.MockReviewDecision
 import com.zerotoone.bottlemap.data.owner.MockDecisionKind
 import com.zerotoone.bottlemap.data.owner.reviewServingKey
 import com.zerotoone.bottlemap.data.owner.servingIdentityKey
+import com.zerotoone.bottlemap.data.owner.ownerExistingUnlinkedOptions
 import com.zerotoone.bottlemap.network.MenuImportStatusDto
 import com.zerotoone.bottlemap.network.ReviewItemDto
 import com.zerotoone.bottlemap.ui.owner.review.CatalogProduct
@@ -159,6 +160,33 @@ private fun mapServerReviewItem(
     val displayName = dto.extractedProductName?.trim()?.ifBlank { null }
         ?: dto.newProductDraft?.displayName?.trim()?.ifBlank { null }
         ?: ""
+    // Existing product-less rows update by normalized bar-local menu name, NOT
+    // by a catalog productId. Show their saved prices during review, not just
+    // during final wire serialization where a discount could be cleared.
+    val oldUnlinked = if (linkedId == null && !nonProduct && displayName.isNotBlank())
+        ownerExistingUnlinkedOptions(snapshot, bar.barId, displayName) else emptyList()
+    val unlinkedCandidates = if (oldUnlinked.isEmpty()) emptyList() else
+        options.mapNotNull { option ->
+            val price = option.price.takeIf(::validPrice)?.toInt() ?: return@mapNotNull null
+            val pour = option.volume.takeIf(::validVolume)?.toInt()
+            ReviewPriceCandidate(
+                servingKey = servingIdentityKey(if (option.bottle) null else pour, option.label),
+                volumeMl = pour,
+                bottle = option.bottle,
+                label = option.label,
+                priceKrw = price,
+                sourceItemId = dto.extractedItemId,
+            )
+        } + oldUnlinked.map { saved ->
+            ReviewPriceCandidate(
+                servingKey = servingIdentityKey(saved.pourMl, saved.label),
+                volumeMl = saved.pourMl,
+                bottle = isBottle(saved.label),
+                label = saved.label,
+                priceKrw = saved.priceKrw,
+                existing = true,
+            )
+        }
     return ReviewItem(
         id = dto.extractedItemId,
         name = displayName,
@@ -179,6 +207,7 @@ private fun mapServerReviewItem(
         primaryOptionLabel = first?.label,
         existingPriceByProductId = existingPrices,
         existingServingPricesByProductId = existingServingPrices,
+        priceCandidates = unlinkedCandidates,
         options = options.drop(1),
         oldPrice = oldPrice,
         photoPrice = photoPrice,

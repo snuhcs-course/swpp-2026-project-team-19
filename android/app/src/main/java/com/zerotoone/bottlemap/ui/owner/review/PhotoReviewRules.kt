@@ -219,6 +219,10 @@ object PhotoReviewRules {
                 if (keys.size != keys.toSet().size) p += ReviewIssue.OPTION
             }
         } else {
+            // A product-less 'other' row also updates existing prices by
+            // normalized menu name; require explicit selection on conflicts.
+            if (x.priceCandidates.isNotEmpty() &&
+                pendingPriceServings(x).isNotEmpty()) p += ReviewIssue.PRICE_CHOICE
             // Non-whisky OCR lines may also contain multiple price options.
             // Every price must be editable and valid *before* publishing.
             val entries = optionSummary(x)
