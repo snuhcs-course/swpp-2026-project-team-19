@@ -711,7 +711,7 @@ Table bar_menu_items {
   bar_id uuid [not null, ref: > bars.id]
   product_id uuid [ref: > products.id, note: 'Null for a whisky waiting for an operator to link it, and always null for kind = other']
   kind menu_item_kind [not null, default: 'whisky']
-  name_key varchar(200) [note: 'Normalized menu name; set exactly when product_id is null. Identifies an unlinked item within the bar']
+  name_key text [note: 'Normalized menu name; set exactly when product_id is null. Identifies an unlinked item within the bar. Unbounded because NFKC normalization can lengthen a 200-character name']
   sold_out_at timestamptz [note: 'Set while the item is sold out; null when on sale. Cleared when the item leaves the current board']
   created_at timestamptz [not null]
 
@@ -813,7 +813,8 @@ Table menu_item_checks {
   bar_id uuid [not null, ref: > bars.id]
   bar_menu_item_id uuid [not null, ref: > bar_menu_items.id]
   display_name varchar(200) [not null, note: 'Name shown on the menu board, saved when the check is created and whenever the line is renamed or moved, so closed checks keep it']
-  reasons menu_item_check_reason[] [not null, note: 'In the order they arose; at least one']
+  reasons menu_item_check_reason[] [not null, note: 'In the order they arose; at least one, also after the check is closed']
+  discarded_options jsonb [not null, default: '[]', note: 'Options the server dropped when merging lines with conflicting prices (price_conflict); the only place the dropped prices are kept']
   status menu_item_check_status [not null, default: 'open']
   source_menu_import_id uuid [ref: > menu_imports.id, note: 'Import whose review line last added a reason; null for direct adds']
   source_extracted_item_id uuid [ref: > extracted_items.id]
@@ -834,8 +835,10 @@ Table menu_item_checks {
   changed in a way a person should confirm (API spec 3.18). An operator resolves it by linking a product,
   creating one and linking it, keeping the current link, or marking the item as non-whisky.
   A current-board whisky item without a product always has one open check (reason unlinked or unlinked_by_name).
-  An item that becomes kind = other gets its open check dismissed; an unlinked whisky that a review links to a
-  product loses the unlinked reasons, and the check is dismissed when no reason is left.
+  An item that becomes kind = other gets its open check dismissed. When an unlinked whisky is linked without an
+  operator, the unlinked reasons are dropped if other reasons remain; otherwise the check is dismissed with its
+  reasons kept. When a board line moves to an item that already has an open check, the moving check's reasons and
+  discarded options are added to that check and the moving check is dismissed.
   Removing the item from the board dismisses its open check in the same transaction; when a rename moves the
   board line to another item (API spec 3.14.1), the open check moves with it. kind = other items never get a check.
   bar_menu_item_id keeps the original item even when linking moves the board entry to another item of the bar.

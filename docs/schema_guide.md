@@ -571,7 +571,7 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 | `bar_id` | `uuid`, NOT NULL, FK → `bars.id` | 관악 위스키 바 ID | 어느 업장의 항목인지 나타낸다. |
 | `product_id` | `uuid`, nullable, FK → `products.id` | Deanston 12 상품 ID | 어떤 정규 상품인지 나타낸다. 카탈로그에 매칭되지 않아 운영자의 연결을 기다리는 위스키와 위스키가 아닌 메뉴는 `null`이다(API 명세 3.9). |
 | `kind` | `menu_item_kind`, NOT NULL, 기본 `whisky` | `other` | 위스키 메뉴인지, 위스키가 아닌 메뉴인지다(4.20). 상품에 연결된 항목은 항상 `whisky`이고, `other`는 상품에 연결하지 않는다. |
-| `name_key` | `varchar(200)`, nullable | `진토닉` | 상품이 없는 항목의 메뉴판 이름을 공통 정규화 함수(별칭과 같은 함수)로 정규화한 값이다. 상품이 없는 항목을 업장 안에서 구분하는 키이며, 다음 메뉴판을 올렸을 때 같은 메뉴를 알아보는 데 쓴다. 상품에 연결된 항목은 `null`이다. |
+| `name_key` | `text`, nullable | `진토닉` | 상품이 없는 항목의 메뉴판 이름을 공통 정규화 함수(별칭과 같은 함수)로 정규화한 값이다. 메뉴판 이름은 200자까지지만 NFKC 정규화로 길어질 수 있어 길이 제한을 두지 않는다. 상품이 없는 항목을 업장 안에서 구분하는 키이며, 다음 메뉴판을 올렸을 때 같은 메뉴를 알아보는 데 쓴다. 상품에 연결된 항목은 `null`이다. |
 | `sold_out_at` | `timestamptz`, nullable | `2026-11-02T12:00:00Z` | 품절로 표시한 시각이다. `null`이면 판매 중이다(API 명세 3.14.8). 품절 항목은 메뉴판에 남지만 손님의 업장 메뉴와 고객 검색에서는 빠지고, 업주와 운영자에게만 품절로 보인다. 항목이 현재 메뉴판에서 빠지면 `null`로 되돌려, 다시 추가했을 때 판매 중으로 시작한다. 메뉴판을 다시 써도 이 행은 남으므로 품절을 여기에 저장한다. |
 | `created_at` | `timestamptz`, NOT NULL | `2026-09-28T04:30:00Z` | 업장 메뉴 항목 최초 생성 시점이다. |
 
@@ -689,13 +689,14 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 | `status` | `menu_item_check_status`, NOT NULL, 기본 `open` | `open` | 4.22 |
 | `source_menu_import_id` | `uuid`, nullable, FK → `menu_imports.id` | 등록 작업 ID | 이유를 마지막으로 더한 검수 줄의 작업이다. 관리자 웹이 그 메뉴판 사진을 보여 준다. 직접 추가로 생긴 확인은 `null`이다. |
 | `source_extracted_item_id` | `uuid`, nullable, FK → `extracted_items.id` | 추출 항목 ID | 그 검수 줄이다. 원문, `source_box`, 추출한 연수와 에디션을 보여 준다. |
+| `discarded_options` | `jsonb`, NOT NULL, 기본 `[]` | `[{"optionLabel": null, "pourMl": 30, "priceKrw": 28000, "displayName": "글렌피딕 12", "extractedItemId": "…"}]` | 같은 항목으로 합치면서 가격이 부딪쳐 서버가 버린 옵션이다(이유 `price_conflict`, API 명세 8.12, 3.14.1). 운영자가 메뉴판에 남은 가격과 비교해, 버린 가격이 맞으면 직접 수정으로 고친다(API 명세 3.18.3). 버린 가격은 이곳 말고는 남지 않는다. |
 | `created_at` | `timestamptz`, NOT NULL | `2026-11-13T09:15:00Z` | 확인이 처음 생긴 시각이다. 열린 확인은 오래된 것부터 처리한다. |
 | `resolution` | `menu_item_check_resolution`, nullable | `link_existing` | `resolved`일 때 처리 방식(4.23)이다. |
 | `resolved_product_id` | `uuid`, nullable, FK → `products.id` | GlenAllachie 10 CS 상품 ID | 처리한 결과 연결된 상품이다. `mark_as_other`면 `null`이다. |
 | `resolved_by_user_id` | `uuid`, nullable, FK → `users.id` | 운영자 ID | 처리한 운영자다. `users` 행이 없는 임시 로그인 운영자와 `dismissed`는 `null`이다. |
 | `resolved_at` | `timestamptz`, nullable | `2026-11-13T15:00:00Z` | `resolved` 또는 `dismissed`가 된 시각이다. |
 
-**핵심 제약:** 한 항목에 `open`인 확인은 최대 하나다(`bar_menu_item_id`에 `status = open` 조건의 partial unique index). 현재 메뉴판에 있는 상품 없는 위스키 항목에는 항상 `unlinked` 또는 `unlinked_by_name` 이유의 열린 확인이 있다. 이름을 고쳐 메뉴판의 줄이 다른 항목으로 옮겨 가면 그 줄의 열린 확인도 새 항목으로 옮긴다(API 명세 3.14.1). 항목이 현재 메뉴판에서 빠지거나 `kind = other`가 되면 그 항목의 열린 확인을 같은 트랜잭션에서 `dismissed`로 바꾼다. 상품 없는 위스키가 검수로 상품에 연결되면 `unlinked`, `unlinked_by_name` 이유를 빼고, 남은 이유가 없으면 `dismissed`로 바꾼다. `kind = other`인 항목에는 확인을 만들지 않는다. 열린 확인의 `bar_menu_item_id`에는 partial unique index(`WHERE status = 'open'`)를 두며, 처리하거나 닫힌 확인은 같은 항목에 여러 개 있을 수 있다.
+**핵심 제약:** 한 항목에 `open`인 확인은 최대 하나다(`bar_menu_item_id`에 `status = open` 조건의 partial unique index). 현재 메뉴판에 있는 상품 없는 위스키 항목에는 항상 `unlinked` 또는 `unlinked_by_name` 이유의 열린 확인이 있다. 항목이 현재 메뉴판에서 빠지거나 `kind = other`가 되면 그 항목의 열린 확인을 같은 트랜잭션에서 `dismissed`로 바꾼다. 상품 없는 위스키가 운영자 처리 없이 상품에 연결되면, 다른 이유가 있으면 `unlinked`, `unlinked_by_name` 이유만 빼고, 없으면 이유는 그대로 두고 `dismissed`로 바꾼다. 그래서 `reasons`는 닫힌 뒤에도 비지 않는다. 이름을 고쳐 메뉴판의 줄이 다른 항목으로 옮겨 가면 그 줄의 열린 확인도 새 항목으로 옮기고, 새 항목에 이미 열린 확인이 있으면 이유와 버린 옵션을 그 확인에 더한 뒤 옮겨 온 확인은 `dismissed`로 바꾼다(API 명세 3.14.1, 3.18.1). `kind = other`인 항목에는 확인을 만들지 않는다. 열린 확인의 `bar_menu_item_id`에는 partial unique index(`WHERE status = 'open'`)를 두며, 처리하거나 닫힌 확인은 같은 항목에 여러 개 있을 수 있다.
 
 **필요한 이유:** 업주가 카탈로그를 몰라도 메뉴를 바로 게시하게 하면서, 상품 연결과 카탈로그 품질은 운영자가 하루 안에 한 줄씩 책임지게 한다. 확인 기록은 처리한 뒤에도 남겨 매칭이 어디서 틀렸는지 볼 수 있게 한다.
 
