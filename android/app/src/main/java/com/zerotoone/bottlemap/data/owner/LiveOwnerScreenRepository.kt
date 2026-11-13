@@ -946,14 +946,19 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                     // Internal legacy enum means an owner-confirmed unlinked item.
                     // The owner NEVER creates shared products/brands/aliases.
                     val kind = if (chosen.newProduct?.category == "whisky") "whisky" else "other"
+                    // Use the confirmed Owner name, never a raw OCR price
+                    // line or a silently truncated string.
                     val name = chosen.displayNameOverride
-                        ?: chosen.newProduct?.name ?: item.extractedProductName ?: item.rawText
+                        ?: chosen.newProduct?.name ?: item.extractedProductName
+                    require(name != null && name.trim().length in 1..200) {
+                        "메뉴 이름은 1~200자로 입력해 주세요."
+                    }
                     mapOf(
                         "action" to "publish_without_product",
                         "extractedItemId" to item.extractedItemId,
                         "finalLineType" to "product",
                         "kind" to kind,
-                        "correctedProductName" to name.trim().take(200),
+                        "correctedProductName" to name.trim(),
                         "options" to ownerFinalReviewOptions(item,chosen,defaultPour,kind == "whisky"),
                     )
                 }
