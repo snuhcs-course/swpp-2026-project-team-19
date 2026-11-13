@@ -253,14 +253,14 @@ def test_a_manual_add_of_an_existing_product_is_a_conflict_without_review_fields
     assert caught.value.details["existingProduct"]["isActive"] is False
 
 
-def test_a_manual_add_of_an_existing_brand_is_a_conflict_without_review_fields(db_session, glenfiddich):
-    with pytest.raises(ApiError) as caught:
-        new_product(db_session, {"type": "new", "canonicalName": "글렌피딕"}, {"displayName": "Glenfiddich 30"})
-
-    assert (caught.value.status_code, caught.value.code) == (409, "DUPLICATE_BRAND_FOUND")
-    assert caught.value.details == {
-        "existingBrand": {"brandId": str(glenfiddich["brand"].id), "canonicalName": "Glenfiddich"}
-    }
+def test_a_manual_add_reuses_brand_found_by_alias_without_new_brand(db_session, glenfiddich):
+    product_id = new_product(
+        db_session, {"type": "new", "canonicalName": "글렌피딕"},
+        {"displayName": "Glenfiddich BottleMap 88", "ageYears": 88, "editionName": "BottleMap"},
+    )
+    product = db_session.get(Product, product_id)
+    assert product.brand_id == glenfiddich["brand"].id
+    assert product.display_name == "Glenfiddich BottleMap 88"
 
 
 def test_a_duplicate_matching_active_and_inactive_products_names_the_active_one(db_session, glenfiddich):
