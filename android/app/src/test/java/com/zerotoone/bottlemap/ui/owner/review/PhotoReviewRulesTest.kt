@@ -68,12 +68,12 @@ class PhotoReviewRulesTest {
         assertTrue(ReviewIssue.VOLUME in PhotoReviewRules.problems(item(MockPhotoReviewScenario.BAD_INPUTS, "glen12")))
     }
 
-    @Test fun duplicateServingsAndMoreThanTenOptionsNeedOptionReview() {
+    @Test fun duplicateOrMoreThanThreeWhiskyServingsNeedOptionReview() {
         val base = item(MockPhotoReviewScenario.BASIC, "ardbeg")
         val duplicate = base.copy(options = listOf(ReviewOption(30.0, 16000.0)))
         assertEquals(listOf(ReviewIssue.OPTION), PhotoReviewRules.problems(duplicate))
         val four = base.copy(options = listOf(ReviewOption(45.0, 1.0), ReviewOption(60.0, 1.0), ReviewOption(0.0, 1.0, true)))
-        assertTrue(PhotoReviewRules.problems(four).isEmpty())
+        assertEquals(listOf(ReviewIssue.OPTION), PhotoReviewRules.problems(four))
         val eleven = base.copy(options = (1..10).map { ReviewOption(it * 10.0 + 100.0, 20000.0) })
         assertEquals(listOf(ReviewIssue.OPTION), PhotoReviewRules.problems(eleven))
     }
