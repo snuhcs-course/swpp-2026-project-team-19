@@ -33,17 +33,18 @@ from app.matching.staged import (
     _AGE_WITH_UNIT,
     _BARE_AGE,
     _HANGUL,
+    _LATIN,
     _PARENTHESIZED,
     _VOCABULARY,
     BILINGUAL_SEPARATOR,
     _find_brand,
-    _parenthesis_variants,
     _script,
 )
 from app.matching.types import CatalogLookup
 from app.matching.vocabulary import to_english
 
 _SPACES = re.compile(r"\s+")
+_PARENTHESES = re.compile(r"[()]")
 _NUMBERS = re.compile(r"\d+")
 _MIN_BARE_AGE = 8
 
@@ -70,14 +71,37 @@ def _age_and_edition(rest: str) -> tuple[int | None, str | None]:
     elif words and _BARE_AGE.match(words[0]) and int(words[0]) >= _MIN_BARE_AGE:
         age = int(words[0])
         rest = " ".join(words[1:])
-    return age, _SPACES.sub(" ", rest).strip() or None
+    # brackets that are not a second spelling hold part of the name: "12 (Sherry Oak)", "(12년) 셰리 오크"
+    return age, _SPACES.sub(" ", _PARENTHESES.sub(" ", rest)).strip() or None
+
+
+def _second_spelling(source: str) -> re.Match | None:
+    """The match of "제목(Title) 나머지" when the brackets hold the same words in the other script.
+
+    The text before the brackets must be in one script and the brackets must have the other one:
+    "글렌알라키(Glenallachie) 15년", "Yamazaki Dr (야마자키 Dr)". Brackets in the same script are part
+    of the name ("Macallan 12 (Sherry Oak)", "맥캘란 (12년) 셰리 오크") and give no second spelling.
+    """
+    match = _PARENTHESIZED.match(source)
+    if match is None:
+        return None
+    other = {"hangul": _LATIN, "latin": _HANGUL}.get(_script(match["title"]))
+    return match if other is not None and other.search(match["inner"]) else None
+
+
+def _bracket_readings(source: str) -> list[str]:
+    match = _second_spelling(source)
+    if match is None:
+        return []
+    rest = match["rest"].strip()
+    return list(dict.fromkeys(f"{match[part].strip()} {rest}".strip() for part in ("title", "inner")))
 
 
 def whole_spellings(source: str) -> tuple[str, ...]:
     """The name one script at a time, when the menu wrote the whole name in two scripts."""
     out: list[str] = []
-    match = _PARENTHESIZED.match(source)
-    if match is not None and match["rest"].strip() and match["title"].strip():
+    match = _second_spelling(source)
+    if match is not None and match["rest"].strip():
         out += [_SPACES.sub(" ", f"{match[part].strip()} {match['rest'].strip()}") for part in ("title", "inner")]
     sides = [side.strip() for side in source.split(BILINGUAL_SEPARATOR)] if BILINGUAL_SEPARATOR in source else []
     if (len(sides) == 2 and all(sides) and None not in (_script(sides[0]), _script(sides[1]))
@@ -88,27 +112,43 @@ def whole_spellings(source: str) -> tuple[str, ...]:
 
 def draft_from_name(name: str | None, catalog: CatalogLookup) -> ProductDraft | None:
     """The draft for a menu line, or None for a line without a name."""
-    source = (name or "").strip()
+    source = _SPACES.sub(" ", name or "").strip()  # OCR text can have double spaces
     if not source:
         return None
     spellings = whole_spellings(source)
-    readings = list(dict.fromkeys([*_parenthesis_variants(source), *spellings, source]))
+    # the line as a whole is read only when it has no second spelling: with one, the other
+    # spelling would be taken for the edition ("발베니 17년 / Balvenie 17Y")
+    readings = list(dict.fromkeys([*_bracket_readings(source), *spellings])) or [source]
+    best: ProductDraft | None = None
     for variant in readings:
         found = _find_brand(variant, catalog)
         if found is None:
             continue
-        brand_ids, _, rest = found
+        brand_ids, alias, rest = found
         if not rest and variant != source:
             continue  # this reading is only the brand ("아벨라워" of "Aberlour 12 (아벨라워)")
         age, edition = _age_and_edition(rest)
         english = to_english(edition, _VOCABULARY) if edition and _VOCABULARY is not None else edition
         english = _SPACES.sub(" ", english).strip() if english else None
-        return ProductDraft(
+        # the brand as written is the reading without its rest; `rest` is rebuilt by the matcher,
+        # so when it is not the reading's tail the matched alias stands in
+        brand_text = variant[: len(variant) - len(rest)].strip() if variant.endswith(rest) else alias
+        draft = ProductDraft(
             source_text=source, spellings=spellings,
             brand_id=brand_ids[0] if len(brand_ids) == 1 else None,
-            brand_text=variant[: len(variant) - len(rest)].strip() if rest else variant,
+            brand_text=brand_text if rest else variant,
             age_years=age, edition_text=edition,
             edition_english=english if english != edition and not _HANGUL.search(english or "") else None,
         )
+        # two spellings of one line can say different amounts ("발베니 16년 / Balvenie 16 French Oak"):
+        # the reading with more parts wins, the first one on a tie
+        if best is None or _parts(draft) > _parts(best):
+            best = draft
+    if best is not None:
+        return best
     match = _AGE_WITH_UNIT.search(source)
     return ProductDraft(source_text=source, spellings=spellings, age_years=int(match[1]) if match else None)
+
+
+def _parts(draft: ProductDraft) -> int:
+    return (draft.age_years is not None) + (draft.edition_text is not None)

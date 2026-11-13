@@ -320,7 +320,8 @@ def _resolve_and_draft(session: Session, menu_import: MenuImport, llm_layer: Mat
         # "multi" (one line naming two products) has no stored status: the line stays ambiguous
         # with both products as candidates (evidence "multiProduct"), and the reviewer decides.
         item.initial_resolution_status = ResolutionStatus(stored_status(result))
-        if item.initial_resolution_status is not ResolutionStatus.EXACT_MATCH:
+        # not for a line naming two products: its brand, age and edition would mix the two
+        if item.initial_resolution_status is not ResolutionStatus.EXACT_MATCH and result.status != "multi":
             _fill_product_parts(item, catalog)
         for candidate in result.candidates:
             session.add(
