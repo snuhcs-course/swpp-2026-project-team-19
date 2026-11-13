@@ -1,5 +1,7 @@
 package com.zerotoone.bottlemap.ui.owner
 
+import com.zerotoone.bottlemap.ui.common.OwnerBottomConfirmSheet
+
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -537,25 +539,26 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
             ?: all.indices.firstOrNull{it!=position && all[it].second.decision==null}
         if(target==null) visit("publish") else visitLine(target)
     }
-    if(showRestartWarning) AlertDialog(
-        onDismissRequest={showRestartWarning=false},
-        title={Text("처음부터 검수할까요?")},
-        text={Text("기존 검수 결과를 모두 초기화해요.")},
-        confirmButton={TextButton(onClick={
-            showRestartWarning=false
-            runCatching {job?.let {vm.resetPhotoReview(it.menuImportId,it.reviewVersion)}}
+    if(showRestartWarning) OwnerBottomConfirmSheet(
+        title = "처음부터 검수할까요?",
+        message = "기존 검수 결과를 모두 초기화해요.",
+        confirmLabel = "처음부터 검수",
+        tag = "owner-review-restart-sheet",
+        onDismiss = { showRestartWarning = false },
+        onConfirm = {
+            showRestartWarning = false
+            runCatching { job?.let { vm.resetPhotoReview(it.menuImportId, it.reviewVersion) } }
                 .onSuccess {
-                    error=null
-                    pageHistory=emptyList()
-                    position=0
-                    selectedProductId=null
-                    pendingNewDraftEncoded=null
-                    pendingNewDraftLineId=null
-                    selectedForLineId=null
-                    screen="summary"
-                }.onFailure {error=it.message}
-        }){Text("처음부터 검수")}},
-        dismissButton={TextButton(onClick={showRestartWarning=false}){Text("취소",color=V4Color.text)}}
+                    error = null
+                    pageHistory = emptyList()
+                    position = 0
+                    selectedProductId = null
+                    pendingNewDraftEncoded = null
+                    pendingNewDraftLineId = null
+                    selectedForLineId = null
+                    screen = "summary"
+                }.onFailure { error = it.message }
+        },
     )
     Column(Modifier.fillMaxSize().background(V4Color.background)) {
         val back: () -> Unit = { if(screen=="summary") onHome() else backPage() }
