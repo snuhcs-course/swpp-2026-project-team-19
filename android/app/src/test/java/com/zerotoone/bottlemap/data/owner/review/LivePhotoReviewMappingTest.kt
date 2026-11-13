@@ -150,10 +150,11 @@ class LivePhotoReviewMappingTest {
         assertEquals("위스키 새 상품",decision.newProduct?.name)
         val missing=dto.copy(extractedBrandName=null,
             newProductDraft=dto.newProductDraft?.copy(brandText=null))
-        try {
-            mapConfirmedReviewDecision(card,missing,30.0,emptyMap())
-            fail("Must not invent a missing catalog brand")
-        } catch (_: IllegalArgumentException) { }
+        // Unverified products are now bar-only until operator approval.
+        // No fabricated global brand is necessary to publish the bar menu.
+        val local = mapConfirmedReviewDecision(card,missing,30.0,emptyMap())
+        assertNull(local.newProduct?.brandId)
+        assertNull(local.newProduct?.brandName)
     }
 
     @Test fun ownerAddedOptionHasNoExtractedIdAndIsSentSeparately() {
