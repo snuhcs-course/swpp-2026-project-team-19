@@ -347,13 +347,15 @@ internal fun OwnerManualMenuScreen(
             }
             // Check the immutable catalog subtype for both new links and edits.
             val linkedCatalog = linked?.takeIf { it.catalogMatched }
-            if (linkedCatalog != null && category == "기타 주류") {
+            if (linkedCatalog != null && category == "기타 주류" &&
+                !viewModel.usesProductionOwnerApi()) {
                 require(alcoholKind.trim().takeIf { it.isNotBlank() } ==
                     manualEditorAlcoholKind(linkedCatalog).trim().takeIf { it.isNotBlank() }) {
                     "카탈로그 상품의 주류 종류는 변경할 수 없어요."
                 }
             }
-            if (category == "기타 주류" && alcoholKind.isBlank()) {
+            if (category == "기타 주류" && alcoholKind.isBlank() &&
+                !viewModel.usesProductionOwnerApi()) {
                 // Existing catalog/photo entries may have no Mock-only subtype.
                 // Do not require one unless the owner is adding or changing the type.
                 require((linked != null && sameCategory && linked.otherAlcoholKind.isNullOrBlank()) ||
@@ -366,6 +368,10 @@ internal fun OwnerManualMenuScreen(
             // entering "맥주" produces a "맥주" group instead of "기타 주류".
             // A linked canonical product's category remains immutable.
             val effectiveCategoryCode = when {
+                // PR #164 only persists kind=other. Never require or stage
+                // a detailed subtype in the production Owner editor.
+                category == "기타 주류" && viewModel.usesProductionOwnerApi() ->
+                    "otherAlcohol"
                 category == "기타 주류" && linked?.catalogMatched == true ->
                     requireNotNull(linked).category
                 category == "기타 주류" ->
@@ -847,7 +853,7 @@ internal fun OwnerManualMenuScreen(
                             }
                         }
                     }
-                    if (category == "기타 주류") {
+                    if (category == "기타 주류" && !viewModel.usesProductionOwnerApi()) {
                         V4FormField("주류 종류", alcoholKind, { alcoholKind = it.take(30) },
                             placeholder = "예: 하이볼, 맥주",
                             testTag = "manual-menu-alcohol-kind")
