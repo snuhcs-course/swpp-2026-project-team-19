@@ -107,16 +107,11 @@ class PhotoReviewViewModelTest {
         assertFalse(vm.item("arran").operatorPending)
     }
 
-    @Test fun editionConflictKeepsMenuBarLocalUntilOwnerConfirmsName() = runTest(dispatcher) {
+    @Test fun editionConflictHonorsChosenLinkForServerOperatorCheck() = runTest(dispatcher) {
         val vm = vm(MockPhotoReviewScenario.EDITION_CONFLICT)
-        val events = vm.collectEvents(backgroundScope)
         vm.confirmSelectedCandidate("arran")
-        assertNull(vm.item("arran").linkedProductId)
-        assertEquals(OperatorReason.SELECTED_PRODUCT_CONFLICT, vm.item("arran").operatorReason)
-        assertEquals(ReviewGroup.PENDING, vm.group("arran"))
-        assertTrue(PhotoReviewEvent.Toast(
-            "연수·에디션이 달라 상품 연결 없이 등록해요. 메뉴 이름을 다시 확인해 주세요."
-        ) in events)
+        assertEquals("arran-port", vm.item("arran").linkedProductId)
+        assertFalse(vm.item("arran").operatorPending)
     }
 
     @Test fun newMenuConfirmGoesToOperatorWithoutCatalogInput() = runTest(dispatcher) {
@@ -133,7 +128,7 @@ class PhotoReviewViewModelTest {
         val events = vm.collectEvents(backgroundScope)
         vm.clearReviewName("bookers")
         vm.saveReviewName("bookers")
-        assertTrue(PhotoReviewEvent.Toast("이름을 입력해 주세요.") in events)
+        assertTrue(PhotoReviewEvent.Toast("메뉴 이름을 다시 확인해 주세요.") in events)
         vm.typeReviewName("bookers", "부커스 2025")
         vm.saveReviewName("bookers")
         val x = vm.item("bookers")

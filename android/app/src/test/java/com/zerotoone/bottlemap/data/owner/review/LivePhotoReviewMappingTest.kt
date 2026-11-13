@@ -236,8 +236,9 @@ class LivePhotoReviewMappingTest {
         // Two OCR prices without ml both inherit 30ml: the same serving
         // is ONE option with a required price choice, not two 30ml rows.
         assertTrue(card.options.isEmpty())
-        assertEquals(2, card.priceCandidates.size)
-        assertEquals(setOf(18000,22000),card.priceCandidates.map { it.priceKrw }.toSet())
+        val ocrPrices = card.priceCandidates.filterNot { it.existing }
+        assertEquals(2, ocrPrices.size)
+        assertEquals(setOf(18000,22000),ocrPrices.map { it.priceKrw }.toSet())
         assertEquals(1,PhotoReviewRules.pendingPriceServings(card).size)
         assertEquals("30",PhotoReviewRules.optionFieldText(card,
             PhotoReviewRules.OptionField.VOLUME,null))

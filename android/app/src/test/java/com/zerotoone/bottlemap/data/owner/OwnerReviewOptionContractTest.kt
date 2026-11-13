@@ -210,4 +210,19 @@ class OwnerReviewOptionContractTest {
         }
     }
 
+    @Test fun unlinkedPhotoUpdatePreservesSavedServingOptionsByBarAndNormalizedName() {
+        val snapshot = MockOwnerSnapshot(
+            products = listOf(MockCatalogProduct("unlinked:row1", "", "글렌피딕 12년",
+                catalogMatched = false)),
+            menuItems = listOf(MockBarMenuItem("row1", "bar1", "unlinked:row1",
+                listOf(MockMenuOption("old-30", "잔", 30, 15000),
+                    MockMenuOption("old-60", "샷", 60, 26000)),
+                displayNameOverride = "글렌피딕 12년")),
+        )
+        val old = ownerExistingUnlinkedOptions(snapshot, "bar1", " 글렌피딕12 ")
+        assertEquals(listOf(30,60),old.map { it.pourMl })
+        assertEquals(emptyList<MockMenuOption>(),
+            ownerExistingUnlinkedOptions(snapshot,"bar2","글렌피딕 12년"))
+    }
+
 }

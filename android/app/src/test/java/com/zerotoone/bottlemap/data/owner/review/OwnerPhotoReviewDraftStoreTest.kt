@@ -55,4 +55,32 @@ class OwnerPhotoReviewDraftStoreTest {
         assertNull(store.load(id,2,listOf("different-item")))
         assertNull(store.load(id,2,listOf("old-item")))
     }
+    @Test fun nonFiniteClassificationSnapshotIsSanitizedBeforeDiskWrite() = runTest {
+        val id = "review-nan-classification"
+        val disk = store("owner-nan")
+        val itemSnapshot = com.zerotoone.bottlemap.ui.owner.review.ClassificationSnapshot(
+            type = com.zerotoone.bottlemap.ui.owner.review.ReviewItemType.OTHER,
+            volume = Double.NaN,
+            volumeSource = com.zerotoone.bottlemap.ui.owner.review.VolumeSource.PHOTO,
+            bottle = false, primaryHasOption = true,
+            options = listOf(com.zerotoone.bottlemap.ui.owner.review.ReviewOption(
+                volume = Double.NaN, price = 12000.0)),
+            match = com.zerotoone.bottlemap.ui.owner.review.ReviewMatch.NEW,
+            matchConfirmed = false, nameSaved = true, newConfirmed = true,
+            linkedProductId = null, linkedProductName = null, newProductName = null,
+            candidates = emptyList(), rawOptionEdits = emptyMap(),
+        )
+        disk.save(id, 1, PhotoReviewState(items = listOf(ReviewItem(
+            id = "one", name = "맥주", classificationSnapshot = itemSnapshot,
+            preMergeOptions = listOf(com.zerotoone.bottlemap.ui.owner.review.ReviewOption(
+                volume = Double.NaN, price = 10000.0)),
+        ))))
+        val restored = store("owner-nan").load(id, 1, listOf("one"))
+        assertNotNull(restored)
+        assertEquals(0.0, restored!!.items.single().classificationSnapshot!!.volume, 0.0)
+        assertEquals(0.0, restored.items.single().classificationSnapshot!!.options.single().volume, 0.0)
+        assertEquals(0.0, restored.items.single().preMergeOptions.single().volume, 0.0)
+        disk.clear(id)
+    }
+
 }
