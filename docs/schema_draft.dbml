@@ -812,6 +812,7 @@ Table menu_item_checks {
   id uuid [pk]
   bar_id uuid [not null, ref: > bars.id]
   bar_menu_item_id uuid [not null, ref: > bar_menu_items.id]
+  display_name varchar(200) [not null, note: 'Name shown on the menu board, saved when the check is created and whenever the line is renamed or moved, so closed checks keep it']
   reasons menu_item_check_reason[] [not null, note: 'In the order they arose; at least one']
   status menu_item_check_status [not null, default: 'open']
   source_menu_import_id uuid [ref: > menu_imports.id, note: 'Import whose review line last added a reason; null for direct adds']
@@ -823,7 +824,7 @@ Table menu_item_checks {
   resolved_at timestamptz [note: 'Set when status leaves open']
 
   indexes {
-    bar_menu_item_id [unique, note: 'Partial: WHERE status = open. At most one open check per item']
+    bar_menu_item_id [note: 'Not unique across all rows. The migration adds a partial unique index on bar_menu_item_id WHERE status = open (DBML cannot express it): at most one open check per item, any number of closed ones']
     (status, created_at)
     (bar_id, status)
   }
@@ -833,6 +834,8 @@ Table menu_item_checks {
   changed in a way a person should confirm (API spec 3.18). An operator resolves it by linking a product,
   creating one and linking it, keeping the current link, or marking the item as non-whisky.
   A current-board whisky item without a product always has one open check (reason unlinked or unlinked_by_name).
+  An item that becomes kind = other gets its open check dismissed; an unlinked whisky that a review links to a
+  product loses the unlinked reasons, and the check is dismissed when no reason is left.
   Removing the item from the board dismisses its open check in the same transaction; when a rename moves the
   board line to another item (API spec 3.14.1), the open check moves with it. kind = other items never get a check.
   bar_menu_item_id keeps the original item even when linking moves the board entry to another item of the bar.

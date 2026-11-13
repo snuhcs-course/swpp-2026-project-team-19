@@ -684,6 +684,7 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 | `id` | `uuid`, PK | 확인 ID | 관리자 웹이 처리할 확인을 가리킨다. |
 | `bar_id` | `uuid`, NOT NULL, FK → `bars.id` | 관악 위스키 바 ID | 업장별로 목록을 거르기 위해 항목의 업장을 함께 저장한다. |
 | `bar_menu_item_id` | `uuid`, NOT NULL, FK → `bar_menu_items.id` | 글렌알라키 항목 ID | 확인 대상 항목이다. 연결하면서 메뉴판의 줄이 그 업장의 다른 항목으로 옮겨져도 원래 항목을 가리킨다. |
+| `display_name` | `varchar(200)`, NOT NULL | `글렌알라키 10년 CS 배치 11` | 항목이 메뉴판에 보이던 이름이다. 메뉴판의 줄(`menu_board_entries`)은 빠지면 지워지므로, 확인을 만들 때와 그 줄의 이름이 바뀌거나 줄이 다른 항목으로 옮겨 갈 때 함께 저장해, 닫힌 확인에서도 이름을 보여 준다(API 명세 3.18.2). |
 | `reasons` | `menu_item_check_reason[]`, NOT NULL | `{unlinked}` | 확인이 필요한 이유(4.21)다. 생긴 순서대로이며 최소 하나다. 열린 확인에 새 이유가 생기면 더한다. |
 | `status` | `menu_item_check_status`, NOT NULL, 기본 `open` | `open` | 4.22 |
 | `source_menu_import_id` | `uuid`, nullable, FK → `menu_imports.id` | 등록 작업 ID | 이유를 마지막으로 더한 검수 줄의 작업이다. 관리자 웹이 그 메뉴판 사진을 보여 준다. 직접 추가로 생긴 확인은 `null`이다. |
@@ -694,7 +695,7 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 | `resolved_by_user_id` | `uuid`, nullable, FK → `users.id` | 운영자 ID | 처리한 운영자다. `users` 행이 없는 임시 로그인 운영자와 `dismissed`는 `null`이다. |
 | `resolved_at` | `timestamptz`, nullable | `2026-11-13T15:00:00Z` | `resolved` 또는 `dismissed`가 된 시각이다. |
 
-**핵심 제약:** 한 항목에 `open`인 확인은 최대 하나다(`bar_menu_item_id`에 `status = open` 조건의 partial unique index). 현재 메뉴판에 있는 상품 없는 위스키 항목에는 항상 `unlinked` 또는 `unlinked_by_name` 이유의 열린 확인이 있다. 이름을 고쳐 메뉴판의 줄이 다른 항목으로 옮겨 가면 그 줄의 열린 확인도 새 항목으로 옮긴다(API 명세 3.14.1). 항목이 현재 메뉴판에서 빠지면 그 항목의 열린 확인을 같은 트랜잭션에서 `dismissed`로 바꾼다. `kind = other`인 항목에는 확인을 만들지 않는다.
+**핵심 제약:** 한 항목에 `open`인 확인은 최대 하나다(`bar_menu_item_id`에 `status = open` 조건의 partial unique index). 현재 메뉴판에 있는 상품 없는 위스키 항목에는 항상 `unlinked` 또는 `unlinked_by_name` 이유의 열린 확인이 있다. 이름을 고쳐 메뉴판의 줄이 다른 항목으로 옮겨 가면 그 줄의 열린 확인도 새 항목으로 옮긴다(API 명세 3.14.1). 항목이 현재 메뉴판에서 빠지거나 `kind = other`가 되면 그 항목의 열린 확인을 같은 트랜잭션에서 `dismissed`로 바꾼다. 상품 없는 위스키가 검수로 상품에 연결되면 `unlinked`, `unlinked_by_name` 이유를 빼고, 남은 이유가 없으면 `dismissed`로 바꾼다. `kind = other`인 항목에는 확인을 만들지 않는다. 열린 확인의 `bar_menu_item_id`에는 partial unique index(`WHERE status = 'open'`)를 두며, 처리하거나 닫힌 확인은 같은 항목에 여러 개 있을 수 있다.
 
 **필요한 이유:** 업주가 카탈로그를 몰라도 메뉴를 바로 게시하게 하면서, 상품 연결과 카탈로그 품질은 운영자가 하루 안에 한 줄씩 책임지게 한다. 확인 기록은 처리한 뒤에도 남겨 매칭이 어디서 틀렸는지 볼 수 있게 한다.
 
@@ -852,7 +853,7 @@ MVP에서는 한 업장에 `uploaded`, `processing`, `ready_for_review` 상태�
 | `decision` | `menu_change_decision`, NOT NULL, 기본 `pending` | `apply` | 운영자가 변경을 적용할지 무시할지 기록한다. |
 | `reviewed_at` | `timestamptz`, nullable | `2026-09-28T04:25:00Z` | 개별 변경 결정 시점이다. |
 
-**필요한 이유:** 운영자가 항목 역할, 옵션 또는 상품 연결을 수정하면 diff도 달라질 수 있다. 최종 제출 시 백엔드는 수정된 결정을 기준으로 최종 변경을 계산해 반영한다. 운영자의 결정은 최종이므로 임시 diff와 달라진 변경도 반영한다. 다만 검수 데이터를 만든 뒤 현재 메뉴판이 바뀌었으면 반영하지 않고, 임시 diff를 다시 만들어 `review_version`을 올린 뒤 최신 검수 데이터를 다시 조회하게 한다. 현재 메뉴판의 항목은 운영자가 `apply`한 `remove`로만 빠진다. AI 누락 때문에 판매 중인 술이 자동으로 사라지는 것을 막고 전체 교체와 일부 수정 모두에서 사람이 최종 결과를 통제한다.
+**필요한 이유:** 운영자가 항목 역할, 옵션 또는 상품 연결을 수정하면 diff도 달라질 수 있다. 최종 제출 시 백엔드는 수정된 결정을 기준으로 최종 변경을 계산해 반영한다. 운영자의 결정은 최종이므로 임시 diff와 달라진 변경도 반영한다. 다만 검수 데이터를 만든 뒤 현재 메뉴판이 바뀌었으면 반영하지 않고, 임시 diff를 다시 만들어 `review_version`을 올린 뒤 최신 검수 데이터를 다시 조회하게 한다. 현재 메뉴판의 항목은 운영자가 `apply`한 `remove`로만 빠진다. 예외는 한 줄이 원래 항목을 대신하는 경우(이름을 고친 줄의 다시 매칭, 미연결 항목과 비교된 줄을 상품에 연결, API 명세 8.11, 3.14.1)뿐이며, 이때도 메뉴판의 줄 수는 그대로다. AI 누락 때문에 판매 중인 술이 자동으로 사라지는 것을 막고 전체 교체와 일부 수정 모두에서 사람이 최종 결과를 통제한다.
 
 **최신 diff 유지 규칙:** 과거 임시 diff 이력은 보존하지 않는다. 최종 확정 전에 검수 데이터를 재생성하면 백엔드는 해당 `menu_import_id`의 기존 `menu_import_changes`를 삭제하고 새 `pending` 행들을 저장한 뒤 `menu_imports.review_version`을 증가시킨다. 이 세 작업은 하나의 트랜잭션으로 처리한다. 이전 화면의 `changeId`와 `reviewVersion`으로 제출된 요청은 거부한다. 최종 반영 때는 실제로 일어난 일이 남도록 행을 갱신한다. `ignore`한 행은 결정만 기록하고, `apply`한 행은 운영자 결정 때문에 최종 변경이 달라졌으면 그 종류와 대상으로 바꾸며(예: `add`가 `update`가 됨), 결과적으로 아무것도 바꾸지 않았으면 삭제한다. 임시 diff에 없던 변경은 `apply` 행으로 추가한다. 따라서 `applied`가 된 작업의 행은 AI가 처음 제안한 초안이 아니라 실제 반영된 변경과 무시한 제안의 기록이며, 이후에는 교체하지 않는다. 반영 응답의 `added`·`updated`·`removed`·`ignored` 개수도 이 행으로 센다. AI의 최초 판단은 `extracted_items`와 `resolution_candidates`에 남는다.
 

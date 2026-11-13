@@ -3569,7 +3569,8 @@ GET /api/search/popular-products?limit=10
 | `price_conflict` | 다시 매칭으로 같은 상품의 줄이 여럿이 되거나, 상품 없는 줄이 같은 이름 키로 합쳐져 같은 용량의 가격이 부딪침. 서버가 한 가격을 골랐다 | 상품이 있으면 나온다 | 검수 제출(8.11, 8.12), 직접 수정의 다시 매칭(3.14.1, 3.14.4) |
 
 - 현재 메뉴판에 있는 상품 없는 위스키 항목에는 항상 `unlinked` 또는 `unlinked_by_name` 사유의 열린 확인이 있다. 검수 반영이나 직접 추가로 그런 항목이 생기거나, 위스키가 아닌 메뉴가 다음 검수에서 `kind = whisky`로 바뀌면 같은 트랜잭션에서 확인을 만든다.
-- `kind = other`인 항목에는 확인을 만들지 않는다.
+- `kind = other`인 항목에는 확인을 만들지 않는다. 열린 확인이 있는 항목이 `other`가 되면(다음 검수에서 같은 이름 키의 줄을 `kind = other`로 게시한 경우, 8.10) 같은 트랜잭션에서 그 확인을 `dismissed`로 바꾼다. 운영자의 `mark_as_other`(3.18.3)는 확인을 `resolved`로 닫는다.
+- 상품 없는 위스키 항목이 검수로 상품에 연결되면(5.4의 미연결 항목과 비교된 줄을 상품에 연결해 게시한 경우) 열린 확인에서 `unlinked`, `unlinked_by_name` 사유를 뺀다. 남은 사유가 없으면 같은 트랜잭션에서 확인을 `dismissed`로 바꾼다. 기계나 업주가 연결한 것이므로, 연수와 에디션이 다르면 8.7의 `attribute_conflict`로 다시 확인에 올라간다.
 - 항목이 현재 메뉴판에서 빠지면(검수의 `remove`, 3.14.5 삭제, 3.14.6 초기화) 그 항목의 열린 확인은 같은 트랜잭션에서 `dismissed`가 된다.
 - 확인의 출처(`source`)는 사유를 만든 검수 줄이다. 검수 제출로 사유를 더할 때는 출처도 그 줄로 바꾼다. 직접 추가(3.14.3)로 생긴 확인은 출처가 `null`이다. 직접 수정(3.14.4)으로 사유를 더할 때는 출처를 바꾸지 않는다(없으면 `null`로 둔다). 운영자가 처음 게시된 메뉴판 사진의 그 줄을 계속 볼 수 있게 하기 위해서다.
 - 이름을 고쳐 메뉴판의 줄이 다른 항목으로 옮겨 가면(3.14.1의 연결 바꾸기, 8.11의 원래 항목 대신하기) 그 줄의 열린 확인은 `dismissed`가 되지 않고 새 항목으로 옮겨 간다.
@@ -3577,7 +3578,7 @@ GET /api/search/popular-products?limit=10
 #### 3.18.2 확인 목록 조회
 
 ```http
-GET /api/menu-item-checks?status=open&barId=22222222-2222-4222-8222-222222222222&limit=100
+GET /api/menu-item-checks?status=open&barId=22222222-2222-4222-8222-222222222222&limit=100&cursor=<cursor>
 Authorization: Bearer <access-token>
 ```
 
@@ -3585,9 +3586,10 @@ Authorization: Bearer <access-token>
 |---|---|---|
 | `status` | 아니오 | `open`, `resolved`, `dismissed` 중 하나. 기본 `open` |
 | `barId` | 아니오 | 이 업장의 확인만. 없으면 모든 업장 |
-| `limit` | 아니오 | 1~200. 기본 100. 넘치면 `truncated = true` |
+| `limit` | 아니오 | 1~200. 기본 100 |
+| `cursor` | 아니오 | 이전 응답의 `nextCursor`. 형식은 정하지 않으며, 같은 `status`와 `barId`로만 쓸 수 있다 |
 
-정렬: `open`은 `createdAt` 오름차순(오래된 확인부터 처리한다), `resolved`와 `dismissed`는 `resolvedAt` 내림차순. 동점이면 `checkId` 오름차순이다.
+정렬: `open`은 `createdAt` 오름차순(오래된 확인부터 처리한다), `resolved`와 `dismissed`는 `resolvedAt` 내림차순. 동점이면 `checkId` 오름차순이다. 다음 페이지는 이 정렬 기준으로 이어지므로, 페이지를 넘기는 사이에 처리된 확인이 있어도 같은 확인이 두 번 나오거나 빠지지 않는다.
 
 `200 OK`
 
@@ -3632,7 +3634,7 @@ Authorization: Bearer <access-token>
       }
     }
   ],
-  "truncated": false
+  "nextCursor": null
 }
 ```
 
@@ -3648,7 +3650,7 @@ Authorization: Bearer <access-token>
 | `bar.barId`, `bar.name`, `bar.status` | | 아니오 | 업장. 비활성 업장의 확인도 목록에 나오지만 처리할 수 없다(3.18.3) |
 | `item.barMenuItemId` | UUID 문자열 | 아니오 | 확인 대상 항목 |
 | `item.kind` | `MenuItemKind` | 아니오 | 2.3 |
-| `item.displayName` | 문자열 | 아니오 | 메뉴판에 보이는 이름. 메뉴판에서 빠진 항목이면 마지막으로 보였던 이름 |
+| `item.displayName` | 문자열 | 아니오 | 메뉴판에 보이는 이름. 메뉴판에서 빠진 항목이면 마지막으로 보였던 이름이다. 메뉴판의 줄은 빠지면 지워지므로, 서버는 확인을 만들 때와 그 줄의 이름이 바뀔 때 이름을 확인에 함께 저장해 둔다 |
 | `item.onBoard` | 불리언 | 아니오 | 지금 현재 메뉴판에 있는지 |
 | `item.soldOut` | 불리언 | 아니오 | 3.14.8 |
 | `item.product` | 객체 | 예 | 지금 연결된 상품. 7.2의 `productId`, `displayName`, `brandId`, `brandName`, `category`, `ageYears`, `editionName`과 같다. 연결되지 않았으면 `null` |
@@ -3657,9 +3659,9 @@ Authorization: Bearer <access-token>
 | `source.rawText`, `source.sourceBox` | | `sourceBox`만 예 | 5.4와 같다. 관리자 웹은 `imageUrl`에서 `sourceBox` 영역을 잘라 보여 준다 |
 | `source.imageUrl`, `source.imageUrlExpiresAt` | | `imageUrlExpiresAt`만 예 | 그 줄이 있는 메뉴판 사진. 5.4와 같은 서명 URL이며, 만료되면 목록을 다시 조회한다 |
 | `source.extractedProductName`, `extractedBrandName`, `extractedAgeYears`, `extractedEditionName` | | 예 | 5.4와 같은 추출값 |
-| `truncated` | 불리언 | 아니오 | `limit` 때문에 잘렸으면 `true` |
+| `nextCursor` | 문자열 | 예 | 다음 페이지의 `cursor`. 다음 페이지가 없으면 `null` |
 
-오류: `401`(3.1.5), `403 FORBIDDEN`(operator가 아님), `422 VALIDATION_FAILED`(`status`가 허용 값이 아님, `barId`가 UUID 형식이 아님, `limit` 범위 밖). 없는 `barId`는 오류 없이 `items = []`다.
+오류: `401`(3.1.5), `403 FORBIDDEN`(operator가 아님), `422 VALIDATION_FAILED`(`status`가 허용 값이 아님, `barId`가 UUID 형식이 아님, `limit` 범위 밖, 읽을 수 없거나 다른 필터에서 받은 `cursor`(`INVALID_CURSOR`)). `INVALID_CURSOR`를 받으면 첫 페이지부터 다시 조회한다. 없는 `barId`는 오류 없이 `items = []`다.
 
 #### 3.18.3 확인 처리
 
@@ -4082,6 +4084,7 @@ HTTP 요청 자체는 성공했지만 비동기 작업이 최종 실패한 경�
 - `before`와 `after`의 `kind`는 그 메뉴 항목의 종류(2.3)다. `before`는 현재 항목의 값이고, `after`는 그 줄의 `extractedKind`다. 검수자가 다른 종류로 게시하면(8.10) 반영 결과는 그 종류가 된다.
 - 제안 상품이 없는 줄(`proposedProductId = null`, 보통 `unmatched`이거나 `extractedKind = other`)은 상품 없이 게시하는 것으로 보고 비교한다. 현재 메뉴판에 이름 키(3.14.1)가 같은 미연결 항목이 있으면 그 항목과 비교해 `update`이거나 변경 없음이고, 없으면 `add`다. 이 변경의 `after.productId`는 `null`이다. 검수자가 그 줄에서 기존 상품을 고르거나 새 상품을 만들면 그 상품으로, 상품 없이 게시하면(8.10) 미연결 항목으로 반영된다. 그 줄을 비상품으로 확정하거나 제외하고 이 변경에 담긴 다른 줄도 게시하지 않으면 이 변경은 `ignore`로 보낸다(8.7의 `CHANGE_WITHOUT_PRODUCT`).
 - 현재 메뉴판의 미연결 항목(3.9의 `productId = null`)도 다른 항목처럼 비교한다. `before.productId`는 `null`이고, 전체 교체(`full_replace`)에서 새 사진에 이름 키가 같은 줄이 없으면 `remove`가 된다.
+- 제안 상품 P가 있는 줄도, P가 현재 메뉴판에 없고 그 줄의 이름 키와 같은 미연결 항목 X가 현재 메뉴판에 있으면 X와 비교한다. 변경은 X의 `update`(`barMenuItemId`는 X, `before.productId = null`, `after.productId`는 P)다. 미연결로 게시했던 위스키가 카탈로그에 등록된 뒤 같은 메뉴판을 다시 올린 경우로, `add`로 비교하면 일부 수정(`partial_update`)에서 X와 P의 두 줄이 남기 때문이다. 이 변경을 `apply`하고 그 줄을 상품에 연결해 게시하면 X를 그 상품에 연결한다(3.14.1의 연결 바꾸기). 검수자가 P가 아닌 다른 상품을 골라도 같다. 그 줄을 상품 없이 게시하면 X를 그대로 갱신한다(8.10).
 - `summary`는 표시용 문구이며 검증이나 반영 기준으로 사용하지 않는다.
 - `reviewDraft`는 이 작업에 저장된 검수 초안(5.9)이다. 저장된 초안이 없으면 `null`이다. 프론트엔드는 검수 화면을 열 때 이 초안의 결정을 화면에 다시 채운다. 초안의 `reviewVersion`이 응답의 `reviewVersion`과 다르면 검수 데이터가 다시 만들어진 것이므로, `extractedItemId`와 `extractedOptionId`가 지금 응답에 있는 결정만 다시 적용하고 `changeDecisions`는 버린다(9.4). 초안의 `draftVersion`은 다음 저장(5.9)에 그대로 보낸다.
 
@@ -4581,7 +4584,7 @@ Content-Type: application/json
 - **가격**: 모든 옵션에 가격이 있어야 한다. 가격을 모르는 옵션은 보내지 않는다.
 - **같은 값**: 한 줄 안에서 `optionLabel`과 `pourMl`이 모두 같은 옵션이 둘 이상이면 `DUPLICATE_OPTION_VALUES`다(3.14.2와 같다).
 - **기본 잔 용량**: 서버는 `pourMl`을 받은 그대로 저장한다. 메뉴판에 용량이 없는 잔 옵션은 프론트엔드가 매장 기본 잔 용량(3.6의 `defaultPourMl`)을 `pourMl`에 채워 보낸다. 병 옵션에는 채우지 않는다.
-- **저장**: 게시된 옵션의 출처(`menu_entry_options.source_extracted_option_id`)에 `extractedOptionId`를 저장하고, 새로 더한 옵션은 `null`이다. 추출 옵션의 값과 다르게 보낸 값은 그 추출 옵션의 교정값(`corrected_*`)에도 기록한다. 삭제와 추가는 게시된 옵션의 출처와 비교해 알 수 있으므로 따로 저장하지 않는다.
+- **저장**: 게시된 옵션의 출처(`menu_entry_options.source_extracted_option_id`)에 `extractedOptionId`를 저장하고, 새로 더한 옵션은 `null`이다. 추출 옵션의 값과 다르게 보낸 값 중 `null`이 아닌 값은 그 추출 옵션의 교정값(`corrected_*`)에도 기록한다. 검수에서 옵션을 지웠는지, 더했는지, 값을 `null`로 지웠는지는 따로 저장하지 않는다. 게시된 옵션은 다음 게시 때 다시 쓰이므로, 이런 검수 결정은 나중에 추적할 수 없다.
 
 검수에서는 할인(3.14.2)을 정하지 않는다. `options`에 할인 필드는 없으며, 보내면 `EXTRA_FORBIDDEN`이다. 할인은 메뉴를 반영한 뒤 직접 편집(3.14.4)으로 정한다. 메뉴판 사진에 할인이 적힌 경우가 드물고, 할인은 기간이 있어 사진에서 읽을 수 없기 때문이다. 반영할 때 기존 할인이 이어지는 규칙은 8.7을 따른다.
 
@@ -4829,7 +4832,7 @@ OCR 잡음, 중복 인식 또는 사용할 수 없는 항목에 사용한다.
   - 프론트엔드는 이 충돌로 업주에게 확인을 묻지 않는다. 후보의 `evidence`는 지금처럼 표시용으로만 쓴다.
 - 신규 브랜드·상품은 트랜잭션 안에서 중복을 다시 검사한다.
 - 백엔드는 운영자가 제출한 결정으로 최종 변경을 계산해 반영한다. 다른 후보를 고르거나 가격을 고쳐서 임시 diff와 달라진 변경도 운영자의 결정이므로 그대로 반영한다.
-- 현재 메뉴판의 항목은 운영자가 `apply`한 `remove`로만 빠진다.
+- 현재 메뉴판의 항목은 운영자가 `apply`한 `remove`로만 빠진다. 예외는 한 줄이 원래 항목을 대신하는 경우뿐이다. 이름을 고친 줄의 다시 매칭으로 원래 항목이 새 항목으로 바뀌거나(8.11), 미연결 항목과 비교된 줄을 상품에 연결해 그 줄이 상품의 항목으로 옮겨 가는 경우(5.4, 3.14.1)다. 이때도 메뉴판의 줄 수는 그대로다.
 - 검수 데이터를 만든 뒤 현재 메뉴판이 바뀌었으면(다른 작업이 먼저 게시된 경우 등) 반영하지 않는다. 백엔드는 임시 diff를 다시 만들고 `reviewVersion`을 올린 뒤 `REVIEW_OUTDATED`를 반환한다.
 - 반영은 메뉴 등록 작업을 잠그기 전에 업장 행을 먼저 잠근다(3.14.1). 같은 업장의 직접 편집, 품절 표시, 판매 정보 확인, 새 등록 작업과 차례로 처리하기 위해서다. 잠근 뒤 업장이 비활성이면 아무것도 반영하지 않고 `404 BAR_NOT_FOUND`(`details.barId`)다. 비활성 업장은 메뉴를 바꾸지 않기 때문이다(3.14.1, 4.4). 이미 반영된 작업을 다시 보낸 경우에도 같다.
 - 반영할 때 품절과 할인은 다음처럼 이어진다. 품절(3.14.8)은 메뉴판에 남는 항목에서 그대로 유지되고, `remove`로 빠진 항목에서는 풀린다. 할인(3.14.2)은 반영 뒤에도 표기(`optionLabel`), 용량(`pourMl`), 정가(`priceKrw`)가 모두 같은 옵션이 남으면 그 옵션에 그대로 유지된다. 정가가 바뀌거나 옵션이 없어지면 할인이 지워진다. 정가가 바뀌면 원래 할인가가 맞는지 알 수 없기 때문이다. 품절 변경과 판매 정보 확인은 "검수 데이터를 만든 뒤 현재 메뉴판이 바뀌었는지" 검사에서 메뉴판 변경으로 보지 않는다.
@@ -4964,7 +4967,10 @@ HTTP/1.1 200 OK
   "finalLineType": "product",
   "action": "publish_without_product",
   "kind": "whisky",
-  "correctedProductName": "Unknown Distillery 25년"
+  "correctedProductName": "Unknown Distillery 25년",
+  "options": [
+    { "extractedOptionId": "20000000-0000-4000-8000-000000000004", "optionLabel": "잔", "pourMl": 30, "priceKrw": 45000 }
+  ]
 }
 ```
 
@@ -5010,7 +5016,7 @@ AI가 위스키가 아닌 메뉴로 분류한 줄(5.4의 `extractedKind = other`
 - 확정된 상품이 비활성이면 확정되지 않은 것으로 본다. 규칙 매처는 활성 상품만 찾는다.
 - 연결이 바뀐 줄의 추출 항목에는 최종 상품을 `selected_product_id`에 저장하고 `selectedMatchMethod = manual`, `matchConfidence = null`로 둔다. 사람이 이름을 고쳐 결과가 달라졌기 때문이다. 연결이 풀린 줄은 `publish_without_product`와 같다(8.10).
 - `aliasesToAdd`는 제출한 상품이 그대로 연결될 때만 저장한다. 연결이 바뀌거나 풀리면 저장하지 않는다. 운영자가 확인할 때 별칭을 넣는다(3.18.3).
-- **원래 항목을 대신한다**: 그 줄이 임시 diff에서 현재 메뉴판의 항목 X와 비교되었고(`update`이거나 변경 없음) 그 변경을 무시하지 않았는데, 다시 매칭으로 X와 다른 상품이 되거나 연결이 풀리면 새 항목이 X의 자리를 대신한다. X는 `remove` 변경 없이도 메뉴판에서 빠지며, 위치와 품절 상태는 새 항목으로 옮긴다(3.14.1의 연결 바꾸기). 업주는 카드 하나를 고쳤으므로 메뉴판에도 한 줄만 남아야 하기 때문이다. 업주가 다른 후보나 검색 결과를 직접 골라 상품이 달라진 경우는 지금처럼 X가 남는다(8.7).
+- **원래 항목을 대신한다**: 그 줄이 임시 diff에서 현재 메뉴판의 항목 X와 비교되었고(`update`이거나 변경 없음) 그 변경을 무시하지 않았는데, 다시 매칭으로 X와 다른 상품이 되거나 연결이 풀리면 새 항목이 X의 자리를 대신한다. X는 `remove` 변경 없이도 메뉴판에서 빠지며, 위치와 품절 상태는 새 항목으로 옮긴다(3.14.1의 연결 바꾸기). 업주는 카드 하나를 고쳤으므로 메뉴판에도 한 줄만 남아야 하기 때문이다. X가 상품에 연결된 항목이고 업주가 다른 후보나 검색 결과를 직접 골라 상품이 달라진 경우는 지금처럼 X가 남는다(8.7). X가 미연결 항목이면 5.4의 규칙대로 X를 그 상품에 연결한다.
 - 다시 매칭으로 같은 상품의 줄이 여럿이 되면 옵션을 합친다(8.12). 그 때문에 같은 표기와 용량에 가격이 부딪치면 거부하지 않고 운영자 확인(3.18, 사유 `price_conflict`)에 올린다(8.12).
 - 반영 응답의 `result`는 최종 결과로 센다. 연결이 풀린 줄은 `unlinkedWhisky`에 들어간다(8.8).
 
