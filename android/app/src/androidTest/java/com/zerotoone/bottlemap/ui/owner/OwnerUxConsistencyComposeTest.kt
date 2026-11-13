@@ -46,10 +46,10 @@ class OwnerUxConsistencyComposeTest {
         val pin = compose.onNodeWithTag("welcome-pin").getUnclippedBoundsInRoot()
         val headline = compose.onNodeWithTag("welcome-headline").getUnclippedBoundsInRoot()
         val horizontalCenter = (pin.left + pin.right) / 2
-        val expectedCenter = root.left + root.width / 4
+        val expectedCenter = root.left + (root.right - root.left) / 4
         org.junit.Assert.assertTrue(
             kotlin.math.abs((horizontalCenter - expectedCenter).value) <= 1.5f)
-        org.junit.Assert.assertTrue(kotlin.math.abs(pin.width.value - 79f) <= 1f)
+        org.junit.Assert.assertTrue(kotlin.math.abs((pin.right - pin.left).value - 79f) <= 1f)
         org.junit.Assert.assertTrue(kotlin.math.abs(pin.bottom.value - headline.top.value) <= 1.5f)
     }
 
