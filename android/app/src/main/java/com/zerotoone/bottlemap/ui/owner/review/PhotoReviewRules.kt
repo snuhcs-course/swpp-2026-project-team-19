@@ -19,6 +19,48 @@ object PhotoReviewRules {
 
     fun countOptions(x: ReviewItem): Int = (if (x.primaryHasOption) 1 else 0) + x.options.size
 
+    const val MAX_PICKED_VOLUMES = 3
+
+    /** Same ml is one serving regardless of whether OCR wrote 잔/샷. */
+    fun servingKey(option: ReviewOption): String = servingIdentityKey(
+        if (option.bottle) null else option.volume.takeIf(::validVolume)?.toInt(),
+        if (option.bottle) "Bottle" else option.label,
+    )
+
+    fun pendingPriceServings(x: ReviewItem): Set<String> {
+        if (!x.volumeChoicesConfirmed) return emptySet()
+        val active = optionSummary(x).map(::servingKey).toSet()
+        return x.priceCandidates.groupBy { it.servingKey }.filter { (key, prices) ->
+            key in active && prices.map { it.priceKrw }.distinct().size > 1 &&
+                key !in x.chosenServingPrices
+        }.keys
+    }
+
+    fun chooseServingPrice(x: ReviewItem, key: String, price: Int): ReviewItem {
+        require(x.priceCandidates.any { it.servingKey == key && it.priceKrw == price })
+        val primary = x.copy(chosenServingPrices = x.chosenServingPrices + (key to price))
+        return if (x.primaryHasOption && servingKey(optionSummary(x).first()) == key)
+            primary.copy(price = price.toDouble(), priceChoice = PriceChoice.MANUAL)
+        else primary.copy(options = x.options.map { option ->
+            if (servingKey(option) == key) option.copy(price = price.toDouble()) else option
+        })
+    }
+
+    fun confirmVolumeChoices(x: ReviewItem): ReviewItem {
+        val picked = x.volumeChoices.filter { servingKey(it) in x.chosenVolumeKeys }
+        if (picked.isEmpty() || picked.size > MAX_PICKED_VOLUMES) return x
+        val first = picked.first()
+        return x.copy(
+            primaryHasOption = true,
+            bottle = first.bottle, volume = first.volume, price = first.price,
+            primarySourceOptionId = first.sourceOptionId,
+            primaryOptionLabel = first.label,
+            options = picked.drop(1),
+            volumeChoicesConfirmed = true,
+            expanded = true,
+        )
+    }
+
     /** Rebind every OCR/default-derived glass, including already valid volumes. */
     fun applyDefaultPour(x: ReviewItem, defaultPour: Double): ReviewItem = x.copy(
         volume = if (x.primaryHasOption && !x.bottle &&
@@ -115,12 +157,18 @@ object PhotoReviewRules {
                 x.match == ReviewMatch.CANDIDATE && !x.matchConfirmed -> p += ReviewIssue.CANDIDATE
                 x.match == ReviewMatch.NEW && !x.nameSaved -> p += ReviewIssue.NEW
             }
-            if (x.oldPrice != null && x.photoPrice != null && x.oldPrice != x.photoPrice &&
-                x.priceChoice == PriceChoice.NONE
-            ) p += ReviewIssue.PRICE_CHOICE
-            if (x.conflictPrices.isNotEmpty() && x.conflictChoice == null) p += ReviewIssue.PHOTO_CONFLICT
+            if (x.priceCandidates.isNotEmpty()) {
+                if (pendingPriceServings(x).isNotEmpty()) p += ReviewIssue.PRICE_CHOICE
+            } else {
+                if (x.oldPrice != null && x.photoPrice != null && x.oldPrice != x.photoPrice &&
+                    x.priceChoice == PriceChoice.NONE) p += ReviewIssue.PRICE_CHOICE
+                if (x.conflictPrices.isNotEmpty() && x.conflictChoice == null)
+                    p += ReviewIssue.PHOTO_CONFLICT
+            }
             val entries = optionSummary(x)
-            if (entries.isEmpty()) {
+            if (!x.volumeChoicesConfirmed && x.volumeChoices.isNotEmpty()) {
+                p += ReviewIssue.OPTION
+            } else if (entries.isEmpty()) {
                 p += ReviewIssue.PRICE
             } else {
                 if (entries.any { !it.bottle && !validVolume(it.volume) }) p += ReviewIssue.VOLUME
@@ -176,7 +224,9 @@ object PhotoReviewRules {
         itemGroup(state.typingSnapshots[x.id] ?: x, state)
 
     fun stats(state: PhotoReviewState): ReviewStats {
-        val all = state.items
+        // Secondary OCR lines are represented inside the master product card;
+        // never show a second Review/Excluded card for an already grouped line.
+        val all = state.items.filter { it.mergedInto == null }
         val byGroup = all.groupBy { displayGroup(state, it) }
         val required = all.filter { it.required || problems(it, state).isNotEmpty() }
         val done = required.count { it.excluded || problems(it, state).isEmpty() }
