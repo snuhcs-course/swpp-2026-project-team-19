@@ -404,6 +404,34 @@ def test_line_naming_two_products_is_stored_as_ambiguous(client, db_session, ima
     ]
 
 
+# ---- I4-P18: product parts read from an unconfirmed line fill the new-product form ----
+
+
+def test_unconfirmed_lines_get_brand_age_and_edition_and_confirmed_lines_do_not(
+    client, db_session, image_storage, operator, glenfiddich, menu_lines
+):
+    menu_lines("글렌피딕(Glenfiddich) 12년", "글렌피딕(Glenfiddich) 21년 그란 레제르바", "모르는 술 10년 셰리", "하우스 위스키")
+
+    import_id = upload(client, make_bar(db_session), operator)
+    confirmed, no_such_age, no_brand, nothing = items_of(load_import(db_session, import_id))
+
+    assert confirmed.initial_resolution_status == ResolutionStatus.EXACT_MATCH
+    assert (confirmed.extracted_brand_name, confirmed.extracted_age_years, confirmed.extracted_edition_name) == (None, None, None)
+    assert no_such_age.initial_resolution_status != ResolutionStatus.EXACT_MATCH
+    assert (no_such_age.extracted_brand_name, no_such_age.extracted_age_years, no_such_age.extracted_edition_name) == (
+        "글렌피딕", 21, "그란 레제르바")
+    assert (no_brand.extracted_brand_name, no_brand.extracted_age_years, no_brand.extracted_edition_name) == (None, 10, None)
+    assert (nothing.extracted_brand_name, nothing.extracted_age_years, nothing.extracted_edition_name) == (None, None, None)
+
+    # the review response builds the new-product form from these fields
+    items = client.get(f"/api/menu-imports/{import_id}", headers=operator).json()["images"][0]["items"]
+    assert items[1]["newProductDraft"] == {
+        "brandText": "글렌피딕", "category": "whisky", "displayName": "글렌피딕(Glenfiddich) 21년 그란 레제르바",
+        "ageYears": 21, "editionName": "그란 레제르바", "abv": None,
+    }
+    assert items[0]["newProductDraft"]["brandText"] is None and items[0]["initialResolutionStatus"] == "exact_match"
+
+
 # ---- I3: the LLM matching layer (M3) after S1–S3; the LLM is always a fake ----
 
 
