@@ -6,7 +6,8 @@ package com.zerotoone.bottlemap.ui.owner.review
  * so every rule is unit tested on the JVM.
  */
 object PhotoReviewRules {
-    const val MAX_OPTIONS = 3
+    // POST review-and-apply accepts 1..10 final options, unlike manual PUT's 1..3.
+    const val MAX_OPTIONS = 10
 
     fun optionSummary(x: ReviewItem): List<ReviewOption> =
         (if (x.primaryHasOption) listOf(ReviewOption(x.volume, x.price, x.bottle, x.primarySourceOptionId)) else emptyList()) + x.options
@@ -38,8 +39,12 @@ object PhotoReviewRules {
                 val keys = entries.map { if (it.bottle) "Bottle" else numberText(it.volume) + "ml" }
                 if (keys.size != keys.toSet().size) p += ReviewIssue.OPTION
             }
-        } else if (!validPrice(x.price)) {
-            p += ReviewIssue.PRICE
+        } else {
+            // Non-whisky OCR lines may also contain multiple price options.
+            // Every price must be editable and valid *before* publishing.
+            val entries = optionSummary(x)
+            if (entries.isEmpty() || entries.any { !validPrice(it.price) }) p += ReviewIssue.PRICE
+            if (entries.size > MAX_OPTIONS) p += ReviewIssue.OPTION
         }
         if (x.typo && !x.nameSaved) p += ReviewIssue.NAME
         if (x.name.isBlank() && ReviewIssue.NAME !in p) p += ReviewIssue.NAME
@@ -262,8 +267,11 @@ object PhotoReviewRules {
             )
             if (target == ReviewItemType.OTHER) {
                 x.copy(
-                    classificationSnapshot = snapshot, volume = Double.NaN, options = emptyList(),
-                    primarySourceOptionId = null, primaryHasOption = false, bottle = false,
+                    classificationSnapshot = snapshot, volume = Double.NaN,
+                    // Keep OCR option identities and all prices when changing type.
+                    // No extra pour-size input is required for non-whisky.
+                    options = x.options, primarySourceOptionId = x.primarySourceOptionId,
+                    primaryHasOption = x.primaryHasOption, bottle = false,
                     // A non-whisky is never linked to the canonical whisky catalog.
                     // The classification snapshot restores the prior link on undo.
                     linkedProductId = null, linkedProductName = null,
@@ -295,7 +303,14 @@ object PhotoReviewRules {
         val raw = if (valid) x.rawOptionEdits - key else x.rawOptionEdits + (key to text)
         val edited = x.copy(rawOptionEdits = raw)
         if (x.type != ReviewItemType.WHISKY) {
-            return if (field == OptionField.PRICE && index == null) edited.copy(price = n) else edited
+            if (field != OptionField.PRICE) return edited
+            return if (index == null) edited.copy(price = n, primaryHasOption = true)
+            else {
+                val previous = x.options.getOrNull(index) ?: return edited
+                edited.copy(options = x.options.toMutableList().also {
+                    it[index] = previous.copy(price = n)
+                })
+            }
         }
         return when {
             index == null && field == OptionField.PRICE -> edited.copy(
@@ -339,7 +354,11 @@ object PhotoReviewRules {
     }
 
     fun addOption(x: ReviewItem, defaultPour: Double): ReviewItem =
-        if (!x.primaryHasOption) {
+        if (x.type == ReviewItemType.OTHER) {
+            if (!x.primaryHasOption) x.copy(primaryHasOption = true, price = 0.0, expanded = true)
+            else x.copy(options = x.options + ReviewOption(volume = Double.NaN, price = 0.0),
+                expanded = true)
+        } else if (!x.primaryHasOption) {
             x.copy(primaryHasOption = true, bottle = false, volume = defaultPour,
                 volumeSource = VolumeSource.DEFAULT, price = 0.0, expanded = true)
         } else x.copy(options = x.options + ReviewOption(), expanded = true)
