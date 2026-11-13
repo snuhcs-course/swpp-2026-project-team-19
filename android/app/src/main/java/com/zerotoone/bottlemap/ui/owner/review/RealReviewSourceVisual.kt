@@ -49,10 +49,10 @@ internal fun RealReviewSourceVisual(
     ) {
         try {
             val photo = withContext(Dispatchers.IO) {
-                retrieveSignedReviewBitmap(sourceUrl, if (large) null else box)
+                retrieveSignedReviewBitmap(sourceUrl, box)
             } ?: refreshSourceUrl?.invoke()?.takeIf { it != sourceUrl }?.let { fresh ->
                 withContext(Dispatchers.IO) {
-                    retrieveSignedReviewBitmap(fresh, if (large) null else box)
+                    retrieveSignedReviewBitmap(fresh, box)
                 }
             }
             value = true to photo
@@ -76,7 +76,9 @@ internal fun RealReviewSourceVisual(
                 bitmap = requireNotNull(image).asImageBitmap(),
                 contentDescription = "원본 메뉴판 사진",
                 modifier = Modifier.fillMaxSize(),
-                contentScale = if (large) ContentScale.Fit else ContentScale.Crop,
+                // Preserve the OCR box's natural aspect ratio: never stretch or
+                // crop its edges a second time to fill the card/modal slot.
+                contentScale = ContentScale.Fit,
             )
         } else {
             Text(if (loaded.first) "원본 사진을 열 수 없어요."
