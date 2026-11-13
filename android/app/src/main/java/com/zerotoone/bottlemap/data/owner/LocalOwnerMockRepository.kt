@@ -493,7 +493,11 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             require(error == null) { error ?: "잘못된 가격 옵션" }
             require(item.options.all { it.optionId.isNotBlank() } &&
                 item.options.map { it.optionId }.distinct().size == item.options.size &&
-                item.options.distinctBy { it.identityKey() }.size == item.options.size &&
+                // Old imported rows may contain multiple label-only servings
+                // without a pour size. Keep their unchanged overflow intact,
+                // while applying the new ml-only rule to editable options.
+                directOptions.distinctBy { servingIdentityKey(it.pourMl, it.label) }
+                    .size == directOptions.size &&
                 item.options.all(::validMockMenuOption)) { "잘못된 저장 옵션입니다." }
             if (state.products.none { it.productId == product.productId }) {
                 require(newBrand != null && newBrand.brandId == product.brandId ||
