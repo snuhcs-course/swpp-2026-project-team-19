@@ -225,4 +225,20 @@ class OwnerReviewOptionContractTest {
             ownerExistingUnlinkedOptions(snapshot,"bar2","글렌피딕 12년"))
     }
 
+    @Test fun appliedInSecondPreflightIsSuccessfulWithoutAnotherPost() {
+        val applied = com.zerotoone.bottlemap.network.MenuImportStatusDto(
+            menuImportId = "same-import", barId = "bar-1",
+            status = "applied", reviewVersion = 4,
+        )
+        assertFalse(photoImportNeedsApply(applied, "same-import", 3))
+        try {
+            photoImportNeedsApply(applied.copy(status = "ready_for_review"),
+                "same-import", 3)
+            org.junit.Assert.fail("Old reviewVersion must be rejected")
+        } catch (_: com.zerotoone.bottlemap.data.owner.review.ReviewVersionConflictException) { }
+        assertTrue(photoImportNeedsApply(
+            applied.copy(status = "ready_for_review", reviewVersion = 3),
+            "same-import", 3))
+    }
+
 }

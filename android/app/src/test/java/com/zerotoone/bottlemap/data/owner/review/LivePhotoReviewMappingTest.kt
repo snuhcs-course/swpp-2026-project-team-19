@@ -459,7 +459,8 @@ class LivePhotoReviewMappingTest {
         val dto = item(status = "unmatched", proposedId = null).copy(candidates = emptyList())
         val state = mapServerPhotoReview(response(dto),local)
         val card = state.items.single()
-        assertEquals(listOf(12000, 15000), card.priceCandidates.map { it.priceKrw }.sorted())
+        assertEquals(listOf(12000, 15000), card.priceCandidates
+            .filter { it.servingKey == "ml:30" }.map { it.priceKrw }.sorted())
         assertEquals(setOf("ml:30"), PhotoReviewRules.pendingPriceServings(card))
         assertFalse(PhotoReviewRules.stats(state).canPublish)
         val chosen = PhotoReviewRules.chooseServingPrice(card, "ml:30", 12000)

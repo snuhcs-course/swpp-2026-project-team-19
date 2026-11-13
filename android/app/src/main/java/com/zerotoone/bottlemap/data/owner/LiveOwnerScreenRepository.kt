@@ -10,6 +10,8 @@ import com.zerotoone.bottlemap.network.OwnedBarDto
 import com.zerotoone.bottlemap.network.OwnerApplicationDto
 import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewRules
 import com.zerotoone.bottlemap.data.owner.review.ReviewVersionConflictException
+import com.zerotoone.bottlemap.data.owner.review.isAppliedReviewImport
+import com.zerotoone.bottlemap.network.MenuImportStatusDto
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
@@ -49,6 +51,20 @@ internal fun ownerExistingUnlinkedOptions(
         "기존 메뉴에 같은 이름의 항목이 중복돼 있어요. 메뉴 관리에서 확인해 주세요."
     }
     return matches.singleOrNull()?.options.orEmpty()
+}
+
+/** An applied import may arrive between the review repository's first GET
+ * and the Owner adapter's second preflight GET. Never treat that as a failed
+ * validation or submit it a second time.
+ */
+internal fun photoImportNeedsApply(
+    response: MenuImportStatusDto, expectedId: String, reviewVersion: Int,
+): Boolean {
+    require(response.menuImportId == expectedId) { "메뉴판 작업이 일치하지 않아요." }
+    if (isAppliedReviewImport(response, expectedId)) return false
+    if (response.reviewVersion != reviewVersion) throw ReviewVersionConflictException()
+    require(response.status == "ready_for_review") { "검수할 수 없는 서버 작업이에요." }
+    return true
 }
 
 class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
@@ -945,8 +961,12 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         val job = current.imports.firstOrNull { it.menuImportId == importId }
             ?: error("메뉴판 작업이 없어요.")
         val original = remote.getMenuImport(importId)
-        require(original.status == "ready_for_review") { "검수할 수 없는 서버 작업이에요." }
-        if (original.reviewVersion != version) throw ReviewVersionConflictException()
+        if (!photoImportNeedsApply(original, importId, version)) {
+            // Another client committed the same import while this client
+            // prepared the decisions. Sync best-effort; do not POST again.
+            runCatching { pollPhotoImportLive(importId) }
+            return 0
+        }
         require(conflictingReviewedPhotoPrices(job).isEmpty()) {
             "같은 메뉴·용량에 다른 가격을 입력했어요. 가격을 하나로 맞춘 후 게시해 주세요."
         }
