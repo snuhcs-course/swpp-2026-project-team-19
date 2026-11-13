@@ -507,3 +507,40 @@ def test_operators_only(client, sample, token_for, glenfiddich):
 
     assert submit(client, sample.menu_import.id, body, customer).status_code == 403
     assert submit(client, sample.menu_import.id, body, {}).status_code == 401
+
+
+
+def test_owner_photo_review_publishes_bar_local_without_creating_catalog(
+    client, db_session, sample, operator, supabase
+):
+    from app.models import BarLocalMenuItem
+    reviewer = make_user(db_session, "reviewer-for-local-photo", user_type=UserType.OPERATOR)
+    owner_user = make_user(db_session, "owner-local-photo")
+    make_owner(db_session, owner_user, sample.bar, reviewer)
+    db_session.commit()
+    owner = {"Authorization": f"Bearer {supabase.token(sub='owner-local-photo')}"}
+    review = client.get(f"/api/menu-imports/{sample.menu_import.id}", headers=owner).json()
+    body = body_from_review(review)
+    local = next(decision for decision in body["itemDecisions"]
+                 if decision["action"] == "create_product")
+    local.pop("brand")
+    local.pop("product")
+    local["action"] = "create_local_menu_item"
+    local["category"] = "whisky"
+    result = submit(client, sample.menu_import.id, body, owner)
+    assert result.status_code == 200, result.text
+    assert result.json()["result"]["createdProducts"] == 0
+    db_session.expire_all()
+    rows = db_session.scalars(
+        select(BarLocalMenuItem).where(BarLocalMenuItem.bar_id == sample.bar.id)
+    ).all()
+    assert len(rows) == 1
+    assert rows[0].display_name == "Unknown Distillery 25"
+    assert rows[0].category == "whisky"
+    menu = client.get(f"/api/bars/{sample.bar.id}/menu", headers=owner).json()
+    pending = next(i for i in menu["items"] if i["displayName"] == "Unknown Distillery 25")
+    assert pending["catalogMatched"] is False
+    assert pending["catalogReviewStatus"] == "pending"
+    assert client.get("/api/search/bars", params={
+        "productId": pending["productId"]
+    }).json()["items"] == []
