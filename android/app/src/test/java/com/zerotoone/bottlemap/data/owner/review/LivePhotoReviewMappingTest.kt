@@ -168,8 +168,9 @@ class LivePhotoReviewMappingTest {
         val linked = PhotoReviewRules.markLinked(
             card, com.zerotoone.bottlemap.ui.owner.review.CatalogProduct("product-1", "Whisky 12")
         )
-        assertEquals(PriceChoice.NONE, linked.priceChoice)
+        assertEquals(PriceChoice.PHOTO, linked.priceChoice)
         assertEquals(12000.0, linked.oldPrice!!, 0.0)
+        assertEquals(setOf("ml:30"),PhotoReviewRules.pendingPriceServings(linked))
         assertTrue(
             com.zerotoone.bottlemap.ui.owner.review.ReviewIssue.PRICE_CHOICE in
                 PhotoReviewRules.problems(linked)
