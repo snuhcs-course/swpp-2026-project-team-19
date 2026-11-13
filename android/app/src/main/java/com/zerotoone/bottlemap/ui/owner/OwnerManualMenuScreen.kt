@@ -676,7 +676,8 @@ internal fun OwnerManualMenuScreen(
                     Row(Modifier.fillMaxWidth(),
                         horizontalArrangement=Arrangement.SpaceBetween,
                         verticalAlignment=Alignment.CenterVertically) {
-                        Row(horizontalArrangement=Arrangement.spacedBy(9.dp),
+                        Row(Modifier.weight(1f, fill = false),
+                            horizontalArrangement=Arrangement.spacedBy(9.dp),
                             verticalAlignment=Alignment.CenterVertically) {
                             Text(if(query.isEmpty()) "전체 " + items.size + "개" else
                                 visible.size.toString() + "개 검색됨",
@@ -684,7 +685,16 @@ internal fun OwnerManualMenuScreen(
                             Text("최근 갱신 "+ownerDisplayDate(bar.lastMenuPublishedAtEpochMs),
                                 color=V4Color.primary,fontSize=11.sp)
                         }
-                        Text("메뉴를 선택해서 편집하세요",color=V4Color.sub,fontSize=11.sp)
+                        Text(
+                            if (activePhotoImport)
+                                "사진으로 메뉴 추가 작업 진행 중에는 메뉴를 직접 수정할 수 없어요."
+                            else "메뉴를 선택해서 편집하세요",
+                            color = if (activePhotoImport) V4Color.primary else V4Color.sub,
+                            fontSize = 11.sp,
+                            textAlign = TextAlign.End,
+                            softWrap = true,
+                            modifier = Modifier.weight(1f).testTag("manual-menu-edit-guidance"),
+                        )
                     }
                     if (visible.isEmpty()) Text(if (query.isEmpty()) "등록된 메뉴가 없어요."
                         else "검색 결과가 없어요.", color = V4Color.sub)
@@ -912,9 +922,9 @@ internal fun OwnerManualMenuScreen(
                                         verticalAlignment = Alignment.Bottom) {
                                         if (d.bottle) Column(Modifier.weight(1f),
                                             verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                                            Text("용량", color = V4Color.text,
+                                            Text("용량 (ml)", color = V4Color.text,
                                                 fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
-                                            Box(Modifier.fillMaxWidth().height(43.dp)
+                                            Box(Modifier.fillMaxWidth().heightIn(min = 48.dp)
                                                 .border(1.dp, V4Color.line, RoundedCornerShape(9.dp))
                                                 .background(V4Color.elevated, RoundedCornerShape(9.dp))
                                                 .padding(horizontal = 12.dp),

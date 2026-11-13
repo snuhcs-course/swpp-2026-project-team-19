@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.height
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.style.TextAlign
@@ -137,11 +138,13 @@ internal fun V4CompactCheck(label: String, checked: Boolean, onChange: (Boolean)
 
 @Composable
 internal fun V4HourButton(text: String, onClick: ()->Unit, modifier: Modifier = Modifier) {
-    Box(modifier.width(75.dp).heightIn(min = 48.dp)
+    Box(modifier.widthIn(min = 48.dp).heightIn(min = 48.dp)
         .background(V4Color.elevated, RoundedCornerShape(6.dp))
         .border(1.dp, V4Color.line, RoundedCornerShape(6.dp))
-        .ownerQuietClick(onClick = onClick), contentAlignment = Alignment.Center) {
-        Text(text, color = V4Color.text, fontSize = 11.sp, maxLines = 2,
+        .ownerQuietClick(onClick = onClick)
+        .padding(horizontal = 3.dp, vertical = 2.dp),
+        contentAlignment = Alignment.Center) {
+        Text(text, color = V4Color.text, fontSize = 11.sp,
             textAlign = TextAlign.Center)
     }
 }
@@ -185,16 +188,17 @@ internal fun V4SearchField(value: String, onChange: (String) -> Unit, tag: Strin
 
 @Composable
 internal fun V4TagChip(label: String, selected: Boolean = false, onClick: ()->Unit) {
-    Box(
-        Modifier.background(if (selected) Color(0xFF4A382A) else V4Color.elevated,
-            RoundedCornerShape(7.dp))
+    Box(Modifier.heightIn(min = 48.dp).ownerQuietClick(onClick = onClick),
+        contentAlignment = Alignment.Center) {
+        Box(Modifier
+            .background(if (selected) Color(0xFF4A382A) else V4Color.elevated,
+                RoundedCornerShape(7.dp))
             .border(1.dp, if (selected) V4Color.primary else V4Color.line,
                 RoundedCornerShape(7.dp))
-            .heightIn(min = 48.dp)
-            .ownerQuietClick(onClick = onClick)
-            .padding(horizontal = 10.dp, vertical = 7.dp)
-    ) {
-        Text(label, fontSize = 12.sp, color = if (selected) Color(0xFFF7DFBF)
-            else V4Color.text, lineHeight = 17.sp)
+            .padding(horizontal = 9.dp, vertical = 5.dp),
+            contentAlignment = Alignment.Center) {
+            Text(label, fontSize = 12.sp, color = if (selected) Color(0xFFF7DFBF)
+                else V4Color.text, lineHeight = 17.sp)
+        }
     }
 }

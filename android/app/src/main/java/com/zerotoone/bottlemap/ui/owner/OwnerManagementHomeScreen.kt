@@ -103,14 +103,15 @@ private fun OwnerQuickCard(
         color = MaterialTheme.colorScheme.surface
     ) {
         Column(
-            Modifier.fillMaxSize().padding(horizontal = 10.dp, vertical = 10.dp),
+            Modifier.fillMaxWidth().heightIn(min = 130.dp)
+                .padding(horizontal = 10.dp, vertical = 10.dp),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
                 OwnerManagerIcon(icon)
                 Text(title, modifier = Modifier.weight(1f), style = MaterialTheme.typography.titleSmall,
                     fontSize = ownerHomeCardTitleSize,
-                    fontWeight = FontWeight.Bold, maxLines = 1, softWrap = false)
+                    fontWeight = FontWeight.Bold, softWrap = true)
             }
             OwnerManagerFooter(footer, onClick)
         }
@@ -120,12 +121,12 @@ private fun OwnerQuickCard(
 @Composable
 private fun OwnerManagerFooter(label: String, onClick: () -> Unit) {
     Row(
-        Modifier.fillMaxWidth().height(36.dp).ownerQuietClick(onClick = onClick),
+        Modifier.fillMaxWidth().heightIn(min = 36.dp).ownerQuietClick(onClick = onClick),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(3.dp)
     ) {
         Text(label, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2)
+            color = MaterialTheme.colorScheme.onSurfaceVariant, softWrap = true)
         Text("›", style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
@@ -198,22 +199,23 @@ fun OwnerManagementHomeScreen(
                     }
                     Box(Modifier.fillMaxWidth()) {
                         // Compact cards with a shared height; never force an unnecessary square.
-                        val equalHeight = if (androidx.compose.ui.platform.LocalDensity.current.fontScale > 1.25f) 152.dp else 130.dp
+                        val equalHeight = 130.dp // minimum; larger system font scales grow cards naturally
                         Row(
                             Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(9.dp)
                         ) {
                             OwnerQuickCard(
-                                Modifier.weight(1f).height(equalHeight),
+                                Modifier.weight(1f).heightIn(min = equalHeight),
                                 BmIconId.MANAGE_BAR, "매장 정보 관리", "사진 · 소개 · 영업시간", onInfo
                             )
                             Surface(
-                                modifier = Modifier.weight(1f).height(equalHeight),
+                                modifier = Modifier.weight(1f).heightIn(min = equalHeight),
                                 shape = RoundedCornerShape(12.dp),
                                 color = MaterialTheme.colorScheme.surface
                             ) {
                                 Column(
-                                    Modifier.fillMaxSize().padding(horizontal = 10.dp, vertical = 10.dp),
+                                    Modifier.fillMaxWidth().heightIn(min = equalHeight)
+                                        .padding(horizontal = 10.dp, vertical = 10.dp),
                                     verticalArrangement = Arrangement.SpaceBetween
                                 ) {
                                     Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
@@ -230,13 +232,12 @@ fun OwnerManagementHomeScreen(
                                                 Text(
                                                     if (exception?.kind == MockExceptionKind.VACATION) "임시 휴무"
                                                     else homeExceptionHeading(exception),
-                                                    modifier = Modifier.align(Alignment.CenterStart),
+                                                    modifier = Modifier.align(Alignment.CenterStart)
+                                                        .padding(end = if (exception == null) 0.dp else 36.dp),
                                                     style = MaterialTheme.typography.titleSmall,
                                                     fontSize = ownerHomeCardTitleSize,
                                                     fontWeight = FontWeight.Bold,
-                                                    maxLines = 1,
-                                                    softWrap = false,
-                                                    overflow = TextOverflow.Visible
+                                                    softWrap = true
                                                 )
                                                 if (exception != null) {
                                                     Box(
@@ -282,7 +283,7 @@ fun OwnerManagementHomeScreen(
                                                 modifier = Modifier.padding(start = 36.dp),
                                                 fontSize = 13.sp, fontWeight = FontWeight.Bold,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                                maxLines = 1
+                                                softWrap = true
                                             )
                                         }
                                     }
@@ -324,7 +325,7 @@ fun OwnerManagementHomeScreen(
                                 // A short visual pill inside an independently sized hit area
                                 // prevents the border from appearing to touch the gauge.
                                 Box(
-                                    Modifier.height(42.dp)
+                                    Modifier.heightIn(min = 42.dp)
                                         .ownerQuietClick(enabled = hasPublishedMenu && !confirmingMenu) {
                                             confirmingMenu=true
                                             ownerScope.launch {
@@ -341,7 +342,7 @@ fun OwnerManagementHomeScreen(
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Box(
-                                        Modifier.height(26.dp)
+                                        Modifier.heightIn(min = 26.dp)
                                             .border(
                                                 BorderStroke(
                                                     2.dp,
