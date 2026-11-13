@@ -11,6 +11,7 @@ internal fun ownerFinalReviewOptions(
     decision: MockReviewDecision,
     defaultPourMl: Int,
     whisky: Boolean,
+    existingOptions: List<MockMenuOption> = emptyList(),
 ): List<Map<String, Any?>> {
     val rawIds = item.options.mapTo(mutableSetOf()) { it.extractedOptionId }
     val selected = decision.correctedOptions ?: item.options.map { option ->
@@ -35,7 +36,19 @@ internal fun ownerFinalReviewOptions(
         val pour = if (bottle) null
             else option.pourMl ?: if (whisky) defaultPourMl else null
         require(pour == null || pour in 1..32767) { "용량을 확인해 주세요." }
+        // Backend #164 still uses (label,pour) literally. For an ALREADY
+        // published serving, reuse its literal label so a 30ml "샷" does not
+        // become a second 30ml option beside that saved row. New servings
+        // use a null glass label; the UI always renders their ml.
+        val sameVolume = existingOptions.filter {
+            servingIdentityKey(it.pourMl, it.label) ==
+                servingIdentityKey(pour, if (bottle) "Bottle" else option.label)
+        }
+        require(sameVolume.size <= 1) {
+            "기존 매장에 같은 용량이 중복 등록되어 있어요. 기존 메뉴를 확인해 주세요."
+        }
         val label = when {
+            sameVolume.isNotEmpty() -> sameVolume.single().label
             bottle -> "Bottle"
             pour != null -> null // not "잔" or "샷": option is identified by its ml
             else -> option.label
