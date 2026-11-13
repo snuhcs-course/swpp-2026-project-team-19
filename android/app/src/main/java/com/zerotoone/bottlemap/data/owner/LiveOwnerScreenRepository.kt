@@ -968,13 +968,17 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                 decision.newProduct?.name ?: line.sourceText
             else before.products.firstOrNull { it.productId == selectedId }?.displayName
                 ?: line.sourceText
+            val category = if(decision.kind == MockDecisionKind.CREATE_PRODUCT)
+                decision.newProduct?.category
+            else before.products.firstOrNull { it.productId == selectedId }?.category
             val body = mutableMapOf<String, Any?>(
                 "menuVersion" to menu.menuVersion,
                 "displayName" to display.take(200),
                 "options" to options.map { option ->
                     mapOf(
                         "optionLabel" to option.label,
-                        "pourMl" to if(option.label in listOf("병", "Bottle", "bottle"))
+                        "pourMl" to if(category != "whisky" ||
+                            option.label in listOf("병", "Bottle", "bottle"))
                             null else option.pourMl ?: 30,
                         "priceKrw" to option.priceKrw,
                         "discount" to null,
