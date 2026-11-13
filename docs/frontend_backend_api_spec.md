@@ -2643,7 +2643,7 @@ Content-Type: application/json
 - `productId`와 `newProduct`를 둘 다 보내거나 둘 다 빠뜨리면 `422`이고 `fieldErrors[].path = productId`, `code = EXACTLY_ONE_REQUIRED`다.
 - 같은 상품이 이미 현재 메뉴판에 있으면 `409 MENU_ITEM_EXISTS`(`details.barMenuItemId`)다. 한 상품은 메뉴판에 한 번만 있고, 용량이나 가격을 더하려면 그 항목을 수정한다(3.14.4).
 - 새 항목은 메뉴판의 맨 끝에 붙는다. 이 업장이 예전에 판매했던 상품이면 그때의 `barMenuItemId`를 다시 쓴다.
-- `newProduct`를 보내면 같은 트랜잭션 안에서 검수의 신규 생성(8.5, 8.6)과 같은 규칙으로 브랜드와 상품의 중복을 검사한다. 같은 브랜드나 상품이 있으면 아무것도 만들지 않고 `409 DUPLICATE_BRAND_FOUND` 또는 `409 DUPLICATE_PRODUCT_FOUND`다. `details`는 9.5와 같되 `extractedItemId`와 `reviewUrl`이 없다. 프론트엔드는 `details.existingProduct`(또는 `existingBrand`)를 보여 주고, 맞으면 그 `productId`(또는 `brandId`)로 다시 요청한다. `existingProduct.isActive = false`이면 그 상품으로는 추가할 수 없으므로(`PRODUCT_INACTIVE`) 다시 요청하지 않고, 상품 검색(7)에서 고르도록 안내한다(9.5).
+- 직접 추가의 `newProduct.brand`가 `type=new`, 별칭 배열 `[]`이고 보낸 대표 브랜드명이 기존 브랜드의 대표명 또는 기존 별칭과 **정확히 정규화 일치**하면 서버는 **기존 브랜드를 재사용**한다. 이는 직접 추가에서 브랜드 텍스트 입력 없이 메뉴명으로 자동 검색할 수 있게 하기 위한 예외다. 검수의 신규 생성(8.5, 8.6)은 기존의 명시적 중복 검증을 유지한다. 새로운 상품명/별칭이 기존 상품과 같으면 `409 DUPLICATE_PRODUCT_FOUND`이며 기존 상품 연결을 확인받아 `productId`로 다시 제출해야 한다. 직접 추가에서 중복 브랜드가 해소되지 않는 경우에는 `409 DUPLICATE_BRAND_FOUND`의 `existingBrand`를 표시하고 기존 브랜드를 선택해 다시 시도한다. 비활성 상품은 재연결할 수 없다(9.5).
 - 만든 상품과 브랜드에는 요청한 사용자를 기록한다. 만든 상품과 별칭은 바로 모든 업장의 고객 검색과 메뉴 매칭에 쓰인다.
 - 응답 본문에서 추가한 항목은 `productId`로 찾는다.
 
@@ -4132,8 +4132,8 @@ Content-Type: application/json
 
 | `action` | 용도 | `finalLineType` | 필드 |
 |---|---|---|---|
-| `select_existing_product` | 기존 상품에 연결 | `product` | `extractedItemId`, `productId` 필수. `correctedProductName`, `optionDecisions`, `aliasesToAdd` 선택 |
-| `create_product` | 새 상품(필요하면 새 브랜드)을 만들어 연결 | `product` | `extractedItemId`, `brand`, `product` 필수. `correctedProductName`, `optionDecisions`, `aliases` 선택 |
+| `select_existing_product` | 기존 상품에 연결 | `product` | `extractedItemId`, `productId` 필수. `correctedProductName`, `optionDecisions`, `excludedOptionIds`, `aliasesToAdd` 선택 |
+| `create_product` | 새 상품(필요하면 새 브랜드)을 만들어 연결 | `product` | `extractedItemId`, `brand`, `product` 필수. `correctedProductName`, `optionDecisions`, `excludedOptionIds`, `aliases` 선택 |
 | `confirm_non_product` | 비상품 줄로 확정 | `section_header`, `description`, `unknown` | `extractedItemId`만 |
 | `reject` | 잡음·중복 등으로 제외 | 어떤 값이든 | `extractedItemId`만 |
 
@@ -4144,6 +4144,7 @@ Content-Type: application/json
 | `extractedItemId` | 예 | 검수 응답의 항목 ID |
 | `correctedProductName` | 아니오 | 메뉴판에 보일 이름. 1~200자. 없거나 `null`이면 추출한 이름을 쓴다 |
 | `optionDecisions` | 아니오 | 고칠 옵션만 보낸다. 보내지 않은 옵션은 추출값 그대로 반영한다. 기본 `[]` |
+| `excludedOptionIds` | 아니오 | 게시에서 제외할 **원본 추출 옵션 ID**의 배열. 기본 `[]`. 해당 항목에 있는 ID만 허용; 중복 및 `optionDecisions`와 동시 지정 불가. 추출 기록은 삭제하지 않으며, 게시할 가격 옵션은 최대 3개여야 한다. |
 | `optionDecisions[].extractedOptionId` | 예 | 그 항목의 옵션 ID |
 | `optionDecisions[].correctedOptionLabel` | 아니오 | 1~100자. 없거나 `null`이면 추출값 유지 |
 | `optionDecisions[].correctedPriceKrw` | 아니오 | 1~2,147,483,647 정수. 없거나 `null`이면 추출값 유지 |
@@ -4151,7 +4152,7 @@ Content-Type: application/json
 
 검수에서는 할인(3.14.2)을 정하지 않는다. `optionDecisions`에 할인 필드는 없으며, 보내면 `EXTRA_FORBIDDEN`이다. 할인은 메뉴를 반영한 뒤 직접 편집(3.14.4)으로 정한다. 메뉴판 사진에 할인이 적힌 경우가 드물고, 할인은 기간이 있어 사진에서 읽을 수 없기 때문이다. 반영할 때 기존 할인이 이어지는 규칙은 8.7을 따른다.
 
-`optionDecisions`의 필드는 "없음 또는 `null` = 고치지 않음"이다. 따라서 추출된 값을 지워 `null`로 만들 수는 없다. 가격이 없는 옵션은 게시하지 않으며, 게시할 상품에는 가격 있는 옵션이 최소 하나 있어야 한다(`NO_PRICED_OPTION`).
+`optionDecisions`의 필드는 "없음 또는 `null` = 고치지 않음"이다. 따라서 추출된 값을 지워 `null`로 만들 수는 없다. **메뉴판에서 추출된 옵션이 4개 이상이면** 통합 검수 화면에는 모두 표시하되, 게시 전 불필요한 옵션을 선택해 `excludedOptionIds`로 제외하여 게시 대상은 **최대 3개**로 줄여야 한다(`TOO_MANY_OPTIONS`). 원본 추출 기록은 보존한다. 가격이 없는 옵션은 게시하지 않으며, 게시할 상품에는 가격 있는 옵션이 최소 하나 있어야 한다(`NO_PRICED_OPTION`).
 
 `select_existing_product`의 추가 필드:
 
@@ -4636,7 +4637,7 @@ API가 보내는 오류는 예상하지 못한 서버 오류(`500 INTERNAL_ERROR
 - `isActive = true`: 기존 상품을 보여 주고, 맞으면 그 상품을 선택해(검수는 `select_existing_product`, 직접 추가는 `productId`) 다시 제출한다. 다른 상품이면 겹치는 별칭을 빼고 다시 제출한다.
 - `isActive = false`: 그 상품으로 다시 제출하지 않는다. 이미 정리된 상품과 이름이 겹친다고 안내하고 상품 검색(7)에서 고르게 한다. 검색에도 없으면 operator 문의를 안내한다(7.2).
 
-신규 브랜드가 기존 브랜드와 같으면 `409 DUPLICATE_BRAND_FOUND`다.
+검수의 신규 브랜드가 기존 브랜드와 같으면 `409 DUPLICATE_BRAND_FOUND`다. 단, **메뉴 직접 추가**에서 `brand.type=new`, `aliases=[]`로 기존 브랜드 대표명/별칭과 정확히 정규화 일치한 경우에 한해 브랜드를 자동 재사용한다(3.14.3).
 
 ```json
 {
