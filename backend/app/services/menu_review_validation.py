@@ -252,11 +252,17 @@ def validate_review(session: Session, menu_import: MenuImport, request: ReviewAn
                 errors.add(f"{path}.productId", "PRODUCT_NOT_FOUND", "상품을 찾을 수 없습니다.")
             elif not product.is_active:
                 errors.add(f"{path}.productId", "PRODUCT_INACTIVE", "비활성 상품은 메뉴에 연결할 수 없습니다.")
+            elif product.category != "whisky":
+                errors.add(f"{path}.productId", "WHISKY_ONLY",
+                    "비위스키는 공용 카탈로그 대신 매장 전용 메뉴로 게시해 주세요.")
             _check_aliases(errors, f"{path}.aliasesToAdd", decision.aliasesToAdd)
         elif isinstance(decision, CreateLocalMenuItem):
             _check_normalizable(errors, f"{path}.correctedProductName",
                 decision.correctedProductName or item.extracted_product_name or item.raw_text)
         else:
+            if decision.product.category != "whisky":
+                errors.add(f"{path}.product.category", "WHISKY_ONLY",
+                    "공용 카탈로그에는 위스키만 등록할 수 있어요. 매장 전용 메뉴로 게시해 주세요.")
             if decision.brand.type == "existing":
                 if decision.brand.brandId not in known_brands:
                     errors.add(f"{path}.brand.brandId", "BRAND_NOT_FOUND", "브랜드를 찾을 수 없습니다.")
