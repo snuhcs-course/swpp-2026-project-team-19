@@ -186,8 +186,9 @@ def test_two_bars_adding_the_same_new_brand_create_it_once(db_engine, two_bars, 
     refused = [o for o in outcomes.values() if isinstance(o, ApiError)]
     assert (len(added), len(refused)) == (1, 1), outcomes
     assert [item.brandName for item in added[0].items] == [BRAND]
-    # The later request ran again, saw the committed brand, and was told to pick it.
-    assert (refused[0].status_code, refused[0].code) == (409, "DUPLICATE_BRAND_FOUND")
-    assert refused[0].details["existingBrand"]["canonicalName"] == BRAND
+    # The later serializable retry reuses the committed canonical brand;
+    # the product is the true duplicate and must still be rejected.
+    assert (refused[0].status_code, refused[0].code) == (409, "DUPLICATE_PRODUCT_FOUND")
+    assert refused[0].details["existingProduct"]["displayName"] == "Concurrent 12"
     with Session(db_engine) as session:
         assert session.scalar(select(func.count()).select_from(Brand).where(Brand.canonical_name == BRAND)) == 1
