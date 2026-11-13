@@ -24,6 +24,16 @@ fun menuWriteErrorText(error: Throwable): String {
     if (incompatible) {
         return "앱과 서버의 메뉴 등록 API 버전이 달라요. 서버 업데이트를 확인해 주세요. (${path})"
     }
+    // PR #164 adds kind to POST /menu/items. A deployed older FastAPI schema
+    // rejects it as EXTRA_FORBIDDEN. Never retry by dropping kind: that could
+    // create a canonical catalog product or lose the requested category.
+    if (error.fieldErrors.any { field ->
+            field.code.equals("EXTRA_FORBIDDEN", ignoreCase = true) &&
+                (field.path == "kind" || field.path.endsWith(".kind"))
+        }) {
+        return "서버가 아직 새 메뉴 등록(kind) API를 지원하지 않아요. " +
+            "메뉴는 저장되지 않았으며 서버 배포 버전을 확인해야 해요."
+    }
     val title = when {
         path.startsWith("options[") -> {
             val index = path.substringAfter('[').substringBefore(']').toIntOrNull()
