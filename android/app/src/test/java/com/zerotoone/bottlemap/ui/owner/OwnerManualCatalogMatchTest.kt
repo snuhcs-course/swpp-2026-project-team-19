@@ -59,6 +59,23 @@ class OwnerManualCatalogMatchTest {
             "딘스톤 12년"))
     }
 
+    @Test fun exactCatalogAliasIsSuggestedWithoutManualBrandInput() {
+        val alias = twelve.copy(matchedAlias = "글렌피딕 12년")
+        assertEquals(alias, manualProductProposal(
+            listOf(alias), "글렌피딕 12년", "위스키", null, null))
+    }
+
+    @Test fun customAlcoholCategoryIsShownAsTypedAndEditableWithoutChangingProductId() {
+        val beer = MockCatalogProduct(
+            productId = "beer-1", brandId = "brewery", displayName = "수제 맥주",
+            category = "맥주", catalogMatched = true)
+        assertEquals("기타 주류", manualEditorCategory(beer))
+        assertEquals("맥주", manualEditorAlcoholKind(beer))
+        assertEquals(beer, manualProductProposal(
+            listOf(beer), "수제 맥주", "기타 주류", null, null))
+        assertEquals("맥주", ownerV4Category(beer))
+    }
+
     @Test fun missingBrandConfirmationDoesNotInferEnglishProductId() {
         assertNull(manualProductProposal(listOf(twelve),
             "글렌피딕12년","위스키",null,null))
