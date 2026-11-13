@@ -158,11 +158,15 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         },
     )
 
+    // UI-only identity for product-less menu entries. NEVER send it as productId:
+    // the server's productId is nullable and may only reference the real catalog.
+    private fun unlinkedUiId(itemId: String) = "unlinked:$itemId"
+
     private fun menuRows(barId: String, menu: BarMenuResponseDto): List<MockBarMenuItem> =
         menu.items.map { entry ->
             MockBarMenuItem(
                 barMenuItemId = entry.barMenuItemId, barId = barId,
-                productId = entry.productId, soldOut = entry.soldOut,
+                productId = entry.productId ?: unlinkedUiId(entry.barMenuItemId), soldOut = entry.soldOut,
                 displayNameOverride = entry.displayName,
                 options = entry.options.map { option ->
                     MockMenuOption(
@@ -287,10 +291,13 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         }.distinctBy { it.brandId }
         val products = menus.values.flatMap { it.items }.map { item ->
             MockCatalogProduct(
-                productId = item.productId,
+                productId = item.productId ?: unlinkedUiId(item.barMenuItemId),
                 brandId = item.brandId ?: "",
                 displayName = item.productName ?: item.displayName,
-                category = item.category,
+                // The server has only whisky/other here. A specific subtype such
+                // as "맥주" is not persisted by PR #164; never invent it.
+                category = item.category ?: if (item.kind == "whisky") "whisky" else "otherAlcohol",
+                catalogMatched = item.productId != null,
             )
         }.distinctBy { it.productId }
         val mappedBars = barsWithCovers.map(::toBar)
@@ -499,6 +506,9 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         newBrand: MockBrand?, before: MockOwnerSnapshot,
     ) {
         val old = before.menuItems.firstOrNull { it.barMenuItemId == item.barMenuItemId }
+        require(item.options.size in 1..3) {
+            "직접 메뉴 수정은 옵션 1~3개만 지원해요. 기존 옵션은 자동으로 지우지 않습니다."
+        }
         val optionBodies = item.options.map { option ->
             mapOf(
                 "optionLabel" to option.label, "pourMl" to option.pourMl,
@@ -510,62 +520,38 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                 },
             )
         }
-            val version = versionByBar[item.barId]
-            val display = item.displayNameOverride
-                ?: (newProduct ?: before.products.firstOrNull { it.productId == item.productId })?.displayName
-                ?: error("메뉴 이름이 없어요.")
-            if(old != null) {
-                remote.updateMenuItem(item.barId, item.barMenuItemId,
-                    mapOf("menuVersion" to version, "displayName" to display,
-                        "options" to optionBodies))
+        val version = versionByBar[item.barId]
+        val previousProduct = before.products.firstOrNull { it.productId == item.productId }
+        val display = item.displayNameOverride
+            ?: newProduct?.displayName ?: previousProduct?.displayName
+            ?: error("메뉴 이름이 없어요.")
+        val requestedCategory = newProduct?.category ?: previousProduct?.category ?: "whisky"
+        val requestedKind = if (requestedCategory == "whisky") "whisky" else "other"
+        if (old != null) {
+            // §3.14.4 PUT accepts name/options only. Neither kind nor category
+            // can change: changing category requires a separate remove/add UX.
+            val originalKind = if (previousProduct?.category == "whisky") "whisky" else "other"
+            require(requestedKind == originalKind) {
+                "종류 변경은 현재 서버에서 지원하지 않아요. 기존 메뉴를 삭제한 뒤 다시 추가해 주세요."
+            }
+            remote.updateMenuItem(item.barId, item.barMenuItemId,
+                mapOf("menuVersion" to version, "displayName" to display,
+                    "options" to optionBodies))
+        } else {
+            val body = mutableMapOf<String, Any?>(
+                "menuVersion" to version, "displayName" to display,
+                "options" to optionBodies,
+            )
+            if (newProduct != null || item.productId.startsWith("unlinked:")) {
+                // PR #164: owner creates a bar-only menu item. Never send newProduct
+                // or create an unapproved global product/brand.
+                body["kind"] = requestedKind
             } else {
-                val body = mutableMapOf<String, Any?>(
-                    "menuVersion" to version, "displayName" to display,
-                    "options" to optionBodies,
-                )
-                if(newProduct == null) {
-                    body["productId"] = item.productId
-                } else {
-                    val knownBrandId = before.brands.firstOrNull {
-                    it.brandId == newProduct.brandId &&
-                        runCatching { java.util.UUID.fromString(it.brandId) }.isSuccess
-                }?.brandId
-                // Deleted menu rows keep their canonical catalog identities.
-                // Before creating a new brand, resolve an existing canonical
-                // name/alias from the *server* to avoid DUPLICATE_BRAND_FOUND.
-                val brandLabel = newBrand?.name?.trim().orEmpty()
-                val existingBrandId = knownBrandId ?: brandLabel.takeIf {
-                    it.length in 2..100
-                }?.let { requested ->
-                    fun norm(value: String) =
-                        java.text.Normalizer.normalize(value, java.text.Normalizer.Form.NFKC)
-                            .filter(Char::isLetterOrDigit).lowercase()
-                    remote.searchCatalogBrands(requested).firstOrNull { found ->
-                        norm(found.canonicalName) == norm(requested) ||
-                            norm(found.matchedAlias) == norm(requested)
-                    }?.brandId
-                }
-                val brand = if(existingBrandId != null)
-                    mapOf("type" to "existing", "brandId" to existingBrandId)
-                else mapOf("type" to "new",
-                    "canonicalName" to (brandLabel.ifBlank {
-                        error("상품 이름으로 브랜드를 확인하지 못했어요.")
-                    }),
-                    "aliases" to emptyList<Any>())
-                    body["newProduct"] = mapOf(
-                        "brand" to brand,
-                        "product" to mapOf(
-                            "category" to newProduct.category,
-                            "displayName" to newProduct.displayName,
-                            "ageYears" to newProduct.ageYears,
-                            "editionName" to newProduct.editionName,
-                            "abv" to newProduct.abvPercent,
-                        ),
-                        "aliases" to emptyList<Any>(),
-                    )
-                }
-                remote.addMenuItem(item.barId, body)
-            }    }
+                body["productId"] = item.productId
+            }
+            remote.addMenuItem(item.barId, body)
+        }
+    }
 
     /** Manual menu screen awaits the HTTP response before claiming success or closing the editor. */
     suspend fun saveManualMenuItemLive(
