@@ -85,6 +85,8 @@ data class ReviewItemDto(
     val rawText: String,
     val sourceBox: List<Int>? = null,
     val extractedLineType: String,
+    val extractedKind: String? = null,
+    val correctedKind: String? = null,
     val correctedLineType: String? = null,
     val effectiveLineType: String,
     val initialResolutionStatus: String? = null,
@@ -111,6 +113,7 @@ data class ReviewImageDto(
 data class ChangeAfterDto(
     val productId: String? = null,
     val displayName: String? = null,
+    val kind: String = "whisky",
 )
 
 data class ProposedChangeDto(
@@ -156,6 +159,7 @@ data class ReviewResultDto(
     val ignored: Int,
     val createdBrands: Int,
     val createdProducts: Int,
+    val unlinkedWhisky: Int = 0,
 )
 
 data class ReviewAppliedResponseDto(
