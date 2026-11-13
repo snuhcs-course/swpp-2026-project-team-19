@@ -121,6 +121,10 @@ data class ReviewItem(
     val required: Boolean = false,
     val recognizedName: String = name,
     val recognizedOffers: List<RecognizedOffer> = listOf(RecognizedOffer(priceKrw = price.takeIf { it > 0 }?.toInt())),
+    // Production-only signed image URL and normalized extraction box.
+    // Mock scenarios leave them null, retaining their exact visual fixtures.
+    val sourcePhotoUrl: String? = null,
+    val sourceBox: List<Int>? = null,
 )
 
 enum class ReviewModalType { SOURCE_PHOTO, PUBLISH, EXCLUDE }
