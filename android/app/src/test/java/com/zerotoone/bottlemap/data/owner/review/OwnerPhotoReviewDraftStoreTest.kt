@@ -11,9 +11,11 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
+import org.robolectric.annotation.Config
 
 /** Exact version / identity restore contracts for a process-kill proof draft. */
 @RunWith(RobolectricTestRunner::class)
+@Config(sdk = [35])
 class OwnerPhotoReviewDraftStoreTest {
     private fun jwt(subject: String) = "header." + Base64.encodeToString(
         """{"sub":"$subject"}""".toByteArray(Charsets.UTF_8),
