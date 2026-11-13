@@ -275,7 +275,7 @@ internal fun OwnerManualMenuScreen(
         alcoholKind = p?.let(::manualEditorAlcoholKind).orEmpty()
         // Photo-imported listings may contain more than three options. Allow editing
         // the first three without silently dropping any additional persisted ones.
-        val editableLimit = if (category == "위스키") MANUAL_MENU_MAX_OPTIONS else 1
+        val editableLimit = MANUAL_MENU_MAX_OPTIONS
         setOptions(item?.options?.take(editableLimit)?.map(::fromSaved)
             ?: listOf(freshOption()))
         beforePromoOptions = null
@@ -333,14 +333,8 @@ internal fun OwnerManualMenuScreen(
                     linked?.let(::manualEditorAlcoholKind)?.takeIf { it.isNotBlank() })) {
                 "다른 매장에서도 사용하는 상품의 종류는 변경할 수 없어요."
             }
-            // Check the immutable catalog subtype for both new links and edits.
             val linkedCatalog = linked?.takeIf { it.catalogMatched }
-            if (linkedCatalog != null && category == "기타 주류") {
-                require(alcoholKind.trim().takeIf { it.isNotBlank() } ==
-                    manualEditorAlcoholKind(linkedCatalog).trim().takeIf { it.isNotBlank() }) {
-                    "카탈로그 상품의 주류 종류는 변경할 수 없어요."
-                }
-            }
+            // A bar-only category is never a mutation of global Product.category.
             if (category == "기타 주류" && alcoholKind.isBlank()) {
                 // Existing catalog/photo entries may have no Mock-only subtype.
                 // Do not require one unless the owner is adding or changing the type.
@@ -354,8 +348,6 @@ internal fun OwnerManualMenuScreen(
             // entering "맥주" produces a "맥주" group instead of "기타 주류".
             // A linked canonical product's category remains immutable.
             val effectiveCategoryCode = when {
-                category == "기타 주류" && linked?.catalogMatched == true ->
-                    requireNotNull(linked).category
                 category == "기타 주류" ->
                     alcoholKind.trim().ifEmpty { "otherAlcohol" }
                 category in MANUAL_MENU_CATEGORIES -> manualMenuCategoryCode(category)
@@ -364,18 +356,17 @@ internal fun OwnerManualMenuScreen(
                     persisted.category
                 }
             }
-            require(old == null || sameCategory || old.options.size <= 1) {
-                "기존 용량 옵션을 삭제하지 않고 종류를 바꿀 수 없어요."
-            }
-            val editedOptions = (if (whisky) draftOptions else draftOptions.take(1))
+            // Keep all existing servings during per-bar category transitions.
+            // Changing category must never silently discard another price.
+            val editedOptions = draftOptions
                 .mapIndexed { index, draft ->
                     val parsed = toOption(draft, whisky,
                         old?.options?.firstOrNull { it.optionId == draft.id },
-                        preserveOriginalServing = sameCategory)
+                        preserveOriginalServing = sameCategory || !whisky)
                     // Preserve imported serving labels/identity when editing a
                     // single-price category without switching its category.
-                    if (!whisky && sameCategory) {
-                        old?.options?.getOrNull(index)?.let { original ->
+                    if (!whisky) {
+                        old?.options?.firstOrNull { it.optionId == draft.id }?.let { original ->
                             parsed.copy(label = original.label, pourMl = original.pourMl)
                         } ?: parsed
                     } else parsed
@@ -383,7 +374,7 @@ internal fun OwnerManualMenuScreen(
             manualMenuOptionError(editedOptions, effectiveCategoryCode, old?.options.orEmpty())?.let {
                 throw IllegalArgumentException(it)
             }
-            val editableLimit = if (whisky) MANUAL_MENU_MAX_OPTIONS else 1
+            val editableLimit = MANUAL_MENU_MAX_OPTIONS
             val legacyTail = if (old != null && old.options.size > editableLimit) {
                 require(persisted?.let(::manualEditorCategory) == category) {
                     "기존 추가 옵션을 보존하려면 원래 종류로 수정해 주세요."
@@ -391,11 +382,8 @@ internal fun OwnerManualMenuScreen(
                 old.options.drop(editableLimit)
             } else emptyList()
             val options = editedOptions + legacyTail
-            if (old != null && persisted?.catalogMatched == true) {
-                require(manualEditorCategory(persisted) == category) {
-                    "제품 종류를 변경하려면 새 메뉴를 추가해 주세요."
-                }
-            }
+            // A canonical listing can be detached into this bar's local menu
+            // when its category changes; the original Product stays untouched.
             // Distinguish an explicit "아니에요" from an accidental second row.
             // Never infer or assign a canonical ID solely from matching text.
             if (old == null && linked == null) {
@@ -418,6 +406,12 @@ internal fun OwnerManualMenuScreen(
                     displayName = name, category = effectiveCategoryCode,
                     otherAlcoholKind = alcoholKind.trim().takeIf {
                         category == "기타 주류" && it.isNotEmpty() })
+                linked != null && !whisky && linked.catalogMatched ->
+                    MockCatalogProduct(
+                        manualId("local-unverified-"), linked.brandId, name,
+                        category = effectiveCategoryCode, catalogMatched = false,
+                        otherAlcoholKind = alcoholKind.trim().takeIf { it.isNotEmpty() },
+                    )
                 linked != null -> linked
                 else -> {
                     val brandFromName = manualBrandProposal(brands,name,"",null)
@@ -448,17 +442,19 @@ internal fun OwnerManualMenuScreen(
                 bar.barId, p.productId, options, soldOut = old?.soldOut ?: false,
                 displayNameOverride = if ((p.catalogMatched || sharedLocal) &&
                     name != p.displayName) name else null)
-            val stagedProduct = if (products.none { it.productId == p.productId } ||
-                (linked != null && !linked.catalogMatched && !sharedLocal)) p else null
-            // The current API's newProduct path writes directly to the global
-            // catalog. Keep the draft onscreen instead of accidentally submitting
-            // a beer or unapproved whisky as a shared canonical product.
-            // Per-bar pending entries are tracked separately in issue #152.
-            if (viewModel.usesProductionOwnerApi() && old == null && stagedProduct != null) {
-                error = "새 상품은 관리자 승인 후 등록할 수 있어요. " +
-                    "현재는 기존 카탈로그 상품만 매장 메뉴에 추가할 수 있어요."
-                return
+            val detachedCanonical = old != null && persisted?.catalogMatched == true &&
+                (effectiveCategoryCode != persisted.category || persisted.category != "whisky")
+            val stagedProduct = when {
+                detachedCanonical -> p.copy(category = effectiveCategoryCode,
+                    catalogMatched = false, displayName = name)
+                products.none { it.productId == p.productId } ||
+                    (linked != null && !linked.catalogMatched && !sharedLocal) -> p
+                else -> null
             }
+            // The owner API now stores unlinked menu items in bar_local_menu_items.
+            // Whisky remains pending until operator approval; other categories
+            // never enter the global catalog or product search.
+
             if(viewModel.usesProductionOwnerApi()) {
                 saving = true
                 saveScope.launch {
@@ -855,8 +851,7 @@ internal fun OwnerManualMenuScreen(
                                 fontSize = 11.sp)
                         }
                     }
-                    (if (category == "위스키") draftOptions else draftOptions.take(1))
-                        .forEachIndexed { i, d ->
+                    draftOptions.forEachIndexed { i, d ->
                             Column(Modifier.fillMaxWidth().background(V4Color.surface,
                                 RoundedCornerShape(9.dp))
                                 .border(1.dp, V4Color.line, RoundedCornerShape(9.dp))
@@ -915,6 +910,15 @@ internal fun OwnerManualMenuScreen(
                                             testTag = "manual-menu-price-" + i)
                                     }
                                 } else {
+                                    if (draftOptions.size > 1) Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                    ) {
+                                        Text("${i + 1}번 가격", color = V4Color.sub, fontSize = 11.sp)
+                                        Text("제거", Modifier.manualTap {
+                                            setOptions(draftOptions.filterIndexed { j, _ -> j != i })
+                                        }, color = V4Color.primary, fontSize = 11.sp)
+                                    }
                                     V4FormField("판매 가격 (원)", d.price, { v ->
                                         changeOption(i) { it.copy(price = ownerPriceInput(it.price, v)) }
                                     }, keyboardType = KeyboardType.Number,
