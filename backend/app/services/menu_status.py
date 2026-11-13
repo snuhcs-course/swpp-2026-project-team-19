@@ -72,7 +72,10 @@ def confirm_menu(
     board = session.scalar(select(MenuBoard).where(MenuBoard.bar_id == bar_id))
     # Before the version, so a bar without a menu that sends null is told there is nothing to confirm.
     # Sold-out items count: they are still on the menu.
-    if board is None or not board.entries:
+    local_exists = session.scalar(
+        select(BarLocalMenuItem.id).where(BarLocalMenuItem.bar_id == bar_id).limit(1)
+    ) is not None
+    if board is None or (not board.entries and not local_exists):
         raise _no_published_menu()
     check_menu_version(board, menu_version)
     board.confirmed_at = _locked_now(session)
