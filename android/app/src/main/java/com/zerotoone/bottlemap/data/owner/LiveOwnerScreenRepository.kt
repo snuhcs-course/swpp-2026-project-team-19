@@ -12,6 +12,7 @@ import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewRules
 import com.zerotoone.bottlemap.data.owner.review.ReviewVersionConflictException
 import com.zerotoone.bottlemap.data.owner.review.isAppliedReviewImport
 import com.zerotoone.bottlemap.network.MenuImportStatusDto
+import com.zerotoone.bottlemap.network.ProposedChangeDto
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
@@ -57,6 +58,17 @@ internal fun ownerExistingUnlinkedOptions(
  * and the Owner adapter's second preflight GET. Never treat that as a failed
  * validation or submit it a second time.
  */
+/** §8.12 applies a grouped change when ANY of its OCR lines survives.
+ * Older responses may supply only extractedItemId; keep that fallback.
+ */
+internal fun photoImportChangeDecision(
+    change: ProposedChangeDto, publishedIds: Set<String>,
+): String {
+    val ids = change.extractedItemIds.ifEmpty { listOfNotNull(change.extractedItemId) }
+    return if (change.changeType != "remove" && ids.any { it in publishedIds })
+        "apply" else "ignore"
+}
+
 internal fun photoImportNeedsApply(
     response: MenuImportStatusDto, expectedId: String, reviewVersion: Int,
 ): Boolean {
@@ -1035,8 +1047,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         val changes = original.proposedChanges.map { change ->
             com.zerotoone.bottlemap.network.ChangeDecisionDto(
                 changeId = change.changeId,
-                decision = if (change.changeType != "remove" &&
-                    change.extractedItemId in publishedIds) "apply" else "ignore",
+                decision = photoImportChangeDecision(change, publishedIds),
             )
         }
         val result = remote.reviewAndApply(importId,

@@ -243,4 +243,18 @@ class OwnerReviewOptionContractTest {
             "same-import", 3))
     }
 
+    @Test fun groupedProposedChangeAppliesWhenOnlyLaterOcrLineIsPublished() {
+        val grouped = com.zerotoone.bottlemap.network.ProposedChangeDto(
+            changeId = "change-a", changeType = "update", extractedItemId = "line-a",
+            summary = "두 줄 같은 메뉴", decision = "apply",
+            extractedItemIds = listOf("line-a", "line-b"),
+        )
+        assertEquals("apply", photoImportChangeDecision(grouped, setOf("line-b")))
+        assertEquals("ignore", photoImportChangeDecision(grouped, emptySet()))
+        assertEquals("apply", photoImportChangeDecision(
+            grouped.copy(extractedItemIds = emptyList()), setOf("line-a")))
+        assertEquals("ignore", photoImportChangeDecision(
+            grouped.copy(changeType = "remove"), setOf("line-a", "line-b")))
+    }
+
 }

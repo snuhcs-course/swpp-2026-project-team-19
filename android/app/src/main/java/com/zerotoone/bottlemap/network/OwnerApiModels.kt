@@ -124,6 +124,8 @@ data class ProposedChangeDto(
     val after: ChangeAfterDto? = null,
     val summary: String,
     val decision: String,
+    /** §5.4/§8.12: every OCR line grouped into this one proposed change. */
+    val extractedItemIds: List<String> = emptyList(),
 )
 
 data class MenuImportStatusDto(
