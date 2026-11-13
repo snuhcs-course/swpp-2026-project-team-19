@@ -61,9 +61,10 @@ class LivePhotoReviewMappingTest {
         assertEquals(dto.extractedItemId,card.id)
         assertEquals("product-1",card.linkedProductId)
         assertEquals(ReviewMatch.EXACT,card.match)
-        assertEquals(PriceChoice.NONE,card.priceChoice)
-        assertEquals(12000.0,card.oldPrice!!,0.0)
-        assertEquals(15000.0,card.photoPrice!!,0.0)
+        assertEquals(PriceChoice.PHOTO,card.priceChoice)
+        assertNull(card.oldPrice)
+        assertEquals(listOf(12000,15000),
+            card.priceCandidates.map { it.priceKrw }.sorted())
         assertEquals(1,PhotoReviewRules.stats(state).pending.size)
         assertEquals(30.0,card.volume,0.0)
         assertEquals(30.0,state.defaultPour,0.0)
@@ -76,13 +77,14 @@ class LivePhotoReviewMappingTest {
         val shot=item(options=listOf(ReviewOptionDto(
             "ocr-shot",1,"샷",30,15000)))
         val otherServing=mapServerPhotoReview(response(shot),saved).items.single()
-        assertEquals(12000.0,otherServing.oldPrice!!,0.0)
-        assertEquals(PriceChoice.NONE,otherServing.priceChoice)
+        assertEquals(listOf(12000,15000),
+            otherServing.priceCandidates.map { it.priceKrw }.sorted())
+        assertEquals(1,com.zerotoone.bottlemap.ui.owner.review.PhotoReviewRules.pendingPriceServings(otherServing).size)
         val glass=shot.copy(options=listOf(ReviewOptionDto(
             "ocr-glass",1,"잔",30,15000)))
         val sameServing=mapServerPhotoReview(response(glass),saved).items.single()
-        assertEquals(12000.0,sameServing.oldPrice!!,0.0)
-        assertEquals(PriceChoice.NONE,sameServing.priceChoice)
+        assertEquals(listOf(12000,15000),
+            sameServing.priceCandidates.map { it.priceKrw }.sorted())
     }
 
     @Test fun koreanAndEnglishBottleShareExistingBarPrice() {
@@ -92,13 +94,13 @@ class LivePhotoReviewMappingTest {
         val korean=item(options=listOf(ReviewOptionDto(
             "ocr-korean-bottle",1,"병",null,150000)))
         val normalized=mapServerPhotoReview(response(korean),saved).items.single()
-        assertEquals(120000.0,normalized.oldPrice!!,0.0)
-        assertEquals(PriceChoice.NONE,normalized.priceChoice)
+        assertEquals(listOf(120000,150000),
+            normalized.priceCandidates.map { it.priceKrw }.sorted())
         val english=korean.copy(options=listOf(ReviewOptionDto(
             "ocr-english-bottle",1,"Bottle",null,150000)))
         val matched=mapServerPhotoReview(response(english),saved).items.single()
-        assertEquals(120000.0,matched.oldPrice!!,0.0)
-        assertEquals(PriceChoice.NONE,matched.priceChoice)
+        assertEquals(listOf(120000,150000),
+            matched.priceCandidates.map { it.priceKrw }.sorted())
     }
 
     @Test fun firstOcrOptionIdentitySurvivesReviewAndCanPublishWithoutFalseNewOptionError() {
@@ -139,24 +141,23 @@ class LivePhotoReviewMappingTest {
         assertEquals(12000,decision.correctedOptions!!.single().priceKrw)
     }
 
-    @Test fun fourWhiskyOptionsRemainPublishableAndAreNeverSilentlyDropped() {
+    @Test fun fourWhiskySizesRequireExplicitSelectionOfUpToThree() {
         val options=(1..4).map { option("opt-$it",it*15,10000+it*1000)
             .copy(optionOrder=it) }
         val dto = item(options=options)
         val review = mapServerPhotoReview(response(dto),fixture())
         val card = review.items.single()
-        assertEquals(4,PhotoReviewRules.countOptions(card))
-        // This fixture has a separate old-vs-photo price choice; resolving it
-        // is sufficient, without discarding the valid fourth OCR serving.
-        val confirmed = card.copy(priceChoice=PriceChoice.PHOTO)
+        assertFalse(card.volumeChoicesConfirmed)
+        assertEquals(4,card.volumeChoices.size)
+        val selected=card.copy(chosenVolumeKeys=card.volumeChoices.take(3)
+            .map(PhotoReviewRules::servingKey).toSet())
+        val confirmed = PhotoReviewRules.confirmVolumeChoices(selected)
+        assertEquals(3,PhotoReviewRules.countOptions(confirmed))
         assertTrue(PhotoReviewRules.problems(confirmed).isEmpty())
         val decision = mapConfirmedReviewDecision(confirmed,dto,30.0,emptyMap())
-        assertTrue(decision.excludedOptionIds.isEmpty())
-        assertEquals(listOf("opt-1","opt-2","opt-3","opt-4"),
+        assertEquals(listOf("opt-1","opt-2","opt-3"),
             decision.correctedOptions!!.map { it.optionId })
-        val trimmed = PhotoReviewRules.removeOption(confirmed,0)
-        val trimmedDecision=mapConfirmedReviewDecision(trimmed,dto,30.0,emptyMap())
-        assertEquals(listOf("opt-2"),trimmedDecision.excludedOptionIds)
+        assertEquals(listOf("opt-4"),decision.excludedOptionIds)
     }
 
     @Test fun replacingOcrServingWithManualOneKeepsExclusionAndNewIdentity() {
