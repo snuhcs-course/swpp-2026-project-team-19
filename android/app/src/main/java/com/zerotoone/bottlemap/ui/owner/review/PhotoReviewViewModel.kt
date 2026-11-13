@@ -459,8 +459,8 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
         val x = item(id) ?: return
         val pour = review?.defaultPour ?: return
         when {
-            x.type == ReviewItemType.OTHER -> toast("그 외 메뉴에는 용량 옵션을 사용하지 않아요.")
-            PhotoReviewRules.countOptions(x) >= PhotoReviewRules.MAX_OPTIONS -> toast("용량 옵션은 최대 3개까지 등록해요.")
+            PhotoReviewRules.countOptions(x) >= PhotoReviewRules.MAX_OPTIONS ->
+                toast("검수 옵션은 최대 10개까지 등록할 수 있어요.")
             else -> mutateItem(id) { PhotoReviewRules.addOption(it, pour) }
         }
     }
