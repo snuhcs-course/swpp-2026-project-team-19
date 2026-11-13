@@ -60,6 +60,7 @@ private fun mapServerReviewItem(
     val nonProduct = dto.effectiveLineType !in setOf("product", "unknown")
     val other = nonProduct || !category.equals("whisky", ignoreCase = true)
     val match = when {
+        other -> ReviewMatch.NEW
         dto.initialResolutionStatus == "exact_match" && dto.proposedProductId != null ->
             ReviewMatch.EXACT
         dto.candidates.size > 1 -> ReviewMatch.CANDIDATE
@@ -67,7 +68,7 @@ private fun mapServerReviewItem(
         else -> ReviewMatch.NEW
     }
     val linkedId = dto.proposedProductId.takeIf {
-        match == ReviewMatch.EXACT && !nonProduct
+        match == ReviewMatch.EXACT && !other && !nonProduct
     }
     // Keep the current bar price for each matching catalog product.
     // A candidate linked after initial review still needs a price-choice prompt.
@@ -107,7 +108,7 @@ private fun mapServerReviewItem(
         type = if (other) ReviewItemType.OTHER else ReviewItemType.WHISKY,
         match = match,
         matchConfirmed = linkedId != null,
-        newConfirmed = linkedId != null,
+        newConfirmed = linkedId != null || other,
         linkedProductId = linkedId,
         linkedProductName = selectedCandidate?.displayName.takeIf { linkedId != null },
         newProductName = dto.newProductDraft?.displayName ?: displayName,
@@ -124,7 +125,7 @@ private fun mapServerReviewItem(
         photoPrice = photoPrice,
         priceChoice = if (oldPrice != null && photoPrice != null &&
             oldPrice != photoPrice) PriceChoice.NONE else PriceChoice.PHOTO,
-        nameSaved = linkedId != null || nonProduct,
+        nameSaved = linkedId != null || other || nonProduct,
         excluded = nonProduct,
         raw = dto.rawText,
         photoIndex = photoOrder,
@@ -155,15 +156,23 @@ internal fun mapConfirmedReviewDecision(
     if (card.excluded) return MockReviewDecision(MockDecisionKind.EXCLUDE)
     val raw = extracted.options.sortedBy { it.optionOrder }
     val choices = if (card.type == ReviewItemType.OTHER) {
+        // The non-whisky UI edits the first price only. Do not silently discard
+        // additional OCR prices: the server's final options[] is authoritative.
         listOf(ReviewOption(price = card.price,
-            sourceOptionId = raw.firstOrNull()?.extractedOptionId))
+            sourceOptionId = raw.firstOrNull()?.extractedOptionId)) +
+            raw.drop(1).map { source ->
+                ReviewOption(
+                    price = (source.extractedPriceKrw ?: 0).toDouble(),
+                    sourceOptionId = source.extractedOptionId,
+                )
+            }
     } else PhotoReviewRules.optionSummary(card)
     require(choices.isNotEmpty() && choices.all {
         validPrice(it.price) &&
             (it.bottle || (card.type == ReviewItemType.OTHER || validVolume(it.volume)))
     }) { "${card.name}: 가격과 용량을 확인해 주세요." }
-    require(choices.size <= PhotoReviewRules.MAX_OPTIONS) {
-        "${card.name}: 용량 옵션은 최대 3개입니다. 불필요한 옵션을 제거해 주세요."
+    require(choices.size <= if (card.type == ReviewItemType.OTHER) 10 else PhotoReviewRules.MAX_OPTIONS) {
+        "${card.name}: 검수 옵션 개수를 확인해 주세요."
     }
     val byId = raw.associateBy { it.extractedOptionId }
     require(choices.mapNotNull { it.sourceOptionId }.distinct().size ==
@@ -207,8 +216,10 @@ internal fun mapConfirmedReviewDecision(
             excludedOptionIds = excludedOptionIds,
         )
     }
-    require(card.newConfirmed && card.nameSaved) {
-        "${card.name}: 신규 상품 정보를 확인해 주세요."
+    // A non-whisky item is published to this bar only: neither a product
+    // confirmation nor a catalog search/brand is required by §8.1.
+    require(card.type == ReviewItemType.OTHER || (card.newConfirmed && card.nameSaved)) {
+        "${card.name}: 신규 위스키 이름을 확인해 주세요."
     }
     val sourceDraft = extracted.newProductDraft
     val brandText = (extracted.extractedBrandName
@@ -217,15 +228,18 @@ internal fun mapConfirmedReviewDecision(
     // Brand metadata is optional and never sent to the server for owner adds.
     val category = if (card.type == ReviewItemType.WHISKY) "whisky" else "other"
     val brandId = existingBrands[brandText.lowercase()]
+    val finalName = card.newProductName?.trim()?.takeIf { it.isNotBlank() }
+        ?: card.name.trim()
+    require(finalName.isNotBlank()) { "게시할 메뉴 이름을 입력해 주세요." }
     return MockReviewDecision(
         MockDecisionKind.CREATE_PRODUCT,
         correctedOptions = mapped,
         displayNameOverride = override,
         excludedOptionIds = excludedOptionIds,
         newProduct = MockNewProductDraft(
-            name = card.newProductName?.trim()?.ifBlank { null } ?: card.name.trim(),
+            name = finalName,
             brandId = brandId,
-            brandName = if (brandId == null) brandText else null,
+            brandName = brandText.takeIf { brandId == null && it.isNotBlank() },
             category = category,
             ageYears = sourceDraft?.ageYears,
             editionName = sourceDraft?.editionName,
