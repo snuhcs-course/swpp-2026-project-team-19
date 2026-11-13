@@ -43,6 +43,30 @@ class OwnerManualMenuComposeTest {
         return OwnerMockViewModel(repo)
     }
 
+    @Test fun otherAlcoholTypedKindBecomesMenuCategoryAndBrandFieldIsAbsent() {
+        val vm = OwnerMockViewModel(LocalOwnerMockRepository(
+            InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar())))
+        compose.setContent { MaterialTheme {
+            OwnerManualMenuScreen(vm.state.collectAsState().value, vm, {}, {}, {})
+        } }
+        compose.onNodeWithTag("manual-menu-add").performClick()
+        compose.onNodeWithTag("manual-menu-brand").assertDoesNotExist()
+        compose.onNodeWithText("위스키", substring = false).performClick()
+        compose.onNodeWithText("기타 주류", substring = false).performClick()
+        compose.onNodeWithTag("manual-menu-name").performTextReplacement("수제 맥주")
+        compose.onNodeWithTag("manual-menu-alcohol-kind").performTextReplacement("맥주")
+        compose.onNodeWithTag("manual-menu-price-0").performScrollTo()
+            .performTextReplacement("9000")
+        compose.onNodeWithTag("manual-menu-save").performScrollTo().performClick()
+        compose.runOnIdle {
+            val snapshot = (vm.state.value as MockOwnerLoadState.Ready).snapshot
+            assertEquals("맥주", snapshot.products.single().category)
+            assertEquals("맥주", ownerV4Category(snapshot.products.single()))
+            assertEquals(9000, snapshot.menuItems.single().options.single().priceKrw)
+        }
+        compose.onNodeWithText("맥주", substring = false).performScrollTo().assertIsDisplayed()
+    }
+
     @Test fun selectedRowKeepsFixedHeightAndEditReturnsToUnselectedList() {
         val vm = fixture()
         compose.setContent {
