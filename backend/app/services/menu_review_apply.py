@@ -346,10 +346,14 @@ def _apply_once(
     old_item_ids = {entry.bar_menu_item_id for entry in board.entries} if board is not None else set()
     _, items = write_board(session, board, menu_import.bar_id, menu_import.id, plan.entries, published_at=published_at)
     _settle_checks(session, menu_import, review, plan, items, old_item_ids)
-    # An added line now has its bar menu item; record it, so the result can count unlinked items.
+    # Record the bar menu item each added or updated line was published as: an added line's item exists
+    # only now, and a takeover may have moved the line to the item of a product the bar sold before. The
+    # result counts unlinked items from these rows (spec 8.8).
     item_of_line = {e.extracted_item_id: item.id for e, item in zip(plan.entries, items) if e.extracted_item_id}
     changes = [
-        replace(c, bar_menu_item_id=item_of_line[c.extracted_item_id]) if c.change_type == MenuChangeType.ADD else c
+        replace(c, bar_menu_item_id=item_of_line[c.extracted_item_id])
+        if c.change_type in (MenuChangeType.ADD, MenuChangeType.UPDATE)
+        else c
         for c in plan.changes
     ]
     _record_changes(session, menu_import, review, changes)

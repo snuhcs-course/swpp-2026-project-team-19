@@ -249,8 +249,10 @@ def test_a_takeover_uses_the_item_of_a_product_the_bar_sold_before(
             3: {"action": "select_existing_product", "productId": str(product.id)},
         },
     )
-    apply(client, menu_import.id, body, operator)
+    result = apply(client, menu_import.id, body, operator)
 
+    # Linked, so not counted as waiting for an operator (spec 8.8).
+    assert result["result"]["unlinkedWhisky"] == 0
     db_session.expire_all()
     menu = client.get(f"/api/bars/{sample.bar.id}/menu", headers=operator).json()["items"]
     assert [(i["barMenuItemId"], i["soldOut"]) for i in menu][-1] == (str(sold_before.id), True)
@@ -371,3 +373,25 @@ def test_an_ignored_change_still_skips_a_line_kept_as_proposed(client, db_sessio
     # The 12 keeps its old prices, and the unknown line, published without a product as proposed, is skipped.
     assert (result["result"]["added"], result["result"]["updated"], result["result"]["unlinkedWhisky"]) == (0, 0, 0)
     assert [(name, prices) for name, _, _, prices in menu_items(client, sample.bar)] == [("글렌피딕 12년", [8000, 17000])]
+
+
+def test_a_corrected_spelling_of_an_unlinked_item_is_published(
+    client, db_session, sample, operator, glenfiddich, published
+):
+    menu_import, items, changes = upload_again(client, db_session, sample.bar, operator)
+
+    body = accept_all(
+        items,
+        changes,
+        {
+            1: {"action": "select_existing_product", "productId": str(glenfiddich[12].id)},
+            # The same name key and options, a different spelling.
+            3: {"action": "publish_without_product", "kind": "whisky", "correctedProductName": "UnknownDistillery 25"},
+        },
+    )
+    result = apply(client, menu_import.id, body, operator)
+
+    assert result["result"]["updated"] == 1
+    assert menu_items(client, sample.bar)[-1][0] == "UnknownDistillery 25"
+    db_session.expire_all()
+    assert db_session.get(BarMenuItem, published.id).name_key == "unknowndistillery25"

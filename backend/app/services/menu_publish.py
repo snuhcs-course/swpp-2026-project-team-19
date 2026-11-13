@@ -90,6 +90,9 @@ class Proposal:
     options: tuple[PublishedOption, ...]
     kind: MenuItemKind = MenuItemKind.WHISKY
     name_key: str | None = None
+    # The reviewer sent the menu name (correctedProductName); it replaces the board's name even when the
+    # options are the same (spec 8.7). A name only read differently by the AI keeps the board's name.
+    name_corrected: bool = False
 
     @property
     def key(self) -> ItemKey:
@@ -152,6 +155,7 @@ def plan_publish(
             and taken is None
             and on_board.kind == proposal.kind
             and _same_options(on_board.options, proposal.options)
+            and not (proposal.name_corrected and proposal.display_name != on_board.display_name)
         )
         entry = on_board if unchanged else BoardEntry(
             proposal.product_id,
@@ -238,6 +242,7 @@ def proposals_from_review(session: Session, review: ValidatedReview, catalog: Ca
         options = tuple(
             PublishedOption(o.label, o.pour_ml, o.price_krw, o.option.id if o.option else None) for o in entry.options
         )
+        name_corrected = entry.decision.correctedProductName is not None
         if entry.is_unlinked:
             proposals.append(
                 Proposal(
@@ -247,6 +252,7 @@ def proposals_from_review(session: Session, review: ValidatedReview, catalog: Ca
                     options=options,
                     kind=MenuItemKind(entry.decision.kind),
                     name_key=name_key(entry.menu_name),
+                    name_corrected=name_corrected,
                 )
             )
             continue
@@ -257,6 +263,7 @@ def proposals_from_review(session: Session, review: ValidatedReview, catalog: Ca
                 product_id=product_id,
                 display_name=entry.menu_name or product_names[product_id],
                 options=options,
+                name_corrected=name_corrected,
             )
         )
     return proposals

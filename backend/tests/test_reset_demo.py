@@ -97,8 +97,8 @@ def bar_photo() -> bytes:
 
 
 def rehearse(client, session, operator, seeds):
-    """What a rehearsal leaves: an applied import that created a brand and product and
-    replaced the Seorosang menu, a failed import at another bar, an alias added to a seed
+    """What a rehearsal leaves: an applied import that created a brand and product, published a whisky
+    without a product (with its operator check) and replaced the Seorosang menu, a failed import at another bar, an alias added to a seed
     product, an edited seed product, a seed bar's details, hours, closure and photo, and a bar that
     is not in the seed, with hours, a closure and a photo of its own."""
     bar_ids = {b["key"]: UUID(b["id"]) for b in seeds.bars["bars"]}
@@ -108,6 +108,8 @@ def rehearse(client, session, operator, seeds):
     menu_import = session.get(MenuImport, import_id)
     items = load_items(session, menu_import)
     created = next(i for i in items if i.raw_text.startswith("Unknown Distillery"))
+    # Published without a product, so it leaves an operator check whose reason points at this import.
+    unlinked = next(i for i in items if i.extracted_line_type == LineType.PRODUCT and i.id != created.id)
     body = {
         "reviewVersion": 1,
         "itemDecisions": [
@@ -130,6 +132,15 @@ def rehearse(client, session, operator, seeds):
                 ],
             }
             if i.id == created.id
+            else {
+                "action": "publish_without_product",
+                "extractedItemId": str(i.id),
+                "finalLineType": "product",
+                "kind": "whisky",
+                "correctedProductName": "리허설 위스키",
+                "options": [{"priceKrw": 10000}],
+            }
+            if i.id == unlinked.id
             else {"action": "reject", "extractedItemId": str(i.id), "finalLineType": "product"}
             for i in items
         ],
@@ -207,6 +218,7 @@ def test_plan_counts_without_changing_anything(client, db_session, image_storage
     assert counts["bar temporary closures"] == 2
     assert counts["bar photos"] == 2
     assert counts["bars with a description, default pour or tags (cleared)"] == 2
+    assert counts["menu item checks"] == 1
     # The created product's own aliases and the one added to a seed product.
     assert counts["product aliases not in the seed"] >= 2
 

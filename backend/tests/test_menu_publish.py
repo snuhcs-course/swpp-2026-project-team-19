@@ -343,3 +343,16 @@ def test_a_product_the_bar_sold_before_gets_its_item_back(client, db_session, im
     )
 
     assert [item.id for item in items] == [old.id]
+
+
+def test_a_corrected_name_replaces_the_boards_name_even_with_the_same_options():
+    """A name the AI read differently keeps the board's; a name the reviewer sent replaces it (spec 8.7)."""
+    a = on_board(A, 10000)
+    read = Proposal(uuid4(), A, "menu read differently", (opt(10000),))
+    corrected = replace(read, name_corrected=True)
+    same_name = replace(corrected, display_name=a.display_name)
+
+    assert (plan([read], [a]).changes, plan([read], [a]).entries[0].display_name) == ([], a.display_name)
+    assert change_types(plan([corrected], [a])) == [MenuChangeType.UPDATE]
+    assert plan([corrected], [a]).entries[0].display_name == "menu read differently"
+    assert plan([same_name], [a]).changes == []
