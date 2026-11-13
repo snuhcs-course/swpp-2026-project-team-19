@@ -116,11 +116,11 @@ fun UxSecondaryButton(text: String, onClick: () -> Unit, modifier: Modifier = Mo
     }
 }
 
-/** `.toast`: bottom message, 18dp from each side and 30dp from the bottom. */
+/** Top banner for transient feedback, clear of the system status/app toolbar. */
 @Composable
 fun UxToast(message: String, modifier: Modifier = Modifier) {
     Row(
-        modifier.fillMaxWidth().padding(start = 18.dp, end = 18.dp, bottom = 30.dp)
+        modifier.fillMaxWidth().padding(start = 18.dp, end = 18.dp, top = 58.dp)
             .background(UxColor.toastBg, RoundedCornerShape(10.dp))
             .border(1.dp, UxColor.toastBorder, RoundedCornerShape(10.dp))
             .padding(horizontal = 14.dp, vertical = 12.dp)
