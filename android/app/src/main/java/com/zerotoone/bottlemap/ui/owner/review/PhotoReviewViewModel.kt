@@ -90,7 +90,7 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
         val changed = change(before)
         var show = changed.show
         val items = changed.items.map { x ->
-            val group = PhotoReviewRules.itemGroup(x)
+            val group = PhotoReviewRules.itemGroup(x, changed)
             if (oldGroups[x.id] != null && oldGroups[x.id] != group) {
                 if (group != ReviewGroup.EXCLUDED) show = show.with(group, true)
                 x.copy(expanded = false)
