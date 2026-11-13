@@ -1003,7 +1003,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                 "새 위스키 ${it}개가 매장 메뉴에 게시됐어요. 운영자 확인 후 상품 검색에 나타나요."
             },
             refreshError?.let { "게시 후 최신 메뉴를 새로고침하지 못했어요." },
-        ).joinToString("\\n").ifEmpty { null }
+        ).joinToString("\n").ifEmpty { null }
         return result.result.added
     }
 
