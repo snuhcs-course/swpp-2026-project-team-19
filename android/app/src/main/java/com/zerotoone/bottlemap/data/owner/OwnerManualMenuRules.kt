@@ -55,8 +55,8 @@ fun manualMenuMatches(
 }
 fun manualMenuOptionError(options: List<MockMenuOption>, category: String, original: List<MockMenuOption> = emptyList()): String? {
     if (options.isEmpty() || options.size > MANUAL_MENU_MAX_OPTIONS) return "가격 옵션은 1~3개여야 해요."
-    if (manualMenuCategoryLabel(category) != "위스키" && options.size != 1)
-        return "이 메뉴는 가격을 하나만 등록할 수 있어요."
+    // All bar-local categories can carry 1..3 distinct priced servings.
+    // The backend validates the same cap regardless of catalog eligibility.
     if (options.any { option -> option.priceKrw !in 1..MAX_OWNER_MENU_PRICE_KRW &&
             original.none { it.optionId == option.optionId && it.priceKrw == option.priceKrw } })
         return "가격은 1원 이상, 1억 원 미만이어야 해요."
