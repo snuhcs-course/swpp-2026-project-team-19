@@ -5,13 +5,15 @@ import java.util.Locale
 /**
  * BottleMap Android serving-name policy.
  *
- * The UI always shows "Bottle". During Owner photo review, both Korean "병"
- * and English "Bottle" mean the same bottle serving, whereas 30ml "잔"
- * and 30ml "샷" remain independently priced servings.
+ * The Owner distinguishes servings by volume, NOT the OCR's word for a
+ * serving. Thus "잔 30ml" and "샷 30ml" have the same identity, while 60ml
+ * is separate. Korean "병" and English "Bottle" are one bottle identity,
+ * regardless of a printed bottle capacity.
  *
- * Backend #164 still stores the submitted literal optionLabel; new Android
- * review requests canonicalize bottle to "Bottle" without changing OCR
- * extractedOptionId or editing existing persisted rows behind the Owner's back.
+ * Backend #164 still keys options by (optionLabel, pourMl). The Android
+ * review serializer uses a null optionLabel for sized non-bottle servings
+ * so fresh Android-reviewed options have one stable server representation.
+ * No existing server rows are migrated or rewritten.
  */
 private val bottleWithSize = Regex(
     """^(?:병|bottle)\s*\(?\s*\d{1,4}(?:\.\d+)?\s*(?:ml|l)\s*\)?$""",
@@ -28,8 +30,11 @@ internal fun canonicalServingLabel(label: String?): String? {
     return if (isBottleServingLabel(trimmed)) "Bottle" else trimmed
 }
 
-internal fun servingIdentityKey(pourMl: Int?, label: String?): String {
-    val normalized = canonicalServingLabel(label).orEmpty().lowercase(Locale.ROOT)
-    val volume = if (normalized == "bottle") null else pourMl
-    return "label:$normalized|ml:${volume ?: "none"}"
+/** One non-bottle option per ml, independent of any OCR words.
+ * An unspecified pour cannot be distinguished by an arbitrary label.
+ */
+internal fun servingIdentityKey(pourMl: Int?, label: String?): String = when {
+    isBottleServingLabel(label) -> "bottle"
+    pourMl != null -> "ml:$pourMl"
+    else -> "ml:unspecified"
 }
