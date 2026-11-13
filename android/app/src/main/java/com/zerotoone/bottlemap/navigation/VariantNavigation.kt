@@ -161,6 +161,11 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                             navController.navigate(if(status==MockImportStatus.READY_FOR_REVIEW)
                                 OwnerPage.MGR_REVIEW.route else OwnerPage.MGR_JOB.route)
                         },
+                        // Mock v20 is intentionally preview-only until the review
+                        // repository is backed by agreed API contracts.
+                        onReviewPreview = if (BuildConfig.DEBUG) {
+                            { navController.navigate(TabRoutes.devPhotoReview("basic")) }
+                        } else null,
                     )
                     OwnerPage.MGR_PHOTO -> OwnerMenuPhotoSelectionScreen(
                         state = mockState, viewModel = data,
