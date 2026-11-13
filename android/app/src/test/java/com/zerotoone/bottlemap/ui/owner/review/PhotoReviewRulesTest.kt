@@ -78,6 +78,35 @@ class PhotoReviewRulesTest {
         assertEquals(listOf(ReviewIssue.OPTION), PhotoReviewRules.problems(eleven))
     }
 
+    @Test fun samePourWithDifferentOcrLabelsIsNotAnOptionCollision() {
+        val first=ReviewItem(id="labelled",name="위스키",
+            volume=30.0,price=14000.0,
+            primaryOptionLabel="잔",
+            options=listOf(ReviewOption(30.0,16000.0,label="샷")))
+        assertTrue(PhotoReviewRules.problems(first).isEmpty())
+        val duplicate=first.copy(options=listOf(ReviewOption(30.0,16000.0,label="잔")))
+        assertTrue(ReviewIssue.OPTION in PhotoReviewRules.problems(duplicate))
+    }
+
+    @Test fun otherToWhiskyRetainsSourceIdsPricesAndLabels() {
+        val other=ReviewItem(id="other-to-whisky",name="위스키 아닌 것으로 인식됨",
+            type=ReviewItemType.OTHER,price=9000.0,volume=Double.NaN,
+            primarySourceOptionId="ocr-first",primaryOptionLabel="잔",
+            options=listOf(ReviewOption(Double.NaN,17000.0,
+                sourceOptionId="ocr-second",label="샷")))
+        val whisky=PhotoReviewRules.reclassify(other,35.0)
+        val final=PhotoReviewRules.optionSummary(whisky)
+        assertEquals(ReviewItemType.WHISKY,whisky.type)
+        assertEquals(listOf("ocr-first","ocr-second"),final.map {it.sourceOptionId})
+        assertEquals(listOf("잔","샷"),final.map {it.label})
+        assertEquals(listOf(9000.0,17000.0),final.map {it.price})
+        assertEquals(35.0,final[0].volume,0.0)
+        assertEquals(35.0,final[1].volume,0.0)
+        val undone=PhotoReviewRules.reclassify(whisky,35.0)
+        assertEquals(ReviewItemType.OTHER,undone.type)
+        assertEquals(PhotoReviewRules.optionSummary(other),PhotoReviewRules.optionSummary(undone))
+    }
+
     @Test fun zeroOptionLineAsksForAPrice() {
         val x = item(MockPhotoReviewScenario.ZERO_OPTION, "glen15")
         assertEquals(listOf(ReviewIssue.PRICE), PhotoReviewRules.problems(x))
