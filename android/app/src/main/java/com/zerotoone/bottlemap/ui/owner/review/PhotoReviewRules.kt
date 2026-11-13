@@ -21,6 +21,19 @@ object PhotoReviewRules {
      * Returns the conflicting serving labels for each OCR line (including a
      * separate photo). No server model or catalog data is modified.
      */
+    /**
+     * Merged Backend #164 deduplicates proposals by canonical productId and
+     * keeps only the first line's options. Until A4 adds server-side merge,
+     * never silently publish two separate OCR lines for one catalog whisky:
+     * ask the owner to consolidate prices and exclude extra lines.
+     */
+    fun duplicateCatalogProductLines(state: PhotoReviewState): Set<String> =
+        state.items.filter { !it.excluded && it.type == ReviewItemType.WHISKY &&
+            !it.linkedProductId.isNullOrBlank()
+        }.groupBy { it.linkedProductId }
+            .values.filter { it.size > 1 }
+            .flatMap { group -> group.map { it.id } }.toSet()
+
     fun duplicatePhotoPriceConflicts(state: PhotoReviewState): Map<String, Set<String>> {
         data class Entry(val itemId: String, val price: Double, val servingLabel: String)
         val buckets = mutableMapOf<String, MutableList<Entry>>()
@@ -81,8 +94,12 @@ object PhotoReviewRules {
         }
         if (x.typo && !x.nameSaved) p += ReviewIssue.NAME
         if (x.name.isBlank() && ReviewIssue.NAME !in p) p += ReviewIssue.NAME
-        if (state != null && x.id in duplicatePhotoPriceConflicts(state))
-            p += ReviewIssue.DUPLICATE_PRICE
+        if (state != null) {
+            if (x.id in duplicatePhotoPriceConflicts(state))
+                p += ReviewIssue.DUPLICATE_PRICE
+            if (x.id in duplicateCatalogProductLines(state))
+                p += ReviewIssue.DUPLICATE_PRODUCT
+        }
         return p.distinct()
     }
 
