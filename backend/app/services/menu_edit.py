@@ -15,7 +15,7 @@ the lock. Nothing is retried on the caller's behalf except a write conflict (app
 """
 
 from datetime import datetime
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
@@ -184,7 +184,7 @@ def _local_options(options: list[MenuOptionInput]) -> list[dict]:
     return [
         {
             **option.model_dump(mode="json"),
-            "menuEntryOptionId": str(__import__("uuid").uuid4()),
+            "menuEntryOptionId": str(uuid4()),
             "sortOrder": index,
         }
         for index, option in enumerate(options, start=1)
@@ -250,6 +250,14 @@ def _add_once(
 ) -> BarMenuResponse:
     board = _open_board(session, principal, bar_id, body.menuVersion)
     if body.localItem is not None:
+        existing_local = session.scalars(
+            select(BarLocalMenuItem).where(BarLocalMenuItem.bar_id == bar_id)
+        ).all()
+        for previous in existing_local:
+            if normalize(previous.display_name) == normalize(body.displayName):
+                raise ApiError(409, "MENU_ITEM_EXISTS",
+                    "이미 등록한 메뉴예요. 기존 메뉴를 수정해 주세요.",
+                    details={"barMenuItemId": str(previous.id)})
         created = board is None
         if created:
             board = MenuBoard(bar_id=bar_id, published_at=func.now(), version=1)
@@ -348,6 +356,10 @@ def _reset_once(
     session: Session, principal: Principal, bar_id: UUID, body: MenuResetRequest, base_url: str
 ) -> BarMenuResponse:
     board = _open_board(session, principal, bar_id, body.menuVersion)
+    for local in session.scalars(
+        select(BarLocalMenuItem).where(BarLocalMenuItem.bar_id == bar_id)
+    ).all():
+        session.delete(local)
     if board is None:
         # Nothing to empty: the answer is the menu as it is, with nothing changed.
         return get_bar_menu(session, str(bar_id), can_manage=lambda bar: True, base_url=base_url)
