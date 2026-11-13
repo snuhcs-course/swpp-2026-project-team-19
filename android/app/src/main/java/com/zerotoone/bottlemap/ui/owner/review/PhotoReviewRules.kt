@@ -97,6 +97,13 @@ object PhotoReviewRules {
             val entries = optionSummary(x)
             if (entries.isEmpty() || entries.any { !validPrice(it.price) }) p += ReviewIssue.PRICE
             if (entries.size > MAX_OPTIONS) p += ReviewIssue.OPTION
+            // The server considers (optionLabel, pourMl) the stable serving
+            // identity even for 'other'. Detect duplicate OCR labels before
+            // submitting; the owner can remove an unsupported duplicate.
+            val keys = entries.map {
+                "${it.label.orEmpty().trim().lowercase()}:${if (validVolume(it.volume)) it.volume.toInt() else "none"}"
+            }
+            if (keys.distinct().size != keys.size) p += ReviewIssue.OPTION
         }
         if (x.typo && !x.nameSaved) p += ReviewIssue.NAME
         if (x.name.isBlank() && ReviewIssue.NAME !in p) p += ReviewIssue.NAME
