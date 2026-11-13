@@ -399,7 +399,12 @@ private fun IssueRowFor(x: ReviewItem, issue: ReviewIssue, vm: PhotoReviewViewMo
                     testTag = "review-conflict-$id-${p.toLong()}")
             }
         }
-        ReviewIssue.PRICE -> IssueRow("가격을 입력해 주세요") {
+        ReviewIssue.PRICE -> if (x.type == ReviewItemType.OTHER &&
+            x.options.any { !validPrice(it.price) }
+        ) IssueRow("모든 가격 옵션을 확인해 주세요") {
+            ReviewChoice("옵션 수정", { vm.toggleExpanded(id) },
+                testTag = "review-other-option-edit-$id")
+        } else IssueRow("가격을 입력해 주세요") {
             ReviewField(x.draftPriceText, { vm.typeInlinePrice(id, it) },
                 Modifier.widthIn(min = 80.dp, max = 126.dp).testTag("review-price-input-$id"),
                 placeholder = "예: 15,000", fontSize = 12f, minHeight = 39.dp, radius = 9.dp,
@@ -417,7 +422,7 @@ private fun IssueRowFor(x: ReviewItem, issue: ReviewIssue, vm: PhotoReviewViewMo
         }
         ReviewIssue.OPTION -> IssueRow(
             if (PhotoReviewRules.countOptions(x) > PhotoReviewRules.MAX_OPTIONS)
-                "옵션은 최대 3개까지만 게시할 수 있어요. 남길 옵션 3개를 선택해 주세요."
+                "검수 옵션은 최대 10개까지 게시할 수 있어요."
             else "용량 옵션을 확인해 주세요"
         ) {
             ReviewChoice("옵션 수정", { vm.toggleExpanded(id) }, testTag = "review-option-edit-$id")
@@ -526,14 +531,46 @@ private fun ReviewDetails(state: PhotoReviewState, x: ReviewItem, vm: PhotoRevie
             if (x.detailNameEditing) Text("수정한 이름은 저장해야 적용돼요.", style = uxText(11f, 400, UxColor.gold))
         }
         if (other) {
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text("가격 (원)", style = uxText(11f, 400, UxColor.muted))
-                ReviewField(PhotoReviewRules.optionFieldText(x, OptionField.PRICE, null),
-                    { vm.typeOptionField(x.id, OptionField.PRICE, null, it) },
-                    Modifier.fillMaxWidth().testTag("review-other-price-${x.id}"), placeholder = "가격", minHeight = 43.dp,
-                    radius = 9.dp, border = UxColor.line, paddingStart = 10.dp, paddingEnd = 10.dp,
-                    keyboardType = KeyboardType.Number, onFocusLost = vm::commitOptionField,
-                    onImeAction = vm::commitOptionField)
+            val entries = PhotoReviewRules.optionSummary(x)
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text("가격 옵션", style = uxText(12f, 750))
+                    Text("${entries.size}/${PhotoReviewRules.MAX_OPTIONS}",
+                        style = uxText(11f, 400, UxColor.sub))
+                }
+                // Show a primary price input even for a zero-option OCR line.
+                if (x.primaryHasOption || entries.isEmpty()) {
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically) {
+                        ReviewField(PhotoReviewRules.optionFieldText(x, OptionField.PRICE, null),
+                            { vm.typeOptionField(x.id, OptionField.PRICE, null, it) },
+                            Modifier.weight(1f).testTag("review-other-price-${x.id}"),
+                            placeholder = "가격 (원)", minHeight = 43.dp, radius = 9.dp,
+                            border = UxColor.line, paddingStart = 10.dp, paddingEnd = 10.dp,
+                            keyboardType = KeyboardType.Number, onFocusLost = vm::commitOptionField,
+                            onImeAction = vm::commitOptionField)
+                        if (x.primaryHasOption) ReviewChoice("제거",
+                            { vm.removeOption(x.id, null) }, testTag = "review-other-remove-${x.id}-main")
+                    }
+                }
+                x.options.forEachIndexed { index, _ ->
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically) {
+                        ReviewField(PhotoReviewRules.optionFieldText(x, OptionField.PRICE, index),
+                            { vm.typeOptionField(x.id, OptionField.PRICE, index, it) },
+                            Modifier.weight(1f).testTag("review-other-price-${x.id}-${index}"),
+                            placeholder = "가격 ${index + 2} (원)", minHeight = 43.dp, radius = 9.dp,
+                            border = UxColor.line, paddingStart = 10.dp, paddingEnd = 10.dp,
+                            keyboardType = KeyboardType.Number, onFocusLost = vm::commitOptionField,
+                            onImeAction = vm::commitOptionField)
+                        ReviewChoice("제거", { vm.removeOption(x.id, index) },
+                            testTag = "review-other-remove-${x.id}-${index}")
+                    }
+                }
+                if (entries.size < PhotoReviewRules.MAX_OPTIONS) ReviewChoice(
+                    "＋ 가격 옵션 추가", { vm.addOption(x.id) },
+                    modifier = Modifier.fillMaxWidth(),
+                    testTag = "review-other-add-option-${x.id}")
             }
         } else {
             OptionEditor(state, x, vm)
