@@ -57,6 +57,8 @@ import com.zerotoone.bottlemap.ui.common.UxSecondaryButton
 import com.zerotoone.bottlemap.ui.common.UxToast
 import com.zerotoone.bottlemap.ui.common.quietClick
 import com.zerotoone.bottlemap.ui.common.uxText
+import com.zerotoone.bottlemap.ui.owner.MenuPhotoSteps
+import com.zerotoone.bottlemap.ui.owner.V4Toolbar
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -235,38 +237,16 @@ private fun buildRows(s: PhotoReviewState): List<ReviewRow> {
     return rows
 }
 
-/** v20 HTML: back-only toolbar and photo/analysis/review/publish stepper. */
+/** Exact same toolbar, spacing, rules and typography as Photo Upload and Read.
+ * Only the highlighted step changes to "확인" (step 2).
+ */
 @Composable
 private fun ReviewAppBar(onBack: () -> Unit) {
     Column(Modifier.fillMaxWidth().background(UxColor.bg)) {
-        Row(
-            // HTML back button uses 20dp container padding + -8dp margin.
-            // With Android's 48dp touch target, 10dp start padding places
-            // the 30dp icon at the same x=19dp as the 390px prototype.
-            Modifier.fillMaxWidth().height(59.dp).padding(start = 10.dp, end = 20.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Box(
-                Modifier.size(48.dp).quietClick(onClick = onBack)
-                    .semantics { contentDescription = "뒤로 가기" }
-                    .testTag("review-back"),
-                contentAlignment = Alignment.Center,
-            ) { BmLineIcon(BmLineIconId.BACK, 30.dp, UxColor.text) }
-        }
-        Row(
-            Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 7.dp, bottom = 15.dp)
-                .testTag("review-steps"),
-            horizontalArrangement = Arrangement.spacedBy(7.dp),
-        ) {
-            listOf("사진 올리기", "읽기", "확인", "더하기").forEachIndexed { index, label ->
-                val highlight = index <= 2
-                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(7.dp)) {
-                    Box(Modifier.fillMaxWidth().height(5.dp)
-                        .background(if(highlight) UxColor.gold else UxColor.line, RoundedCornerShape(6.dp)))
-                    Text(label, style = uxText(11f, if(index == 2) 750 else 400,
-                        if(index == 2) UxColor.gold else UxColor.muted, lineHeight = 1.55f))
-                }
-            }
+        Box(Modifier.testTag("review-back")) { V4Toolbar(null, onBack) }
+        Column(Modifier.fillMaxWidth().padding(horizontal = 18.dp)
+            .testTag("review-steps")) {
+            MenuPhotoSteps(step = 2)
         }
     }
 }
@@ -422,15 +402,8 @@ private fun ReviewModalLayer(s: PhotoReviewState, vm: PhotoReviewViewModel) {
         ReviewModalType.SOURCE_PHOTO -> SourcePhotoModal(s, modal, vm)
         ReviewModalType.PUBLISH -> {
             val stats = PhotoReviewRules.stats(s)
-            val summary = PhotoReviewRules.publishSummary(s)
-            val lines = buildList {
-                add("위스키 ${stats.ready.size} · 그 외 메뉴 ${stats.other.size} · 제외 ${stats.excluded.size}")
-                if (summary.changedPrices > 0) add("기존 가격 변경 ${summary.changedPrices}건")
-                if (summary.unlinkedNew > 0) add("연결 없이 등록할 메뉴 ${summary.unlinkedNew}건")
-                if (summary.merged > 0) add("여러 줄을 합친 위스키 ${summary.merged}건")
-                if (summary.operatorChecks > 0) add("게시 후 운영자 확인 ${summary.operatorChecks}건")
-            }
-            BottomSheetLayer("이대로 게시할까요?", lines.joinToString("\n"), "게시하기", vm::dismissModal, vm::confirmPublish,
+            val summary = "위스키 ${stats.ready.size} · 그 외 메뉴 ${stats.other.size} · 제외 ${stats.excluded.size}"
+            BottomSheetLayer("이대로 게시할까요?", summary, "게시하기", vm::dismissModal, vm::confirmPublish,
                 "review-publish-sheet")
         }
         ReviewModalType.EXCLUDE -> BottomSheetLayer("이번 게시에서 제외할까요?", "기존에 등록된 메뉴는 삭제하지 않아요.", "제외",
