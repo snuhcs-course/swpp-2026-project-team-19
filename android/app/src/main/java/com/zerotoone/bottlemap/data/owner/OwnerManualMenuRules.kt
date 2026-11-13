@@ -60,9 +60,8 @@ fun manualMenuOptionError(options: List<MockMenuOption>, category: String, origi
     if (options.any { option -> option.priceKrw !in 1..MAX_OWNER_MENU_PRICE_KRW &&
             original.none { it.optionId == option.optionId && it.priceKrw == option.priceKrw } })
         return "가격은 1원 이상, 1억 원 미만이어야 해요."
-    if (manualMenuCategoryLabel(category) == "위스키" && options.any {
-            it.pourMl != null && it.pourMl !in 1..32767
-        }) return "용량을 입력하거나 Bottle 판매를 선택해 주세요."
+    if (options.any { it.pourMl != null && it.pourMl !in 1..32767 })
+        return "용량은 1~32767ml 사이여야 해요."
     if (options.any { option -> option.discount?.discountedPriceKrw?.let { price ->
             price > MAX_OWNER_MENU_PRICE_KRW &&
                 original.none { it.optionId == option.optionId &&
