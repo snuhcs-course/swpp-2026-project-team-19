@@ -261,9 +261,15 @@ object PhotoReviewRules {
                 primarySourceOptionId = x.primarySourceOptionId,
             )
             if (target == ReviewItemType.OTHER) {
-                x.copy(classificationSnapshot = snapshot, volume = Double.NaN, options = emptyList(),
-                    primarySourceOptionId = null,
-                    primaryHasOption = false, bottle = false)
+                x.copy(
+                    classificationSnapshot = snapshot, volume = Double.NaN, options = emptyList(),
+                    primarySourceOptionId = null, primaryHasOption = false, bottle = false,
+                    // A non-whisky is never linked to the canonical whisky catalog.
+                    // The classification snapshot restores the prior link on undo.
+                    linkedProductId = null, linkedProductName = null,
+                    match = ReviewMatch.NEW, matchConfirmed = true, newConfirmed = true,
+                    nameSaved = true, operatorPending = false, operatorReason = null,
+                )
             } else {
                 x.copy(classificationSnapshot = snapshot, volume = defaultPour, volumeSource = VolumeSource.DEFAULT,
                     options = emptyList(), primaryHasOption = true, primarySourceOptionId = null,
