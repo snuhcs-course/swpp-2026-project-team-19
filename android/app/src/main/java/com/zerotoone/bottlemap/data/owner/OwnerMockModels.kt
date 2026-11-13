@@ -124,7 +124,7 @@ data class MockMenuOption(
     val priceKrw: Int,
     val discount: MockDiscount? = null, // C10 unagreed
 ) {
-    fun identityKey(): String = "${label.orEmpty().trim().lowercase()}|${pourMl ?: "-"}"
+    fun identityKey(): String = servingIdentityKey(pourMl, label)
     fun displayPrice(nowEpochMs: Long): Int = discount?.effectivePrice(priceKrw, nowEpochMs) ?: priceKrw
 }
 
