@@ -2,6 +2,10 @@
 package com.zerotoone.bottlemap.ui.customer
 
 import android.content.Context
+import androidx.compose.foundation.Image
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import com.zerotoone.bottlemap.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -151,8 +155,18 @@ internal fun CustomerP18Home(
         Row(Modifier.fillMaxWidth().height(56.dp).padding(start = 20.dp,end=8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween) {
-            Text("BottleMap",style=MaterialTheme.typography.titleMedium,
-                fontSize = 18.sp,fontWeight=FontWeight.Bold,color=P18Gold)
+            Row(verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Image(
+                    painter = painterResource(R.drawable.bottlemap_welcome_pin),
+                    contentDescription = null,
+                    modifier = Modifier.size(width = 23.dp, height = 30.dp)
+                        .testTag("customer-home-pin"),
+                    contentScale = ContentScale.Fit,
+                )
+                Text("BottleMap", style = MaterialTheme.typography.headlineSmall,
+                    fontSize = 18.sp, fontWeight = FontWeight.Bold, color = P18Gold)
+            }
             if (onAccount != null) Box(Modifier.size(48.dp).clickable(onClick=onAccount)
                 .testTag("customer-account-entry"), contentAlignment=Alignment.Center) {
                 BmIcon(BmIconId.ACCOUNT,"마이페이지",Modifier.size(24.dp),tint=P18Text)
