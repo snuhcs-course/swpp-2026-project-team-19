@@ -242,6 +242,11 @@ def create_catalog_entries(
     return result
 
 
+def add_product_aliases(session: Session, product_id: UUID, aliases: list[ProductAliasInput]) -> None:
+    """An operator's confirmed spellings of a product (spec 3.18.3); one already stored is skipped."""
+    _CatalogWriter(session, None).add_product_aliases(product_id, aliases)
+
+
 def create_new_product(
     session: Session,
     brand: BrandDecision,

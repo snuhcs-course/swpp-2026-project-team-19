@@ -33,7 +33,9 @@ def test_the_page_and_its_files_are_served(client):
     assert page.status_code == 200
     assert page.headers["content-type"].startswith("text/html")
     assert '<script src="app.js" defer></script>' in page.text
+    assert '<script src="checks.js" defer></script>' in page.text
     assert client.get("/admin/app.js").status_code == 200
+    assert client.get("/admin/checks.js").status_code == 200
     assert client.get("/admin/style.css").status_code == 200
 
 
@@ -47,7 +49,7 @@ def test_admin_without_a_slash_redirects_so_relative_paths_resolve(client):
 def test_the_page_is_not_cached_and_allows_only_known_sources(client, monkeypatch):
     monkeypatch.setenv("SUPABASE_URL", SUPABASE_URL)
 
-    for path in ("/admin/", "/admin/app.js", "/admin/config.js"):
+    for path in ("/admin/", "/admin/app.js", "/admin/checks.js", "/admin/config.js"):
         headers = client.get(path).headers
         policy = headers["content-security-policy"]
         assert "script-src 'self' https://cdn.jsdelivr.net dapi.kakao.com *.kakaocdn.net *.daumcdn.net" in policy

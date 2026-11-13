@@ -7,6 +7,7 @@ from app.api.routes.business_certificate import router as business_certificate_r
 from app.api.routes.catalog import router as catalog_router
 from app.api.routes.health import router as health_router
 from app.api.routes.media import router as media_router
+from app.api.routes.menu_checks import router as menu_checks_router
 from app.api.routes.menu_imports import router as menu_imports_router
 from app.api.routes.owner_applications import router as owner_applications_router
 from app.api.routes.search import router as search_router
@@ -19,6 +20,7 @@ api_router.include_router(bars_router)
 api_router.include_router(bar_photos_router)
 api_router.include_router(search_router)
 api_router.include_router(menu_imports_router)
+api_router.include_router(menu_checks_router)
 api_router.include_router(catalog_router)
 api_router.include_router(business_certificate_router)
 api_router.include_router(owner_applications_router)
