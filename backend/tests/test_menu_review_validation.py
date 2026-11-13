@@ -65,6 +65,29 @@ def test_option_corrections_replace_only_the_values_sent(db_session, review, gle
     assert [(o.label, o.pour_ml, o.price_krw) for o in exact.options] == [("잔", 15, 9500), (None, 30, 17000)]
 
 
+def test_owner_can_append_manually_priced_serving_without_ocr_id(db_session, review, glenfiddich):
+    body = valid_body(review, glenfiddich)
+    body["itemDecisions"][1]["addedOptions"] = [
+        {"optionLabel": "잔", "pourMl": 60, "priceKrw": 27000}
+    ]
+    row = validate(db_session, review, body).items[1]
+    assert len(row.priced_options) == 3
+    added = row.priced_options[-1]
+    assert added.option is None
+    assert (added.label, added.pour_ml, added.price_krw) == ("잔", 60, 27000)
+
+
+def test_owner_added_servings_obey_three_total_options(db_session, review, glenfiddich):
+    body = valid_body(review, glenfiddich)
+    body["itemDecisions"][1]["addedOptions"] = [
+        {"optionLabel": "잔", "pourMl": 60, "priceKrw": 27000},
+        {"optionLabel": "병", "pourMl": None, "priceKrw": 170000},
+    ]
+    assert ("itemDecisions[1].excludedOptionIds", "TOO_MANY_OPTIONS") in field_errors(
+        db_session, review, body
+    )
+
+
 def test_excluding_a_reviewed_option_retains_only_selected_prices(db_session, review, glenfiddich):
     body = valid_body(review, glenfiddich)
     extracted = review[1][1]
