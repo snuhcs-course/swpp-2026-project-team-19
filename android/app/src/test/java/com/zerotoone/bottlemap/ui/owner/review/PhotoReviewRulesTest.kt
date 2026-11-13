@@ -425,7 +425,7 @@ class PhotoReviewRulesTest {
             priceCandidates=listOf(ReviewPriceCandidate("ml:30",volumeMl=30,
                 priceKrw=15000)),
             existingServingPricesByProductId=mapOf("product" to listOf(
-                ReviewPriceCandidate("Bottle",bottle=true,priceKrw=130000,
+                ReviewPriceCandidate("bottle",bottle=true,priceKrw=130000,
                     existing=true))),
         )
         val bottle=PhotoReviewRules.toggleBottle(original,null,30.0)
