@@ -341,4 +341,44 @@ class PhotoReviewRulesTest {
         assertTrue(PhotoReviewRules.stats(excluded).canPublish)
     }
 
+    @Test fun defaultPourChangesRefreshOnlyDefaultDerivedPrimaryAndSecondaryGlasses() {
+        val original=ReviewItem(id="default-review",name="위스키",
+            volume=30.0,volumeSource=VolumeSource.DEFAULT,price=15000.0,
+            options=listOf(
+                ReviewOption(volume=30.0,price=22000.0,
+                    sourceOptionId="ocr-unsized",volumeFromDefault=true),
+                ReviewOption(volume=60.0,price=28000.0,
+                    sourceOptionId="ocr-sized",volumeFromDefault=false),
+                ReviewOption(volume=0.0,price=180000.0,bottle=true,
+                    sourceOptionId="ocr-bottle"),
+            ))
+        val changed=PhotoReviewRules.applyDefaultPour(original,45.0)
+        assertEquals(45.0,changed.volume,0.0)
+        assertEquals(listOf(45.0,60.0,0.0),changed.options.map { it.volume })
+        assertEquals(listOf("ocr-unsized","ocr-sized","ocr-bottle"),
+            changed.options.map { it.sourceOptionId })
+        val manuallyEdited=PhotoReviewRules.editOption(changed,
+            PhotoReviewRules.OptionField.VOLUME,0,"35")
+        val again=PhotoReviewRules.applyDefaultPour(manuallyEdited,50.0)
+        assertEquals(50.0,again.volume,0.0)
+        assertEquals(35.0,again.options[0].volume,0.0)
+        val editedPrimary=PhotoReviewRules.editOption(original,
+            PhotoReviewRules.OptionField.VOLUME,null,"40")
+        assertEquals(40.0,PhotoReviewRules.applyDefaultPour(editedPrimary,50.0).volume,0.0)
+    }
+
+    @Test fun priceConflictUsesBothOcrOptionLabelAndPour() {
+        val a=ReviewItem(id="photo-a",name="같은 위스키",
+            linkedProductId="shared-product",volume=30.0,price=18000.0,
+            primaryOptionLabel="잔")
+        val b=a.copy(id="photo-b",price=22000.0,primaryOptionLabel="샷")
+        assertTrue(PhotoReviewRules.duplicatePhotoPriceConflicts(
+            PhotoReviewState(items=listOf(a,b))).isEmpty())
+        val sameLabel=b.copy(primaryOptionLabel="잔")
+        assertEquals(setOf("photo-a","photo-b"),
+            PhotoReviewRules.duplicatePhotoPriceConflicts(
+                PhotoReviewState(items=listOf(a,sameLabel))).keys)
+    }
+
+
 }
