@@ -71,8 +71,12 @@ class OwnerManualCatalogMatchTest {
             category = "맥주", catalogMatched = true)
         assertEquals("기타 주류", manualEditorCategory(beer))
         assertEquals("맥주", manualEditorAlcoholKind(beer))
-        assertEquals(beer, manualProductProposal(
+        // A legacy non-whisky catalog row is never offered as a canonical
+        // match for a new bar-only beer. Only an owned local menu row can match.
+        assertNull(manualProductProposal(
             listOf(beer), "수제 맥주", "기타 주류", null, null))
+        assertEquals(beer.copy(catalogMatched = false), manualProductProposal(
+            listOf(beer.copy(catalogMatched = false)), "수제 맥주", "기타 주류", null, null))
         assertEquals("맥주", ownerV4Category(beer))
     }
 
