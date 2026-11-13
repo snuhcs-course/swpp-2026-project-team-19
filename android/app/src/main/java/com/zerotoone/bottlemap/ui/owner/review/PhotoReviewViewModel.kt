@@ -170,6 +170,9 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
         set(s.copy(modal = null))
     }
 
+    suspend fun refreshSourcePhotoUrl(itemId: String): String? =
+        repository.refreshSourcePhotoUrl(itemId)
+
     fun openSourcePhoto(id: String, mergeIndex: Int? = null) {
         val s = review ?: return
         set(s.copy(modal = ReviewModal(ReviewModalType.SOURCE_PHOTO, id, mergeIndex)))
