@@ -52,6 +52,8 @@ data class ReviewOption(
     // Real extracted option identity and label survive edits/reclassification.
     val sourceOptionId: String? = null,
     val label: String? = null,
+    /** OCR omitted a glass pour; update this if the bar default changes. */
+    val volumeFromDefault: Boolean = false,
 )
 
 /** The fields that "분류 변경" stores so that changing back restores the original options. */
