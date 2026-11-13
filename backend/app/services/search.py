@@ -100,7 +100,7 @@ def _selling_entries(session: Session, product_ids: list[UUID]):
 
 
 def _active_product(session: Session, product_id: UUID) -> Product | None:
-    query = select(Product).where(Product.id == product_id, Product.is_active).options(joinedload(Product.brand))
+    query = select(Product).where(Product.id == product_id, Product.is_active, Product.category == "whisky").options(joinedload(Product.brand))
     return session.scalar(query)
 
 
