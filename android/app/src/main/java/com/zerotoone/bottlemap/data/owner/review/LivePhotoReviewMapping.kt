@@ -179,7 +179,8 @@ internal fun mapConfirmedReviewDecision(
     val excludedOptionIds = raw.map { it.extractedOptionId }
         .filterNot { it in retainedIds }
     val mapped = choices.mapIndexed { index, chosen ->
-        val source = chosen.sourceOptionId?.let(byId::get) ?: raw.getOrNull(index)
+        // An owner-added option must never borrow a different OCR option ID.
+        val source = chosen.sourceOptionId?.let(byId::get)
         val bottle = card.type == ReviewItemType.WHISKY && chosen.bottle
         val label = if (bottle) "Bottle" else source?.extractedOptionLabel
         require(source?.extractedOptionLabel == null || label != null) {
