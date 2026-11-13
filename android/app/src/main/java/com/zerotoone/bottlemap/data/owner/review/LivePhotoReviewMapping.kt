@@ -144,22 +144,34 @@ internal fun mapConfirmedReviewDecision(
     existingBrands: Map<String, String>,
 ): MockReviewDecision {
     if (card.excluded) return MockReviewDecision(MockDecisionKind.EXCLUDE)
+    val raw = extracted.options.sortedBy { it.optionOrder }
     val choices = if (card.type == ReviewItemType.OTHER) {
-        listOf(ReviewOption(price = card.price))
+        listOf(ReviewOption(price = card.price,
+            sourceOptionId = raw.firstOrNull()?.extractedOptionId))
     } else PhotoReviewRules.optionSummary(card)
     require(choices.isNotEmpty() && choices.all {
         validPrice(it.price) &&
             (it.bottle || (card.type == ReviewItemType.OTHER || validVolume(it.volume)))
     }) { "${card.name}: 가격과 용량을 확인해 주세요." }
-    val raw = extracted.options.sortedBy { it.optionOrder }
-    require(raw.isEmpty() || choices.size == raw.size) {
-        "${card.name}: 추출된 옵션의 개수 변경은 현재 API에서 지원하지 않아요."
-    }
     require(choices.size <= PhotoReviewRules.MAX_OPTIONS) {
-        "${card.name}: 용량 옵션은 3개까지만 게시할 수 있어요."
+        "${card.name}: 용량 옵션은 최대 3개입니다. 불필요한 옵션을 제거해 주세요."
     }
+    val byId = raw.associateBy { it.extractedOptionId }
+    require(choices.mapNotNull { it.sourceOptionId }.distinct().size ==
+        choices.count { it.sourceOptionId != null }) {
+        "${card.name}: 중복된 OCR 옵션을 선택할 수 없어요."
+    }
+    require(choices.all { choice ->
+        choice.sourceOptionId == null || choice.sourceOptionId in byId
+    }) { "${card.name}: 검수 옵션이 서버와 일치하지 않아요." }
+    require(raw.isEmpty() || choices.all { it.sourceOptionId != null }) {
+        "${card.name}: 새로운 용량 옵션은 사진 검수에서 추가할 수 없어요. 게시 후 직접 수정해 주세요."
+    }
+    val retainedIds = choices.mapNotNull { it.sourceOptionId }.toSet()
+    val excludedOptionIds = raw.map { it.extractedOptionId }
+        .filterNot { it in retainedIds }
     val mapped = choices.mapIndexed { index, chosen ->
-        val source = raw.getOrNull(index)
+        val source = chosen.sourceOptionId?.let(byId::get) ?: raw.getOrNull(index)
         val bottle = card.type == ReviewItemType.WHISKY && chosen.bottle
         val label = if (bottle) "Bottle" else source?.extractedOptionLabel
         require(source?.extractedOptionLabel == null || label != null) {
@@ -183,6 +195,7 @@ internal fun mapConfirmedReviewDecision(
             productId = card.linkedProductId,
             correctedOptions = mapped,
             displayNameOverride = override,
+            excludedOptionIds = excludedOptionIds,
         )
     }
     require(card.newConfirmed && card.nameSaved) {
@@ -202,6 +215,7 @@ internal fun mapConfirmedReviewDecision(
         MockDecisionKind.CREATE_PRODUCT,
         correctedOptions = mapped,
         displayNameOverride = override,
+        excludedOptionIds = excludedOptionIds,
         newProduct = MockNewProductDraft(
             name = card.newProductName?.trim()?.ifBlank { null } ?: card.name.trim(),
             brandId = brandId,
