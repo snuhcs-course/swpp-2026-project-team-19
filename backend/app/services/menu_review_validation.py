@@ -43,7 +43,7 @@ from app.schemas.menu_review import (
 class FinalOption:
     """An extracted option with the reviewer's corrections applied."""
 
-    option: ExtractedOption
+    option: ExtractedOption | None
     label: str | None
     pour_ml: int | None
     price_krw: int | None
@@ -168,6 +168,8 @@ def _final_options(
                 price_krw=_corrected(correction.correctedPriceKrw, option.extracted_price_krw),
             )
         )
+    for extra in decision.addedOptions:
+        final.append(FinalOption(None, extra.optionLabel, extra.pourMl, extra.priceKrw))
     return tuple(final)
 
 
