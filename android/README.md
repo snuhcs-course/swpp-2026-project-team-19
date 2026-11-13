@@ -62,6 +62,27 @@ on the deployed server.
   `MENU_OUTDATED` / `REVIEW_OUTDATED` must preserve drafts and prompt
   refresh/review. Do not announce success until the server commits.
 
+## Bottle display and debug-only fixture boundary
+
+- Android considers the OCR labels `병` and `Bottle` one bottle serving,
+  and displays **Bottle** even for a legacy row whose saved bottle has
+  `pourMl`. New reviewed bottle options submit `optionLabel: "Bottle"`,
+  retaining the original `extractedOptionId`.
+- A same-size glass `잔 30ml` is **not** the same serving as `샷 30ml`.
+  Both label and size are needed for an independent glass price.
+- The merged Backend #164 persists literal option labels. Android does not
+  retroactively rename existing database rows or claim a server migration.
+- v18 OCR mock scenarios, preview-only repositories, demo shared preferences,
+  and fixture builders now live in `android/app/src/debug`. No release Owner
+  route can substitute mock OCR data.
+- Some `MockOwner*` model/interface names and `LocalOwnerMockRepository`
+  still act as an in-memory state adapter behind `LiveOwnerScreenRepository`.
+  They **are not a mock Backend implementation in the production navigation**.
+  Removing the shared state model requires a separate incremental migration,
+  not deleting files before live device QA.
+- See `android/QA_PR168.md` for Galaxy S23 cases and synthetic A/B/C photo
+  data supplied with this work.
+
 ## CI / verification
 
 From the repository root:
