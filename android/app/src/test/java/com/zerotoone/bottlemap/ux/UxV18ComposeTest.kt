@@ -10,6 +10,8 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasText
 import com.zerotoone.bottlemap.data.owner.review.MockPhotoReviewRepository
 import com.zerotoone.bottlemap.data.owner.review.MockPhotoReviewScenario
 import com.zerotoone.bottlemap.navigation.BottomTabs
@@ -93,7 +95,9 @@ class UxV18ComposeTest {
         rule.onNodeWithTag("review-steps").assertIsDisplayed()
         rule.onNodeWithText("사진 올리기").assertIsDisplayed()
         rule.onNodeWithText("읽기").assertIsDisplayed()
-        rule.onNodeWithText("확인").assertIsDisplayed()
+        rule.onNode(
+            hasText("확인") and hasAnyAncestor(hasTestTag("review-steps"))
+        ).assertIsDisplayed()
         rule.onNodeWithText("더하기").assertIsDisplayed()
         rule.onNodeWithText("메뉴 검수").assertIsDisplayed()
     }
@@ -169,7 +173,9 @@ class UxV18ComposeTest {
         val vm = review()
         rule.onNodeWithTag("photo-review-list").performScrollToNode(hasTestTag("review-publish"))
         rule.onNodeWithText("검수 0/5 완료").assertIsDisplayed()
-        rule.onNodeWithText("확인이 필요한 메뉴 5개를 먼저 검수해 주세요.").assertIsDisplayed()
+        // Scrolling the publish action into view may clip the preceding helper
+        // text with the new v20 stepper height; assert content, not viewport.
+        rule.onNodeWithText("확인이 필요한 메뉴 5개를 먼저 검수해 주세요.").assertExists()
         rule.onNodeWithTag("review-publish").performClick()
         assertTrue((vm.load.value as PhotoReviewLoad.Ready).review.modal == null)
     }
