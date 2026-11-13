@@ -121,6 +121,9 @@ def _record_item(entry: ReviewedItem, catalog: CatalogResult) -> None:
     options_corrected = False
     for final in entry.options:
         option = final.option
+        if option is None:
+            options_corrected = True
+            continue
         option.corrected_option_label = final.label if final.label != option.extracted_option_label else None
         option.corrected_pour_ml = final.pour_ml if final.pour_ml != option.extracted_pour_ml else None
         option.corrected_price_krw = final.price_krw if final.price_krw != option.extracted_price_krw else None
