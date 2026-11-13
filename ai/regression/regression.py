@@ -228,6 +228,7 @@ def match_lines(fixtures: list[dict], seed: dict | None = None) -> dict:
     """condition -> photo_id -> [{name, gold, kind, outcome, status, state, rank1}] for every expected line.
     `state` is the review state (app.matching.review_state): confirmed, or what the owner has to do."""
     be = harness.Backend(REPO_ROOT)
+    from app.matching.linking_guards import apply_linking_guards
     from app.matching.review_state import review_state
     seed = seed or load_seed()
     out = {}
@@ -242,7 +243,8 @@ def match_lines(fixtures: list[dict], seed: dict | None = None) -> dict:
             keys = {pid: key for key, pid in bc.key_to_id.items()}
             rows = []
             for name, graw in harness.label_lines(fx["expected_items"]):
-                r = be.resolve(name, bc.catalog)
+                # as menu import stores it: the rules, then the guards on a confirmed line
+                r = apply_linking_guards(name, be.resolve(name, bc.catalog), bc.catalog)
                 g = harness.gold_for(be, graw, bc.key_to_id, dev=True)
                 outcome = be.judge(g, r, bc.key_to_id, lambda ref: ref in bc.key_to_id)
                 kind = ("non_whisky" if g == "non_whisky" else "unknown" if g == "unknown"

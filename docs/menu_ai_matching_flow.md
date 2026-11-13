@@ -1655,9 +1655,9 @@ products
 | `extracted_line_type` | AI가 1차 분류한 값을 저장하며 검수 후에도 변경하지 않음 |
 | `corrected_line_type` | 운영자가 최초 역할을 바꾼 경우에만 저장, 그대로 승인하면 null |
 | `extracted_product_name` | AI 추출 직후 |
-| `extracted_brand_name` | AI가 브랜드 표기를 추출한 경우 |
-| `extracted_age_years` | AI가 연수를 추출한 경우, NAS 또는 미인식이면 null |
-| `extracted_edition_name` | AI가 에디션 표기를 추출한 경우 |
+| `extracted_brand_name` | AI가 브랜드 표기를 추출한 경우. 추출이 세 칸(브랜드·연수·에디션)을 모두 비웠고 최초 매칭이 `exact_match`가 아닌 상품 줄은, 최초 후보 생성 때 서버가 `extracted_product_name`에서 읽은 값으로 채운다(I4-P18, 아래 참고) |
+| `extracted_age_years` | AI가 연수를 추출한 경우, NAS 또는 미인식이면 null. 위와 같은 줄은 서버가 이름에서 읽은 연수 |
+| `extracted_edition_name` | AI가 에디션 표기를 추출한 경우. 위와 같은 줄은 서버가 이름에서 읽은 에디션(어휘집이 모두 옮길 수 있으면 영문) |
 | `extracted_abv` | AI가 도수를 추출한 경우 |
 | `extraction_confidence` | AI 추출 직후 |
 | `initial_resolution_status` | 최초 후보 생성 완료 시 `exact_match`, `ambiguous`, `unmatched` 중 하나를 저장하고 검수 후에도 변경하지 않음. `exact_match`를 확정한 규칙은 후보 `evidence.rule`에 남음. 매칭 미실행 항목은 null |
@@ -1667,6 +1667,8 @@ products
 | `review_status` | 초기 `pending`, 검수 후 변경 |
 | `corrected_product_name` | 운영자가 상품명을 수정한 경우 |
 | `reviewed_at` | 검수 완료 시 |
+
+이름에서 읽은 값(I4-P18): 지금 추출(하이브리드 프롬프트)은 브랜드·연수·에디션을 따로 내지 않으므로 세 칸이 비어 있다. 확정되지 않은 상품 줄은 검수에서 새 상품 등록으로 갈 수 있어, 서버가 규칙 매칭과 같은 방식으로 줄 이름을 읽어 세 칸을 채운다(`app/matching/product_draft.py`). 카탈로그 브랜드로 시작하는 이름이면 그 브랜드 표기, 단위가 붙은 연수(또는 브랜드 바로 뒤의 8 이상 숫자), 나머지가 에디션이다. 추출이 한 칸이라도 채운 줄, `exact_match` 줄, 두 상품이 한 줄에 적힌 줄(`evidence.multiProduct`)은 건드리지 않는다. 이 값은 모델이 읽은 값이 아니라 이름을 규칙으로 나눈 값이므로 틀릴 수 있고, 매칭 결과(`initial_resolution_status`, 후보)에는 쓰이지 않는다. 검수 응답의 `extractedBrandName`·`extractedAgeYears`·`extractedEditionName`과 `newProductDraft`가 이 칸을 그대로 보여 준다. API 명세 8.7의 연수·에디션 비교(운영자 확인)도 이 칸을 추출값으로 쓴다.
 
 ### 18.6 extracted_options
 
