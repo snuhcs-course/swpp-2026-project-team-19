@@ -38,8 +38,15 @@ def test_the_owner_uploads_reviews_and_publishes_the_menu(client, db_session, su
     brands = client.get("/api/catalog/brands", params={"query": "글렌피딕"}, headers=owner)
     assert [brand["canonicalName"] for brand in brands.json()["items"]] == ["Glenfiddich"]
 
+    body = valid_body(sample, glenfiddich)
+    for decision in body["itemDecisions"]:
+        if decision["action"] == "create_product":
+            decision.pop("brand")
+            decision.pop("product")
+            decision["action"] = "create_local_menu_item"
+            decision["category"] = "whisky"
     response = client.post(
-        f"/api/menu-imports/{sample.menu_import.id}/review-and-apply", headers=owner, json=valid_body(sample, glenfiddich)
+        f"/api/menu-imports/{sample.menu_import.id}/review-and-apply", headers=owner, json=body,
     )
 
     assert response.status_code == 200, response.text
@@ -49,10 +56,13 @@ def test_the_owner_uploads_reviews_and_publishes_the_menu(client, db_session, su
     assert board.last_import_id == sample.menu_import.id
     listed = client.get(f"/api/bars/{bar.id}/menu-imports", headers=owner).json()["items"]
     assert [item["status"] for item in listed] == ["applied"]
-    # The brand and product the review created record the owner who created them.
-    created = db_session.scalar(select(Product).where(Product.created_from_extracted_item_id == sample.items[3].id))
-    owner_id = db_session.scalar(select(User.id).where(User.auth_subject == OWNER_SUBJECT))
-    assert (created.created_by_user_id, created.brand.created_by_user_id) == (owner_id, owner_id)
+    # A bar-only whisky has no globally searchable Product row before approval.
+    from app.models import BarLocalMenuItem
+    local = db_session.scalar(select(BarLocalMenuItem).where(BarLocalMenuItem.bar_id == bar.id))
+    assert local is not None and local.category == "whisky"
+    assert db_session.scalar(select(Product).where(
+        Product.created_from_extracted_item_id == sample.items[3].id,
+    )) is None
 
 
 def test_the_owner_cancels_an_import_and_uploads_again(client, db_session, supabase, reviewer, image_storage):
