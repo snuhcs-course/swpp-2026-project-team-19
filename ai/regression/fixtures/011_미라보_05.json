@@ -1,0 +1,434 @@
+{
+  "photo_id": "011_미라보_05",
+  "bar": "미라보",
+  "photo": {
+    "file": "011_mirabeau_05.jpeg",
+    "photo_dir": "eval_photos_test",
+    "sha256": "0e4a720b7e1741d5689aceca8bd53ee7f7bb15c52739950929d39402bad47124"
+  },
+  "labels": "eval/labels_heldout_v1_1.json",
+  "gold": "eval/match_gold_v1_1.json",
+  "why": [
+    "price",
+    "wrong_match"
+  ],
+  "history": "One recorded run read 21,000 as 23,000, and the same run cited the price line of another row for 15 items.",
+  "expected_items": [
+    {
+      "raw_name": "크라겐모어(Cragganmore) 12년",
+      "price_krw": 17000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "cragganmore-12"
+    },
+    {
+      "raw_name": "벤로막(Benromach) 10년",
+      "price_krw": 16000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "benromach-10"
+    },
+    {
+      "raw_name": "벤로막(Benromach) 12년 캐스크 스트랭스",
+      "price_krw": 17000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:benromach-12-cs"
+    },
+    {
+      "raw_name": "벤로막(Benromach) 피트 스모크",
+      "price_krw": 17000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:benromach-peat-smoke"
+    },
+    {
+      "raw_name": "벤로막(Benromach) 2013 빈티지",
+      "price_krw": 21000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:benromach-2013-vintage"
+    },
+    {
+      "raw_name": "벤로막(Benromach) 15년",
+      "price_krw": 27000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "benromach-15"
+    },
+    {
+      "raw_name": "벤로막(Benromach) 싱글 캐스크",
+      "price_krw": 29000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "unknown"
+    },
+    {
+      "raw_name": "벤로막(Benromach) 21년",
+      "price_krw": 45000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:benromach-21"
+    },
+    {
+      "raw_name": "벤리악(Benriach) 10년",
+      "price_krw": 15000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:benriach-10"
+    },
+    {
+      "raw_name": "벤리악(Benriach) 12년",
+      "price_krw": 16000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "benriach-12"
+    },
+    {
+      "raw_name": "벤리악(Benriach) 12년 스모키",
+      "price_krw": 16000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:benriach-smoky-12"
+    },
+    {
+      "raw_name": "오반(Oban) 리틀 베이",
+      "price_krw": 15000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:oban-little-bay"
+    },
+    {
+      "raw_name": "오반(Oban) 14년",
+      "price_krw": 21000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "oban-14"
+    },
+    {
+      "raw_name": "글렌파클라스(Glenfarclas) 10년",
+      "price_krw": 16000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glenfarclas-10"
+    },
+    {
+      "raw_name": "글렌파클라스(Glenfarclas) 12년",
+      "price_krw": 18000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glenfarclas-12"
+    },
+    {
+      "raw_name": "글렌파클라스(Glenfarclas) 105 캐스크 스트랭스",
+      "price_krw": 20000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glenfarclas-105"
+    },
+    {
+      "raw_name": "글렌파클라스(Glenfarclas) 15년",
+      "price_krw": 23000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glenfarclas-15"
+    },
+    {
+      "raw_name": "글렌파클라스(Glenfarclas) 25년",
+      "price_krw": 65000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:glenfarclas-25"
+    },
+    {
+      "raw_name": "글렌고인(Glengoyne) 12년",
+      "price_krw": 16000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glengoyne-12"
+    },
+    {
+      "raw_name": "글렌고인(Glengoyne) 15년",
+      "price_krw": 23000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:glengoyne-15"
+    },
+    {
+      "raw_name": "글렌고인(Glengoyne) 배치 10 캐스크 스트랭스",
+      "price_krw": 25000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:glengoyne-cs-batch-10"
+    },
+    {
+      "raw_name": "글렌고인(Glengoyne) 18년",
+      "price_krw": 34000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:glengoyne-18"
+    },
+    {
+      "raw_name": "클라이넬리쉬(Clynelish) 14년",
+      "price_krw": 21000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "clynelish-14"
+    },
+    {
+      "raw_name": "클라이넬리쉬(Clynelish) 디스틸러리 에디션",
+      "price_krw": 21000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:clynelish-de"
+    },
+    {
+      "raw_name": "달모어(Dalmore) 12년",
+      "price_krw": 18000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "dalmore-12"
+    },
+    {
+      "raw_name": "달모어(Dalmore) 12년 셰리캐스크 셀렉트",
+      "price_krw": 23000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "dalmore-12-sherry-cask-select"
+    },
+    {
+      "raw_name": "달모어(Dalmore) 포트우드",
+      "price_krw": 23000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "dalmore-port-wood"
+    },
+    {
+      "raw_name": "달모어(Dalmore) 15년",
+      "price_krw": 29000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "dalmore-15"
+    },
+    {
+      "raw_name": "달모어(Dalmore) 시가몰트",
+      "price_krw": 32000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "dalmore-cigar-malt"
+    },
+    {
+      "raw_name": "달모어(Dalmore) 킹 알렉산더 3세",
+      "price_krw": 52000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:dalmore-king-alexander-iii"
+    },
+    {
+      "raw_name": "달모어(Dalmore) 18년",
+      "price_krw": 78000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:dalmore-18"
+    },
+    {
+      "raw_name": "아벨라워(Aberlour) 12년",
+      "price_krw": 17000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "aberlour-12"
+    },
+    {
+      "raw_name": "아벨라워(Aberlour) 14년",
+      "price_krw": 23000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:aberlour-14"
+    },
+    {
+      "raw_name": "아벨라워(Aberlour) 아부나흐 알바",
+      "price_krw": 26000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:aberlour-abunadh-alba"
+    },
+    {
+      "raw_name": "아벨라워(Aberlour) 아부나흐",
+      "price_krw": 27000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "aberlour-abunadh"
+    },
+    {
+      "raw_name": "아벨라워(Aberlour) 16년",
+      "price_krw": 29000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:aberlour-16"
+    },
+    {
+      "raw_name": "에드라두어(Edradour) 10년",
+      "price_krw": 20000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "edradour-10"
+    },
+    {
+      "raw_name": "에드라두어(Edradour) 10년 발렌친",
+      "price_krw": 20000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:ballechin-10"
+    },
+    {
+      "raw_name": "에드라두어(Edradour) 12년 칼레도니아",
+      "price_krw": 25000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:edradour-caledonia-12"
+    },
+    {
+      "raw_name": "에드라두어(Edradour) 12년 보르도 캐스크",
+      "price_krw": 25000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:edradour-12-bordeaux"
+    },
+    {
+      "raw_name": "에드라두어(Edradour) 12년 캐스크 스트랭스",
+      "price_krw": 28000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:edradour-12-cs"
+    },
+    {
+      "raw_name": "에드라두어(Edradour) 12년 소테른 캐스크",
+      "price_krw": 28000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:edradour-12-sauternes"
+    },
+    {
+      "raw_name": "에드라두어(Edradour) 10년 싱글캐스크 캐스크 스트랭스",
+      "price_krw": 35000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:edradour-10-single-cask-cs"
+    },
+    {
+      "raw_name": "에드라두어(Edradour) 21년 캐스크 스트랭스",
+      "price_krw": 100000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:edradour-21-cs"
+    },
+    {
+      "raw_name": "달위니(Dalwhinnie) 15년",
+      "price_krw": 19000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "dalwhinnie-15"
+    },
+    {
+      "raw_name": "로얄 브라클라(Royal Brackla) 12년",
+      "price_krw": 18000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "royal-brackla-12"
+    },
+    {
+      "raw_name": "로얄 브라클라(Royal Brackla) 18년",
+      "price_krw": 32000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "royal-brackla-18"
+    },
+    {
+      "raw_name": "로얄 브라클라(Royal Brackla) 21년",
+      "price_krw": 49000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:royal-brackla-21"
+    },
+    {
+      "raw_name": "아녹(Ancnoc) 12년",
+      "price_krw": 16000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:ancnoc-12"
+    },
+    {
+      "raw_name": "아녹(Ancnoc) 피티드 셰리",
+      "price_krw": 17000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:ancnoc-peated-sherry"
+    },
+    {
+      "raw_name": "아녹(Ancnoc) 피트 하트",
+      "price_krw": 19000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:ancnoc-peatheart"
+    },
+    {
+      "raw_name": "아녹(Ancnoc) 18년",
+      "price_krw": 37000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:ancnoc-18"
+    }
+  ]
+}

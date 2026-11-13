@@ -1,0 +1,17 @@
+{
+  "photo_id": "007_위스키복춘_04",
+  "bar": "위스키복춘",
+  "photo": {
+    "file": "007_bokchun_04.jpg",
+    "photo_dir": "eval_photos",
+    "sha256": "7a959aaa7105c30136a445472584ffc350ed4a11ab73f5307bf0b4ab6acba24b"
+  },
+  "labels": "eval/labels_v1_1.json",
+  "gold": "eval/match_gold_v1_1.json",
+  "why": [
+    "non_whisky_page",
+    "extra_lines"
+  ],
+  "history": "Cocktail-only page: the expected output is empty. One recorded run returned two cocktails.",
+  "expected_items": []
+}

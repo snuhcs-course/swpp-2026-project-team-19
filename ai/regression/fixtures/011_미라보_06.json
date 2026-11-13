@@ -1,0 +1,449 @@
+{
+  "photo_id": "011_미라보_06",
+  "bar": "미라보",
+  "photo": {
+    "file": "011_mirabeau_06.jpeg",
+    "photo_dir": "eval_photos_test",
+    "sha256": "18b0085ea7a48c723228f039ec68faa00ae0047e37813d38c44886ab8330cee5"
+  },
+  "labels": "eval/labels_heldout_v1_1.json",
+  "gold": "eval/match_gold_v1_1.json",
+  "why": [
+    "wrong_match"
+  ],
+  "history": "With the I2 catalog 8 lines got candidates that did not include the right product.",
+  "expected_items": [
+    {
+      "raw_name": "발베니(Balvenie) 12년 더블 우드",
+      "price_krw": 18000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "balvenie-12-doublewood"
+    },
+    {
+      "raw_name": "발베니(Balvenie) 12년 아메리칸 오크",
+      "price_krw": 20000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:balvenie-12-american-oak"
+    },
+    {
+      "raw_name": "발베니(Balvenie) 12년 싱글 배럴",
+      "price_krw": 23000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:balvenie-12-single-barrel"
+    },
+    {
+      "raw_name": "발베니(Balvenie) 14년 캐리비안 캐스크",
+      "price_krw": 23000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "balvenie-14-caribbean"
+    },
+    {
+      "raw_name": "발베니(Balvenie) 14년 위크 오브 피트",
+      "price_krw": 25000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:balvenie-14-week-of-peat"
+    },
+    {
+      "raw_name": "발베니(Balvenie) 15년 마데이라 캐스크",
+      "price_krw": 35000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:balvenie-15-madeira"
+    },
+    {
+      "raw_name": "발베니(Balvenie) 16년 프렌치 오크",
+      "price_krw": 37000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:balvenie-16-french-oak"
+    },
+    {
+      "raw_name": "발베니(Balvenie) 18년 페드로 히메네즈 캐스크",
+      "price_krw": 47000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:balvenie-18-px"
+    },
+    {
+      "raw_name": "발베니(Balvenie) 21년 포트 우드",
+      "price_krw": 70000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "balvenie-21-portwood"
+    },
+    {
+      "raw_name": "글렌리벳(Glenrivet) 12년 더블 오크",
+      "price_krw": 16000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glenlivet-12"
+    },
+    {
+      "raw_name": "글렌리벳(Glenrivet) 15년 프렌치 오크",
+      "price_krw": 20000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glenlivet-15"
+    },
+    {
+      "raw_name": "글렌리벳(Glenrivet) 18년",
+      "price_krw": 26000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glenlivet-18"
+    },
+    {
+      "raw_name": "글렌그란트(Glengrant) 12년",
+      "price_krw": 16000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glen-grant-12"
+    },
+    {
+      "raw_name": "글렌그란트(Glengrant) 15년",
+      "price_krw": 20000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glen-grant-15"
+    },
+    {
+      "raw_name": "글렌그란트(Glengrant) 18년",
+      "price_krw": 32000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glen-grant-18"
+    },
+    {
+      "raw_name": "모틀락(Mortlach) 16년",
+      "price_krw": 25000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:mortlach-16"
+    },
+    {
+      "raw_name": "올트모어(Aultmore) 12년",
+      "price_krw": 18000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "aultmore-12"
+    },
+    {
+      "raw_name": "올트모어(Aultmore) 18년",
+      "price_krw": 30000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:aultmore-18"
+    },
+    {
+      "raw_name": "올트모어(Aultmore) 21년",
+      "price_krw": 45000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:aultmore-21"
+    },
+    {
+      "raw_name": "에버펠디(Aberfeldy) 12년",
+      "price_krw": 16000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:aberfeldy-12"
+    },
+    {
+      "raw_name": "에버펠디(Aberfeldy) 16년",
+      "price_krw": 23000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:aberfeldy-16"
+    },
+    {
+      "raw_name": "글렌로티스(Glenrothes) 12년",
+      "price_krw": 16000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glenrothes-12"
+    },
+    {
+      "raw_name": "글렌로티스(Glenrothes) WMC",
+      "price_krw": 22000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glenrothes-whisky-makers-cut"
+    },
+    {
+      "raw_name": "글렌로티스(Glenrothes) 18년",
+      "price_krw": 31000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:glenrothes-18"
+    },
+    {
+      "raw_name": "맥켈란(Maccallan) 12년 더블 캐스크",
+      "price_krw": 18000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "macallan-12-double-cask"
+    },
+    {
+      "raw_name": "맥켈란(Maccallan) 12년 셰리 캐스크",
+      "price_krw": 21000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "macallan-12-sherry-oak"
+    },
+    {
+      "raw_name": "맥켈란(Maccallan) 15년 더블 캐스크",
+      "price_krw": 27000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "macallan-15-double-cask"
+    },
+    {
+      "raw_name": "맥켈란(Maccallan) 클래식컷 2025",
+      "price_krw": 28000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:macallan-classic-cut-2025"
+    },
+    {
+      "raw_name": "맥켈란(Maccallan) 18년 더블캐스크",
+      "price_krw": 48000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:macallan-18-double-cask"
+    },
+    {
+      "raw_name": "맥켈란(Maccallan) 18년 셰리 캐스크",
+      "price_krw": 55000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:macallan-18-sherry-oak"
+    },
+    {
+      "raw_name": "글렌피딕(Glenfiddich) 12년",
+      "price_krw": 16000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glenfiddich-12"
+    },
+    {
+      "raw_name": "글렌피딕(Glenfiddich) 12년 아몬티야또 셰리 피니시",
+      "price_krw": 16000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glenfiddich-12-sherry-cask-finish"
+    },
+    {
+      "raw_name": "글렌피딕(Glenfiddich) 14년",
+      "price_krw": 18000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:glenfiddich-14"
+    },
+    {
+      "raw_name": "글렌피딕(Glenfiddich) 15년",
+      "price_krw": 20000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glenfiddich-15"
+    },
+    {
+      "raw_name": "글렌피딕(Glenfiddich) 18년",
+      "price_krw": 28000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glenfiddich-18"
+    },
+    {
+      "raw_name": "글렌피딕(Glenfiddich) 21년 그란 르제르바",
+      "price_krw": 43000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glenfiddich-21"
+    },
+    {
+      "raw_name": "글렌피딕(Glenfiddich) 23년 그랑 크루",
+      "price_krw": 64000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:glenfiddich-23-grand-cru"
+    },
+    {
+      "raw_name": "글렌알라키(Glenallachie) 8년",
+      "price_krw": 16000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glenallachie-8"
+    },
+    {
+      "raw_name": "글렌알라키(Glenallachie) 12년",
+      "price_krw": 19000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glenallachie-12"
+    },
+    {
+      "raw_name": "글렌알라키(Glenallachie) 10년 캐스크 스트랭스",
+      "price_krw": 22000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glenallachie-10-cask-strength"
+    },
+    {
+      "raw_name": "글렌알라키(Glenallachie) 9년 퀴베 캐스크 피니시",
+      "price_krw": 22000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:glenallachie-9-cuvee"
+    },
+    {
+      "raw_name": "글렌알라키(Glenallachie) 8년 스코티시 오크 피니시",
+      "price_krw": 23000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:glenallachie-8-scottish-oak"
+    },
+    {
+      "raw_name": "글렌알라키(Glenallachie) 10년 루비포트 캐스크 피니시",
+      "price_krw": 23000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:glenallachie-10-ruby-port"
+    },
+    {
+      "raw_name": "글렌알라키(Glenallachie) 12년 모스카텔 캐스크 피니시",
+      "price_krw": 23000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:glenallachie-12-moscatel"
+    },
+    {
+      "raw_name": "글렌알라키(Glenallachie) 10년 스페니시 오크 피니시",
+      "price_krw": 25000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:glenallachie-10-spanish-oak"
+    },
+    {
+      "raw_name": "글렌알라키(Glenallachie) 15년",
+      "price_krw": 27000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glenallachie-15"
+    },
+    {
+      "raw_name": "글렌알라키(Glenallachie) 18년",
+      "price_krw": 42000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glenallachie-18"
+    },
+    {
+      "raw_name": "글렌알라키(Glenallachie) 18년 PX 펀천",
+      "price_krw": 68000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:glenallachie-18-px-puncheon"
+    },
+    {
+      "raw_name": "발렌타인 글렌버기(Glenburgie) 12년",
+      "price_krw": 15000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:glenburgie-12"
+    },
+    {
+      "raw_name": "발렌타인 글렌버기(Glenburgie) 15년",
+      "price_krw": 20000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:glenburgie-15"
+    },
+    {
+      "raw_name": "탐두(Tamdhu) 12년",
+      "price_krw": 17000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:tamdhu-12"
+    },
+    {
+      "raw_name": "탐두(Tamdhu) 배치스트랭스 8",
+      "price_krw": 26000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:tamdhu-batch-strength-8"
+    },
+    {
+      "raw_name": "탐두(Tamdhu) 15년",
+      "price_krw": 29000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:tamdhu-15"
+    },
+    {
+      "raw_name": "탐두(Tamdhu) 18년",
+      "price_krw": 48000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:tamdhu-18"
+    }
+  ]
+}

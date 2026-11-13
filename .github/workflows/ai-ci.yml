@@ -33,11 +33,14 @@ jobs:
         id: filter
         uses: dorny/paths-filter@v3
         with:
-          # ai/match_llm imports the backend matching code, so backend changes there count too.
+          # ai/match_llm imports the backend matching code, and ai/regression replays recorded
+          # answers through backend/app/extraction, so backend changes there count too.
           filters: |
             ai:
               - 'ai/**'
+              - 'eval/**'
               - 'backend/app/matching/**'
+              - 'backend/app/extraction/**'
               - 'backend/app/core/**'
               - '.github/workflows/ai-ci.yml'
 

@@ -1,0 +1,370 @@
+{
+  "photo_id": "011_미라보_02",
+  "bar": "미라보",
+  "photo": {
+    "file": "011_mirabeau_02.jpeg",
+    "photo_dir": "eval_photos_test",
+    "sha256": "1b633621a35da5c61a543a3e18e07ebc4134e739a5d903776fef4b2af077e685"
+  },
+  "labels": "eval/labels_heldout_v1_1.json",
+  "gold": "eval/match_gold_v1_1.json",
+  "why": [
+    "omission",
+    "heading_plus_line"
+  ],
+  "history": "Lines under a distillery heading. One recorded run dropped the heading from two lines (킬커란 12년, 16년), which counts as two omissions and two extra lines.",
+  "expected_items": [
+    {
+      "raw_name": "하이랜드 파크(Highland Park) 12년",
+      "price_krw": 16000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "highland-park-12"
+    },
+    {
+      "raw_name": "하이랜드 파크(Highland Park) 캐스크 스트랭스 배치 4",
+      "price_krw": 22000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:highland-park-cs-batch-4"
+    },
+    {
+      "raw_name": "하이랜드 파크(Highland Park) 캐스크 스트랭스 헤더",
+      "price_krw": 23000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "unknown"
+    },
+    {
+      "raw_name": "하이랜드 파크(Highland Park) 15년",
+      "price_krw": 23000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:highland-park-15"
+    },
+    {
+      "raw_name": "하이랜드 파크(Highland Park) 18년",
+      "price_krw": 29000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:highland-park-18"
+    },
+    {
+      "raw_name": "하이랜드 파크(Highland Park) 16년",
+      "price_krw": 31000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:highland-park-16"
+    },
+    {
+      "raw_name": "글렌킨치(Glenkinchie) 12년",
+      "price_krw": 15000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "glenkinchie-12"
+    },
+    {
+      "raw_name": "오큰토션(Auchentoshan) 아메리칸 오크",
+      "price_krw": 15000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:auchentoshan-american-oak"
+    },
+    {
+      "raw_name": "오큰토션(Auchentoshan) 12년",
+      "price_krw": 15000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "auchentoshan-12"
+    },
+    {
+      "raw_name": "오큰토션(Auchentoshan) 쇼비뇽 블랑",
+      "price_krw": 17000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:auchentoshan-sauvignon-blanc"
+    },
+    {
+      "raw_name": "오큰토션(Auchentoshan) 쓰리 우드",
+      "price_krw": 20000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:auchentoshan-three-wood"
+    },
+    {
+      "raw_name": "오큰토션(Auchentoshan) 18년",
+      "price_krw": 27000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:auchentoshan-18"
+    },
+    {
+      "raw_name": "스프링뱅크(Springbank) 롱로우 피티드",
+      "price_krw": 23000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:longrow-peated"
+    },
+    {
+      "raw_name": "스프링뱅크(Springbank) 10년",
+      "price_krw": 25000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:springbank-10"
+    },
+    {
+      "raw_name": "스프링뱅크(Springbank) 12년 캐스크 스트랭스",
+      "price_krw": 40000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:springbank-12-cs"
+    },
+    {
+      "raw_name": "스프링뱅크(Springbank) 15년",
+      "price_krw": 40000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:springbank-15"
+    },
+    {
+      "raw_name": "글렌가일(Glengyle) 킬커란 12년",
+      "price_krw": 21000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:kilkerran-12"
+    },
+    {
+      "raw_name": "글렌가일(Glengyle) 해빌리 피티드",
+      "price_krw": 23000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:kilkerran-heavily-peated"
+    },
+    {
+      "raw_name": "글렌가일(Glengyle) 킬커란 16년",
+      "price_krw": 33000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:kilkerran-16"
+    },
+    {
+      "raw_name": "글렌스코시아(Glenscotia) 더블 캐스크",
+      "price_krw": 18000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:glen-scotia-double-cask"
+    },
+    {
+      "raw_name": "글렌스코시아(Glenscotia) 15년",
+      "price_krw": 23000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:glen-scotia-15"
+    },
+    {
+      "raw_name": "글렌스코시아(Glenscotia) 18년",
+      "price_krw": 38000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:glen-scotia-18"
+    },
+    {
+      "raw_name": "글렌스코시아(Glenscotia) 12년 머메이드",
+      "price_krw": 39000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:glen-scotia-12-mermaid"
+    },
+    {
+      "raw_name": "고든앤맥페일(Gordon&Macphail) 밀튼더프 10년",
+      "price_krw": 20000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:gm-miltonduff-10"
+    },
+    {
+      "raw_name": "고든앤맥페일(Gordon&Macphail) 부나하벤 10년",
+      "price_krw": 20000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:gm-bunnahabhain-10"
+    },
+    {
+      "raw_name": "고든앤맥페일(Gordon&Macphail) 부나하벤 헤빌리 피티드 11년",
+      "price_krw": 20000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:gm-bunnahabhain-heavily-peated-11"
+    },
+    {
+      "raw_name": "고든앤맥페일(Gordon&Macphail) 글렌로티스 11년",
+      "price_krw": 20000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:gm-glenrothes-11"
+    },
+    {
+      "raw_name": "헌터랭(Hunterlaing) 스카라버스",
+      "price_krw": 15000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:scarabus"
+    },
+    {
+      "raw_name": "헌터랭(Hunterlaing) 로얄 브라클라 14년",
+      "price_krw": 37000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:hunter-laing-royal-brackla-14"
+    },
+    {
+      "raw_name": "헌터랭(Hunterlaing) 크라겐모어 26년",
+      "price_krw": 120000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:hunter-laing-cragganmore-26"
+    },
+    {
+      "raw_name": "더글라스랭(Douglaslaing) 락 아일랜드",
+      "price_krw": 15000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:rock-island"
+    },
+    {
+      "raw_name": "더글라스랭(Douglaslaing) 에피큐리안",
+      "price_krw": 15000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:epicurean"
+    },
+    {
+      "raw_name": "더글라스랭(Douglaslaing) 티모러스 비스티",
+      "price_krw": 15000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:timorous-beastie"
+    },
+    {
+      "raw_name": "더글라스랭(Douglaslaing) 골드론",
+      "price_krw": 16000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:gauldrons"
+    },
+    {
+      "raw_name": "더글라스랭(Douglaslaing) 골드론 캐스크 스트랭스",
+      "price_krw": 23000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:gauldrons-cs"
+    },
+    {
+      "raw_name": "더글라스랭(Douglaslaing) 골드론 셰리 캐스크",
+      "price_krw": 23000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:gauldrons-sherry"
+    },
+    {
+      "raw_name": "더글라스랭(Douglaslaing) 스칼리웩 윈터 에디션 2025",
+      "price_krw": 22000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:scallywag-winter-2025"
+    },
+    {
+      "raw_name": "더글라스랭(Douglaslaing) 빅피트 윈터 에디션 2025",
+      "price_krw": 23000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:big-peat-winter-2025"
+    },
+    {
+      "raw_name": "블랙애더(Blackadder) 셰리 스네이크",
+      "price_krw": 35000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:blackadder-sherry-snake"
+    },
+    {
+      "raw_name": "콤파스 박스(Compass Box) 오차드 하우스",
+      "price_krw": 17000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:compass-box-orchard-house"
+    },
+    {
+      "raw_name": "포트에스케이그(Port Askaig) 8년",
+      "price_krw": 16000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:port-askaig-8"
+    },
+    {
+      "raw_name": "포트에스케이그(Port Askaig) 17년",
+      "price_krw": 40000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:port-askaig-17"
+    },
+    {
+      "raw_name": "엘리먼츠 오브 아일라(Elements of Islay) 버번",
+      "price_krw": 19000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:elements-of-islay-bourbon"
+    },
+    {
+      "raw_name": "엘리먼츠 오브 아일라(Elements of Islay) 셰리",
+      "price_krw": 21000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:elements-of-islay-sherry"
+    }
+  ]
+}

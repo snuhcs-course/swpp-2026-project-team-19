@@ -1,0 +1,243 @@
+{
+  "photo_id": "010_수이_04",
+  "bar": "수이",
+  "photo": {
+    "file": "010_sui_04.jpeg",
+    "photo_dir": "eval_photos_final",
+    "sha256": "73ca111934637d77dde341c30cd92100011971a964276fb61c0dba214e535954"
+  },
+  "labels": "eval/labels_final_v1.json",
+  "gold": "eval/match_gold_final_v1.json",
+  "why": [
+    "extra_lines",
+    "non_whisky_lines",
+    "wrong_match"
+  ],
+  "history": "Whisky next to tequila, cognac and calvados. The recorded run returned 12 lines of the other spirits that the label leaves out.",
+  "expected_items": [
+    {
+      "raw_name": "Yamazaki 12y (야마자키 12년)",
+      "price_krw": 46000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "yamazaki-12"
+    },
+    {
+      "raw_name": "Yamazaki Dr (야마자키 Dr)",
+      "price_krw": 30000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "yamazaki-distillers-reserve"
+    },
+    {
+      "raw_name": "Hakushu Dr (하쿠슈 Dr)",
+      "price_krw": 30000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "hakushu-distillers-reserve"
+    },
+    {
+      "raw_name": "Hibiki (히비키)",
+      "price_krw": 23000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "hibiki-japanese-harmony"
+    },
+    {
+      "raw_name": "Kavalan Original (카발란)",
+      "price_krw": 23000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "kavalan-classic"
+    },
+    {
+      "raw_name": "Kavalan Triple Sherry Cask",
+      "price_krw": 24000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "kavalan-triple-sherry"
+    },
+    {
+      "raw_name": "Kavalan Vinho Barrique",
+      "price_krw": 43000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "kavalan-solist-vinho-barrique"
+    },
+    {
+      "raw_name": "SANSIBAR 21y Batch4 (산시바)",
+      "price_krw": 25000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "unknown"
+    },
+    {
+      "raw_name": "SANSIBAR 21y",
+      "price_krw": 27000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "unknown"
+    },
+    {
+      "raw_name": "High Coast Sherry",
+      "price_krw": 26000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:high-coast-sherry"
+    },
+    {
+      "raw_name": "High Coast Maria PX Sherry",
+      "price_krw": 30000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:high-coast-maria"
+    },
+    {
+      "raw_name": "High Coast Eva Beer Cask",
+      "price_krw": 26000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:high-coast-eva"
+    },
+    {
+      "raw_name": "Eld Vatten 8y (엘드바튼)",
+      "price_krw": 23000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "unknown"
+    },
+    {
+      "raw_name": "Eld Vatten 11y (브룩라디)",
+      "price_krw": 48000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:eld-vatten-bruichladdich-11"
+    },
+    {
+      "raw_name": "Eld Vatten 14y (벤네비스)",
+      "price_krw": 50000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:eld-vatten-ben-nevis-14"
+    },
+    {
+      "raw_name": "김과장 #2 (바베이도스 럼)",
+      "price_krw": 40000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "non_whisky"
+    },
+    {
+      "raw_name": "김과장 #3 (하이랜드 파크)",
+      "price_krw": 25000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:kimgwajang-3-highland-park"
+    },
+    {
+      "raw_name": "김과장 #4 (클라이넬리쉬)",
+      "price_krw": 29000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:kimgwajang-4-clynelish"
+    },
+    {
+      "raw_name": "Hakushu 12y",
+      "price_krw": 35000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "hakushu-12"
+    },
+    {
+      "raw_name": "The Nectar 11y (글렌 오드)",
+      "price_krw": 27000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:nectar-glen-ord-11"
+    },
+    {
+      "raw_name": "The Nectar 12y (밀튼 더프)",
+      "price_krw": 27000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:nectar-miltonduff-12"
+    },
+    {
+      "raw_name": "The Maltman Dailuaine 14y (달루인)",
+      "price_krw": 32000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:maltman-dailuaine-14"
+    },
+    {
+      "raw_name": "The Maltman DeanSton 14y (딘스톤)",
+      "price_krw": 28000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:maltman-deanston-14"
+    },
+    {
+      "raw_name": "The Maltman Campbeltown 10y",
+      "price_krw": 33000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:maltman-campbeltown-10"
+    },
+    {
+      "raw_name": "The Maltman Master's Blend 34y",
+      "price_krw": 50000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:maltman-masters-blend-34"
+    },
+    {
+      "raw_name": "Whisky Agency Bruichladdich 12y",
+      "price_krw": 50000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:twa-bruichladdich-12"
+    },
+    {
+      "raw_name": "Whisky Agency Secret Islay 6y",
+      "price_krw": 22000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "new:twa-secret-islay-6"
+    },
+    {
+      "raw_name": "Signatory Speyside M Sherry",
+      "price_krw": 24000,
+      "pour_ml": null,
+      "unit": "glass",
+      "note": null,
+      "gold": "unknown"
+    }
+  ]
+}
