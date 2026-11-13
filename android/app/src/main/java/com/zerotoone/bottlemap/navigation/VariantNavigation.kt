@@ -19,6 +19,7 @@ import androidx.navigation.navigation
 import androidx.navigation.navArgument
 import com.zerotoone.bottlemap.BuildConfig
 import com.zerotoone.bottlemap.data.owner.review.MockPhotoReviewScenario
+import com.zerotoone.bottlemap.data.owner.review.LivePhotoReviewRepository
 import com.zerotoone.bottlemap.data.owner.review.PreviewOnlyPhotoReviewRepository
 import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewScreen
 import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewViewModel
@@ -188,23 +189,55 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                         }
                     )
                     OwnerPage.MGR_REVIEW -> {
-                        if (BuildConfig.DEBUG) {
-                            // I4-P14: Wire the existing one-page UX review into the
-                            // actual photo-flow destination for Mock UI approval.
-                            // The repository is deliberately preview-only: photos,
-                            // API decisions and publication are NOT connected yet.
-                            val reviewVm: PhotoReviewViewModel = viewModel(
-                                factory = PhotoReviewViewModel.Factory(
-                                    PreviewOnlyPhotoReviewRepository(
-                                        MockPhotoReviewScenario.BASIC
-                                    )
+                        val snapshot = when (mockState) {
+                            is MockOwnerLoadState.Ready -> mockState.snapshot
+                            is MockOwnerLoadState.Empty -> mockState.snapshot
+                            else -> null
+                        }
+                        val activeBar = snapshot?.selectedBarId
+                            ?: snapshot?.bars?.firstOrNull()?.barId
+                        val latestJob = snapshot?.imports?.lastOrNull {
+                            it.barId == activeBar && it.status == MockImportStatus.READY_FOR_REVIEW
+                        }
+                        // Existing Stage 8 can still handle the API's 4+ option
+                        // case; never truncate such a photo to the HTML's three
+                        // editable options or silently change any price.
+                        val exceedsV20OptionLimit = latestJob?.images?.any { image ->
+                            image.lines.any { it.options.size > 3 }
+                        } == true
+                        if (data.usesProductionOwnerApi() && exceedsV20OptionLimit) {
+                            OwnerPhotoStage8Screen(
+                                state = mockState, vm = data,
+                                resumeFromMenu = navController.previousBackStackEntry
+                                    ?.savedStateHandle?.get<Boolean>("resumeOwnerImport") == true,
+                                onBack = { navController.popBackStack() },
+                                onHome = { navController.navigate(OwnerPage.MGR_MENU.route) {
+                                    popUpTo(OwnerPage.MGR_HOME.route) { inclusive = false }
+                                    launchSingleTop = true
+                                } },
+                            )
+                        } else {
+                            val repository = if (data.usesProductionOwnerApi()) {
+                                // Real backend and authenticated owner data for
+                                // both Debug and Release. No BASIC fixture.
+                                LivePhotoReviewRepository(
+                                    owner = data,
+                                    importId = latestJob?.menuImportId,
                                 )
+                            } else {
+                                // Offline fixture mode is intentionally preview
+                                // only, not a fake server publication.
+                                PreviewOnlyPhotoReviewRepository(
+                                    MockPhotoReviewScenario.BASIC,
+                                )
+                            }
+                            val reviewVm: PhotoReviewViewModel = viewModel(
+                                key = "owner-review-${latestJob?.menuImportId ?: "fixture"}",
+                                factory = PhotoReviewViewModel.Factory(repository),
                             )
                             PhotoReviewScreen(
                                 vm = reviewVm,
                                 onLeave = {
-                                    // Both Back and "나중에 하기" return to the
-                                    // existing menu management (never a fake screen).
                                     if (!navController.popBackStack(
                                             OwnerPage.MGR_MENU.route, inclusive = false
                                         )) {
@@ -216,21 +249,6 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                                         }
                                     }
                                 },
-                            )
-                        } else {
-                            // Keep the deployed API-backed review/publish flow
-                            // untouched until Mock UI sign-off and API integration.
-                            OwnerPhotoStage8Screen(
-                                state = mockState, vm = data,
-                                resumeFromMenu = navController.previousBackStackEntry
-                                    ?.savedStateHandle?.get<Boolean>("resumeOwnerImport") == true,
-                                onBack = { navController.popBackStack() },
-                                onHome = {
-                                    navController.navigate(OwnerPage.MGR_MENU.route) {
-                                        popUpTo(OwnerPage.MGR_HOME.route) { inclusive = false }
-                                        launchSingleTop = true
-                                    }
-                                }
                             )
                         }
                     }
