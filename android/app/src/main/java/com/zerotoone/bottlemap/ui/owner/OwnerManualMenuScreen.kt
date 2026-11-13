@@ -270,6 +270,10 @@ internal fun OwnerManualMenuScreen(
         setOptions(draftOptions.mapIndexed { i, d -> if (i == index) transform(d) else d })
     }
     fun edit(item: MockBarMenuItem?) {
+        if (item != null && item.options.size > 3 && viewModel.usesProductionOwnerApi()) {
+            onNotice("이 메뉴는 가격 옵션이 4개 이상이어서 직접 수정할 수 없어요. 기존 메뉴는 유지됩니다.")
+            return
+        }
         editId = item?.barMenuItemId
         val p = products.firstOrNull { it.productId == item?.productId }
         linkedId = p?.productId?.takeIf { p.catalogMatched }
