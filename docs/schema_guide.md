@@ -683,12 +683,9 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 |---|---|---|---|
 | `id` | `uuid`, PK | 확인 ID | 관리자 웹이 처리할 확인을 가리킨다. |
 | `bar_id` | `uuid`, NOT NULL, FK → `bars.id` | 관악 위스키 바 ID | 업장별로 목록을 거르기 위해 항목의 업장을 함께 저장한다. |
-| `bar_menu_item_id` | `uuid`, NOT NULL, FK → `bar_menu_items.id` | 글렌알라키 항목 ID | 확인 대상 항목이다. 연결하면서 메뉴판의 줄이 그 업장의 다른 항목으로 옮겨져도 원래 항목을 가리킨다. |
+| `bar_menu_item_id` | `uuid`, NOT NULL, FK → `bar_menu_items.id` | 글렌알라키 항목 ID | 확인 대상 항목이다. 열려 있는 동안은 메뉴판의 줄을 따라간다. 이름 수정이나 다시 매칭으로 줄이 다른 항목으로 옮겨 가면 열린 확인도 그 항목으로 옮기거나 합친다(API 명세 3.14.1, 3.18.1). 운영자가 처리해 닫은 확인은, 처리하면서 줄이 다른 항목으로 옮겨 갔어도 처리한 항목을 가리킨 채 남는다. |
 | `display_name` | `varchar(200)`, NOT NULL | `글렌알라키 10년 CS 배치 11` | 항목이 메뉴판에 보이던 이름이다. 메뉴판의 줄(`menu_board_entries`)은 빠지면 지워지므로, 확인을 만들 때와 그 줄의 이름이 바뀌거나 줄이 다른 항목으로 옮겨 갈 때 함께 저장해, 닫힌 확인에서도 이름을 보여 준다(API 명세 3.18.2). |
-| `reasons` | `menu_item_check_reason[]`, NOT NULL | `{unlinked}` | 확인이 필요한 이유(4.21)다. 생긴 순서대로이며 최소 하나다. 열린 확인에 새 이유가 생기면 더한다. |
 | `status` | `menu_item_check_status`, NOT NULL, 기본 `open` | `open` | 4.22 |
-| `source_menu_import_id` | `uuid`, nullable, FK → `menu_imports.id` | 등록 작업 ID | 이유를 마지막으로 더한 검수 줄의 작업이다. 관리자 웹이 그 메뉴판 사진을 보여 준다. 직접 추가로 생긴 확인은 `null`이다. |
-| `source_extracted_item_id` | `uuid`, nullable, FK → `extracted_items.id` | 추출 항목 ID | 그 검수 줄이다. 원문, `source_box`, 추출한 연수와 에디션을 보여 준다. |
 | `discarded_options` | `jsonb`, NOT NULL, 기본 `[]` | `[{"optionLabel": null, "pourMl": 30, "priceKrw": 28000, "displayName": "글렌피딕 12", "extractedItemId": "…"}]` | 같은 항목으로 합치면서 가격이 부딪쳐 서버가 버린 옵션이다(이유 `price_conflict`, API 명세 8.12, 3.14.1). 운영자가 메뉴판에 남은 가격과 비교해, 버린 가격이 맞으면 직접 수정으로 고친다(API 명세 3.18.3). 버린 가격은 이곳 말고는 남지 않는다. |
 | `created_at` | `timestamptz`, NOT NULL | `2026-11-13T09:15:00Z` | 확인이 처음 생긴 시각이다. 열린 확인은 오래된 것부터 처리한다. |
 | `resolution` | `menu_item_check_resolution`, nullable | `link_existing` | `resolved`일 때 처리 방식(4.23)이다. |
@@ -699,6 +696,23 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 **핵심 제약:** 한 항목에 `open`인 확인은 최대 하나다(`bar_menu_item_id`에 `status = open` 조건의 partial unique index). 현재 메뉴판에 있는 상품 없는 위스키 항목에는 항상 `unlinked` 또는 `unlinked_by_name` 이유의 열린 확인이 있다. 항목이 현재 메뉴판에서 빠지거나 `kind = other`가 되면 그 항목의 열린 확인을 같은 트랜잭션에서 `dismissed`로 바꾼다. 상품 없는 위스키가 운영자 처리 없이 상품에 연결되면, 다른 이유가 있으면 `unlinked`, `unlinked_by_name` 이유만 빼고, 없으면 이유는 그대로 두고 `dismissed`로 바꾼다. 그래서 `reasons`는 닫힌 뒤에도 비지 않는다. 이름을 고쳐 메뉴판의 줄이 다른 항목으로 옮겨 가면 그 줄의 열린 확인도 새 항목으로 옮기고, 새 항목에 이미 열린 확인이 있으면 이유와 버린 옵션을 그 확인에 더한 뒤 옮겨 온 확인은 `dismissed`로 바꾼다(API 명세 3.14.1, 3.18.1). `kind = other`인 항목에는 확인을 만들지 않는다. 열린 확인의 `bar_menu_item_id`에는 partial unique index(`WHERE status = 'open'`)를 두며, 처리하거나 닫힌 확인은 같은 항목에 여러 개 있을 수 있다.
 
 **필요한 이유:** 업주가 카탈로그를 몰라도 메뉴를 바로 게시하게 하면서, 상품 연결과 카탈로그 품질은 운영자가 하루 안에 한 줄씩 책임지게 한다. 확인 기록은 처리한 뒤에도 남겨 매칭이 어디서 틀렸는지 볼 수 있게 한다.
+
+### 7.8 menu_item_check_reasons
+
+**역할:** 메뉴 항목 확인(7.7)의 이유를 하나씩, 그 이유를 만든 검수 줄과 함께 저장한다(API 명세 3.18.2의 `reasons[]`).
+
+| 컬럼 | 타입과 제약 | 예시 | 설명과 필요한 이유 |
+|---|---|---|---|
+| `id` | `uuid`, PK | 이유 행 ID | |
+| `check_id` | `uuid`, NOT NULL, FK → `menu_item_checks.id` | 확인 ID | 어느 확인의 이유인지 나타낸다. |
+| `reason` | `menu_item_check_reason`, NOT NULL | `attribute_conflict` | 확인이 필요한 이유(4.21)다. |
+| `source_menu_import_id` | `uuid`, nullable, FK → `menu_imports.id` | 등록 작업 ID | 이 이유를 만든 검수 줄의 작업이다. 관리자 웹이 그 메뉴판 사진을 보여 준다. 직접 추가나 직접 수정으로 생긴 이유는 `null`이다. |
+| `source_extracted_item_id` | `uuid`, nullable, FK → `extracted_items.id` | 추출 항목 ID | 그 검수 줄이다. 원문, `source_box`, 추출한 연수와 에디션을 보여 준다. `source_menu_import_id`와 함께 있거나 함께 `null`이다. |
+| `added_at` | `timestamptz`, NOT NULL | `2026-11-13T09:15:00Z` | 이유가 더해진 시각이다. 확인의 이유는 이 순서로 보여 준다. |
+
+**핵심 제약:** 확인 하나에 이유는 최소 하나이며, 확인이 닫힌 뒤에도 비지 않는다. 이유를 더해도 앞선 이유의 출처는 바뀌지 않는다. 같은 이유가 다른 줄에서 다시 생기면 행을 하나 더 만들고, 이유와 출처가 모두 같으면 더하지 않는다. 열린 확인 둘을 합치면 이유 행을 남는 확인으로 옮긴다(API 명세 3.18.1).
+
+**필요한 이유:** 한 항목에 여러 이유가 쌓일 수 있고, 운영자는 이유마다 다른 근거를 봐야 한다. 예를 들어 `attribute_conflict`는 그 이유를 만든 줄의 연수와 에디션과 비교해야 하므로, 다른 줄 때문에 `price_conflict`가 더해져도 그 근거가 바뀌면 안 된다.
 
 ## 8 AI Menu Import
 

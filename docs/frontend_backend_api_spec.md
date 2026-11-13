@@ -141,6 +141,8 @@ GET 주변 업장 조회 (위치 + 반경)
 
 업장별 권한은 대상 업장을 알아야 판단할 수 있다. 그래서 업주도 호출할 수 있는 API는 3번을 먼저 확인한 뒤 "호출자가 operator이거나 대상 업장의 현재 업주인가"(아니면 `403`)를 확인한다. 이 API들에서는 operator나 업주가 아닌 호출자도 없는 `barId`나 `menuImportId`를 보내면 `404`를 받는다. 메뉴 등록 작업은 작업이 속한 업장의 업주인지 확인한다. 카탈로그 검색은 대상이 없으므로 현재 업주인 업장이 하나 이상인지 확인한다.
 
+업주가 호출할 수 있는 API라도 카탈로그에 브랜드와 상품을 새로 만드는 부분은 operator만 할 수 있다. 검수 제출의 `create_product`(8.1)와 직접 추가의 `newProduct`(3.14.3)가 그렇다. 업주가 보내면 요청 전체를 `422 VALIDATION_FAILED`(`fieldErrors[].code = OPERATOR_ONLY`)로 거부한다. 같은 요청의 다른 부분은 업주도 보낼 수 있으므로 `403`이 아니라 필드 오류로 알린다.
+
 업주 여부는 매 요청 DB에서 확인하므로 승인과 해제가 다음 요청부터 반영된다. 업주 신청은 다른 사람의 신청이 있는지 알리지 않도록 권한이 없을 때도 `404 OWNER_APPLICATION_NOT_FOUND`를 반환한다(3.11.4).
 
 ### 2.3 주요 Enum
@@ -2730,13 +2732,14 @@ Content-Type: application/json
 |---|---|---|---|
 | `menuVersion` | 정수 | 예 (`null` 가능) | 3.14.1. 메뉴판이 없으면 `null` |
 | `productId` | UUID 문자열 | `productId`, `newProduct`, `kind` 중 하나 | 활성 상품. 없으면 `PRODUCT_NOT_FOUND`, 비활성이면 `PRODUCT_INACTIVE` |
-| `newProduct.brand` | 객체 | `newProduct`를 보내면 예 | 8.1 `create_product`의 `brand`와 같다. 없는 `brandId`는 `BRAND_NOT_FOUND` |
+| `newProduct.brand` | 객체 | `newProduct`를 보내면 예 | 8.1 `create_product`의 `brand`와 같다. 없는 `brandId`는 `BRAND_NOT_FOUND`. `newProduct`는 operator만 보낼 수 있다(아래) |
 | `newProduct.product` | 객체 | `newProduct`를 보내면 예 | 8.1 `create_product`의 `product`와 같다 |
 | `newProduct.aliases` | 배열 | 아니오 | 8.1 `create_product`의 `aliases`와 같다. 기본 `[]` |
 | `kind` | `MenuItemKind` | `productId`, `newProduct`, `kind` 중 하나 | 상품 없이 추가할 항목의 종류(2.3). `whisky`이면 운영자의 연결을 기다리는 위스키, `other`이면 위스키가 아닌 메뉴다 |
 | `displayName` | 문자열 | `kind`를 보내면 예, 아니면 아니오 | 메뉴판에 보일 이름. 앞뒤 공백을 지운 뒤 1~200자. 상품을 보낼 때 없거나 `null`이면 상품의 `displayName` |
 | `options` | 배열 | 예 | 3.14.2 |
 
+- `newProduct`는 operator만 보낼 수 있다. 업주가 보내면 아무것도 바꾸지 않고 `422`이며 `fieldErrors[].path = newProduct`, `code = OPERATOR_ONLY`다. 카탈로그에 없는 술은 업주가 `kind = whisky`로 상품 없이 추가하고 운영자가 연결한다(3.18). 이 검사는 호출자가 누구인지로 판단하므로, 권한(`403`) 확인 뒤 각 API의 업무 규칙 단계에서 한다(3.14.1의 검사 순서).
 - `productId`, `newProduct`, `kind` 중 둘 이상을 보내거나 하나도 보내지 않으면 `422`이고 `fieldErrors[].path = productId`, `code = EXACTLY_ONE_REQUIRED`다.
 - `kind`를 보냈는데 `displayName`이 없거나 `null`이면 `422`이고 `fieldErrors[].path = displayName`, `code = MISSING`이다. `displayName`을 정규화한 이름 키(3.14.1)가 빈 값이면 `NOT_NORMALIZABLE`이다.
 - 같은 상품이 이미 현재 메뉴판에 있으면 `409 MENU_ITEM_EXISTS`(`details.barMenuItemId`)다. 한 상품은 메뉴판에 한 번만 있고, 용량이나 가격을 더하려면 그 항목을 수정한다(3.14.4). 상품 없이 추가할 때는 이름 키가 같은 미연결 항목이 현재 메뉴판에 있으면 같은 오류다. 종류(`kind`)가 달라도 이름 키가 같으면 같은 항목으로 본다.
@@ -2822,7 +2825,7 @@ Content-Type: application/json
 | `409` | `MENU_OUTDATED` | 보낸 `menuVersion`이 현재 값과 다름. 다른 기기나 operator의 편집, 검수 반영, 성공한 요청의 재전송 | 3.9를 다시 불러오고, 입력 중이던 값은 유지한 채 다시 저장하게 함 |
 | `409` | `MENU_ITEM_EXISTS` | 추가하려는 상품, 또는 같은 이름 키의 미연결 항목이 이미 메뉴판에 있음(3.14.3). 미연결 항목의 이름을 다른 미연결 항목과 같게 바꿈(3.14.4). `details.barMenuItemId` | 그 항목의 수정 화면으로 안내 |
 | `409` | `DUPLICATE_BRAND_FOUND`, `DUPLICATE_PRODUCT_FOUND` | 신규 브랜드나 상품과 같은 것이 이미 있음 (3.14.3, 9.5) | 기존 브랜드나 상품을 보여 주고 고르게 함. `existingProduct.isActive = false`이면 상품 검색으로 안내 |
-| `422` | `VALIDATION_FAILED` | 필드 규칙 위반, `TOO_SHORT`, `TOO_LONG`, `DUPLICATE_OPTION_VALUES`, `DISCOUNT_NOT_LOWER`, `DISCOUNT_ENDED`, `END_BEFORE_START`, `EXACTLY_ONE_REQUIRED`, `NOT_NORMALIZABLE`(신규 브랜드·상품 이름이나 별칭, 또는 미연결 항목의 `displayName`에 쓸 수 있는 글자가 없음, 8.7과 같다), `PRODUCT_NOT_FOUND`, `PRODUCT_INACTIVE`, `BRAND_NOT_FOUND` | `fieldErrors` 표시 |
+| `422` | `VALIDATION_FAILED` | 필드 규칙 위반, `TOO_SHORT`, `TOO_LONG`, `DUPLICATE_OPTION_VALUES`, `DISCOUNT_NOT_LOWER`, `DISCOUNT_ENDED`, `END_BEFORE_START`, `EXACTLY_ONE_REQUIRED`, `OPERATOR_ONLY`(업주가 `newProduct`를 보냄, 3.14.3), `NOT_NORMALIZABLE`(신규 브랜드·상품 이름이나 별칭, 또는 미연결 항목의 `displayName`에 쓸 수 있는 글자가 없음, 8.7과 같다), `PRODUCT_NOT_FOUND`, `PRODUCT_INACTIVE`, `BRAND_NOT_FOUND` | `fieldErrors` 표시 |
 | `503` | `TEMPORARY_WRITE_CONFLICT` | 직렬화 충돌 3회 재시도 실패 | 잠시 후 같은 요청 재시도 |
 
 #### 3.14.8 품절 표시
@@ -3558,9 +3561,9 @@ GET /api/search/popular-products?limit=10
 
 #### 3.18.1 확인이 생기는 경우
 
-확인 하나는 메뉴 항목 하나(`barMenuItemId`)에 대한 것이다. 한 항목에 열린 확인(`status = open`)은 최대 하나이며, 새 사유가 생기면 열린 확인에 사유를 더한다.
+확인 하나는 메뉴 항목 하나(`barMenuItemId`)에 대한 것이다. 한 항목에 열린 확인(`status = open`)은 최대 하나이며, 새 사유가 생기면 열린 확인에 사유를 더한다. 사유마다 그 사유를 만든 검수 줄(출처)을 따로 남긴다.
 
-| 사유 (`reasons[]`) | 항목 상태 | 고객 검색 | 생기는 때 |
+| 사유 (`reasons[].reason`) | 항목 상태 | 고객 검색 | 생기는 때 |
 |---|---|---|---|
 | `unlinked` | 상품 없는 위스키 | 나오지 않는다 | 상품 없이 게시(8.10)하거나 상품 없이 직접 추가(3.14.3)한 `kind = whisky` 항목 |
 | `relinked_by_name` | 업주가 이름을 고쳐 다시 매칭한 결과 다른 상품에 연결됨. 상품 없던 항목이 연결된 경우도 같다 | 나온다 | 검수 제출(8.11), 직접 수정(3.14.4) |
@@ -3571,10 +3574,10 @@ GET /api/search/popular-products?limit=10
 - 현재 메뉴판에 있는 상품 없는 위스키 항목에는 항상 `unlinked` 또는 `unlinked_by_name` 사유의 열린 확인이 있다. 검수 반영이나 직접 추가로 그런 항목이 생기거나, 위스키가 아닌 메뉴가 다음 검수에서 `kind = whisky`로 바뀌면 같은 트랜잭션에서 확인을 만든다.
 - `kind = other`인 항목에는 확인을 만들지 않는다. 열린 확인이 있는 항목이 `other`가 되면(다음 검수에서 같은 이름 키의 줄을 `kind = other`로 게시한 경우, 8.10) 같은 트랜잭션에서 그 확인을 `dismissed`로 바꾼다. 운영자의 `mark_as_other`(3.18.3)는 확인을 `resolved`로 닫는다.
 - **확인 정리**: 다음 두 경우에는 같은 트랜잭션에서 확인을 이렇게 정리한다. 확인의 `reasons`는 닫힌 뒤에도 비지 않는다.
-  - 상품 없는 위스키 항목이 운영자 처리 없이 상품에 연결되면(5.4의 미연결 항목과 비교된 줄을 검수에서 상품에 연결해 게시, 8.11과 3.14.4의 다시 매칭) `unlinked`, `unlinked_by_name` 사유는 더 맞지 않는다. 다른 사유가 남아 있으면 이 두 사유만 빼고 확인을 열어 둔다. 다른 사유가 없으면 사유는 그대로 두고 확인을 `dismissed`로 바꾼다. 연수와 에디션이 다르면 8.7의 `attribute_conflict`로 다시 올라간다.
-  - 줄이 다른 항목으로 옮겨 가면(3.14.1의 연결 바꾸기, 8.11의 원래 항목 대신하기) 위 정리를 먼저 한 뒤, 열려 있는 줄의 확인을 옮긴 항목으로 옮긴다. 옮긴 항목에 이미 열린 확인이 있으면, 줄의 확인의 사유(중복 제외)와 버린 옵션(`discardedOptions`)을 그 확인에 더하고 줄의 확인은 `dismissed`로 바꾼다. 한 항목에 열린 확인은 하나뿐이기 때문이다.
+  - 상품 없는 위스키 항목이 운영자 처리 없이 상품에 연결되면(5.4의 미연결 항목과 비교된 줄을 검수에서 상품에 연결해 게시, 8.11과 3.14.4의 다시 매칭) `unlinked`, `unlinked_by_name` 사유는 더 맞지 않는다. 다른 사유가 남아 있으면 이 두 사유의 항목만 빼고 확인을 열어 둔다. 다른 사유가 없으면 사유는 그대로 두고 확인을 `dismissed`로 바꾼다. 연수와 에디션이 다르면 8.7의 `attribute_conflict`로 다시 올라간다.
+  - 줄이 다른 항목으로 옮겨 가면(3.14.1의 연결 바꾸기, 8.11의 원래 항목 대신하기) 위 정리를 먼저 한 뒤, 열려 있는 줄의 확인을 옮긴 항목으로 옮긴다. 옮긴 항목에 이미 열린 확인이 있으면, 줄의 확인의 사유 항목(출처 포함, 사유와 출처가 모두 같은 항목은 하나만)과 버린 옵션(`discardedOptions`)을 그 확인에 더하고 줄의 확인은 `dismissed`로 바꾼다. 한 항목에 열린 확인은 하나뿐이기 때문이다.
 - 항목이 현재 메뉴판에서 빠지면(검수의 `remove`, 3.14.5 삭제, 3.14.6 초기화) 그 항목의 열린 확인은 같은 트랜잭션에서 `dismissed`가 된다.
-- 확인의 출처(`source`)는 사유를 만든 검수 줄이다. 검수 제출로 사유를 더할 때는 출처도 그 줄로 바꾼다. 직접 추가(3.14.3)로 생긴 확인은 출처가 `null`이다. 직접 수정(3.14.4)으로 사유를 더할 때는 출처를 바꾸지 않는다(없으면 `null`로 둔다). 운영자가 처음 게시된 메뉴판 사진의 그 줄을 계속 볼 수 있게 하기 위해서다.
+- **출처**: 사유 항목마다 출처(`reasons[].source`)를 둔다. 검수 제출로 생긴 사유는 그 사유를 만든 검수 줄이고, 직접 추가(3.14.3)나 직접 수정(3.14.4)으로 생긴 사유는 `null`이다. 사유를 더해도 앞선 사유의 출처는 바뀌지 않는다. 예를 들어 `attribute_conflict`가 열려 있는 항목에 다른 줄 때문에 `price_conflict`가 더해져도, 운영자는 `attribute_conflict`를 그 사유를 만든 줄의 연수와 에디션으로 판단한다. 같은 사유가 다른 줄에서 다시 생기면 사유 항목을 하나 더 만든다. 사유와 출처가 모두 같으면 더하지 않는다.
 - 이름을 고쳐 메뉴판의 줄이 다른 항목으로 옮겨 가면(3.14.1의 연결 바꾸기, 8.11의 원래 항목 대신하기) 그 줄의 열린 확인은 메뉴판에서 빠진 것으로 보지 않고 위의 확인 정리대로 새 항목으로 옮기거나 합친다.
 
 #### 3.18.2 확인 목록 조회
@@ -3601,7 +3604,24 @@ Authorization: Bearer <access-token>
     {
       "checkId": "c0c0c0c0-c0c0-4c0c-8c0c-c0c0c0c0c0c1",
       "status": "open",
-      "reasons": ["unlinked"],
+      "reasons": [
+        {
+          "reason": "unlinked",
+          "addedAt": "2026-11-13T09:15:00Z",
+          "source": {
+            "menuImportId": "77777777-7777-4777-8777-777777777777",
+            "extractedItemId": "10000000-0000-4000-8000-000000000004",
+            "rawText": "글렌알라키 10 CS batch 11 30ml 26,000",
+            "sourceBox": [62, 418, 931, 447],
+            "imageUrl": "https://cdn.example.com/signed/menu-image-001",
+            "imageUrlExpiresAt": "2026-11-13T09:45:00Z",
+            "extractedProductName": "글렌알라키 10 CS batch 11",
+            "extractedBrandName": "글렌알라키",
+            "extractedAgeYears": 10,
+            "extractedEditionName": "Cask Strength Batch 11"
+          }
+        }
+      ],
       "createdAt": "2026-11-13T09:15:00Z",
       "resolvedAt": null,
       "resolution": null,
@@ -3622,18 +3642,6 @@ Authorization: Bearer <access-token>
         "options": [
           { "optionLabel": null, "pourMl": 30, "priceKrw": 26000 }
         ]
-      },
-      "source": {
-        "menuImportId": "77777777-7777-4777-8777-777777777777",
-        "extractedItemId": "10000000-0000-4000-8000-000000000004",
-        "rawText": "글렌알라키 10 CS batch 11 30ml 26,000",
-        "sourceBox": [62, 418, 931, 447],
-        "imageUrl": "https://cdn.example.com/signed/menu-image-001",
-        "imageUrlExpiresAt": "2026-11-13T09:45:00Z",
-        "extractedProductName": "글렌알라키 10 CS batch 11",
-        "extractedBrandName": "글렌알라키",
-        "extractedAgeYears": 10,
-        "extractedEditionName": "Cask Strength Batch 11"
       }
     }
   ],
@@ -3645,7 +3653,14 @@ Authorization: Bearer <access-token>
 |---|---|---|---|
 | `checkId` | UUID 문자열 | 아니오 | |
 | `status` | 문자열 | 아니오 | `open`(처리 전), `resolved`(운영자가 처리함), `dismissed`(항목이 메뉴판에서 빠져 닫힘) |
-| `reasons` | 문자열 배열 | 아니오 | 3.18.1의 사유. 생긴 순서이며 최소 1개 |
+| `reasons` | 배열 | 아니오 | 사유 항목. 생긴 순서이며 최소 1개. 확인이 닫힌 뒤에도 비지 않는다(3.18.1) |
+| `reasons[].reason` | 문자열 | 아니오 | 3.18.1의 사유 |
+| `reasons[].addedAt` | RFC 3339 문자열 | 아니오 | 이 사유가 더해진 시각 |
+| `reasons[].source` | 객체 | 예 | 이 사유를 만든 검수 줄. 직접 추가나 직접 수정으로 생긴 사유면 `null` |
+| `reasons[].source.menuImportId`, `extractedItemId` | UUID 문자열 | 아니오 | 그 검수 줄의 작업과 추출 항목 |
+| `reasons[].source.rawText`, `sourceBox` | | `sourceBox`만 예 | 5.4와 같다. 관리자 웹은 `imageUrl`에서 `sourceBox` 영역을 잘라 보여 준다 |
+| `reasons[].source.imageUrl`, `imageUrlExpiresAt` | | `imageUrlExpiresAt`만 예 | 그 줄이 있는 메뉴판 사진. 5.4와 같은 서명 URL이며, 만료되면 목록을 다시 조회한다 |
+| `reasons[].source.extractedProductName`, `extractedBrandName`, `extractedAgeYears`, `extractedEditionName` | | 예 | 5.4와 같은 추출값 |
 | `createdAt` | RFC 3339 문자열 | 아니오 | 확인이 처음 생긴 시각 |
 | `resolvedAt` | RFC 3339 문자열 | 예 | `resolved` 또는 `dismissed`가 된 시각 |
 | `resolution` | 문자열 | 예 | `resolved`일 때 처리 방식(3.18.3의 `resolution`) |
@@ -3662,10 +3677,6 @@ Authorization: Bearer <access-token>
 | `item.soldOut` | 불리언 | 아니오 | 3.14.8 |
 | `item.product` | 객체 | 예 | 지금 연결된 상품. 7.2의 `productId`, `displayName`, `brandId`, `brandName`, `category`, `ageYears`, `editionName`과 같다. 연결되지 않았으면 `null` |
 | `item.options` | 배열 | 아니오 | 지금 메뉴판의 옵션(3.9의 `optionLabel`, `pourMl`, `priceKrw`). 메뉴판에 없으면 `[]` |
-| `source` | 객체 | 예 | 사유를 만든 검수 줄. 직접 추가로 생긴 확인이면 `null` |
-| `source.rawText`, `source.sourceBox` | | `sourceBox`만 예 | 5.4와 같다. 관리자 웹은 `imageUrl`에서 `sourceBox` 영역을 잘라 보여 준다 |
-| `source.imageUrl`, `source.imageUrlExpiresAt` | | `imageUrlExpiresAt`만 예 | 그 줄이 있는 메뉴판 사진. 5.4와 같은 서명 URL이며, 만료되면 목록을 다시 조회한다 |
-| `source.extractedProductName`, `extractedBrandName`, `extractedAgeYears`, `extractedEditionName` | | 예 | 5.4와 같은 추출값 |
 | `nextCursor` | 문자열 | 예 | 다음 페이지의 `cursor`. 다음 페이지가 없으면 `null` |
 
 오류: `401`(3.1.5), `403 FORBIDDEN`(operator가 아님), `422 VALIDATION_FAILED`(`status`가 허용 값이 아님, `barId`가 UUID 형식이 아님, `limit` 범위 밖, 읽을 수 없거나 다른 필터에서 받은 `cursor`(`INVALID_CURSOR`)). `INVALID_CURSOR`를 받으면 첫 페이지부터 다시 조회한다. 없는 `barId`는 오류 없이 `items = []`다.
@@ -4565,12 +4576,12 @@ Content-Type: application/json
 | `action` | 용도 | `finalLineType` | 필드 |
 |---|---|---|---|
 | `select_existing_product` | 기존 상품에 연결 | `product` | `extractedItemId`, `productId`, `options` 필수. `correctedProductName`, `aliasesToAdd` 선택 |
-| `create_product` | 새 상품(필요하면 새 브랜드)을 만들어 연결 | `product` | `extractedItemId`, `brand`, `product`, `options` 필수. `correctedProductName`, `aliases` 선택 |
+| `create_product` | 새 상품(필요하면 새 브랜드)을 만들어 연결. operator만 | `product` | `extractedItemId`, `brand`, `product`, `options` 필수. `correctedProductName`, `aliases` 선택 |
 | `publish_without_product` | 상품 없이 메뉴 항목으로 게시 (8.10) | `product` | `extractedItemId`, `kind`, `options` 필수. `correctedProductName` 선택 |
 | `confirm_non_product` | 비상품 줄로 확정 | `section_header`, `description`, `unknown` | `extractedItemId`만 |
 | `reject` | 잡음·중복 등으로 제외 | 어떤 값이든 | `extractedItemId`만 |
 
-업주 화면은 카탈로그에서 찾지 못한 줄을 `create_product`가 아니라 `publish_without_product`로 보낸다. 브랜드와 상품 정보는 업주가 아니라 운영자가 정하기 때문이다(8.10). `create_product`는 그대로 두며, operator가 검수할 때 쓸 수 있다.
+업주 화면은 카탈로그에서 찾지 못한 줄을 `create_product`가 아니라 `publish_without_product`로 보낸다. 브랜드와 상품 정보는 업주가 아니라 운영자가 정하기 때문이다(8.10). `create_product`는 operator만 보낼 수 있다. 업주(operator가 아닌 호출자)가 보내면 `422`이고 `fieldErrors[].path = itemDecisions[i].action`, `code = OPERATOR_ONLY`다. 카탈로그는 운영자가 정한다는 원칙을 앱이 아니라 서버가 지키기 위해서다. 아무것도 반영하지 않는다.
 
 메뉴 항목으로 게시하는 결정(`select_existing_product`, `create_product`, `publish_without_product`)의 공통 필드:
 
@@ -4725,6 +4736,8 @@ OCR 잡음, 중복 인식 또는 사용할 수 없는 항목에 사용한다.
 
 ### 8.5 기존 브랜드로 신규 상품 생성
 
+8.5와 8.6의 `create_product`는 operator만 보낸다(8.1).
+
 ```json
 {
   "extractedItemId": "10000000-0000-4000-8000-000000000007",
@@ -4826,9 +4839,9 @@ OCR 잡음, 중복 인식 또는 사용할 수 없는 항목에 사용한다.
 - `changeDecisions`는 현재 `pending` 변경을 빠짐없이 한 번씩 포함해야 한다.
 - 변경의 `extractedItemIds`에 담긴 줄을 모두 `confirm_non_product`나 `reject`로 결정했으면 그 변경은 `ignore`여야 한다. `apply`이면 `fieldErrors[].path = changeDecisions[i].decision`, `code = CHANGE_WITHOUT_PRODUCT`다. 담긴 줄 중 하나라도 메뉴 항목으로 게시하면 `apply`할 수 있다. 예: 잔 줄과 병 줄이 합쳐진 변경에서 잔 줄만 제외하고 병 줄을 게시하려면 `apply`로 보낸다. 추출 항목이 없는 변경(`remove`)에는 이 규칙이 없다.
 - 변경을 `ignore`하면 그 변경에 담긴 줄 중 최종 결정이 여전히 그 변경의 대상(같은 상품, 상품이 없으면 같은 이름 키)인 줄은 메뉴판을 바꾸지 않는다. 대상이 달라진 줄은 그 결정대로 반영한다.
-- `finalLineType = product`이면 `select_existing_product`, `create_product`, `publish_without_product` 중 하나여야 한다.
+- `finalLineType = product`이면 `select_existing_product`, `create_product`, `publish_without_product` 중 하나여야 한다. `create_product`는 operator만 보낼 수 있다(`OPERATOR_ONLY`, 8.1).
 - 메뉴 항목으로 게시하는 줄은 `options`가 1~10개이고 모든 옵션에 가격이 있어야 한다(8.1). 상품 없이 게시하는 줄도 같다. `extractedOptionId`는 그 줄의 추출 옵션이어야 하고 한 줄에서 겹치지 않아야 한다.
-- 같은 상품(상품 없는 줄은 같은 이름 키)으로 게시하는 줄이 여럿이면 옵션을 합쳐 한 항목으로 게시한다(8.12). 같은 `productId`로 제출한 줄끼리(다시 매칭으로 상품이 바뀐 줄 제외) 표기와 용량이 같은 옵션의 가격이 다르면 `fieldErrors[].code = OPTION_PRICE_CONFLICT`다. 다시 매칭이나 이름 키 때문에 합쳐진 줄의 충돌은 거부하지 않는다(8.12).
+- 같은 상품(상품 없는 줄은 같은 이름 키)으로 게시하는 줄이 여럿이면 옵션을 합쳐 한 항목으로 게시한다(8.12). 같은 `productId`로 제출한 줄끼리(다시 매칭으로 상품이 바뀐 줄 제외) 표기와 용량이 같은 옵션의 가격이 다르면 `fieldErrors[].code = OPTION_PRICE_CONFLICT`다. 다시 매칭 때문에 합쳐진 줄과, 이름 키로 합쳐진 상품 없는 위스키 줄의 충돌은 거부하지 않는다. 이름 키로 합쳐진 위스키가 아닌 메뉴(`kind = other`)의 충돌은 같은 코드로 거부한다(8.12).
 - `publish_without_product`의 메뉴판 이름(`correctedProductName ?? extractedProductName`)이 없거나, 정규화한 이름 키(3.14.1)가 빈 값이면 `fieldErrors[].path = itemDecisions[i].correctedProductName`, `code = NOT_NORMALIZABLE`이다.
 - 기존 상품은 존재하고 연결 가능한 상태여야 한다.
 - 이름을 고친 위스키 줄은 이 이름으로 다시 매칭하고, 그 결과로 연결할 상품을 정한다(8.11). 제출한 `productId`와 달라져도 거부하지 않는다.
@@ -4836,7 +4849,7 @@ OCR 잡음, 중복 인식 또는 사용할 수 없는 항목에 사용한다.
   - 대상: `select_existing_product`로 게시하는 줄 중 이름을 고치지 않은 줄(8.11의 대상이 아닌 줄)이다. 후보에서 고른 상품과 검색에서 고른 상품 모두 같다. 이름을 고친 줄은 추출한 연수와 에디션이 예전 이름에서 나온 값이고, 다시 매칭(8.11)이 연결을 정하므로 비교하지 않는다. `create_product`와 `publish_without_product`도 비교하지 않는다.
   - 비교: 최종 상품과 그 줄의 `extractedAgeYears`, `extractedEditionName`을 매칭 흐름 문서 10장의 규칙으로 서버가 직접 비교한다. 후보의 `evidence`에 기대지 않으므로 검색으로 고른 상품도 같은 기준이다. 연수가 둘 다 있고 다르거나(`ageConflict`), 추출 에디션이 상품의 에디션명과 그 상품의 별칭 어디에도 없거나(`editionConflict`), 에디션이 추출값 쪽에만 있으면(`editionOnlyInExtracted`) 충돌이다. 자동 확정(`exact_match`)된 상품은 이 규칙으로 충돌이 없어 확정된 것이므로 그대로 받아들이면 확인에 올라가지 않는다.
   - 제출한 사람과 관계없이 같다. operator가 제출해도 확인에 올린다. 고르는 사람과 확인하는 사람이 같더라도 한 번 더 보게 하기 위해서다.
-  - 확인은 반영과 같은 트랜잭션에서 만들고, 출처는 그 검수 줄이다. 운영자는 확인 목록(3.18.2)에서 연결된 상품의 연수와 에디션, 추출값, 사진의 그 줄을 함께 보고, 맞으면 `keep`, 틀리면 `link_existing`으로 처리한다(3.18.3).
+  - 확인은 반영과 같은 트랜잭션에서 만들고, 이 사유의 출처(`reasons[].source`)는 그 검수 줄이다. 운영자는 확인 목록(3.18.2)에서 연결된 상품의 연수와 에디션, 그 사유의 출처에 있는 추출값과 사진의 그 줄을 함께 보고, 맞으면 `keep`, 틀리면 `link_existing`으로 처리한다(3.18.3).
   - 프론트엔드는 이 충돌로 업주에게 확인을 묻지 않는다. 후보의 `evidence`는 지금처럼 표시용으로만 쓴다.
 - 신규 브랜드·상품은 트랜잭션 안에서 중복을 다시 검사한다.
 - 백엔드는 운영자가 제출한 결정으로 최종 변경을 계산해 반영한다. 다른 후보를 고르거나 가격을 고쳐서 임시 diff와 달라진 변경도 운영자의 결정이므로 그대로 반영한다.
@@ -5050,11 +5063,12 @@ AI가 위스키가 아닌 메뉴로 분류한 줄(5.4의 `extractedKind = other`
 |---|---|
 | 업주가 같은 `productId`로 제출한 줄끼리 부딪침(다시 매칭으로 상품이 바뀌지 않은 줄) | 거부한다. `422 VALIDATION_FAILED`이고, 부딪친 옵션마다 `fieldErrors[].path`가 뒤에 오는 줄의 그 옵션(`itemDecisions[i].options[j]`), `code = OPTION_PRICE_CONFLICT`다. 아무것도 반영하지 않는다. 프론트엔드가 `productId`로 미리 묶어 막을 수 있는 충돌이다 |
 | 다시 매칭(8.11) 때문에 같은 상품이 된 줄끼리 부딪침 | 거부하지 않는다. 업주는 이 충돌을 화면에서 볼 수 없었기 때문이다. 이름을 고치지 않은 줄의 가격을 쓰고, 둘 다 고쳤으면 메뉴 순서가 앞선 줄의 가격을 쓴다. 합친 항목을 운영자 확인(3.18, 사유 `price_conflict`)에 올리고, 버린 옵션을 그 확인의 `discardedOptions`에 남긴다 |
-| 상품 없이 게시하는 줄끼리 이름 키가 같아 부딪침 | 거부하지 않는다. 이름 키는 서버의 정규화 함수로 계산하므로 프론트엔드가 같은 묶음을 미리 알 수 없기 때문이다(예: "글렌알라키 10 CS"와 "글렌알라키10CS"). 메뉴 순서가 앞선 줄의 가격을 쓴다. `kind = whisky`이면 합친 항목의 열린 확인(3.18)에 사유 `price_conflict`를 더하고 버린 옵션을 `discardedOptions`에 남긴다. `kind = other`이면 확인을 만들지 않는다 |
+| 상품 없이 게시하는 위스키 줄(`kind = whisky`)끼리 이름 키가 같아 부딪침 | 거부하지 않는다. 이름 키는 서버의 정규화 함수로 계산하므로 프론트엔드가 같은 묶음을 미리 알 수 없기 때문이다(예: "글렌알라키 10 CS"와 "글렌알라키10CS"). 메뉴 순서가 앞선 줄의 가격을 쓰고, 합친 항목의 열린 확인(3.18)에 사유 `price_conflict`를 더하고 버린 옵션을 `discardedOptions`에 남긴다 |
+| 합친 항목이 위스키가 아닌 메뉴(`kind = other`)인데 이름 키가 같은 줄끼리 부딪침 | 거부한다. 첫째 줄과 같은 `422 OPTION_PRICE_CONFLICT`다. 위스키가 아닌 메뉴는 운영자 확인에 올리지 않으므로 가격을 버리면 어디에도 남지 않고, 가격은 업주가 정할 일이기 때문이다. 프론트엔드는 이 묶음을 미리 알 수 없었을 수 있으므로, 오류를 받으면 `fieldErrors[].path`가 가리키는 줄과 같은 이름의 줄을 함께 보여 주고 가격을 고르게 한다 |
 
 **프론트엔드 처리**: 같은 `productId`로 제출하는 줄의 충돌은 프론트엔드가 제출 전에 막는다는 전제다. 서버의 `OPTION_PRICE_CONFLICT`는 그 전제가 깨졌을 때의 안전장치다.
 
-- 검수 화면은 같은 상품으로 정해진 카드를 "같은 위스키가 두 줄 있어 하나로 합쳤어요"로 묶고, 합친 옵션을 보여 준다. 상품 없이 게시하는 줄은 메뉴판 이름이 똑같은 카드만 묶어 보여 줄 수 있으며, 서버는 정규화한 이름 키로 더 넓게 합칠 수 있다(위 표의 셋째 줄). 같은 상품의 줄은 임시 diff 변경의 `extractedItemIds`(5.4)로도 알 수 있다. 업주가 후보나 검색에서 상품을 고르면 그 결과로 다시 묶는다.
+- 검수 화면은 같은 상품으로 정해진 카드를 "같은 위스키가 두 줄 있어 하나로 합쳤어요"로 묶고, 합친 옵션을 보여 준다. 상품 없이 게시하는 줄은 메뉴판 이름이 똑같은 카드만 묶어 보여 줄 수 있으며, 서버는 정규화한 이름 키로 더 넓게 합칠 수 있다(위 표의 셋째, 넷째 줄). 위스키가 아닌 메뉴는 이름이 똑같은 카드끼리도 가격 충돌을 미리 막는다. 같은 상품의 줄은 임시 diff 변경의 `extractedItemIds`(5.4)로도 알 수 있다. 업주가 후보나 검색에서 상품을 고르면 그 결과로 다시 묶는다.
 - 같은 표기와 용량에 가격이 다른 옵션이 있으면 업주가 하나를 고르게 하고, 고르기 전에는 게시 버튼을 막는다. 고르지 않은 옵션은 그 줄의 `options`에서 빼고 제출한다(8.1).
 - 묶인 카드는 서로 다른 위스키가 같은 상품으로 잘못 매칭된 것을 업주가 알아챌 기회이기도 하다. 업주가 한 줄의 상품을 바꾸면 묶음에서 빠진다.
 - 그래도 `OPTION_PRICE_CONFLICT`를 받으면 해당 카드의 묶음을 열어 다시 고르게 한다.
@@ -5158,7 +5172,7 @@ API가 보내는 오류는 예상하지 못한 서버 오류(`500 INTERNAL_ERROR
 `fieldErrors`의 `code`와 `message`는 두 종류다.
 
 - **요청 형식 검증**(필수값, 길이, 숫자 범위, 허용 값 등): Pydantic 오류 종류를 대문자로 바꾼 값을 `code`로 쓴다. 예: `MISSING`, `STRING_TOO_LONG`, `STRING_TOO_SHORT`, `TOO_SHORT`, `TOO_LONG`, `GREATER_THAN`, `GREATER_THAN_EQUAL`, `LESS_THAN_EQUAL`, `LITERAL_ERROR`, `UUID_PARSING`, `INT_PARSING`, `FLOAT_PARSING`, `BOOL_TYPE`, `DATE_TYPE`, `DATE_FROM_DATETIME_PARSING`, `EXTRA_FORBIDDEN`, `UNION_TAG_NOT_FOUND`, `UNION_TAG_INVALID`, `TIMEZONE_AWARE`. `message`는 Pydantic의 영어 기본 문구다.
-- **업무 규칙 검증**: 백엔드가 정한 `code`와 한국어 `message`를 쓴다. 예: `BLANK`, `NOT_SEARCHABLE`, `LAT_LNG_REQUIRED_TOGETHER`, `INVALID_CURSOR`, `MISSING_ITEM`, `DUPLICATE_ITEM`, `UNKNOWN_ITEM`, `MISSING_CHANGE`, `DUPLICATE_CHANGE`, `UNKNOWN_CHANGE`, `UNKNOWN_OPTION`, `DUPLICATE_OPTION`, `DUPLICATE_OPTION_VALUES`, `EXACTLY_ONE_REQUIRED`, `PRODUCT_NOT_FOUND`, `PRODUCT_INACTIVE`, `BRAND_NOT_FOUND`, `CHANGE_WITHOUT_PRODUCT`, `NOT_NORMALIZABLE`, `INVALID_BUSINESS_NUMBER`, `DATE_IN_FUTURE`, `COORDINATES_REQUIRED`, `BOUNDS_INVERTED`, `BOUNDS_TOO_LARGE`, `INVALID_CHARACTER`, `DUPLICATE_TAG`, `DUPLICATE_DAY`, `INVALID_TIME`, `SAME_OPEN_CLOSE`, `TIME_ON_CLOSED_DAY`, `DATE_IN_PAST`, `DATE_NOT_TODAY`, `END_BEFORE_START`, `IMAGE_DIMENSIONS_TOO_LARGE`, `DISCOUNT_NOT_LOWER`, `DISCOUNT_ENDED`, `RESOLUTION_NOT_ALLOWED`, `OPTION_PRICE_CONFLICT`.
+- **업무 규칙 검증**: 백엔드가 정한 `code`와 한국어 `message`를 쓴다. 예: `BLANK`, `NOT_SEARCHABLE`, `LAT_LNG_REQUIRED_TOGETHER`, `INVALID_CURSOR`, `MISSING_ITEM`, `DUPLICATE_ITEM`, `UNKNOWN_ITEM`, `MISSING_CHANGE`, `DUPLICATE_CHANGE`, `UNKNOWN_CHANGE`, `UNKNOWN_OPTION`, `DUPLICATE_OPTION`, `DUPLICATE_OPTION_VALUES`, `EXACTLY_ONE_REQUIRED`, `PRODUCT_NOT_FOUND`, `PRODUCT_INACTIVE`, `BRAND_NOT_FOUND`, `CHANGE_WITHOUT_PRODUCT`, `NOT_NORMALIZABLE`, `INVALID_BUSINESS_NUMBER`, `DATE_IN_FUTURE`, `COORDINATES_REQUIRED`, `BOUNDS_INVERTED`, `BOUNDS_TOO_LARGE`, `INVALID_CHARACTER`, `DUPLICATE_TAG`, `DUPLICATE_DAY`, `INVALID_TIME`, `SAME_OPEN_CLOSE`, `TIME_ON_CLOSED_DAY`, `DATE_IN_PAST`, `DATE_NOT_TODAY`, `END_BEFORE_START`, `IMAGE_DIMENSIONS_TOO_LARGE`, `DISCOUNT_NOT_LOWER`, `DISCOUNT_ENDED`, `RESOLUTION_NOT_ALLOWED`, `OPTION_PRICE_CONFLICT`, `OPERATOR_ONLY`.
 
 ### 9.4 검수 버전 충돌
 

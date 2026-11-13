@@ -813,11 +813,8 @@ Table menu_item_checks {
   bar_id uuid [not null, ref: > bars.id]
   bar_menu_item_id uuid [not null, ref: > bar_menu_items.id]
   display_name varchar(200) [not null, note: 'Name shown on the menu board, saved when the check is created and whenever the line is renamed or moved, so closed checks keep it']
-  reasons menu_item_check_reason[] [not null, note: 'In the order they arose; at least one, also after the check is closed']
   discarded_options jsonb [not null, default: '[]', note: 'Options the server dropped when merging lines with conflicting prices (price_conflict); the only place the dropped prices are kept']
   status menu_item_check_status [not null, default: 'open']
-  source_menu_import_id uuid [ref: > menu_imports.id, note: 'Import whose review line last added a reason; null for direct adds']
-  source_extracted_item_id uuid [ref: > extracted_items.id]
   created_at timestamptz [not null]
   resolution menu_item_check_resolution [note: 'Set when status = resolved']
   resolved_product_id uuid [ref: > products.id, note: 'Product the item ended up linked to; null for mark_as_other']
@@ -841,7 +838,30 @@ Table menu_item_checks {
   discarded options are added to that check and the moving check is dismissed.
   Removing the item from the board dismisses its open check in the same transaction; when a rename moves the
   board line to another item (API spec 3.14.1), the open check moves with it. kind = other items never get a check.
-  bar_menu_item_id keeps the original item even when linking moves the board entry to another item of the bar.
+  While a check is open, bar_menu_item_id follows its board line: when a rename or rematch moves the line to
+  another item (API spec 3.14.1), the open check moves or merges with it. Once an operator resolves a check, it
+  keeps pointing at the item it was resolved on, even if the resolution moved the line to another item.
+  Reasons live in menu_item_check_reasons, each with the review line that caused it.
+  '''
+}
+
+Table menu_item_check_reasons {
+  id uuid [pk]
+  check_id uuid [not null, ref: > menu_item_checks.id]
+  reason menu_item_check_reason [not null]
+  source_menu_import_id uuid [ref: > menu_imports.id, note: 'Import of the review line that raised this reason; null for direct adds and edits']
+  source_extracted_item_id uuid [ref: > extracted_items.id, note: 'The review line itself; set exactly when source_menu_import_id is set']
+  added_at timestamptz [not null]
+
+  indexes {
+    (check_id, added_at)
+  }
+
+  Note: '''
+  One reason of a menu item check, with its own evidence. A check has at least one reason, also after it is closed.
+  Adding a reason never changes the source of an earlier one, so an attribute_conflict keeps the line whose age and
+  edition the operator must compare. The same reason from another line is a new row; a row with the same reason and
+  source is not added twice. Merging checks moves these rows to the remaining check.
   '''
 }
 
@@ -969,6 +989,7 @@ TableGroup "Published Menus" {
   menu_board_entries
   menu_entry_options
   menu_item_checks
+  menu_item_check_reasons
 }
 
 TableGroup "AI Menu Import" {
