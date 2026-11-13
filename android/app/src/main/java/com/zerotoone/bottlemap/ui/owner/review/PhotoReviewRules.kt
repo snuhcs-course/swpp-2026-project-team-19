@@ -2,6 +2,7 @@ package com.zerotoone.bottlemap.ui.owner.review
 
 import com.zerotoone.bottlemap.data.owner.isBottleServingLabel
 import com.zerotoone.bottlemap.data.owner.servingIdentityKey
+import com.zerotoone.bottlemap.data.owner.canonicalServingLabel
 
 /**
  * Pure review rules ported from BottleMap_Minimal_UX_v18.html (problems(), itemGroup(),
@@ -124,11 +125,9 @@ object PhotoReviewRules {
             .values.filter { it.size > 1 }
             .flatMap { group -> group.map { it.id } }.toSet()
 
-    /**
-     * #164 also deduplicates all product-less menu proposals by the bar's
-     * normalized name key, regardless of whisky/other kind. Block exact
-     * normalized name collisions on the client rather than silently losing
-     * a second line's unique price options. Do not guess a catalog product.
+    /** §8.12 merges product-less rows by normalized name. Original whisky
+     * groups are reviewed together; pure OTHER groups with separate servings
+     * must be allowed through instead of forcing an exclusion/rename.
      */
     /** Mirrors Backend #164's app.core.normalize.normalize name key for
      * preflight ONLY; the server remains the authority on unique names.
@@ -147,8 +146,40 @@ object PhotoReviewRules {
         state.items.filter { !it.excluded && it.linkedProductId == null &&
             it.name.isNotBlank()
         }.groupBy { normalizedUnlinkedMenuName(it.name) }
-            .filterKeys { it.isNotBlank() }.values.filter { it.size > 1 }
+            .filterKeys { it.isNotBlank() }.values.filter { group ->
+                group.size > 1 && group.any { it.type != ReviewItemType.OTHER }
+            }
             .flatMap { group -> group.map { it.id } }.toSet()
+
+    /** §8.12: the server merges same-name OTHER lines, but a conflict on
+     * the exact option label + pour tuple returns 422. Check such conflicts
+     * before publishing, while allowing different sizes/labels to merge.
+     */
+    fun duplicateOtherPrices(state: PhotoReviewState): Set<String> {
+        val collisions = mutableSetOf<String>()
+        val sameName = state.items.filter { item ->
+            !item.excluded && item.mergedInto == null &&
+                item.type == ReviewItemType.OTHER && item.linkedProductId == null &&
+                normalizedUnlinkedMenuName(item.name).isNotEmpty()
+        }.groupBy { normalizedUnlinkedMenuName(it.name) }
+        sameName.values.filter { it.size > 1 }.forEach { group ->
+            val options = group.flatMap { item ->
+                optionSummary(item).filter { validPrice(it.price) }.map { opt ->
+                    val bottle = opt.bottle || isBottleServingLabel(opt.label)
+                    val label = if (bottle) "Bottle" else canonicalServingLabel(opt.label)
+                    val pour = if (bottle) null
+                        else opt.volume.takeIf(::validVolume)?.toInt()
+                    Triple(item.id, label to pour, opt.price)
+                }
+            }
+            options.groupBy { it.second }.values.forEach { candidates ->
+                if (candidates.map { it.first }.distinct().size > 1 &&
+                    candidates.map { it.third }.distinct().size > 1
+                ) collisions += candidates.map { it.first }
+            }
+        }
+        return collisions
+    }
 
     fun duplicatePhotoPriceConflicts(state: PhotoReviewState): Map<String, Set<String>> {
         data class Entry(val itemId: String, val price: Double, val servingLabel: String)
@@ -242,7 +273,8 @@ object PhotoReviewRules {
             normalizedUnlinkedMenuName(x.name).isBlank()) &&
             ReviewIssue.NAME !in p) p += ReviewIssue.NAME
         if (state != null) {
-            if (x.id in duplicatePhotoPriceConflicts(state))
+            if (x.id in duplicatePhotoPriceConflicts(state) ||
+                x.id in duplicateOtherPrices(state))
                 p += ReviewIssue.DUPLICATE_PRICE
             if (x.id in duplicateCatalogProductLines(state))
                 p += ReviewIssue.DUPLICATE_PRODUCT

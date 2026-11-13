@@ -324,22 +324,33 @@ class PhotoReviewRulesTest {
         assertEquals(2,PhotoReviewRules.countOptions(manuallyCombined))
     }
 
-    @Test fun repeatedBarOnlyPhotoNamesDoNotSilentlyDiscardASecondLine() {
-        val first=ReviewItem(id="unlinked-a",name=" 맥주 1 ",
-            type=ReviewItemType.OTHER,linkedProductId=null,price=8000.0)
-        val second=ReviewItem(id="unlinked-b",name="맥주1",
-            type=ReviewItemType.OTHER,linkedProductId=null,price=10000.0)
-        val duplicate=PhotoReviewState(items=listOf(first,second))
-        assertEquals(setOf("unlinked-a","unlinked-b"),
-            PhotoReviewRules.duplicateUnlinkedNames(duplicate))
-        assertTrue(ReviewIssue.DUPLICATE_MENU_NAME in
-            PhotoReviewRules.problems(first,duplicate))
-        assertFalse(PhotoReviewRules.stats(duplicate).canPublish)
-        val renamed=duplicate.copy(items=listOf(first,second.copy(name="맥주 2")))
-        assertTrue(PhotoReviewRules.duplicateUnlinkedNames(renamed).isEmpty())
-        assertTrue(PhotoReviewRules.stats(renamed).canPublish)
-        val excluded=duplicate.copy(items=listOf(first,second.copy(excluded=true)))
-        assertTrue(PhotoReviewRules.stats(excluded).canPublish)
+    @Test fun sameNameOtherLinesWithDifferentOptionsMayMergeOnServer() {
+        val first=ReviewItem(id="other-a",name=" 맥주 1 ",
+            type=ReviewItemType.OTHER,linkedProductId=null,
+            primaryOptionLabel="잔",volume=30.0,price=8000.0)
+        val second=ReviewItem(id="other-b",name="맥주1",
+            type=ReviewItemType.OTHER,linkedProductId=null,
+            primaryOptionLabel="병",bottle=true,volume=0.0,price=25000.0)
+        val review=PhotoReviewState(items=listOf(first,second))
+        assertTrue(PhotoReviewRules.duplicateUnlinkedNames(review).isEmpty())
+        assertTrue(PhotoReviewRules.duplicateOtherPrices(review).isEmpty())
+        assertTrue(PhotoReviewRules.stats(review).canPublish)
+    }
+
+    @Test fun sameNameOtherLinesWithSameOptionDifferentPricesNeedCorrection() {
+        val first=ReviewItem(id="other-a",name=" 맥주 1 ",
+            type=ReviewItemType.OTHER,linkedProductId=null,
+            primaryOptionLabel="잔",volume=30.0,price=8000.0)
+        val second=ReviewItem(id="other-b",name="맥주1",
+            type=ReviewItemType.OTHER,linkedProductId=null,
+            primaryOptionLabel="잔",volume=30.0,price=10000.0)
+        val review=PhotoReviewState(items=listOf(first,second))
+        assertEquals(setOf("other-a","other-b"),PhotoReviewRules.duplicateOtherPrices(review))
+        assertTrue(ReviewIssue.DUPLICATE_PRICE in PhotoReviewRules.problems(first,review))
+        assertFalse(PhotoReviewRules.stats(review).canPublish)
+        val fixed=review.copy(items=listOf(first,second.copy(price=8000.0)))
+        assertTrue(PhotoReviewRules.duplicateOtherPrices(fixed).isEmpty())
+        assertTrue(PhotoReviewRules.stats(fixed).canPublish)
     }
 
     @Test fun defaultPourChangesRefreshOnlyDefaultDerivedPrimaryAndSecondaryGlasses() {

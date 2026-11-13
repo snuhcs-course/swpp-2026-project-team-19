@@ -530,7 +530,10 @@ private fun IssueRowFor(x: ReviewItem, issue: ReviewIssue, vm: PhotoReviewViewMo
         ) {
             ReviewChoice("옵션 수정", { vm.toggleExpanded(id) }, testTag = "review-option-edit-$id")
         }
-        ReviewIssue.DUPLICATE_PRICE -> IssueRow("같은 위스키·용량의 사진별 가격이 달라요") {
+        ReviewIssue.DUPLICATE_PRICE -> IssueRow(
+            if (x.type == ReviewItemType.OTHER) "같은 메뉴·옵션의 사진별 가격이 달라요"
+            else "같은 위스키·용량의 사진별 가격이 달라요"
+        ) {
             ReviewChoice("가격 수정", { vm.toggleExpanded(id) },
                 testTag = "review-duplicate-price-edit-$id")
         }
