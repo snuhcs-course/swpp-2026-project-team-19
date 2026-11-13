@@ -83,15 +83,35 @@ class LivePhotoReviewMappingTest {
         assertEquals(12000,decision.correctedOptions!!.single().priceKrw)
     }
 
-    @Test fun largeOptionSetIsRejectedRatherThanTruncated() {
+    @Test fun largeOptionSetShowsAllAndBlocksPublishUntilThreeRemain() {
         val options=(1..4).map { option("opt-$it",it*15,10000+it*1000)
             .copy(optionOrder=it) }
-        try {
-            mapServerPhotoReview(response(item(options=options)),fixture())
-            fail("Cannot silently drop extracted options")
-        } catch (error: IllegalArgumentException) {
-            assertTrue(error.message.orEmpty().contains("3개"))
-        }
+        val dto = item(options=options)
+        val review = mapServerPhotoReview(response(dto),fixture())
+        val card = review.items.single()
+        assertEquals(4,PhotoReviewRules.countOptions(card))
+        assertFalse(PhotoReviewRules.stats(review).canPublish)
+        assertTrue(com.zerotoone.bottlemap.ui.owner.review.ReviewIssue.OPTION in
+            PhotoReviewRules.problems(card))
+        val trimmed = PhotoReviewRules.removeOption(card,1)
+        assertEquals(3,PhotoReviewRules.countOptions(trimmed))
+        val decision = mapConfirmedReviewDecision(
+            trimmed.copy(priceChoice=PriceChoice.PHOTO),dto,30.0,emptyMap())
+        assertEquals(listOf("opt-2"),decision.excludedOptionIds)
+        assertEquals(listOf("opt-1","opt-3","opt-4"),
+            decision.correctedOptions!!.map { it.optionId })
+    }
+
+    @Test fun missingPourUsesConfiguredBarDefaultInEveryOption() {
+        val options=listOf(option("opt-a",null,18000),
+            option("opt-b",null,22000).copy(optionOrder=2))
+        val card=mapServerPhotoReview(response(item(options=options)),fixture()).items.single()
+        assertEquals(30.0,card.volume,0.0)
+        assertEquals(30.0,card.options.single().volume,0.0)
+        assertEquals("30",PhotoReviewRules.optionFieldText(card,
+            PhotoReviewRules.OptionField.VOLUME,null))
+        assertEquals("30",PhotoReviewRules.optionFieldText(card,
+            PhotoReviewRules.OptionField.VOLUME,0))
     }
 
     @Test fun newProductRequiresBrandAndHonorsConfirmedProductFields() {
