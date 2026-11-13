@@ -41,6 +41,10 @@ fun manualMenuShortName(product: MockCatalogProduct, brandName: String): String 
     val remaining = name.removePrefix(brandName).trim().trimStart('·', ':', '-', '—').trim()
     return if (name.startsWith(brandName) && remaining.isNotEmpty()) remaining else name
 }
+private fun normalizedUnlinkedMenuSearch(value: String): String =
+    java.text.Normalizer.normalize(value, java.text.Normalizer.Form.NFKC)
+        .lowercase(java.util.Locale.ROOT).filterNot(Char::isWhitespace)
+
 fun manualMenuMatches(
     item: MockBarMenuItem, product: MockCatalogProduct?, brandName: String, query: String
 ): Boolean {
@@ -51,7 +55,14 @@ fun manualMenuMatches(
         product?.otherAlcoholKind) + item.options.flatMap { o ->
         listOfNotNull(o.pourMl?.toString(), o.label, o.priceKrw.toString())
     }
-    return candidates.any { it.contains(term, ignoreCase = true) }
+    // This is a search of THIS BAR'S published menu, not a shared catalog
+    // lookup. Product-less menu names (e.g. "위스키 1") must match "위스키1"
+    // regardless of spacing or Unicode width.
+    val key = normalizedUnlinkedMenuSearch(term)
+    return candidates.any { candidate ->
+        candidate.contains(term, ignoreCase = true) ||
+            normalizedUnlinkedMenuSearch(candidate).contains(key)
+    }
 }
 fun manualMenuOptionError(options: List<MockMenuOption>, category: String, original: List<MockMenuOption> = emptyList()): String? {
     if (options.isEmpty() || options.size > MANUAL_MENU_MAX_OPTIONS) return "가격 옵션은 1~3개여야 해요."
