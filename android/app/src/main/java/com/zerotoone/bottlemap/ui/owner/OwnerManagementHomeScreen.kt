@@ -641,4 +641,6 @@ fun OwnerMenuQuickEntryScreen(
     onBack: () -> Unit,
     onNewPhoto: () -> Unit,
     onExistingJob: (MockImportStatus) -> Unit,
-) = OwnerManualMenuScreen(state, viewModel, onBack, onNewPhoto, onExistingJob)
+    onNotice: (String) -> Unit = {},
+) = OwnerManualMenuScreen(state, viewModel, onBack, onNewPhoto, onExistingJob,
+    onNotice = onNotice)
