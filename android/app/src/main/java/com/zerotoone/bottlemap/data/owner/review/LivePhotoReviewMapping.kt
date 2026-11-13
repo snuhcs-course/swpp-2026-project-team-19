@@ -107,7 +107,7 @@ private fun mapServerReviewItem(
         type = if (other) ReviewItemType.OTHER else ReviewItemType.WHISKY,
         match = match,
         matchConfirmed = linkedId != null,
-        newConfirmed = linkedId != null,
+        newConfirmed = linkedId != null || other,
         linkedProductId = linkedId,
         linkedProductName = selectedCandidate?.displayName.takeIf { linkedId != null },
         newProductName = dto.newProductDraft?.displayName ?: displayName,
@@ -124,7 +124,7 @@ private fun mapServerReviewItem(
         photoPrice = photoPrice,
         priceChoice = if (oldPrice != null && photoPrice != null &&
             oldPrice != photoPrice) PriceChoice.NONE else PriceChoice.PHOTO,
-        nameSaved = linkedId != null || nonProduct,
+        nameSaved = linkedId != null || other,
         excluded = nonProduct,
         raw = dto.rawText,
         photoIndex = photoOrder,
@@ -206,7 +206,7 @@ internal fun mapConfirmedReviewDecision(
             excludedOptionIds = excludedOptionIds,
         )
     }
-    require(card.newConfirmed && card.nameSaved) {
+    if (card.type == ReviewItemType.WHISKY) require(card.newConfirmed && card.nameSaved) {
         "${card.name}: 신규 상품 정보를 확인해 주세요."
     }
     val sourceDraft = extracted.newProductDraft
@@ -214,9 +214,10 @@ internal fun mapConfirmedReviewDecision(
         ?: sourceDraft?.brandText)?.trim().orEmpty()
     // Brand metadata can be absent for beer/other menus. The owner review
     // submits a bar-only item, not a globally canonical Product.
-    val category = sourceDraft?.category?.takeIf { it.isNotBlank() }
-        ?: if (card.type == ReviewItemType.WHISKY) "whisky" else
-            error("${card.name}: 상품 분류를 확인해 주세요.")
+    val category = if (card.type == ReviewItemType.WHISKY) "whisky"
+        else sourceDraft?.category?.takeIf {
+            it.isNotBlank() && !it.equals("whisky", ignoreCase = true)
+        } ?: "otherAlcohol"
     val brandId = existingBrands[brandText.lowercase()]
     return MockReviewDecision(
         MockDecisionKind.CREATE_PRODUCT,
