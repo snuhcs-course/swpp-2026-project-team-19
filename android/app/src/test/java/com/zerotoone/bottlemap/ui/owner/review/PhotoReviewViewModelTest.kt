@@ -4,6 +4,7 @@ import com.zerotoone.bottlemap.data.owner.review.MockPhotoReviewRepository
 import com.zerotoone.bottlemap.data.owner.review.MockPhotoReviewScenario
 import com.zerotoone.bottlemap.data.owner.review.PhotoReviewRepository
 import com.zerotoone.bottlemap.data.owner.review.ReviewAlreadyAppliedException
+import com.zerotoone.bottlemap.data.owner.review.ReviewVersionConflictException
 import com.zerotoone.bottlemap.network.BottleMapApiException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
@@ -595,6 +596,48 @@ class PhotoReviewViewModelTest {
         val result = vm.publishOutcome.value as PublishOutcome.Failed
         assertEquals(PublishFailure.VALIDATION, result.reason)
         assertTrue(result.detail!!.contains("입력값을 확인해 주세요."))
+    }
+
+    @Test fun queuedDraftWritesCannotSaveOldReviewUnderReloadedVersion() = runTest(dispatcher) {
+        val firstSaveStarted = CompletableDeferred<Unit>()
+        val unblockFirstSave = CompletableDeferred<Unit>()
+        val mock = MockPhotoReviewRepository(MockPhotoReviewScenario.READY)
+        var loads = 0
+        var writes = 0
+        val repo = object : PhotoReviewRepository by mock {
+            override suspend fun loadReview(): PhotoReviewState {
+                loads++
+                return mock.loadReview()
+            }
+            override suspend fun saveDraft(state: PhotoReviewState) {
+                writes++
+                if (writes == 1) {
+                    firstSaveStarted.complete(Unit)
+                    unblockFirstSave.await()
+                }
+                assertEquals("No stale draft may commit after reloading new version", 1, loads)
+            }
+            override suspend fun publish(state: PhotoReviewState) {
+                throw ReviewVersionConflictException()
+            }
+        }
+        val vm = PhotoReviewViewModel(repo)
+        vm.requestPublish()
+        firstSaveStarted.await()
+        vm.confirmPublish()
+        assertEquals(PublishFailure.CONFLICT,
+            (vm.publishOutcome.value as PublishOutcome.Failed).reason)
+        vm.returnToReview()
+        assertEquals(1,loads) // reload waits for the in-flight old-version save
+        unblockFirstSave.complete(Unit)
+        assertEquals(2,loads)
+        assertEquals(1,writes) // queued stale modal-close save was invalidated
+        assertTrue(vm.load.value is PhotoReviewLoad.Ready)
+    }
+
+    @Test fun typedPreflightReviewVersionConflictIsNotValidation() {
+        assertEquals(PublishFailure.CONFLICT,
+            classifyPublishFailure(ReviewVersionConflictException()))
     }
 
 }

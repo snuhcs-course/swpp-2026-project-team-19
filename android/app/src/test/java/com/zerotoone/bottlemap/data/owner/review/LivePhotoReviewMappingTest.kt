@@ -2,6 +2,7 @@ package com.zerotoone.bottlemap.data.owner.review
 
 import com.zerotoone.bottlemap.data.owner.MockBar
 import com.zerotoone.bottlemap.data.owner.MockBarMenuItem
+import com.zerotoone.bottlemap.data.owner.MockCatalogProduct
 import com.zerotoone.bottlemap.data.owner.MockMenuOption
 import com.zerotoone.bottlemap.data.owner.MockOwnerSnapshot
 import com.zerotoone.bottlemap.data.owner.MockDecisionKind
@@ -444,6 +445,46 @@ class LivePhotoReviewMappingTest {
         assertTrue(reviewerCandidateConflicts(12,"Sherry Cask",12,"Port Cask"))
         assertFalse(reviewerCandidateConflicts(12,"SHERRY CASK",12,"sherry cask"))
         assertFalse(reviewerCandidateConflicts(12,null,12,"Sherry Cask"))
+    }
+
+    @Test fun existingUnlinkedWhiskyNeedsPriceChoiceBeforeReplacingDiscountedServing() {
+        val local = fixture().copy(
+            products = listOf(MockCatalogProduct("unlinked:row1", "",
+                "위스키 12년", catalogMatched = false)),
+            menuItems = listOf(MockBarMenuItem("row1", "bar-1", "unlinked:row1",
+                listOf(MockMenuOption("old-30", "잔", 30, 12000),
+                    MockMenuOption("old-60", "샷", 60, 26000)),
+                displayNameOverride = "위스키 12년")),
+        )
+        val dto = item(status = "unmatched", proposedId = null).copy(candidates = emptyList())
+        val state = mapServerPhotoReview(response(dto),local)
+        val card = state.items.single()
+        assertEquals(listOf(12000, 15000), card.priceCandidates.map { it.priceKrw }.sorted())
+        assertEquals(setOf("ml:30"), PhotoReviewRules.pendingPriceServings(card))
+        assertFalse(PhotoReviewRules.stats(state).canPublish)
+        val chosen = PhotoReviewRules.chooseServingPrice(card, "ml:30", 12000)
+        assertTrue(PhotoReviewRules.pendingPriceServings(chosen).isEmpty())
+        assertEquals(12000.0, chosen.price, 0.0)
+    }
+
+    @Test fun existingUnlinkedOtherMenuAlsoRequiresSavedPriceReview() {
+        val local = fixture().copy(
+            products = listOf(MockCatalogProduct("unlinked:row2", "",
+                "위스키 12년", catalogMatched = false)),
+            menuItems = listOf(MockBarMenuItem("row2", "bar-1", "unlinked:row2",
+                listOf(MockMenuOption("old", "잔", 30, 12000)),
+                displayNameOverride = "위스키 12년")),
+        )
+        val dto = item(status = "unmatched", proposedId = null)
+            .copy(extractedKind = "other", candidates = emptyList(),
+                newProductDraft = null)
+        val card = mapServerPhotoReview(response(dto),local).items.single()
+        assertEquals(com.zerotoone.bottlemap.ui.owner.review.ReviewItemType.OTHER, card.type)
+        assertTrue(com.zerotoone.bottlemap.ui.owner.review.ReviewIssue.PRICE_CHOICE in
+            PhotoReviewRules.problems(card))
+        val selected = PhotoReviewRules.chooseServingPrice(card, "ml:30", 12000)
+        assertFalse(com.zerotoone.bottlemap.ui.owner.review.ReviewIssue.PRICE_CHOICE in
+            PhotoReviewRules.problems(selected))
     }
 
 }
