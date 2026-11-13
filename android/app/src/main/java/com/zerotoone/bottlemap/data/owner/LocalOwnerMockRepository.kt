@@ -477,6 +477,9 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             // Photo-imported rows can predate the direct editor's three-option cap.
             // Keep their original overflow untouched when editing the first three.
             val oldRow = state.menuItems.firstOrNull { it.barMenuItemId == item.barMenuItemId }
+            val detachingCatalog = oldRow != null && oldRow.productId != item.productId &&
+                !proposedProduct.catalogMatched &&
+                state.products.any { it.productId == oldRow.productId && it.catalogMatched }
             val editableLimit = MANUAL_MENU_MAX_OPTIONS
             val legacyTail = oldRow?.options?.drop(editableLimit).orEmpty()
             val preservesLegacyTail = oldRow != null && legacyTail.isNotEmpty() &&
@@ -507,7 +510,8 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             }) { "이미 등록한 제품이에요. 기존 메뉴에서 용량·가격을 수정해 주세요." }
             require(state.menuItems.none {
                 it.barMenuItemId == item.barMenuItemId &&
-                    (it.productId != item.productId || it.barId != item.barId)
+                    (it.productId != item.productId || it.barId != item.barId) &&
+                    !detachingCatalog
             }) { "기존 메뉴의 제품 ID는 변경할 수 없어요." }
             require(state.menuItems.none { existing ->
                 existing.barMenuItemId != item.barMenuItemId && existing.options.any { other ->
@@ -539,13 +543,21 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             } else state.brands
             val newProducts = state.products.filterNot { it.productId == finalProduct.productId } +
                 finalProduct
-            val saved = retainedMenuId(state, item)
+            // Match the production API: detaching a canonical listing creates
+            // a new bar-local row with a new ID. The global Product is untouched.
+            val localItem = if (detachingCatalog) item.copy(
+                barMenuItemId = "local-menu-" + java.util.UUID.randomUUID().toString()
+            ) else item
+            val saved = retainedMenuId(state, localItem)
             requireUnclaimedMenuId(state, saved)
-            require(state.menuItems.none { it.barMenuItemId == saved.barMenuItemId &&
+            val withoutDetached = if (detachingCatalog)
+                state.menuItems.filterNot { it.barMenuItemId == oldRow?.barMenuItemId }
+            else state.menuItems
+            require(withoutDetached.none { it.barMenuItemId == saved.barMenuItemId &&
                 (it.barId != saved.barId || it.productId != saved.productId) })
             state.copy(
                 brands = newBrands, products = newProducts,
-                menuItems = retainMenuOrder(state.menuItems, saved),
+                menuItems = retainMenuOrder(withoutDetached, saved),
                 menuItemIdHistory = state.menuItemIdHistory +
                     (menuHistoryKey(saved.barId, saved.productId) to saved.barMenuItemId),
                 bars = state.bars.map { b ->
