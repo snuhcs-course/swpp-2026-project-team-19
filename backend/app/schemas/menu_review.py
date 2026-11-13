@@ -45,6 +45,13 @@ class OptionDecision(_Strict):
     correctedPourMl: int | None = Field(default=None, ge=1, le=MAX_POUR_ML)
 
 
+class AddedMenuOption(_Strict):
+    """One owner-added serving absent from OCR. No fabricated extractedOptionId."""
+    optionLabel: str | None = Field(default=None, min_length=1, max_length=100)
+    pourMl: int | None = Field(default=None, ge=1, le=32767)
+    priceKrw: int = Field(gt=0, le=MAX_PRICE_KRW)
+
+
 class ExistingBrand(_Strict):
     type: Literal["existing"]
     brandId: UUID
@@ -77,6 +84,10 @@ class _ProductDecision(_Strict):
     # OCR retains every extracted option; explicitly excluded IDs are not published.
     excludedOptionIds: list[UUID] = Field(default_factory=list,
         description="Extracted option IDs omitted from the final (max 3) menu")
+    addedOptions: list[AddedMenuOption] = Field(
+        default_factory=list,
+        description="Additional owner-entered servings not extracted by OCR; maximum three total at publish",
+    )
 
 
 class SelectExistingProduct(_ProductDecision):
