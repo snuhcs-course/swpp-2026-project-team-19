@@ -37,6 +37,35 @@ class LocalOwnerMockRepositoryTest {
         assertTrue("Expected invalid mock operation to fail", failed)
     }
 
+    @Test fun liveOwnerReviewStagesBarOnlyLineWithoutBrandAndExcludesOnlySelectedOcrId() {
+        val lines=listOf(
+            MockExtractedLine("line-a","맥주 1",MockLineKind.PRODUCT,
+                options=listOf(MockMenuOption("ocr-a",priceKrw=8000))),
+            MockExtractedLine("line-b","맥주 1",MockLineKind.PRODUCT,
+                options=listOf(MockMenuOption("ocr-b",priceKrw=9000))),
+        )
+        val import=MockMenuImport("import-live","fixture-bar",
+            MockImportStatus.READY_FOR_REVIEW,3,
+            listOf(MockPhotoExtraction("photo-live","content://photo/live",1,lines)))
+        val fixture=OwnerMockFixtures.registeredBar()
+        val r=repo(InMemoryMockOwnerStateStore(fixture.copy(imports=listOf(import))))
+        val unlinked=MockReviewDecision(
+            MockDecisionKind.CREATE_PRODUCT,
+            correctedOptions=listOf(MockMenuOption("ocr-a",priceKrw=8000)),
+            newProduct=MockNewProductDraft("맥주 1",category="other"),
+        )
+        // The mock decideLine requires a canonical brand, but merged #164's
+        // publish_without_product does not; this live staging path must work.
+        r.stageLiveReviewDecision("import-live","line-a",3,unlinked)
+        r.stageLiveReviewDecision("import-live","line-b",3,
+            MockReviewDecision(MockDecisionKind.EXCLUDE))
+        val staged=ready(r).imports.single().images.single().lines
+        assertEquals(MockDecisionKind.CREATE_PRODUCT,staged[0].decision?.kind)
+        assertEquals("other",staged[0].decision?.newProduct?.category)
+        assertEquals(MockDecisionKind.EXCLUDE,staged[1].decision?.kind)
+        rejects { r.stageLiveReviewDecision("import-live","line-a",2,unlinked) }
+    }
+
     @Test fun managerMenuConfirmationPersistsWithoutChangingPublicationTimestamp() {
         val store = InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar())
         val r = repo(store)
