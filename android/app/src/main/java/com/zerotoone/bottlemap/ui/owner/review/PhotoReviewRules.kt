@@ -9,7 +9,7 @@ object PhotoReviewRules {
     const val MAX_OPTIONS = 3
 
     fun optionSummary(x: ReviewItem): List<ReviewOption> =
-        (if (x.primaryHasOption) listOf(ReviewOption(x.volume, x.price, x.bottle)) else emptyList()) + x.options
+        (if (x.primaryHasOption) listOf(ReviewOption(x.volume, x.price, x.bottle, x.primarySourceOptionId)) else emptyList()) + x.options
 
     fun countOptions(x: ReviewItem): Int = (if (x.primaryHasOption) 1 else 0) + x.options.size
 
@@ -230,7 +230,8 @@ object PhotoReviewRules {
         val changed = if (prev != null && prev.type == target) {
             x.copy(
                 volume = prev.volume, volumeSource = prev.volumeSource, bottle = prev.bottle,
-                primaryHasOption = prev.primaryHasOption, options = prev.options, match = prev.match,
+                primaryHasOption = prev.primaryHasOption, options = prev.options,
+                primarySourceOptionId = prev.primarySourceOptionId, match = prev.match,
                 matchConfirmed = prev.matchConfirmed, nameSaved = prev.nameSaved,
                 newConfirmed = prev.newConfirmed, linkedProductId = prev.linkedProductId,
                 linkedProductName = prev.linkedProductName, newProductName = prev.newProductName,
@@ -245,13 +246,16 @@ object PhotoReviewRules {
                 linkedProductId = x.linkedProductId, linkedProductName = x.linkedProductName,
                 newProductName = x.newProductName, candidates = x.candidates,
                 rawOptionEdits = x.rawOptionEdits,
+                primarySourceOptionId = x.primarySourceOptionId,
             )
             if (target == ReviewItemType.OTHER) {
                 x.copy(classificationSnapshot = snapshot, volume = Double.NaN, options = emptyList(),
+                    primarySourceOptionId = null,
                     primaryHasOption = false, bottle = false)
             } else {
                 x.copy(classificationSnapshot = snapshot, volume = defaultPour, volumeSource = VolumeSource.DEFAULT,
-                    options = emptyList(), primaryHasOption = true, bottle = false, match = ReviewMatch.NEW,
+                    options = emptyList(), primaryHasOption = true, primarySourceOptionId = null,
+                    bottle = false, match = ReviewMatch.NEW,
                     newConfirmed = false, nameSaved = false, matchConfirmed = false, newProductName = x.name)
             }
         }
@@ -323,7 +327,7 @@ object PhotoReviewRules {
         } else x.copy(options = x.options + ReviewOption(), expanded = true)
 
     fun removeOption(x: ReviewItem, index: Int?): ReviewItem =
-        if (index == null) x.copy(primaryHasOption = false, expanded = true)
+        if (index == null) x.copy(primaryHasOption = false, primarySourceOptionId = null, expanded = true)
         else x.copy(options = x.options.filterIndexed { i, _ -> i != index }, expanded = true)
 
     // ---- Publish summary ----
