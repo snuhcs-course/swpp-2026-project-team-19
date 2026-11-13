@@ -42,7 +42,10 @@ class Route:
 
     @property
     def url(self) -> str:
-        return self.path.format(barId=MISSING_ID, menuImportId=MISSING_ID, applicationId=MISSING_ID)
+        return self.path.format(
+            barId=MISSING_ID, menuImportId=MISSING_ID,
+            applicationId=MISSING_ID, localItemId=MISSING_ID,
+        )
 
 
 @dataclass(frozen=True)
@@ -85,6 +88,12 @@ OPERATOR_ONLY = [
         {"json": {"reason": "확인할 수 없습니다."}},
         (404, "OWNER_APPLICATION_NOT_FOUND"),
         (404, "USER_NOT_FOUND"),
+    ),
+    Route(
+        "post",
+        "/api/bars/{barId}/menu/local-items/{localItemId}/approve",
+        {"json": {"menuVersion": 1, "productId": MISSING_ID}},
+        (404, "BAR_NOT_FOUND"),
     ),
     # Records no reviewer, so a temporary-login operator needs no users row.
     Route("post", "/api/owner-applications/{applicationId}/verify-business", {}, (404, "OWNER_APPLICATION_NOT_FOUND")),
