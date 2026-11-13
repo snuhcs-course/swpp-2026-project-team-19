@@ -1,0 +1,1848 @@
+{
+  "condition": "hybrid",
+  "model": "gemini-3.5-flash-lite",
+  "thinking_level": "medium",
+  "source_image": "011_mirabeau_03.jpeg",
+  "photo_id": "011_미라보_03",
+  "prompt_version": "hybrid-v1",
+  "prompt_sha256": "b73f15d2b20460fc9e51dc12926e57d09fe3548a47ef8cfc6771c6a3ebe1ac50",
+  "started_at": "2026-11-13T05:26:40.134632+00:00",
+  "latency_ms": 19929,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 8024,
+  "output_tokens": 4616,
+  "thought_tokens": 0,
+  "total_tokens": 12640,
+  "output": {
+    "items": [
+      {
+        "raw_name": "라가불린(Lagavulin) 8년",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "라가불린(Lagavulin) 11년 스위트 피트",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "라가불린(Lagavulin) 디스틸러리 에디션 2023",
+        "price_krw": 21000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "라가불린(Lagavulin) 16년",
+        "price_krw": 25000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "킬호만(Kilchoman) 마키어 베이",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "킬호만(Kilchoman) 사닉",
+        "price_krw": 42000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "킬호만(Kilchoman) 마키어베이 캐스크 스트랭스",
+        "price_krw": 21000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "킬호만(Kilchoman) 코리아 스몰배치",
+        "price_krw": 22000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "킬호만(Kilchoman) 배치 스트랭스",
+        "price_krw": 23000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "킬호만(Kilchoman) 사닉 캐스크 스트랭스",
+        "price_krw": 25000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "킬호만(Kilchoman) 피노 셰리 캐스크",
+        "price_krw": 27000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "킬호만(Kilchoman) 꼬냑 캐스크",
+        "price_krw": 27000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "킬호만(Kilchoman) PX 셰리 캐스크",
+        "price_krw": 27000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "킬호만(Kilchoman) 로크곰",
+        "price_krw": 27000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "킬호만(Kilchoman) 100% 아일라",
+        "price_krw": 27000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "킬호만(Kilchoman) 포트 싱글 캐스크 피니시",
+        "price_krw": 28000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "킬호만(Kilchoman) 소테른 캐스크",
+        "price_krw": 28000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "킬호만(Kilchoman) 포트 캐스크",
+        "price_krw": 28000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "킬호만(Kilchoman) 16년",
+        "price_krw": 54000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "브룩라디(Bruichladdich) 스코티시 발리",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "브룩라디(Bruichladdich) 아일라 발리",
+        "price_krw": 22000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "브룩라디(Bruichladdich) 18년",
+        "price_krw": 60000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "브룩라디(Bruichladdich) 블랙아트 에디션 11",
+        "price_krw": 140000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "포트샬롯(Port Charllotte) 10년",
+        "price_krw": 19000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "포트샬롯(Port Charllotte) 아일라 발리 2014",
+        "price_krw": 23000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "포트샬롯(Port Charllotte) PMC:01",
+        "price_krw": 33000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "옥토모어(Octomore) 14.1",
+        "price_krw": 43000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "옥토모어(Octomore) 14.2",
+        "price_krw": 47000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "옥토모어(Octomore) 15.1",
+        "price_krw": 47000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "옥토모어(Octomore) 15.2",
+        "price_krw": 49000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "옥토모어(Octomore) 15.3",
+        "price_krw": 60000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "쿨일라 (Caol Ila) 12년",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "쿨일라 (Caol Ila) 18년",
+        "price_krw": 42000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "부나하벤(Bunnahabhain) 12년",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "부나하벤(Bunnahabhain) 크루아 모나",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "부나하벤(Bunnahabhain) 안클라닥",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "부나하벤(Bunnahabhain) 토흐카흐",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "부나하벤(Bunnahabhain) 에리네 그레이뉴",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "부나하벤(Bunnahabhain) 12년 캐스크 스트랭스",
+        "price_krw": 33000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "부나하벤(Bunnahabhain) 14년 루비포트 캐스크 피니시",
+        "price_krw": 37000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "부나하벤(Bunnahabhain) 18년",
+        "price_krw": 48000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "아란(Arran) 10년",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "아란(Arran) 쿼터 캐스크",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "아란(Arran) 포트 캐스크",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "아란(Arran) 아마로네 캐스크",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "아란(Arran) 소테른 캐스크",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "아란(Arran) 셰리 캐스크 캐스크 스트랭스",
+        "price_krw": 21000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "아란(Arran) 마크리무어 캐스크 스트랭스",
+        "price_krw": 21000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "아란(Arran) 마크리무어 10년",
+        "price_krw": 27000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "아란(Arran) 시그니처 시리즈",
+        "price_krw": 32000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "아란(Arran) 프라이빗 캐스크 No.2",
+        "price_krw": 32000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "아란(Arran) 18년",
+        "price_krw": 50000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "아란(Arran) 21년",
+        "price_krw": 68000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "아란(Arran) 25년",
+        "price_krw": 140000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "탈리스커(Talisker) 스카이",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "탈리스커(Talisker) 10년",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "탈리스커(Talisker) 더 와일드 블루",
+        "price_krw": 17000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "탈리스커(Talisker) 스톰",
+        "price_krw": 17000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "탈리스커(Talisker) 18년",
+        "price_krw": 45000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "탈리스커(Talisker) 25년",
+        "price_krw": 95000,
+        "pour_ml": null,
+        "unit": "glass"
+      }
+    ]
+  },
+  "other_items": null,
+  "other_items_dropped": null,
+  "raw_text": "{\"items\": [{\"raw_name\": \"라가불린(Lagavulin) 8년\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L002\", \"L003\"], \"price\": [\"L007\"]}}, {\"raw_name\": \"라가불린(Lagavulin) 11년 스위트 피트\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L002\", \"L004\"], \"price\": [\"L008\"]}}, {\"raw_name\": \"라가불린(Lagavulin) 디스틸러리 에디션 2023\", \"price_krw\": 21000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L002\", \"L005\"], \"price\": [\"L009\"]}}, {\"raw_name\": \"라가불린(Lagavulin) 16년\", \"price_krw\": 25000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L002\", \"L006\"], \"price\": [\"L010\"]}}, {\"raw_name\": \"킬호만(Kilchoman) 마키어 베이\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L001\", \"L047\"], \"price\": [\"L023\"]}}, {\"raw_name\": \"킬호만(Kilchoman) 사닉\", \"price_krw\": 42000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L001\", \"L048\"], \"price\": [\"L024\"]}}, {\"raw_name\": \"킬호만(Kilchoman) 마키어베이 캐스크 스트랭스\", \"price_krw\": 21000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L001\", \"L049\"], \"price\": [\"L062\"]}}, {\"raw_name\": \"킬호만(Kilchoman) 코리아 스몰배치\", \"price_krw\": 22000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L001\", \"L050\"], \"price\": [\"L063\"]}}, {\"raw_name\": \"킬호만(Kilchoman) 배치 스트랭스\", \"price_krw\": 23000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L001\", \"L051\"], \"price\": [\"L064\"]}}, {\"raw_name\": \"킬호만(Kilchoman) 사닉 캐스크 스트랭스\", \"price_krw\": 25000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L001\", \"L052\"], \"price\": [\"L065\"]}}, {\"raw_name\": \"킬호만(Kilchoman) 피노 셰리 캐스크\", \"price_krw\": 27000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L001\", \"L053\"], \"price\": [\"L066\"]}}, {\"raw_name\": \"킬호만(Kilchoman) 꼬냑 캐스크\", \"price_krw\": 27000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L001\", \"L054\"], \"price\": [\"L067\"]}}, {\"raw_name\": \"킬호만(Kilchoman) PX 셰리 캐스크\", \"price_krw\": 27000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L001\", \"L055\"], \"price\": [\"L068\"]}}, {\"raw_name\": \"킬호만(Kilchoman) 로크곰\", \"price_krw\": 27000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L001\", \"L056\"], \"price\": [\"L069\"]}}, {\"raw_name\": \"킬호만(Kilchoman) 100% 아일라\", \"price_krw\": 27000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L001\", \"L057\"], \"price\": [\"L070\"]}}, {\"raw_name\": \"킬호만(Kilchoman) 포트 싱글 캐스크 피니시\", \"price_krw\": 28000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L001\", \"L058\"], \"price\": [\"L071\"]}}, {\"raw_name\": \"킬호만(Kilchoman) 소테른 캐스크\", \"price_krw\": 28000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L001\", \"L059\"], \"price\": [\"L072\"]}}, {\"raw_name\": \"킬호만(Kilchoman) 포트 캐스크\", \"price_krw\": 28000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L001\", \"L060\"], \"price\": [\"L073\"]}}, {\"raw_name\": \"킬호만(Kilchoman) 16년\", \"price_krw\": 54000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L001\", \"L061\"], \"price\": [\"L076\"]}}, {\"raw_name\": \"브룩라디(Bruichladdich) 스코티시 발리\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L046\", \"L041\"], \"price\": [\"L077\"]}}, {\"raw_name\": \"브룩라디(Bruichladdich) 아일라 발리\", \"price_krw\": 22000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L046\", \"L042\"], \"price\": [\"L078\"]}}, {\"raw_name\": \"브룩라디(Bruichladdich) 18년\", \"price_krw\": 60000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L046\", \"L043\"], \"price\": [\"L079\"]}}, {\"raw_name\": \"브룩라디(Bruichladdich) 블랙아트 에디션 11\", \"price_krw\": 140000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L046\", \"L044\"], \"price\": [\"L080\"]}}, {\"raw_name\": \"포트샬롯(Port Charllotte) 10년\", \"price_krw\": 19000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L045\", \"L117\"], \"price\": [\"L120\"]}}, {\"raw_name\": \"포트샬롯(Port Charllotte) 아일라 발리 2014\", \"price_krw\": 23000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L045\", \"L118\"], \"price\": [\"L121\"]}}, {\"raw_name\": \"포트샬롯(Port Charllotte) PMC:01\", \"price_krw\": 33000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L045\", \"L119\"], \"price\": [\"L122\"]}}, {\"raw_name\": \"옥토모어(Octomore) 14.1\", \"price_krw\": 43000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L129\", \"L124\"], \"price\": [\"L130\"]}}, {\"raw_name\": \"옥토모어(Octomore) 14.2\", \"price_krw\": 47000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L129\", \"L125\"], \"price\": [\"L131\"]}}, {\"raw_name\": \"옥토모어(Octomore) 15.1\", \"price_krw\": 47000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L129\", \"L126\"], \"price\": [\"L132\"]}}, {\"raw_name\": \"옥토모어(Octomore) 15.2\", \"price_krw\": 49000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L129\", \"L127\"], \"price\": [\"L133\"]}}, {\"raw_name\": \"옥토모어(Octomore) 15.3\", \"price_krw\": 60000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L129\", \"L128\"], \"price\": [\"L134\"]}}, {\"raw_name\": \"쿨일라 (Caol Ila) 12년\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L013\", \"L011\"], \"price\": [\"L025\"]}}, {\"raw_name\": \"쿨일라 (Caol Ila) 18년\", \"price_krw\": 42000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L013\", \"L012\"], \"price\": [\"L026\"]}}, {\"raw_name\": \"부나하벤(Bunnahabhain) 12년\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L014\", \"L015\"], \"price\": [\"L027\"]}}, {\"raw_name\": \"부나하벤(Bunnahabhain) 크루아 모나\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L014\", \"L016\"], \"price\": [\"L028\"]}}, {\"raw_name\": \"부나하벤(Bunnahabhain) 안클라닥\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L014\", \"L017\"], \"price\": [\"L029\"]}}, {\"raw_name\": \"부나하벤(Bunnahabhain) 토흐카흐\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L014\", \"L018\"], \"price\": [\"L025\"]}}, {\"raw_name\": \"부나하벤(Bunnahabhain) 에리네 그레이뉴\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L014\", \"L019\"], \"price\": [\"L025\"]}}, {\"raw_name\": \"부나하벤(Bunnahabhain) 12년 캐스크 스트랭스\", \"price_krw\": 33000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L014\", \"L020\"], \"price\": [\"L030\"]}}, {\"raw_name\": \"부나하벤(Bunnahabhain) 14년 루비포트 캐스크 피니시\", \"price_krw\": 37000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L014\", \"L021\"], \"price\": [\"L031\"]}}, {\"raw_name\": \"부나하벤(Bunnahabhain) 18년\", \"price_krw\": 48000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L014\", \"L022\"], \"price\": [\"L032\"]}}, {\"raw_name\": \"아란(Arran) 10년\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L081\", \"L083\"], \"price\": [\"L096\"]}}, {\"raw_name\": \"아란(Arran) 쿼터 캐스크\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L081\", \"L084\"], \"price\": [\"L097\"]}}, {\"raw_name\": \"아란(Arran) 포트 캐스크\", \"price_krw\": 20000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L081\", \"L085\"], \"price\": [\"L098\"]}}, {\"raw_name\": \"아란(Arran) 아마로네 캐스크\", \"price_krw\": 20000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L081\", \"L086\"], \"price\": [\"L099\"]}}, {\"raw_name\": \"아란(Arran) 소테른 캐스크\", \"price_krw\": 20000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L081\", \"L087\"], \"price\": [\"L100\"]}}, {\"raw_name\": \"아란(Arran) 셰리 캐스크 캐스크 스트랭스\", \"price_krw\": 21000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L081\", \"L088\"], \"price\": [\"L101\"]}}, {\"raw_name\": \"아란(Arran) 마크리무어 캐스크 스트랭스\", \"price_krw\": 21000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L081\", \"L089\"], \"price\": [\"L102\"]}}, {\"raw_name\": \"아란(Arran) 마크리무어 10년\", \"price_krw\": 27000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L081\", \"L090\"], \"price\": [\"L103\"]}}, {\"raw_name\": \"아란(Arran) 시그니처 시리즈\", \"price_krw\": 32000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L081\", \"L091\"], \"price\": [\"L104\"]}}, {\"raw_name\": \"아란(Arran) 프라이빗 캐스크 No.2\", \"price_krw\": 32000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L081\", \"L092\"], \"price\": [\"L105\"]}}, {\"raw_name\": \"아란(Arran) 18년\", \"price_krw\": 50000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L081\", \"L093\"], \"price\": [\"L106\"]}}, {\"raw_name\": \"아란(Arran) 21년\", \"price_krw\": 68000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L081\", \"L094\"], \"price\": [\"L107\"]}}, {\"raw_name\": \"아란(Arran) 25년\", \"price_krw\": 140000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L081\", \"L095\"], \"price\": [\"L108\"]}}, {\"raw_name\": \"탈리스커(Talisker) 스카이\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L123\", \"L135\"], \"price\": [\"L141\"]}}, {\"raw_name\": \"탈리스커(Talisker) 10년\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L123\", \"L136\"], \"price\": [\"L142\"]}}, {\"raw_name\": \"탈리스커(Talisker) 더 와일드 블루\", \"price_krw\": 17000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L123\", \"L137\"], \"price\": [\"L143\"]}}, {\"raw_name\": \"탈리스커(Talisker) 스톰\", \"price_krw\": 17000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L123\", \"L138\"], \"price\": [\"L144\"]}}, {\"raw_name\": \"탈리스커(Talisker) 18년\", \"price_krw\": 45000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L123\", \"L139\"], \"price\": [\"L145\"]}}, {\"raw_name\": \"탈리스커(Talisker) 25년\", \"price_krw\": 95000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L123\", \"L140\"], \"price\": [\"L146\"]}}]}",
+  "ocr_lines": [
+    {
+      "id": "L001",
+      "box": [
+        121,
+        131,
+        285,
+        148
+      ],
+      "text": "킬호만(Kilchoman)"
+    },
+    {
+      "id": "L002",
+      "box": [
+        138,
+        37,
+        302,
+        54
+      ],
+      "text": "라가불린(Lagavulin)"
+    },
+    {
+      "id": "L003",
+      "box": [
+        135,
+        60,
+        165,
+        74
+      ],
+      "text": "8년"
+    },
+    {
+      "id": "L004",
+      "box": [
+        133,
+        72,
+        276,
+        89
+      ],
+      "text": "11년 스위트 피트"
+    },
+    {
+      "id": "L005",
+      "box": [
+        131,
+        87,
+        332,
+        105
+      ],
+      "text": "디스틸러리 에디션 2023"
+    },
+    {
+      "id": "L006",
+      "box": [
+        128,
+        104,
+        168,
+        119
+      ],
+      "text": "16년"
+    },
+    {
+      "id": "L007",
+      "box": [
+        427,
+        60,
+        466,
+        73
+      ],
+      "text": "18.0"
+    },
+    {
+      "id": "L008",
+      "box": [
+        427,
+        75,
+        465,
+        87
+      ],
+      "text": "18.0"
+    },
+    {
+      "id": "L009",
+      "box": [
+        427,
+        91,
+        465,
+        103
+      ],
+      "text": "21.0"
+    },
+    {
+      "id": "L010",
+      "box": [
+        427,
+        106,
+        465,
+        119
+      ],
+      "text": "25.0"
+    },
+    {
+      "id": "L011",
+      "box": [
+        522,
+        56,
+        561,
+        69
+      ],
+      "text": "12년"
+    },
+    {
+      "id": "L012",
+      "box": [
+        522,
+        70,
+        562,
+        85
+      ],
+      "text": "18년"
+    },
+    {
+      "id": "L013",
+      "box": [
+        521,
+        34,
+        649,
+        49
+      ],
+      "text": "쿨일라 (Caol Ila)"
+    },
+    {
+      "id": "L014",
+      "box": [
+        524,
+        99,
+        731,
+        117
+      ],
+      "text": "부나하벤(Bunnahabhain)"
+    },
+    {
+      "id": "L015",
+      "box": [
+        527,
+        123,
+        568,
+        138
+      ],
+      "text": "12년"
+    },
+    {
+      "id": "L016",
+      "box": [
+        529,
+        138,
+        632,
+        155
+      ],
+      "text": "크루아 모나"
+    },
+    {
+      "id": "L017",
+      "box": [
+        529,
+        154,
+        609,
+        173
+      ],
+      "text": "안클라닥"
+    },
+    {
+      "id": "L018",
+      "box": [
+        531,
+        171,
+        611,
+        189
+      ],
+      "text": "토흐카흐"
+    },
+    {
+      "id": "L019",
+      "box": [
+        531,
+        188,
+        675,
+        207
+      ],
+      "text": "에리네 그레이뉴"
+    },
+    {
+      "id": "L020",
+      "box": [
+        531,
+        205,
+        726,
+        224
+      ],
+      "text": "12년 캐스크 스트랭스"
+    },
+    {
+      "id": "L021",
+      "box": [
+        531,
+        222,
+        788,
+        242
+      ],
+      "text": "14년 루비포트 캐스크 피니시"
+    },
+    {
+      "id": "L022",
+      "box": [
+        533,
+        243,
+        576,
+        261
+      ],
+      "text": "18년"
+    },
+    {
+      "id": "L023",
+      "box": [
+        816,
+        62,
+        851,
+        74
+      ],
+      "text": "16.0"
+    },
+    {
+      "id": "L024",
+      "box": [
+        817,
+        76,
+        855,
+        90
+      ],
+      "text": "42.0"
+    },
+    {
+      "id": "L025",
+      "box": [
+        828,
+        126,
+        864,
+        138
+      ],
+      "text": "16.0"
+    },
+    {
+      "id": "L026",
+      "box": [
+        830,
+        142,
+        866,
+        155
+      ],
+      "text": "16.0"
+    },
+    {
+      "id": "L027",
+      "box": [
+        833,
+        158,
+        870,
+        171
+      ],
+      "text": "16.0"
+    },
+    {
+      "id": "L028",
+      "box": [
+        837,
+        174,
+        875,
+        188
+      ],
+      "text": "16.0"
+    },
+    {
+      "id": "L029",
+      "box": [
+        840,
+        191,
+        878,
+        205
+      ],
+      "text": "16.0"
+    },
+    {
+      "id": "L030",
+      "box": [
+        843,
+        208,
+        882,
+        222
+      ],
+      "text": "33.0"
+    },
+    {
+      "id": "L031",
+      "box": [
+        847,
+        225,
+        885,
+        240
+      ],
+      "text": "37.0"
+    },
+    {
+      "id": "L032",
+      "box": [
+        850,
+        243,
+        891,
+        257
+      ],
+      "text": "48.0"
+    },
+    {
+      "id": "L033",
+      "box": [
+        905,
+        73,
+        1000,
+        101
+      ],
+      "text": "하이랜드 파크"
+    },
+    {
+      "id": "L034",
+      "box": [
+        915,
+        95,
+        948,
+        109
+      ],
+      "text": "12년"
+    },
+    {
+      "id": "L035",
+      "box": [
+        916,
+        106,
+        999,
+        132
+      ],
+      "text": "캐스크 스트"
+    },
+    {
+      "id": "L036",
+      "box": [
+        919,
+        121,
+        999,
+        145
+      ],
+      "text": "캐스크 스트"
+    },
+    {
+      "id": "L037",
+      "box": [
+        932,
+        138,
+        958,
+        152
+      ],
+      "text": "5년"
+    },
+    {
+      "id": "L038",
+      "box": [
+        926,
+        151,
+        964,
+        169
+      ],
+      "text": "18년"
+    },
+    {
+      "id": "L039",
+      "box": [
+        932,
+        168,
+        965,
+        182
+      ],
+      "text": "16년"
+    },
+    {
+      "id": "L040",
+      "box": [
+        937,
+        192,
+        1000,
+        217
+      ],
+      "text": "로우랜드"
+    },
+    {
+      "id": "L041",
+      "box": [
+        67,
+        493,
+        213,
+        513
+      ],
+      "text": "스코티시 발리"
+    },
+    {
+      "id": "L042",
+      "box": [
+        64,
+        514,
+        189,
+        536
+      ],
+      "text": "아일라 발리"
+    },
+    {
+      "id": "L043",
+      "box": [
+        62,
+        540,
+        111,
+        560
+      ],
+      "text": "18년"
+    },
+    {
+      "id": "L044",
+      "box": [
+        59,
+        561,
+        266,
+        585
+      ],
+      "text": "블랙아트 에디션 11"
+    },
+    {
+      "id": "L045",
+      "box": [
+        49,
+        609,
+        319,
+        633
+      ],
+      "text": "포트샬롯(Port Charllotte)"
+    },
+    {
+      "id": "L046",
+      "box": [
+        71,
+        461,
+        319,
+        482
+      ],
+      "text": "브룩라디(Bruichladdich)"
+    },
+    {
+      "id": "L047",
+      "box": [
+        118,
+        157,
+        220,
+        174
+      ],
+      "text": "마키어 베이"
+    },
+    {
+      "id": "L048",
+      "box": [
+        116,
+        176,
+        156,
+        191
+      ],
+      "text": "사닉"
+    },
+    {
+      "id": "L049",
+      "box": [
+        114,
+        191,
+        363,
+        210
+      ],
+      "text": "마키어베이 캐스크 스트랭스"
+    },
+    {
+      "id": "L050",
+      "box": [
+        111,
+        210,
+        257,
+        226
+      ],
+      "text": "코리아 스몰배치"
+    },
+    {
+      "id": "L051",
+      "box": [
+        107,
+        227,
+        236,
+        245
+      ],
+      "text": "배치 스트랭스"
+    },
+    {
+      "id": "L052",
+      "box": [
+        104,
+        245,
+        302,
+        263
+      ],
+      "text": "사닉 캐스크 스트랭스"
+    },
+    {
+      "id": "L053",
+      "box": [
+        102,
+        263,
+        259,
+        281
+      ],
+      "text": "피노 셰리 캐스크"
+    },
+    {
+      "id": "L054",
+      "box": [
+        99,
+        282,
+        212,
+        299
+      ],
+      "text": "꼬냑 캐스크"
+    },
+    {
+      "id": "L055",
+      "box": [
+        95,
+        302,
+        245,
+        319
+      ],
+      "text": "PX 셰리 캐스크"
+    },
+    {
+      "id": "L056",
+      "box": [
+        94,
+        321,
+        160,
+        340
+      ],
+      "text": "로크곰"
+    },
+    {
+      "id": "L057",
+      "box": [
+        90,
+        341,
+        215,
+        359
+      ],
+      "text": "100% 아일라"
+    },
+    {
+      "id": "L058",
+      "box": [
+        88,
+        362,
+        323,
+        381
+      ],
+      "text": "포트 싱글 캐스크 피니시"
+    },
+    {
+      "id": "L059",
+      "box": [
+        85,
+        383,
+        226,
+        401
+      ],
+      "text": "소테른 캐스크"
+    },
+    {
+      "id": "L060",
+      "box": [
+        81,
+        404,
+        203,
+        420
+      ],
+      "text": "포트 캐스크"
+    },
+    {
+      "id": "L061",
+      "box": [
+        78,
+        424,
+        125,
+        443
+      ],
+      "text": "16년"
+    },
+    {
+      "id": "L062",
+      "box": [
+        427,
+        160,
+        465,
+        173
+      ],
+      "text": "16.0"
+    },
+    {
+      "id": "L063",
+      "box": [
+        427,
+        177,
+        465,
+        190
+      ],
+      "text": "18.0"
+    },
+    {
+      "id": "L064",
+      "box": [
+        427,
+        194,
+        465,
+        207
+      ],
+      "text": "21.0"
+    },
+    {
+      "id": "L065",
+      "box": [
+        425,
+        212,
+        465,
+        225
+      ],
+      "text": "22.0"
+    },
+    {
+      "id": "L066",
+      "box": [
+        425,
+        230,
+        467,
+        243
+      ],
+      "text": "23.0"
+    },
+    {
+      "id": "L067",
+      "box": [
+        425,
+        249,
+        467,
+        262
+      ],
+      "text": "25.0"
+    },
+    {
+      "id": "L068",
+      "box": [
+        427,
+        267,
+        467,
+        281
+      ],
+      "text": "27.0"
+    },
+    {
+      "id": "L069",
+      "box": [
+        427,
+        286,
+        469,
+        299
+      ],
+      "text": "27.0"
+    },
+    {
+      "id": "L070",
+      "box": [
+        427,
+        306,
+        469,
+        319
+      ],
+      "text": "27.0"
+    },
+    {
+      "id": "L071",
+      "box": [
+        427,
+        325,
+        469,
+        339
+      ],
+      "text": "27.0"
+    },
+    {
+      "id": "L072",
+      "box": [
+        427,
+        345,
+        470,
+        361
+      ],
+      "text": "27.0"
+    },
+    {
+      "id": "L073",
+      "box": [
+        427,
+        365,
+        472,
+        380
+      ],
+      "text": "28.0"
+    },
+    {
+      "id": "L074",
+      "box": [
+        427,
+        385,
+        472,
+        401
+      ],
+      "text": "28.0"
+    },
+    {
+      "id": "L075",
+      "box": [
+        425,
+        405,
+        472,
+        422
+      ],
+      "text": "28.0"
+    },
+    {
+      "id": "L076",
+      "box": [
+        427,
+        426,
+        472,
+        443
+      ],
+      "text": "54.0"
+    },
+    {
+      "id": "L077",
+      "box": [
+        427,
+        493,
+        474,
+        510
+      ],
+      "text": "18.0"
+    },
+    {
+      "id": "L078",
+      "box": [
+        427,
+        516,
+        474,
+        532
+      ],
+      "text": "22.0"
+    },
+    {
+      "id": "L079",
+      "box": [
+        427,
+        538,
+        474,
+        555
+      ],
+      "text": "60.0"
+    },
+    {
+      "id": "L080",
+      "box": [
+        429,
+        561,
+        486,
+        578
+      ],
+      "text": "140.0"
+    },
+    {
+      "id": "L081",
+      "box": [
+        534,
+        323,
+        647,
+        342
+      ],
+      "text": "아란(Arran)"
+    },
+    {
+      "id": "L082",
+      "box": [
+        534,
+        278,
+        712,
+        302
+      ],
+      "text": "아일랜드(Island)"
+    },
+    {
+      "id": "L083",
+      "box": [
+        536,
+        351,
+        582,
+        370
+      ],
+      "text": "10년"
+    },
+    {
+      "id": "L084",
+      "box": [
+        538,
+        371,
+        653,
+        391
+      ],
+      "text": "쿼터 캐스크"
+    },
+    {
+      "id": "L085",
+      "box": [
+        539,
+        392,
+        654,
+        410
+      ],
+      "text": "포트 캐스크"
+    },
+    {
+      "id": "L086",
+      "box": [
+        539,
+        411,
+        700,
+        432
+      ],
+      "text": "아마로네 캐스크"
+    },
+    {
+      "id": "L087",
+      "box": [
+        541,
+        433,
+        681,
+        453
+      ],
+      "text": "소테른 캐스크"
+    },
+    {
+      "id": "L088",
+      "box": [
+        541,
+        451,
+        826,
+        474
+      ],
+      "text": "셰리 캐스크 캐스크 스트랭스"
+    },
+    {
+      "id": "L089",
+      "box": [
+        543,
+        472,
+        823,
+        496
+      ],
+      "text": "마크리무어 캐스크 스트랭스"
+    },
+    {
+      "id": "L090",
+      "box": [
+        544,
+        496,
+        706,
+        518
+      ],
+      "text": "마크리무어 10년"
+    },
+    {
+      "id": "L091",
+      "box": [
+        543,
+        519,
+        707,
+        542
+      ],
+      "text": "시그니처 시리즈"
+    },
+    {
+      "id": "L092",
+      "box": [
+        543,
+        541,
+        767,
+        564
+      ],
+      "text": "프라이빗 캐스크 No.2"
+    },
+    {
+      "id": "L093",
+      "box": [
+        545,
+        565,
+        594,
+        587
+      ],
+      "text": "18년"
+    },
+    {
+      "id": "L094",
+      "box": [
+        547,
+        590,
+        597,
+        611
+      ],
+      "text": "21년"
+    },
+    {
+      "id": "L095",
+      "box": [
+        547,
+        614,
+        599,
+        635
+      ],
+      "text": "25년"
+    },
+    {
+      "id": "L096",
+      "box": [
+        870,
+        349,
+        908,
+        362
+      ],
+      "text": "16.0"
+    },
+    {
+      "id": "L097",
+      "box": [
+        873,
+        368,
+        913,
+        383
+      ],
+      "text": "18.0"
+    },
+    {
+      "id": "L098",
+      "box": [
+        875,
+        388,
+        917,
+        402
+      ],
+      "text": "20.0"
+    },
+    {
+      "id": "L099",
+      "box": [
+        880,
+        409,
+        922,
+        424
+      ],
+      "text": "20.0"
+    },
+    {
+      "id": "L100",
+      "box": [
+        884,
+        430,
+        925,
+        444
+      ],
+      "text": "20.0"
+    },
+    {
+      "id": "L101",
+      "box": [
+        887,
+        450,
+        929,
+        466
+      ],
+      "text": "21.0"
+    },
+    {
+      "id": "L102",
+      "box": [
+        891,
+        472,
+        934,
+        490
+      ],
+      "text": "21.0"
+    },
+    {
+      "id": "L103",
+      "box": [
+        894,
+        495,
+        939,
+        512
+      ],
+      "text": "27.0"
+    },
+    {
+      "id": "L104",
+      "box": [
+        899,
+        517,
+        942,
+        534
+      ],
+      "text": "32.0"
+    },
+    {
+      "id": "L105",
+      "box": [
+        903,
+        540,
+        946,
+        556
+      ],
+      "text": "32.0"
+    },
+    {
+      "id": "L106",
+      "box": [
+        906,
+        564,
+        949,
+        578
+      ],
+      "text": "50.0"
+    },
+    {
+      "id": "L107",
+      "box": [
+        911,
+        587,
+        955,
+        603
+      ],
+      "text": "68.0"
+    },
+    {
+      "id": "L108",
+      "box": [
+        915,
+        611,
+        970,
+        626
+      ],
+      "text": "140.0"
+    },
+    {
+      "id": "L109",
+      "box": [
+        943,
+        225,
+        1000,
+        248
+      ],
+      "text": "글렌킨"
+    },
+    {
+      "id": "L110",
+      "box": [
+        953,
+        251,
+        988,
+        267
+      ],
+      "text": "12년"
+    },
+    {
+      "id": "L111",
+      "box": [
+        958,
+        277,
+        998,
+        295
+      ],
+      "text": "오큰토"
+    },
+    {
+      "id": "L112",
+      "box": [
+        963,
+        302,
+        998,
+        319
+      ],
+      "text": "아메"
+    },
+    {
+      "id": "L113",
+      "box": [
+        967,
+        320,
+        998,
+        336
+      ],
+      "text": "12년"
+    },
+    {
+      "id": "L114",
+      "box": [
+        974,
+        339,
+        998,
+        351
+      ],
+      "text": "쇼비"
+    },
+    {
+      "id": "L115",
+      "box": [
+        977,
+        357,
+        998,
+        370
+      ],
+      "text": "쓰러"
+    },
+    {
+      "id": "L116",
+      "box": [
+        981,
+        375,
+        998,
+        388
+      ],
+      "text": "18"
+    },
+    {
+      "id": "L117",
+      "box": [
+        45,
+        646,
+        99,
+        668
+      ],
+      "text": "10년"
+    },
+    {
+      "id": "L118",
+      "box": [
+        43,
+        670,
+        234,
+        695
+      ],
+      "text": "아일라 발리 2014"
+    },
+    {
+      "id": "L119",
+      "box": [
+        40,
+        699,
+        132,
+        719
+      ],
+      "text": "PMC:01"
+    },
+    {
+      "id": "L120",
+      "box": [
+        431,
+        648,
+        479,
+        667
+      ],
+      "text": "19.0"
+    },
+    {
+      "id": "L121",
+      "box": [
+        431,
+        674,
+        479,
+        691
+      ],
+      "text": "23.0"
+    },
+    {
+      "id": "L122",
+      "box": [
+        431,
+        700,
+        479,
+        717
+      ],
+      "text": "33.0"
+    },
+    {
+      "id": "L123",
+      "box": [
+        548,
+        653,
+        743,
+        679
+      ],
+      "text": "탈리스커(Talisker)"
+    },
+    {
+      "id": "L124",
+      "box": [
+        31,
+        789,
+        81,
+        809
+      ],
+      "text": "14.1"
+    },
+    {
+      "id": "L125",
+      "box": [
+        29,
+        818,
+        80,
+        836
+      ],
+      "text": "14.2"
+    },
+    {
+      "id": "L126",
+      "box": [
+        26,
+        846,
+        76,
+        865
+      ],
+      "text": "15.1"
+    },
+    {
+      "id": "L127",
+      "box": [
+        22,
+        874,
+        74,
+        893
+      ],
+      "text": "15.2"
+    },
+    {
+      "id": "L128",
+      "box": [
+        19,
+        904,
+        71,
+        923
+      ],
+      "text": "15.3"
+    },
+    {
+      "id": "L129",
+      "box": [
+        31,
+        747,
+        259,
+        773
+      ],
+      "text": "옥토모어(Octomore)"
+    },
+    {
+      "id": "L130",
+      "box": [
+        432,
+        781,
+        482,
+        799
+      ],
+      "text": "43.0"
+    },
+    {
+      "id": "L131",
+      "box": [
+        432,
+        809,
+        482,
+        827
+      ],
+      "text": "47.0"
+    },
+    {
+      "id": "L132",
+      "box": [
+        434,
+        836,
+        484,
+        854
+      ],
+      "text": "47.0"
+    },
+    {
+      "id": "L133",
+      "box": [
+        434,
+        863,
+        484,
+        881
+      ],
+      "text": "49.0"
+    },
+    {
+      "id": "L134",
+      "box": [
+        434,
+        892,
+        484,
+        910
+      ],
+      "text": "60.0"
+    },
+    {
+      "id": "L135",
+      "box": [
+        552,
+        691,
+        625,
+        715
+      ],
+      "text": "스카이"
+    },
+    {
+      "id": "L136",
+      "box": [
+        552,
+        719,
+        606,
+        741
+      ],
+      "text": "10년"
+    },
+    {
+      "id": "L137",
+      "box": [
+        557,
+        743,
+        719,
+        768
+      ],
+      "text": "더 와일드 블루"
+    },
+    {
+      "id": "L138",
+      "box": [
+        557,
+        772,
+        609,
+        797
+      ],
+      "text": "스톰"
+    },
+    {
+      "id": "L139",
+      "box": [
+        556,
+        799,
+        609,
+        823
+      ],
+      "text": "18년"
+    },
+    {
+      "id": "L140",
+      "box": [
+        557,
+        827,
+        613,
+        850
+      ],
+      "text": "25년"
+    },
+    {
+      "id": "L141",
+      "box": [
+        927,
+        688,
+        972,
+        704
+      ],
+      "text": "15.0"
+    },
+    {
+      "id": "L142",
+      "box": [
+        932,
+        712,
+        979,
+        730
+      ],
+      "text": "16.0"
+    },
+    {
+      "id": "L143",
+      "box": [
+        936,
+        737,
+        981,
+        755
+      ],
+      "text": "17.0"
+    },
+    {
+      "id": "L144",
+      "box": [
+        941,
+        763,
+        986,
+        781
+      ],
+      "text": "17.0"
+    },
+    {
+      "id": "L145",
+      "box": [
+        944,
+        789,
+        991,
+        807
+      ],
+      "text": "45.0"
+    },
+    {
+      "id": "L146",
+      "box": [
+        949,
+        815,
+        995,
+        835
+      ],
+      "text": "95.0"
+    }
+  ],
+  "ocr_cache_same_bytes": true,
+  "run": 3
+}
