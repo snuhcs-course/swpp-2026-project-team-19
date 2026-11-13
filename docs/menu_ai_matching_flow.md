@@ -507,6 +507,8 @@ OCR LLM과 Vision LLM은 메뉴에서 인식한 모든 상품 또는 비상품 �
 
 이 판단은 최종 확정이 아니다. AI가 헤더나 설명을 `product`로 잘못 분류하거나 실제 상품을 다른 유형으로 분류할 수 있으므로 운영자 검수가 끝날 때까지 `lineType`은 1차 분류로만 취급한다.
 
+`lineType = product`인 줄에는 메뉴 종류 `kind`도 함께 반환한다. 위스키면 `whisky`, 칵테일, 하이볼, 맥주, 와인, 음료, 안주처럼 위스키가 아닌 메뉴면 `other`다. 비상품 줄은 `null`이다. `kind`가 없으면 백엔드는 `whisky`로 본다. 업주가 위스키가 아닌 메뉴도 메뉴판에 올릴 수 있게 하기 위해서다(API 명세 2.3, 8.10). `lineType`과 마찬가지로 1차 판단이며, 업주가 검수에서 바꿀 수 있다.
+
 ```json
 {
   "items": [
@@ -526,6 +528,7 @@ OCR LLM과 Vision LLM은 메뉴에서 인식한 모든 상품 또는 비상품 �
       "itemOrder": 7,
       "rawText": "딘스톤 12년 15ml 8.0 / 30ml 15.0",
       "lineType": "product",
+      "kind": "whisky",
       "productName": "딘스톤 12년",
       "brandText": "딘스톤",
       "ageYears": 12,
@@ -562,11 +565,12 @@ OCR LLM과 Vision LLM은 메뉴에서 인식한 모든 상품 또는 비상품 �
 - 섹션 제목, 열 제목, 설명, 세트 메뉴, 비위스키 섹션(칵테일·와인·맥주·음식 등)은 프롬프트가 반환하지 않게 한다.
 - 한 줄에 잔·병 가격이 모두 있으면 두 항목으로 나눠 반환한다. 어댑터(`backend/app/extraction/convert.py`)는 이름이 같은 인접한 잔·병 항목을 옵션 두 개(`잔`, `병`)를 가진 한 항목으로 묶어 4.3 형식으로 바꾼다.
 - 따라서 현재 모든 항목의 `lineType`은 `product`이고, `brandText`, `ageYears`, `editionName`, `abv`, `confidence`는 항상 `null`이다. 이름에 적힌 연수(예: `12년`)는 7장 정규화로 별칭 조회 키에 반영되지만, 10장의 연수·에디션 비교는 추출값이 없어 동작하지 않는다.
+- prompt v1은 위스키 줄만 반환하므로 어댑터는 모든 항목을 `kind = whisky`로 둔다. 위스키가 아닌 메뉴 줄도 `kind = other`로 반환하게 하는 것은 추출 프롬프트의 후속 작업이다(AI 담당). 백엔드의 저장, 매칭 생략, 검수 응답과 게시는 그 전에도 4.3 형식의 `kind`를 받으면 동작한다.
 - 4.3 형식 전체를 채우는 prompt v2는 후속 과제다. v1과 결과가 달라지므로 새 평가 실행으로 정확도를 확인한 뒤 v1을 대체한다.
 
 ## 5 extracted_items와 extracted_options 저장
 
-백엔드는 4.3 응답의 `items`를 각각 하나의 `extracted_items` 행으로 저장한다. `extracted_line_type`에는 AI의 1차 분류를 넣고 `corrected_line_type = null`, `review_status = pending`으로 저장한다. `section_header`, `description`, `unknown`도 원문과 함께 보존하지만 `extracted_line_type = product`인 항목만 최초 상품 매칭 단계로 보낸다.
+백엔드는 4.3 응답의 `items`를 각각 하나의 `extracted_items` 행으로 저장한다. `extracted_line_type`에는 AI의 1차 분류를 넣고 `corrected_line_type = null`, `review_status = pending`으로 저장한다. `section_header`, `description`, `unknown`도 원문과 함께 보존하지만 `extracted_line_type = product`이고 `extracted_kind = whisky`인 항목만 최초 상품 매칭 단계로 보낸다. AI가 위스키가 아닌 메뉴로 판단한 줄(`extracted_kind = other`)은 매칭하지 않고 `initial_resolution_status = null`로 두며, 검수에서 상품 없는 메뉴 항목으로 게시된다(API 명세 8.10). 검수자가 다른 종류로 게시하면 `corrected_kind`에 남겨, AI의 종류 분류를 `corrected_line_type`처럼 평가할 수 있게 한다.
 
 섹션 제목은 옵션 없이 항목만 저장한다.
 
@@ -661,7 +665,7 @@ extracted_options #2
 
 > **안전 규칙과 위스키 용어 사전 (I3-A4):** (1) S3는 숫자 앞 이름(앞의 `더`/`The`와 문장부호 제외)이 3음절 이하 한글일 때 1음절 차이로 확정하지 않고 후보도 내지 않는다(`달모어 18` ≠ `보모어 18`, `더 달무어 18`, `아드백-10`). (2) S2가 에디션 토큰으로 상품 하나를 골랐어도 그 상품의 `edition_name`에 줄에 없는 단어가 있으면(cask·oak·finish 같은 중립어 제외) 확정하지 않고 그 상품 하나를 확인 권장(`confirmRecommended`)으로 남기며, 빠진 단어를 evidence `editionOnlyInProduct`에 적는다(`anCnoc Sherry` → anCnoc Peated Sherry Cask). 줄에 사전이 모르는 한글 단어가 있으면(`비노 바리끄`) 사전에 있는 영어 단어만 빠진 것으로 센다. 줄에 연수가 아닌 숫자(연도, `#2`, `16.2`. 도수·용량·잔·가격 표기인 `46%`, `700 ml`, `16,000원`은 제외)가 있으면, 이름에 숫자가 있는데 줄의 숫자가 하나도 없는 상품은 후보에서 뺀다(`클래식컷 2025` ≠ Classic Cut 2020). (3) 줄에 다시 쓴 브랜드명(`Aberlour 12 (아벨라워)`, `(컴파스 박스)`처럼 두 토큰에 걸쳐도)은 에디션 토큰이 아니고, 브랜드명뿐인 이름 변형은 다른 이름이 아무것도 못 찾을 때만 쓴다. 연수가 없을 때 어느 상품에도 맞지 않는 짧은 영문자 토큰(`DR`)은 상품을 지우지 않는다(숫자는 지운다). 어느 상품에 맞으면 다른 토큰처럼 상품을 가른다(아래 I4 규칙). (4) S1–S3가 확정하지 못한 줄은 `backend/app/matching/vocab_ko_en.json`의 한글 위스키 용어를 영어로 바꿔(셰리 캐스크 → sherry cask, 더블우드 → double wood) 한 번 더 찾고, 확정되거나, 후보가 없던 줄에 후보가 생기고 1순위 후보에 맞는 에디션 토큰이 있을 때만(브랜드+연수만 맞는 목록은 버림) 그 결과를 쓴다. 이때 후보 evidence `vocabulary`에 바꾼 이름이 들어가고 `rule`은 그 후보를 찾은 단계 그대로다. 사전의 영어 단어는 카탈로그 에디션·표준명에서만 골랐고, 한글 표기를 만든 경위와 한계는 파일의 `about`에 있다.
 
-> **일반 단어와 짧은 영문자 토큰 (I4):** S2·S2b의 에디션 토큰 규칙 두 가지. (1) 한두 글자 영문자 토큰(`PX`, `CS`, `DR`)은 별칭 안 어디에 들어 있는지로 맞추지 않고, 상품 표준명의 온전한 단어일 때만 그 상품에 맞는다. `CS`는 Cask Strength, `DR`은 Distillers Reserve로 읽는다(`라프로익 10년 CS` → Laphroaig 10 Cask Strength 확정, `Yamazaki Dr` → Yamazaki Distillers Reserve 확정). 풀어 쓴 단어는 `editionOnlyInProduct` 계산에서도 줄에 있는 것으로 센다. (2) 어느 위스키에나 붙는 단어(`싱글몰트`, `스카치`, `위스키`, `버번`, `캐스크`, `오크`, `피니시`, `single malt`, `the` 등, `staged.py`의 `_GENERIC_TOKENS`)가 그 브랜드의 어떤 상품에도 맞지 않으면 빼고 본다. S2b가 켜져 있고 줄이 확정되지 않았을 때만 적용한다. 남은 토큰에 일반 단어가 아닌 것이 있고 그 토큰들이 상품 하나에 모두 맞으면 그 상품을, 남은 토큰이 없고 연수가 있으면 그 연수의 에디션 없는 상품 하나를 확인 권장(`confirmRecommended`)으로 남기고 뺀 단어를 evidence `ignoredWords`에 적는다(`글렌피딕 12년 싱글몰트` → Glenfiddich 12 권장). 자동 확정(`exact_match`)은 하지 않는다. 다른 메뉴에서는 그 단어가 에디션일 수 있기 때문이다. 연수 없이 일반 단어만 있는 줄은 아무것도 고르지 않고, 어느 상품에 맞는 일반 단어(`Cask Strength`의 `cask`)는 빼지 않는다. 측정(규칙만, LLM 층 없음): dev 836줄 정답 618 → 623, I3 675줄 470 → 472(as-is), 오매칭과 틀린 권장은 그대로.
+> **일반 단어와 짧은 영문자 토큰 (I4):** S2·S2b의 에디션 토큰 규칙 두 가지. (1) 한두 글자 영문자 토큰(`PX`, `CS`, `DR`)은 별칭 안 어디에 들어 있는지로 맞추지 않고, 상품 표준명의 온전한 단어일 때만 그 상품에 맞는다. `CS`는 Cask Strength, `DR`은 Distillers Reserve로 읽는다(`라프로익 10년 CS` → Laphroaig 10 Cask Strength 확정, `Yamazaki Dr` → Yamazaki Distillers Reserve 확정). 풀어 쓴 단어는 `editionOnlyInProduct` 계산에서도 줄에 있는 것으로 센다. (2) 어느 위스키에나 붙는 단어(`싱글몰트`, `스카치`, `버번`, `캐스크`, `오크`, `피니시`, `single malt`, `the` 등, `staged.py`의 `_GENERIC_TOKENS`)가 그 브랜드의 어떤 상품에도 맞지 않으면 빼고 본다. S2b가 켜져 있고 줄이 확정되지 않았을 때만 적용한다. 남은 토큰에 일반 단어가 아닌 것이 있고 그 토큰들이 상품 하나에 모두 맞으면 그 상품을, 남은 토큰이 없고 연수가 있으면 그 연수의 에디션 없는 상품 하나를 확인 권장(`confirmRecommended`)으로 남기고 뺀 단어를 evidence `ignoredWords`에 적는다(`글렌피딕 12년 싱글몰트` → Glenfiddich 12 권장). 자동 확정(`exact_match`)은 하지 않는다. 다른 메뉴에서는 그 단어가 에디션일 수 있기 때문이다. 연수 없이 일반 단어만 있는 줄은 아무것도 고르지 않고, 어느 상품에 맞는 일반 단어(`Cask Strength`의 `cask`)는 빼지 않는다. `위스키`·`whisky`·`whiskey`는 이 규칙의 대상이 아니다. I3부터 에디션 토큰이 되기 전에 빠지는 중립어라(`_NEUTRAL_TOKENS`) 확정을 막지 않는다(`Glenfiddich 12 Whisky` → Glenfiddich 12 확정, `Glenfiddich 12 Scotch` → 권장). 측정(규칙만, LLM 층 없음): dev 836줄 정답 618 → 623, I3 675줄 470 → 472(as-is), 오매칭과 틀린 권장은 그대로.
 
 ```text
 for each extracted_item:
@@ -1128,6 +1132,16 @@ LLM 응답:
 - `remove`: 현재 메뉴판에는 있지만 전체 교체 초안에는 없는 상품이다. 일부 수정 모드에서는 사진에 없다는 이유만으로 제거하지 않는다.
 - 변경 없음: 상품과 옵션 구성이 같으면 `menu_import_changes`를 만들지 않는다.
 
+상품이 없는 줄과 항목은 상품 ID 대신 이름 키로 비교한다(API 명세 3.14.1, 8.10). 이름 키는 메뉴판 이름을 7장의 정규화 함수로 정규화한 값이다.
+
+- 제안 상품이 없는 줄(`unmatched`, 또는 매칭하지 않은 `extracted_kind = other` 줄)은 상품 없이 게시하는 것으로 보고, 변경의 `after.kind`를 그 줄의 `extracted_kind`로 하여 추출한 상품명의 이름 키로 현재 메뉴판의 미연결 항목(`bar_menu_items.product_id IS NULL`)과 비교한다. 같은 이름 키의 항목이 있으면 `update`이거나 변경 없음이고, 없으면 `add`다.
+- 현재 메뉴판의 미연결 항목은 이름 키가 같은 줄이 없으면 전체 교체 초안에서 `remove`다.
+- 제안 상품 P가 있는 줄도, P가 현재 메뉴판에 없고 이름 키가 같은 미연결 항목 X가 있으면 X의 `update`로 비교한다. 미연결로 게시했던 위스키가 카탈로그에 등록된 뒤 같은 메뉴판을 다시 올린 경우다. `add`로 비교하면 일부 수정 모드에서 X와 P의 두 줄이 남는다. 반영할 때 그 줄을 상품에 연결해 게시하면 X를 그 상품에 연결하고(API 명세 3.14.1의 연결 바꾸기), X의 열린 확인은 API 명세 3.18.1의 확인 정리를 따른다(다른 사유가 있으면 `unlinked` 사유만 빼고, 없으면 `dismissed`).
+- 이름 키가 같은 줄이 여럿이면 같은 상품의 여러 줄과 같은 규칙을 따른다(아래). 종류가 섞이면 하나라도 `whisky`인 묶음은 `whisky`다(API 명세 8.12).
+- 이름 키를 만들 수 없는 줄(정규화한 값이 빈 값)은 비교하지 않고 `add`로 둔다. 검수자가 이름을 고치지 않고 상품 없이 게시하면 제출에서 거부된다(API 명세 8.7).
+
+같은 상품을 제안받은 줄이 여럿이면(상품이 없으면 같은 이름 키) 메뉴 순서로 옵션을 합쳐 한 항목으로 비교하고 변경도 하나만 만든다(API 명세 8.12). 이름과 위치는 첫 줄의 것이고, 표기, 용량, 가격이 모두 같은 옵션은 하나만 남긴다. 변경 행의 `extracted_item_id`는 첫 줄이며, 검수 응답의 `extractedItemIds`는 같은 규칙으로 줄을 다시 묶어 계산한다. 첫 줄만 남기고 나머지 줄을 버리던 이전 규칙은 쓰지 않는다. 둘째 줄의 가격도 실제 판매 정보이기 때문이다.
+
 변경 대상마다 `menu_import_changes` 행을 만들고 `menu_import_id`, `change_type`, 기존 항목인 `bar_menu_item_id`, 새 추출 항목인 `extracted_item_id`를 연결한다. 검수 전 `decision`은 `pending`이다. 백엔드는 가격과 용량의 변경 내용을 만들기 위해 연결된 `extracted_options`와 현재 `menu_entry_options`를 함께 조회하고, 그 결과를 14장의 통합 검수 응답에 포함한다. 프론트엔드는 응답받은 변경 내용을 통합 검수 화면에 표시한다.
 
 과거 임시 diff 이력은 보존하지 않는다. 최종 확정 전에 후보·항목·옵션 변경으로 검수 데이터를 다시 만들면, 하나의 트랜잭션에서 해당 `menu_import_id`의 기존 `menu_import_changes`를 삭제하고 새 `pending` 행들로 교체한 뒤 `menu_imports.review_version`을 증가시킨다. 이전 화면의 `changeId`와 `reviewVersion`으로 제출된 요청은 거부한다.
@@ -1143,6 +1157,8 @@ resolution_candidates[candidate_rank = 1].product_id
 extracted_options
 → menu_entry_options.source_extracted_option_id
 ```
+
+검수자가 상품 없이 게시하면(API 명세 8.10의 `publish_without_product`) 17장의 반영에서 그 줄의 메뉴판 이름으로 이름 키를 계산해, 현재 메뉴판에 같은 이름 키의 미연결 항목이 있으면 그 행을 쓰고 없으면 `product_id = null`, `kind`는 제출값, `name_key`는 계산값인 새 `bar_menu_items` 행을 만든다. 메뉴판에서 빠진 예전 미연결 행은 다시 쓰지 않는다. 추출 항목의 `selected_product_id`, `selected_match_method`, `match_confidence`는 `null`로 둔다.
 
 운영자가 기존 상품을 최종 선택하면 그 `productId`를 `extracted_items.selected_product_id`에 저장한다. 제안된 1순위를 그대로 승인하면 두 값이 같고, 다른 후보를 선택하면 `selected_product_id`는 `proposedProductId`와 달라진다. 1순위를 그대로 확정한 경우에는 그 후보의 `method`를 `selected_match_method`에 복사하고, 다른 후보 선택·직접 검색·신규 등록은 `manual`로 기록한다. 신규 상품을 선택하면 생성된 새 `products.id`를 저장하며, 비상품 또는 제외 항목은 두 필드를 모두 null로 유지한다. 실제 게시 반영은 17장에서 `selected_product_id`를 기준으로 수행한다.
 
@@ -1300,16 +1316,18 @@ POST /api/menu-imports/import-001/review-and-apply
       "action": "select_existing_product",
       "productId": "product-deanston-12",
       "correctedProductName": "딘스톤 12년",
-      "optionDecisions": [
+      "options": [
         {
           "extractedOptionId": "option-001",
-          "correctedPriceKrw": 8000,
-          "correctedPourMl": 15
+          "optionLabel": null,
+          "pourMl": 15,
+          "priceKrw": 8000
         },
         {
           "extractedOptionId": "option-002",
-          "correctedPriceKrw": 15000,
-          "correctedPourMl": 30
+          "optionLabel": null,
+          "pourMl": 30,
+          "priceKrw": 15000
         }
       ]
     }
@@ -1331,7 +1349,7 @@ POST /api/menu-imports/import-001/review-and-apply
 
 기존 상품 선택은 14장의 통합 최종 요청에 포함한다. 백엔드는 상품 존재 여부, 활성 상태, 각 옵션의 가격과 용량 범위를 다시 검증한 뒤 최종 반영 트랜잭션에서 `extracted_items`와 `extracted_options`를 갱신한다.
 
-브랜드·연수·에디션 충돌은 거부 사유가 아니다. AI가 연수나 에디션을 잘못 읽었을 때 운영자가 올바른 상품을 골라 바로잡을 수 있어야 하기 때문이다. 대신 프론트엔드는 운영자가 고른 상품이 추출값과 충돌하면(후보의 `evidence`에 `ageConflict`, `editionConflict`, `editionOnlyInExtracted`가 있거나, 상품 검색으로 고른 상품의 `ageYears`·`editionName`이 추출값과 다르면) 제출 전에 한 번 확인을 받는다. 예: "추출된 연수(12)와 다른 상품(15)입니다. 계속할까요?"
+브랜드·연수·에디션 충돌은 거부 사유가 아니다. AI가 연수나 에디션을 잘못 읽었을 때 운영자가 올바른 상품을 골라 바로잡을 수 있어야 하기 때문이다. 제출 전에 업주에게 확인을 묻지도 않는다. 대신 최종 반영 트랜잭션에서 백엔드가 고른 상품과 그 줄의 추출 연수와 에디션을 10장의 규칙으로 다시 비교하고, `ageConflict`, `editionConflict`, `editionOnlyInExtracted` 중 하나라도 해당하면 그 상품에 연결해 게시한 뒤 `menu_item_checks`(스키마 가이드 7.7)에 사유 `attribute_conflict`로 올린다. 후보에서 고른 상품과 검색에서 고른 상품 모두 같고, 제출한 사람이 operator여도 같다. 메뉴판 이름을 고친 줄은 추출값이 예전 이름에서 나온 값이므로 비교하지 않고 17장의 다시 매칭을 따른다(API 명세 8.7, 8.11).
 
 ```text
 selected_product_id    = product-deanston-12
@@ -1342,7 +1360,7 @@ corrected_product_name = 필요한 경우 수정값
 reviewed_at            = 현재 시각
 ```
 
-각 옵션의 수정값은 해당 `extracted_options` 행의 `corrected_option_label`, `corrected_price_krw`, `corrected_pour_ml`에 저장한다.
+검수 제출은 줄마다 최종 옵션 목록 전체(`options`)를 보낸다(API 명세 8.1). 추출 옵션을 가리키는 옵션(`extractedOptionId`)의 값이 추출값과 다르면 해당 `extracted_options` 행의 `corrected_option_label`, `corrected_price_krw`, `corrected_pour_ml`에 저장한다. 목록에서 빠진 추출 옵션은 게시하지 않고, `extractedOptionId`가 없는 옵션은 업주가 새로 더한 옵션으로 게시한다. 교정값 컬럼의 `null`은 "고치지 않음"이므로, 업주가 값을 `null`로 지운 것은 기록되지 않는다. 검수에서 옵션을 지웠는지, 더했는지도 따로 저장하지 않는다. 게시된 옵션 행은 다음 게시 때 다시 쓰이므로 이런 검수 결정은 나중에 추적할 수 없다.
 
 AI 제안과 추출값을 그대로 승인하면 `confirmed`, 값을 수정하거나 다른 상품을 선택하면 `corrected`로 처리할 수 있다. `selected_match_method`는 운영자가 최종 확정했다는 사실 자체가 아니라 자동 1순위가 실제로 유지됐는지를 나타낸다. 따라서 모든 검수를 무조건 `manual`로 기록하지 않는다. 다른 후보를 선택하면 방법은 `manual`이지만 그 후보에 대해 시스템이 계산한 `score`는 `match_confidence`에 남긴다. 후보 목록에 없던 상품을 직접 검색하거나 신규 등록하면 대응 점수가 없으므로 null로 둔다.
 
@@ -1363,7 +1381,7 @@ created_at       = 현재 시각
 
 ## 16 신규 상품 등록
 
-기존 후보가 없거나 모두 잘못된 상품이면 운영자가 통합 검수 화면에서 신규 상품 등록을 선택한다. 이때 상품 정보뿐 아니라 기존 브랜드 사용 또는 신규 브랜드 생성 중 하나를 운영자가 명시적으로 선택한다. 기존 브랜드라면 `brandId`를 제출하고, 신규 브랜드라면 `canonicalName`과 별칭을 제출한다. 검수 화면에서는 생성 예정 데이터만 보여주며 실제 카탈로그 행은 최종 제출 전까지 만들지 않는다.
+기존 후보가 없거나 모두 잘못된 상품이면 운영자가 통합 검수 화면에서 신규 상품 등록을 선택한다. 신규 상품 등록(`create_product`)은 operator만 할 수 있으며, 업주가 보내면 백엔드가 `OPERATOR_ONLY`로 거부한다(API 명세 8.1). 업주는 그런 줄을 상품 없이 게시하고, 운영자가 확인 목록에서 연결하거나 등록한다(API 명세 8.10, 3.18). 이때 상품 정보뿐 아니라 기존 브랜드 사용 또는 신규 브랜드 생성 중 하나를 운영자가 명시적으로 선택한다. 기존 브랜드라면 `brandId`를 제출하고, 신규 브랜드라면 `canonicalName`과 별칭을 제출한다. 검수 화면에서는 생성 예정 데이터만 보여주며 실제 카탈로그 행은 최종 제출 전까지 만들지 않는다.
 
 최종 확정 단계는 AI로 브랜드를 다시 추론하지 않는다. 운영자가 제출한 브랜드 결정을 백엔드가 규칙과 DB 조회로 검증한다. 추출된 브랜드 표기가 기존 별칭에 없을 때 AI가 검수 전 후보를 추천할 수는 있지만, 최종 `brandId` 또는 신규 생성 여부는 운영자가 결정한다.
 
@@ -1535,13 +1553,13 @@ products
 1. bars 행 잠금(FOR UPDATE), 그다음 menu_import 잠금, 상태와 reviewVersion 검증
 2. 검수 데이터를 만든 뒤 현재 메뉴판이 바뀌었는지 검사
 3. 모든 finalLineType과 추출값 교정 검증
-4. 기존 상품 선택 검증
+4. 기존 상품 선택 검증, 이름을 고친 줄의 다시 매칭(API 명세 8.11), 상품 없이 게시하는 줄의 이름 키 계산
 5. 신규 브랜드·상품 중복 재검사와 필요한 행 생성
 6. extracted_items와 extracted_options 최종 갱신
 7. 확정된 결과를 기준으로 최종 변경 계산
 8. 현재 메뉴판에 변경 적용(품절과 할인 이어 받기), menu_boards.version 증가
 9. menu_import_changes 결정과 review_confirmed_at 저장
-10. menu_imports.status = applied 및 completed_at 저장
+10. menu_imports.status = applied 및 completed_at 저장, 검수 초안(review_draft) 지우기
 ```
 
 서로 다른 업장의 최종 확정 요청이 같은 신규 브랜드나 상품을 동시에 등록하면 양쪽 모두 최초 중복 조회에서 `없음`을 볼 수 있다. `SERIALIZABLE` 격리 수준에서는 DB가 두 트랜잭션을 순서대로 실행한 것과 같은 결과를 만들 수 없는 경우 하나를 직렬화 충돌로 중단한다. 백엔드는 중단된 트랜잭션을 완전히 롤백하고 다음처럼 처음부터 다시 실행한다.
@@ -1567,7 +1585,11 @@ products
 
 재시도에서 앞선 요청이 만든 브랜드나 상품이 중복 재검사에서 조회되면 새 행을 만들지 않고 `409 DUPLICATE_*_FOUND`로 거부해, 운영자가 그 기존 항목을 고르게 한다. `menu_import.status`, `reviewVersion`, 운영자 결정도 매번 다시 검증하며, 이미 `applied`된 작업은 다시 적용하지 않는다. AI 호출, 객체 저장소 업로드, 알림 전송처럼 DB 롤백으로 되돌릴 수 없는 외부 작업은 이 트랜잭션 안에서 실행하지 않는다. 적용 후 이벤트의 신뢰성 있는 전달이 필요해지면 별도의 outbox 패턴을 검토한다.
 
-운영자의 결정은 최종이다. 다른 후보를 고르거나 가격을 고쳐서 최종 변경이 임시 diff와 달라져도 그대로 반영한다. 현재 메뉴판의 항목은 운영자가 `apply`한 `remove`로만 빠진다. 다만 검수 데이터를 만든 뒤 현재 메뉴판이 바뀌었으면(다른 작업이 먼저 게시된 경우 등) 운영자는 오래된 메뉴판을 보고 결정한 것이므로 반영하지 않는다. 이때 백엔드는 임시 diff를 다시 만들고 `review_version`을 올린 뒤 `REVIEW_OUTDATED`를 반환하며, 작업은 `ready_for_review` 상태를 유지한다.
+운영자의 결정은 최종이다. 다른 후보를 고르거나 가격을 고쳐서 최종 변경이 임시 diff와 달라져도 그대로 반영한다.
+
+7단계의 최종 변경도 같은 상품의 줄을 합쳐 계산한다(API 명세 8.12). 같은 `productId`로 제출한 줄끼리 표기와 용량이 같은 옵션의 가격이 다르면 3단계에서 `OPTION_PRICE_CONFLICT`로 거부한다. 다시 매칭 때문에 같은 상품이 된 줄의 가격 충돌은 거부하지 않고, 이름을 고치지 않은 줄의 가격을 쓴 뒤 `price_conflict`로 운영자 확인에 올린다. 상품 없는 위스키 줄이 같은 이름 키로 합쳐져 생긴 충돌도 거부하지 않고 메뉴 순서가 앞선 줄의 가격을 쓰며 `price_conflict`를 더한다. 이름 키는 서버만 계산하므로 업주가 미리 알 수 없기 때문이다. 위스키가 아닌 메뉴(`kind = other`)는 운영자 확인에 올리지 않으므로, 같은 이름 키로 합쳐진 줄의 충돌도 `OPTION_PRICE_CONFLICT`로 거부해 업주가 고르게 한다.
+
+4단계의 다시 매칭은 업주가 메뉴판 이름을 고친 위스키 줄(`correctedProductName`의 정규화값이 추출한 상품명의 정규화값과 다름)에만 한다. 처리 단계와 같은 규칙 매처를 고친 이름 하나로 실행하고, LLM 층과 임베딩 후보 단계는 쓰지 않는다. 결과가 제출한 상품과 같으면 그대로, 다른 상품 하나로 확정되면 그 상품으로 바꾸고, 확정되지 않으면 상품 없는 위스키로 게시한다. 바뀌거나 풀린 줄은 `menu_item_checks`(스키마 가이드 7.7)에 올린다. 그 줄이 임시 diff에서 현재 메뉴판의 항목과 비교되었다면, 다시 매칭으로 달라진 새 항목이 그 항목의 자리를 대신하고 그 항목은 `remove` 변경 없이도 메뉴판에서 빠진다. 업주가 고친 카드 하나가 메뉴판의 두 줄로 남지 않게 하기 위해서다. 이 경우와, 미연결 항목과 비교된 줄을 상품에 연결해 그 줄이 상품의 항목으로 옮겨 가는 경우(13장, API 명세 3.14.1)를 빼면 현재 메뉴판의 항목은 운영자가 `apply`한 `remove`로만 빠진다. 다만 검수 데이터를 만든 뒤 현재 메뉴판이 바뀌었으면(다른 작업이 먼저 게시된 경우 등) 운영자는 오래된 메뉴판을 보고 결정한 것이므로 반영하지 않는다. 이때 백엔드는 임시 diff를 다시 만들고 `review_version`을 올린 뒤 `REVIEW_OUTDATED`를 반환하며, 작업은 `ready_for_review` 상태를 유지한다.
 
 8단계에서 품절과 할인은 다음처럼 이어진다. 품절은 `bar_menu_items.sold_out_at`에 있어 메뉴판에 남는 항목에서는 그대로이고, `remove`로 빠진 항목은 `null`로 되돌린다. 할인은 옵션 행에 있어 옵션을 새로 쓰면 사라지므로, 표기, 용량, 정가가 모두 같은 새 옵션에 옮긴다. 정가가 바뀌거나 옵션이 없어지면 할인을 버린다. 검수 제출에는 할인 필드가 없어 검수에서 새 할인을 정하지 않는다. 새 할인은 반영 뒤 직접 편집(API 명세 3.14.4)으로만 정한다. 품절 표시와 판매 정보 확인(API 명세 3.14.8, 3.14.9)은 검수 중에도 받지만 메뉴판 내용을 바꾸지 않으므로, 2단계의 "메뉴판이 바뀌었는지" 검사에서 변경으로 보지 않는다.
 
@@ -1648,7 +1670,7 @@ products
 | `corrected_product_name` | 운영자가 상품명을 수정한 경우 |
 | `reviewed_at` | 검수 완료 시 |
 
-이름에서 읽은 값(I4-P18): 지금 추출(하이브리드 프롬프트)은 브랜드·연수·에디션을 따로 내지 않으므로 세 칸이 비어 있다. 확정되지 않은 상품 줄은 검수에서 새 상품 등록으로 갈 수 있어, 서버가 규칙 매칭과 같은 방식으로 줄 이름을 읽어 세 칸을 채운다(`app/matching/product_draft.py`). 카탈로그 브랜드로 시작하는 이름이면 그 브랜드 표기, 단위가 붙은 연수(또는 브랜드 바로 뒤의 8 이상 숫자), 나머지가 에디션이다. 추출이 한 칸이라도 채운 줄, `exact_match` 줄, 두 상품이 한 줄에 적힌 줄(`evidence.multiProduct`)은 건드리지 않는다. 이 값은 모델이 읽은 값이 아니라 이름을 규칙으로 나눈 값이므로 틀릴 수 있고, 매칭 결과(`initial_resolution_status`, 후보)에는 쓰이지 않는다. 검수 응답의 `extractedBrandName`·`extractedAgeYears`·`extractedEditionName`과 `newProductDraft`가 이 칸을 그대로 보여 준다.
+이름에서 읽은 값(I4-P18): 지금 추출(하이브리드 프롬프트)은 브랜드·연수·에디션을 따로 내지 않으므로 세 칸이 비어 있다. 확정되지 않은 상품 줄은 검수에서 새 상품 등록으로 갈 수 있어, 서버가 규칙 매칭과 같은 방식으로 줄 이름을 읽어 세 칸을 채운다(`app/matching/product_draft.py`). 카탈로그 브랜드로 시작하는 이름이면 그 브랜드 표기, 단위가 붙은 연수(또는 브랜드 바로 뒤의 8 이상 숫자), 나머지가 에디션이다. 추출이 한 칸이라도 채운 줄, `exact_match` 줄, 두 상품이 한 줄에 적힌 줄(`evidence.multiProduct`)은 건드리지 않는다. 이 값은 모델이 읽은 값이 아니라 이름을 규칙으로 나눈 값이므로 틀릴 수 있고, 매칭 결과(`initial_resolution_status`, 후보)에는 쓰이지 않는다. 검수 응답의 `extractedBrandName`·`extractedAgeYears`·`extractedEditionName`과 `newProductDraft`가 이 칸을 그대로 보여 준다. API 명세 8.7의 연수·에디션 비교(운영자 확인)도 이 칸을 추출값으로 쓴다.
 
 ### 18.6 extracted_options
 

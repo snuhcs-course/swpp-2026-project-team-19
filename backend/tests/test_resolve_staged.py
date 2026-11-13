@@ -798,3 +798,11 @@ def test_a_short_token_fits_only_a_whole_word_of_the_product(two_brands):
     result = staged("Laphroaig 10 DR", two_brands, "S2b")
     assert {c.product_id for c in result.candidates} == {LAPHROAIG_10, LAPHROAIG_10_CS}
     assert result.candidates[0].evidence["editionUnmatched"] == ["dr"]
+
+
+def test_whisky_words_are_neutral_and_other_generic_words_only_recommend(two_brands):
+    # 위스키/whisky are dropped before edition tokens are made (I3), so the default product is confirmed
+    for name in ("글렌피딕 12년 위스키", "Glenfiddich 12 Whisky", "Glenfiddich 12 Whiskey"):
+        result = staged(name, two_brands, "S2b")
+        assert result.status == "exact_match" and result.proposed_product_id == FIDDICH_12, name
+    _one_recommended(staged("Glenfiddich 12 Scotch", two_brands, "S2b"), FIDDICH_12, ["scotch"])

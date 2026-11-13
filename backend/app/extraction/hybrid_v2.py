@@ -60,7 +60,42 @@ def line_groups(hybrid_items: list[dict[str, Any]]) -> list[list[dict[str, Any]]
     groups: list[list[dict[str, Any]]] = []
     for same_category in _runs(hybrid_items):
         groups += group_items(same_category)
-    return groups
+    return _join_split_pairs(groups)
+
+
+def _join_split_pairs(groups: list[list[dict[str, Any]]]) -> list[list[dict[str, Any]]]:
+    """Join a glass row and a bottle row that the answer did not put next to each other, when
+    they are one printed line: same name, same category, and the same OCR name lines (not empty).
+
+    The prompt lets the model list items in any order, so the two price rows of one line can be
+    apart ("all glass rows, then all bottle rows"). Rows without OCR name lines are left as they
+    are: with nothing to show they are one line, two lines of the same name stay two items.
+    The joined group takes the place of its first row.
+    """
+    out: list[list[dict[str, Any]]] = []
+    for group in groups:
+        partner = _split_partner(out, group) if len(group) == 1 else None
+        if partner is not None:
+            partner.append(group[0])
+        else:
+            out.append(group)
+    return out
+
+
+def _split_partner(earlier: list[list[dict[str, Any]]], group: list[dict[str, Any]]) -> list[dict[str, Any]] | None:
+    [row] = group
+    lines = set(row["source_lines"]["name"])
+    if not lines:
+        return None
+    for candidate in earlier:
+        if len(candidate) != 1:
+            continue
+        [other] = candidate
+        if (other["raw_name"] == row["raw_name"] and other["category"] == row["category"]
+                and {other["unit"], row["unit"]} == {"glass", "bottle"}
+                and set(other["source_lines"]["name"]) == lines):
+            return candidate
+    return None
 
 
 def _runs(hybrid_items: list[dict[str, Any]]) -> list[list[dict[str, Any]]]:

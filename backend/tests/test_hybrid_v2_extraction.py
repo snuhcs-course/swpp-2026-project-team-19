@@ -98,6 +98,35 @@ def test_rows_that_are_neighbours_only_after_filtering_are_not_merged():
         (1, "페른홀로우 하이볼", ["잔"], ["L004"]), (2, "하우스 와인", ["잔"], []), (3, "페른홀로우 하이볼", ["병"], ["L005"])]
 
 
+def test_glass_and_bottle_rows_of_one_printed_line_are_joined_when_apart():
+    # all glass rows first, then all bottle rows: the rows of one line share their OCR name line
+    out = convert({"items": [
+        item("페른홀로우 12년", "whisky", 15000, "glass", name_lines=["L002"], price_lines=["L003"]),
+        item("페른홀로우 하이볼", "cocktail", 12000, "glass", name_lines=["L004"], price_lines=["L005"]),
+        item("하우스 와인", "other", 9000, "glass", name_lines=["L001"]),
+        item("페른홀로우 12년", "whisky", 150000, "bottle", name_lines=["L002"], price_lines=["L003"]),
+        item("하우스 와인", "other", 45000, "bottle", name_lines=["L001"]),
+    ]})
+    assert [(i["itemOrder"], i["rawText"], [o["optionLabel"] for o in i["options"]]) for i in out["items"]] == [
+        (1, "페른홀로우 12년", ["잔", "병"])]
+    assert out["itemSources"] == [{"itemOrder": 1, "nameLines": ["L002"], "priceLines": ["L003"],
+                                   "box": [100, 100, 880, 120]}]
+    assert [(o["rawText"], [x["optionLabel"] for x in o["options"]]) for o in out["otherItems"]] == [
+        ("페른홀로우 하이볼", ["잔"]), ("하우스 와인", ["잔", "병"])]
+
+
+def test_rows_apart_stay_apart_without_the_same_name_line():
+    # different name lines, no name lines, or another category: two lines of the same name
+    for first, second in (
+        (item("A", "whisky", 9000, "glass", name_lines=["L002"]), item("A", "whisky", 90000, "bottle", name_lines=["L004"])),
+        (item("A", "whisky", 9000, "glass"), item("A", "whisky", 90000, "bottle")),
+        (item("A", "whisky", 9000, "glass", name_lines=["L002"]), item("A", "other", 90000, "bottle", name_lines=["L002"])),
+        (item("A", "whisky", 9000, "glass", name_lines=["L002"]), item("A", "whisky", 9500, "glass", name_lines=["L002"])),
+    ):
+        out = convert({"items": [first, item("B", "food", 5000, None), second]})
+        assert len(out["items"]) + len(out["otherItems"]) == 3  # A, B, A: nothing joined
+
+
 def test_adjacent_glass_and_bottle_rows_are_still_one_line():
     out = convert(V2_OUTPUT)
     assert [[o["optionLabel"] for o in i["options"]] for i in out["items"]] == [["잔", "병"]]
