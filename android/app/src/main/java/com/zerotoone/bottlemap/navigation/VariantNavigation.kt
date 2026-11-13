@@ -1,6 +1,5 @@
 package com.zerotoone.bottlemap.navigation
 
-import android.net.Uri
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -13,18 +12,11 @@ import com.zerotoone.bottlemap.data.owner.OwnerMockRuntime
 import com.zerotoone.bottlemap.ui.owner.OwnerMockViewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
-import androidx.navigation.navArgument
-import com.zerotoone.bottlemap.BuildConfig
-import com.zerotoone.bottlemap.data.owner.review.MockPhotoReviewScenario
 import com.zerotoone.bottlemap.data.owner.review.LivePhotoReviewRepository
-import com.zerotoone.bottlemap.data.owner.review.PreviewOnlyPhotoReviewRepository
 import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewScreen
 import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewViewModel
-import com.zerotoone.bottlemap.ui.owner.ExtractionReviewScreen
-import com.zerotoone.bottlemap.ui.owner.MenuUploadScreen
 import com.zerotoone.bottlemap.ui.owner.OwnerOnboardingScreen
 import com.zerotoone.bottlemap.ui.owner.OwnerManagementHomeScreen
 import com.zerotoone.bottlemap.ui.owner.OwnerMenuPhotoSelectionScreen
@@ -181,19 +173,14 @@ internal fun NavGraphBuilder.registerVariantRoutes(
                         val latestJob = snapshot?.imports?.lastOrNull {
                             it.barId == activeBar && it.status == MockImportStatus.READY_FOR_REVIEW
                         }
-                        // Show every OCR option in the v20 UI. The visual
-                        // workflow currently limits editing to 3 even though
-                        // server PR #164 accepts 1-10 final options; no OCR
-                        // option is silently removed from a request.
-                        val repository = if (data.usesProductionOwnerApi()) {
-                            LivePhotoReviewRepository(
-                                owner = data,
-                                importId = latestJob?.menuImportId,
-                                context = LocalContext.current.applicationContext,
-                            )
-                        } else {
-                            PreviewOnlyPhotoReviewRepository(MockPhotoReviewScenario.BASIC)
-                        }
+                        // Owner review always loads the authenticated import.
+                        // Debug/mock scenarios belong to src/debug and cannot
+                        // be substituted into a real publishable route.
+                        val repository = LivePhotoReviewRepository(
+                            owner = data,
+                            importId = latestJob?.menuImportId,
+                            context = LocalContext.current.applicationContext,
+                        )
                         val reviewVm: PhotoReviewViewModel = viewModel(
                             key = "owner-review-${latestJob?.menuImportId ?: "fixture"}",
                             factory = PhotoReviewViewModel.Factory(repository),
@@ -236,26 +223,6 @@ internal fun NavGraphBuilder.registerVariantRoutes(
             }
         }
 
-        // Keep the earlier developer integration test routes available in DEBUG builds
-        // only. They use temp operator login and must not be exposed from production UX.
-        if (BuildConfig.DEBUG) {
-            composable(OwnerRoutes.LEGACY_UPLOAD) {
-                MenuUploadScreen(
-                    onOpenReview = { id ->
-                        navController.navigate("owner/extraction-review/" + Uri.encode(id))
-                    },
-                )
-            }
-            composable(
-                route = OwnerRoutes.LEGACY_REVIEW,
-                arguments = listOf(navArgument("menuImportId") { type = NavType.StringType }),
-            ) { entry ->
-                ExtractionReviewScreen(
-                    menuImportId = entry.arguments?.getString("menuImportId").orEmpty(),
-                    onBack = { navController.popBackStack() },
-                )
-            }
-        }
     }
 }
 
