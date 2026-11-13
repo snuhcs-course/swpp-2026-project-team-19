@@ -207,9 +207,11 @@ internal fun SourceVisual(
     large: Boolean = false,
     sourcePhotoUrl: String? = null,
     sourceBox: List<Int>? = null,
+    refreshSourceUrl: (suspend () -> String?)? = null,
 ) {
     if (!sourcePhotoUrl.isNullOrBlank()) {
-        RealReviewSourceVisual(sourcePhotoUrl, sourceBox, height, large, modifier)
+        RealReviewSourceVisual(sourcePhotoUrl, sourceBox, height, large, modifier,
+            refreshSourceUrl)
         return
     }
     Box(
