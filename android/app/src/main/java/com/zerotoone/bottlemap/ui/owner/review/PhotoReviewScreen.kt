@@ -97,6 +97,7 @@ fun PhotoReviewScreen(
     initialFocusItemId: String? = null,
 ) {
     val load by vm.load.collectAsStateWithLifecycle()
+    val publishing by vm.publishing.collectAsStateWithLifecycle()
     var toast by remember { mutableStateOf<Pair<Long, String>?>(null) }
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
@@ -145,7 +146,9 @@ fun PhotoReviewScreen(
     }
 
     BackHandler {
-        if (state?.modal != null) vm.dismissModal() else vm.leave()
+        if (!publishing) {
+            if (state?.modal != null) vm.dismissModal() else vm.leave()
+        }
     }
 
     Box(Modifier.fillMaxSize().background(UxColor.bg).testTag("photo-review-screen")) {
@@ -197,7 +200,7 @@ fun PhotoReviewScreen(
                         }
                     }
                 }
-                ReviewModalLayer(s, vm)
+                ReviewModalLayer(s, vm, publishing)
             }
         }
         toast?.let { (_, message) ->
@@ -396,7 +399,7 @@ private fun PublishFooter(stats: ReviewStats, vm: PhotoReviewViewModel) {
 // ---- Modals ----
 
 @Composable
-private fun ReviewModalLayer(s: PhotoReviewState, vm: PhotoReviewViewModel) {
+private fun ReviewModalLayer(s: PhotoReviewState, vm: PhotoReviewViewModel, publishing: Boolean) {
     val modal = s.modal ?: return
     when (modal.type) {
         ReviewModalType.SOURCE_PHOTO -> SourcePhotoModal(s, modal, vm)
@@ -404,7 +407,7 @@ private fun ReviewModalLayer(s: PhotoReviewState, vm: PhotoReviewViewModel) {
             val stats = PhotoReviewRules.stats(s)
             val summary = "위스키 ${stats.ready.size} · 그 외 메뉴 ${stats.other.size} · 제외 ${stats.excluded.size}"
             BottomSheetLayer("이대로 게시할까요?", summary, "게시하기", vm::dismissModal, vm::confirmPublish,
-                "review-publish-sheet")
+                "review-publish-sheet", busy = publishing)
         }
         ReviewModalType.EXCLUDE -> BottomSheetLayer("이번 게시에서 제외할까요?", "기존에 등록된 메뉴는 삭제하지 않아요.", "제외",
             vm::dismissModal, { modal.itemId?.let(vm::confirmExclude) }, "review-exclude-sheet")
@@ -412,7 +415,7 @@ private fun ReviewModalLayer(s: PhotoReviewState, vm: PhotoReviewViewModel) {
 }
 
 @Composable
-private fun BottomSheetLayer(title: String, body: String, confirm: String, onCancel: () -> Unit, onConfirm: () -> Unit, tag: String) {
+private fun BottomSheetLayer(title: String, body: String, confirm: String, onCancel: () -> Unit, onConfirm: () -> Unit, tag: String, busy: Boolean = false) {
     Box(Modifier.fillMaxSize().background(ReviewColor.sheetScrim).quietClick(onClick = {}), contentAlignment = Alignment.BottomCenter) {
         Column(
             Modifier.fillMaxWidth().wrapContentHeight()
@@ -427,8 +430,10 @@ private fun BottomSheetLayer(title: String, body: String, confirm: String, onCan
             Text(title, style = uxText(21f, 700, serif = true), modifier = Modifier.padding(vertical = 10.dp))
             Text(body, style = uxText(13f, 400, UxColor.sub, lineHeight = 1.65f), modifier = Modifier.padding(bottom = 16.dp))
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                UxSecondaryButton("취소", onCancel, Modifier.weight(1f).testTag("$tag-cancel"))
-                UxMainButton(confirm, onConfirm, Modifier.weight(1f).testTag("$tag-confirm"))
+                UxSecondaryButton("취소", onCancel, Modifier.weight(1f).testTag("$tag-cancel"),
+                    enabled = !busy)
+                UxMainButton(if (busy) "게시 중..." else confirm, onConfirm,
+                    Modifier.weight(1f).testTag("$tag-confirm"), enabled = !busy)
             }
         }
     }
