@@ -2529,6 +2529,43 @@ GET /api/search/map-bars?south=37.470&west=126.940&north=37.490&east=126.970
 
 ### 3.14 메뉴 직접 편집
 
+> **I4-P32 / Issue #152 — 제안된 새 계약 (PR 검증 및 서버 배포 전):**
+> 공용 상품 `products`와 매장 전용 `bar_local_menu_items`를 분리한다.
+> `POST /api/bars/{barId}/menu/items`는 `productId`(승인된 위스키),
+> `localItem`(매장 전용), `newProduct`(operator 전용) **셋 중 하나**를 사용한다.
+> `localItem: { "category": "맥주" }`와 `displayName`, `options`를
+> 보내면 **자기 매장 메뉴에 즉시 게시**하지만 전역 상품·별칭을 만들지 않는다.
+> `localItem.category = "whisky"`도 먼저 매장에 게시되고 승인 대기한다.
+> `GET /api/bars/{barId}/menu`의 `items[]`는 매장 전용 항목이면
+> `catalogMatched = false`, `catalogReviewStatus = "pending"`
+> (위스키) 또는 `null`(비위스키)이다. 이때 `productId`와
+> `barMenuItemId`는 매장 전용 UUID를 가리키며 **products.id가 아니다**.
+> `brandId`와 `brandName`는 `null`일 수 있다.
+> `PUT .../menu/items/{barMenuItemId}`의 선택 필드 `category`를 보내면
+> 매장 전용 카테고리를 바꾼다. 기존 공용 상품 연결 메뉴에 다른 종류를
+> 보내면 해당 매장만 별도 로컬 항목으로 전환하여 원래
+> `products.category`는 변경하지 않는다. 반환된 새 `barMenuItemId`
+> 를 후속 요청에 사용해야 한다.
+> `DELETE`, `reset`, `sold-out`은 로컬 항목도 매장 범위에서 처리한다.
+> 고객 위스키 검색(3.10)은 승인된 `category = whisky` 공용 상품만
+> 조회하므로 로컬 맥주·승인 대기 위스키는 검색되지 않는다.
+>
+> **관리자 승인 API (운영자 권한만):**
+> `POST /api/bars/{barId}/menu/local-items/{localItemId}/approve`
+> `{ "menuVersion": n, "productId": UUID }` 또는
+> `{ "menuVersion": n, "newProduct": { ... } }`를 보낸다.
+> 기존 승인된 위스키 연결 또는 신규 위스키 정규 상품·브랜드 생성을
+> 한 트랜잭션에서 수행하고 로컬 항목을 카탈로그 연결 메뉴로 교체한다.
+> 승인 이후부터 검색 대상이 된다. 비위스키는 승인할 수 없다.
+> 관리자 **웹 UI와 기존 잘못 분류된 데이터 정비는 별도 의존 작업**이다.
+>
+> **사진 검수(8.1)**: 신규 위스키/기타 주류를 업주가 확정할 때
+> `create_local_menu_item` 결정으로 `category`, `correctedProductName`,
+> `optionDecisions`, `excludedOptionIds`, `addedOptions`를 전달한다.
+> 기존 승인 상품은 `select_existing_product`로 연결한다. 업주의
+> `create_product`/카탈로그 별칭 추가는 승인 전까지 서버에서 차단한다.
+
+
 > **2026-11-13 안전 제한 / Issue #152 (PR #151):** 아래 3.14.3에서 서술한
 > `newProduct` 즉시 생성 동작은 신규 상품 승인 정책과 충돌한다.
 > **현재 수정 브랜치에서는 업주가 `newProduct`로 전역 카탈로그를 생성하려는 요청을
@@ -4151,6 +4188,7 @@ Content-Type: application/json
 |---|---|---|---|
 | `select_existing_product` | 기존 상품에 연결 | `product` | `extractedItemId`, `productId` 필수. `correctedProductName`, `optionDecisions`, `excludedOptionIds`, `addedOptions`, `aliasesToAdd` 선택 |
 | `create_product` | 새 상품(필요하면 새 브랜드)을 만들어 연결 | `product` | `extractedItemId`, `brand`, `product` 필수. `correctedProductName`, `optionDecisions`, `excludedOptionIds`, `addedOptions`, `aliases` 선택 |
+| `create_local_menu_item` | 현재 매장에만 게시, 신규 위스키는 관리자 승인 대기 | `product` | `extractedItemId`, `category` 필수. `correctedProductName`, `optionDecisions`, `excludedOptionIds`, `addedOptions` 선택. 공용 카탈로그에 브랜드·상품을 생성하지 않음 |
 | `confirm_non_product` | 비상품 줄로 확정 | `section_header`, `description`, `unknown` | `extractedItemId`만 |
 | `reject` | 잡음·중복 등으로 제외 | 어떤 값이든 | `extractedItemId`만 |
 
