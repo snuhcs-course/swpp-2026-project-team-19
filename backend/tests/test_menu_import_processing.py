@@ -405,6 +405,32 @@ def test_line_naming_two_products_is_stored_as_ambiguous(client, db_session, ima
     # I4-P18: no brand, age or edition is read from a line of two products ("Buffalo Trace" with the
     # edition "/ Maker's Mark" would be a draft that fuses them)
     assert (item.extracted_brand_name, item.extracted_age_years, item.extracted_edition_name) == (None, None, None)
+    # and the whole line is not suggested as an alias: saved on one of the two products, it would
+    # resolve to that product alone on the next import
+    [shown] = client.get(f"/api/menu-imports/{menu_import.id}", headers=operator).json()["images"][0]["items"]
+    assert shown["newProductDraft"]["aliasSuggestions"] == []
+    assert shown["newProductDraft"]["displayName"] == "Buffalo Trace / Maker's Mark"
+
+
+def test_bilingual_sides_on_different_products_get_no_alias_suggestion(
+    client, db_session, image_storage, operator, glenfiddich, menu_lines
+):
+    # the two spellings of the line matched different products: either one saved as an alias
+    # of the product the reviewer picks would make the other side resolve to the wrong product
+    deanston = make_product(db_session, make_brand(db_session, "Deanston", aliases=("딘스톤",)), "Deanston 12",
+                            aliases=("딘스톤 12년",), age_years=12)
+    menu_lines("딘스톤 12년 / Glenfiddich 12", "글렌피딕 12년 / Glenfiddich 12")
+
+    menu_import = load_import(db_session, upload(client, make_bar(db_session), operator))
+
+    split, same = items_of(menu_import)
+    assert {c.product_id for c in split.candidates} == {deanston.id, glenfiddich[12].id}
+    assert all(c.evidence.get("splitBilingual") for c in split.candidates)
+    shown = client.get(f"/api/menu-imports/{menu_import.id}", headers=operator).json()["images"][0]["items"]
+    assert shown[0]["newProductDraft"]["aliasSuggestions"] == []
+    # both sides on one product: the spellings are suggested as before
+    assert same.initial_resolution_status == ResolutionStatus.EXACT_MATCH
+    assert shown[1]["newProductDraft"]["aliasSuggestions"] == ["글렌피딕 12년", "Glenfiddich 12"]
 
 
 # ---- I4-P18: product parts read from an unconfirmed line fill the new-product form ----
@@ -431,6 +457,7 @@ def test_unconfirmed_lines_get_brand_age_and_edition_and_confirmed_lines_do_not(
     assert items[1]["newProductDraft"] == {
         "brandText": "글렌피딕", "category": "whisky", "displayName": "글렌피딕(Glenfiddich) 21년 그란 레제르바",
         "ageYears": 21, "editionName": "그란 레제르바", "abv": None,
+        "aliasSuggestions": ["글렌피딕 21년 그란 레제르바", "Glenfiddich 21년 그란 레제르바"],
     }
     assert items[0]["newProductDraft"]["brandText"] is None and items[0]["initialResolutionStatus"] == "exact_match"
 

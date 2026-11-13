@@ -175,6 +175,7 @@ def test_review_payload(client, db_session, image_storage, operator, glenfiddich
         "ageYears": 12,
         "editionName": None,
         "abv": None,
+        "aliasSuggestions": ["글렌피딕 12년"],
     }
     assert (conflict["initialResolutionStatus"], conflict["proposedProductId"]) == ("ambiguous", str(glenfiddich[12].id))
     assert conflict["candidates"][0]["evidence"]["ageConflict"] is True

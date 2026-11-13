@@ -507,3 +507,32 @@ def test_operators_only(client, sample, token_for, glenfiddich):
 
     assert submit(client, sample.menu_import.id, body, customer).status_code == 403
     assert submit(client, sample.menu_import.id, body, {}).status_code == 401
+
+
+def test_alias_suggestions_of_the_review_can_be_sent_back_as_aliases(client, db_session, sample, operator, glenfiddich):
+    # I4-P18: the review response suggests the line's spellings; the client sends the ones the
+    # reviewer keeps, with create_product (`aliases`) or select_existing_product (`aliasesToAdd`)
+    from app.models import ProductAlias
+
+    review = client.get(f"/api/menu-imports/{sample.menu_import.id}", headers=operator).json()
+    drafts = {item["extractedItemId"]: item["newProductDraft"]
+              for image in review["images"] for item in image["items"] if item["newProductDraft"]}
+    assert all(draft["aliasSuggestions"] for draft in drafts.values())
+    body = body_from_review(review)
+    sent = {}
+    for decision in body["itemDecisions"]:
+        key = {"create_product": "aliases", "select_existing_product": "aliasesToAdd"}.get(decision["action"])
+        if key:
+            sent[decision["extractedItemId"]] = drafts[decision["extractedItemId"]]["aliasSuggestions"]
+            decision[key] = [{"aliasText": text} for text in sent[decision["extractedItemId"]]]
+    assert {d["action"] for d in body["itemDecisions"]} >= {"create_product", "select_existing_product"}
+
+    applied(client, sample, body, operator)
+
+    db_session.expire_all()
+    stored = set(db_session.scalars(select(ProductAlias.alias_text)))
+    assert {text for texts in sent.values() for text in texts} <= stored
+    # the spelling of the line now finds the product it was created for
+    created = db_session.scalar(select(Product).where(Product.display_name == "Unknown Distillery 25"))
+    aliases = set(db_session.scalars(select(ProductAlias.alias_text).where(ProductAlias.product_id == created.id)))
+    assert "Unknown Distillery 25" in aliases

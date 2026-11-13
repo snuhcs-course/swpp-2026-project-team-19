@@ -22,6 +22,7 @@ from app.models import (
     PipelineStatus,
     Product,
 )
+from app.matching.product_draft import alias_suggestions
 from app.schemas.menu_import import (
     ChangeAfter,
     ChangeAfterOption,
@@ -138,6 +139,20 @@ def source_boxes(raw_output: Any) -> dict[int, list[int]]:
     return boxes
 
 
+def _alias_suggestions(item: ExtractedItem) -> list[str]:
+    """Nothing for a line whose parts name different products: two products on one line
+    (`evidence.multiProduct`), or a bilingual line whose two sides matched different products
+    ("딘스톤 12년 / Glenfiddich 12", `evidence.splitBilingual` on candidates of different
+    products). Saved on the product the reviewer picks, one side would become an alias of the
+    wrong product and resolve to it on the next import."""
+    evidences = [(candidate.product_id, candidate.evidence or {}) for candidate in item.candidates]
+    if any(evidence.get("multiProduct") for _, evidence in evidences):
+        return []
+    if len({product for product, evidence in evidences if evidence.get("splitBilingual")}) > 1:
+        return []
+    return alias_suggestions(item.extracted_product_name)
+
+
 def _review_item(item: ExtractedItem, products: dict[UUID, Product], boxes: dict[int, list[int]]) -> ReviewItem:
     effective = item.corrected_line_type or item.extracted_line_type
     return ReviewItem(
@@ -175,6 +190,7 @@ def _review_item(item: ExtractedItem, products: dict[UUID, Product], boxes: dict
                 ageYears=item.extracted_age_years,
                 editionName=item.extracted_edition_name,
                 abv=_float(item.extracted_abv),
+                aliasSuggestions=_alias_suggestions(item),
             )
             if effective == LineType.PRODUCT
             else None
