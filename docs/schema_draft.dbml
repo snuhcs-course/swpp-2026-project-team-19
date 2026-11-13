@@ -98,6 +98,27 @@ Enum menu_item_kind {
   other
 }
 
+Enum menu_item_check_reason {
+  unlinked
+  relinked_by_name
+  unlinked_by_name
+  attribute_conflict
+  price_conflict
+}
+
+Enum menu_item_check_status {
+  open
+  resolved
+  dismissed
+}
+
+Enum menu_item_check_resolution {
+  link_existing
+  create_and_link
+  keep
+  mark_as_other
+}
+
 Enum menu_change_type {
   add
   update
@@ -777,6 +798,36 @@ Table menu_entry_options {
   '''
 }
 
+Table menu_item_checks {
+  id uuid [pk]
+  bar_id uuid [not null, ref: > bars.id]
+  bar_menu_item_id uuid [not null, ref: > bar_menu_items.id]
+  reasons menu_item_check_reason[] [not null, note: 'In the order they arose; at least one']
+  status menu_item_check_status [not null, default: 'open']
+  source_menu_import_id uuid [ref: > menu_imports.id, note: 'Import whose review line last added a reason; null for direct adds']
+  source_extracted_item_id uuid [ref: > extracted_items.id]
+  created_at timestamptz [not null]
+  resolution menu_item_check_resolution [note: 'Set when status = resolved']
+  resolved_product_id uuid [ref: > products.id, note: 'Product the item ended up linked to; null for mark_as_other']
+  resolved_by_user_id uuid [ref: > users.id, note: 'Null for a temporary-login operator without a users row, and for dismissed checks']
+  resolved_at timestamptz [note: 'Set when status leaves open']
+
+  indexes {
+    bar_menu_item_id [unique, note: 'Partial: WHERE status = open. At most one open check per item']
+    (status, created_at)
+    (bar_id, status)
+  }
+
+  Note: '''
+  A menu item an operator should look at: a whisky published without a product, or a link the owner's review
+  changed in a way a person should confirm (API spec 3.18). An operator resolves it by linking a product,
+  creating one and linking it, keeping the current link, or marking the item as non-whisky.
+  A current-board whisky item without a product always has one open check. Removing the item from the board
+  dismisses its open check in the same transaction. kind = other items never get a check.
+  bar_menu_item_id keeps the original item even when linking moves the board entry to another item of the bar.
+  '''
+}
+
 Table product_search_counts {
   search_date date [not null, note: 'Seoul local date of the search']
   product_id uuid [not null, note: 'No foreign key so the counts survive catalogue changes']
@@ -900,6 +951,7 @@ TableGroup "Published Menus" {
   menu_boards
   menu_board_entries
   menu_entry_options
+  menu_item_checks
 }
 
 TableGroup "AI Menu Import" {

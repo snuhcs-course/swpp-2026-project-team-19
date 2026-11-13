@@ -16,6 +16,7 @@
 - 현재 메뉴판 항목의 직접 추가, 수정, 삭제와 초기화, 품절, 기간 할인, 판매 정보 확인
 - 매장 정보(한 줄 소개, 태그, 정규 영업시간), 임시 휴무, 매장 사진
 - 고객의 상품 검색, 주변·지도 업장 조회와 업장 상세 메뉴 조회
+- 운영자의 메뉴 항목 확인과 상품 연결
 - 고객 홈 화면의 "요즘 많이 찾는 위스키"와 이를 위한 검색 집계
 - 멱등성, 검수 버전 충돌과 공통 오류 응답
 
@@ -114,6 +115,7 @@ GET 주변 업장 조회 (위치 + 반경)
 | `POST /api/owner-applications/{applicationId}/cancel`, `PUT /api/owner-applications/{applicationId}/menu-photos`, `PUT`과 `DELETE /api/owner-applications/{applicationId}/cover-photo` | | 본인 신청만 | 본인 신청만 | 본인 신청만 |
 | `GET /api/owner-applications`, `POST .../approve`, `POST .../reject`, `POST .../verify-business` | | | | O |
 | `DELETE /api/bars/{barId}/owner` | | | | O |
+| `GET /api/menu-item-checks`, `POST /api/menu-item-checks/{checkId}/resolve` | | | | O |
 | `GET /api/bars`, `POST /api/bars`(지금은 구현하지 않음, 3.5) | | | | O |
 | `GET /api/bars/{barId}` | | | O | O |
 | `PATCH /api/bars/{barId}` | | | O (`status` 제외) | O |
@@ -129,7 +131,7 @@ GET 주변 업장 조회 (위치 + 반경)
 
 `/media/{key}`는 로컬 저장소를 쓰는 개발 환경에서만 있는 사진 파일 경로이며 API 계약이 아니다. 배포 서버(S3)에는 없다. 매장 사진은 이 경로가 아니라 `GET /api/bar-photos/{photoId}`와 `GET /api/bar-photos/{photoId}/thumbnail`(3.16.5)로 전달하며, 이 경로는 모든 환경에 있다.
 
-`/admin/`은 operator 웹 대시보드의 정적 파일(HTML, JS, CSS)이며 API 계약이 아니다. 페이지가 브라우저에서 Supabase Google 로그인을 하고 3.11의 API를 그대로 호출하므로, 권한은 위 표와 같다(operator만 신청 목록을 보고 승인·거절한다). `/admin/config.js`는 페이지에 공개 설정만 준다: Supabase 프로젝트 URL과 publishable key, 그리고 `new_bar` 승인 화면의 지도와 주소 검색에 쓰는 Kakao JavaScript 키(등록한 도메인에서만 동작). 좌표는 브라우저에서 Kakao Maps JavaScript SDK로 찾으며 백엔드 API는 쓰지 않는다. 승인 요청(3.11.7)의 `latitude`, `longitude`는 지금과 같다.
+`/admin/`은 operator 웹 대시보드의 정적 파일(HTML, JS, CSS)이며 API 계약이 아니다. 페이지가 브라우저에서 Supabase Google 로그인을 하고 3.11의 API를 그대로 호출하므로, 권한은 위 표와 같다(operator만 신청 목록을 보고 승인·거절한다). 메뉴 항목 확인 화면도 같은 방식으로 3.18의 API를 호출한다. `/admin/config.js`는 페이지에 공개 설정만 준다: Supabase 프로젝트 URL과 publishable key, 그리고 `new_bar` 승인 화면의 지도와 주소 검색에 쓰는 Kakao JavaScript 키(등록한 도메인에서만 동작). 좌표는 브라우저에서 Kakao Maps JavaScript SDK로 찾으며 백엔드 API는 쓰지 않는다. 승인 요청(3.11.7)의 `latitude`, `longitude`는 지금과 같다.
 
 인증이 필요한 요청에서 백엔드는 다음 순서로 검증한다. 단, JSON 본문을 읽을 수 없거나 multipart 본문의 구조(경계 문자열 등)가 깨졌으면 이 순서와 관계없이 먼저 `400 INVALID_REQUEST`다(9.2).
 
@@ -302,6 +304,8 @@ ignore
 | `POST` | `/api/owner-applications/{applicationId}/verify-business` | 사업자등록 정보 다시 검증 |
 | `GET` | `/api/me/bars` | 내가 업주인 업장 목록 |
 | `DELETE` | `/api/bars/{barId}/owner` | 업주 해제 |
+| `GET` | `/api/menu-item-checks` | 운영자가 확인할 메뉴 항목 목록 |
+| `POST` | `/api/menu-item-checks/{checkId}/resolve` | 메뉴 항목 확인 처리 (상품 연결 등) |
 
 별도의 신규 브랜드·상품 생성 API는 두지 않는다. 신규 카탈로그 데이터는 `review-and-apply` 요청(8.5, 8.6)이나 메뉴 항목 직접 추가 요청(3.14.3) 안에서 제안하고, 그 요청의 트랜잭션에서 생성한다.
 
@@ -1011,7 +1015,7 @@ GET /api/bars/{barId}/menu
 | 연결을 기다리는 위스키 | `null` | `whisky` | 나오지 않는다. 운영자가 상품에 연결하면 그때부터 나온다 |
 | 위스키가 아닌 메뉴 | `null` | `other` | 나오지 않는다. 상품에 연결하지 않는다 |
 
-연결을 기다리는 위스키는 카탈로그에서 매칭되지 않은 줄을 업주가 상품 없이 게시한 항목이다(8.10, 3.14.3). 운영자가 확인한 뒤 기존 상품에 연결하거나 카탈로그에 새로 등록해 연결한다. 연결된 뒤에도 `barMenuItemId`와 `displayName`은 그대로다. 프론트엔드는 `productId`가 `null`인 항목을 연결 여부로 구분해 보여 주지 않아도 된다. 고객에게는 셋 모두 메뉴판의 한 줄이다.
+연결을 기다리는 위스키는 카탈로그에서 매칭되지 않은 줄을 업주가 상품 없이 게시한 항목이다(8.10, 3.14.3). 운영자가 확인한 뒤 기존 상품에 연결하거나 카탈로그에 새로 등록해 연결한다(3.18). 연결된 뒤에도 `barMenuItemId`와 `displayName`은 그대로다. 프론트엔드는 `productId`가 `null`인 항목을 연결 여부로 구분해 보여 주지 않아도 된다. 고객에게는 셋 모두 메뉴판의 한 줄이다.
 
 #### 3.9.1 게시된 메뉴가 없을 때
 
@@ -2729,7 +2733,7 @@ Content-Type: application/json
 - `kind`를 보냈는데 `displayName`이 없거나 `null`이면 `422`이고 `fieldErrors[].path = displayName`, `code = MISSING`이다. `displayName`을 정규화한 이름 키(3.14.1)가 빈 값이면 `NOT_NORMALIZABLE`이다.
 - 같은 상품이 이미 현재 메뉴판에 있으면 `409 MENU_ITEM_EXISTS`(`details.barMenuItemId`)다. 한 상품은 메뉴판에 한 번만 있고, 용량이나 가격을 더하려면 그 항목을 수정한다(3.14.4). 상품 없이 추가할 때는 이름 키가 같은 미연결 항목이 현재 메뉴판에 있으면 같은 오류다. 종류(`kind`)가 달라도 이름 키가 같으면 같은 항목으로 본다.
 - 새 항목은 메뉴판의 맨 끝에 붙는다. 이 업장이 예전에 판매했던 상품이면 그때의 `barMenuItemId`를 다시 쓴다. 상품 없이 추가한 항목은 항상 새 `barMenuItemId`를 받는다(3.14.1).
-- `kind = whisky`로 추가한 항목은 운영자가 상품에 연결하기 전까지 고객 검색에 나오지 않는다(3.9, 3.10.2). 업주가 상품을 고를 수 있으면 `productId`로 추가하는 편이 바로 검색에 나온다.
+- `kind = whisky`로 추가한 항목은 운영자 확인 목록(3.18)에 올라가며, 운영자가 상품에 연결하기 전까지 고객 검색에 나오지 않는다(3.9, 3.10.2). 업주가 상품을 고를 수 있으면 `productId`로 추가하는 편이 바로 검색에 나온다.
 - `newProduct`를 보내면 같은 트랜잭션 안에서 검수의 신규 생성(8.5, 8.6)과 같은 규칙으로 브랜드와 상품의 중복을 검사한다. 같은 브랜드나 상품이 있으면 아무것도 만들지 않고 `409 DUPLICATE_BRAND_FOUND` 또는 `409 DUPLICATE_PRODUCT_FOUND`다. `details`는 9.5와 같되 `extractedItemId`와 `reviewUrl`이 없다. 프론트엔드는 `details.existingProduct`(또는 `existingBrand`)를 보여 주고, 맞으면 그 `productId`(또는 `brandId`)로 다시 요청한다. `existingProduct.isActive = false`이면 그 상품으로는 추가할 수 없으므로(`PRODUCT_INACTIVE`) 다시 요청하지 않고, 상품 검색(7)에서 고르도록 안내한다(9.5).
 - 만든 상품과 브랜드에는 요청한 사용자를 기록한다. 만든 상품과 별칭은 바로 모든 업장의 고객 검색과 메뉴 매칭에 쓰인다.
 - 응답 본문에서 추가한 항목은 `productId`로 찾는다. 상품 없이 추가한 항목은 응답 `items`의 마지막 항목이다.
@@ -3533,6 +3537,201 @@ GET /api/search/popular-products?limit=10
 | 네트워크 오류, `5xx` | | | 이 영역만 숨기거나 재시도 버튼을 보여 준다. 홈 화면의 다른 영역은 그대로 쓴다 |
 
 이 API는 공개 API이므로 `401`과 `403`을 반환하지 않는다.
+
+### 3.18 운영자 메뉴 항목 확인
+
+운영자가 확인해야 할 메뉴 항목을 한 목록에 모으고, 운영자가 각 항목을 상품에 연결하거나 지금 연결이 맞다고 확인하는 API다. operator만 호출할 수 있다. 관리자 웹(`/admin/`)이 이 API로 확인 대기 화면을 보여 준다.
+
+| 메서드 | 경로 | 용도 |
+|---|---|---|
+| `GET` | `/api/menu-item-checks` | 확인 목록 조회 (3.18.2) |
+| `POST` | `/api/menu-item-checks/{checkId}/resolve` | 확인 처리 (3.18.3) |
+
+#### 3.18.1 확인이 생기는 경우
+
+확인 하나는 메뉴 항목 하나(`barMenuItemId`)에 대한 것이다. 한 항목에 열린 확인(`status = open`)은 최대 하나이며, 새 사유가 생기면 열린 확인에 사유를 더한다.
+
+| 사유 (`reasons[]`) | 항목 상태 | 고객 검색 | 생기는 때 |
+|---|---|---|---|
+| `unlinked` | 상품 없는 위스키 | 나오지 않는다 | 상품 없이 게시(8.10)하거나 상품 없이 직접 추가(3.14.3)한 `kind = whisky` 항목 |
+| `relinked_by_name` | 업주가 이름을 고쳐 다른 상품에 연결됨 | 나온다 | 3번 항목에서 정의 |
+| `unlinked_by_name` | 업주가 이름을 고쳐 연결이 풀림 | 나오지 않는다 | 3번 항목에서 정의 |
+| `attribute_conflict` | 고른 상품의 연수나 에디션이 사진과 다름 | 나온다 | 6번 항목에서 정의 |
+| `price_conflict` | 같은 상품의 여러 줄에서 같은 용량의 가격이 부딪침 | 나온다 | 3번, 4번 항목에서 정의 |
+
+- 현재 메뉴판에 있는 상품 없는 위스키 항목에는 항상 `unlinked` 사유의 열린 확인이 있다. 검수 반영이나 직접 추가로 그런 항목이 생기거나, 위스키가 아닌 메뉴가 다음 검수에서 `kind = whisky`로 바뀌면 같은 트랜잭션에서 확인을 만든다.
+- `kind = other`인 항목에는 확인을 만들지 않는다.
+- 항목이 현재 메뉴판에서 빠지면(검수의 `remove`, 3.14.5 삭제, 3.14.6 초기화) 그 항목의 열린 확인은 같은 트랜잭션에서 `dismissed`가 된다.
+- 확인의 출처(`source`)는 사유를 만든 검수 줄이다. 사유를 더할 때 출처도 그 줄로 바꾼다. 직접 추가로 생긴 확인은 출처가 `null`이다.
+
+#### 3.18.2 확인 목록 조회
+
+```http
+GET /api/menu-item-checks?status=open&barId=22222222-2222-4222-8222-222222222222&limit=100
+Authorization: Bearer <access-token>
+```
+
+| 쿼리 | 필수 | 규칙 |
+|---|---|---|
+| `status` | 아니오 | `open`, `resolved`, `dismissed` 중 하나. 기본 `open` |
+| `barId` | 아니오 | 이 업장의 확인만. 없으면 모든 업장 |
+| `limit` | 아니오 | 1~200. 기본 100. 넘치면 `truncated = true` |
+
+정렬: `open`은 `createdAt` 오름차순(오래된 확인부터 처리한다), `resolved`와 `dismissed`는 `resolvedAt` 내림차순. 동점이면 `checkId` 오름차순이다.
+
+`200 OK`
+
+```json
+{
+  "items": [
+    {
+      "checkId": "c0c0c0c0-c0c0-4c0c-8c0c-c0c0c0c0c0c1",
+      "status": "open",
+      "reasons": ["unlinked"],
+      "createdAt": "2026-11-13T09:15:00Z",
+      "resolvedAt": null,
+      "resolution": null,
+      "resolvedProductId": null,
+      "bar": {
+        "barId": "22222222-2222-4222-8222-222222222222",
+        "name": "관악 위스키 바",
+        "status": "active"
+      },
+      "item": {
+        "barMenuItemId": "99999999-9999-4999-8999-999999999993",
+        "kind": "whisky",
+        "displayName": "글렌알라키 10년 CS 배치 11",
+        "onBoard": true,
+        "soldOut": false,
+        "product": null,
+        "options": [
+          { "optionLabel": null, "pourMl": 30, "priceKrw": 26000 }
+        ]
+      },
+      "source": {
+        "menuImportId": "77777777-7777-4777-8777-777777777777",
+        "extractedItemId": "10000000-0000-4000-8000-000000000004",
+        "rawText": "글렌알라키 10 CS batch 11 30ml 26,000",
+        "sourceBox": [62, 418, 931, 447],
+        "imageUrl": "https://cdn.example.com/signed/menu-image-001",
+        "imageUrlExpiresAt": "2026-11-13T09:45:00Z",
+        "extractedProductName": "글렌알라키 10 CS batch 11",
+        "extractedBrandName": "글렌알라키",
+        "extractedAgeYears": 10,
+        "extractedEditionName": "Cask Strength Batch 11"
+      }
+    }
+  ],
+  "truncated": false
+}
+```
+
+| 필드 | 타입 | null 가능 | 설명 |
+|---|---|---|---|
+| `checkId` | UUID 문자열 | 아니오 | |
+| `status` | 문자열 | 아니오 | `open`(처리 전), `resolved`(운영자가 처리함), `dismissed`(항목이 메뉴판에서 빠져 닫힘) |
+| `reasons` | 문자열 배열 | 아니오 | 3.18.1의 사유. 생긴 순서이며 최소 1개 |
+| `createdAt` | RFC 3339 문자열 | 아니오 | 확인이 처음 생긴 시각 |
+| `resolvedAt` | RFC 3339 문자열 | 예 | `resolved` 또는 `dismissed`가 된 시각 |
+| `resolution` | 문자열 | 예 | `resolved`일 때 처리 방식(3.18.3의 `resolution`) |
+| `resolvedProductId` | UUID 문자열 | 예 | 처리한 결과 연결된 상품. `link_existing`, `create_and_link`, `keep`일 때 값이 있다 |
+| `bar.barId`, `bar.name`, `bar.status` | | 아니오 | 업장. 비활성 업장의 확인도 목록에 나오지만 처리할 수 없다(3.18.3) |
+| `item.barMenuItemId` | UUID 문자열 | 아니오 | 확인 대상 항목 |
+| `item.kind` | `MenuItemKind` | 아니오 | 2.3 |
+| `item.displayName` | 문자열 | 아니오 | 메뉴판에 보이는 이름. 메뉴판에서 빠진 항목이면 마지막으로 보였던 이름 |
+| `item.onBoard` | 불리언 | 아니오 | 지금 현재 메뉴판에 있는지 |
+| `item.soldOut` | 불리언 | 아니오 | 3.14.8 |
+| `item.product` | 객체 | 예 | 지금 연결된 상품. 7.2의 `productId`, `displayName`, `brandId`, `brandName`, `category`, `ageYears`, `editionName`과 같다. 연결되지 않았으면 `null` |
+| `item.options` | 배열 | 아니오 | 지금 메뉴판의 옵션(3.9의 `optionLabel`, `pourMl`, `priceKrw`). 메뉴판에 없으면 `[]` |
+| `source` | 객체 | 예 | 사유를 만든 검수 줄. 직접 추가로 생긴 확인이면 `null` |
+| `source.rawText`, `source.sourceBox` | | `sourceBox`만 예 | 5.4와 같다. 관리자 웹은 `imageUrl`에서 `sourceBox` 영역을 잘라 보여 준다 |
+| `source.imageUrl`, `source.imageUrlExpiresAt` | | `imageUrlExpiresAt`만 예 | 그 줄이 있는 메뉴판 사진. 5.4와 같은 서명 URL이며, 만료되면 목록을 다시 조회한다 |
+| `source.extractedProductName`, `extractedBrandName`, `extractedAgeYears`, `extractedEditionName` | | 예 | 5.4와 같은 추출값 |
+| `truncated` | 불리언 | 아니오 | `limit` 때문에 잘렸으면 `true` |
+
+오류: `401`(3.1.5), `403 FORBIDDEN`(operator가 아님), `422 VALIDATION_FAILED`(`status`가 허용 값이 아님, `barId`가 UUID 형식이 아님, `limit` 범위 밖). 없는 `barId`는 오류 없이 `items = []`다.
+
+#### 3.18.3 확인 처리
+
+```http
+POST /api/menu-item-checks/{checkId}/resolve
+Authorization: Bearer <access-token>
+Content-Type: application/json
+```
+
+기존 상품에 연결할 때. 메뉴판 표기를 별칭으로 함께 넣으면 다음부터 같은 표기가 자동으로 확정된다:
+
+```json
+{
+  "resolution": "link_existing",
+  "productId": "44444444-4444-4444-8444-444444444445",
+  "aliasesToAdd": [
+    { "aliasText": "글렌알라키 10년 CS 배치 11", "languageCode": "ko", "isSearchable": true }
+  ]
+}
+```
+
+카탈로그에 새로 등록해 연결할 때:
+
+```json
+{
+  "resolution": "create_and_link",
+  "brand": { "type": "existing", "brandId": "dddddddd-dddd-4ddd-8ddd-ddddddddddd3" },
+  "product": {
+    "category": "whisky",
+    "displayName": "GlenAllachie 10 Cask Strength Batch 11",
+    "ageYears": 10,
+    "editionName": "Cask Strength Batch 11",
+    "abv": 58.2
+  },
+  "aliases": [
+    { "aliasText": "글렌알라키 10년 CS 배치 11", "languageCode": "ko", "isSearchable": true }
+  ]
+}
+```
+
+지금 연결이 맞을 때 `{"resolution": "keep"}`, 위스키가 아닌 메뉴일 때 `{"resolution": "mark_as_other"}`를 보낸다.
+
+| `resolution` | 하는 일 | 필드 | 쓸 수 있는 항목 |
+|---|---|---|---|
+| `link_existing` | 기존 상품에 연결하거나 연결을 바꾼다 | `productId` 필수. `aliasesToAdd` 선택(8.1의 `select_existing_product`와 같은 형식) | 모든 확인 |
+| `create_and_link` | 새 상품(필요하면 새 브랜드)을 만들어 연결한다 | `brand`, `product` 필수. `aliases` 선택(8.1의 `create_product`와 같은 형식) | 모든 확인 |
+| `keep` | 지금 연결이 맞다고 확인만 한다 | 없음 | 상품에 연결된 항목 |
+| `mark_as_other` | 위스키가 아닌 메뉴로 바꾼다(`kind = other`) | 없음 | 상품 없는 항목 |
+
+- 정의하지 않은 필드는 받지 않는다(`EXTRA_FORBIDDEN`).
+- `aliasesToAdd`와 `aliases`는 운영자가 그 표기가 이 상품의 정상 표기임을 확인했을 때 보낸다(8.2와 같다). 메뉴판의 오타처럼 손님 검색에는 쓰지 않을 표기는 `isSearchable = false`로 넣는다. 관리자 웹은 연결할 때 메뉴판 이름(`item.displayName`)을 별칭 입력 칸에 미리 채워 둔다.
+- 쓸 수 없는 항목에 `keep`이나 `mark_as_other`를 보내면 `422`이고 `fieldErrors[].path = resolution`, `code = RESOLUTION_NOT_ALLOWED`다.
+
+반영 규칙:
+
+- 메뉴를 바꾸는 다른 요청처럼 업장 행을 먼저 잠그고 처리한다(3.14.1). 업장이 비활성이면 `404 BAR_NOT_FOUND`다.
+- 업장에 미완료 메뉴 등록 작업이 있으면 아무것도 바꾸지 않고 `409 ACTIVE_IMPORT_EXISTS`(`details.menuImportId`, `details.status`)다. 검수 중인 메뉴판의 항목이 바뀌면 업주의 검수가 오래된 메뉴판을 보고 결정하게 되기 때문이다. 관리자 웹은 이 확인을 건너뛰고 작업이 끝난 뒤 다시 처리한다.
+- 확인이 `open`이 아니면 `409 INVALID_CHECK_STATE`(`details.checkId`, `details.status`)다. 같은 요청을 다시 보낸 경우도 같으며, 관리자 웹은 목록을 다시 조회한다.
+- **연결** (`link_existing`, `create_and_link`): 항목의 상품을 바꾸고 상품 없는 항목이었으면 이름 키를 지운다. `barMenuItemId`, `displayName`, 옵션, 품절 상태는 그대로다. 연결한 순간부터 고객 검색(3.10)과 인기 위스키(3.17)에 나온다.
+  - 이 업장이 예전에 판매했던 상품이면(메뉴판에 없는 그 상품의 항목이 있으면) 그 항목의 `barMenuItemId`를 다시 쓴다. 메뉴판의 줄은 그 항목으로 옮기고 품절 상태도 옮긴다. 상품 없던 항목은 더 쓰지 않는다. 업장과 상품의 조합마다 항목이 하나이기 때문이다(3.14.1).
+  - 그 상품이 이미 현재 메뉴판의 다른 항목이면 두 항목을 하나로 합친다. 남는 항목은 이미 그 상품에 연결된 항목이고, 이름, 위치, 품절 상태는 그 항목의 것을 쓴다. 옵션 합치기 규칙은 4번 항목에서 정의한다.
+  - 지금 연결된 상품과 같은 상품을 보내면 `keep`과 같다. `aliasesToAdd`는 그대로 저장한다.
+  - `create_and_link`의 중복 검사는 검수의 신규 생성(8.5, 8.6)과 같다. 같은 브랜드나 상품이 있으면 아무것도 만들지 않고 `409 DUPLICATE_BRAND_FOUND` 또는 `409 DUPLICATE_PRODUCT_FOUND`다. `details`는 9.5와 같되 `extractedItemId`와 `reviewUrl`이 없다. 만든 상품과 브랜드에는 요청한 operator를 기록한다.
+- **`keep`**: 메뉴는 바꾸지 않는다.
+- **`mark_as_other`**: 항목의 `kind`를 `other`로 바꾼다. 상품 검색에는 계속 나오지 않는다.
+- 메뉴판의 항목이 바뀌는 처리(연결, `mark_as_other`)는 메뉴판 버전(`menuVersion`)을 1 올린다. 업주가 열어 둔 직접 편집이 바뀐 항목을 보고 다시 판단하게 하기 위해서다. 고객에게 보이는 이름과 가격은 바뀌지 않으므로 `publishedAt`은 바꾸지 않는다. `keep`과 별칭만 더하는 처리는 버전을 올리지 않는다.
+- 처리가 끝나면 확인은 `resolved`가 되고, 처리 방식, 결과 상품, 처리한 사용자와 시각을 기록한다. 요청 하나는 하나의 트랜잭션이며 실패하면 아무것도 바뀌지 않는다.
+- 검사 순서: 인증(`401`) → operator(`403`) → 요청 형식(`422`) → 확인(`404 MENU_ITEM_CHECK_NOT_FOUND`) → 업장 행 잠금 → 업장 상태(`404 BAR_NOT_FOUND`) → 미완료 작업(`409 ACTIVE_IMPORT_EXISTS`) → 확인 상태(`409 INVALID_CHECK_STATE`) → 처리 방식과 항목(`422 RESOLUTION_NOT_ALLOWED`) → 상품과 브랜드(`422 PRODUCT_NOT_FOUND`, `PRODUCT_INACTIVE`, `BRAND_NOT_FOUND`, `409 DUPLICATE_*`).
+
+`200 OK`, 본문은 처리한 확인 하나다(3.18.2의 `items[]` 한 개와 같은 형식).
+
+| HTTP | code | 발생 조건 | 관리자 웹 처리 |
+|---|---|---|---|
+| `401` | `UNAUTHENTICATED` | 3.1.5 | 다시 로그인 |
+| `403` | `FORBIDDEN` | operator가 아님 | 접근 차단 |
+| `404` | `MENU_ITEM_CHECK_NOT_FOUND` | 확인이 없거나 `checkId`가 UUID 형식이 아님. `details.checkId` | 목록 다시 조회 |
+| `404` | `BAR_NOT_FOUND` | 업장이 비활성 | 안내. 업장을 다시 활성화하기 전에는 처리하지 않음 |
+| `409` | `ACTIVE_IMPORT_EXISTS` | 업장에 미완료 메뉴 등록 작업이 있음 | 작업이 끝난 뒤 다시 처리하라고 안내 |
+| `409` | `INVALID_CHECK_STATE` | 확인이 이미 `resolved` 또는 `dismissed` | 목록 다시 조회 |
+| `409` | `DUPLICATE_BRAND_FOUND`, `DUPLICATE_PRODUCT_FOUND` | 새 브랜드나 상품, 또는 별칭이 기존 것과 겹침(9.5) | 기존 브랜드나 상품을 보여 주고 `link_existing`이나 기존 브랜드로 다시 처리 |
+| `422` | `VALIDATION_FAILED` | 필드 규칙 위반, `RESOLUTION_NOT_ALLOWED`, `NOT_NORMALIZABLE`, `PRODUCT_NOT_FOUND`, `PRODUCT_INACTIVE`, `BRAND_NOT_FOUND` | `fieldErrors` 표시 |
+| `503` | `TEMPORARY_WRITE_CONFLICT` | 직렬화 충돌 3회 재시도 실패 | 잠시 후 같은 요청 재시도 |
 
 ## 4. 메뉴 등록 요청
 
@@ -4616,7 +4815,7 @@ HTTP/1.1 200 OK
 - 메뉴판 이름은 `correctedProductName ?? extractedProductName`이다.
 - 현재 메뉴판에 이름 키(3.14.1)가 같은 미연결 항목이 있으면 그 항목을 갱신한다. `barMenuItemId`와 품절 상태는 그대로이고, 종류는 이번에 보낸 `kind`로 바뀐다. 없으면 새 미연결 항목을 만든다. 현재 메뉴판에서 빠진 예전 미연결 항목은 다시 쓰지 않는다.
 - 같은 제출에서 이름 키가 같은 줄이 여럿이면 같은 항목으로 본다. 같은 상품에 연결한 줄이 여럿일 때와 같은 규칙을 따른다(8.9).
-- `kind = whisky`인 항목은 메뉴판에 바로 보이지만, 운영자가 상품에 연결하기 전까지 고객 검색과 인기 위스키에 나오지 않는다(3.9, 3.10.2). `kind = other`인 항목은 상품에 연결하지 않으며 메뉴판에만 보인다.
+- `kind = whisky`인 항목은 메뉴판에 바로 보이지만, 운영자가 상품에 연결하기 전까지 고객 검색과 인기 위스키에 나오지 않는다(3.9, 3.10.2). 반영과 같은 트랜잭션에서 운영자 확인(3.18, 사유 `unlinked`)을 만든다. `kind = other`인 항목은 상품에 연결하지 않으며 메뉴판에만 보인다.
 - 추출 항목에는 `selected_product_id = null`로 저장한다. `finalLineType`이 `product`이므로 `confirm_non_product`와 구분된다. `selectedMatchMethod`와 `matchConfidence`도 `null`이다.
 - 반영 응답의 `result`는 다른 항목과 같이 센다. `createdProducts`에는 세지 않는다.
 
@@ -4658,6 +4857,7 @@ API가 보내는 오류는 예상하지 못한 서버 오류(`500 INTERNAL_ERROR
 | `404` | `BAR_OWNER_NOT_FOUND` | 업주 해제 대상 업장에 현재 업주가 없음 (3.11.10) | 업장 상세 재조회 |
 | `404` | `MENU_IMPORT_NOT_FOUND` | 등록 작업이 없음 | 작업 목록 이동 |
 | `404` | `MENU_ITEM_NOT_FOUND` | 직접 수정, 삭제할 항목이 현재 메뉴판에 없음. `details.barMenuItemId` (3.14) | 메뉴 다시 조회 |
+| `404` | `MENU_ITEM_CHECK_NOT_FOUND` | 운영자가 처리할 메뉴 항목 확인이 없음. `details.checkId` (3.18.3) | 확인 목록 다시 조회 |
 | `404` | `PHOTO_NOT_FOUND` | 삭제하거나 조회할 매장 사진이 없음. `details.photoId` (3.16) | 업장 상세 다시 조회 |
 | `404` | `USER_NOT_FOUND` | `GET /api/me`로 사용자를 만들기 전에 `PATCH /api/me`, `POST /api/owner-applications`, 업주 신청 승인과 거절(3.11.7, 3.11.8), 업주 해제(3.11.10) 호출 | `GET /api/me` 호출 후 같은 요청 재시도 |
 | `404` | `NOT_FOUND` | 존재하지 않는 경로, 또는 비활성화된 임시 로그인 호출 | 요청 경로·서버 설정 확인 |
@@ -4667,13 +4867,14 @@ API가 보내는 오류는 예상하지 못한 서버 오류(`500 INTERNAL_ERROR
 | `409` | `INVALID_APPLICATION_STATE` | `pending`이 아닌 신청의 승인·거절·취소·다시 검증, 사진 변경 (3.11) | 신청 상세 재조회 |
 | `409` | `INVALID_APPLICATION_TYPE` | `existing_bar` 신청에 대표 사진을 올리거나 지움. `details.applicationType` (3.11.17) | 기존 업장의 사진은 승인 뒤 3.16으로 올림 |
 | `409` | `IDEMPOTENCY_KEY_REUSED` | 같은 키에 다른 요청 내용 | 새 키로 명시적 재요청 |
-| `409` | `ACTIVE_IMPORT_EXISTS` | 업장에 미완료 작업이 이미 있는데 새 작업을 올리거나(4.4) 메뉴를 직접 편집함(3.14). `details.menuImportId`, `details.status` | 기존 작업으로 이동하거나 취소(5.7) 후 다시 요청 |
+| `409` | `ACTIVE_IMPORT_EXISTS` | 업장에 미완료 작업이 이미 있는데 새 작업을 올리거나(4.4) 메뉴를 직접 편집하거나(3.14) 운영자가 메뉴 항목 확인을 처리함(3.18.3). `details.menuImportId`, `details.status` | 기존 작업으로 이동하거나 취소(5.7) 후 다시 요청 |
 | `409` | `MENU_OUTDATED` | 직접 편집이나 판매 정보 확인(3.14.9) 요청의 `menuVersion`이 현재 메뉴판 버전과 다름. `details.submittedMenuVersion`, `details.currentMenuVersion` (3.14) | 메뉴 다시 조회 후 다시 저장 |
 | `409` | `NO_PUBLISHED_MENU` | 판매 정보 확인(3.14.9)을 했는데 메뉴판이 없거나 항목이 없음 | 메뉴 등록으로 안내 |
 | `409` | `MENU_ITEM_EXISTS` | 직접 추가하려는 상품, 또는 이름 키가 같은 미연결 항목이 이미 현재 메뉴판에 있음(3.14.3). 미연결 항목의 이름을 다른 미연결 항목과 같게 바꿈(3.14.4). `details.barMenuItemId` | 그 항목 수정으로 안내 |
 | `409` | `PHOTO_EXISTS` | 내용이 같은 매장 사진이 이미 있음. `details.photoId` (3.16.2) | 이미 등록된 사진이라고 안내하고 사진 목록 다시 조회 |
 | `409` | `PHOTO_LIMIT_REACHED` | 매장 사진이 이미 15장. `details.maxPhotos` (3.16.2) | 사진을 지운 뒤 추가하라고 안내 |
 | `409` | `PHOTOS_OUTDATED` | 순서 변경에 보낸 사진 ID가 현재 사진과 다름. `details.photos` (3.16.4) | `details.photos`로 화면을 바꾸고 다시 정렬하게 함 |
+| `409` | `INVALID_CHECK_STATE` | 이미 `resolved` 또는 `dismissed`인 메뉴 항목 확인을 처리함. `details.checkId`, `details.status` (3.18.3) | 확인 목록 다시 조회 |
 | `409` | `INVALID_IMPORT_STATE` | 현재 상태에서 요청 불가. 예: `ready_for_review`가 아닌 작업의 검수 제출, `applied`·`failed` 작업의 취소. `details.menuImportId`, `details.status`에 현재 상태 | 상태 재조회 |
 | `409` | `REVIEW_OUTDATED` | `reviewVersion` 불일치, 또는 검수 데이터를 만든 뒤 현재 메뉴판이 바뀜 | `details.reviewUrl`로 최신 검수 데이터 재조회 |
 | `409` | `DUPLICATE_BRAND_FOUND` | 신규 브랜드와 동일할 수 있는 브랜드 발견 (검수 또는 직접 추가) | 기존 브랜드 선택 화면 표시 |
@@ -4715,7 +4916,7 @@ API가 보내는 오류는 예상하지 못한 서버 오류(`500 INTERNAL_ERROR
 `fieldErrors`의 `code`와 `message`는 두 종류다.
 
 - **요청 형식 검증**(필수값, 길이, 숫자 범위, 허용 값 등): Pydantic 오류 종류를 대문자로 바꾼 값을 `code`로 쓴다. 예: `MISSING`, `STRING_TOO_LONG`, `STRING_TOO_SHORT`, `TOO_SHORT`, `TOO_LONG`, `GREATER_THAN`, `GREATER_THAN_EQUAL`, `LESS_THAN_EQUAL`, `LITERAL_ERROR`, `UUID_PARSING`, `INT_PARSING`, `FLOAT_PARSING`, `BOOL_TYPE`, `DATE_TYPE`, `DATE_FROM_DATETIME_PARSING`, `EXTRA_FORBIDDEN`, `UNION_TAG_NOT_FOUND`, `UNION_TAG_INVALID`, `TIMEZONE_AWARE`. `message`는 Pydantic의 영어 기본 문구다.
-- **업무 규칙 검증**: 백엔드가 정한 `code`와 한국어 `message`를 쓴다. 예: `BLANK`, `NOT_SEARCHABLE`, `LAT_LNG_REQUIRED_TOGETHER`, `INVALID_CURSOR`, `MISSING_ITEM`, `DUPLICATE_ITEM`, `UNKNOWN_ITEM`, `MISSING_CHANGE`, `DUPLICATE_CHANGE`, `UNKNOWN_CHANGE`, `UNKNOWN_OPTION`, `DUPLICATE_OPTION`, `DUPLICATE_OPTION_VALUES`, `EXACTLY_ONE_REQUIRED`, `NO_PRICED_OPTION`, `PRODUCT_NOT_FOUND`, `PRODUCT_INACTIVE`, `BRAND_NOT_FOUND`, `CHANGE_WITHOUT_PRODUCT`, `NOT_NORMALIZABLE`, `INVALID_BUSINESS_NUMBER`, `DATE_IN_FUTURE`, `COORDINATES_REQUIRED`, `BOUNDS_INVERTED`, `BOUNDS_TOO_LARGE`, `INVALID_CHARACTER`, `DUPLICATE_TAG`, `DUPLICATE_DAY`, `INVALID_TIME`, `SAME_OPEN_CLOSE`, `TIME_ON_CLOSED_DAY`, `DATE_IN_PAST`, `DATE_NOT_TODAY`, `END_BEFORE_START`, `IMAGE_DIMENSIONS_TOO_LARGE`, `DISCOUNT_NOT_LOWER`, `DISCOUNT_ENDED`.
+- **업무 규칙 검증**: 백엔드가 정한 `code`와 한국어 `message`를 쓴다. 예: `BLANK`, `NOT_SEARCHABLE`, `LAT_LNG_REQUIRED_TOGETHER`, `INVALID_CURSOR`, `MISSING_ITEM`, `DUPLICATE_ITEM`, `UNKNOWN_ITEM`, `MISSING_CHANGE`, `DUPLICATE_CHANGE`, `UNKNOWN_CHANGE`, `UNKNOWN_OPTION`, `DUPLICATE_OPTION`, `DUPLICATE_OPTION_VALUES`, `EXACTLY_ONE_REQUIRED`, `NO_PRICED_OPTION`, `PRODUCT_NOT_FOUND`, `PRODUCT_INACTIVE`, `BRAND_NOT_FOUND`, `CHANGE_WITHOUT_PRODUCT`, `NOT_NORMALIZABLE`, `INVALID_BUSINESS_NUMBER`, `DATE_IN_FUTURE`, `COORDINATES_REQUIRED`, `BOUNDS_INVERTED`, `BOUNDS_TOO_LARGE`, `INVALID_CHARACTER`, `DUPLICATE_TAG`, `DUPLICATE_DAY`, `INVALID_TIME`, `SAME_OPEN_CLOSE`, `TIME_ON_CLOSED_DAY`, `DATE_IN_PAST`, `DATE_NOT_TODAY`, `END_BEFORE_START`, `IMAGE_DIMENSIONS_TOO_LARGE`, `DISCOUNT_NOT_LOWER`, `DISCOUNT_ENDED`, `RESOLUTION_NOT_ALLOWED`.
 
 ### 9.4 검수 버전 충돌
 

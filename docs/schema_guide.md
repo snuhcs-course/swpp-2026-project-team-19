@@ -258,6 +258,37 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 | `whisky` | 위스키 메뉴. 상품에 연결되어 있거나, 카탈로그에 매칭되지 않아 운영자의 연결을 기다린다. 기본값 |
 | `other` | 진토닉, 콜라 같은 위스키가 아닌 메뉴. 상품에 연결하지 않고 그 업장 메뉴에만 보인다 |
 
+### 4.21 menu_item_check_reason
+
+운영자가 메뉴 항목을 확인해야 하는 이유다(API 명세 3.18.1).
+
+| 값 | 의미 |
+|---|---|
+| `unlinked` | 상품 없이 게시하거나 추가한 위스키. 상품에 연결해야 고객 검색에 나온다 |
+| `relinked_by_name` | 업주가 이름을 고쳐 다시 매칭한 결과 다른 상품에 연결됨 |
+| `unlinked_by_name` | 업주가 이름을 고쳐 다시 매칭한 결과 연결이 풀림 |
+| `attribute_conflict` | 업주가 고른 상품의 연수나 에디션이 사진에서 읽은 값과 다름 |
+| `price_conflict` | 같은 상품의 여러 줄에서 같은 용량의 가격이 부딪쳐 서버가 하나를 골랐음 |
+
+### 4.22 menu_item_check_status
+
+| 값 | 의미 |
+|---|---|
+| `open` | 운영자가 아직 처리하지 않음 |
+| `resolved` | 운영자가 처리함 |
+| `dismissed` | 처리하기 전에 항목이 메뉴판에서 빠져 닫힘 |
+
+### 4.23 menu_item_check_resolution
+
+운영자의 처리 방식이다(API 명세 3.18.3).
+
+| 값 | 의미 |
+|---|---|
+| `link_existing` | 기존 상품에 연결하거나 연결을 바꿈 |
+| `create_and_link` | 새 상품(필요하면 새 브랜드)을 만들어 연결함 |
+| `keep` | 지금 연결이 맞다고 확인함 |
+| `mark_as_other` | 위스키가 아닌 메뉴로 바꿈(`bar_menu_items.kind = other`) |
+
 ## 5 Accounts and Bars
 
 ### 5.1 users
@@ -643,6 +674,29 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 - 30일이 지난 행은 지운다. 오늘을 포함한 서울 날짜 30일의 행만 남기며, `product_search_counts`처럼 새 행을 만들 때 같은 트랜잭션에서 지운다. 조회 API는 없고 팀원이 데이터베이스에서 직접 본다.
 
 **필요한 이유:** 고객이 찾았지만 카탈로그에 없는 위스키를 알아야 별칭과 상품을 보완할 수 있다. 검색어는 개인정보가 섞일 수 있는 유일한 값이므로 거르는 규칙, 행 수 상한, 짧은 보관 기간을 함께 둔다.
+
+### 7.7 menu_item_checks
+
+**역할:** 운영자가 확인해야 할 업장 메뉴 항목을 저장한다(API 명세 3.18). 상품 없이 게시된 위스키를 상품에 연결하거나, 업주의 검수로 바뀐 연결이 맞는지 확인하는 작업 목록이다.
+
+| 컬럼 | 타입과 제약 | 예시 | 설명과 필요한 이유 |
+|---|---|---|---|
+| `id` | `uuid`, PK | 확인 ID | 관리자 웹이 처리할 확인을 가리킨다. |
+| `bar_id` | `uuid`, NOT NULL, FK → `bars.id` | 관악 위스키 바 ID | 업장별로 목록을 거르기 위해 항목의 업장을 함께 저장한다. |
+| `bar_menu_item_id` | `uuid`, NOT NULL, FK → `bar_menu_items.id` | 글렌알라키 항목 ID | 확인 대상 항목이다. 연결하면서 메뉴판의 줄이 그 업장의 다른 항목으로 옮겨져도 원래 항목을 가리킨다. |
+| `reasons` | `menu_item_check_reason[]`, NOT NULL | `{unlinked}` | 확인이 필요한 이유(4.21)다. 생긴 순서대로이며 최소 하나다. 열린 확인에 새 이유가 생기면 더한다. |
+| `status` | `menu_item_check_status`, NOT NULL, 기본 `open` | `open` | 4.22 |
+| `source_menu_import_id` | `uuid`, nullable, FK → `menu_imports.id` | 등록 작업 ID | 이유를 마지막으로 더한 검수 줄의 작업이다. 관리자 웹이 그 메뉴판 사진을 보여 준다. 직접 추가로 생긴 확인은 `null`이다. |
+| `source_extracted_item_id` | `uuid`, nullable, FK → `extracted_items.id` | 추출 항목 ID | 그 검수 줄이다. 원문, `source_box`, 추출한 연수와 에디션을 보여 준다. |
+| `created_at` | `timestamptz`, NOT NULL | `2026-11-13T09:15:00Z` | 확인이 처음 생긴 시각이다. 열린 확인은 오래된 것부터 처리한다. |
+| `resolution` | `menu_item_check_resolution`, nullable | `link_existing` | `resolved`일 때 처리 방식(4.23)이다. |
+| `resolved_product_id` | `uuid`, nullable, FK → `products.id` | GlenAllachie 10 CS 상품 ID | 처리한 결과 연결된 상품이다. `mark_as_other`면 `null`이다. |
+| `resolved_by_user_id` | `uuid`, nullable, FK → `users.id` | 운영자 ID | 처리한 운영자다. `users` 행이 없는 임시 로그인 운영자와 `dismissed`는 `null`이다. |
+| `resolved_at` | `timestamptz`, nullable | `2026-11-13T15:00:00Z` | `resolved` 또는 `dismissed`가 된 시각이다. |
+
+**핵심 제약:** 한 항목에 `open`인 확인은 최대 하나다(`bar_menu_item_id`에 `status = open` 조건의 partial unique index). 현재 메뉴판에 있는 상품 없는 위스키 항목에는 항상 `unlinked` 이유의 열린 확인이 있다. 항목이 현재 메뉴판에서 빠지면 그 항목의 열린 확인을 같은 트랜잭션에서 `dismissed`로 바꾼다. `kind = other`인 항목에는 확인을 만들지 않는다.
+
+**필요한 이유:** 업주가 카탈로그를 몰라도 메뉴를 바로 게시하게 하면서, 상품 연결과 카탈로그 품질은 운영자가 하루 안에 한 줄씩 책임지게 한다. 확인 기록은 처리한 뒤에도 남겨 매칭이 어디서 틀렸는지 볼 수 있게 한다.
 
 ## 8 AI Menu Import
 
