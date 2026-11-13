@@ -52,11 +52,11 @@ private fun mapServerReviewItem(
 ): ReviewItem {
     val recognized = dto.options.sortedBy { it.optionOrder }
     // Keep ALL OCR options visible for owner review, including 4+.
-    // PhotoReviewRules.problems() prevents publication until at most 3 remain.
+    // Legacy UI review limit may be smaller than the server's 1..10 bound; never drop OCR options silently.
     val selectedCandidate = dto.candidates.firstOrNull {
         it.productId == dto.proposedProductId
     }
-    val category = selectedCandidate?.category ?: dto.newProductDraft?.category ?: "whisky"
+    val category = dto.extractedKind ?: selectedCandidate?.category ?: dto.newProductDraft?.category ?: "whisky"
     val nonProduct = dto.effectiveLineType !in setOf("product", "unknown")
     val other = nonProduct || !category.equals("whisky", ignoreCase = true)
     val match = when {
@@ -173,8 +173,8 @@ internal fun mapConfirmedReviewDecision(
     require(choices.all { choice ->
         choice.sourceOptionId == null || choice.sourceOptionId in byId
     }) { "${card.name}: 검수 옵션이 서버와 일치하지 않아요." }
-    // A manually added option has no OCR ID. The agreed API field
-    // addedOptions publishes it without inventing an extractedOptionId.
+    // A manually added option has no OCR ID. The final options[] request
+    // sends null extractedOptionId, not a fabricated server identity.
     val retainedIds = choices.mapNotNull { it.sourceOptionId }.toSet()
     val excludedOptionIds = raw.map { it.extractedOptionId }
         .filterNot { it in retainedIds }
@@ -213,12 +213,9 @@ internal fun mapConfirmedReviewDecision(
     val sourceDraft = extracted.newProductDraft
     val brandText = (extracted.extractedBrandName
         ?: sourceDraft?.brandText)?.trim().orEmpty()
-    require(brandText.isNotBlank()) {
-        "${card.name}: 브랜드 정보가 없어 자동 등록할 수 없어요."
-    }
-    val category = sourceDraft?.category?.takeIf { it.isNotBlank() }
-        ?: if (card.type == ReviewItemType.WHISKY) "whisky" else
-            error("${card.name}: 상품 분류를 확인해 주세요.")
+    // PR #164 publishes new lines on the bar without any catalog product.
+    // Brand metadata is optional and never sent to the server for owner adds.
+    val category = if (card.type == ReviewItemType.WHISKY) "whisky" else "other"
     val brandId = existingBrands[brandText.lowercase()]
     return MockReviewDecision(
         MockDecisionKind.CREATE_PRODUCT,
