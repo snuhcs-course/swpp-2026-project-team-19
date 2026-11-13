@@ -1138,6 +1138,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                         "extractedItemId" to item.extractedItemId,
                         "finalLineType" to "product",
                         "productId" to chosen.productId,
+                        "correctedProductName" to chosen.displayNameOverride,
                         "optionDecisions" to reviewOptions(item, chosen),
                     )
                 }
@@ -1160,6 +1161,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                         "extractedItemId" to item.extractedItemId,
                         "finalLineType" to "product",
                         "brand" to brand,
+                        "correctedProductName" to chosen.displayNameOverride,
                         "product" to mapOf(
                             "category" to draft.category,
                             "displayName" to draft.name,
