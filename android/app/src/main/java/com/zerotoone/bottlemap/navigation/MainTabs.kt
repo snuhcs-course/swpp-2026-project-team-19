@@ -40,9 +40,7 @@ object TabRoutes {
     const val SEARCH_HOME = "customer/search"
     const val WELCOME = "welcome"
     const val LOGIN_ERROR = "auth/login-error/{origin}"
-    const val DEV_PHOTO_REVIEW = "dev/photo-review/{scenario}"
     fun loginError(origin: LoginOrigin) = "auth/login-error/" + origin.name.lowercase()
-    fun devPhotoReview(scenario: String) = "dev/photo-review/$scenario"
 }
 
 /** Where a Google sign-in was started, so a retry continues to the same place. */
@@ -55,13 +53,10 @@ enum class LoginOrigin { WELCOME, OWNER, ACCOUNT }
 internal val routesWithoutTabs: Set<String> = setOf(
     TabRoutes.WELCOME,
     TabRoutes.LOGIN_ERROR,
-    TabRoutes.DEV_PHOTO_REVIEW,
     "customer/login",
     OwnerPage.MGR_PHOTO.route,
     OwnerPage.MGR_JOB.route,
     OwnerPage.MGR_REVIEW.route,
-    OwnerRoutes.LEGACY_UPLOAD,
-    OwnerRoutes.LEGACY_REVIEW,
 )
 
 internal fun showsBottomTabs(route: String?): Boolean = route != null && route !in routesWithoutTabs
