@@ -614,10 +614,7 @@ internal fun OwnerManualMenuScreen(
                             MockImportStatus.PROCESSING,MockImportStatus.UPLOADED ->
                                 "메뉴판 분석 중 · 작업 확인하기"
                             MockImportStatus.READY_FOR_REVIEW ->
-                                if(activeJob.images.flatMap { it.lines }
-                                        .filter {it.kind==MockLineKind.PRODUCT}
-                                        .all {it.decision!=null}) "메뉴 게시 이어서 하기"
-                                else "추가할 메뉴 확인하기"
+                                "메뉴 검수 이어서 하기"
                             MockImportStatus.FAILED -> "메뉴판 분석 실패 · 다시 확인하기"
                             else -> "메뉴판 사진으로 추가하기"
                         },color=V4Color.text,
