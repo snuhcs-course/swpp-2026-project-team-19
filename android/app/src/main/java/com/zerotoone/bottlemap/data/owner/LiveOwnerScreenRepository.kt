@@ -8,6 +8,7 @@ import com.zerotoone.bottlemap.data.OwnerRepository
 import com.zerotoone.bottlemap.network.BarMenuResponseDto
 import com.zerotoone.bottlemap.network.OwnedBarDto
 import com.zerotoone.bottlemap.network.OwnerApplicationDto
+import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewRules
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
@@ -27,6 +28,28 @@ import kotlinx.coroutines.sync.withLock
  * but owner identity, published menus and mutations come from the live server.
  * Never persist fetched personal or owner data into local Mock preferences.
  */
+/** A partial photo update of an unlinked item must retain its saved options.
+ * The unlinked:<barMenuItemId> ID exists only on Android, never in the API.
+ */
+internal fun ownerExistingUnlinkedOptions(
+    snapshot: MockOwnerSnapshot, barId: String, name: String,
+): List<MockMenuOption> {
+    val key = PhotoReviewRules.normalizedUnlinkedMenuName(name)
+    if (key.isBlank()) return emptyList()
+    val unlinkedIds = snapshot.products.filterNot { it.catalogMatched }
+        .associateBy { it.productId }
+    val matches = snapshot.menuItems.filter { row ->
+        row.barId == barId && row.productId in unlinkedIds &&
+            PhotoReviewRules.normalizedUnlinkedMenuName(
+                row.displayNameOverride ?: unlinkedIds.getValue(row.productId).displayName,
+            ) == key
+    }
+    require(matches.size <= 1) {
+        "기존 메뉴에 같은 이름의 항목이 중복돼 있어요. 메뉴 관리에서 확인해 주세요."
+    }
+    return matches.singleOrNull()?.options.orEmpty()
+}
+
 class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
     private val app = context.applicationContext
     private val local = LocalOwnerMockRepository(InMemoryMockOwnerStateStore())
@@ -964,7 +987,10 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                         "finalLineType" to "product",
                         "kind" to kind,
                         "correctedProductName" to name.trim(),
-                        "options" to ownerFinalReviewOptions(item,chosen,defaultPour,kind == "whisky"),
+                        "options" to ownerFinalReviewOptions(
+                            item, chosen, defaultPour, kind == "whisky",
+                            existingOptions = ownerExistingUnlinkedOptions(current, job.barId, name.trim()),
+                        ),
                     )
                 }
                 MockDecisionKind.CONFIRM_NON_PRODUCT -> mapOf(

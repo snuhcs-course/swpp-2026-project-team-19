@@ -441,19 +441,11 @@ object PhotoReviewRules {
         ) to RematchOutcome.OPERATOR
     }
 
-    /** The server has no deferred catalog-link approval in review-and-apply.
-     * A contradictory age/edition must NOT be sent as SELECT_PRODUCT. Keep it
-     * bar-local and require explicit name confirmation for operator follow-up.
+    /** API §8.7: apply the owner's chosen catalog link. The server
+     * detects conflicting OCR attributes and queues operator review atomically.
      */
-    fun linkChosenProduct(x: ReviewItem, product: CatalogProduct, operatorCheck: Boolean): ReviewItem {
-        if (!operatorCheck) return markLinked(x, product)
-        return markAsNewForOperator(x, x.name).copy(
-            operatorPending = true,
-            operatorReason = OperatorReason.SELECTED_PRODUCT_CONFLICT,
-            priceCandidates = x.priceCandidates.filterNot { it.existing },
-            chosenServingPrices = emptyMap(),
-        )
-    }
+    fun linkChosenProduct(x: ReviewItem, product: CatalogProduct, operatorCheck: Boolean): ReviewItem =
+        markLinked(x, product)
 
     // ---- Classification ----
 

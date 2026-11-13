@@ -430,22 +430,9 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
         if (product == null) toast("위스키를 먼저 선택해 주세요.") else linkChosen(x, product)
     }
 
-    /** Decision 7: link at once; a conflicting age or edition goes to the operator. */
+    /** Contract §8.7: server handles age/edition conflicts after linking. */
     private fun linkChosen(x: ReviewItem, product: CatalogProduct) {
-        viewModelScope.launch {
-            val operatorCheck = try {
-                repository.needsOperatorCheck(x, product)
-            } catch (cancelled: CancellationException) {
-                throw cancelled
-            } catch (_: Exception) {
-                toast("상품 연결 여부를 확인하지 못했어요. 다시 시도해 주세요.")
-                return@launch
-            }
-            mutateItem(x.id) { PhotoReviewRules.linkChosenProduct(it, product, operatorCheck) }
-            if (operatorCheck) toast(
-                "연수·에디션이 달라 상품 연결 없이 등록해요. 메뉴 이름을 다시 확인해 주세요."
-            )
-        }
+        mutateItem(x.id) { PhotoReviewRules.linkChosenProduct(it, product, false) }
     }
 
     fun confirmNew(id: String) = mutateItem(id) {

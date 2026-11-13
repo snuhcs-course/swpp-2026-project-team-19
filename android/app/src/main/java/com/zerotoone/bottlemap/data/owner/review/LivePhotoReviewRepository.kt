@@ -163,23 +163,10 @@ class LivePhotoReviewRepository(
             .distinctBy { it.productId }
     }
 
-    /** The current API verifies that a selected product is active, but does
-     * not compare OCR age/edition. For explicit structured contradictions,
-     * publish the owner's original menu name without a catalog link.
-     */
+    /** Contract §8.7 assigns attribute_conflict to the server. */
     override suspend fun needsOperatorCheck(
         item: ReviewItem, product: CatalogProduct,
-    ): Boolean {
-        val dto = loaded?.images?.flatMap { it.items }
-            ?.firstOrNull { it.extractedItemId == item.id } ?: return false
-        val candidate = dto.candidates.firstOrNull {
-            it.productId == product.productId
-        } ?: return false
-        return reviewerCandidateConflicts(
-            dto.extractedAgeYears, dto.extractedEditionName,
-            candidate.ageYears, candidate.editionName,
-        )
-    }
+    ): Boolean = false
 
     override suspend fun saveDefaultPour(ml: Int) {
         require(ml in 1..999)

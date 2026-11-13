@@ -7,6 +7,7 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.zerotoone.bottlemap.data.AppAuth
 import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewState
+import com.zerotoone.bottlemap.ui.owner.review.ReviewOption
 import java.io.File
 import java.security.MessageDigest
 import kotlinx.coroutines.CancellationException
@@ -24,6 +25,10 @@ import kotlinx.coroutines.withContext
  * latest GET /api/menu-imports/{id} on restore and graft fresh source URLs back.
  * A reviewVersion mismatch automatically discards the obsolete local draft.
  */
+private fun sanitizeReviewOption(option: ReviewOption): ReviewOption =
+    option.copy(price = option.price.takeIf { it.isFinite() } ?: 0.0,
+        volume = option.volume.takeIf { it.isFinite() } ?: 0.0)
+
 internal class OwnerPhotoReviewDraftStore(
     context: Context,
     private val accessToken: suspend () -> String? = {
@@ -92,10 +97,13 @@ internal class OwnerPhotoReviewDraftStore(
                     mergeSources = item.mergeSources.map { it.copy(sourcePhotoUrl = null) },
                     price = item.price.takeIf { it.isFinite() } ?: 0.0,
                     volume = item.volume.takeIf { it.isFinite() } ?: 0.0,
-                    options = item.options.map { option ->
-                        option.copy(
-                            price = option.price.takeIf { it.isFinite() } ?: 0.0,
-                            volume = option.volume.takeIf { it.isFinite() } ?: 0.0,
+                    options = item.options.map(::sanitizeReviewOption),
+                    preMergeOptions = item.preMergeOptions.map(::sanitizeReviewOption),
+                    volumeChoices = item.volumeChoices.map(::sanitizeReviewOption),
+                    classificationSnapshot = item.classificationSnapshot?.let { snapshot ->
+                        snapshot.copy(
+                            volume = snapshot.volume.takeIf { it.isFinite() } ?: 0.0,
+                            options = snapshot.options.map(::sanitizeReviewOption),
                         )
                     },
                 )
