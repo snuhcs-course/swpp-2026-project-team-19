@@ -14,7 +14,7 @@ import java.util.Locale
  * extractedOptionId or editing existing persisted rows behind the Owner's back.
  */
 private val bottleWithSize = Regex(
-    """^(?:병|bottle)\\s*\\(?\\s*\\d{1,4}(?:\\.\\d+)?\\s*(?:ml|l)\\s*\\)?$""",
+    """^(?:병|bottle)\s*\(?\s*\d{1,4}(?:\.\d+)?\s*(?:ml|l)\s*\)?$""",
     RegexOption.IGNORE_CASE,
 )
 
