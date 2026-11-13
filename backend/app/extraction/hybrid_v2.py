@@ -25,7 +25,7 @@ from pydantic import BaseModel, ValidationError
 
 from app.extraction.clova import ClovaSettings
 from app.extraction.config import ExtractionSettings, load_settings
-from app.extraction.convert import group_items, to_flow_items
+from app.extraction.convert import _flow_item, group_items
 from app.extraction.errors import InvalidModelOutputError
 from app.extraction.gemini import build_request, call_with_retries
 from app.extraction.hybrid import HybridItem, item_sources, run_ocr, user_text
@@ -64,38 +64,35 @@ def line_groups(hybrid_items: list[dict[str, Any]]) -> list[list[dict[str, Any]]
 
 
 def _join_split_pairs(groups: list[list[dict[str, Any]]]) -> list[list[dict[str, Any]]]:
-    """Join a glass row and a bottle row that the answer did not put next to each other, when
-    they are one printed line: same name, same category, and the same OCR name lines (not empty).
+    """Join the rows of one printed line that group_items left apart.
 
-    The prompt lets the model list items in any order, so the two price rows of one line can be
-    apart ("all glass rows, then all bottle rows"). Rows without OCR name lines are left as they
-    are: with nothing to show they are one line, two lines of the same name stay two items.
-    The joined group takes the place of its first row.
+    group_items joins only a glass row and the bottle row right after it, so a line with three
+    prices ("Glass 20ml / 40ml / Bottle") or rows the model listed apart ("all glass rows, then
+    all bottle rows", which the prompt allows) became several items. A group is joined into an
+    earlier group when every row has the same name, the same category and the same OCR name lines
+    (not empty), and no two rows would be the same option (unit and pour size). Rows without OCR
+    name lines stay as they are: nothing shows that two lines of the same name are one line. The
+    joined group takes the place of its first row.
     """
     out: list[list[dict[str, Any]]] = []
     for group in groups:
-        partner = _split_partner(out, group) if len(group) == 1 else None
+        partner = next((earlier for earlier in out if _one_line(earlier, group)), None)
         if partner is not None:
-            partner.append(group[0])
+            partner.extend(group)
         else:
             out.append(group)
     return out
 
 
-def _split_partner(earlier: list[list[dict[str, Any]]], group: list[dict[str, Any]]) -> list[dict[str, Any]] | None:
-    [row] = group
-    lines = set(row["source_lines"]["name"])
-    if not lines:
-        return None
-    for candidate in earlier:
-        if len(candidate) != 1:
-            continue
-        [other] = candidate
-        if (other["raw_name"] == row["raw_name"] and other["category"] == row["category"]
-                and {other["unit"], row["unit"]} == {"glass", "bottle"}
-                and set(other["source_lines"]["name"]) == lines):
-            return candidate
-    return None
+def _one_line(first: list[dict[str, Any]], second: list[dict[str, Any]]) -> bool:
+    rows = first + second
+    lines = {tuple(sorted(row["source_lines"]["name"])) for row in rows}
+    if len(lines) != 1 or not next(iter(lines)):
+        return False
+    if len({(row["raw_name"], row["category"]) for row in rows}) != 1:
+        return False
+    options = [(row["unit"], row["pour_ml"]) for row in rows]
+    return len(set(options)) == len(options)
 
 
 def _runs(hybrid_items: list[dict[str, Any]]) -> list[list[dict[str, Any]]]:
@@ -107,6 +104,20 @@ def _runs(hybrid_items: list[dict[str, Any]]) -> list[list[dict[str, Any]]]:
         else:
             runs.append([item])
     return runs
+
+
+def _group_source(group: list[dict[str, Any]], table: list[dict[str, Any]]) -> dict[str, Any]:
+    """item_sources for one line of any number of rows (item_sources regroups in pairs)."""
+    [source] = item_sources(_as_one(group), table)
+    return source
+
+
+def _as_one(group: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """One row that carries the OCR lines of the whole group, so item_sources sees one item."""
+    first = group[0]
+    return [{**first, "unit": None, "source_lines": {
+        "name": [i for row in group for i in row["source_lines"]["name"]],
+        "price": [i for row in group for i in row["source_lines"]["price"]]}}]
 
 
 def _plain(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -125,7 +136,7 @@ def other_items(hybrid_items: list[dict[str, Any]], table: list[dict[str, Any]])
     for group in line_groups(hybrid_items):
         if group[0]["category"] == WHISKY:
             continue
-        [flow], [source] = to_flow_items(_plain(group)), item_sources(group, table)
+        flow, source = _flow_item(1, _plain(group)), _group_source(group, table)
         name = flow["rawText"].strip()
         try:
             options = [ExtractedOption.model_validate(o).model_dump() for o in flow["options"]]
@@ -148,8 +159,8 @@ def convert_output(text: str, table: list[dict[str, Any]]) -> dict[str, Any]:
     """
     hybrid = HybridExtractionV2.model_validate_json(text).model_dump()
     whisky = [group for group in line_groups(hybrid["items"]) if group[0]["category"] == WHISKY]
-    flow_items = [{**to_flow_items(_plain(group))[0], "itemOrder": order} for order, group in enumerate(whisky, start=1)]
-    sources = [{**item_sources(group, table)[0], "itemOrder": order} for order, group in enumerate(whisky, start=1)]
+    flow_items = [_flow_item(order, _plain(group)) for order, group in enumerate(whisky, start=1)]
+    sources = [{**_group_source(group, table), "itemOrder": order} for order, group in enumerate(whisky, start=1)]
     items = ExtractionItems.model_validate({"items": flow_items})
     others, dropped = other_items(hybrid["items"], table)
     return {"items": items.model_dump(mode="json")["items"], "rawOutput": hybrid,
