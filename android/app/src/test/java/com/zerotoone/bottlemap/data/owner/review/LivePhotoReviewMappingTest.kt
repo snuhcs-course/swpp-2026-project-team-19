@@ -178,6 +178,19 @@ class LivePhotoReviewMappingTest {
         assertEquals(MockDecisionKind.EXCLUDE,decision.kind)
     }
 
+    @Test fun ownerCanRestoreExcludedNonWhiskyPhotoLineForBarOnlyPublication() {
+        val dto = item(lineType = "description", proposedId = null).copy(
+            newProductDraft = null, extractedBrandName = null,
+        )
+        val card = mapServerPhotoReview(response(dto), fixture()).items.single()
+        assertTrue(card.excluded)
+        val restored = card.copy(excluded = false, price = 8000.0)
+        val decision = mapConfirmedReviewDecision(restored, dto, 30.0, emptyMap())
+        assertEquals(MockDecisionKind.CREATE_PRODUCT, decision.kind)
+        assertEquals("otherAlcohol", decision.newProduct?.category)
+        assertNull(decision.newProduct?.brandName)
+    }
+
     @Test fun staleOrIncompleteStatusCannotMasqueradeAsReadyReview() {
         val dto=response(item()).copy(status="processing")
         try {
