@@ -910,219 +910,37 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         return status
     }
 
-    private fun reviewOptions(
+    /** PR #164 requires every option's final values, not separate correction arrays. */
+    private fun finalReviewOptions(
         item: com.zerotoone.bottlemap.network.ReviewItemDto,
         decision: MockReviewDecision,
+        defaultPourMl: Int,
+        whisky: Boolean,
     ): List<Map<String, Any?>> {
-        val corrected = decision.correctedOptions ?: return emptyList()
-        val byId = item.options.associateBy { it.extractedOptionId }
-        return corrected.mapNotNull { option ->
-            val extracted = byId[option.optionId] ?: return@mapNotNull null
-            val edits = mutableMapOf<String, Any?>("extractedOptionId" to option.optionId)
-            if(option.priceKrw != extracted.extractedPriceKrw)
-                edits["correctedPriceKrw"] = option.priceKrw
-            validateReviewOptionClearing(option,
-                MockMenuOption(extracted.extractedOptionId,
-                    label = extracted.extractedOptionLabel,
-                    pourMl = extracted.extractedPourMl, priceKrw = extracted.extractedPriceKrw ?: 0))
-            if(option.pourMl != extracted.extractedPourMl && option.pourMl != null)
-                edits["correctedPourMl"] = option.pourMl
-            if(option.label != extracted.extractedOptionLabel && option.label != null)
-                edits["correctedOptionLabel"] = option.label
-            edits
-        }
-    }
-
-    /** The backend accepts owner-added options separately from OCR corrections. */
-    private fun addedReviewOptions(
-        item: com.zerotoone.bottlemap.network.ReviewItemDto,
-        decision: MockReviewDecision,
-    ): List<Map<String, Any?>> {
-        val extractedIds = item.options.mapTo(mutableSetOf()) { it.extractedOptionId }
-        return decision.correctedOptions.orEmpty().filterNot { it.optionId in extractedIds }
-            .map { option ->
-                mapOf(
-                    "optionLabel" to option.label,
-                    "pourMl" to option.pourMl,
-                    "priceKrw" to option.priceKrw,
-                )
-            }
-    }
-
-    /**
-     * Stage 8 can collect a price for a product without extracted options, but the
-     * backend review API cannot create a new extractedOptionId. Preserve that UI
-     * choice and use the already-supported manual add API after review publish.
-     */
-    private suspend fun publishPriceEntryOnlyRows(
-        before: MockOwnerSnapshot, job: MockMenuImport,
-        missingOptionLineIds: Set<String>,
-    ): Triple<Int, Int, List<String>> {
-        var menu = remote.getOwnedMenu(job.barId)
-        var added = 0
-        var created = 0
-        val warnings = mutableListOf<String>()
-        val candidates = job.images.flatMap { it.lines }.filter { line ->
-            line.extractedItemId in missingOptionLineIds &&
-                line.decision?.kind in listOf(
-                    MockDecisionKind.SELECT_PRODUCT, MockDecisionKind.CREATE_PRODUCT)
-        }
-        for(line in candidates) {
-            val decision = requireNotNull(line.decision)
-            val options = decision.correctedOptions.orEmpty()
-            if(options.isEmpty() || options.any { it.priceKrw <= 0 } || options.size > 3) {
-                warnings += "${line.sourceText}: 가격을 확인하고 직접 등록해 주세요."
-                continue
-            }
-            val selectedId = decision.productId
-            if(selectedId != null && (before.menuItems.any {
-                it.barId == job.barId && it.productId == selectedId
-            } || menu.items.any { it.productId == selectedId })) continue
-            val display = if(decision.kind == MockDecisionKind.CREATE_PRODUCT)
-                decision.newProduct?.name ?: line.sourceText
-            else before.products.firstOrNull { it.productId == selectedId }?.displayName
-                ?: line.sourceText
-            val category = if(decision.kind == MockDecisionKind.CREATE_PRODUCT)
-                decision.newProduct?.category
-            else before.products.firstOrNull { it.productId == selectedId }?.category
-            val body = mutableMapOf<String, Any?>(
-                "menuVersion" to menu.menuVersion,
-                "displayName" to display.take(200),
-                "options" to options.map { option ->
-                    mapOf(
-                        "optionLabel" to option.label,
-                        "pourMl" to if(category != "whisky" ||
-                            option.label in listOf("병", "Bottle", "bottle"))
-                            null else option.pourMl ?: 30,
-                        "priceKrw" to option.priceKrw,
-                        "discount" to null,
-                    )
-                },
+        val rawIds = item.options.mapTo(mutableSetOf()) { it.extractedOptionId }
+        val selected = decision.correctedOptions ?: item.options.map { option ->
+            MockMenuOption(
+                optionId = option.extractedOptionId,
+                label = option.extractedOptionLabel,
+                pourMl = option.extractedPourMl,
+                priceKrw = option.extractedPriceKrw ?: 0,
             )
-            if(decision.kind == MockDecisionKind.SELECT_PRODUCT) {
-                body["productId"] = requireNotNull(selectedId)
-            } else {
-                val draft = requireNotNull(decision.newProduct)
-                body["newProduct"] = mapOf(
-                    "brand" to if(draft.brandId != null)
-                        mapOf("type" to "existing", "brandId" to draft.brandId)
-                    else mapOf("type" to "new",
-                        "canonicalName" to requireNotNull(draft.brandName),
-                        "aliases" to emptyList<Any>()),
-                    "product" to mapOf(
-                        "category" to draft.category,
-                        "displayName" to draft.name,
-                        "ageYears" to draft.ageYears,
-                        "editionName" to draft.editionName,
-                        "abv" to draft.abvPercent,
-                    ),
-                    "aliases" to emptyList<Any>(),
-                )
-            }
-            try {
-                menu = remote.addMenuItem(job.barId, body)
-                added++
-                if(decision.kind == MockDecisionKind.CREATE_PRODUCT) created++
-            } catch(cancelled: CancellationException) {
-                throw cancelled
-            } catch(error: Exception) {
-                warnings += "${display}: 사진에서 입력한 가격을 추가하지 못했어요. 직접 등록해 주세요."
-                menu = remote.getOwnedMenu(job.barId)
-            }
         }
-        return Triple(added, created, warnings)
-    }
-
-    private fun sameServing(
-        current: com.zerotoone.bottlemap.network.BarMenuOptionDto, scanned: MockMenuOption,
-    ): Boolean = if(current.pourMl != null || scanned.pourMl != null)
-        current.pourMl != null && current.pourMl == scanned.pourMl
-    else current.optionLabel.orEmpty().trim().equals(
-        scanned.label.orEmpty().trim(), ignoreCase = true)
-
-    /**
-     * A photo must never overwrite a discount. The old catalog row is kept in the
-     * publish transaction, then only the recognized option prices are updated with
-     * the regular manual edit API. All untouched prices/options/discounts survive.
-     */
-    private suspend fun updatePreviouslyListedPrices(
-        original: MockOwnerSnapshot, job: MockMenuImport,
-    ): List<String> {
-        val previouslyListed = original.menuItems.filter { it.barId == job.barId }
-            .associateBy { it.productId }
-        val selected = reviewedServingsByProduct(job, previouslyListed.keys)
-        if(selected.isEmpty()) return emptyList()
-        val warnings = mutableListOf<String>()
-        var menu = remote.getOwnedMenu(job.barId)
-        for((productId, priced) in selected) {
-            val listed = menu.items.firstOrNull { it.productId == productId } ?: continue
-            if(priced.isEmpty() || priced.any { it.priceKrw <= 0 }) {
-                warnings += "${listed.displayName}: 가격을 확인하고 직접 수정해 주세요."
-                continue
-            }
-            val existingOptions = listed.options.sortedBy { it.sortOrder }
-            val options = existingOptions.map { entry ->
-                mutableMapOf<String, Any?>(
-                    "optionLabel" to entry.optionLabel,
-                    "pourMl" to entry.pourMl,
-                    "priceKrw" to entry.priceKrw,
-                    "discount" to entry.discount?.let { discount ->
-                        mapOf(
-                            "discountedPriceKrw" to discount.discountedPriceKrw,
-                            "startsAt" to discount.startsAt,
-                            "endsAt" to discount.endsAt,
-                        )
-                    },
-                )
-            }.toMutableList()
-            var changed = false
-            for(scanned in priced) {
-                val matchIndex = options.indexOfFirst { entry ->
-                    reviewServingKey(entry["pourMl"] as? Int,
-                        entry["optionLabel"] as? String) ==
-                        reviewServingKey(scanned.pourMl, scanned.label)
-                }
-                if(matchIndex >= 0) {
-                    val oldOption = existingOptions.getOrNull(matchIndex)
-                    if(options[matchIndex]["priceKrw"] == scanned.priceKrw) continue
-                    if(oldOption?.discount != null &&
-                        scanned.priceKrw <= oldOption.discount.discountedPriceKrw) {
-                        warnings += "${listed.displayName}: 기존 할인가보다 정가가 낮아 가격 확인이 필요해요."
-                        continue
-                    }
-                    options[matchIndex]["priceKrw"] = scanned.priceKrw
-                    changed = true
-                } else if(options.size < 3 && listed.category == "whisky") {
-                    options += mutableMapOf(
-                        "optionLabel" to scanned.label,
-                        "pourMl" to scanned.pourMl,
-                        "priceKrw" to scanned.priceKrw,
-                        "discount" to null,
-                    )
-                    changed = true
-                } else {
-                    warnings += "${listed.displayName}: 추가 용량은 메뉴에서 직접 확인해 주세요."
-                }
-            }
-            if(!changed) continue
-            try {
-                menu = remote.updateMenuItem(
-                    barId = job.barId, itemId = listed.barMenuItemId,
-                    body = mapOf(
-                        "menuVersion" to menu.menuVersion,
-                        "displayName" to listed.displayName,
-                        "options" to options,
-                    ),
-                )
-            } catch(cancelled: CancellationException) {
-                throw cancelled
-            } catch(error: Exception) {
-                warnings += "${listed.displayName}: 가격 변경 실패. 직접 수정해 주세요."
-                // A successful request can race a lost response. Reload the version.
-                menu = remote.getOwnedMenu(job.barId)
-            }
+        require(selected.size in 1..10) { "검수 메뉴의 가격 옵션은 1~10개여야 해요." }
+        val retained = selected.mapNotNull { it.optionId.takeIf(rawIds::contains) }
+        require(retained.distinct().size == retained.size) {
+            "동일한 OCR 옵션을 두 번 게시할 수 없어요."
         }
-        return warnings
+        return selected.map { option ->
+            require(option.priceKrw in 1..99_999_999) { "가격을 확인해 주세요." }
+            val isBottle = option.label?.lowercase() in listOf("bottle", "병")
+            mapOf(
+                "extractedOptionId" to option.optionId.takeIf(rawIds::contains),
+                "optionLabel" to option.label,
+                "pourMl" to (option.pourMl ?: if (whisky && !isBottle) defaultPourMl else null),
+                "priceKrw" to option.priceKrw,
+            )
+        }
     }
 
     /** Apply all item decisions in one backend transaction, and never accept removals. */
@@ -1137,75 +955,41 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
             "같은 메뉴·용량에 다른 가격을 입력했어요. 가격을 하나로 맞춘 후 게시해 주세요."
         }
         val decisions = job.images.flatMap { it.lines }.associateBy { it.extractedItemId }
-        // Owner-added servings are now supported by the native review API.
-        // Keep only rows without ANY publishable option in the legacy fallback.
-        val missingOptionLineIds = original.images.flatMap { it.items }
-            .filter { it.options.isEmpty() &&
-                decisions[it.extractedItemId]?.decision?.correctedOptions.isNullOrEmpty() }
-            .mapTo(mutableSetOf()) { it.extractedItemId }
+        val defaultPour = current.bars.firstOrNull { it.barId == job.barId }
+            ?.defaultPourMl ?: 30
+        // Validate the COMPLETE request before the first network write.
         val itemDecisions = original.images.flatMap { it.items }.map { item ->
             val chosen = decisions[item.extractedItemId]?.decision
                 ?: error("확인하지 않은 메뉴가 있어요.")
             when(chosen.kind) {
-                MockDecisionKind.SELECT_PRODUCT -> {
-                    // Existing rows are priced through the manual endpoint AFTER publish,
-                    // so the backend's review transaction cannot drop their discounts.
-                    if(item.extractedItemId in missingOptionLineIds ||
-                        current.menuItems.any { row ->
-                            row.barId == job.barId && row.productId == chosen.productId
-                        }) mapOf(
-                        "action" to "reject",
-                        "extractedItemId" to item.extractedItemId,
-                        "finalLineType" to "product",
-                    ) else mapOf(
-                        "action" to "select_existing_product",
-                        "extractedItemId" to item.extractedItemId,
-                        "finalLineType" to "product",
-                        "productId" to chosen.productId,
-                        "correctedProductName" to chosen.displayNameOverride,
-                        "optionDecisions" to reviewOptions(item, chosen),
-                        "excludedOptionIds" to chosen.excludedOptionIds,
-                        "addedOptions" to addedReviewOptions(item, chosen),
-                    )
-                }
+                MockDecisionKind.SELECT_PRODUCT -> mapOf(
+                    "action" to "select_existing_product",
+                    "extractedItemId" to item.extractedItemId,
+                    "finalLineType" to "product",
+                    "productId" to requireNotNull(chosen.productId),
+                    "correctedProductName" to chosen.displayNameOverride,
+                    "options" to finalReviewOptions(item,chosen,defaultPour,true),
+                )
                 MockDecisionKind.CREATE_PRODUCT -> {
-                    if(item.extractedItemId in missingOptionLineIds) {
-                        mapOf(
-                            "action" to "reject",
-                            "extractedItemId" to item.extractedItemId,
-                            "finalLineType" to "product",
-                        )
-                    } else {
-                    val draft = requireNotNull(chosen.newProduct)
-                    val brand = if(draft.brandId != null)
-                        mapOf("type" to "existing", "brandId" to draft.brandId)
-                    else mapOf("type" to "new",
-                        "canonicalName" to requireNotNull(draft.brandName),
-                        "aliases" to emptyList<Any>())
+                    // Internal legacy enum means an owner-confirmed unlinked item.
+                    // The owner NEVER creates shared products/brands/aliases.
+                    val kind = if (chosen.newProduct?.category == "whisky") "whisky" else "other"
+                    val name = chosen.displayNameOverride
+                        ?: chosen.newProduct?.name ?: item.extractedProductName ?: item.rawText
                     mapOf(
-                        "action" to "create_product",
+                        "action" to "publish_without_product",
                         "extractedItemId" to item.extractedItemId,
                         "finalLineType" to "product",
-                        "brand" to brand,
-                        "correctedProductName" to chosen.displayNameOverride,
-                        "product" to mapOf(
-                            "category" to draft.category,
-                            "displayName" to draft.name,
-                            "ageYears" to draft.ageYears,
-                            "editionName" to draft.editionName,
-                            "abv" to draft.abvPercent,
-                        ),
-                        "optionDecisions" to reviewOptions(item, chosen),
-                        "excludedOptionIds" to chosen.excludedOptionIds,
-                        "addedOptions" to addedReviewOptions(item, chosen),
+                        "kind" to kind,
+                        "correctedProductName" to name.trim().take(200),
+                        "options" to finalReviewOptions(item,chosen,defaultPour,kind == "whisky"),
                     )
-                    }
                 }
                 MockDecisionKind.CONFIRM_NON_PRODUCT -> mapOf(
                     "action" to "confirm_non_product",
                     "extractedItemId" to item.extractedItemId,
-                    "finalLineType" to (if(item.effectiveLineType=="product") "unknown"
-                        else item.effectiveLineType),
+                    "finalLineType" to if(item.effectiveLineType == "product") "unknown"
+                        else item.effectiveLineType,
                 )
                 MockDecisionKind.EXCLUDE -> mapOf(
                     "action" to "reject",
@@ -1214,24 +998,16 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                 )
             }
         }
-        val positiveItems = job.images.flatMap { it.lines }.filter {
-            it.decision?.kind in listOf(MockDecisionKind.SELECT_PRODUCT,
+        val publishedIds = decisions.filterValues { decision ->
+            decision.decision?.kind in listOf(MockDecisionKind.SELECT_PRODUCT,
                 MockDecisionKind.CREATE_PRODUCT)
-        }.map { it.extractedItemId }.toSet()
-        val changes = original.proposedChanges.map {
+        }.keys
+        // Partial update: never remove an existing menu without explicit intent.
+        val changes = original.proposedChanges.map { change ->
             com.zerotoone.bottlemap.network.ChangeDecisionDto(
-                changeId = it.changeId,
-                decision = if(it.changeType == "remove" ||
-                    it.changeType == "update" ||
-                    it.extractedItemId in missingOptionLineIds ||
-                    it.extractedItemId !in positiveItems ||
-                    it.extractedItemId?.let { id ->
-                        decisions[id]?.decision?.productId?.let { productId ->
-                            current.menuItems.any { row ->
-                                row.barId == job.barId && row.productId == productId
-                            }
-                        }
-                    } == true) "ignore" else "apply",
+                changeId = change.changeId,
+                decision = if (change.changeType != "remove" &&
+                    change.extractedItemId in publishedIds) "apply" else "ignore",
             )
         }
         val result = remote.reviewAndApply(importId,
@@ -1240,33 +1016,23 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                 itemDecisions = itemDecisions,
                 changeDecisions = changes,
             ))
-        // The review already succeeded: never show a retryable "publish failed" for
-        // post-publish menu writes, because review-and-apply cannot be replayed.
-        val extra = try {
-            publishPriceEntryOnlyRows(current, job, missingOptionLineIds)
-        } catch(cancelled: CancellationException) {
-            throw cancelled
-        } catch(error: Exception) {
-            Triple(0, 0, listOf("가격 입력 메뉴를 자동 추가하지 못했어요. 직접 확인해 주세요."))
-        }
-        val warnings = try {
-            extra.third + updatePreviouslyListedPrices(current, job)
-        } catch(cancelled: CancellationException) {
-            throw cancelled
-        } catch(error: Exception) {
-            extra.third + listOf("메뉴 게시 후 일부 기존 메뉴 가격을 확인하지 못했어요. 직접 확인해 주세요.")
-        }
+        // No post-publish manual edits: a 200 review result is already committed.
+        // Avoid changing discounts/options in follow-up writes or retrying the import.
         publishSnapshot(current.copy(imports = current.imports.map {
-            if(it.menuImportId == importId) it.copy(status = MockImportStatus.APPLIED,
-                publishedAddedCount = result.result.added + extra.first,
-                publishedNewProductCount = result.result.createdProducts + extra.second)
-            else it
+            if(it.menuImportId == importId) it.copy(
+                status = MockImportStatus.APPLIED,
+                publishedAddedCount = result.result.added,
+                publishedNewProductCount = 0,
+            ) else it
         }))
         val refreshError = runCatching { refresh() }.exceptionOrNull()
-        lastPublishWarning = (warnings + listOfNotNull(
-            refreshError?.let { "게시 후 최신 메뉴를 새로고침하지 못했어요." }
-        )).distinct().take(3).joinToString("\n").ifEmpty { null }
-        return result.result.added + extra.first
+        lastPublishWarning = listOfNotNull(
+            result.result.unlinkedWhisky.takeIf { it > 0 }?.let {
+                "새 위스키 ${it}개가 매장 메뉴에 게시됐어요. 운영자 확인 후 상품 검색에 나타나요."
+            },
+            refreshError?.let { "게시 후 최신 메뉴를 새로고침하지 못했어요." },
+        ).joinToString("\\n").ifEmpty { null }
+        return result.result.added
     }
 
     // Local-only interactions that have no published server equivalent must not fake a save.
