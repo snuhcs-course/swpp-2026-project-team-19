@@ -63,9 +63,13 @@ def _same_edition(a: str | None, b: str | None) -> bool:
 
 
 class _CatalogWriter:
-    def __init__(self, session: Session, created_by_user_id: UUID | None) -> None:
+    def __init__(
+        self, session: Session, created_by_user_id: UUID | None,
+        *, reuse_manual_brand: bool = False,
+    ) -> None:
         self.session = session
         self.created_by_user_id = created_by_user_id
+        self.reuse_manual_brand = reuse_manual_brand
         self.created_brand_ids: set[UUID] = set()
         self.created_product_ids: set[UUID] = set()
 
@@ -171,7 +175,22 @@ class _CatalogWriter:
         found = self._find_brand(decision)
         if found is not None:
             if found.id not in self.created_brand_ids:
-                raise self._duplicate_brand(found, details)
+                # Direct menu entry has no brand input. It may send the canonical
+                # brand name (or an existing alias) inferred from the menu name.
+                # Reuse that exact identity instead of forcing an impossible
+                # manual brand-picker step. Review-created brands still require
+                # explicit brand decisions and preserve the old conflict rule.
+                matches_canonical = normalize(found.canonical_name) == normalize(decision.canonicalName)
+                matches_alias = self.session.scalar(
+                    select(BrandAlias.id).where(
+                        BrandAlias.brand_id == found.id,
+                        BrandAlias.normalized_alias == normalize(decision.canonicalName),
+                    )
+                ) is not None
+                if not (self.reuse_manual_brand and not decision.aliases
+                        and (matches_canonical or matches_alias)):
+                    raise self._duplicate_brand(found, details)
+                return found.id
             self._add_brand_aliases(found.id, aliases)
             return found.id
         brand = Brand(canonical_name=decision.canonicalName, created_by_user_id=self.created_by_user_id)
@@ -251,4 +270,6 @@ def create_new_product(
     created_by_user_id: UUID | None,
 ) -> UUID:
     """A manual add's new product (API spec 3.14.3). A duplicate's 409 has no review fields."""
-    return _CatalogWriter(session, created_by_user_id).create_product(brand, product, aliases, details={})
+    return _CatalogWriter(
+        session, created_by_user_id, reuse_manual_brand=True,
+    ).create_product(brand, product, aliases, details={})
