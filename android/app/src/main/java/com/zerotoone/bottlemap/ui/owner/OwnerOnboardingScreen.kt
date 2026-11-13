@@ -585,9 +585,9 @@ fun OwnerOnboardingScreen(
                             },
                             onManage={ bar ->
                                 viewModel.selectBar(bar.barId)
-                                if(!viewModel.usesProductionOwnerApi() && !snapshot.hasPublishedInitialReview(bar.barId)) {
-                                    onFirstReview(snapshot.imports.lastOrNull{it.barId==bar.barId}?.status)
-                                } else onManagerPreview()
+                                // Approval always opens the bar management home.
+                                // Menu review, if required, is reachable from there.
+                                onManagerPreview()
                             },
                             onViewApplication={ id ->
                                 activeApplicationId=id;go(RegPage.VIEW_APPLICATION)
