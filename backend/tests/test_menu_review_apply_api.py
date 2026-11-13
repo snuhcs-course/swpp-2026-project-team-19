@@ -31,7 +31,7 @@ from app.services import menu_review_apply, serializable
 from app.services.menu_review_apply import review_and_apply
 from tests.factories import make_bar, make_owner, make_user
 from tests.sql_support import recorded_statements
-from tests.review_support import JPEG, make_glenfiddich, upload_sample_review, valid_body
+from tests.review_support import JPEG, make_glenfiddich, options_of, upload_sample_review, valid_body
 
 
 @pytest.fixture
@@ -77,15 +77,27 @@ def body_from_review(review):
     for image in review["images"]:
         for item in image["items"]:
             base = {"extractedItemId": item["extractedItemId"], "finalLineType": item["effectiveLineType"]}
+            options = [
+                {
+                    "extractedOptionId": o["extractedOptionId"],
+                    "optionLabel": o["extractedOptionLabel"],
+                    "pourMl": o["extractedPourMl"],
+                    "priceKrw": o["extractedPriceKrw"],
+                }
+                for o in item["options"]
+            ]
             if item["effectiveLineType"] != "product":
                 decisions.append({**base, "action": "confirm_non_product"})
             elif item["proposedProductId"]:
-                decisions.append({**base, "action": "select_existing_product", "productId": item["proposedProductId"]})
+                decisions.append(
+                    {**base, "action": "select_existing_product", "productId": item["proposedProductId"], "options": options}
+                )
             else:
                 draft = item["newProductDraft"]
                 decisions.append(
                     {
                         **base,
+                        "options": options,
                         "action": "create_product",
                         "brand": {"type": "new", "canonicalName": draft["brandText"] or draft["displayName"]},
                         "product": {
@@ -131,6 +143,7 @@ def test_review_to_customer_search(client, db_session, sample, operator, glenfid
         "ignored": 0,
         "createdBrands": 1,
         "createdProducts": 1,
+        "unlinkedWhisky": 0,
     }
     status = client.get(f"/api/menu-imports/{sample.menu_import.id}", headers=operator).json()
     assert (status["status"], status["appliedAt"], status["menuBoardId"]) == (
@@ -164,9 +177,7 @@ def test_review_to_customer_search(client, db_session, sample, operator, glenfid
 def test_decisions_are_recorded_on_items_and_options(client, db_session, sample, operator, glenfiddich):
     header, exact, conflict, unknown, description = sample.items
     body = valid_body(sample, glenfiddich)
-    body["itemDecisions"][1]["optionDecisions"] = [
-        {"extractedOptionId": str(exact.options[0].id), "correctedPriceKrw": 9500, "correctedPourMl": 15}
-    ]
+    body["itemDecisions"][1]["options"][0]["priceKrw"] = 9500
     body["itemDecisions"][4]["finalLineType"] = "unknown"
 
     result = applied(client, sample, body, operator)
@@ -239,6 +250,7 @@ def test_changes_left_are_the_applied_and_ignored_ones(client, db_session, sampl
         "ignored": 1,
         "createdBrands": 1,
         "createdProducts": 1,
+        "unlinkedWhisky": 0,
     }
     menu = client.get(f"/api/bars/{sample.bar.id}/menu").json()
     assert [i["productId"] for i in menu["items"]] == [str(glenfiddich[15].id), str(glenfiddich[12].id)]
@@ -304,6 +316,7 @@ def test_errors_roll_back_everything(client, db_session, sample, operator, glenf
     body["itemDecisions"][2] = {
         **body["itemDecisions"][3],
         "extractedItemId": body["itemDecisions"][2]["extractedItemId"],
+        "options": options_of(sample.items[2]),
         "brand": {"type": "existing", "brandId": str(glenfiddich["brand"].id)},
         "product": {"displayName": "Glenfiddich Twelve", "ageYears": 12},
     }

@@ -119,6 +119,15 @@ def rehearse(client, session, operator, seeds):
                 "finalLineType": "product",
                 "brand": {"type": "new", "canonicalName": "Unknown Distillery"},
                 "product": {"displayName": "Unknown Distillery 25", "ageYears": 25},
+                "options": [
+                    {
+                        "extractedOptionId": str(o.id),
+                        "optionLabel": o.extracted_option_label,
+                        "pourMl": o.extracted_pour_ml,
+                        "priceKrw": o.extracted_price_krw,
+                    }
+                    for o in i.options
+                ],
             }
             if i.id == created.id
             else {"action": "reject", "extractedItemId": str(i.id), "finalLineType": "product"}

@@ -98,3 +98,74 @@ def test_mixed_changes_keep_menu_order_then_removals():
         (MenuChangeType.ADD, ITEM[2], None),
         (MenuChangeType.REMOVE, None, BAR_ITEM[2]),
     ]
+
+
+# ---- items without a product (API spec 5.4, matching flow 13) ----
+
+
+def unmatched(item, key, options=GLASS_BOTTLE):
+    return ProposedEntry(extracted_item_id=item, product_id=None, options=options, name_key=key)
+
+
+def unlinked(bar_item, key, options=GLASS_BOTTLE):
+    return CurrentEntry(bar_menu_item_id=bar_item, product_id=None, options=options, name_key=key)
+
+
+def test_an_unmatched_line_is_compared_with_the_unlinked_entry_of_its_name_key():
+    board = [unlinked(BAR_ITEM[0], "하이볼"), unlinked(BAR_ITEM[1], "진토닉")]
+
+    changes = compute_draft_changes(
+        [unmatched(ITEM[0], "하이볼"), unmatched(ITEM[1], "진토닉", (("잔", None, 9000),)), unmatched(ITEM[2], "맥주1")],
+        board,
+        ImportMode.FULL_REPLACE,
+    )
+
+    assert changes == [
+        DraftChange(MenuChangeType.UPDATE, bar_menu_item_id=BAR_ITEM[1], extracted_item_id=ITEM[1]),
+        DraftChange(MenuChangeType.ADD, extracted_item_id=ITEM[2]),
+    ]
+
+
+def test_an_unlinked_entry_no_line_names_is_removed_in_a_full_replace_only():
+    board = [unlinked(BAR_ITEM[0], "하이볼")]
+
+    assert compute_draft_changes([], board, ImportMode.FULL_REPLACE) == [
+        DraftChange(MenuChangeType.REMOVE, bar_menu_item_id=BAR_ITEM[0])
+    ]
+    assert compute_draft_changes([], board, ImportMode.PARTIAL_UPDATE) == []
+
+
+def test_a_matched_line_takes_over_the_unlinked_entry_of_its_name_key():
+    """The same menu, now matched to a product: compared with the unlinked entry, not added beside it."""
+    board = [unlinked(BAR_ITEM[0], "unknowndistillery25")]
+    line = ProposedEntry(ITEM[0], PRODUCT[0], GLASS_BOTTLE, name_key="unknowndistillery25")
+
+    for mode in (ImportMode.FULL_REPLACE, ImportMode.PARTIAL_UPDATE):
+        assert compute_draft_changes([line], board, mode) == [
+            DraftChange(MenuChangeType.UPDATE, bar_menu_item_id=BAR_ITEM[0], extracted_item_id=ITEM[0])
+        ]
+
+
+def test_a_matched_line_whose_product_is_on_the_board_keeps_to_that_entry():
+    board = [current(BAR_ITEM[0], PRODUCT[0]), unlinked(BAR_ITEM[1], "glenfiddich12")]
+    line = ProposedEntry(ITEM[0], PRODUCT[0], GLASS_BOTTLE, name_key="glenfiddich12")
+
+    changes = compute_draft_changes([line], board, ImportMode.FULL_REPLACE)
+
+    assert changes == [DraftChange(MenuChangeType.REMOVE, bar_menu_item_id=BAR_ITEM[1])]
+
+
+def test_lines_without_a_name_key_are_added_and_repeated_keys_take_the_first():
+    board = [unlinked(BAR_ITEM[0], "하이볼", (("잔", None, 1),))]
+
+    changes = compute_draft_changes(
+        [unmatched(ITEM[0], ""), unmatched(ITEM[1], "하이볼"), unmatched(ITEM[2], "하이볼"), unmatched(ITEM[3], "")],
+        board,
+        ImportMode.FULL_REPLACE,
+    )
+
+    assert changes == [
+        DraftChange(MenuChangeType.ADD, extracted_item_id=ITEM[0]),
+        DraftChange(MenuChangeType.UPDATE, bar_menu_item_id=BAR_ITEM[0], extracted_item_id=ITEM[1]),
+        DraftChange(MenuChangeType.ADD, extracted_item_id=ITEM[3]),
+    ]

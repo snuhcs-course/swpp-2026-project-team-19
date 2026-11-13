@@ -8,7 +8,7 @@ from app.schemas.menu_review import BrandDecision, NewProduct, ProductAliasInput
 from app.services.menu_review_catalog import create_catalog_entries, create_new_product
 from app.services.menu_review_validation import validate_review
 from tests.factories import make_product, make_user
-from tests.review_support import make_glenfiddich, upload_sample_review, valid_body
+from tests.review_support import make_glenfiddich, options_of, upload_sample_review, valid_body
 
 
 @pytest.fixture
@@ -27,7 +27,7 @@ def sample(client, db_session, image_storage, operator, glenfiddich):
 
 
 def run(db_session, sample, body):
-    review = validate_review(db_session, sample.menu_import, ReviewAndApplyRequest.model_validate(body))
+    review = validate_review(db_session, sample.menu_import, ReviewAndApplyRequest.model_validate(body), operator=True)
     return create_catalog_entries(db_session, sample.menu_import, review, created_by_user_id=None)
 
 
@@ -151,7 +151,11 @@ def test_a_product_with_the_same_attributes_is_a_conflict(db_session, sample, gl
 def test_rows_created_earlier_in_the_same_submission_are_reused(db_session, sample, glenfiddich):
     body = valid_body(sample, glenfiddich)
     new_product = body["itemDecisions"][3]
-    second = {**new_product, "extractedItemId": body["itemDecisions"][2]["extractedItemId"]}
+    second = {
+        **new_product,
+        "extractedItemId": body["itemDecisions"][2]["extractedItemId"],
+        "options": options_of(sample.items[2]),
+    }
     body["itemDecisions"][2] = second  # the ambiguous line names the same new product
 
     result = run(db_session, sample, body)
@@ -165,6 +169,7 @@ def test_two_products_of_one_new_brand(db_session, sample, glenfiddich):
     body["itemDecisions"][2] = {
         **body["itemDecisions"][3],
         "extractedItemId": body["itemDecisions"][2]["extractedItemId"],
+        "options": options_of(sample.items[2]),
         "product": {"displayName": "Unknown Distillery 18", "ageYears": 18},
     }
 

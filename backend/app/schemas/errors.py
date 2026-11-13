@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field
 
 
 class FieldErrorResponse(BaseModel):
-    path: str = Field(description='Request field, e.g. "query" or "itemDecisions[0].optionDecisions[1].correctedPriceKrw"')
+    path: str = Field(description='Request field, e.g. "query" or "itemDecisions[0].options[1].priceKrw"')
     code: str = Field(description='Machine-readable reason, e.g. "MISSING", "STRING_TOO_LONG", "BLANK"')
     message: str
 
