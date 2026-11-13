@@ -18,16 +18,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.zerotoone.bottlemap.BuildConfig
-import com.zerotoone.bottlemap.data.owner.review.MockPhotoReviewRepository
-import com.zerotoone.bottlemap.data.owner.review.MockPhotoReviewScenario
 import com.zerotoone.bottlemap.ui.auth.LoginErrorScreen
 import com.zerotoone.bottlemap.ui.auth.SharedPrefsFirstLaunchStore
 import com.zerotoone.bottlemap.ui.auth.SignInOutcome
 import com.zerotoone.bottlemap.ui.auth.WelcomeScreen
 import com.zerotoone.bottlemap.ui.auth.rememberGoogleSignInFlow
 import com.zerotoone.bottlemap.ui.common.UxToast
-import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewScreen
-import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraphBuilder
@@ -80,12 +76,12 @@ private object Routes {
  * App navigation. UX v18: a first-launch welcome, then two bottom tabs (검색, 내 정보) that
  * keep separate back stacks. The owner area lives in the 내 정보 tab.
  *
- * [devReviewScenario] and [resetWelcome] are honoured in debug builds only, so the mock
- * review scenarios and the welcome can be opened for UX review (see MainActivity).
+ * [resetWelcome] is a debug-only first-launch reset for UX regression QA.
+ * No demo OCR screen is reachable through production navigation.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun BottleMapNavHost(devReviewScenario: String? = null, resetWelcome: Boolean = false) {
+fun BottleMapNavHost(resetWelcome: Boolean = false) {
     val navController = rememberNavController()
     // Single Activity-scoped state shared by My Page, Login and restored sessions.
     val authViewModel: AuthViewModel = viewModel()
@@ -93,7 +89,6 @@ fun BottleMapNavHost(devReviewScenario: String? = null, resetWelcome: Boolean = 
     val firstLaunch = remember { SharedPrefsFirstLaunchStore(context) }
     val startDestination = remember {
         if (BuildConfig.DEBUG && resetWelcome) firstLaunch.reset()
-        if (BuildConfig.DEBUG && devReviewScenario != null) firstLaunch.markDone()
         if (firstLaunch.isDone()) variantStartDestination else TabRoutes.WELCOME
     }
     var toast by remember { mutableStateOf<Pair<Long, String>?>(null) }
@@ -102,12 +97,6 @@ fun BottleMapNavHost(devReviewScenario: String? = null, resetWelcome: Boolean = 
         if (toast != null) {
             kotlinx.coroutines.delay(2500)
             toast = null
-        }
-    }
-    LaunchedEffect(devReviewScenario) {
-        if (BuildConfig.DEBUG && devReviewScenario != null) {
-            navController.selectTab(MainTab.ACCOUNT)
-            navController.navigate(TabRoutes.devPhotoReview(devReviewScenario))
         }
     }
     val backStackEntry by navController.currentBackStackEntryAsState()
@@ -310,35 +299,6 @@ private fun NavGraphBuilder.accountGraph(
             )
         }
         registerVariantRoutes(navController, showToast)
-        if (BuildConfig.DEBUG) {
-            // MOCK ONLY: v18 photo-review scenarios, opened from MainActivity's debug extra.
-            composable(
-                TabRoutes.DEV_PHOTO_REVIEW,
-                arguments = listOf(navArgument("scenario") { type = NavType.StringType }),
-            ) { entry ->
-                val scenario = MockPhotoReviewScenario.fromId(entry.arguments?.getString("scenario"))
-                    ?: MockPhotoReviewScenario.BASIC
-                val vm: PhotoReviewViewModel = viewModel(
-                    factory = PhotoReviewViewModel.Factory(MockPhotoReviewRepository(scenario)))
-                PhotoReviewScreen(
-                    vm = vm,
-                    initialFocusItemId = scenario.focusItemId,
-                    onLeave = {
-                        // In-app preview returns to the *same* menu-management entry.
-                        // An adb-launched mock route has no menu parent, so route there.
-                        if (navController.previousBackStackEntry?.destination?.route ==
-                            OwnerPage.MGR_MENU.route) {
-                            navController.popBackStack()
-                        } else {
-                            navController.navigate(OwnerPage.MGR_MENU.route) {
-                                popUpTo(TabRoutes.DEV_PHOTO_REVIEW) { inclusive = true }
-                                launchSingleTop = true
-                            }
-                        }
-                    },
-                )
-            }
-        }
     }
 }
 
