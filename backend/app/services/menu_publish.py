@@ -192,7 +192,8 @@ def proposals_from_review(session: Session, review: ValidatedReview, catalog: Ca
                     entry.decision.correctedProductName or item.extracted_product_name or product_names[product_id]
                 ),
                 options=tuple(
-                    PublishedOption(o.label, o.pour_ml, o.price_krw, o.option.id) for o in entry.priced_options
+                    PublishedOption(o.label, o.pour_ml, o.price_krw,
+                        o.option.id if o.option is not None else None) for o in entry.priced_options
                 ),
             )
         )
