@@ -1,5 +1,7 @@
 package com.zerotoone.bottlemap.data.owner.review
 
+import android.content.Context
+
 import com.zerotoone.bottlemap.data.OwnerRepository
 import com.zerotoone.bottlemap.data.owner.MockImportStatus
 import com.zerotoone.bottlemap.data.owner.MockOwnerLoadState
@@ -12,6 +14,8 @@ import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewState
 import com.zerotoone.bottlemap.ui.owner.review.ReviewItem
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.text.Normalizer
 
 /**
@@ -28,11 +32,15 @@ import java.text.Normalizer
 class LivePhotoReviewRepository(
     private val owner: OwnerMockViewModel,
     private val importId: String?,
+    context: Context,
     private val remote: OwnerRepository = OwnerRepository(),
 ) : PhotoReviewRepository {
     private var loaded: MenuImportStatusDto? = null
     private var activeImportId: String? = null
     private var inMemoryDraft: PhotoReviewState? = null
+    private val draftStore = OwnerPhotoReviewDraftStore(context)
+    private val draftMutex = Mutex()
+    private var published = false
 
     private fun snapshot(): MockOwnerSnapshot = when (val current = owner.state.value) {
         is MockOwnerLoadState.Ready -> current.snapshot
@@ -72,10 +80,20 @@ class LivePhotoReviewRepository(
             it.menuImportId == id && it.reviewVersion == response.reviewVersion
         }) { "검수 버전이 변경됐어요. 다시 불러와 주세요." }
         val state = mapServerPhotoReview(response, current)
-        val restored = inMemoryDraft.takeIf {
+        val local = draftStore.load(id, requireNotNull(response.reviewVersion),
+            state.items.map { it.id })
+        val chosen = inMemoryDraft.takeIf {
             loaded?.reviewVersion == response.reviewVersion &&
                 it?.items?.map { item -> item.id } == state.items.map { item -> item.id }
-        } ?: state
+        } ?: local ?: state
+        // Signed URLs expire, and source observations belong to the server.
+        // Restore only owner edits; rebind fresh data to the current response.
+        val currentItems = state.items.associateBy { it.id }
+        val restored = chosen.copy(items = chosen.items.map { old ->
+            val fresh = currentItems.getValue(old.id)
+            old.copy(sourcePhotoUrl = fresh.sourcePhotoUrl, sourceBox = fresh.sourceBox,
+                raw = fresh.raw, recognizedOffers = fresh.recognizedOffers)
+        }, modal = null, typingSnapshots = emptyMap())
         loaded = response
         return restored
     }
@@ -123,9 +141,16 @@ class LivePhotoReviewRepository(
         }?.imageUrl
     }
 
-    /** This is an in-memory draft only, not a fake server-side save. */
+    /** Durable device-local draft; never claims a server-side write. */
     override suspend fun saveDraft(state: PhotoReviewState) {
-        inMemoryDraft = state
+        val id = activeImportId ?: return
+        val version = loaded?.reviewVersion ?: return
+        draftMutex.withLock {
+            if (!published) {
+                draftStore.save(id, version, state)
+                inMemoryDraft = state
+            }
+        }
     }
 
     override suspend fun publish(state: PhotoReviewState) {
@@ -182,7 +207,11 @@ class LivePhotoReviewRepository(
         } catch (cancelled: CancellationException) {
             throw cancelled
         }
-        inMemoryDraft = null
+        draftMutex.withLock {
+            published = true
+            draftStore.clear(id)
+            inMemoryDraft = null
+        }
     }
 
     private fun normalized(value: String): String =
