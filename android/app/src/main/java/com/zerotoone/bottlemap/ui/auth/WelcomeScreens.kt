@@ -3,6 +3,10 @@ package com.zerotoone.bottlemap.ui.auth
 import android.content.Context
 import androidx.core.content.edit
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Image
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import com.zerotoone.bottlemap.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -63,7 +67,10 @@ class SharedPrefsFirstLaunchStore(context: Context) : FirstLaunchStore {
     }
 }
 
-/** First-launch welcome (v18 `welcome`). The bottom tabs are hidden here. */
+/** First-launch welcome. Exact v20 `.welcome` geometry at a 390dp reference width.
+ * The pin is the isolated transparent artwork embedded in the supplied v20 HTML.
+ * Login remains a one-tap Credential Manager action owned by the caller.
+ */
 @Composable
 fun WelcomeScreen(
     onBrowseAsGuest: () -> Unit,
@@ -72,43 +79,51 @@ fun WelcomeScreen(
     busy: Boolean = false,
     inlineError: String? = null,
 ) {
-    // .welcome: min-height calc(100% - 70px), actions pushed to the bottom (margin-top: auto).
     BoxWithConstraints(Modifier.fillMaxSize().background(UxColor.bg).testTag("welcome-screen")) {
-        val minHeight = maxHeight - 70.dp
+        // CSS: .welcome { height:100%; min-height:630px; padding:0 20px }
+        val contentHeight = maxOf(maxHeight, 630.dp)
+        val pinHeight = minOf(194.dp, contentHeight * 0.33f)
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-            Column(
-                Modifier.fillMaxWidth().heightIn(min = minHeight)
-                    .padding(start = 20.dp, end = 20.dp, top = 100.dp, bottom = 33.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceBetween,
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Box {
-                        // .logo-large with its cap (::before) drawn 12dp above the frame, outside its box.
-                        Box(Modifier.size(75.dp, 85.dp).border(2.dp, UxColor.gold, RoundedCornerShape(18.dp)),
-                            contentAlignment = Alignment.Center) {
-                            Text("B", style = uxText(47f, 700, UxColor.gold, lineHeight = 1.2f, serif = true))
-                        }
-                        Box(Modifier.align(Alignment.TopCenter).offset(y = (-12).dp).size(22.dp, 8.dp)
-                            .background(UxColor.gold, RoundedCornerShape(5.dp)))
-                    }
-                    Spacer(Modifier.height(22.dp))
-                    Text("BottleMap", style = uxText(28f, 700, serif = true, letterSpacing = (-1).sp))
-                    Text("마시고 싶은 위스키, 어디에서 만날까요?", style = uxText(13f, 400, UxColor.sub),
-                        textAlign = TextAlign.Center, modifier = Modifier.padding(vertical = 13.dp))
-                }
-                Column(Modifier.fillMaxWidth().padding(top = 24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        UxMainButton("로그인 없이 둘러보기", onBrowseAsGuest, Modifier.testTag("welcome-guest"), enabled = !busy)
-                        UxSecondaryButton("Google로 계속", onGoogle, Modifier.testTag("welcome-google"), enabled = !busy)
+            Box(Modifier.fillMaxWidth().height(contentHeight)) {
+                // v20: left 20; pin bottom exactly 22dp above the 50% headline line.
+                Image(
+                    painter = painterResource(R.drawable.bottlemap_welcome_pin),
+                    contentDescription = "위스키 잔이 담긴 지도 핀",
+                    modifier = Modifier.offset(x = 20.dp, y = contentHeight / 2 - 22.dp - pinHeight)
+                        .size(width = 158.dp, height = pinHeight)
+                        .testTag("welcome-pin"),
+                    contentScale = ContentScale.Fit,
+                    alignment = Alignment.BottomStart,
+                )
+                Text(
+                    "Find the bottle first,\nthen the bar.",
+                    style = uxText(30f, 700, UxColor.text, 1.27f, serif = true,
+                        letterSpacing = (-0.9).sp),
+                    textAlign = TextAlign.Start,
+                    modifier = Modifier.offset(x = 20.dp, y = contentHeight / 2)
+                        .widthIn(max = 350.dp).testTag("welcome-headline"),
+                )
+                Column(
+                    Modifier.align(Alignment.BottomCenter).fillMaxWidth()
+                        .padding(start = 20.dp, end = 20.dp, bottom = 23.dp),
+                ) {
+                    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        UxMainButton("Google로 계속", onGoogle,
+                            Modifier.testTag("welcome-google"), enabled = !busy)
+                        UxSecondaryButton("로그인 없이 둘러보기", onBrowseAsGuest,
+                            Modifier.testTag("welcome-guest"), enabled = !busy)
                         if (inlineError != null) InlineAlert(inlineError)
                     }
-                    Row(Modifier.padding(top = 18.dp), verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally)) {
-                        Text("매장을 운영하시나요?", style = uxText(12f, 400, UxColor.muted))
-                        Box(Modifier.heightIn(min = 48.dp).quietClick(enabled = !busy, onClick = onOwner)
+                    Row(
+                        Modifier.fillMaxWidth().padding(top = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterHorizontally),
+                    ) {
+                        Text("사장님이신가요?", style = uxText(12f, 400, UxColor.muted))
+                        Box(Modifier.heightIn(min = 48.dp)
+                            .quietClick(enabled = !busy, onClick = onOwner)
                             .testTag("welcome-owner"), contentAlignment = Alignment.Center) {
-                            Text("매장 등록 · 관리", style = uxText(12f, 700, UxColor.gold))
+                            Text("매장 등록하기", style = uxText(12f, 700, UxColor.gold))
                         }
                     }
                 }
