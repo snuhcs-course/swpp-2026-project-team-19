@@ -187,6 +187,27 @@ class LivePhotoReviewMappingTest {
         assertEquals("사장님이 수정한 맥주 이름",decision.newProduct?.name)
     }
 
+    @Test fun unnamedNonWhiskyMustReceiveOwnerNameInsteadOfRawOcrPriceLine() {
+        val dto=item(options=listOf(ReviewOptionDto("cola-1",1,null,null,5000)),
+            status="unmatched",proposedId=null)
+            .copy(extractedKind="other",candidates=emptyList(),
+                extractedProductName=null,newProductDraft=null,
+                rawText="콜라 5,000원")
+        val review=mapServerPhotoReview(response(dto),fixture())
+        val card=review.items.single()
+        assertEquals("",card.name)
+        assertEquals("콜라 5,000원",card.raw)
+        assertFalse(card.nameSaved)
+        assertTrue(com.zerotoone.bottlemap.ui.owner.review.ReviewIssue.NAME in
+            PhotoReviewRules.problems(card))
+        assertFalse(PhotoReviewRules.stats(review).canPublish)
+        val named=card.copy(name="콜라",nameSaved=true)
+        assertTrue(PhotoReviewRules.problems(named).isEmpty())
+        val decision=mapConfirmedReviewDecision(named,dto,30.0,emptyMap())
+        assertEquals("콜라",decision.newProduct?.name)
+        assertEquals("콜라",decision.displayNameOverride)
+    }
+
     @Test fun nonWhiskyOcrMenuCanPublishWithoutCatalogConfirmationOrBrand() {
         val dto=item(
             options=listOf(ReviewOptionDto("beer-1",1,"잔",null,8000)),
