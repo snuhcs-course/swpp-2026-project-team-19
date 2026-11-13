@@ -205,7 +205,13 @@ internal fun SourceVisual(
     modifier: Modifier = Modifier,
     height: Dp,
     large: Boolean = false,
+    sourcePhotoUrl: String? = null,
+    sourceBox: List<Int>? = null,
 ) {
+    if (!sourcePhotoUrl.isNullOrBlank()) {
+        RealReviewSourceVisual(sourcePhotoUrl, sourceBox, height, large, modifier)
+        return
+    }
     Box(
         modifier.fillMaxWidth().height(height)
             .clip(RoundedCornerShape(8.dp))
