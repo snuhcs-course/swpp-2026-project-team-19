@@ -9,7 +9,8 @@ import com.zerotoone.bottlemap.data.owner.servingIdentityKey
  * so every rule is unit tested on the JVM.
  */
 object PhotoReviewRules {
-    // POST review-and-apply accepts 1..10 final options, unlike manual PUT's 1..3.
+    // Backend #164 allows up to 10, but the Owner-confirmed whisky UX
+    // requires a maximum of THREE distinct serving sizes.
     const val MAX_OPTIONS = 10
 
     fun optionSummary(x: ReviewItem): List<ReviewOption> =
@@ -173,7 +174,7 @@ object PhotoReviewRules {
             } else {
                 if (entries.any { !it.bottle && !validVolume(it.volume) }) p += ReviewIssue.VOLUME
                 if (entries.any { !validPrice(it.price) }) p += ReviewIssue.PRICE
-                if (entries.size > MAX_OPTIONS) p += ReviewIssue.OPTION
+                if (entries.size > MAX_PICKED_VOLUMES) p += ReviewIssue.OPTION
                 // Owner defines a serving by pour size only:
                 // '잔 30ml' and '샷 30ml' are duplicate options.
                 val keys = entries.map {
