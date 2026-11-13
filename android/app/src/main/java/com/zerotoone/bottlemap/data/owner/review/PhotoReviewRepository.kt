@@ -7,11 +7,10 @@ import com.zerotoone.bottlemap.ui.owner.review.ReviewItem
 /**
  * Data contract of the one-page photo-menu review screen.
  *
- * The screen and its ViewModel only talk to this interface. This step ships the mock
- * ([MockPhotoReviewRepository]); the server-backed implementation replaces it later
- * without touching the composables. Several behaviours here are NOT in the current API
- * spec yet (marked "Mock only" below); the real implementation must wait for the spec
- * change instead of inventing fields.
+ * The screen and ViewModel use this interface. LivePhotoReviewRepository
+ * implements the approved #164 server review-and-apply contract; development
+ * fixtures are isolated in src/debug and never replace real Owner review.
+ * Local draft persistence is device-only; no server draft API is assumed.
  */
 interface PhotoReviewRepository {
     /** The review to show, mapped into the screen model. A saved draft is restored here. */
@@ -22,7 +21,7 @@ interface PhotoReviewRepository {
 
     /**
      * Exact-name rematch after the owner renames a line (decision 2).
-     * Mock only: the agreed design runs this on the server at submit time.
+     * Client-side search/reconfirmation is advisory; the server remains authoritative.
      */
     suspend fun exactMatches(name: String): List<CatalogProduct>
 
@@ -35,7 +34,7 @@ interface PhotoReviewRepository {
     /** Saves the bar's default glass size (spec 3.7 `defaultPourMl`, 1..999). */
     suspend fun saveDefaultPour(ml: Int)
 
-    /** Saves the in-progress review (decision 9). Mock only: no draft API exists yet. */
+    /** Saves the on-device in-progress review; no Backend A5 draft API exists yet. */
     suspend fun saveDraft(state: PhotoReviewState)
 
     /** Refresh a short-lived signed photo URL after expiry/403 (contract §5.4).
