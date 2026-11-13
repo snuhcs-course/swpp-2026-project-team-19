@@ -46,9 +46,13 @@ on the deployed server.
   `extractedOptionId` where applicable and using null only for reviewer-added
   options. Do **not** send `optionDecisions`, `addedOptions`,
   `excludedOptionIds`, or Owner `create_product`. Photo review can edit all
-  1–10 whisky and non-whisky price options. A duplicate catalog whisky +
-  serving across photos with inconsistent prices blocks Publish and lets
-  the owner edit the individual options; do not silently choose one.
+  1–10 whisky and non-whisky price options. Since merged Backend #164
+  keeps only the first proposal when multiple OCR lines select one canonical
+  whisky, **any duplicate linked whisky lines block Publish**, even if their
+  prices agree. The owner must manually copy unique serving prices into the
+  retained card and explicitly exclude the redundant OCR line; inconsistent
+  serving prices are also highlighted. This is a safe Android-only workaround
+  until Backend A4 supplies an agreed atomic merge contract.
 - **Read:** `GET /api/bars/{barId}/menu` can return `productId: null`,
   `category: null`, `kind: "whisky" | "other"`. Show these items in Owner
   and Customer bar menus without inventing catalog identity. Unlinked whiskies
