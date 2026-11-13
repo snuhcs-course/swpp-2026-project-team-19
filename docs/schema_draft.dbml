@@ -410,7 +410,9 @@ Table brand_aliases {
   No normalization-version column is stored. When the deterministic backend normalization rule changes,
   every brand_aliases and product_aliases normalized_alias value is regenerated with
   backend/scripts/renormalize_aliases.py (dry run first, then --apply, then seed_catalog.py again)
-  before the backend using the new rule is activated.
+  before the backend using the new rule is activated. The same run recomputes bar_menu_items.name_key for
+  current-board unlinked items from their board display_name and reports any same-bar collisions, which an
+  operator resolves with a manual edit before applying; off-board unlinked rows are never reused and are left as is.
   '''
 }
 
@@ -711,7 +713,7 @@ Table bar_menu_items {
   bar_id uuid [not null, ref: > bars.id]
   product_id uuid [ref: > products.id, note: 'Null for a whisky waiting for an operator to link it, and always null for kind = other']
   kind menu_item_kind [not null, default: 'whisky']
-  name_key text [note: 'Normalized menu name; set exactly when product_id is null. Identifies an unlinked item within the bar. Unbounded because NFKC normalization can lengthen a 200-character name']
+  name_key text [note: 'Normalized menu name; set exactly when product_id is null. Identifies an unlinked item within the bar. Unbounded because NFKC normalization can lengthen a 200-character name. Recomputed with the aliases when the normalization rule changes']
   sold_out_at timestamptz [note: 'Set while the item is sold out; null when on sale. Cleared when the item leaves the current board']
   created_at timestamptz [not null]
 
@@ -861,7 +863,8 @@ Table menu_item_check_reasons {
   One reason of a menu item check, with its own evidence. A check has at least one reason, also after it is closed.
   Adding a reason never changes the source of an earlier one, so an attribute_conflict keeps the line whose age and
   edition the operator must compare. The same reason from another line is a new row; a row with the same reason and
-  source is not added twice. Merging checks moves these rows to the remaining check.
+  source is not added twice. Merging checks copies the closing check's rows to the remaining check, so the dismissed
+  check keeps its own reasons.
   '''
 }
 
