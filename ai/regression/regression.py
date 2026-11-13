@@ -280,6 +280,11 @@ def compare_matching(baseline: dict, current: dict) -> tuple[list[str], list[str
                                  f"{c['kind']} now: the catalog changed (run --update if that is intended)")
                     continue
                 if severity(c) == severity(b):
+                    # same outcome, other review state (P24): who confirms what changed, e.g. a
+                    # recommended line became a choice or the other way round
+                    if b.get("state") != c.get("state"):
+                        worse.append(f"{condition} {pid}: {c['name']!r} (gold {c['gold']}) review state "
+                                     f"{b.get('state')} -> {c.get('state')} (run --update if that is intended)")
                     continue
                 text = (f"{condition} {pid}: {c['name']!r} (gold {c['gold']}) "
                         f"{b['outcome']} -> {c['outcome']} (now {c['rank1']})")

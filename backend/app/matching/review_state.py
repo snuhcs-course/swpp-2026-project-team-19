@@ -9,14 +9,16 @@ Only `confirmed` may be accepted without a person. The other three are the revie
 states: an uncertain match, several candidates, and no catalog candidate.
 
 A result counts as confirmed only when it is consistent with that (`can_auto_confirm`): status
-exact_match, a proposed product that is also the first candidate, found by a rule and not by the
-LLM layer or the embedding step, and not marked confirmRecommended. Any other exact_match is
+exact_match, exactly one candidate, which is the proposed product, found by a rule and not by the
+LLM layer or the embedding step, not marked confirmRecommended, and without evidence that blocks
+an exact match (ageConflict, editionConflict, editionOnlyInExtracted, editionUnmatched). Any other exact_match is
 treated as needing review, so a layer that returns a contradictory result cannot get a line
 published unseen. `stored_status` gives the status menu import stores for a result.
 """
 
 from enum import StrEnum
 
+from app.matching.staged import _BLOCKING_EVIDENCE
 from app.matching.types import ResolutionResult
 
 
@@ -31,11 +33,12 @@ REVIEW_REQUIRED = frozenset({ReviewState.CONFIRM_RECOMMENDED, ReviewState.CHOOSE
 
 
 def can_auto_confirm(result: ResolutionResult) -> bool:
-    if result.status != "exact_match" or result.proposed_product_id is None or not result.candidates:
+    if result.status != "exact_match" or result.proposed_product_id is None or len(result.candidates) != 1:
         return False
-    first = result.candidates[0]
-    return (first.product_id == result.proposed_product_id and first.method == "alias"
-            and not first.evidence.get("confirmRecommended"))
+    [only] = result.candidates
+    return (only.product_id == result.proposed_product_id and only.method == "alias"
+            and not only.evidence.get("confirmRecommended")
+            and not any(only.evidence.get(key) for key in _BLOCKING_EVIDENCE))
 
 
 def review_state(result: ResolutionResult) -> ReviewState:
