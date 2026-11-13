@@ -771,8 +771,10 @@ internal fun OwnerManualMenuScreen(
                         if (editId == null) rejectedId = null
                     }, placeholder = "예: 라가불린 10년", testTag = "manual-menu-name")
                     if (editId == null) {
+                        val matchedBrandId = confirmedBrandId
+                            ?: manualBrandProposal(brands,itemName,"",null)?.brandId
                         val suggested=manualProductProposal(
-                            candidates,itemName,category,confirmedBrandId,rejectedId)
+                            candidates,itemName,category,matchedBrandId,rejectedId)
                         val inactiveMatch = inactiveOwnerCatalogMatch(candidates, itemName)
                         if(inactiveMatch != null) {
                             Text("“" + inactiveMatch.displayName +
