@@ -37,6 +37,8 @@ sealed interface PhotoReviewEvent {
 class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : ViewModel() {
     private val _load = MutableStateFlow<PhotoReviewLoad>(PhotoReviewLoad.Loading)
     val load: StateFlow<PhotoReviewLoad> = _load.asStateFlow()
+    private val _publishing = MutableStateFlow(false)
+    val publishing: StateFlow<Boolean> = _publishing.asStateFlow()
 
     private val _events = Channel<PhotoReviewEvent>(Channel.BUFFERED)
     val events = _events.receiveAsFlow()
@@ -46,6 +48,7 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
     }
 
     fun reload() {
+        if (_publishing.value) return
         _load.value = PhotoReviewLoad.Loading
         viewModelScope.launch {
             _load.value = try {
@@ -114,6 +117,7 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
     // ---- Screen-level actions ----
 
     fun leave() {
+        if (_publishing.value) return
         review?.let { set(it.copy(modal = null)) }
         _events.trySend(PhotoReviewEvent.Leave)
     }
@@ -159,26 +163,37 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
     }
 
     fun requestPublish() {
+        if (_publishing.value) return
         val s = review ?: return
         if (PhotoReviewRules.stats(s).canPublish) set(s.copy(modal = ReviewModal(ReviewModalType.PUBLISH)))
     }
 
     fun confirmPublish() {
+        if (_publishing.value) return
         val s = review ?: return
+        if (s.modal?.type != ReviewModalType.PUBLISH) return
+        if (!PhotoReviewRules.stats(s).canPublish) return
+        // Guard before launching: rapid taps must never submit two atomic
+        // review-and-apply calls for the same server reviewVersion.
+        _publishing.value = true
         viewModelScope.launch {
             try {
                 repository.publish(s)
+                _publishing.value = false
                 leave()
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (error: Exception) {
                 set(s.copy(modal = null))
                 toast(menuWriteErrorText(error))
+            } finally {
+                _publishing.value = false
             }
         }
     }
 
     fun dismissModal() {
+        if (_publishing.value) return
         val s = review ?: return
         set(s.copy(modal = null))
     }
