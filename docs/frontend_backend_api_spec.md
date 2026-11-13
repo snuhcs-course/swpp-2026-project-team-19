@@ -4840,7 +4840,7 @@ OCR 잡음, 중복 인식 또는 사용할 수 없는 항목에 사용한다.
 - `itemDecisions`는 검수 대상 항목을 빠짐없이 한 번씩 포함해야 한다.
 - `changeDecisions`는 현재 `pending` 변경을 빠짐없이 한 번씩 포함해야 한다.
 - 변경의 `extractedItemIds`에 담긴 줄을 모두 `confirm_non_product`나 `reject`로 결정했으면 그 변경은 `ignore`여야 한다. `apply`이면 `fieldErrors[].path = changeDecisions[i].decision`, `code = CHANGE_WITHOUT_PRODUCT`다. 담긴 줄 중 하나라도 메뉴 항목으로 게시하면 `apply`할 수 있다. 예: 잔 줄과 병 줄이 합쳐진 변경에서 잔 줄만 제외하고 병 줄을 게시하려면 `apply`로 보낸다. 추출 항목이 없는 변경(`remove`)에는 이 규칙이 없다.
-- 변경을 `ignore`하면 그 변경에 담긴 줄 중 최종 결정이 여전히 그 변경의 대상(같은 상품, 상품이 없으면 같은 이름 키)인 줄은 메뉴판을 바꾸지 않는다. 대상이 달라진 줄은 그 결정대로 반영한다.
+- 변경을 `ignore`하면 그 변경에 담긴 줄 중 최종 결정이 여전히 그 변경의 대상(같은 상품, 상품이 없으면 같은 이름 키)인 줄은 메뉴판을 바꾸지 않는다. 대상은 그 줄이 제안받은 것(1순위 상품)과, 변경이 비교한 현재 항목이다. 대상이 달라진 줄은 그 결정대로 반영한다. 예: 글렌피딕 12의 `update`를 무시하고 그 줄을 글렌피딕 15로 고르면 15로 반영된다. 단, 제안 상품이 없는 줄(5.4)의 `add`는 "검수자가 정하는 무엇으로든 그 줄을 추가하는" 변경이므로, 무시하면 어떤 결정이든 그 줄은 반영하지 않는다.
 - `finalLineType = product`이면 `select_existing_product`, `create_product`, `publish_without_product` 중 하나여야 한다. `create_product`와 빈 배열이 아닌 `aliasesToAdd`는 operator만 보낼 수 있다(`OPERATOR_ONLY`, 2.2, 8.1).
 - 메뉴 항목으로 게시하는 줄은 `options`가 1~10개이고 모든 옵션에 가격이 있어야 한다(8.1). 상품 없이 게시하는 줄도 같다. `extractedOptionId`는 그 줄의 추출 옵션이어야 하고 한 줄에서 겹치지 않아야 한다.
 - 같은 상품(상품 없는 줄은 같은 이름 키)으로 게시하는 줄이 여럿이면 옵션을 합쳐 한 항목으로 게시한다(8.12). 같은 `productId`로 제출한 줄끼리(다시 매칭으로 상품이 바뀐 줄 제외) 표기와 용량이 같은 옵션의 가격이 다르면 `fieldErrors[].code = OPTION_PRICE_CONFLICT`다. 다시 매칭 때문에 합쳐진 줄과, 이름 키로 합쳐진 상품 없는 위스키 줄의 충돌은 거부하지 않는다. 이름 키로 합쳐진 위스키가 아닌 메뉴(`kind = other`)의 충돌은 같은 코드로 거부한다(8.12).

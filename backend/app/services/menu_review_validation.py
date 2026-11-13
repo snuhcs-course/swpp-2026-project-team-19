@@ -10,7 +10,7 @@ State checks (status, reviewVersion, board changes) and duplicate checks for new
 entries happen in the apply step, inside its transaction.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from uuid import UUID
 
 from sqlalchemy import select
@@ -19,10 +19,13 @@ from sqlalchemy.orm import Session, selectinload
 from app.core.errors import validation_failed_fields
 from app.core.normalize import normalize
 from app.models import (
+    BarMenuItem,
     Brand,
     ExtractedItem,
     ExtractedOption,
     ExtractionRun,
+    MenuBoard,
+    MenuBoardEntry,
     MenuChangeDecision,
     MenuImage,
     MenuImport,
@@ -38,7 +41,7 @@ from app.schemas.menu_review import (
     ReviewAndApplyRequest,
     SelectExistingProduct,
 )
-from app.services.menu_items import name_key
+from app.services.menu_items import ItemKey, item_key, name_key
 
 PRODUCT_DECISIONS = (SelectExistingProduct, CreateProduct, PublishWithoutProduct)
 
@@ -87,6 +90,8 @@ class ValidatedReview:
     change_decisions: dict[UUID, MenuChangeDecision]
     # Existing products selected by select_existing_product decisions.
     products: dict[UUID, Product]
+    # Lines not published because the reviewer ignored their change (see ignored_lines).
+    ignored_lines: set[UUID] = field(default_factory=set)
 
 
 def load_items(session: Session, menu_import: MenuImport) -> list[ExtractedItem]:
@@ -152,6 +157,63 @@ def _final_options(
     return tuple(final)
 
 
+def proposal_key(item: ExtractedItem) -> ItemKey:
+    """What the draft proposed for the line: its rank-1 product, else its extracted name's key (spec 5.4)."""
+    if item.candidates:
+        return item_key(item.candidates[0].product_id, None)
+    return item_key(None, name_key(item.extracted_product_name or ""))
+
+
+def _final_key(item: ExtractedItem, decision: ItemDecision) -> ItemKey | None:
+    """What the reviewer decided the line is; None when it is no menu item or a product still to be created
+    (a new product is never what the draft proposed)."""
+    if isinstance(decision, SelectExistingProduct):
+        return item_key(decision.productId, None)
+    if isinstance(decision, PublishWithoutProduct):
+        return item_key(None, name_key(decision.correctedProductName or item.extracted_product_name or ""))
+    return None
+
+
+def _board_keys(session: Session, bar_id: UUID) -> dict[UUID, ItemKey]:
+    """The key of every item on the bar's current board."""
+    rows = session.execute(
+        select(BarMenuItem.id, BarMenuItem.product_id, BarMenuItem.name_key)
+        .join(MenuBoardEntry, MenuBoardEntry.bar_menu_item_id == BarMenuItem.id)
+        .join(MenuBoard, MenuBoard.id == MenuBoardEntry.menu_board_id)
+        .where(MenuBoard.bar_id == bar_id)
+    ).all()
+    return {item_id: item_key(product_id, key) for item_id, product_id, key in rows}
+
+
+def ignored_lines(
+    changes: list[MenuImportChange],
+    change_decisions: dict[UUID, MenuChangeDecision],
+    final_keys: dict[UUID, ItemKey | None],
+    proposal_keys: dict[UUID, ItemKey],
+    board_keys: dict[UUID, ItemKey],
+) -> set[UUID]:
+    """Lines not published because their change was ignored (spec 8.7): only while the line's final
+    decision is still the change's target, which is what the line was proposed as, or the board item the
+    change was compared with. A line the reviewer decided to be something else follows that decision.
+    A line proposed without a product has no such target: its change adds the line as whatever it is
+    decided to be (spec 5.4), so ignoring it always skips the line."""
+    skipped = set()
+    for change in changes:
+        line = change.extracted_item_id
+        if line is None or change_decisions.get(change.id) != MenuChangeDecision.IGNORE:
+            continue
+        proposed = proposal_keys.get(line)
+        if proposed is None or proposed[0] == "name":
+            skipped.add(line)
+            continue
+        targets = {proposed}
+        if change.bar_menu_item_id in board_keys:
+            targets.add(board_keys[change.bar_menu_item_id])
+        if final_keys.get(line) in targets:
+            skipped.add(line)
+    return skipped
+
+
 def validate_review(
     session: Session, menu_import: MenuImport, request: ReviewAndApplyRequest, *, operator: bool
 ) -> ValidatedReview:
@@ -188,12 +250,15 @@ def validate_review(
     if missing := len(changes) - len(change_decisions):
         errors.add("changeDecisions", "MISSING_CHANGE", f"결정하지 않은 변경 제안이 {missing}개 있습니다.")
 
-    # An item whose proposed add/update is ignored is not published, so its options are not compared.
-    ignored_items = {
-        change.extracted_item_id
-        for change in changes
-        if change.extracted_item_id and change_decisions.get(change.id) == MenuChangeDecision.IGNORE
-    }
+    # A line whose ignored change still targets what it was decided to be is not published, so its options
+    # are not compared.
+    ignored_items = ignored_lines(
+        changes,
+        change_decisions,
+        {item_id: _final_key(items_by_id[item_id], decision) for item_id, (_, decision) in decided.items()},
+        {item.id: proposal_key(item) for item in items},
+        _board_keys(session, menu_import.bar_id),
+    )
 
     selected_ids = {d.productId for _, d in decided.values() if isinstance(d, SelectExistingProduct)}
     products = {p.id: p for p in session.scalars(select(Product).where(Product.id.in_(selected_ids)))}
@@ -262,4 +327,6 @@ def validate_review(
 
     if errors.items:
         raise validation_failed_fields(errors.items)
-    return ValidatedReview(items=reviewed, changes=changes, change_decisions=change_decisions, products=products)
+    return ValidatedReview(
+        items=reviewed, changes=changes, change_decisions=change_decisions, products=products, ignored_lines=ignored_items
+    )

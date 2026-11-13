@@ -332,3 +332,42 @@ def test_extracted_product_lines_are_stored_as_whisky(db_session, sample):
         ("product", MenuItemKind.WHISKY),
         ("description", None),
     }
+
+
+# ---- ignoring a change (spec 8.7) ----
+
+
+def ignore(body, change):
+    for decision in body["changeDecisions"]:
+        if decision["changeId"] == str(change.id):
+            decision["decision"] = "ignore"
+    return body
+
+
+def test_an_ignored_change_skips_the_line_only_while_it_is_still_the_target(
+    client, db_session, sample, operator, glenfiddich
+):
+    """The 12 line's proposed update is ignored, but the reviewer decided the line is the 15: it is
+    published as the 15. The 12 stays as it was."""
+    body = ignore(valid_body(sample, glenfiddich), sample.changes[MenuChangeType.UPDATE])
+    body["itemDecisions"][1]["productId"] = str(glenfiddich[15].id)
+    body = without_product(body, 3)
+
+    apply(client, sample.menu_import.id, body, operator)
+
+    assert [(name, product, prices) for name, product, _, prices in menu_items(client, sample.bar)] == [
+        ("글렌피딕 12년", str(glenfiddich[15].id), [9000, 17000]),
+        ("Unknown Distillery 25", None, [45000]),
+        ("글렌피딕 12년", str(glenfiddich[12].id), [8000, 17000]),
+    ]
+
+
+def test_an_ignored_change_still_skips_a_line_kept_as_proposed(client, db_session, sample, operator, glenfiddich):
+    body = ignore(valid_body(sample, glenfiddich), sample.changes[MenuChangeType.UPDATE])
+    body = ignore(without_product(body, 3), sample.changes[MenuChangeType.ADD])
+
+    result = apply(client, sample.menu_import.id, body, operator)
+
+    # The 12 keeps its old prices, and the unknown line, published without a product as proposed, is skipped.
+    assert (result["result"]["added"], result["result"]["updated"], result["result"]["unlinkedWhisky"]) == (0, 0, 0)
+    assert [(name, prices) for name, _, _, prices in menu_items(client, sample.bar)] == [("글렌피딕 12년", [8000, 17000])]

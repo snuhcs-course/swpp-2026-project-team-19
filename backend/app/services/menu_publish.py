@@ -46,17 +46,9 @@ from app.models import (
     MenuItemKind,
     Product,
 )
-from app.services.menu_items import name_key
+from app.services.menu_items import ItemKey, item_key, name_key
 from app.services.menu_review_catalog import CatalogResult
 from app.services.menu_review_validation import ValidatedReview
-
-# ("product", product id) for an item linked to a product, ("name", name key) for one without.
-ItemKey = tuple[str, object]
-
-
-def item_key(product_id: UUID | None, key: str | None) -> ItemKey:
-    return ("product", product_id) if product_id is not None else ("name", key)
-
 
 @dataclass(frozen=True)
 class PublishedOption:
@@ -276,11 +268,6 @@ def review_plan(
     """(board or None, plan) for a validated review whose catalog entries exist."""
     board, current = load_board(session, bar_id)
     decisions = review.change_decisions
-    ignored = {
-        c.extracted_item_id
-        for c in review.changes
-        if c.extracted_item_id and decisions[c.id] == MenuChangeDecision.IGNORE
-    }
     approved = {
         c.bar_menu_item_id
         for c in review.changes
@@ -295,7 +282,7 @@ def review_plan(
         proposals_from_review(session, review, catalog),
         current,
         mode=mode,
-        ignored_items=ignored,
+        ignored_items=review.ignored_lines,
         approved_removals=approved,
         takeovers=takeovers,
     )

@@ -13,6 +13,14 @@ from app.core.normalize import normalize
 from app.models import MenuBoardEntry
 
 
+# ("product", product id) for an item linked to a product, ("name", name key) for one without.
+ItemKey = tuple[str, object]
+
+
+def item_key(product_id: UUID | None, key: str | None) -> ItemKey:
+    return ("product", product_id) if product_id is not None else ("name", key)
+
+
 def name_key(display_name: str) -> str:
     """The name key of a menu name; empty when nothing in it normalizes (the caller answers NOT_NORMALIZABLE)."""
     return normalize(display_name)
