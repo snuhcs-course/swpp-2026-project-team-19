@@ -236,6 +236,7 @@ class LivePhotoReviewMappingTest {
         val dto=item(options=listOf(ReviewOptionDto("ocr-bottle",1,"병",null,88000)),
             status="unmatched",proposedId=null)
         val card=mapServerPhotoReview(response(dto),fixture()).items.single()
+            .copy(newConfirmed=true,nameSaved=true)
         val mapped=mapConfirmedReviewDecision(card,dto,30.0,emptyMap())
         val option=requireNotNull(mapped.correctedOptions).single()
         assertEquals("병",option.label)
