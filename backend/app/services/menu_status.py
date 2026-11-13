@@ -17,7 +17,7 @@ from sqlalchemy.orm import Session
 
 from app.core.errors import ApiError
 from app.core.security import Principal
-from app.models import Bar, MenuBoard
+from app.models import Bar, BarLocalMenuItem, MenuBoard
 from app.schemas.bar import BarDetail
 from app.schemas.menu import BarMenuResponse
 from app.services.bar_detail import get_bar_detail
@@ -37,6 +37,19 @@ def set_sold_out(
     """Mark an item on the board sold out or back on sale; the menu as its managers see it (spec 3.9).
     Setting the value it already has changes nothing, and an item stays sold out from the first mark."""
     lock_managed_bar(session, principal, bar_id)
+    # Local menu items have their own stock state; they are not catalog products.
+    try:
+        parsed_id = UUID(bar_menu_item_id)
+    except ValueError:
+        parsed_id = None
+    local = session.get(BarLocalMenuItem, parsed_id) if parsed_id is not None else None
+    if local is not None and local.bar_id == bar_id:
+        if not sold_out:
+            local.sold_out_at = None
+        elif local.sold_out_at is None:
+            local.sold_out_at = _locked_now(session)
+        session.commit()
+        return get_bar_menu(session, str(bar_id), can_manage=lambda bar: True, base_url=base_url)
     # Checked under the lock, so an item a review or a delete has just taken off the board is not found.
     item = board_entry(current_board(session, bar_id), bar_menu_item_id).bar_menu_item
     if not sold_out:
@@ -59,7 +72,10 @@ def confirm_menu(
     board = session.scalar(select(MenuBoard).where(MenuBoard.bar_id == bar_id))
     # Before the version, so a bar without a menu that sends null is told there is nothing to confirm.
     # Sold-out items count: they are still on the menu.
-    if board is None or not board.entries:
+    local_exists = session.scalar(
+        select(BarLocalMenuItem.id).where(BarLocalMenuItem.bar_id == bar_id).limit(1)
+    ) is not None
+    if board is None or (not board.entries and not local_exists):
         raise _no_published_menu()
     check_menu_version(board, menu_version)
     board.confirmed_at = _locked_now(session)
