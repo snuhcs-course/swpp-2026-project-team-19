@@ -321,10 +321,16 @@ private fun NavGraphBuilder.accountGraph(
                     vm = vm,
                     initialFocusItemId = scenario.focusItemId,
                     onLeave = {
-                        // "나중에 하기" returns to the existing menu-management screen.
-                        navController.navigate(OwnerPage.MGR_MENU.route) {
-                            popUpTo(TabRoutes.DEV_PHOTO_REVIEW) { inclusive = true }
-                            launchSingleTop = true
+                        // In-app preview returns to the *same* menu-management entry.
+                        // An adb-launched mock route has no menu parent, so route there.
+                        if (navController.previousBackStackEntry?.destination?.route ==
+                            OwnerPage.MGR_MENU.route) {
+                            navController.popBackStack()
+                        } else {
+                            navController.navigate(OwnerPage.MGR_MENU.route) {
+                                popUpTo(TabRoutes.DEV_PHOTO_REVIEW) { inclusive = true }
+                                launchSingleTop = true
+                            }
                         }
                     },
                 )
