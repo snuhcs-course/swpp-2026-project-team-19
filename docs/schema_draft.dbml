@@ -25,7 +25,8 @@ Project BottleMap {
   PostgreSQL is the selected database engine. Supabase Auth with the Google provider is the selected
   authentication provider. ID strategy is not final.
   Accessory features such as reviews, recommendations, feeds, alerts, stale-menu reports,
-  natural-language search, and non-whisky categories are outside the current MVP schema.
+  natural-language search, and a non-whisky catalog are outside the current MVP schema.
+  Non-whisky menu lines are stored only as bar menu items without a product (bar_menu_items.kind = other).
   '''
 }
 
@@ -90,6 +91,32 @@ Enum match_method {
   embedding
   llm
   manual
+}
+
+Enum menu_item_kind {
+  whisky
+  other
+}
+
+Enum menu_item_check_reason {
+  unlinked
+  relinked_by_name
+  unlinked_by_name
+  attribute_conflict
+  price_conflict
+}
+
+Enum menu_item_check_status {
+  open
+  resolved
+  dismissed
+}
+
+Enum menu_item_check_resolution {
+  link_existing
+  create_and_link
+  keep
+  mark_as_other
 }
 
 Enum menu_change_type {
@@ -383,7 +410,9 @@ Table brand_aliases {
   No normalization-version column is stored. When the deterministic backend normalization rule changes,
   every brand_aliases and product_aliases normalized_alias value is regenerated with
   backend/scripts/renormalize_aliases.py (dry run first, then --apply, then seed_catalog.py again)
-  before the backend using the new rule is activated.
+  before the backend using the new rule is activated. The same run recomputes bar_menu_items.name_key for
+  current-board unlinked items from their board display_name and reports any same-bar collisions, which an
+  operator resolves with a manual edit before applying; off-board unlinked rows are never reused and are left as is.
   '''
 }
 
@@ -453,6 +482,10 @@ Table menu_imports {
   review_version integer [not null, default: 0, note: 'Incremented whenever the consolidated review payload is regenerated']
   owner_note text
   review_confirmed_at timestamptz
+  review_draft jsonb [note: 'Review input saved before submission (API spec 5.9); not interpreted by the server. Cleared on apply or cancel']
+  review_draft_version integer [not null, default: 0, note: 'Raised on every draft save; a save must send the version it read']
+  review_draft_saved_at timestamptz
+  review_draft_saved_by_user_id uuid [ref: > users.id, note: 'Null for a temporary-login operator without a users row']
   recovery_count smallint [not null, default: 0, note: 'Times processing was resumed after a server restart; past 3 the import fails instead (CHECK >= 0)']
   created_at timestamptz [not null]
   completed_at timestamptz
@@ -483,6 +516,11 @@ Table menu_imports {
   without changing the menu board or the catalog, its images and AI records are kept, and the bar can
   take a new upload. completed_at records when an import became applied, failed or canceled.
   Owner submissions use the same structure and rules as operator submissions.
+  While ready_for_review, the reviewer's unfinished input can be saved as review_draft so the review can
+  continue on another device or in the operator web. Saving locks only the import row and compares
+  review_draft_version so two editors do not overwrite each other. The draft never changes the menu board
+  or the catalog, survives review regeneration (REVIEW_OUTDATED), and is cleared when the import is applied
+  or canceled.
   Import records and their related images and AI results are retained through the project period,
   even after a newer menu replaces the current published menu.
   '''
@@ -538,6 +576,8 @@ Table extracted_items {
   item_order smallint [not null]
   raw_text text [not null]
   extracted_line_type extracted_line_type [not null, default: 'unknown']
+  extracted_kind menu_item_kind [note: 'AI menu kind for product lines (whisky or other); null for non-product lines. Only whisky lines are matched']
+  corrected_kind menu_item_kind [note: 'Kind the reviewer published when it differs from extracted_kind; null when unchanged, like corrected_line_type. A line published with a product counts as whisky']
   corrected_line_type extracted_line_type
   extracted_product_name varchar(200)
   extracted_brand_name varchar(120)
@@ -672,18 +712,28 @@ Table menu_import_changes {
 Table bar_menu_items {
   id uuid [pk]
   bar_id uuid [not null, ref: > bars.id]
-  product_id uuid [not null, ref: > products.id]
+  product_id uuid [ref: > products.id, note: 'Null for a whisky waiting for an operator to link it, and always null for kind = other']
+  kind menu_item_kind [not null, default: 'whisky']
+  name_key text [note: 'Normalized menu name; set exactly when product_id is null. Identifies an unlinked item within the bar. Unbounded because NFKC normalization can lengthen a 200-character name. Recomputed with the aliases when the normalization rule changes']
   sold_out_at timestamptz [note: 'Set while the item is sold out; null when on sale. Cleared when the item leaves the current board']
   created_at timestamptz [not null]
 
   indexes {
     (bar_id, product_id) [unique]
+    (bar_id, name_key)
     product_id
   }
 
   Note: '''
-  A row is one bar-specific menu item backed by a shared canonical product. It is not deleted merely
+  A row is one bar-specific menu item. Usually it is backed by a shared canonical product; it is not deleted merely
   because a later menu board omits it, and it can be reused if the product returns later.
+  An item without a product (product_id null) is either a whisky the catalog does not match yet, published as is
+  and waiting for an operator to link it (kind = whisky), or a non-whisky menu that is never linked (kind = other).
+  Such an item is shown on the bar's menu but not in product search. It is identified within the bar by name_key;
+  the backend keeps name_key unique among the current board's unlinked items while holding the bar row lock,
+  so the index on (bar_id, name_key) is not unique. An unlinked item that leaves the board is not reused.
+  Checks: (product_id IS NULL) = (name_key IS NOT NULL); kind = 'other' implies product_id IS NULL.
+  PostgreSQL treats null product_id values as distinct, so the (bar_id, product_id) unique index still holds.
   Membership in the bar's current menu board decides whether the item is on the menu: linked means on the board;
   unlinked means retained but not on the board. Customers see a linked item only while it is not sold out.
   No separate visibility status is stored.
@@ -758,6 +808,64 @@ Table menu_entry_options {
   copies a discount to the new option with the same label, pour size and list price, and drops it otherwise.
   A manual add, edit or delete changes only the requested item; other items keep their options and discounts.
   An ended discount is not deleted by a job; the API omits it from responses.
+  '''
+}
+
+Table menu_item_checks {
+  id uuid [pk]
+  bar_id uuid [not null, ref: > bars.id]
+  bar_menu_item_id uuid [not null, ref: > bar_menu_items.id]
+  display_name varchar(200) [not null, note: 'Name shown on the menu board, saved when the check is created and whenever the line is renamed or moved, so closed checks keep it']
+  discarded_options jsonb [not null, default: '[]', note: 'Options the server dropped when merging lines with conflicting prices (price_conflict); the only place the dropped prices are kept']
+  status menu_item_check_status [not null, default: 'open']
+  created_at timestamptz [not null]
+  resolution menu_item_check_resolution [note: 'Set when status = resolved']
+  resolved_product_id uuid [ref: > products.id, note: 'Product the item ended up linked to; null for mark_as_other']
+  resolved_by_user_id uuid [ref: > users.id, note: 'Null for a temporary-login operator without a users row, and for dismissed checks']
+  resolved_at timestamptz [note: 'Set when status leaves open']
+
+  indexes {
+    bar_menu_item_id [note: 'Not unique across all rows. The migration adds a partial unique index on bar_menu_item_id WHERE status = open (DBML cannot express it): at most one open check per item, any number of closed ones']
+    (status, created_at)
+    (bar_id, status)
+  }
+
+  Note: '''
+  A menu item an operator should look at: a whisky published without a product, or a link the owner's review
+  changed in a way a person should confirm (API spec 3.18). An operator resolves it by linking a product,
+  creating one and linking it, keeping the current link, or marking the item as non-whisky.
+  A current-board whisky item without a product always has one open check (reason unlinked or unlinked_by_name).
+  An item that becomes kind = other gets its open check dismissed. When an unlinked whisky is linked without an
+  operator, the unlinked reasons are dropped if other reasons remain; otherwise the check is dismissed with its
+  reasons kept. When a board line moves to an item that already has an open check, the moving check's reasons and
+  discarded options are added to that check and the moving check is dismissed.
+  Removing the item from the board dismisses its open check in the same transaction; when a rename moves the
+  board line to another item (API spec 3.14.1), the open check moves with it. kind = other items never get a check.
+  While a check is open, bar_menu_item_id follows its board line: when a rename or rematch moves the line to
+  another item (API spec 3.14.1), the open check moves or merges with it. Once an operator resolves a check, it
+  keeps pointing at the item it was resolved on, even if the resolution moved the line to another item.
+  Reasons live in menu_item_check_reasons, each with the review line that caused it.
+  '''
+}
+
+Table menu_item_check_reasons {
+  id uuid [pk]
+  check_id uuid [not null, ref: > menu_item_checks.id]
+  reason menu_item_check_reason [not null]
+  source_menu_import_id uuid [ref: > menu_imports.id, note: 'Import of the review line that raised this reason; null for direct adds and edits']
+  source_extracted_item_id uuid [ref: > extracted_items.id, note: 'The review line itself; set exactly when source_menu_import_id is set']
+  added_at timestamptz [not null]
+
+  indexes {
+    (check_id, added_at)
+  }
+
+  Note: '''
+  One reason of a menu item check, with its own evidence. A check has at least one reason, also after it is closed.
+  Adding a reason never changes the source of an earlier one, so an attribute_conflict keeps the line whose age and
+  edition the operator must compare. The same reason from another line is a new row; a row with the same reason and
+  source is not added twice. Merging checks copies the closing check's rows to the remaining check, so the dismissed
+  check keeps its own reasons.
   '''
 }
 
@@ -884,6 +992,8 @@ TableGroup "Published Menus" {
   menu_boards
   menu_board_entries
   menu_entry_options
+  menu_item_checks
+  menu_item_check_reasons
 }
 
 TableGroup "AI Menu Import" {
