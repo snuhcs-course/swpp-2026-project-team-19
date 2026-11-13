@@ -93,15 +93,18 @@ private fun mapServerReviewItem(
             price = (option.extractedPriceKrw ?: 0).toDouble(),
             bottle = bottle,
             sourceOptionId = option.extractedOptionId,
+            label = option.extractedOptionLabel,
         )
     }
     val first = options.firstOrNull()
     val firstServerOption = recognized.firstOrNull()
     val oldPrice = linkedId?.let(existingPrices::get)
     val photoPrice = firstServerOption?.extractedPriceKrw?.toDouble()
+    // Raw OCR text is evidence, not a publishable menu name: it can contain
+    // price/volume tokens. A missing name must remain blank until Owner input.
     val displayName = dto.extractedProductName?.trim()?.ifBlank { null }
         ?: dto.newProductDraft?.displayName?.trim()?.ifBlank { null }
-        ?: dto.rawText.trim().take(200)
+        ?: ""
     return ReviewItem(
         id = dto.extractedItemId,
         name = displayName,
@@ -119,13 +122,14 @@ private fun mapServerReviewItem(
             VolumeSource.DEFAULT else VolumeSource.PHOTO,
         primaryHasOption = first != null,
         primarySourceOptionId = first?.sourceOptionId,
+        primaryOptionLabel = first?.label,
         existingPriceByProductId = existingPrices,
         options = options.drop(1),
         oldPrice = oldPrice,
         photoPrice = photoPrice,
         priceChoice = if (oldPrice != null && photoPrice != null &&
             oldPrice != photoPrice) PriceChoice.NONE else PriceChoice.PHOTO,
-        nameSaved = linkedId != null || other || nonProduct,
+        nameSaved = displayName.isNotBlank() && (linkedId != null || other || nonProduct),
         excluded = nonProduct,
         raw = dto.rawText,
         photoIndex = photoOrder,
