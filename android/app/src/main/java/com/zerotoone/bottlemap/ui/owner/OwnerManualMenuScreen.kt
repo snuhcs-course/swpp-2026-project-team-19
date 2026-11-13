@@ -457,6 +457,24 @@ internal fun OwnerManualMenuScreen(
                 saving = true
                 saveScope.launch {
                     try {
+                        if (old == null && linkedId == null && name.length >= 2) {
+                            // Await a fresh server lookup before creating any product.
+                            // A deleted menu is NOT a deleted catalog product: offer
+                            // the original product again with "맞아요 / 아니에요".
+                            val fresh = viewModel.searchCatalogLive(name)
+                            val exact = fresh.firstOrNull {
+                                it.isActive && it.productId != rejectedId &&
+                                    manualEditorCategory(it) == category &&
+                                    (normalizeOwnerCatalogName(it.displayName) ==
+                                        normalizeOwnerCatalogName(name) ||
+                                     normalizeOwnerCatalogName(it.matchedAlias.orEmpty()) ==
+                                        normalizeOwnerCatalogName(name))
+                            }
+                            if (exact != null) {
+                                error = "“${exact.displayName}”이 맞나요? 맞아요 또는 아니에요를 선택해 주세요."
+                                return@launch
+                            }
+                        }
                         viewModel.saveManualMenuItemLive(stagedItem, stagedProduct, brand)
                         screen = "list"; selectedId = null; editId = null; error = null
                     } catch(cancelled: CancellationException) {
@@ -770,7 +788,7 @@ internal fun OwnerManualMenuScreen(
                                     brandName = brands.firstOrNull {
                                         it.brandId == suggested.brandId }?.name.orEmpty()
                                     if (category == "기타 주류")
-                                        alcoholKind = suggested.otherAlcoholKind.orEmpty()
+                                        alcoholKind = manualEditorAlcoholKind(suggested)
                                 }, modifier = Modifier.weight(1f))
                                 ManualButton("아니에요", { rejectedId = suggested.productId },
                                     modifier = Modifier.weight(1f), secondary = true)
