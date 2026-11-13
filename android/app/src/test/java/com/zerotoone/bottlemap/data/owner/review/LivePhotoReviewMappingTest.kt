@@ -156,7 +156,7 @@ class LivePhotoReviewMappingTest {
             PhotoReviewRules.OptionField.VOLUME,0))
     }
 
-    @Test fun newProductRequiresBrandAndHonorsConfirmedProductFields() {
+    @Test fun newWhiskyIsPublishedUnlinkedEvenWhenBrandIsMissing() {
         val dto=item(status="unmatched",proposedId=null)
         val card=mapServerPhotoReview(response(dto),fixture()).items.single()
             .copy(newConfirmed=true,nameSaved=true,name="위스키 새 상품",
@@ -166,12 +166,64 @@ class LivePhotoReviewMappingTest {
         assertEquals(MockDecisionKind.CREATE_PRODUCT,decision.kind)
         assertEquals("brand-1",decision.newProduct?.brandId)
         assertEquals("위스키 새 상품",decision.newProduct?.name)
+        // The owner never creates a catalog brand or product; brand is optional.
         val missing=dto.copy(extractedBrandName=null,
             newProductDraft=dto.newProductDraft?.copy(brandText=null))
-        try {
-            mapConfirmedReviewDecision(card,missing,30.0,emptyMap())
-            fail("Must not invent a missing catalog brand")
-        } catch (_: IllegalArgumentException) { }
+        val unlinked=mapConfirmedReviewDecision(card,missing,30.0,emptyMap())
+        assertEquals("whisky",unlinked.newProduct?.category)
+        assertNull(unlinked.newProduct?.brandId)
+        assertNull(unlinked.newProduct?.brandName)
+    }
+
+    @Test fun nonWhiskyOcrMenuCanPublishWithoutCatalogConfirmationOrBrand() {
+        val dto=item(
+            options=listOf(ReviewOptionDto("beer-1",1,"잔",null,8000)),
+            status="unmatched",proposedId=null,
+        ).copy(extractedProductName="맥주 1",extractedBrandName=null,
+            extractedKind="other",candidates=emptyList(),newProductDraft=null)
+        val card=mapServerPhotoReview(response(dto),fixture()).items.single()
+        assertEquals(com.zerotoone.bottlemap.ui.owner.review.ReviewItemType.OTHER,card.type)
+        assertNull(card.linkedProductId)
+        assertFalse(card.excluded)
+        assertTrue(PhotoReviewRules.stats(
+            mapServerPhotoReview(response(dto),fixture())).canPublish)
+        val decision=mapConfirmedReviewDecision(card,dto,30.0,emptyMap())
+        assertEquals(MockDecisionKind.CREATE_PRODUCT,decision.kind)
+        assertEquals("other",decision.newProduct?.category)
+        assertEquals("맥주 1",decision.newProduct?.name)
+        assertEquals(1,decision.correctedOptions!!.size)
+        assertEquals("beer-1",decision.correctedOptions!!.single().optionId)
+        assertNull(decision.correctedOptions!!.single().pourMl)
+        assertEquals(8000,decision.correctedOptions!!.single().priceKrw)
+    }
+
+    @Test fun nonWhiskyOcrMultiplePricesArePreservedInsteadOfTruncated() {
+        val options=(1..4).map {
+            ReviewOptionDto("beer-$it",it,if(it==4) "병" else "잔 $it",
+                null,8000+it*1000)
+        }
+        val dto=item(options=options,status="unmatched",proposedId=null)
+            .copy(extractedKind="other",candidates=emptyList(),newProductDraft=null)
+        val card=mapServerPhotoReview(response(dto),fixture()).items.single()
+            .copy(price=15000.0)
+        val decision=mapConfirmedReviewDecision(card,dto,30.0,emptyMap())
+        val actual=requireNotNull(decision.correctedOptions)
+        assertEquals(4,actual.size)
+        assertEquals(options.map { it.extractedOptionId },actual.map { it.optionId })
+        assertEquals(15000,actual.first().priceKrw)
+        assertEquals(options.last().extractedPriceKrw,actual.last().priceKrw)
+        assertEquals(null,actual.last().pourMl)
+    }
+
+    @Test fun nonWhiskyKindNeverUsesStaleCatalogSuggestion() {
+        val dto=item().copy(extractedKind="other")
+        val card=mapServerPhotoReview(response(dto),fixture()).items.single()
+        assertEquals(com.zerotoone.bottlemap.ui.owner.review.ReviewItemType.OTHER,card.type)
+        assertNull(card.linkedProductId)
+        val decision=mapConfirmedReviewDecision(card,dto,30.0,emptyMap())
+        assertEquals(MockDecisionKind.CREATE_PRODUCT,decision.kind)
+        assertNull(decision.productId)
+        assertEquals("other",decision.newProduct?.category)
     }
 
     @Test fun ownerAddedOptionHasNoExtractedIdAndIsSentSeparately() {
