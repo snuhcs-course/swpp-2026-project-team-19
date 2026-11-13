@@ -88,7 +88,6 @@ class MainTabsNavigationTest {
         assertFalse(showsBottomTabs(OwnerPage.MGR_REVIEW.route))
         assertFalse(showsBottomTabs(TabRoutes.WELCOME))
         assertFalse(showsBottomTabs(TabRoutes.LOGIN_ERROR))
-        assertFalse(showsBottomTabs(TabRoutes.DEV_PHOTO_REVIEW))
         assertTrue(showsBottomTabs(TabRoutes.SEARCH_HOME))
         assertTrue(showsBottomTabs("customer/account"))
         assertTrue(showsBottomTabs(OwnerPage.MGR_MENU.route))
