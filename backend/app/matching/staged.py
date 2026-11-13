@@ -362,10 +362,12 @@ def _short_token_fits(token: str, product: ProductInfo) -> bool:
 
 # Line words that say what every whisky has, not which edition it is. Left out only when they
 # fit none of the products (`_narrow_brand`): "Elements of Islay 버번" keeps its 버번.
+# 위스키/whisky/whiskey are not here: they are _NEUTRAL_TOKENS, dropped before any edition token is
+# made, and do not stop a confirmation ("Glenfiddich 12 Whisky" is exact, as in I3).
 _GENERIC_TOKENS = frozenset(normalize(word) for word in (
     "the", "and", "of", "더", "앤", "오브",
-    "whisky", "whiskey", "scotch", "single", "malt", "bourbon", "distillery",
-    "위스키", "스카치", "싱글", "몰트", "싱글몰트", "버번", "버본", "디스틸러리",
+    "scotch", "single", "malt", "bourbon", "distillery",
+    "스카치", "싱글", "몰트", "싱글몰트", "버번", "버본", "디스틸러리",
     "cask", "oak", "wood", "finish", "matured", "캐스크", "케스크", "오크", "우드", "피니시", "피니쉬",
 ))
 
