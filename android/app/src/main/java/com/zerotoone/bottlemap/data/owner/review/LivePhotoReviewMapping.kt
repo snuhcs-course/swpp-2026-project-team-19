@@ -1,5 +1,8 @@
 package com.zerotoone.bottlemap.data.owner.review
 
+import com.zerotoone.bottlemap.data.owner.isBottleServingLabel
+import com.zerotoone.bottlemap.data.owner.canonicalServingLabel
+
 import com.zerotoone.bottlemap.data.owner.MockBar
 import com.zerotoone.bottlemap.data.owner.MockMenuOption
 import com.zerotoone.bottlemap.data.owner.MockNewProductDraft
@@ -47,8 +50,7 @@ internal fun mapServerPhotoReview(
     return PhotoReviewState(items = lines, defaultPour = defaultPour.toDouble())
 }
 
-private fun isBottle(label: String?): Boolean =
-    label?.trim()?.lowercase() in setOf("bottle", "병")
+private fun isBottle(label: String?): Boolean = isBottleServingLabel(label)
 
 /** A missing OCR pour only inherits the bar default for an explicit glass. */
 private fun isGlass(label: String?): Boolean {
@@ -93,10 +95,9 @@ private fun mapServerReviewItem(
                 // existing "잔 30ml" is not the photographed "샷 30ml".
                 when {
                     firstScanned == null -> false
-                    // "Bottle" and "병" are distinct optionLabel values in
-                    // merged Backend #164; never reuse one label's old price
-                    // as the price of the other.
-                    isBottle(saved.label) && isBottle(ocrLabel) -> savedLabel == ocrLabel
+                    // "Bottle" and "병" are equivalent bottle servings in
+                    // BottleMap Android. Original OCR IDs remain unchanged.
+                    isBottle(saved.label) && isBottle(ocrLabel) -> true
                     isBottle(saved.label) || isBottle(ocrLabel) -> false
                     ocrLabel != null && savedLabel != ocrLabel -> false
                     else -> saved.pourMl != null &&
@@ -216,16 +217,15 @@ internal fun mapConfirmedReviewDecision(
     val mapped = choices.mapIndexed { index, chosen ->
         // An owner-added option must never borrow a different OCR option ID.
         val source = chosen.sourceOptionId?.let(byId::get)
-        // Preserve original Korean OCR labels (including "병"). A reviewer
-        // switching an OCR glass to bottle explicitly changes it to "Bottle";
-        // switching an OCR bottle back to glass clears its bottle-only label.
+        // Display and publish all bottle variants as "Bottle", retaining the
+        // original extractedOptionId for traceability and server validation.
         val originalLabel = source?.extractedOptionLabel
         val bottle = chosen.bottle ||
             (card.type == ReviewItemType.OTHER && isBottle(originalLabel))
         val label = when {
-            bottle -> originalLabel?.takeIf(::isBottle) ?: "Bottle"
+            bottle -> "Bottle"
             isBottle(originalLabel) -> null
-            else -> chosen.label ?: originalLabel
+            else -> canonicalServingLabel(chosen.label ?: originalLabel)
         }
         MockMenuOption(
             optionId = source?.extractedOptionId ?: "manual-${card.id}-$index",
