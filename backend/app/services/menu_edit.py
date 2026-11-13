@@ -23,7 +23,7 @@ from sqlalchemy.orm import Session, selectinload
 from app.core.errors import ApiError, validation_failed_fields
 from app.core.normalize import normalize
 from app.core.security import Principal
-from app.models import Bar, BarMenuItem, BarStatus, Brand, MenuBoard, MenuBoardEntry, MenuEntryOption, Product
+from app.models import Bar, BarMenuItem, BarLocalMenuItem, BarStatus, Brand, MenuBoard, MenuBoardEntry, MenuEntryOption, Product
 from app.schemas.menu import BarMenuResponse
 from app.schemas.menu_edit import MenuItemAddRequest, MenuItemUpdateRequest, MenuOptionInput, MenuResetRequest
 from app.services.bar_access import can_manage_bar, forbidden, is_operator
@@ -75,8 +75,14 @@ def check_request(body: MenuItemAddRequest | MenuItemUpdateRequest, now: datetim
     """The rules a request breaks on its own, all reported together as one 422. `now` is the request time."""
     errors = _Errors()
     if isinstance(body, MenuItemAddRequest):
-        if (body.productId is None) == (body.newProduct is None):
-            errors.add("productId", "EXACTLY_ONE_REQUIRED", "productId와 newProduct 중 하나만 보내야 합니다.")
+        if sum(value is not None for value in (body.productId, body.newProduct, body.localItem)) != 1:
+            errors.add("productId", "EXACTLY_ONE_REQUIRED",
+                "productId, newProduct, localItem 중 하나만 보내야 합니다.")
+        if body.localItem is not None:
+            if body.displayName is None:
+                errors.add("displayName", "MISSING", "매장 전용 메뉴 이름이 필요합니다.")
+            else:
+                _check_normalizable(errors, "displayName", body.displayName)
         new = body.newProduct
         if new is not None:
             if new.brand.type == "new":
@@ -174,6 +180,26 @@ def _options(options: list[MenuOptionInput]) -> list[MenuEntryOption]:
     ]
 
 
+def _local_options(options: list[MenuOptionInput]) -> list[dict]:
+    return [
+        {
+            **option.model_dump(mode="json"),
+            "menuEntryOptionId": str(__import__("uuid").uuid4()),
+            "sortOrder": index,
+        }
+        for index, option in enumerate(options, start=1)
+    ]
+
+
+def _local_for(session: Session, bar_id: UUID, raw_id: str) -> BarLocalMenuItem | None:
+    try:
+        item_id = UUID(raw_id)
+    except ValueError:
+        return None
+    item = session.get(BarLocalMenuItem, item_id)
+    return item if item is not None and item.bar_id == bar_id else None
+
+
 def _publish(session: Session, board: MenuBoard, base_url: str, *, created: bool = False) -> BarMenuResponse:
     """Raise the version (a board created by this edit starts at 1), stamp the time, and answer the
     whole menu (spec 3.9) as it now is."""
@@ -223,6 +249,18 @@ def _add_once(
     session: Session, principal: Principal, bar_id: UUID, body: MenuItemAddRequest, base_url: str
 ) -> BarMenuResponse:
     board = _open_board(session, principal, bar_id, body.menuVersion)
+    if body.localItem is not None:
+        created = board is None
+        if created:
+            board = MenuBoard(bar_id=bar_id, published_at=func.now(), version=1)
+            session.add(board)
+        session.add(BarLocalMenuItem(
+            bar_id=bar_id,
+            display_name=body.displayName,
+            category=body.localItem.category,
+            options=_local_options(body.options),
+        ))
+        return _publish(session, board, base_url, created=created)
     product = _product_for(session, body, principal)
     entries = board.entries if board is not None else []
     on_board = next((e for e in entries if e.bar_menu_item.product_id == product.id), None)
@@ -265,7 +303,23 @@ def _update_once(
     base_url: str,
 ) -> BarMenuResponse:
     board = _open_board(session, principal, bar_id, body.menuVersion)
+    local = _local_for(session, bar_id, bar_menu_item_id)
+    if local is not None:
+        local.display_name = body.displayName
+        if body.category is not None:
+            local.category = body.category
+        local.options = _local_options(body.options)
+        return _publish(session, board, base_url)
     entry = board_entry(board, bar_menu_item_id)
+    if body.category is not None and body.category != entry.bar_menu_item.product.category:
+        # Detach only this bar's listing. The shared catalog row and other bars stay untouched.
+        session.add(BarLocalMenuItem(
+            bar_id=bar_id, display_name=body.displayName, category=body.category,
+            options=_local_options(body.options), sold_out_at=entry.bar_menu_item.sold_out_at,
+        ))
+        board.entries.remove(entry)
+        clear_sold_out(session, {entry.bar_menu_item_id})
+        return _publish(session, board, base_url)
     entry.display_name = body.displayName
     # Delete the old options before inserting the new ones, which reuse their sort orders.
     entry.options.clear()
@@ -278,6 +332,10 @@ def _delete_once(
     session: Session, principal: Principal, bar_id: UUID, bar_menu_item_id: str, menu_version: int, base_url: str
 ) -> BarMenuResponse:
     board = _open_board(session, principal, bar_id, menu_version)
+    local = _local_for(session, bar_id, bar_menu_item_id)
+    if local is not None:
+        session.delete(local)
+        return _publish(session, board, base_url)
     # The entry and its options go; the bar menu item stays for a later add of the same product, back
     # on sale. The other entries keep their sort orders, so the order may have a gap.
     entry = board_entry(board, bar_menu_item_id)
