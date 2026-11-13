@@ -511,11 +511,11 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         newBrand: MockBrand?, before: MockOwnerSnapshot,
     ) {
         val old = before.menuItems.firstOrNull { it.barMenuItemId == item.barMenuItemId }
-        // New direct entries use the approved 1-3 option editor; existing
-        // OCR-published items may already have 4-10 options. Preserve them
-        // rather than refusing a name/price edit or deleting the overflow.
-        require(item.options.size in 1..(if (old == null) 3 else 10)) {
-            "메뉴 옵션 수를 확인해 주세요. 기존 옵션은 자동으로 삭제하지 않습니다."
+        // PR #164 manual PUT/POST both allow 1-3 options and *replace* all
+        // options. A photo-published row with 4-10 options cannot be safely
+        // edited here; never truncate the list and silently lose prices.
+        require(item.options.size in 1..3) {
+            "사진으로 등록한 옵션 4개 이상 메뉴는 직접 수정 API에서 지원하지 않아요. 기존 옵션은 유지됩니다."
         }
         val optionBodies = item.options.map { option ->
             mapOf(
