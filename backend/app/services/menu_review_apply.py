@@ -21,6 +21,7 @@ A serialization failure reruns everything from step 1, up to three attempts in t
 (app.services.serializable).
 """
 
+from dataclasses import replace
 from uuid import UUID
 
 from sqlalchemy import func, select
@@ -30,8 +31,10 @@ from app.core.errors import ApiError
 from app.core.security import Principal
 from app.models import (
     Bar,
+    BarMenuItem,
     BarStatus,
     Brand,
+    CheckReason,
     ExtractedItem,
     ExtractionRun,
     ImportStatus,
@@ -42,21 +45,24 @@ from app.models import (
     MenuImage,
     MenuImport,
     MenuImportChange,
+    MenuItemKind,
     Product,
     ReviewStatus,
 )
 from app.schemas.menu_review import (
     ConfirmNonProduct,
+    PublishWithoutProduct,
     Reject,
     ReviewAndApplyRequest,
     ReviewAppliedResponse,
     ReviewResult,
     SelectExistingProduct,
 )
-from app.services.bar_access import can_manage_bar, forbidden
+from app.services.bar_access import can_manage_bar, forbidden, is_operator
 from app.services.bar_menu import bar_not_found
+from app.services.menu_checks import dismiss_open_checks, raise_check, settle_linked
 from app.services.menu_draft import build_draft, replace_draft
-from app.services.menu_publish import AppliedChange, review_plan, write_board
+from app.services.menu_publish import AppliedChange, PublishPlan, review_plan, write_board
 from app.services.menu_review_catalog import CatalogResult, create_catalog_entries
 from app.services.menu_review_validation import ReviewedItem, ValidatedReview, pending_changes, validate_review
 from app.services.serializable import SessionFactory, run_serializable, write_conflict
@@ -91,6 +97,34 @@ def _change_key(change_type: MenuChangeType, extracted_item_id: UUID | None, bar
 # ---- recording ----
 
 
+def _corrected(final_value, extracted_value):
+    """A correction column holds a different value the reviewer sent. A cleared value (null) is not
+    recorded: null there means "not corrected" (spec 8.1)."""
+    return final_value if final_value is not None and final_value != extracted_value else None
+
+
+def _record_options(entry: ReviewedItem) -> bool:
+    """Store the corrections of the extracted options the line kept; True when the reviewer changed the
+    options at all (a value, a removed option or an added one)."""
+    kept_ids = set()
+    changed = False
+    for final in entry.options:
+        option = final.option
+        if option is None:
+            changed = True
+            continue
+        kept_ids.add(option.id)
+        option.corrected_option_label = _corrected(final.label, option.extracted_option_label)
+        option.corrected_pour_ml = _corrected(final.pour_ml, option.extracted_pour_ml)
+        option.corrected_price_krw = _corrected(final.price_krw, option.extracted_price_krw)
+        changed |= (final.label, final.pour_ml, final.price_krw) != (
+            option.extracted_option_label,
+            option.extracted_pour_ml,
+            option.extracted_price_krw,
+        )
+    return changed or kept_ids != {option.id for option in entry.item.options}
+
+
 def _record_item(entry: ReviewedItem, catalog: CatalogResult) -> None:
     item, decision = entry.item, entry.decision
     final_type = decision.finalLineType
@@ -98,11 +132,29 @@ def _record_item(entry: ReviewedItem, catalog: CatalogResult) -> None:
     item.reviewed_at = func.now()
     if isinstance(decision, (ConfirmNonProduct, Reject)):
         item.selected_product_id = item.selected_match_method = item.match_confidence = None
-        item.corrected_product_name = None
+        item.corrected_product_name = item.corrected_kind = None
         if isinstance(decision, Reject):
             item.review_status = ReviewStatus.REJECTED
         else:
             item.review_status = ReviewStatus.CONFIRMED if item.corrected_line_type is None else ReviewStatus.CORRECTED
+        return
+
+    name = decision.correctedProductName
+    item.corrected_product_name = name if name is not None and name != item.extracted_product_name else None
+    # A line published with a product is a whisky (spec 8.10); the AI's kind defaults to whisky.
+    final_kind = MenuItemKind(decision.kind) if isinstance(decision, PublishWithoutProduct) else MenuItemKind.WHISKY
+    item.corrected_kind = final_kind if final_kind != (item.extracted_kind or MenuItemKind.WHISKY) else None
+    options_corrected = _record_options(entry)
+    if isinstance(decision, PublishWithoutProduct):
+        item.selected_product_id = item.selected_match_method = item.match_confidence = None
+        # Publishing an unmatched line as it was read accepts the system's result (no product found).
+        unchanged = (
+            not item.candidates
+            and item.corrected_line_type is None
+            and item.corrected_product_name is None
+            and item.corrected_kind is None
+        )
+        item.review_status = ReviewStatus.CONFIRMED if unchanged and not options_corrected else ReviewStatus.CORRECTED
         return
 
     product_id = catalog.product_ids[item.id]
@@ -114,19 +166,12 @@ def _record_item(entry: ReviewedItem, catalog: CatalogResult) -> None:
     # chosen candidate keeps the score the system gave it.
     item.selected_match_method = top.method if kept_top else MatchMethod.MANUAL
     item.match_confidence = candidates[product_id].score if product_id in candidates else None
-    name = decision.correctedProductName
-    item.corrected_product_name = name if name is not None and name != item.extracted_product_name else None
-
-    options_corrected = False
-    for final in entry.options:
-        option = final.option
-        option.corrected_option_label = final.label if final.label != option.extracted_option_label else None
-        option.corrected_pour_ml = final.pour_ml if final.pour_ml != option.extracted_pour_ml else None
-        option.corrected_price_krw = final.price_krw if final.price_krw != option.extracted_price_krw else None
-        options_corrected |= any(
-            v is not None for v in (option.corrected_option_label, option.corrected_pour_ml, option.corrected_price_krw)
-        )
-    unchanged = kept_top and item.corrected_line_type is None and item.corrected_product_name is None
+    unchanged = (
+        kept_top
+        and item.corrected_line_type is None
+        and item.corrected_product_name is None
+        and item.corrected_kind is None
+    )
     item.review_status = ReviewStatus.CONFIRMED if unchanged and not options_corrected else ReviewStatus.CORRECTED
 
 
@@ -189,6 +234,18 @@ def applied_response(session: Session, menu_import: MenuImport) -> ReviewApplied
     # created_at as the products created with it.
     created_brands = {brand_id for product_at, brand_id, brand_at in created if brand_at == product_at}
     board_id = session.scalar(select(MenuBoard.id).where(MenuBoard.last_import_id == menu_import.id))
+    # Items this import added or changed that are whiskies without a product (spec 8.8).
+    unlinked_whisky = session.scalar(
+        select(func.count(func.distinct(BarMenuItem.id)))
+        .join(MenuImportChange, MenuImportChange.bar_menu_item_id == BarMenuItem.id)
+        .where(
+            MenuImportChange.menu_import_id == menu_import.id,
+            MenuImportChange.decision == MenuChangeDecision.APPLY,
+            MenuImportChange.change_type.in_([MenuChangeType.ADD, MenuChangeType.UPDATE]),
+            BarMenuItem.product_id.is_(None),
+            BarMenuItem.kind == MenuItemKind.WHISKY,
+        )
+    )
     return ReviewAppliedResponse(
         menuImportId=menu_import.id,
         status="applied",
@@ -202,8 +259,39 @@ def applied_response(session: Session, menu_import: MenuImport) -> ReviewApplied
             ignored=sum(1 for _, decision in decisions if decision == MenuChangeDecision.IGNORE),
             createdBrands=len(created_brands),
             createdProducts=len(created),
+            unlinkedWhisky=unlinked_whisky,
         ),
     )
+
+
+def _settle_checks(
+    session: Session,
+    menu_import: MenuImport,
+    review: ValidatedReview,
+    plan: PublishPlan,
+    items: list[BarMenuItem],
+    old_item_ids: set[UUID],
+) -> None:
+    """Keep the operator checks right after the board was written (spec 3.18.1): a whisky published
+    without a product opens or adds an unlinked check with its line as source; an unlinked item a line
+    linked to a product loses its unlinked reasons; an item that left the board or became other has no
+    open check."""
+    unlinked_lines = {entry.item.id for entry in review.items if entry.is_unlinked}
+    for entry, item in zip(plan.entries, items):
+        if entry.bar_menu_item_id in plan.linked_items:
+            settle_linked(session, entry.bar_menu_item_id, item, entry.display_name)
+        elif item.product_id is None and item.kind == MenuItemKind.OTHER:
+            dismiss_open_checks(session, {item.id})
+        elif item.product_id is None and entry.extracted_item_id in unlinked_lines:
+            raise_check(
+                session,
+                item,
+                entry.display_name,
+                CheckReason.UNLINKED,
+                source_menu_import_id=menu_import.id,
+                source_extracted_item_id=entry.extracted_item_id,
+            )
+    dismiss_open_checks(session, old_item_ids - {item.id for item in items} - plan.linked_items)
 
 
 # ---- the transaction ----
@@ -248,15 +336,27 @@ def _apply_once(
         session.commit()
         raise _outdated(menu_import, request.reviewVersion)
 
-    review = validate_review(session, menu_import, request)
+    review = validate_review(session, menu_import, request, operator=is_operator(session, principal))
     catalog = create_catalog_entries(
         session, menu_import, review, created_by_user_id=caller_user_id(session, principal)
     )
     for entry in review.items:
         _record_item(entry, catalog)
     board, plan = review_plan(session, menu_import.bar_id, menu_import.mode, review, catalog)
-    write_board(session, board, menu_import.bar_id, menu_import.id, plan.entries, published_at=published_at)
-    _record_changes(session, menu_import, review, plan.changes)
+    old_item_ids = {entry.bar_menu_item_id for entry in board.entries} if board is not None else set()
+    _, items = write_board(session, board, menu_import.bar_id, menu_import.id, plan.entries, published_at=published_at)
+    _settle_checks(session, menu_import, review, plan, items, old_item_ids)
+    # Record the bar menu item each added or updated line was published as: an added line's item exists
+    # only now, and a takeover may have moved the line to the item of a product the bar sold before. The
+    # result counts unlinked items from these rows (spec 8.8).
+    item_of_line = {e.extracted_item_id: item.id for e, item in zip(plan.entries, items) if e.extracted_item_id}
+    changes = [
+        replace(c, bar_menu_item_id=item_of_line[c.extracted_item_id])
+        if c.change_type in (MenuChangeType.ADD, MenuChangeType.UPDATE)
+        else c
+        for c in plan.changes
+    ]
+    _record_changes(session, menu_import, review, changes)
     menu_import.status = ImportStatus.APPLIED
     menu_import.review_confirmed_at = published_at
     menu_import.completed_at = published_at

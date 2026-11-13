@@ -194,7 +194,7 @@ def read_menu_import(
             422,
             "`VALIDATION_FAILED`, every problem in `fieldErrors`. Besides shape errors: `UNKNOWN_ITEM`, "
             "`DUPLICATE_ITEM`, `MISSING_ITEM`, `UNKNOWN_CHANGE`, `DUPLICATE_CHANGE`, `MISSING_CHANGE`, "
-            "`UNKNOWN_OPTION`, `DUPLICATE_OPTION`, `NO_PRICED_OPTION`, `DUPLICATE_OPTION_VALUES`, "
+            "`UNKNOWN_OPTION`, `DUPLICATE_OPTION`, `DUPLICATE_OPTION_VALUES`, `OPERATOR_ONLY`, "
             "`PRODUCT_NOT_FOUND`, `PRODUCT_INACTIVE`, `BRAND_NOT_FOUND`, `NOT_NORMALIZABLE`, "
             "`CHANGE_WITHOUT_PRODUCT`.",
         ),

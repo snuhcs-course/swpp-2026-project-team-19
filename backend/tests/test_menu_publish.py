@@ -1,10 +1,11 @@
+from dataclasses import replace
 from datetime import datetime, timedelta, timezone
 from uuid import UUID, uuid4
 
 import pytest
 from sqlalchemy import select
 
-from app.models import BarMenuItem, ImportMode, MenuBoard, MenuChangeType
+from app.models import BarMenuItem, ImportMode, MenuBoard, MenuChangeType, MenuItemKind
 from app.schemas.menu_review import ReviewAndApplyRequest
 from app.services.menu_publish import (
     BoardEntry,
@@ -56,8 +57,8 @@ def test_add_update_and_unchanged():
 
     assert products(result) == [C, A, B]
     assert change_types(result) == [MenuChangeType.ADD, MenuChangeType.UPDATE]
-    # An unchanged entry is kept as it is, menu name included.
-    assert result.entries[2] == b
+    # An unchanged entry is kept as it is, menu name included, now from the line that published it.
+    assert result.entries[2] == replace(b, extracted_item_id=result.entries[2].extracted_item_id)
     # An updated entry keeps its bar menu item.
     assert result.entries[1].bar_menu_item_id == a.bar_menu_item_id
     assert result.entries[1].display_name == "menu 1"
@@ -147,7 +148,9 @@ def sample(client, db_session, image_storage, operator, glenfiddich):
 
 
 def publish(db_session, sample, body):
-    review = validate_review(db_session, sample.menu_import, ReviewAndApplyRequest.model_validate(body))
+    review = validate_review(
+        db_session, sample.menu_import, ReviewAndApplyRequest.model_validate(body), operator=True
+    )
     catalog = create_catalog_entries(db_session, sample.menu_import, review, created_by_user_id=None)
     board, result = review_plan(db_session, sample.bar.id, sample.menu_import.mode, review, catalog)
     write_board(db_session, board, sample.bar.id, sample.menu_import.id, result.entries, published_at=NOW)
@@ -215,7 +218,7 @@ def test_first_publish_creates_the_board(client, db_session, image_storage, oper
     bar = make_bar(db_session, "Empty")
     entries = [BoardEntry(glenfiddich[12].id, "글렌피딕 12년", (opt(9000),))]
 
-    board = write_board(db_session, None, bar.id, sample.menu_import.id, entries, published_at=NOW)
+    board, _ = write_board(db_session, None, bar.id, sample.menu_import.id, entries, published_at=NOW)
 
     assert (board.bar_id, board.version, board.published_at) == (bar.id, 1, NOW)
     assert board_rows(db_session, bar.id) == [("글렌피딕 12년", [(None, 30, 9000)])]
@@ -255,7 +258,7 @@ def test_a_publish_raises_the_version_and_carries_discounts_to_the_same_options(
         BoardEntry(glenfiddich[15].id, "글렌피딕 15년", (fifteen.options[0],), fifteen.bar_menu_item_id),
     ]
 
-    written = write_board(db_session, board, bar.id, sample.menu_import.id, entries, published_at=NOW)
+    written, _ = write_board(db_session, board, bar.id, sample.menu_import.id, entries, published_at=NOW)
 
     assert (written.version, written.published_at, written.last_import_id) == (5, NOW, sample.menu_import.id)
     db_session.expire_all()
@@ -267,3 +270,89 @@ def test_a_publish_raises_the_version_and_carries_discounts_to_the_same_options(
         [("잔", 14000, started, ends), ("병", None, None, None)],
         [("잔", 19000, started, ends)],
     ]
+
+
+# ---- items without a product (spec 3.14.1, 5.4, 8.10) ----
+
+
+def unlinked_on_board(key, price, kind=MenuItemKind.WHISKY):
+    return BoardEntry(None, key, (opt(price),), uuid4(), kind=kind, name_key=key)
+
+
+def unlinked_proposal(key, price, kind=MenuItemKind.WHISKY):
+    return Proposal(uuid4(), None, key, (opt(price),), kind=kind, name_key=key)
+
+
+def test_an_unlinked_line_is_the_unlinked_entry_of_its_name_key():
+    highball = unlinked_on_board("하이볼", 9000, MenuItemKind.OTHER)
+
+    result = plan([unlinked_proposal("하이볼", 9000, MenuItemKind.OTHER), unlinked_proposal("진토닉", 8000)], [highball])
+
+    assert [(e.name_key, e.bar_menu_item_id) for e in result.entries] == [("하이볼", highball.bar_menu_item_id), ("진토닉", None)]
+    assert change_types(result) == [MenuChangeType.ADD]
+
+
+def test_a_changed_kind_is_an_update():
+    highball = unlinked_on_board("하이볼", 9000)
+
+    result = plan([unlinked_proposal("하이볼", 9000, MenuItemKind.OTHER)], [highball])
+
+    assert change_types(result) == [MenuChangeType.UPDATE]
+    assert result.entries[0].kind == MenuItemKind.OTHER
+
+
+def test_a_line_takes_over_only_an_unlinked_entry():
+    """A takeover comes from an applied update; one whose entry has a product (the reviewer picked another
+    product for that line) adds the line instead."""
+    unlinked, linked = unlinked_on_board("unknown", 45000), on_board(B, 1000)
+    first, second = proposal(A, 45000), proposal(C, 1000)
+    takeovers = {first.extracted_item_id: unlinked.bar_menu_item_id, second.extracted_item_id: linked.bar_menu_item_id}
+
+    result = plan_publish(
+        [first, second, unlinked_proposal("unknown", 45000)],
+        [unlinked, linked],
+        mode=PARTIAL,
+        ignored_items=set(),
+        approved_removals=set(),
+        takeovers=takeovers,
+    )
+
+    assert result.linked_items == {unlinked.bar_menu_item_id}
+    assert [(e.product_id, e.bar_menu_item_id) for e in result.entries] == [
+        (A, unlinked.bar_menu_item_id),
+        (B, linked.bar_menu_item_id),
+        (C, None),
+        # The unlinked entry is now the product's; a later line of its name is a new item.
+        (None, None),
+    ]
+
+
+def test_a_bar_without_a_board_has_no_entries(db_session):
+    assert load_board(db_session, make_bar(db_session, "No board").id) == (None, [])
+
+
+def test_a_product_the_bar_sold_before_gets_its_item_back(client, db_session, image_storage, operator, glenfiddich):
+    sample = upload_sample_review(client, db_session, operator, glenfiddich)
+    bar = make_bar(db_session, "Sold before")
+    old = BarMenuItem(bar_id=bar.id, product_id=glenfiddich[15].id)
+    db_session.add(old)
+    db_session.flush()
+
+    _, items = write_board(
+        db_session, None, bar.id, sample.menu_import.id, [BoardEntry(glenfiddich[15].id, "15", (opt(1),))], published_at=NOW
+    )
+
+    assert [item.id for item in items] == [old.id]
+
+
+def test_a_corrected_name_replaces_the_boards_name_even_with_the_same_options():
+    """A name the AI read differently keeps the board's; a name the reviewer sent replaces it (spec 8.7)."""
+    a = on_board(A, 10000)
+    read = Proposal(uuid4(), A, "menu read differently", (opt(10000),))
+    corrected = replace(read, name_corrected=True)
+    same_name = replace(corrected, display_name=a.display_name)
+
+    assert (plan([read], [a]).changes, plan([read], [a]).entries[0].display_name) == ([], a.display_name)
+    assert change_types(plan([corrected], [a])) == [MenuChangeType.UPDATE]
+    assert plan([corrected], [a]).entries[0].display_name == "menu read differently"
+    assert plan([same_name], [a]).changes == []

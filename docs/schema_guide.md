@@ -177,7 +177,7 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 | 값 | 의미 |
 |---|---|
 | `add` | 현재 메뉴판에 없던 항목을 추가 |
-| `update` | 기존 항목의 옵션(가격·용량·옵션명)을 수정한다. 옵션이 같고 표시명만 다르면 변경으로 보지 않고 기존 표시명을 유지한다. AI가 같은 메뉴의 이름을 조금씩 다르게 읽어 불필요한 변경이 생기는 것을 막기 위해서다. `update`가 반영될 때는 표시명도 새 값으로 바뀐다. |
+| `update` | 기존 항목의 옵션(가격·용량·옵션명)을 수정한다. 옵션이 같고 표시명만 다르면 변경으로 보지 않고 기존 표시명을 유지한다. AI가 같은 메뉴의 이름을 조금씩 다르게 읽어 불필요한 변경이 생기는 것을 막기 위해서다. `update`가 반영될 때는 표시명도 새 값으로 바뀐다. 단, 검수자가 메뉴판 이름(`correctedProductName`)을 직접 고쳐 보냈고 그 이름이 지금 메뉴판의 이름과 다르면, 옵션이 같아도 `update`로 반영해 그 이름으로 바꾼다. AI의 흔들림이 아니라 검수자의 결정이기 때문이다(API 명세 8.7). |
 | `remove` | 현재 메뉴판에서 항목을 제외 |
 
 ### 4.12 menu_change_decision
@@ -527,7 +527,7 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 | 컬럼 | 타입과 제약 | 예시 | 설명과 필요한 이유 |
 |---|---|---|---|
 | `id` | `uuid`, PK | Deanston 12 상품 ID | 업장 메뉴와 검색 결과가 참조하는 정규 상품 식별자다. |
-| `category` | `varchar(30)`, NOT NULL, 기본 `whisky` | `whisky` | MVP는 위스키이지만 이후 rum gin wine sake 확장을 위한 구분값이다. |
+| `category` | `varchar(30)`, NOT NULL, 기본 `whisky` | `whisky` | 공용 카탈로그는 위스키만 담으므로 API는 `whisky`만 받는다(API 명세 8.1). 위스키가 아닌 메뉴는 상품 없이 매장 메뉴에만 둔다(7.1의 `kind = other`). 컬럼은 이후 rum gin wine sake 확장을 위해 문자열로 둔다. |
 | `display_name` | `varchar(200)`, NOT NULL | `Deanston 12` | 검색 결과와 운영자 화면에 사용하는 대표 표시명이다. 상품 식별자나 단독 병합 키로 사용하지 않는다. |
 | `brand_id` | `uuid`, NOT NULL, FK → `brands.id` | Deanston 브랜드 ID | AI가 추출한 브랜드를 구조적으로 비교한다. |
 | `age_years` | `smallint`, nullable | `12` | 연수가 다른 상품의 잘못된 병합을 막는다. NAS 상품은 null이다. |
@@ -695,7 +695,7 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 
 **핵심 제약:** 한 항목에 `open`인 확인은 최대 하나다(`bar_menu_item_id`에 `status = open` 조건의 partial unique index). 현재 메뉴판에 있는 상품 없는 위스키 항목에는 항상 `unlinked` 또는 `unlinked_by_name` 이유의 열린 확인이 있다. 항목이 현재 메뉴판에서 빠지거나 `kind = other`가 되면 그 항목의 열린 확인을 같은 트랜잭션에서 `dismissed`로 바꾼다. 상품 없는 위스키가 운영자 처리 없이 상품에 연결되면, 다른 이유가 있으면 `unlinked`, `unlinked_by_name` 이유만 빼고, 없으면 이유는 그대로 두고 `dismissed`로 바꾼다. 그래서 `reasons`는 닫힌 뒤에도 비지 않는다. 이름을 고쳐 메뉴판의 줄이 다른 항목으로 옮겨 가면 그 줄의 열린 확인도 새 항목으로 옮기고, 새 항목에 이미 열린 확인이 있으면 이유와 버린 옵션을 그 확인에 더한 뒤 옮겨 온 확인은 `dismissed`로 바꾼다(API 명세 3.14.1, 3.18.1). `kind = other`인 항목에는 확인을 만들지 않는다. 열린 확인의 `bar_menu_item_id`에는 partial unique index(`WHERE status = 'open'`)를 두며, 처리하거나 닫힌 확인은 같은 항목에 여러 개 있을 수 있다.
 
-**필요한 이유:** 업주가 카탈로그를 몰라도 메뉴를 바로 게시하게 하면서, 상품 연결과 카탈로그 품질은 운영자가 하루 안에 한 줄씩 책임지게 한다. 확인 기록은 처리한 뒤에도 남겨 매칭이 어디서 틀렸는지 볼 수 있게 한다.
+**필요한 이유:** 업주가 카탈로그를 몰라도 메뉴를 바로 게시하게 하면서, 상품 연결과 카탈로그 품질은 운영자가 한 줄씩 책임지게 한다. 미연결 위스키는 운영자가 연결하기 전까지 검색에 나오지 않으므로, 대기 목록은 오래된 것부터 빨리 처리한다. 확인 기록은 처리한 뒤에도 남겨 매칭이 어디서 틀렸는지 볼 수 있게 한다.
 
 ### 7.8 menu_item_check_reasons
 

@@ -2,7 +2,7 @@
 the sales info confirmation (3.14.9).
 
 The shapes, lengths and ranges are checked here. The rules that compare fields (duplicate
-options, discounts, exactly one of productId and newProduct, names that normalize to nothing)
+options, discounts, exactly one of productId, newProduct and kind, names that normalize to nothing)
 are checked by app.services.menu_edit.check_request, still before the bar is looked up.
 """
 
@@ -11,6 +11,7 @@ from uuid import UUID
 
 from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, StrictBool
 
+from app.models.menu import MenuItemKind
 from app.schemas.menu_review import BrandDecision, NewProduct, ProductAliasInput
 
 MAX_MENU_PRICE_KRW = 99_999_999
@@ -56,10 +57,20 @@ class NewMenuProduct(_Strict):
 
 class MenuItemAddRequest(_Strict):
     menuVersion: int | None = Field(description="`menuVersion` of the menu the edit was made on; null without one")
-    productId: UUID | None = Field(default=None, description="An active catalog product; or send `newProduct`")
-    newProduct: NewMenuProduct | None = None
+    productId: UUID | None = Field(
+        default=None, description="An active catalog product. Exactly one of `productId`, `newProduct` and `kind`"
+    )
+    newProduct: NewMenuProduct | None = Field(default=None, description="A new catalog product; operators only")
+    kind: MenuItemKind | None = Field(
+        default=None,
+        description="Add the item without a product (spec 3.14.3): whisky waits for an operator to link it, "
+        "other is a non-whisky menu. Needs `displayName`",
+    )
     displayName: str | None = Field(
-        default=None, min_length=1, max_length=200, description="Name on the menu; null for the product's name"
+        default=None,
+        min_length=1,
+        max_length=200,
+        description="Name on the menu; null for the product's name. Required with `kind`",
     )
     options: Options
 

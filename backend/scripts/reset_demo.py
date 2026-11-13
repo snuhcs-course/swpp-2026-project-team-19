@@ -2,7 +2,7 @@
 
 What a rehearsal leaves behind is removed:
 - every menu import, applied ones included, with all its rows and its photos;
-- every menu board and bar menu item;
+- every menu board and bar menu item, and every operator menu item check;
 - every bar's description, default pour, tags, weekly hours, temporary closure and photos with their
   files (the seed sets none);
 - every bar, brand, product, and alias whose id is not in the seed files, such as the
@@ -52,6 +52,8 @@ from app.models import (  # noqa: E402
     MenuEntryOption,
     MenuImage,
     MenuImport,
+    MenuItemCheck,
+    MenuItemCheckReason,
     Product,
     ProductAlias,
 )
@@ -113,6 +115,7 @@ def plan(session: Session, seeds: Seeds) -> list[tuple[str, int]]:
         ("menu boards", count(MenuBoard)),
         ("menu board entries", count(MenuBoardEntry)),
         ("bar menu items", count(BarMenuItem)),
+        ("menu item checks", count(MenuItemCheck)),
         ("bar weekly hours", count(BarWeeklyHours)),
         ("bar temporary closures", count(BarOperatingException)),
         ("bar photos", count(BarPhoto)),
@@ -130,6 +133,9 @@ def reset(session: Session, seeds: Seeds) -> list[str]:
     session.execute(delete(MenuBoard))
     # Products created while reviewing point at the extracted line they came from.
     session.execute(update(Product).values(created_from_extracted_item_id=None))
+    # Operator checks point at bar menu items, and their reasons at the import line that raised them.
+    session.execute(delete(MenuItemCheckReason))
+    session.execute(delete(MenuItemCheck))
     keys = delete_import_rows(session, list(session.scalars(select(MenuImport.id))))
     # After the imports: their proposed changes refer to bar menu items.
     session.execute(delete(BarMenuItem))

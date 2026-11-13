@@ -3,7 +3,16 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
-from app.models import ImportMode, ImportStatus, LineType, MatchMethod, MenuChangeDecision, MenuChangeType, ResolutionStatus
+from app.models import (
+    ImportMode,
+    ImportStatus,
+    LineType,
+    MatchMethod,
+    MenuChangeDecision,
+    MenuChangeType,
+    MenuItemKind,
+    ResolutionStatus,
+)
 from app.schemas.common import UtcDateTime
 
 
@@ -94,6 +103,10 @@ class ReviewItem(BaseModel):
         )
     )
     extractedLineType: LineType = Field(description="The AI's first classification; never changed by review")
+    extractedKind: MenuItemKind | None = Field(
+        description="The AI's menu kind for product lines (spec 2.3): whisky, or other for a non-whisky menu, "
+        "which is not matched. Null for non-product lines. Never changed by review"
+    )
     correctedLineType: LineType | None = Field(description="Set only when review changed the classification")
     effectiveLineType: LineType = Field(description="correctedLineType ?? extractedLineType; use for display")
     initialResolutionStatus: ResolutionStatus | None = Field(
@@ -134,13 +147,15 @@ class ChangeAfterOption(BaseModel):
 
 
 class ChangeBefore(BaseModel):
-    productId: UUID
-    displayName: str = Field(description="Canonical product name")
+    productId: UUID | None = Field(description="The item's product; null for an item without one (spec 3.9)")
+    kind: MenuItemKind
+    displayName: str = Field(description="Canonical product name, or the menu name of an item without a product")
     options: list[ChangeBeforeOption]
 
 
 class ChangeAfter(BaseModel):
     productId: UUID | None = Field(description="Proposed product; null when the item matched no product")
+    kind: MenuItemKind = Field(description="The line's extractedKind")
     displayName: str | None = Field(description="Canonical product name, or the extracted name when unmatched")
     options: list[ChangeAfterOption]
 

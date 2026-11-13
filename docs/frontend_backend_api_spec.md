@@ -141,7 +141,7 @@ GET 주변 업장 조회 (위치 + 반경)
 
 업장별 권한은 대상 업장을 알아야 판단할 수 있다. 그래서 업주도 호출할 수 있는 API는 3번을 먼저 확인한 뒤 "호출자가 operator이거나 대상 업장의 현재 업주인가"(아니면 `403`)를 확인한다. 이 API들에서는 operator나 업주가 아닌 호출자도 없는 `barId`나 `menuImportId`를 보내면 `404`를 받는다. 메뉴 등록 작업은 작업이 속한 업장의 업주인지 확인한다. 카탈로그 검색은 대상이 없으므로 현재 업주인 업장이 하나 이상인지 확인한다.
 
-업주가 호출할 수 있는 API라도 카탈로그에 브랜드와 상품을 새로 만드는 부분은 operator만 할 수 있다. 검수 제출의 `create_product`(8.1)와 직접 추가의 `newProduct`(3.14.3)가 그렇다. 업주가 보내면 요청 전체를 `422 VALIDATION_FAILED`(`fieldErrors[].code = OPERATOR_ONLY`)로 거부한다. 같은 요청의 다른 부분은 업주도 보낼 수 있으므로 `403`이 아니라 필드 오류로 알린다.
+업주가 호출할 수 있는 API라도 공용 카탈로그(브랜드, 상품, 별칭)를 만들거나 바꾸는 부분은 operator만 할 수 있다. 검수 제출의 `create_product`와 `select_existing_product`의 `aliasesToAdd`(8.1), 직접 추가의 `newProduct`(3.14.3)가 그렇다. 업주가 보내면 요청 전체를 `422 VALIDATION_FAILED`(`fieldErrors[].code = OPERATOR_ONLY`)로 거부한다. `aliasesToAdd`는 빈 배열(`[]`)이나 생략은 받는다. 업주의 결정은 그 매장 메뉴판에만 반영되고, 공용 카탈로그는 운영자가 확인(3.18)하면서 정한다. 같은 요청의 다른 부분은 업주도 보낼 수 있으므로 `403`이 아니라 필드 오류로 알린다.
 
 업주 여부는 매 요청 DB에서 확인하므로 승인과 해제가 다음 요청부터 반영된다. 업주 신청은 다른 사람의 신청이 있는지 알리지 않도록 권한이 없을 때도 `404 OWNER_APPLICATION_NOT_FOUND`를 반환한다(3.11.4).
 
@@ -2733,7 +2733,7 @@ Content-Type: application/json
 | `menuVersion` | 정수 | 예 (`null` 가능) | 3.14.1. 메뉴판이 없으면 `null` |
 | `productId` | UUID 문자열 | `productId`, `newProduct`, `kind` 중 하나 | 활성 상품. 없으면 `PRODUCT_NOT_FOUND`, 비활성이면 `PRODUCT_INACTIVE` |
 | `newProduct.brand` | 객체 | `newProduct`를 보내면 예 | 8.1 `create_product`의 `brand`와 같다. 없는 `brandId`는 `BRAND_NOT_FOUND`. `newProduct`는 operator만 보낼 수 있다(아래) |
-| `newProduct.product` | 객체 | `newProduct`를 보내면 예 | 8.1 `create_product`의 `product`와 같다 |
+| `newProduct.product` | 객체 | `newProduct`를 보내면 예 | 8.1 `create_product`의 `product`와 같다. `category`는 `whisky`만 받는다 |
 | `newProduct.aliases` | 배열 | 아니오 | 8.1 `create_product`의 `aliases`와 같다. 기본 `[]` |
 | `kind` | `MenuItemKind` | `productId`, `newProduct`, `kind` 중 하나 | 상품 없이 추가할 항목의 종류(2.3). `whisky`이면 운영자의 연결을 기다리는 위스키, `other`이면 위스키가 아닌 메뉴다 |
 | `displayName` | 문자열 | `kind`를 보내면 예, 아니면 아니오 | 메뉴판에 보일 이름. 앞뒤 공백을 지운 뒤 1~200자. 상품을 보낼 때 없거나 `null`이면 상품의 `displayName` |
@@ -2825,7 +2825,7 @@ Content-Type: application/json
 | `409` | `MENU_OUTDATED` | 보낸 `menuVersion`이 현재 값과 다름. 다른 기기나 operator의 편집, 검수 반영, 성공한 요청의 재전송 | 3.9를 다시 불러오고, 입력 중이던 값은 유지한 채 다시 저장하게 함 |
 | `409` | `MENU_ITEM_EXISTS` | 추가하려는 상품, 또는 같은 이름 키의 미연결 항목이 이미 메뉴판에 있음(3.14.3). 미연결 항목의 이름을 다른 미연결 항목과 같게 바꿈(3.14.4). `details.barMenuItemId` | 그 항목의 수정 화면으로 안내 |
 | `409` | `DUPLICATE_BRAND_FOUND`, `DUPLICATE_PRODUCT_FOUND` | 신규 브랜드나 상품과 같은 것이 이미 있음 (3.14.3, 9.5) | 기존 브랜드나 상품을 보여 주고 고르게 함. `existingProduct.isActive = false`이면 상품 검색으로 안내 |
-| `422` | `VALIDATION_FAILED` | 필드 규칙 위반, `TOO_SHORT`, `TOO_LONG`, `DUPLICATE_OPTION_VALUES`, `DISCOUNT_NOT_LOWER`, `DISCOUNT_ENDED`, `END_BEFORE_START`, `EXACTLY_ONE_REQUIRED`, `OPERATOR_ONLY`(업주가 `newProduct`를 보냄, 3.14.3), `NOT_NORMALIZABLE`(신규 브랜드·상품 이름이나 별칭, 또는 미연결 항목의 `displayName`에 쓸 수 있는 글자가 없음, 8.7과 같다), `PRODUCT_NOT_FOUND`, `PRODUCT_INACTIVE`, `BRAND_NOT_FOUND` | `fieldErrors` 표시 |
+| `422` | `VALIDATION_FAILED` | 필드 규칙 위반, `TOO_SHORT`, `TOO_LONG`, `DUPLICATE_OPTION_VALUES`, `DISCOUNT_NOT_LOWER`, `DISCOUNT_ENDED`, `END_BEFORE_START`, `EXACTLY_ONE_REQUIRED`, `OPERATOR_ONLY`(업주가 `newProduct`를 보냄, 3.14.3), `LITERAL_ERROR`(`newProduct.product.category`가 `whisky`가 아님), `NOT_NORMALIZABLE`(신규 브랜드·상품 이름이나 별칭, 또는 미연결 항목의 `displayName`에 쓸 수 있는 글자가 없음, 8.7과 같다), `PRODUCT_NOT_FOUND`, `PRODUCT_INACTIVE`, `BRAND_NOT_FOUND` | `fieldErrors` 표시 |
 | `503` | `TEMPORARY_WRITE_CONFLICT` | 직렬화 충돌 3회 재시도 실패 | 잠시 후 같은 요청 재시도 |
 
 #### 3.14.8 품절 표시
@@ -4612,7 +4612,7 @@ Content-Type: application/json
 | 필드 | 필수 | 규칙 |
 |---|---|---|
 | `productId` | 예 | 활성 상품의 ID. 비활성이면 `PRODUCT_INACTIVE`(7.2) |
-| `aliasesToAdd` | 아니오 | 이 상품에 추가할 별칭. 기본 `[]` |
+| `aliasesToAdd` | 아니오 | 이 상품에 추가할 별칭. 기본 `[]`. operator만 보낼 수 있다. 업주가 빈 배열이 아닌 값을 보내면 `fieldErrors[].path = itemDecisions[i].aliasesToAdd`, `code = OPERATOR_ONLY`다(2.2) |
 | `aliasesToAdd[].aliasText` | 예 | 1~200자 |
 | `aliasesToAdd[].languageCode` | 아니오 | 10자 이하. 예: `ko`, `en` |
 | `aliasesToAdd[].isSearchable` | 아니오 | 고객 검색에 쓸지 여부. 기본 `true` |
@@ -4625,7 +4625,7 @@ Content-Type: application/json
 | `brand.brandId` | `existing`만 필수 | 기존 브랜드 ID |
 | `brand.canonicalName` | `new`만 필수 | 1~120자. 별칭으로도 함께 저장한다 |
 | `brand.aliases` | 아니오 | `new`만. `aliasText` 1~120자, `languageCode` 10자 이하. 기본 `[]` |
-| `product.category` | 아니오 | 1~30자. 기본 `whisky` |
+| `product.category` | 아니오 | `whisky`만 받는다. 기본 `whisky`. 공용 카탈로그는 위스키만 담기 때문이다. 다른 값이면 `LITERAL_ERROR`다. 위스키가 아닌 메뉴는 상품 없이 게시한다(8.10) |
 | `product.displayName` | 예 | 대표 상품명. 1~200자. 별칭으로도 함께 저장한다 |
 | `product.ageYears` | 아니오 | 0~200 정수 |
 | `product.editionName` | 아니오 | 1~150자 |
@@ -4641,6 +4641,8 @@ Content-Type: application/json
 `changeDecisions[]`는 `changeId`(필수)와 `decision`(`apply` 또는 `ignore`, 필수)이다. `reviewVersion`은 1 이상 정수다. 추출 항목에 연결된 변경(`extractedItemIds`가 빈 배열이 아닌 변경)은 그 줄 중 하나라도 메뉴 항목으로 게시할 때(`select_existing_product`, `create_product`, `publish_without_product`)만 `apply`할 수 있다(8.7).
 
 ### 8.2 기존 상품 선택 예시
+
+operator가 보낸 예시다. 업주는 `aliasesToAdd`를 빼고(또는 `[]`로) 보낸다(2.2).
 
 ```json
 {
@@ -4706,7 +4708,7 @@ productId == proposedProductId
 → matchConfidence = null
 ```
 
-`aliasesToAdd`는 운영자가 실제 동일 상품의 정상 표기임을 확인한 경우에만 보낸다. 단순 공백 차이와 명백한 OCR 오류는 보내지 않는다.
+`aliasesToAdd`는 operator가 실제 동일 상품의 정상 표기임을 확인한 경우에만 보낸다. 단순 공백 차이와 명백한 OCR 오류는 보내지 않는다. 업주는 보낼 수 없다(2.2).
 
 `finalLineType`이 응답의 `extractedLineType`과 같으면 백엔드는 `corrected_line_type = null`로 유지한다. 서로 다르면 `corrected_line_type = finalLineType`을 저장한다. `initial_resolution_status`는 어떤 검수 결정을 제출하더라도 변경하지 않는다.
 
@@ -4838,12 +4840,13 @@ OCR 잡음, 중복 인식 또는 사용할 수 없는 항목에 사용한다.
 - `itemDecisions`는 검수 대상 항목을 빠짐없이 한 번씩 포함해야 한다.
 - `changeDecisions`는 현재 `pending` 변경을 빠짐없이 한 번씩 포함해야 한다.
 - 변경의 `extractedItemIds`에 담긴 줄을 모두 `confirm_non_product`나 `reject`로 결정했으면 그 변경은 `ignore`여야 한다. `apply`이면 `fieldErrors[].path = changeDecisions[i].decision`, `code = CHANGE_WITHOUT_PRODUCT`다. 담긴 줄 중 하나라도 메뉴 항목으로 게시하면 `apply`할 수 있다. 예: 잔 줄과 병 줄이 합쳐진 변경에서 잔 줄만 제외하고 병 줄을 게시하려면 `apply`로 보낸다. 추출 항목이 없는 변경(`remove`)에는 이 규칙이 없다.
-- 변경을 `ignore`하면 그 변경에 담긴 줄 중 최종 결정이 여전히 그 변경의 대상(같은 상품, 상품이 없으면 같은 이름 키)인 줄은 메뉴판을 바꾸지 않는다. 대상이 달라진 줄은 그 결정대로 반영한다.
-- `finalLineType = product`이면 `select_existing_product`, `create_product`, `publish_without_product` 중 하나여야 한다. `create_product`는 operator만 보낼 수 있다(`OPERATOR_ONLY`, 8.1).
+- 변경을 `ignore`하면 그 변경에 담긴 줄 중 최종 결정이 여전히 그 변경의 대상(같은 상품, 상품이 없으면 같은 이름 키)인 줄은 메뉴판을 바꾸지 않는다. 대상은 그 줄이 제안받은 것(1순위 상품)과, 변경이 비교한 현재 항목이다. 대상이 달라진 줄은 그 결정대로 반영한다. 예: 글렌피딕 12의 `update`를 무시하고 그 줄을 글렌피딕 15로 고르면 15로 반영된다. 단, 제안 상품이 없는 줄(5.4)의 `add`는 "검수자가 정하는 무엇으로든 그 줄을 추가하는" 변경이므로, 무시하면 어떤 결정이든 그 줄은 반영하지 않는다.
+- `finalLineType = product`이면 `select_existing_product`, `create_product`, `publish_without_product` 중 하나여야 한다. `create_product`와 빈 배열이 아닌 `aliasesToAdd`는 operator만 보낼 수 있다(`OPERATOR_ONLY`, 2.2, 8.1).
 - 메뉴 항목으로 게시하는 줄은 `options`가 1~10개이고 모든 옵션에 가격이 있어야 한다(8.1). 상품 없이 게시하는 줄도 같다. `extractedOptionId`는 그 줄의 추출 옵션이어야 하고 한 줄에서 겹치지 않아야 한다.
 - 같은 상품(상품 없는 줄은 같은 이름 키)으로 게시하는 줄이 여럿이면 옵션을 합쳐 한 항목으로 게시한다(8.12). 같은 `productId`로 제출한 줄끼리(다시 매칭으로 상품이 바뀐 줄 제외) 표기와 용량이 같은 옵션의 가격이 다르면 `fieldErrors[].code = OPTION_PRICE_CONFLICT`다. 다시 매칭 때문에 합쳐진 줄과, 이름 키로 합쳐진 상품 없는 위스키 줄의 충돌은 거부하지 않는다. 이름 키로 합쳐진 위스키가 아닌 메뉴(`kind = other`)의 충돌은 같은 코드로 거부한다(8.12).
 - `publish_without_product`의 메뉴판 이름(`correctedProductName ?? extractedProductName`)이 없거나, 정규화한 이름 키(3.14.1)가 빈 값이면 `fieldErrors[].path = itemDecisions[i].correctedProductName`, `code = NOT_NORMALIZABLE`이다.
 - 기존 상품은 존재하고 연결 가능한 상태여야 한다.
+- 검수자가 `correctedProductName`을 보냈고 그 이름이 지금 메뉴판의 이름과 다르면, 옵션이 같아도 그 줄의 항목을 `update`로 반영해 메뉴판 이름을 바꾼다. 옵션이 같고 AI가 읽은 이름만 다를 때는 지금처럼 기존 이름을 유지한다(매칭 흐름 문서 13장).
 - 이름을 고친 위스키 줄은 이 이름으로 다시 매칭하고, 그 결과로 연결할 상품을 정한다(8.11). 제출한 `productId`와 달라져도 거부하지 않는다.
 - 선택한 상품의 연수나 에디션이 추출값과 충돌해도 거부하지 않고, 제출하기 전에 확인도 묻지 않는다. AI가 잘못 읽은 값을 바로잡을 수 있어야 하고, 연결이 맞는지는 업주보다 운영자가 정확하게 판단하기 때문이다. 대신 서버가 비교해 충돌하면 그 상품에 연결해 게시하고 운영자 확인(3.18, 사유 `attribute_conflict`)에 올린다.
   - 대상: `select_existing_product`로 게시하는 줄 중 이름을 고치지 않은 줄(8.11의 대상이 아닌 줄)이다. 후보에서 고른 상품과 검색에서 고른 상품 모두 같다. 이름을 고친 줄은 추출한 연수와 에디션이 예전 이름에서 나온 값이고, 다시 매칭(8.11)이 연결을 정하므로 비교하지 않는다. `create_product`와 `publish_without_product`도 비교하지 않는다.
@@ -5007,7 +5010,7 @@ HTTP/1.1 200 OK
 
 AI가 위스키가 아닌 메뉴로 분류한 줄(5.4의 `extractedKind = other`)은 보통 `kind = other`로 이 결정을 보낸다. 반대로 AI가 위스키로 분류한 줄도 업주가 위스키가 아닌 메뉴로 바꿔 `kind = other`로 보낼 수 있다.
 
-프론트엔드 처리: 게시 완료 화면에서 반영 응답의 `result.unlinkedWhisky`(8.8)가 1 이상이면 "새로 등록한 메뉴는 다음 날부터 위스키 검색에 나와요"를 한 번 보여 준다. 다시 매칭으로 연결이 풀린 줄(8.11)도 여기에 들어가므로, 프론트엔드가 제출한 결정만으로 판단하지 않는다.
+프론트엔드 처리: 게시 완료 화면에서 반영 응답의 `result.unlinkedWhisky`(8.8)가 1 이상이면 "새로 등록한 위스키는 운영자가 확인한 뒤부터 위스키 검색에 나와요"를 한 번 보여 준다. 메뉴판에는 바로 보인다. 서버는 검색에 나오는 시점을 보장하지 않으므로(운영자가 연결해야 나온다, 3.18) "다음 날부터"처럼 시점을 약속하는 문구는 쓰지 않는다. 다시 매칭으로 연결이 풀린 줄(8.11)도 여기에 들어가므로, 프론트엔드가 제출한 결정만으로 판단하지 않는다.
 
 ### 8.11 이름을 고친 줄의 다시 매칭
 

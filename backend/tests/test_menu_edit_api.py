@@ -30,6 +30,7 @@ from tests.sql_support import recorded_statements
 NOW = datetime.now(timezone.utc)
 STARTS, ENDS = NOW - timedelta(days=1), NOW + timedelta(days=14)
 OWNER_SUBJECT = "owner-subject"
+OPERATOR_SUBJECT = "operator-subject"
 
 
 def utc(value: datetime) -> str:
@@ -232,7 +233,10 @@ def test_missing_and_inactive_products_and_brands_are_rejected(client, operator,
 
 
 def test_a_new_product_is_created_searchable_and_records_its_creator(client, db_session, supabase, bar):
-    owner = owner_of(db_session, supabase, bar)
+    """Only an operator may create a catalog product (spec 2.2, 3.14.3)."""
+    make_user(db_session, OPERATOR_SUBJECT, user_type=UserType.OPERATOR)
+    db_session.commit()
+    operator = {"Authorization": f"Bearer {supabase.token(sub=OPERATOR_SUBJECT)}"}
     new_product = {
         "brand": {"type": "new", "canonicalName": "Deanston"},
         "product": {"displayName": "Deanston Virgin Oak", "editionName": "Virgin Oak", "abv": 46.3},
@@ -243,13 +247,13 @@ def test_a_new_product_is_created_searchable_and_records_its_creator(client, db_
         client,
         bar.id,
         {"menuVersion": 4, "newProduct": new_product, "displayName": "딘스톤 버진 오크", "options": [option(pour=None)]},
-        owner,
+        operator,
     )
 
     assert response.status_code == 201, response.text
     product = db_session.scalar(select(Product).where(Product.display_name == "Deanston Virgin Oak"))
-    owner_id = db_session.scalar(select(User.id).where(User.auth_subject == OWNER_SUBJECT))
-    assert (product.created_by_user_id, product.brand.created_by_user_id) == (owner_id, owner_id)
+    operator_id = db_session.scalar(select(User.id).where(User.auth_subject == OPERATOR_SUBJECT))
+    assert (product.created_by_user_id, product.brand.created_by_user_id) == (operator_id, operator_id)
     assert product.created_from_extracted_item_id is None
     assert item_of(response.json(), product)["brandName"] == "Deanston"
     found = client.get("/api/search/bars", params={"query": "딘스톤 버진 오크"}).json()

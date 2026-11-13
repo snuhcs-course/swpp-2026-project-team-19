@@ -31,13 +31,13 @@ def valid_body(review, glenfiddich):
     return sample_body(review[3], glenfiddich)
 
 
-def validate(db_session, review, body):
-    return validate_review(db_session, review[0], ReviewAndApplyRequest.model_validate(body))
+def validate(db_session, review, body, *, operator=True):
+    return validate_review(db_session, review[0], ReviewAndApplyRequest.model_validate(body), operator=operator)
 
 
-def field_errors(db_session, review, body):
+def field_errors(db_session, review, body, *, operator=True):
     with pytest.raises(ApiError) as caught:
-        validate(db_session, review, body)
+        validate(db_session, review, body, operator=operator)
     assert (caught.value.status_code, caught.value.code) == (422, "VALIDATION_FAILED")
     return {(e["path"], e["code"]) for e in caught.value.field_errors}
 
@@ -53,16 +53,22 @@ def test_valid_decisions(db_session, review, glenfiddich):
     assert len(result.change_decisions) == 3
 
 
-def test_option_corrections_replace_only_the_values_sent(db_session, review, glenfiddich):
+def test_options_are_the_lines_final_list(db_session, review, glenfiddich):
+    """Values are sent whole, an extracted option left out is not published, an added one has no
+    extracted option, and a value can be cleared to null (spec 8.1)."""
     body = valid_body(review, glenfiddich)
     first_option = review[1][1].options[0]
-    body["itemDecisions"][1]["optionDecisions"] = [
-        {"extractedOptionId": str(first_option.id), "correctedPriceKrw": 9500, "correctedOptionLabel": "잔"}
+    body["itemDecisions"][1]["options"] = [
+        {"extractedOptionId": str(first_option.id), "optionLabel": "잔", "pourMl": None, "priceKrw": 9500},
+        {"optionLabel": "병", "priceKrw": 160000},
     ]
 
     exact = validate(db_session, review, body).items[1]
 
-    assert [(o.label, o.pour_ml, o.price_krw) for o in exact.options] == [("잔", 15, 9500), (None, 30, 17000)]
+    assert [(o.option, o.label, o.pour_ml, o.price_krw) for o in exact.options] == [
+        (first_option, "잔", None, 9500),
+        (None, "병", None, 160000),
+    ]
 
 
 def test_items_and_changes_must_each_be_decided_once(db_session, review, glenfiddich):
@@ -82,52 +88,116 @@ def test_items_and_changes_must_each_be_decided_once(db_session, review, glenfid
     }
 
 
-def test_option_decisions_must_name_the_items_options(db_session, review, glenfiddich):
+def test_options_must_name_the_lines_own_options_once(db_session, review, glenfiddich):
     body = valid_body(review, glenfiddich)
     exact, unknown = review[1][1], review[1][3]
-    body["itemDecisions"][1]["optionDecisions"] = [
-        {"extractedOptionId": str(unknown.options[0].id), "correctedPriceKrw": 1000},
-        {"extractedOptionId": str(exact.options[0].id), "correctedPriceKrw": 1000},
-        {"extractedOptionId": str(exact.options[0].id), "correctedPriceKrw": 2000},
+    body["itemDecisions"][1]["options"] = [
+        {"extractedOptionId": str(unknown.options[0].id), "priceKrw": 1000},
+        {"extractedOptionId": str(exact.options[0].id), "pourMl": 15, "priceKrw": 1000},
+        {"extractedOptionId": str(exact.options[0].id), "pourMl": 30, "priceKrw": 2000},
     ]
 
     assert field_errors(db_session, review, body) == {
-        ("itemDecisions[1].optionDecisions[0].extractedOptionId", "UNKNOWN_OPTION"),
-        ("itemDecisions[1].optionDecisions[2].extractedOptionId", "DUPLICATE_OPTION"),
+        ("itemDecisions[1].options[0].extractedOptionId", "UNKNOWN_OPTION"),
+        ("itemDecisions[1].options[2].extractedOptionId", "DUPLICATE_OPTION"),
     }
 
 
-def test_published_products_need_distinct_priced_options(db_session, review, glenfiddich):
+def test_published_options_need_distinct_label_and_pour(db_session, review, glenfiddich):
     body = valid_body(review, glenfiddich)
-    exact = review[1][1]
-    # The header line turned into a product has no options at all.
-    body["itemDecisions"][0] = {
-        "action": "select_existing_product",
-        "extractedItemId": body["itemDecisions"][0]["extractedItemId"],
-        "finalLineType": "product",
-        "productId": str(glenfiddich[15].id),
-    }
-    body["itemDecisions"][1]["optionDecisions"] = [{"extractedOptionId": str(exact.options[1].id), "correctedPourMl": 15}]
+    body["itemDecisions"][1]["options"] = [{"pourMl": 30, "priceKrw": 9000}, {"pourMl": 30, "priceKrw": 17000}]
 
-    assert field_errors(db_session, review, body) == {
-        ("itemDecisions[0].optionDecisions", "NO_PRICED_OPTION"),
-        ("itemDecisions[1].optionDecisions", "DUPLICATE_OPTION_VALUES"),
-    }
+    assert field_errors(db_session, review, body) == {("itemDecisions[1].options", "DUPLICATE_OPTION_VALUES")}
 
 
-def test_an_ignored_item_needs_no_price(db_session, review, glenfiddich):
-    unknown = review[1][3]
-    unknown.options[0].extracted_price_krw = None
-    db_session.flush()
+def test_an_ignored_items_options_are_not_compared(db_session, review, glenfiddich):
     body = valid_body(review, glenfiddich)
+    body["itemDecisions"][3]["options"] = [{"pourMl": 30, "priceKrw": 9000}, {"pourMl": 30, "priceKrw": 17000}]
     add = review[2][MenuChangeType.ADD]
     for decision in body["changeDecisions"]:
         if decision["changeId"] == str(add.id):
             decision["decision"] = "ignore"
 
-    assert validate(db_session, review, body).items[3].priced_options == ()
-    body["changeDecisions"] = [{**d, "decision": "apply"} for d in body["changeDecisions"]]
-    assert field_errors(db_session, review, body) == {("itemDecisions[3].optionDecisions", "NO_PRICED_OPTION")}
+    validate(db_session, review, body)
+
+
+# ---- publishing without a product (spec 8.10) ----
+
+
+def without_product(body, index, kind="whisky", **fields):
+    decision = body["itemDecisions"][index]
+    body["itemDecisions"][index] = {
+        "action": "publish_without_product",
+        "extractedItemId": decision["extractedItemId"],
+        "finalLineType": "product",
+        "kind": kind,
+        "options": decision.get("options") or [{"priceKrw": 12000}],
+        **fields,
+    }
+    return body
+
+
+def test_a_line_can_be_published_without_a_product(db_session, review, glenfiddich):
+    body = without_product(valid_body(review, glenfiddich), 3, kind="other")
+
+    result = validate(db_session, review, body)
+
+    unknown = result.items[3]
+    assert (unknown.is_product, unknown.is_unlinked, unknown.menu_name) == (True, True, "Unknown Distillery 25")
+    # Its proposed add can be applied.
+    assert len(result.change_decisions) == 3
+
+
+def test_a_line_without_a_product_needs_a_name_with_a_key(db_session, review, glenfiddich):
+    blank = without_product(valid_body(review, glenfiddich), 3, correctedProductName="!!")
+    # The header line has no extracted product name, so it needs a corrected one.
+    nameless = without_product(valid_body(review, glenfiddich), 0)
+
+    assert field_errors(db_session, review, blank) == {("itemDecisions[3].correctedProductName", "NOT_NORMALIZABLE")}
+    assert field_errors(db_session, review, nameless) == {("itemDecisions[0].correctedProductName", "NOT_NORMALIZABLE")}
+
+
+def test_an_unknown_kind_is_a_shape_error():
+    body = {
+        "reviewVersion": 1,
+        "itemDecisions": [
+            {
+                "action": "publish_without_product",
+                "extractedItemId": str(uuid4()),
+                "finalLineType": "product",
+                "kind": "beer",
+                "options": [{"priceKrw": 8000}],
+            }
+        ],
+        "changeDecisions": [],
+    }
+
+    with pytest.raises(ValidationError) as caught:
+        ReviewAndApplyRequest.model_validate(body)
+    assert [(field_path(tuple(e["loc"])), e["type"]) for e in caught.value.errors()] == [
+        ("itemDecisions[0].kind", "enum")
+    ]
+
+
+# ---- the catalog is the operators' (spec 2.2) ----
+
+
+def test_only_an_operator_creates_products_or_adds_aliases(db_session, review, glenfiddich):
+    body = valid_body(review, glenfiddich)
+    body["itemDecisions"][1]["aliasesToAdd"] = [{"aliasText": "글렌피딕 십이년"}]
+
+    validate(db_session, review, body)
+    assert field_errors(db_session, review, body, operator=False) == {
+        ("itemDecisions[1].aliasesToAdd", "OPERATOR_ONLY"),
+        ("itemDecisions[3].action", "OPERATOR_ONLY"),
+    }
+
+
+def test_an_owner_may_send_no_aliases(db_session, review, glenfiddich):
+    body = without_product(valid_body(review, glenfiddich), 3)
+    body["itemDecisions"][1]["aliasesToAdd"] = []
+
+    validate(db_session, review, body, operator=False)
 
 
 def test_selected_products_and_brands_must_exist(db_session, review, glenfiddich):
@@ -194,9 +264,45 @@ def test_applied_changes_need_their_item_kept_as_a_product(db_session, review, g
                 "action": "select_existing_product",
                 "finalLineType": "product",
                 "productId": str(uuid4()),
-                "optionDecisions": [{"extractedOptionId": str(uuid4()), "correctedPriceKrw": 0}],
+                "options": [{"extractedOptionId": str(uuid4()), "priceKrw": 0}],
             },
-            ("itemDecisions[0].optionDecisions[0].correctedPriceKrw", "GREATER_THAN"),
+            ("itemDecisions[0].options[0].priceKrw", "GREATER_THAN_EQUAL"),
+        ),
+        (
+            {
+                "action": "select_existing_product",
+                "finalLineType": "product",
+                "productId": str(uuid4()),
+                "options": [{"priceKrw": 100_000_000}],
+            },
+            ("itemDecisions[0].options[0].priceKrw", "LESS_THAN_EQUAL"),
+        ),
+        (
+            {"action": "select_existing_product", "finalLineType": "product", "productId": str(uuid4()), "options": []},
+            ("itemDecisions[0].options", "TOO_SHORT"),
+        ),
+        (
+            {
+                "action": "select_existing_product",
+                "finalLineType": "product",
+                "productId": str(uuid4()),
+                "options": [{"pourMl": ml, "priceKrw": 1000} for ml in range(1, 12)],
+            },
+            ("itemDecisions[0].options", "TOO_LONG"),
+        ),
+        (
+            {"action": "select_existing_product", "finalLineType": "product", "productId": str(uuid4())},
+            ("itemDecisions[0].options", "MISSING"),
+        ),
+        (
+            {
+                "action": "create_product",
+                "finalLineType": "product",
+                "brand": {"type": "new", "canonicalName": "X"},
+                "product": {"displayName": "X", "category": "gin"},
+                "options": [{"priceKrw": 1000}],
+            },
+            ("itemDecisions[0].product.category", "LITERAL_ERROR"),
         ),
         (
             {
@@ -204,6 +310,7 @@ def test_applied_changes_need_their_item_kept_as_a_product(db_session, review, g
                 "finalLineType": "product",
                 "brand": {"type": "existing"},
                 "product": {"displayName": "X"},
+                "options": [{"priceKrw": 1000}],
             },
             ("itemDecisions[0].brand.brandId", "MISSING"),
         ),
@@ -228,6 +335,7 @@ def test_names_are_trimmed_and_blank_names_rejected():
                 "finalLineType": "product",
                 "brand": {"type": "new", "canonicalName": "  New Distillery "},
                 "product": {"displayName": "   "},
+                "options": [{"priceKrw": 1000}],
             }
         ],
         "changeDecisions": [],

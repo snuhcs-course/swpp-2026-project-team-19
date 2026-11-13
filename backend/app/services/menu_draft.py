@@ -22,6 +22,7 @@ from app.models import (
     ResolutionCandidate,
 )
 from app.services.menu_diff import CurrentEntry, DraftChange, ProposedEntry, compute_draft_changes
+from app.services.menu_items import name_key
 
 
 def product_items(session: Session, menu_import: MenuImport) -> list[ExtractedItem]:
@@ -53,6 +54,7 @@ def current_board(session: Session, bar_id: UUID) -> list[CurrentEntry]:
             bar_menu_item_id=entry.bar_menu_item_id,
             product_id=entry.bar_menu_item.product_id,
             options=tuple((o.option_label, o.pour_ml, o.price_krw) for o in entry.options),
+            name_key=entry.bar_menu_item.name_key,
         )
         for entry in board.entries
     ]
@@ -76,6 +78,7 @@ def build_draft(session: Session, menu_import: MenuImport) -> list[DraftChange]:
             extracted_item_id=item.id,
             product_id=proposed_products.get(item.id),
             options=tuple((o.extracted_option_label, o.extracted_pour_ml, o.extracted_price_krw) for o in item.options),
+            name_key=name_key(item.extracted_product_name or ""),
         )
         for item in items
     ]

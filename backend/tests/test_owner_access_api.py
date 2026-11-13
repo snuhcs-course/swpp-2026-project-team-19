@@ -38,9 +38,24 @@ def test_the_owner_uploads_reviews_and_publishes_the_menu(client, db_session, su
     brands = client.get("/api/catalog/brands", params={"query": "글렌피딕"}, headers=owner)
     assert [brand["canonicalName"] for brand in brands.json()["items"]] == ["Glenfiddich"]
 
-    response = client.post(
-        f"/api/menu-imports/{sample.menu_import.id}/review-and-apply", headers=owner, json=valid_body(sample, glenfiddich)
-    )
+    # Only an operator may create the new product the sample body creates (spec 2.2, 8.1).
+    url = f"/api/menu-imports/{sample.menu_import.id}/review-and-apply"
+    refused = client.post(url, headers=owner, json=valid_body(sample, glenfiddich))
+    assert refused.status_code == 422, refused.text
+    assert [(e["path"], e["code"]) for e in refused.json()["error"]["fieldErrors"]] == [
+        ("itemDecisions[3].action", "OPERATOR_ONLY")
+    ]
+    body = valid_body(sample, glenfiddich)
+    unknown = body["itemDecisions"][3]
+    body["itemDecisions"][3] = {
+        "action": "publish_without_product",
+        "extractedItemId": unknown["extractedItemId"],
+        "finalLineType": "product",
+        "kind": "whisky",
+        "options": unknown["options"],
+    }
+
+    response = client.post(url, headers=owner, json=body)
 
     assert response.status_code == 200, response.text
     db_session.expire_all()
@@ -49,10 +64,13 @@ def test_the_owner_uploads_reviews_and_publishes_the_menu(client, db_session, su
     assert board.last_import_id == sample.menu_import.id
     listed = client.get(f"/api/bars/{bar.id}/menu-imports", headers=owner).json()["items"]
     assert [item["status"] for item in listed] == ["applied"]
-    # The brand and product the review created record the owner who created them.
-    created = db_session.scalar(select(Product).where(Product.created_from_extracted_item_id == sample.items[3].id))
-    owner_id = db_session.scalar(select(User.id).where(User.auth_subject == OWNER_SUBJECT))
-    assert (created.created_by_user_id, created.brand.created_by_user_id) == (owner_id, owner_id)
+    # The owner's review grew no catalog: the new whisky is on the menu without a product.
+    assert db_session.scalar(select(Product).where(Product.created_from_extracted_item_id == sample.items[3].id)) is None
+    menu = client.get(f"/api/bars/{bar.id}/menu").json()["items"]
+    assert [(i["displayName"], i["productId"], i["kind"]) for i in menu] == [
+        ("글렌피딕 12년", str(glenfiddich[12].id), "whisky"),
+        ("Unknown Distillery 25", None, "whisky"),
+    ]
 
 
 def test_the_owner_cancels_an_import_and_uploads_again(client, db_session, supabase, reviewer, image_storage):

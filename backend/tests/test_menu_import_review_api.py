@@ -242,8 +242,9 @@ def test_review_lists_items_of_every_image_in_order(client, db_session, image_st
 
     assert [image["imageOrder"] for image in body["images"]] == [1, 2]
     assert [len(image["items"]) for image in body["images"]] == [5, 5]
-    # Repeated products in the second photo add no changes; each unmatched line does.
-    assert [c["changeType"] for c in body["proposedChanges"]] == ["add", "add", "add"]
+    # Repeated lines in the second photo add no changes: the same product, or for the unmatched line the
+    # same name key, which is published as the same item without a product (spec 5.4).
+    assert [c["changeType"] for c in body["proposedChanges"]] == ["add", "add"]
 
 
 def test_applied_import(client, db_session, operator):

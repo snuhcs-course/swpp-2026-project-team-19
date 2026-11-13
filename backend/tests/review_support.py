@@ -65,6 +65,19 @@ def upload_sample_review(
     return SampleReview(menu_import, bar, board, load_items(session, menu_import), changes)
 
 
+def options_of(item: ExtractedItem) -> list[dict]:
+    """The line's extracted options as a final option list (spec 8.1), unchanged."""
+    return [
+        {
+            "extractedOptionId": str(option.id),
+            "optionLabel": option.extracted_option_label,
+            "pourMl": option.extracted_pour_ml,
+            "priceKrw": option.extracted_price_krw,
+        }
+        for option in item.options
+    ]
+
+
 def valid_body(sample: SampleReview, glenfiddich: dict[int, Product]) -> dict:
     """Keep 12 (exact), reject the ambiguous line, create Unknown Distillery 25 with a new
     brand, confirm the header and description, and apply every change."""
@@ -78,6 +91,7 @@ def valid_body(sample: SampleReview, glenfiddich: dict[int, Product]) -> dict:
                 "extractedItemId": str(exact.id),
                 "finalLineType": "product",
                 "productId": str(glenfiddich[12].id),
+                "options": options_of(exact),
             },
             {"action": "reject", "extractedItemId": str(conflict.id), "finalLineType": "product"},
             {
@@ -86,6 +100,7 @@ def valid_body(sample: SampleReview, glenfiddich: dict[int, Product]) -> dict:
                 "finalLineType": "product",
                 "brand": {"type": "new", "canonicalName": "Unknown Distillery"},
                 "product": {"displayName": "Unknown Distillery 25", "ageYears": 25},
+                "options": options_of(unknown),
             },
             {"action": "confirm_non_product", "extractedItemId": str(description.id), "finalLineType": "description"},
         ],

@@ -1,16 +1,16 @@
 """Checks on a review submission that need the import's rows (API spec 8.7). Reads only.
 
 The request body's own shape is checked by the schema. This checks the decisions against
-the import: every item and pending change decided exactly once, options belong to their
-item, a published product has a priced option, selected products and brands exist, names
-normalize to something, and applied changes point at items kept as products. All problems
-are reported together as one 422.
+the import: every item and pending change decided exactly once, options come from their own
+item and have different label and pour size, selected products and brands exist, names
+normalize to something, only operators grow the catalog (OPERATOR_ONLY), and applied changes
+point at items published as menu items. All problems are reported together as one 422.
 
 State checks (status, reviewVersion, board changes) and duplicate checks for new catalog
 entries happen in the apply step, inside its transaction.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from uuid import UUID
 
 from sqlalchemy import select
@@ -19,10 +19,13 @@ from sqlalchemy.orm import Session, selectinload
 from app.core.errors import validation_failed_fields
 from app.core.normalize import normalize
 from app.models import (
+    BarMenuItem,
     Brand,
     ExtractedItem,
     ExtractedOption,
     ExtractionRun,
+    MenuBoard,
+    MenuBoardEntry,
     MenuChangeDecision,
     MenuImage,
     MenuImport,
@@ -34,19 +37,24 @@ from app.schemas.menu_review import (
     ItemDecision,
     ProductAliasInput,
     ProductDecision,
+    PublishWithoutProduct,
     ReviewAndApplyRequest,
     SelectExistingProduct,
 )
+from app.services.menu_items import ItemKey, item_key, name_key
+
+PRODUCT_DECISIONS = (SelectExistingProduct, CreateProduct, PublishWithoutProduct)
 
 
 @dataclass(frozen=True)
 class FinalOption:
-    """An extracted option with the reviewer's corrections applied."""
+    """One option of the line's final list (spec 8.1), with the extracted option it comes from (None when
+    the reviewer added it)."""
 
-    option: ExtractedOption
+    option: ExtractedOption | None
     label: str | None
     pour_ml: int | None
-    price_krw: int | None
+    price_krw: int
 
 
 @dataclass(frozen=True)
@@ -55,17 +63,23 @@ class ReviewedItem:
     decision: ItemDecision
     # Position in itemDecisions, for error paths.
     index: int
-    # Every option of a product decision in display order; empty otherwise.
+    # The final options of a decision that publishes the line, in display order; empty otherwise.
     options: tuple[FinalOption, ...] = ()
 
     @property
     def is_product(self) -> bool:
-        return isinstance(self.decision, (SelectExistingProduct, CreateProduct))
+        """Published as a menu item, with a product or without one."""
+        return isinstance(self.decision, PRODUCT_DECISIONS)
 
     @property
-    def priced_options(self) -> tuple[FinalOption, ...]:
-        """The options that can be published (menu_entry_options.price_krw is required)."""
-        return tuple(o for o in self.options if o.price_krw is not None)
+    def is_unlinked(self) -> bool:
+        return isinstance(self.decision, PublishWithoutProduct)
+
+    @property
+    def menu_name(self) -> str | None:
+        """The name on the menu: the corrected name, else the extracted one (a line retyped as a product
+        may have none; a product decision then falls back to the product's name)."""
+        return self.decision.correctedProductName or self.item.extracted_product_name
 
 
 @dataclass(frozen=True)
@@ -76,6 +90,8 @@ class ValidatedReview:
     change_decisions: dict[UUID, MenuChangeDecision]
     # Existing products selected by select_existing_product decisions.
     products: dict[UUID, Product]
+    # Lines not published because the reviewer ignored their change (see ignored_lines).
+    ignored_lines: set[UUID] = field(default_factory=set)
 
 
 def load_items(session: Session, menu_import: MenuImport) -> list[ExtractedItem]:
@@ -120,44 +136,88 @@ def _check_aliases(errors: _Errors, path: str, aliases: list[ProductAliasInput])
         _check_normalizable(errors, f"{path}[{index}].aliasText", alias.aliasText)
 
 
-def _corrected(corrected, extracted):
-    """A null correction keeps the extracted value."""
-    return extracted if corrected is None else corrected
-
-
 def _final_options(
     errors: _Errors, path: str, item: ExtractedItem, decision: ProductDecision
 ) -> tuple[FinalOption, ...]:
+    """The decision's options as sent. An extractedOptionId must name one of the line's own options, once."""
     by_id = {option.id: option for option in item.options}
-    corrections = {}
-    for index, correction in enumerate(decision.optionDecisions):
-        option_path = f"{path}.optionDecisions[{index}].extractedOptionId"
-        if correction.extractedOptionId not in by_id:
-            errors.add(option_path, "UNKNOWN_OPTION", "이 항목의 옵션이 아닙니다.")
-        elif correction.extractedOptionId in corrections:
-            errors.add(option_path, "DUPLICATE_OPTION", "같은 옵션에 수정이 두 번 있습니다.")
-        else:
-            corrections[correction.extractedOptionId] = correction
+    seen: set[UUID] = set()
     final = []
-    for option in item.options:
-        correction = corrections.get(option.id)
-        if correction is None:
-            final.append(
-                FinalOption(option, option.extracted_option_label, option.extracted_pour_ml, option.extracted_price_krw)
-            )
-            continue
-        final.append(
-            FinalOption(
-                option=option,
-                label=_corrected(correction.correctedOptionLabel, option.extracted_option_label),
-                pour_ml=_corrected(correction.correctedPourMl, option.extracted_pour_ml),
-                price_krw=_corrected(correction.correctedPriceKrw, option.extracted_price_krw),
-            )
-        )
+    for index, sent in enumerate(decision.options):
+        source = None
+        if sent.extractedOptionId is not None:
+            option_path = f"{path}.options[{index}].extractedOptionId"
+            source = by_id.get(sent.extractedOptionId)
+            if source is None:
+                errors.add(option_path, "UNKNOWN_OPTION", "이 항목의 옵션이 아닙니다.")
+            elif sent.extractedOptionId in seen:
+                errors.add(option_path, "DUPLICATE_OPTION", "같은 옵션이 두 번 있습니다.")
+            seen.add(sent.extractedOptionId)
+        final.append(FinalOption(source, sent.optionLabel, sent.pourMl, sent.priceKrw))
     return tuple(final)
 
 
-def validate_review(session: Session, menu_import: MenuImport, request: ReviewAndApplyRequest) -> ValidatedReview:
+def proposal_key(item: ExtractedItem) -> ItemKey:
+    """What the draft proposed for the line: its rank-1 product, else its extracted name's key (spec 5.4)."""
+    if item.candidates:
+        return item_key(item.candidates[0].product_id, None)
+    return item_key(None, name_key(item.extracted_product_name or ""))
+
+
+def _final_key(item: ExtractedItem, decision: ItemDecision) -> ItemKey | None:
+    """What the reviewer decided the line is; None when it is no menu item or a product still to be created
+    (a new product is never what the draft proposed)."""
+    if isinstance(decision, SelectExistingProduct):
+        return item_key(decision.productId, None)
+    if isinstance(decision, PublishWithoutProduct):
+        return item_key(None, name_key(decision.correctedProductName or item.extracted_product_name or ""))
+    return None
+
+
+def _board_keys(session: Session, bar_id: UUID) -> dict[UUID, ItemKey]:
+    """The key of every item on the bar's current board."""
+    rows = session.execute(
+        select(BarMenuItem.id, BarMenuItem.product_id, BarMenuItem.name_key)
+        .join(MenuBoardEntry, MenuBoardEntry.bar_menu_item_id == BarMenuItem.id)
+        .join(MenuBoard, MenuBoard.id == MenuBoardEntry.menu_board_id)
+        .where(MenuBoard.bar_id == bar_id)
+    ).all()
+    return {item_id: item_key(product_id, key) for item_id, product_id, key in rows}
+
+
+def ignored_lines(
+    changes: list[MenuImportChange],
+    change_decisions: dict[UUID, MenuChangeDecision],
+    final_keys: dict[UUID, ItemKey | None],
+    proposal_keys: dict[UUID, ItemKey],
+    board_keys: dict[UUID, ItemKey],
+) -> set[UUID]:
+    """Lines not published because their change was ignored (spec 8.7): only while the line's final
+    decision is still the change's target, which is what the line was proposed as, or the board item the
+    change was compared with. A line the reviewer decided to be something else follows that decision.
+    A line proposed without a product has no such target: its change adds the line as whatever it is
+    decided to be (spec 5.4), so ignoring it always skips the line."""
+    skipped = set()
+    for change in changes:
+        line = change.extracted_item_id
+        if line is None or change_decisions.get(change.id) != MenuChangeDecision.IGNORE:
+            continue
+        proposed = proposal_keys.get(line)
+        if proposed is None or proposed[0] == "name":
+            skipped.add(line)
+            continue
+        targets = {proposed}
+        if change.bar_menu_item_id in board_keys:
+            targets.add(board_keys[change.bar_menu_item_id])
+        if final_keys.get(line) in targets:
+            skipped.add(line)
+    return skipped
+
+
+def validate_review(
+    session: Session, menu_import: MenuImport, request: ReviewAndApplyRequest, *, operator: bool
+) -> ValidatedReview:
+    """`operator`: whether the caller is an operator, who alone may grow the shared catalog (spec 2.2)."""
     errors = _Errors()
     items = load_items(session, menu_import)
     items_by_id = {item.id: item for item in items}
@@ -190,12 +250,15 @@ def validate_review(session: Session, menu_import: MenuImport, request: ReviewAn
     if missing := len(changes) - len(change_decisions):
         errors.add("changeDecisions", "MISSING_CHANGE", f"결정하지 않은 변경 제안이 {missing}개 있습니다.")
 
-    # An item whose proposed add/update is ignored is not published, so it needs no price.
-    ignored_items = {
-        change.extracted_item_id
-        for change in changes
-        if change.extracted_item_id and change_decisions.get(change.id) == MenuChangeDecision.IGNORE
-    }
+    # A line whose ignored change still targets what it was decided to be is not published, so its options
+    # are not compared.
+    ignored_items = ignored_lines(
+        changes,
+        change_decisions,
+        {item_id: _final_key(items_by_id[item_id], decision) for item_id, (_, decision) in decided.items()},
+        {item.id: proposal_key(item) for item in items},
+        _board_keys(session, menu_import.bar_id),
+    )
 
     selected_ids = {d.productId for _, d in decided.values() if isinstance(d, SelectExistingProduct)}
     products = {p.id: p for p in session.scalars(select(Product).where(Product.id.in_(selected_ids)))}
@@ -210,21 +273,27 @@ def validate_review(session: Session, menu_import: MenuImport, request: ReviewAn
             continue
         index, decision = decided[item.id]
         path = f"itemDecisions[{index}]"
-        if not isinstance(decision, (SelectExistingProduct, CreateProduct)):
+        if not isinstance(decision, PRODUCT_DECISIONS):
             reviewed.append(ReviewedItem(item=item, decision=decision, index=index))
             continue
 
         options = _final_options(errors, path, item, decision)
         entry = ReviewedItem(item=item, decision=decision, index=index, options=options)
         if item.id not in ignored_items:
-            priced = entry.priced_options
-            if not priced:
-                errors.add(f"{path}.optionDecisions", "NO_PRICED_OPTION", "가격이 있는 옵션이 하나 이상 필요합니다.")
-            keys = [(o.label, o.pour_ml) for o in priced]
+            keys = [(o.label, o.pour_ml) for o in options]
             if len(keys) != len(set(keys)):
-                errors.add(f"{path}.optionDecisions", "DUPLICATE_OPTION_VALUES", "옵션명과 용량이 같은 옵션이 있습니다.")
-        if decision.correctedProductName is not None:
+                errors.add(f"{path}.options", "DUPLICATE_OPTION_VALUES", "옵션명과 용량이 같은 옵션이 있습니다.")
+        if isinstance(decision, PublishWithoutProduct):
+            # Known only by its menu name, which must have a name key (spec 8.7).
+            if not name_key(entry.menu_name or ""):
+                errors.add(f"{path}.correctedProductName", "NOT_NORMALIZABLE", "메뉴 이름으로 쓸 수 있는 글자가 없습니다.")
+        elif decision.correctedProductName is not None:
             _check_normalizable(errors, f"{path}.correctedProductName", decision.correctedProductName)
+
+        if isinstance(decision, CreateProduct) and not operator:
+            errors.add(f"{path}.action", "OPERATOR_ONLY", "새 상품은 운영자만 만들 수 있습니다.")
+        if isinstance(decision, SelectExistingProduct) and decision.aliasesToAdd and not operator:
+            errors.add(f"{path}.aliasesToAdd", "OPERATOR_ONLY", "별칭은 운영자만 추가할 수 있습니다.")
 
         if isinstance(decision, SelectExistingProduct):
             product = products.get(decision.productId)
@@ -233,7 +302,7 @@ def validate_review(session: Session, menu_import: MenuImport, request: ReviewAn
             elif not product.is_active:
                 errors.add(f"{path}.productId", "PRODUCT_INACTIVE", "비활성 상품은 메뉴에 연결할 수 없습니다.")
             _check_aliases(errors, f"{path}.aliasesToAdd", decision.aliasesToAdd)
-        else:
+        elif isinstance(decision, CreateProduct):
             if decision.brand.type == "existing":
                 if decision.brand.brandId not in known_brands:
                     errors.add(f"{path}.brand.brandId", "BRAND_NOT_FOUND", "브랜드를 찾을 수 없습니다.")
@@ -258,4 +327,6 @@ def validate_review(session: Session, menu_import: MenuImport, request: ReviewAn
 
     if errors.items:
         raise validation_failed_fields(errors.items)
-    return ValidatedReview(items=reviewed, changes=changes, change_decisions=change_decisions, products=products)
+    return ValidatedReview(
+        items=reviewed, changes=changes, change_decisions=change_decisions, products=products, ignored_lines=ignored_items
+    )

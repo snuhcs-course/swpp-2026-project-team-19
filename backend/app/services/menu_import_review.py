@@ -19,6 +19,7 @@ from app.models import (
     MenuImage,
     MenuImport,
     MenuImportChange,
+    MenuItemKind,
     PipelineStatus,
     Product,
 )
@@ -138,6 +139,13 @@ def source_boxes(raw_output: Any) -> dict[int, list[int]]:
     return boxes
 
 
+def extracted_kind(item: ExtractedItem) -> MenuItemKind | None:
+    """The AI's kind of a product line, whisky when the AI gave none (spec 5.4); None for other lines."""
+    if item.extracted_line_type != LineType.PRODUCT:
+        return None
+    return item.extracted_kind or MenuItemKind.WHISKY
+
+
 def _review_item(item: ExtractedItem, products: dict[UUID, Product], boxes: dict[int, list[int]]) -> ReviewItem:
     effective = item.corrected_line_type or item.extracted_line_type
     return ReviewItem(
@@ -146,6 +154,7 @@ def _review_item(item: ExtractedItem, products: dict[UUID, Product], boxes: dict
         rawText=item.raw_text,
         sourceBox=boxes.get(item.item_order),
         extractedLineType=item.extracted_line_type,
+        extractedKind=extracted_kind(item),
         correctedLineType=item.corrected_line_type,
         effectiveLineType=effective,
         initialResolutionStatus=item.initial_resolution_status,
@@ -210,7 +219,7 @@ def _review(session: Session, menu_import: MenuImport, storage: ImageStorage, ba
     board_entries = {entry.bar_menu_item_id: entry for entry in (board.entries if board else [])}
 
     product_ids = {c.product_id for item in items.values() for c in item.candidates}
-    product_ids |= {entry.bar_menu_item.product_id for entry in board_entries.values()}
+    product_ids |= {e.bar_menu_item.product_id for e in board_entries.values() if e.bar_menu_item.product_id}
     products = {
         product.id: product
         for product in session.scalars(
@@ -225,7 +234,13 @@ def _review(session: Session, menu_import: MenuImport, storage: ImageStorage, ba
         before = (
             ChangeBefore(
                 productId=entry.bar_menu_item.product_id,
-                displayName=products[entry.bar_menu_item.product_id].display_name,
+                kind=entry.bar_menu_item.kind,
+                # An item without a product is known by its menu name (spec 3.9).
+                displayName=(
+                    products[entry.bar_menu_item.product_id].display_name
+                    if entry.bar_menu_item.product_id
+                    else entry.display_name
+                ),
                 options=[
                     ChangeBeforeOption(
                         menuEntryOptionId=o.id, optionLabel=o.option_label, pourMl=o.pour_ml, priceKrw=o.price_krw
@@ -241,6 +256,7 @@ def _review(session: Session, menu_import: MenuImport, storage: ImageStorage, ba
             product_id = item.candidates[0].product_id if item.candidates else None
             after = ChangeAfter(
                 productId=product_id,
+                kind=extracted_kind(item) or MenuItemKind.WHISKY,
                 displayName=products[product_id].display_name if product_id else item.extracted_product_name,
                 options=[
                     ChangeAfterOption(
