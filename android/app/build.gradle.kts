@@ -66,13 +66,19 @@ android {
         buildConfig = true
     }
 
-    // Robolectric renders Compose screens on the JVM for the opt-in UX screenshot test.
-    // The screenshot test is skipped unless -PbmUxScreenshots=true is passed.
+    // Robolectric UX screenshots are an opt-in visual artifact, NOT regular
+    // unit tests. Exclude the class from normal CI instead of silently
+    // counting three Assume skips, which violates our test-inventory policy.
+    // Keep the original explicit command:
+    // ./gradlew :app:testDebugUnitTest --tests '*UxV18ScreenshotTest*' -PbmUxScreenshots=true
     testOptions {
         unitTests.isIncludeAndroidResources = true
         unitTests.all {
-            it.systemProperty("bm.ux.screenshots",
-                providers.gradleProperty("bmUxScreenshots").orNull ?: "false")
+            val screenshots = providers.gradleProperty("bmUxScreenshots").orNull == "true"
+            if (!screenshots) {
+                it.filter.excludeTestsMatching("com.zerotoone.bottlemap.ux.UxV18ScreenshotTest")
+            }
+            it.systemProperty("bm.ux.screenshots", screenshots.toString())
             it.systemProperty("bm.ux.screenshotDir", layout.buildDirectory.dir("ux-screenshots").get().asFile.path)
         }
     }
