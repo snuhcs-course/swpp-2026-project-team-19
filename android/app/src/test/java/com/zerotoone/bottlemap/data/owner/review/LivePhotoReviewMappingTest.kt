@@ -216,6 +216,25 @@ class LivePhotoReviewMappingTest {
         assertEquals(null,actual.last().pourMl)
     }
 
+    @Test fun missingSecondaryBeerPriceBlocksPublishUntilOwnerEditsThatOption() {
+        val first=ReviewOptionDto("beer-price-1",1,"잔",null,8000)
+        val missing=ReviewOptionDto("beer-price-2",2,"병",null,null)
+        val dto=item(options=listOf(first,missing),status="unmatched",proposedId=null)
+            .copy(extractedKind="other",candidates=emptyList(),newProductDraft=null)
+        val review=mapServerPhotoReview(response(dto),fixture())
+        val card=review.items.single()
+        assertEquals(2,PhotoReviewRules.countOptions(card))
+        assertFalse(PhotoReviewRules.stats(review).canPublish)
+        val fixed=PhotoReviewRules.editOption(card,
+            PhotoReviewRules.OptionField.PRICE,0,"13000")
+        assertTrue(PhotoReviewRules.problems(fixed).isEmpty())
+        val decision=mapConfirmedReviewDecision(fixed,dto,30.0,emptyMap())
+        val options=requireNotNull(decision.correctedOptions)
+        assertEquals(listOf("beer-price-1","beer-price-2"),options.map { it.optionId })
+        assertEquals(listOf(8000,13000),options.map { it.priceKrw })
+        assertNull(options[1].pourMl)
+    }
+
     @Test fun nonWhiskyKindNeverUsesStaleCatalogSuggestion() {
         val dto=item().copy(extractedKind="other")
         val card=mapServerPhotoReview(response(dto),fixture()).items.single()
