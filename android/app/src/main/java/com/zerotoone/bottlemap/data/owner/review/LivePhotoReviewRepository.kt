@@ -11,6 +11,7 @@ import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewRules
 import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewState
 import com.zerotoone.bottlemap.ui.owner.review.ReviewItem
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.first
 import java.text.Normalizer
 
 /**
@@ -26,10 +27,11 @@ import java.text.Normalizer
  */
 class LivePhotoReviewRepository(
     private val owner: OwnerMockViewModel,
-    private val importId: String,
+    private val importId: String?,
     private val remote: OwnerRepository = OwnerRepository(),
 ) : PhotoReviewRepository {
     private var loaded: MenuImportStatusDto? = null
+    private var activeImportId: String? = null
     private var inMemoryDraft: PhotoReviewState? = null
 
     private fun snapshot(): MockOwnerSnapshot = when (val current = owner.state.value) {
@@ -38,19 +40,36 @@ class LivePhotoReviewRepository(
         else -> error("매장 정보를 불러오는 중이에요. 다시 시도해 주세요.")
     }
 
+    private suspend fun resolveImportId(): String {
+        importId?.let { return it }
+        val current = owner.state.first { it !is MockOwnerLoadState.Loading }
+        val snap = when (current) {
+            is MockOwnerLoadState.Ready -> current.snapshot
+            is MockOwnerLoadState.Empty -> current.snapshot
+            is MockOwnerLoadState.Error -> error(current.message)
+            MockOwnerLoadState.Loading -> error("매장 정보를 불러오는 중이에요.")
+        }
+        val barId = snap.selectedBarId ?: snap.bars.firstOrNull()?.barId
+        return snap.imports.lastOrNull {
+            it.barId == barId && it.status == MockImportStatus.READY_FOR_REVIEW
+        }?.menuImportId ?: error("검수할 메뉴판 작업이 없어요. 메뉴 관리에서 다시 선택해 주세요.")
+    }
+
     override suspend fun loadReview(): PhotoReviewState {
-        val status = owner.pollPhotoImportLive(importId)
+        val id = resolveImportId()
+        activeImportId = id
+        val status = owner.pollPhotoImportLive(id)
         require(status == MockImportStatus.READY_FOR_REVIEW) {
             "메뉴판 분석이 아직 완료되지 않았어요."
         }
-        val response = remote.getMenuImport(importId)
-        require(response.menuImportId == importId &&
+        val response = remote.getMenuImport(id)
+        require(response.menuImportId == id &&
             response.status == "ready_for_review" && response.reviewVersion != null) {
             "검수할 수 없는 메뉴판 작업이에요."
         }
         val current = snapshot()
         require(current.imports.any {
-            it.menuImportId == importId && it.reviewVersion == response.reviewVersion
+            it.menuImportId == id && it.reviewVersion == response.reviewVersion
         }) { "검수 버전이 변경됐어요. 다시 불러와 주세요." }
         val state = mapServerPhotoReview(response, current)
         val restored = inMemoryDraft.takeIf {
@@ -98,7 +117,8 @@ class LivePhotoReviewRepository(
             "확인이 필요한 메뉴를 먼저 검수해 주세요."
         }
         val original = loaded ?: error("검수 데이터를 먼저 불러와 주세요.")
-        val latest = remote.getMenuImport(importId)
+        val id = activeImportId ?: error("검수 작업을 먼저 불러와 주세요.")
+        val latest = remote.getMenuImport(id)
         require(latest.status == "ready_for_review" &&
             latest.reviewVersion == original.reviewVersion) {
             "검수 버전이 달라졌어요. 다시 불러와 확인해 주세요."
@@ -136,12 +156,12 @@ class LivePhotoReviewRepository(
         }
         val version = requireNotNull(original.reviewVersion)
         decisions.forEach { (itemId, decision) ->
-            owner.review(importId, itemId, version, decision)
+            owner.review(id, itemId, version, decision)
         }
         try {
             // Existing tested production path preserves add-only semantics,
             // discounts, and correct post-commit success/error boundaries.
-            owner.publishPhotoImportLive(importId, version)
+            owner.publishPhotoImportLive(id, version)
         } catch (cancelled: CancellationException) {
             throw cancelled
         }
