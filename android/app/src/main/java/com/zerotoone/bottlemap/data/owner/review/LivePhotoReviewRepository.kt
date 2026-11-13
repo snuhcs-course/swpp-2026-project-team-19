@@ -112,6 +112,18 @@ class LivePhotoReviewRepository(
         owner.saveBarLive(bar.copy(defaultPourMl = ml))
     }
 
+    override suspend fun refreshSourcePhotoUrl(itemId: String): String? {
+        val importId = activeImportId ?: return null
+        val version = loaded?.reviewVersion ?: return null
+        val current = remote.getMenuImport(importId)
+        require(current.reviewVersion == version) {
+            "검수 버전이 변경됐어요. 다시 검수 정보를 불러와 주세요."
+        }
+        return current.images.firstOrNull { image ->
+            image.items.any { it.extractedItemId == itemId }
+        }?.imageUrl
+    }
+
     /** This is an in-memory draft only, not a fake server-side save. */
     override suspend fun saveDraft(state: PhotoReviewState) {
         inMemoryDraft = state
