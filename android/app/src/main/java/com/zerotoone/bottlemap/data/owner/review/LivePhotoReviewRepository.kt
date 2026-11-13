@@ -32,6 +32,9 @@ import java.text.Normalizer
 /** Only GET for this exact import may establish that publishing already completed. */
 class ReviewAlreadyAppliedException : IllegalStateException("이미 게시된 메뉴판 작업이에요.")
 
+/** Typed error for preflight reviewVersion mismatches (distinct from field validation). */
+class ReviewVersionConflictException : IllegalStateException("검수 버전이 달라졌어요. 다시 불러와 확인해 주세요.")
+
 internal fun reviewerCandidateConflicts(
     extractedAge: Int?, extractedEdition: String?,
     candidateAge: Int?, candidateEdition: String?,
@@ -240,10 +243,10 @@ class LivePhotoReviewRepository(
             finishPublishedDraft(id)
             return
         }
-        require(latest.menuImportId == id &&
-            latest.status == "ready_for_review" &&
-            latest.reviewVersion == original.reviewVersion) {
-            "검수 버전이 달라졌어요. 다시 불러와 확인해 주세요."
+        if (latest.reviewVersion != original.reviewVersion)
+            throw ReviewVersionConflictException()
+        require(latest.menuImportId == id && latest.status == "ready_for_review") {
+            "검수할 수 없는 메뉴판 작업이에요."
         }
         val rawItems = latest.images.flatMap { it.items }
         val cards = state.items.associateBy { it.id }

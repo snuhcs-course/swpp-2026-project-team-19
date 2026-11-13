@@ -9,6 +9,7 @@ import com.zerotoone.bottlemap.network.BarMenuResponseDto
 import com.zerotoone.bottlemap.network.OwnedBarDto
 import com.zerotoone.bottlemap.network.OwnerApplicationDto
 import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewRules
+import com.zerotoone.bottlemap.data.owner.review.ReviewVersionConflictException
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
@@ -945,7 +946,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
             ?: error("메뉴판 작업이 없어요.")
         val original = remote.getMenuImport(importId)
         require(original.status == "ready_for_review") { "검수할 수 없는 서버 작업이에요." }
-        require(original.reviewVersion == version) { "REVIEW_OUTDATED" }
+        if (original.reviewVersion != version) throw ReviewVersionConflictException()
         require(conflictingReviewedPhotoPrices(job).isEmpty()) {
             "같은 메뉴·용량에 다른 가격을 입력했어요. 가격을 하나로 맞춘 후 게시해 주세요."
         }

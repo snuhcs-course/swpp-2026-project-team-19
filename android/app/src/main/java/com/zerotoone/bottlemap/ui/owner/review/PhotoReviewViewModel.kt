@@ -7,6 +7,7 @@ import com.zerotoone.bottlemap.network.BottleMapApiException
 import com.zerotoone.bottlemap.network.menuWriteErrorText
 import com.zerotoone.bottlemap.data.owner.review.PhotoReviewRepository
 import com.zerotoone.bottlemap.data.owner.review.ReviewAlreadyAppliedException
+import com.zerotoone.bottlemap.data.owner.review.ReviewVersionConflictException
 import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewRules.OptionField
 import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewRules.RematchOutcome
 import kotlinx.coroutines.CancellationException
@@ -45,8 +46,8 @@ internal fun classifyPublishFailure(error: Throwable): PublishFailure {
     return when {
         api?.httpStatus == 401 || api?.code == "UNAUTHORIZED" -> PublishFailure.AUTH
         api?.httpStatus == 403 -> PublishFailure.FORBIDDEN
-        api?.httpStatus == 409 || error.message == "REVIEW_OUTDATED" ->
-            PublishFailure.CONFLICT
+        api?.httpStatus == 409 || error is ReviewVersionConflictException ||
+            error.message == "REVIEW_OUTDATED" -> PublishFailure.CONFLICT
         api?.httpStatus == 422 || error is IllegalArgumentException ->
             PublishFailure.VALIDATION
         api?.code == "NETWORK_ERROR" -> PublishFailure.NETWORK
@@ -90,16 +91,22 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
 
     fun reload() {
         if (_publishing.value) return
+        // Invalidate all queued writes before the repository changes its loaded
+        // reviewVersion. Also wait for any already-running save to finish at the
+        // old version; otherwise it could persist stale decisions as the new one.
+        ++latestDraftRevision
         _load.value = PhotoReviewLoad.Loading
         viewModelScope.launch {
-            _load.value = try {
-                PhotoReviewLoad.Ready(repository.loadReview())
-            } catch (applied: ReviewAlreadyAppliedException) {
-                PhotoReviewLoad.Applied
-            } catch (cancelled: CancellationException) {
-                throw cancelled
-            } catch (error: Exception) {
-                PhotoReviewLoad.Error(error.message ?: "검수 정보를 불러오지 못했어요.")
+            draftSaveMutex.withLock {
+                _load.value = try {
+                    PhotoReviewLoad.Ready(repository.loadReview())
+                } catch (applied: ReviewAlreadyAppliedException) {
+                    PhotoReviewLoad.Applied
+                } catch (cancelled: CancellationException) {
+                    throw cancelled
+                } catch (error: Exception) {
+                    PhotoReviewLoad.Error(error.message ?: "검수 정보를 불러오지 못했어요.")
+                }
             }
         }
     }
