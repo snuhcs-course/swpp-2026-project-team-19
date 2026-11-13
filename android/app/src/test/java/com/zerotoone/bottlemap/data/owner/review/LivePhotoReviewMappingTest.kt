@@ -126,6 +126,24 @@ class LivePhotoReviewMappingTest {
             decision.correctedOptions!!.map { it.optionId })
     }
 
+    @Test fun replacingOcrServingWithManualOneKeepsExclusionAndNewIdentity() {
+        val dto = item(options = listOf(
+            option("opt-1", 30, 15000),
+            option("opt-2", 45, 22000).copy(optionOrder = 2),
+        ))
+        val original = mapServerPhotoReview(response(dto), fixture()).items.single()
+        val updated = PhotoReviewRules.removeOption(original, 0).copy(
+            options = listOf(
+                com.zerotoone.bottlemap.ui.owner.review.ReviewOption(60.0, 27000.0)
+            ), priceChoice = PriceChoice.PHOTO,
+        )
+        val decision = mapConfirmedReviewDecision(updated, dto, 30.0, emptyMap())
+        assertEquals(listOf("opt-2"), decision.excludedOptionIds)
+        assertEquals("opt-1", decision.correctedOptions!![0].optionId)
+        assertTrue(decision.correctedOptions!![1].optionId.startsWith("manual-"))
+        assertEquals(60, decision.correctedOptions!![1].pourMl)
+    }
+
     @Test fun missingPourUsesConfiguredBarDefaultInEveryOption() {
         val options=listOf(option("opt-a",null,18000),
             option("opt-b",null,22000).copy(optionOrder=2))
