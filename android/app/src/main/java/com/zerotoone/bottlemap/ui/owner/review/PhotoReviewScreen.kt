@@ -235,19 +235,36 @@ private fun buildRows(s: PhotoReviewState): List<ReviewRow> {
     return rows
 }
 
+/** v20 HTML: back-only toolbar and photo/analysis/review/publish stepper. */
 @Composable
 private fun ReviewAppBar(onBack: () -> Unit) {
-    Row(
-        Modifier.fillMaxWidth().height(59.dp).background(UxColor.bg).padding(horizontal = 20.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(9.dp),
-    ) {
-        Box(
-            Modifier.size(48.dp).quietClick(onClick = onBack).semantics { contentDescription = "뒤로" }
-                .testTag("review-back"),
-            contentAlignment = Alignment.Center,
-        ) { BmLineIcon(BmLineIconId.BACK, 19.dp, UxColor.sub) }
-        Text("메뉴 검수", style = uxText(17f, 750, letterSpacing = (-0.45).sp))
+    Column(Modifier.fillMaxWidth().background(UxColor.bg)) {
+        Row(
+            Modifier.fillMaxWidth().height(59.dp).padding(horizontal = 20.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(
+                Modifier.size(48.dp).quietClick(onClick = onBack)
+                    .semantics { contentDescription = "뒤로 가기" }
+                    .testTag("review-back"),
+                contentAlignment = Alignment.Center,
+            ) { BmLineIcon(BmLineIconId.BACK, 30.dp, UxColor.text) }
+        }
+        Row(
+            Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 7.dp, bottom = 15.dp)
+                .testTag("review-steps"),
+            horizontalArrangement = Arrangement.spacedBy(7.dp),
+        ) {
+            listOf("사진 올리기", "읽기", "확인", "더하기").forEachIndexed { index, label ->
+                val highlight = index <= 2
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(7.dp)) {
+                    Box(Modifier.fillMaxWidth().height(5.dp)
+                        .background(if(highlight) UxColor.gold else UxColor.line, RoundedCornerShape(6.dp)))
+                    Text(label, style = uxText(11f, if(index == 2) 750 else 400,
+                        if(index == 2) UxColor.gold else UxColor.muted, lineHeight = 1.55f))
+                }
+            }
+        }
     }
 }
 
@@ -263,7 +280,7 @@ private fun ReviewHead(s: PhotoReviewState, stats: ReviewStats, vm: PhotoReviewV
     ) {
         Row(Modifier.fillMaxWidth().heightIn(min = 39.dp), verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween) {
-            Text("사진으로 메뉴 추가", style = uxText(17f, 700, letterSpacing = (-0.3).sp))
+            Text("메뉴 검수", style = uxText(17f, 700, letterSpacing = (-0.3).sp))
             Box(Modifier.heightIn(min = 48.dp).quietClick(onClick = vm::leave).padding(8.dp).testTag("review-later"),
                 contentAlignment = Alignment.Center) {
                 Text("나중에 하기", style = uxText(12f, 750, UxColor.gold))
