@@ -58,25 +58,11 @@ internal fun NavGraphBuilder.registerVariantRoutes(
             val ownerViewModel: OwnerMockViewModel = viewModel(factory = OwnerMockViewModel.Factory(
                 OwnerMockRuntime.repository(LocalContext.current)))
             LaunchedEffect(ownerViewModel) { ownerViewModel.retry() }
-            val mockState = ownerViewModel.state.collectAsStateWithLifecycle().value
-            val snapshot = when (mockState) {
-                is MockOwnerLoadState.Ready -> mockState.snapshot
-                is MockOwnerLoadState.Empty -> mockState.snapshot
-                else -> null
-            }
             // Always show the owned-bar list. One or many bars use the same flow;
             // the user explicitly selects which bar to manage.
             OwnerOnboardingScreen(
                 viewModel = ownerViewModel,
                 onBack = { navController.popBackStack() },
-                onFirstReview = { status ->
-                    val next=when(status) {
-                        MockImportStatus.READY_FOR_REVIEW -> OwnerPage.MGR_REVIEW
-                        MockImportStatus.UPLOADED, MockImportStatus.PROCESSING -> OwnerPage.MGR_JOB
-                        else -> OwnerPage.MGR_PHOTO
-                    }
-                    navController.navigate(next.route)
-                },
                 onManagerPreview = { navController.navigate(OwnerPage.MGR_HOME.route) },
             )
             }
@@ -89,14 +75,6 @@ internal fun NavGraphBuilder.registerVariantRoutes(
                 viewModel = viewModel(factory = OwnerMockViewModel.Factory(
                     OwnerMockRuntime.repository(LocalContext.current))),
                 onBack = { navController.popBackStack() },
-                onFirstReview = { status ->
-                    val next=when(status) {
-                        MockImportStatus.READY_FOR_REVIEW -> OwnerPage.MGR_REVIEW
-                        MockImportStatus.UPLOADED, MockImportStatus.PROCESSING -> OwnerPage.MGR_JOB
-                        else -> OwnerPage.MGR_PHOTO
-                    }
-                    navController.navigate(next.route)
-                },
                 onManagerPreview = { navController.navigate(OwnerPage.MGR_HOME.route) },
                 startRegistration = true,
             )
