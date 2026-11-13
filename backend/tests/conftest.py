@@ -39,6 +39,8 @@ def mock_extractor(monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
 
     monkeypatch.setenv("MENU_EXTRACTOR", "mock")
     monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    # the hybrid adapter tests fake prompt v1 answers; the prompt v2 tests ask for v2 themselves
+    monkeypatch.delenv("EXTRACTION_HYBRID_PROMPT", raising=False)
     for name in ("MATCHING_LLM_ENABLED", "MATCHING_LLM_MAX_CALLS", "MATCHING_LLM_M3B_ENABLED", "MATCHING_LLM_MODE"):
         monkeypatch.delenv(name, raising=False)
     for name in ("EMBEDDING_ENABLED", "EMBEDDING_MODEL", "EMBEDDING_MIN_SIMILARITY"):

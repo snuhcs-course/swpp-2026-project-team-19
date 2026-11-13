@@ -50,6 +50,34 @@ def load_prompt() -> str:
     return PROMPT_PATH.read_text(encoding="utf-8").replace("\r\n", "\n")
 
 
+def line_groups(hybrid_items: list[dict[str, Any]]) -> list[list[dict[str, Any]]]:
+    """The rows of each menu line, in output order: one row, or a glass row and a bottle row.
+
+    Grouped over the whole answer, before whisky and non-whisky rows are separated. Grouping the
+    separated lists instead would pair a glass row with a bottle row of the same name that had
+    another line between them, which convert.group_items never does.
+    """
+    groups: list[list[dict[str, Any]]] = []
+    for same_category in _runs(hybrid_items):
+        groups += group_items(same_category)
+    return groups
+
+
+def _runs(hybrid_items: list[dict[str, Any]]) -> list[list[dict[str, Any]]]:
+    """Consecutive rows of one category."""
+    runs: list[list[dict[str, Any]]] = []
+    for item in hybrid_items:
+        if runs and runs[-1][0]["category"] == item["category"]:
+            runs[-1].append(item)
+        else:
+            runs.append([item])
+    return runs
+
+
+def _plain(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [{k: v for k, v in row.items() if k not in ("source_lines", "category")} for row in rows]
+
+
 def other_items(hybrid_items: list[dict[str, Any]], table: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], int]:
     """The non-whisky items in output order, and how many were dropped as unusable.
 
@@ -57,11 +85,12 @@ def other_items(hybrid_items: list[dict[str, Any]], table: list[dict[str, Any]])
     break the stored limits is dropped instead of failing the photo: these lines are extra, and
     one bad cocktail must not cost the owner the whisky lines.
     """
-    rows = [item for item in hybrid_items if item["category"] != WHISKY]
-    plain = [{k: v for k, v in row.items() if k not in ("source_lines", "category")} for row in rows]
     out: list[dict[str, Any]] = []
     dropped = 0
-    for group, flow, source in zip(group_items(rows), to_flow_items(plain), item_sources(rows, table)):
+    for group in line_groups(hybrid_items):
+        if group[0]["category"] == WHISKY:
+            continue
+        [flow], [source] = to_flow_items(_plain(group)), item_sources(group, table)
         name = flow["rawText"].strip()
         try:
             options = [ExtractedOption.model_validate(o).model_dump() for o in flow["options"]]
@@ -83,12 +112,13 @@ def convert_output(text: str, table: list[dict[str, Any]]) -> dict[str, Any]:
     when the answer is not prompt v2 output or a whisky line fails the flow validation.
     """
     hybrid = HybridExtractionV2.model_validate_json(text).model_dump()
-    whisky = [item for item in hybrid["items"] if item["category"] == WHISKY]
-    v1_items = [{k: v for k, v in item.items() if k not in ("source_lines", "category")} for item in whisky]
-    items = ExtractionItems.model_validate({"items": to_flow_items(v1_items)})
+    whisky = [group for group in line_groups(hybrid["items"]) if group[0]["category"] == WHISKY]
+    flow_items = [{**to_flow_items(_plain(group))[0], "itemOrder": order} for order, group in enumerate(whisky, start=1)]
+    sources = [{**item_sources(group, table)[0], "itemOrder": order} for order, group in enumerate(whisky, start=1)]
+    items = ExtractionItems.model_validate({"items": flow_items})
     others, dropped = other_items(hybrid["items"], table)
     return {"items": items.model_dump(mode="json")["items"], "rawOutput": hybrid,
-            "itemSources": item_sources(whisky, table), "otherItems": others, "otherItemsDropped": dropped}
+            "itemSources": sources, "otherItems": others, "otherItemsDropped": dropped}
 
 
 def extract_menu_hybrid_v2(
