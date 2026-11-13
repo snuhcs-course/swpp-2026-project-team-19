@@ -69,6 +69,22 @@ class LivePhotoReviewMappingTest {
         assertEquals(30.0,state.defaultPour,0.0)
     }
 
+    @Test fun sameSizeDifferentLabelDoesNotUseWrongExistingWhiskyPrice() {
+        val saved=fixture().copy(menuItems=listOf(MockBarMenuItem(
+            "row-1","bar-1","product-1",
+            listOf(MockMenuOption("old-30",label="잔",pourMl=30,priceKrw=12000)))))
+        val shot=item(options=listOf(ReviewOptionDto(
+            "ocr-shot",1,"샷",30,15000)))
+        val otherServing=mapServerPhotoReview(response(shot),saved).items.single()
+        assertNull(otherServing.oldPrice)
+        assertEquals(PriceChoice.PHOTO,otherServing.priceChoice)
+        val glass=shot.copy(options=listOf(ReviewOptionDto(
+            "ocr-glass",1,"잔",30,15000)))
+        val sameServing=mapServerPhotoReview(response(glass),saved).items.single()
+        assertEquals(12000.0,sameServing.oldPrice!!,0.0)
+        assertEquals(PriceChoice.NONE,sameServing.priceChoice)
+    }
+
     @Test fun firstOcrOptionIdentitySurvivesReviewAndCanPublishWithoutFalseNewOptionError() {
         val dto = item()
         val card = mapServerPhotoReview(response(dto), fixture()).items.single()
