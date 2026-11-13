@@ -570,7 +570,7 @@ OCR LLM과 Vision LLM은 메뉴에서 인식한 모든 상품 또는 비상품 �
 
 ## 5 extracted_items와 extracted_options 저장
 
-백엔드는 4.3 응답의 `items`를 각각 하나의 `extracted_items` 행으로 저장한다. `extracted_line_type`에는 AI의 1차 분류를 넣고 `corrected_line_type = null`, `review_status = pending`으로 저장한다. `section_header`, `description`, `unknown`도 원문과 함께 보존하지만 `extracted_line_type = product`이고 `extracted_kind = whisky`인 항목만 최초 상품 매칭 단계로 보낸다. AI가 위스키가 아닌 메뉴로 판단한 줄(`extracted_kind = other`)은 매칭하지 않고 `initial_resolution_status = null`로 두며, 검수에서 상품 없는 메뉴 항목으로 게시된다(API 명세 8.10).
+백엔드는 4.3 응답의 `items`를 각각 하나의 `extracted_items` 행으로 저장한다. `extracted_line_type`에는 AI의 1차 분류를 넣고 `corrected_line_type = null`, `review_status = pending`으로 저장한다. `section_header`, `description`, `unknown`도 원문과 함께 보존하지만 `extracted_line_type = product`이고 `extracted_kind = whisky`인 항목만 최초 상품 매칭 단계로 보낸다. AI가 위스키가 아닌 메뉴로 판단한 줄(`extracted_kind = other`)은 매칭하지 않고 `initial_resolution_status = null`로 두며, 검수에서 상품 없는 메뉴 항목으로 게시된다(API 명세 8.10). 검수자가 다른 종류로 게시하면 `corrected_kind`에 남겨, AI의 종류 분류를 `corrected_line_type`처럼 평가할 수 있게 한다.
 
 섹션 제목은 옵션 없이 항목만 저장한다.
 

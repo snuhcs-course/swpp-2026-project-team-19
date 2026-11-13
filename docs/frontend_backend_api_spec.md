@@ -3744,7 +3744,7 @@ Content-Type: application/json
 - **`keep`**: 메뉴는 바꾸지 않는다.
 - **가격 충돌(`price_conflict`)을 바로잡기**: 처리 방식은 옵션을 받지 않는다. 버린 가격(`discardedOptions`)이 맞으면, 운영자가 먼저 직접 수정(3.14.4, operator도 호출할 수 있다)으로 항목의 옵션을 고친 뒤 이 확인을 처리한다. 상품에 연결된 항목은 `keep`, 상품 없는 위스키 항목은 연결(`link_existing`, `create_and_link`)로 닫는다. 직접 수정은 옵션을 1~3개만 받으므로(3.14.2), 합쳐서 옵션이 4개 이상인 항목은 그때 3개 이하로 정리한다. 이름은 그대로 보내야 다시 매칭(3.14.4)이 일어나지 않는다.
 - **`mark_as_other`**: 항목의 `kind`를 `other`로 바꾼다. 상품 검색에는 계속 나오지 않는다.
-- 메뉴판의 항목이 바뀌는 처리(연결, `mark_as_other`)는 메뉴판 버전(`menuVersion`)을 1 올린다. 업주가 열어 둔 직접 편집이 바뀐 항목을 보고 다시 판단하게 하기 위해서다. 고객에게 보이는 이름과 가격은 바뀌지 않으므로 `publishedAt`은 바꾸지 않는다. `keep`과 별칭만 더하는 처리는 버전을 올리지 않는다.
+- 메뉴판의 항목이 바뀌는 처리(연결, `mark_as_other`)는 메뉴판 버전(`menuVersion`)을 1 올린다. 업주가 열어 둔 직접 편집이 바뀐 항목을 보고 다시 판단하게 하기 위해서다. 고객에게 보이는 이름과 가격은 바뀌지 않으므로 `publishedAt`은 바꾸지 않는다. `publishedAt`(고객 검색의 `menuUpdatedAt`)은 판매 정보, 즉 메뉴판의 상품과 가격을 언제 갱신했는지를 나타내고, 연결된 항목의 가격 정보는 실제로 그 시각의 것이기 때문이다. 연결 때 갱신하면 가격은 그대로인데 메뉴가 새로 갱신된 것처럼 보이고, 업주 화면의 "최근 갱신"(3.14.9)도 바뀐다. 그래서 새로 검색에 나오는 항목도 위치 없는 검색에서는 그 메뉴판의 `publishedAt`으로 정렬된다(3.10.2). `keep`과 별칭만 더하는 처리는 버전을 올리지 않는다.
 - 처리가 끝나면 확인은 `resolved`가 되고, 처리 방식, 결과 상품, 처리한 사용자와 시각을 기록한다. 요청 하나는 하나의 트랜잭션이며 실패하면 아무것도 바뀌지 않는다.
 - 검사 순서: 인증(`401`) → operator(`403`) → 요청 형식(`422`) → 확인(`404 MENU_ITEM_CHECK_NOT_FOUND`) → 업장 행 잠금 → 업장 상태(`404 BAR_NOT_FOUND`) → 미완료 작업(`409 ACTIVE_IMPORT_EXISTS`) → 확인 상태(`409 INVALID_CHECK_STATE`) → 처리 방식과 항목(`422 RESOLUTION_NOT_ALLOWED`) → 상품과 브랜드(`422 PRODUCT_NOT_FOUND`, `PRODUCT_INACTIVE`, `BRAND_NOT_FOUND`, `409 DUPLICATE_*`).
 
@@ -5002,6 +5002,7 @@ HTTP/1.1 200 OK
 - 같은 제출에서 이름 키가 같은 줄이 여럿이면 같은 항목으로 본다. 같은 상품에 연결한 줄이 여럿일 때와 같은 규칙을 따른다(8.12).
 - `kind = whisky`인 항목은 메뉴판에 바로 보이지만, 운영자가 상품에 연결하기 전까지 고객 검색과 인기 위스키에 나오지 않는다(3.9, 3.10.2). 반영과 같은 트랜잭션에서 운영자 확인(3.18, 사유 `unlinked`)을 만든다. `kind = other`인 항목은 상품에 연결하지 않으며 메뉴판에만 보인다.
 - 추출 항목에는 `selected_product_id = null`로 저장한다. `finalLineType`이 `product`이므로 `confirm_non_product`와 구분된다. `selectedMatchMethod`와 `matchConfidence`도 `null`이다.
+- 검수자가 보낸 `kind`가 그 줄의 `extractedKind`와 다르면 추출 항목의 `corrected_kind`에 저장하고, 같으면 `null`로 둔다(`correctedLineType`과 같은 규칙). AI의 위스키와 비위스키 분류가 맞았는지 나중에 평가하기 위해서다. 메뉴 항목의 `kind`는 다음 검수나 운영자 처리로 바뀔 수 있으므로 이 평가에 쓸 수 없다. 상품에 연결해 게시한 줄(`select_existing_product`, `create_product`)의 최종 종류는 `whisky`로 본다.
 - 반영 응답의 `result`는 다른 항목과 같이 센다. `createdProducts`에는 세지 않는다.
 
 AI가 위스키가 아닌 메뉴로 분류한 줄(5.4의 `extractedKind = other`)은 보통 `kind = other`로 이 결정을 보낸다. 반대로 AI가 위스키로 분류한 줄도 업주가 위스키가 아닌 메뉴로 바꿔 `kind = other`로 보낼 수 있다.

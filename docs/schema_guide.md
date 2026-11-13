@@ -797,7 +797,8 @@ MVP에서는 한 업장에 `uploaded`, `processing`, `ready_for_review` 상태�
 | `item_order` | `smallint`, NOT NULL | `7` | 같은 실행 안에서 AI가 인식한 항목의 원본 표시 순서를 보존한다. |
 | `raw_text` | `text`, NOT NULL | `딘스톤 12년 15ml 8.0 / 30ml 15.0` | AI 구조화 전의 상품과 옵션 전체 원문을 보존한다. |
 | `extracted_line_type` | `extracted_line_type`, NOT NULL, 기본 `unknown` | `product` | AI가 1차 판별한 역할이다. 평가를 위해 운영자 검수 후에도 변경하지 않는다. |
-| `extracted_kind` | `menu_item_kind`, nullable | `other` | AI가 1차 판별한 메뉴 종류(4.20)다. `extracted_line_type = product`인 줄은 `whisky` 또는 `other`이고(AI가 돌려주지 않으면 `whisky`), 비상품 줄은 `null`이다. `whisky`인 줄만 상품 매칭을 한다. 검수 후에도 변경하지 않는다. 최종 종류는 게시된 `bar_menu_items.kind`에 있다. |
+| `extracted_kind` | `menu_item_kind`, nullable | `other` | AI가 1차 판별한 메뉴 종류(4.20)다. `extracted_line_type = product`인 줄은 `whisky` 또는 `other`이고(AI가 돌려주지 않으면 `whisky`), 비상품 줄은 `null`이다. `whisky`인 줄만 상품 매칭을 한다. 검수 후에도 변경하지 않는다. |
+| `corrected_kind` | `menu_item_kind`, nullable | `whisky` | 검수자가 게시한 종류가 `extracted_kind`와 다를 때만 그 값을 저장하고, 같으면 `null`이다(`corrected_line_type`과 같은 규칙). 상품에 연결해 게시한 줄은 `whisky`로 본다. 게시된 `bar_menu_items.kind`는 다음 검수나 운영자 처리로 바뀌므로, AI 종류 분류의 정확도는 이 컬럼으로 평가한다. |
 | `corrected_line_type` | `extracted_line_type`, nullable | `product` | 운영자가 최초 역할을 바꾼 경우에만 교정값을 저장한다. 그대로 승인하면 null이다. |
 | `extracted_product_name` | `varchar(200)`, nullable | `딘스톤 12년` | AI가 구조화한 상품명이다. |
 | `extracted_brand_name` | `varchar(120)`, nullable | `딘스톤` | AI가 분리한 브랜드 표기다. 브랜드 별칭 조회에 사용한다. |
@@ -1074,8 +1075,8 @@ DBML만으로 충분히 표현하기 어렵거나 현재 초안에 아직 명시
 - enum을 DB enum으로 구현할지 문자열과 CHECK 제약으로 구현할지
 - 가격이 반드시 존재해야 하는지, `가격 문의` 같은 값을 허용할지
 - 상품 `category`를 자유 문자열로 유지할지 별도 Enum 또는 테이블로 분리할지
-- 한 메뉴 이미지에 동일 상품이 여러 줄 등장할 때 하나의 메뉴 항목과 여러 옵션으로 합치는 기준
-- 같은 상품이 서로 다른 메뉴 섹션에 중복 노출되는 것을 허용할지
+
+같은 상품이 여러 줄에 나올 때 합치는 기준과 섹션별 중복 노출 여부는 정해졌다. 최종 상품이 같은 줄(상품이 없으면 같은 이름 키)은 사진과 섹션에 관계없이 한 메뉴 항목으로 합치고 옵션을 모두 모으며, 같은 상품을 메뉴판에 두 번 보이지 않는다(7.1, API 명세 8.12).
 
 ## 14 현재 MVP 범위 밖 기능
 
