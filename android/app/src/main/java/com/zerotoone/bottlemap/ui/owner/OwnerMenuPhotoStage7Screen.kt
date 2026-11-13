@@ -119,7 +119,7 @@ internal fun stage7CurrentJob(state: MockOwnerLoadState): MockMenuImport? =
         MockImportStatus.APPLIED, MockImportStatus.CANCELED) }
 
 @Composable
-private fun MenuPhotoSteps(step: Int, failed: Boolean = false) {
+internal fun MenuPhotoSteps(step: Int, failed: Boolean = false) {
     val labels = listOf("사진 올리기", "읽기", "확인", "더하기")
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
         labels.forEachIndexed { i, label ->
