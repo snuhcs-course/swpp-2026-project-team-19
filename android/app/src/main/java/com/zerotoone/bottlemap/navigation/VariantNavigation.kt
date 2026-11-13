@@ -18,6 +18,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import androidx.navigation.navArgument
 import com.zerotoone.bottlemap.BuildConfig
+import com.zerotoone.bottlemap.data.owner.review.MockPhotoReviewScenario
+import com.zerotoone.bottlemap.data.owner.review.PreviewOnlyPhotoReviewRepository
+import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewScreen
+import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewViewModel
 import com.zerotoone.bottlemap.ui.owner.ExtractionReviewScreen
 import com.zerotoone.bottlemap.ui.owner.MenuUploadScreen
 import com.zerotoone.bottlemap.ui.owner.OwnerOnboardingScreen
@@ -161,11 +165,6 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                             navController.navigate(if(status==MockImportStatus.READY_FOR_REVIEW)
                                 OwnerPage.MGR_REVIEW.route else OwnerPage.MGR_JOB.route)
                         },
-                        // Mock v20 is intentionally preview-only until the review
-                        // repository is backed by agreed API contracts.
-                        onReviewPreview = if (BuildConfig.DEBUG) {
-                            { navController.navigate(TabRoutes.devPhotoReview("basic")) }
-                        } else null,
                     )
                     OwnerPage.MGR_PHOTO -> OwnerMenuPhotoSelectionScreen(
                         state = mockState, viewModel = data,
@@ -188,16 +187,53 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                             }
                         }
                     )
-                    OwnerPage.MGR_REVIEW -> OwnerPhotoStage8Screen(
-                        state = mockState, vm = data,
-                        resumeFromMenu = navController.previousBackStackEntry?.savedStateHandle
-                            ?.get<Boolean>("resumeOwnerImport") == true,
-                        onBack = { navController.popBackStack() },
-                        onHome = { navController.navigate(OwnerPage.MGR_MENU.route) {
-                            popUpTo(OwnerPage.MGR_HOME.route) { inclusive = false }
-                            launchSingleTop = true
-                        } }
-                    )
+                    OwnerPage.MGR_REVIEW -> {
+                        if (BuildConfig.DEBUG) {
+                            // I4-P14: Wire the existing one-page UX review into the
+                            // actual photo-flow destination for Mock UI approval.
+                            // The repository is deliberately preview-only: photos,
+                            // API decisions and publication are NOT connected yet.
+                            val reviewVm: PhotoReviewViewModel = viewModel(
+                                factory = PhotoReviewViewModel.Factory(
+                                    PreviewOnlyPhotoReviewRepository(
+                                        MockPhotoReviewScenario.BASIC
+                                    )
+                                )
+                            )
+                            PhotoReviewScreen(
+                                vm = reviewVm,
+                                onLeave = {
+                                    // Both Back and "나중에 하기" return to the
+                                    // existing menu management (never a fake screen).
+                                    if (!navController.popBackStack(
+                                            OwnerPage.MGR_MENU.route, inclusive = false
+                                        )) {
+                                        navController.navigate(OwnerPage.MGR_MENU.route) {
+                                            popUpTo(OwnerPage.MGR_REVIEW.route) {
+                                                inclusive = true
+                                            }
+                                            launchSingleTop = true
+                                        }
+                                    }
+                                },
+                            )
+                        } else {
+                            // Keep the deployed API-backed review/publish flow
+                            // untouched until Mock UI sign-off and API integration.
+                            OwnerPhotoStage8Screen(
+                                state = mockState, vm = data,
+                                resumeFromMenu = navController.previousBackStackEntry
+                                    ?.savedStateHandle?.get<Boolean>("resumeOwnerImport") == true,
+                                onBack = { navController.popBackStack() },
+                                onHome = {
+                                    navController.navigate(OwnerPage.MGR_MENU.route) {
+                                        popUpTo(OwnerPage.MGR_HOME.route) { inclusive = false }
+                                        launchSingleTop = true
+                                    }
+                                }
+                            )
+                        }
+                    }
                     else -> OwnerSkeletonScreen(
                         page = page,
                         mockState = mockState,
