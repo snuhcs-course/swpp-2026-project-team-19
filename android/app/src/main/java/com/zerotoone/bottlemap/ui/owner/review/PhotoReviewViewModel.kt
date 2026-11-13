@@ -3,6 +3,7 @@ package com.zerotoone.bottlemap.ui.owner.review
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.zerotoone.bottlemap.network.menuWriteErrorText
 import com.zerotoone.bottlemap.data.owner.review.PhotoReviewRepository
 import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewRules.OptionField
 import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewRules.RematchOutcome
@@ -172,7 +173,7 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                 throw cancelled
             } catch (error: Exception) {
                 set(s.copy(modal = null))
-                toast(error.message ?: "게시하지 못했어요.")
+                toast(menuWriteErrorText(error))
             }
         }
     }
