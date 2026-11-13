@@ -336,6 +336,75 @@ private fun SelectableRow(text: String, selected: Boolean, onClick: () -> Unit, 
     }
 }
 
+/** One inline price choice for each conflicting ml in the SAME whisky card.
+ * Existing bar price and each recognized 잔/샷 price share the available width.
+ */
+@Composable
+private fun GroupedServingPriceChoices(x: ReviewItem, vm: PhotoReviewViewModel) {
+    val unresolved = PhotoReviewRules.pendingPriceServings(x)
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        unresolved.forEach { serving ->
+            val candidates = x.priceCandidates.filter { it.servingKey == serving }
+            val size = if (candidates.any { it.bottle }) "Bottle"
+                else candidates.firstOrNull()?.volumeMl?.let { "${it}ml" } ?: "용량 미인식"
+            Column(verticalArrangement = Arrangement.spacedBy(7.dp)) {
+                Text("$size 가격을 선택해 주세요",
+                    style = uxText(11f, 680, UxColor.sub))
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                    candidates.forEachIndexed { index, candidate ->
+                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally) {
+                            Box(Modifier.heightIn(min = 19.dp), contentAlignment = Alignment.Center) {
+                                if (!candidate.existing) {
+                                    Text("New", style = uxText(10f, 800, UxColor.gold))
+                                }
+                            }
+                            val label = if (candidate.existing) "기존 가격"
+                                else "${candidate.label?.trim()?.takeIf { it.isNotEmpty() }
+                                    ?: size} 표시 가격"
+                            Text(label, style = uxText(9.5f, 560, UxColor.sub),
+                                maxLines = 2, textAlign = TextAlign.Center)
+                            ReviewChoice(
+                                won(candidate.priceKrw.toDouble()),
+                                { vm.chooseServingPrice(x.id, serving, candidate.priceKrw) },
+                                modifier = Modifier.fillMaxWidth(),
+                                selected = x.chosenServingPrices[serving] == candidate.priceKrw,
+                                minHeight = 46.dp, fontSize = 10f, horizontalPadding = 2.dp,
+                                verticalPadding = 7.dp,
+                                testTag = "review-serving-price-${x.id}-$index",
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** When OCR found >3 different sizes, show up to three selection buttons
+ * vertically, then confirm exactly as catalog candidate selection does.
+ */
+@Composable
+private fun ReviewVolumeSelection(x: ReviewItem, vm: PhotoReviewViewModel) {
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(9.dp)) {
+        SelectionHead("용량은 최대 3가지까지 설정 가능해요.",
+            x.chosenVolumeKeys.isNotEmpty(),
+            { vm.confirmVolumeChoices(x.id) },
+            "review-volume-confirm-${x.id}")
+        x.volumeChoices.forEachIndexed { i, option ->
+            val key = PhotoReviewRules.servingKey(option)
+            val label = if (option.bottle) "Bottle"
+                else "${option.volume.toInt()}ml"
+            SelectableRow(
+                "$label  ${won(option.price)}",
+                key in x.chosenVolumeKeys,
+                { vm.toggleVolumeChoice(x.id, key) },
+                49, 12f, 9, 10, "review-volume-pick-${x.id}-$i",
+            )
+        }
+    }
+}
+
 @Composable
 private fun IssueRowFor(x: ReviewItem, issue: ReviewIssue, vm: PhotoReviewViewModel, focus: ReviewFocus) {
     val id = x.id
@@ -373,7 +442,9 @@ private fun IssueRowFor(x: ReviewItem, issue: ReviewIssue, vm: PhotoReviewViewMo
             SelectionHead("위스키를 검색해 주세요", canConfirm, { vm.confirmSelectedSearch(id) }, "review-search-confirm-$id")
             CatalogSearch(x, vm)
         }
-        ReviewIssue.PRICE_CHOICE -> Row(Modifier.fillMaxWidth().heightIn(min = 37.dp),
+        ReviewIssue.PRICE_CHOICE -> if (x.priceCandidates.isNotEmpty())
+            GroupedServingPriceChoices(x, vm)
+        else Row(Modifier.fillMaxWidth().heightIn(min = 37.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Text("가격을 선택해 주세요", style = uxText(10.5f, 680, UxColor.sub), maxLines = 1,
                 modifier = Modifier.width(106.dp).padding(top = 23.dp))
@@ -421,10 +492,12 @@ private fun IssueRowFor(x: ReviewItem, issue: ReviewIssue, vm: PhotoReviewViewMo
                 onImeAction = { vm.commitInlineVolume(id) })
             SaveButton({ vm.commitInlineVolume(id) }, "review-volume-save-$id")
         }
-        ReviewIssue.OPTION -> IssueRow(
+        ReviewIssue.OPTION -> if (!x.volumeChoicesConfirmed && x.volumeChoices.isNotEmpty())
+            ReviewVolumeSelection(x, vm)
+        else IssueRow(
             if (PhotoReviewRules.countOptions(x) > PhotoReviewRules.MAX_OPTIONS)
                 "검수 옵션은 최대 10개까지 게시할 수 있어요."
-            else "동일한 용량은 한 옵션만 등록할 수 있어요. 가격을 확인하고 중복 옵션을 제외해 주세요."
+            else "같은 용량의 옵션은 하나만 남겨 주세요."
         ) {
             ReviewChoice("옵션 수정", { vm.toggleExpanded(id) }, testTag = "review-option-edit-$id")
         }
