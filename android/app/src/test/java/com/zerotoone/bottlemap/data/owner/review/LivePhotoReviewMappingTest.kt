@@ -85,15 +85,15 @@ class LivePhotoReviewMappingTest {
         assertEquals(PriceChoice.NONE,sameServing.priceChoice)
     }
 
-    @Test fun bottleAndKoreanBottleDoNotBorrowEachOthersExistingPrices() {
+    @Test fun koreanAndEnglishBottleShareExistingBarPrice() {
         val saved=fixture().copy(menuItems=listOf(MockBarMenuItem(
             "row-1","bar-1","product-1",
             listOf(MockMenuOption("saved-bottle",label="Bottle",priceKrw=120000)))))
         val korean=item(options=listOf(ReviewOptionDto(
             "ocr-korean-bottle",1,"병",null,150000)))
-        val noMatch=mapServerPhotoReview(response(korean),saved).items.single()
-        assertNull(noMatch.oldPrice)
-        assertEquals(PriceChoice.PHOTO,noMatch.priceChoice)
+        val normalized=mapServerPhotoReview(response(korean),saved).items.single()
+        assertEquals(120000.0,normalized.oldPrice!!,0.0)
+        assertEquals(PriceChoice.NONE,normalized.priceChoice)
         val english=korean.copy(options=listOf(ReviewOptionDto(
             "ocr-english-bottle",1,"Bottle",null,150000)))
         val matched=mapServerPhotoReview(response(english),saved).items.single()
@@ -264,14 +264,14 @@ class LivePhotoReviewMappingTest {
         assertEquals(8000,decision.correctedOptions!!.single().priceKrw)
     }
 
-    @Test fun originalKoreanBottleLabelIsNotTranslatedDuringPublish() {
+    @Test fun koreanBottleIsPublishedAsBottleWithoutLosingOcrIdentity() {
         val dto=item(options=listOf(ReviewOptionDto("ocr-bottle",1,"병",null,88000)),
             status="unmatched",proposedId=null)
         val card=mapServerPhotoReview(response(dto),fixture()).items.single()
             .copy(newConfirmed=true,nameSaved=true)
         val mapped=mapConfirmedReviewDecision(card,dto,30.0,emptyMap())
         val option=requireNotNull(mapped.correctedOptions).single()
-        assertEquals("병",option.label)
+        assertEquals("Bottle",option.label)
         assertNull(option.pourMl)
         assertEquals("ocr-bottle",option.optionId)
     }
