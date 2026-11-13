@@ -464,7 +464,9 @@ internal fun OwnerManualMenuScreen(
                             val fresh = viewModel.searchCatalogLive(name)
                             val exact = fresh.firstOrNull {
                                 it.isActive && it.productId != rejectedId &&
-                                    manualEditorCategory(it) == category &&
+                                    (manualMenuCategoryLabel(it.category).takeIf { label ->
+                                        label in MANUAL_MENU_CATEGORIES
+                                    } ?: "기타 주류") == category &&
                                     (normalizeOwnerCatalogName(it.displayName) ==
                                         normalizeOwnerCatalogName(name) ||
                                      normalizeOwnerCatalogName(it.matchedAlias.orEmpty()) ==
