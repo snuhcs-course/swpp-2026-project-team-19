@@ -228,8 +228,9 @@ internal fun OwnerManualMenuScreen(
     var linkedId by rememberSaveable(bar?.barId) { mutableStateOf<String?>(null) }
     var rejectedId by rememberSaveable(bar?.barId) { mutableStateOf<String?>(null) }
     var itemName by rememberSaveable(bar?.barId) { mutableStateOf("") }
-    LaunchedEffect(screen, itemName) {
-        if(screen=="item" && itemName.trim().length>=2 && viewModel.usesProductionOwnerApi()) {
+    LaunchedEffect(screen, itemName, category) {
+        if(screen=="item" && category=="위스키" && itemName.trim().length>=2 &&
+            viewModel.usesProductionOwnerApi()) {
             kotlinx.coroutines.delay(300)
             runCatching { viewModel.searchCatalogLive(itemName) }
         }
@@ -237,8 +238,8 @@ internal fun OwnerManualMenuScreen(
     var brandName by rememberSaveable(bar?.barId) { mutableStateOf("") }
     var confirmedBrandId by rememberSaveable(bar?.barId) { mutableStateOf<String?>(null) }
     var rejectedBrandId by rememberSaveable(bar?.barId) { mutableStateOf<String?>(null) }
-    LaunchedEffect(screen,itemName,editId,linkedId) {
-        if(screen=="item" && editId==null && linkedId==null &&
+    LaunchedEffect(screen,itemName,editId,linkedId,category) {
+        if(screen=="item" && category=="위스키" && editId==null && linkedId==null &&
             viewModel.usesProductionOwnerApi()) {
             // The name itself identifies the brand; never ask for a second
             // manual brand field. Search canonical names and aliases.
@@ -467,7 +468,7 @@ internal fun OwnerManualMenuScreen(
                 saving = true
                 saveScope.launch {
                     try {
-                        if (old == null && linkedId == null && name.length >= 2) {
+                        if (old == null && category == "위스키" && linkedId == null && name.length >= 2) {
                             // Await a fresh server lookup before creating any product.
                             // A deleted menu is NOT a deleted catalog product: offer
                             // the original product again with "맞아요 / 아니에요".
@@ -781,7 +782,7 @@ internal fun OwnerManualMenuScreen(
                         // display name is customized. Category changes still clear it.
                         if (editId == null) rejectedId = null
                     }, placeholder = "예: 라가불린 10년", testTag = "manual-menu-name")
-                    if (editId == null) {
+                    if (editId == null && category == "위스키") {
                         val matchedBrandId = confirmedBrandId
                             ?: manualBrandProposal(brands,itemName,"",null)?.brandId
                         val suggested=manualProductProposal(
@@ -850,10 +851,6 @@ internal fun OwnerManualMenuScreen(
                         V4FormField("주류 종류", alcoholKind, { alcoholKind = it.take(30) },
                             placeholder = "예: 하이볼, 맥주",
                             testTag = "manual-menu-alcohol-kind")
-                    }
-                    if (category != "위스키" && viewModel.usesProductionOwnerApi()) {
-                        Text("현재 서버는 위스키/그 외 메뉴만 구분해요. 세부 종류(맥주·안주 등)는 저장되지 않아요.",
-                            color = V4Color.sub, fontSize = 12.sp)
                     }
                     HorizontalDivider(color = V4Color.line, thickness = 1.dp)
                     if (category == "위스키") {
