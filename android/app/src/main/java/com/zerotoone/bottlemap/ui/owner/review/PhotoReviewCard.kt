@@ -424,7 +424,7 @@ private fun IssueRowFor(x: ReviewItem, issue: ReviewIssue, vm: PhotoReviewViewMo
         ReviewIssue.OPTION -> IssueRow(
             if (PhotoReviewRules.countOptions(x) > PhotoReviewRules.MAX_OPTIONS)
                 "검수 옵션은 최대 10개까지 게시할 수 있어요."
-            else "용량 옵션을 확인해 주세요"
+            else "동일한 용량은 한 옵션만 등록할 수 있어요. 가격을 확인하고 중복 옵션을 제외해 주세요."
         ) {
             ReviewChoice("옵션 수정", { vm.toggleExpanded(id) }, testTag = "review-option-edit-$id")
         }
