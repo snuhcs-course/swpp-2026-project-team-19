@@ -74,6 +74,9 @@ class _ProductDecision(_Strict):
         default=None, min_length=1, max_length=200, description="The line's name as it should appear on the menu"
     )
     optionDecisions: list[OptionDecision] = Field(default_factory=list, description="Only options being corrected")
+    # OCR retains every extracted option; explicitly excluded IDs are not published.
+    excludedOptionIds: list[UUID] = Field(default_factory=list,
+        description="Extracted option IDs omitted from the final (max 3) menu")
 
 
 class SelectExistingProduct(_ProductDecision):
