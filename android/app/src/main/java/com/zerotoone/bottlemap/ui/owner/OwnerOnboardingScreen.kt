@@ -92,7 +92,6 @@ internal fun shouldAutoOpenOwnerRegistrationIntro(
 fun OwnerOnboardingScreen(
     viewModel: OwnerMockViewModel,
     onBack: () -> Unit,
-    onFirstReview: (MockImportStatus?) -> Unit,
     onManagerPreview: () -> Unit,
     startRegistration: Boolean = false,
 ) {
