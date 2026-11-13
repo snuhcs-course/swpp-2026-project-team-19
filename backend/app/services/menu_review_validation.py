@@ -129,6 +129,15 @@ def _final_options(
     errors: _Errors, path: str, item: ExtractedItem, decision: ProductDecision
 ) -> tuple[FinalOption, ...]:
     by_id = {option.id: option for option in item.options}
+    excluded = set()
+    for index, option_id in enumerate(decision.excludedOptionIds):
+        field = f"{path}.excludedOptionIds[{index}]"
+        if option_id not in by_id:
+            errors.add(field, "UNKNOWN_OPTION", "이 항목의 옵션이 아닙니다.")
+        elif option_id in excluded:
+            errors.add(field, "DUPLICATE_OPTION", "같은 옵션을 두 번 제외할 수 없습니다.")
+        else:
+            excluded.add(option_id)
     corrections = {}
     for index, correction in enumerate(decision.optionDecisions):
         option_path = f"{path}.optionDecisions[{index}].extractedOptionId"
@@ -140,6 +149,11 @@ def _final_options(
             corrections[correction.extractedOptionId] = correction
     final = []
     for option in item.options:
+        if option.id in excluded:
+            if option.id in corrections:
+                errors.add(f"{path}.excludedOptionIds", "EXCLUDED_OPTION_CORRECTED",
+                    "제외한 옵션을 동시에 수정할 수 없습니다.")
+            continue
         correction = corrections.get(option.id)
         if correction is None:
             final.append(
@@ -218,6 +232,9 @@ def validate_review(session: Session, menu_import: MenuImport, request: ReviewAn
         entry = ReviewedItem(item=item, decision=decision, index=index, options=options)
         if item.id not in ignored_items:
             priced = entry.priced_options
+            if len(priced) > 3:
+                errors.add(f"{path}.excludedOptionIds", "TOO_MANY_OPTIONS",
+                    "게시할 가격 옵션은 최대 3개입니다. 나머지를 제외해 주세요.")
             if not priced:
                 errors.add(f"{path}.optionDecisions", "NO_PRICED_OPTION", "가격이 있는 옵션이 하나 이상 필요합니다.")
             keys = [(o.label, o.pour_ml) for o in priced]
