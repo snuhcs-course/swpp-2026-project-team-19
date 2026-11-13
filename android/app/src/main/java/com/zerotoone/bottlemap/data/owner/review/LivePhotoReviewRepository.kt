@@ -157,6 +157,18 @@ class LivePhotoReviewRepository(
         }
     }
 
+    /** A committed server review must never be reported as a failed publish
+     * just because the HTTP response or local draft deletion was interrupted.
+     */
+    private suspend fun finishPublishedDraft(id: String) {
+        draftMutex.withLock {
+            published = true
+            // Local persistence is best effort once the server has committed.
+            runCatching { draftStore.clear(id) }
+            inMemoryDraft = null
+        }
+    }
+
     override suspend fun publish(state: PhotoReviewState) {
         require(PhotoReviewRules.stats(state).canPublish) {
             "확인이 필요한 메뉴를 먼저 검수해 주세요."
@@ -164,7 +176,16 @@ class LivePhotoReviewRepository(
         val original = loaded ?: error("검수 데이터를 먼저 불러와 주세요.")
         val id = activeImportId ?: error("검수 작업을 먼저 불러와 주세요.")
         val latest = remote.getMenuImport(id)
-        require(latest.status == "ready_for_review" &&
+        if (isAppliedReviewImport(latest, id)) {
+            // If the prior request committed but its response was lost, the
+            // same import is already customer-visible. Do not keep a false
+            // failed Draft or attempt an unrelated second publication.
+            runCatching { owner.pollPhotoImportLive(id) }
+            finishPublishedDraft(id)
+            return
+        }
+        require(latest.menuImportId == id &&
+            latest.status == "ready_for_review" &&
             latest.reviewVersion == original.reviewVersion) {
             "검수 버전이 달라졌어요. 다시 불러와 확인해 주세요."
         }
@@ -191,17 +212,19 @@ class LivePhotoReviewRepository(
             owner.review(id, itemId, version, decision)
         }
         try {
-            // Existing tested production path preserves add-only semantics,
-            // discounts, and correct post-commit success/error boundaries.
+            // The server's #164 endpoint is atomic and idempotent per import.
             owner.publishPhotoImportLive(id, version)
         } catch (cancelled: CancellationException) {
             throw cancelled
+        } catch (error: Exception) {
+            // The server may have committed before the client lost its
+            // response. Confirm THIS import's applied status before deciding
+            // that a retry failed; do not invent a successful publication.
+            val observed = runCatching { remote.getMenuImport(id) }.getOrNull()
+            if (observed == null || !isAppliedReviewImport(observed, id)) throw error
+            runCatching { owner.pollPhotoImportLive(id) }
         }
-        draftMutex.withLock {
-            published = true
-            draftStore.clear(id)
-            inMemoryDraft = null
-        }
+        finishPublishedDraft(id)
     }
 
     private fun normalized(value: String): String =
