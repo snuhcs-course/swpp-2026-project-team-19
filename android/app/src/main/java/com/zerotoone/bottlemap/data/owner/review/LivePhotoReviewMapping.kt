@@ -34,7 +34,7 @@ internal fun mapServerPhotoReview(
     val defaultPour = bar.defaultPourMl ?: 30
     val lines = response.images.sortedBy { it.imageOrder }.flatMap { image ->
         image.items.sortedBy { it.itemOrder }.map { dto ->
-            mapServerReviewItem(dto, image.imageOrder, bar, snapshot, defaultPour)
+            mapServerReviewItem(dto, image.imageOrder, image.imageUrl, bar, snapshot, defaultPour)
         }
     }
     require(lines.map { it.id }.distinct().size == lines.size) {
@@ -47,7 +47,7 @@ private fun isBottle(label: String?): Boolean =
     label?.trim()?.lowercase() in setOf("bottle", "병")
 
 private fun mapServerReviewItem(
-    dto: ReviewItemDto, photoOrder: Int, bar: MockBar,
+    dto: ReviewItemDto, photoOrder: Int, photoUrl: String, bar: MockBar,
     snapshot: MockOwnerSnapshot, defaultPour: Int,
 ): ReviewItem {
     val recognized = dto.options.sortedBy { it.optionOrder }
@@ -124,6 +124,8 @@ private fun mapServerReviewItem(
         hasSourceBox = dto.sourceBox?.size == 4,
         required = !nonProduct,
         recognizedName = displayName,
+        sourcePhotoUrl = photoUrl,
+        sourceBox = dto.sourceBox,
         recognizedOffers = recognized.map {
             RecognizedOffer(volumeMl = it.extractedPourMl,
                 bottle = isBottle(it.extractedOptionLabel),
