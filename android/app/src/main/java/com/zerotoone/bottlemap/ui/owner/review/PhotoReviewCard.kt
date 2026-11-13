@@ -497,6 +497,9 @@ private fun IssueRowFor(x: ReviewItem, issue: ReviewIssue, vm: PhotoReviewViewMo
         else IssueRow(
             if (PhotoReviewRules.countOptions(x) > PhotoReviewRules.MAX_OPTIONS)
                 "검수 옵션은 최대 10개까지 게시할 수 있어요."
+            else if (x.type == ReviewItemType.WHISKY &&
+                PhotoReviewRules.countOptions(x) > PhotoReviewRules.MAX_PICKED_VOLUMES)
+                "용량은 최대 3가지까지 설정 가능해요."
             else "같은 용량의 옵션은 하나만 남겨 주세요."
         ) {
             ReviewChoice("옵션 수정", { vm.toggleExpanded(id) }, testTag = "review-option-edit-$id")
@@ -715,7 +718,7 @@ private fun OptionEditor(state: PhotoReviewState, x: ReviewItem, vm: PhotoReview
         Row(Modifier.fillMaxWidth().padding(bottom = 4.dp), horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically) {
             Text("용량별 가격", style = uxText(13f, 750))
-            Text("${options.size}/${PhotoReviewRules.MAX_OPTIONS}", style = uxText(11f, 400, UxColor.sub))
+            Text("${options.size}/${PhotoReviewRules.MAX_PICKED_VOLUMES}", style = uxText(11f, 400, UxColor.sub))
         }
         if (x.primaryHasOption) OptionCard(x, null, 1, vm)
         x.options.forEachIndexed { i, _ -> OptionCard(x, i, if (x.primaryHasOption) i + 2 else i + 1, vm) }
@@ -723,7 +726,7 @@ private fun OptionEditor(state: PhotoReviewState, x: ReviewItem, vm: PhotoReview
             Text("인식된 옵션이 없어요. 가격을 입력하거나 아래에서 추가할 수 있어요.",
                 style = uxText(11f, 400, UxColor.muted), modifier = Modifier.padding(vertical = 9.dp))
         }
-        if (options.size < PhotoReviewRules.MAX_OPTIONS) {
+        if (options.size < PhotoReviewRules.MAX_PICKED_VOLUMES) {
             Box(
                 Modifier.fillMaxWidth().heightIn(min = 49.dp)
                     .background(UxColor.elevated, RoundedCornerShape(10.dp))
