@@ -3,6 +3,7 @@ package com.zerotoone.bottlemap.ui.owner.review
 import com.zerotoone.bottlemap.data.owner.review.MockPhotoReviewRepository
 import com.zerotoone.bottlemap.data.owner.review.MockPhotoReviewScenario
 import com.zerotoone.bottlemap.data.owner.review.PhotoReviewRepository
+import com.zerotoone.bottlemap.network.BottleMapApiException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -291,7 +292,7 @@ class PhotoReviewViewModelTest {
         assertNull(vm.state.modal)
     }
 
-    @Test fun publishOnlyWhenReadyAndLeavesAfterwards() = runTest(dispatcher) {
+    @Test fun publishOnlyWhenReadyAndShowsSuccessBeforeLeaving() = runTest(dispatcher) {
         val blocked = vm()
         blocked.requestPublish()
         assertNull(blocked.state.modal)
@@ -302,6 +303,9 @@ class PhotoReviewViewModelTest {
         assertEquals(ReviewModalType.PUBLISH, vm.state.modal?.type)
         vm.confirmPublish()
         assertNotNull(repo.published)
+        assertTrue(vm.publishOutcome.value is PublishOutcome.Success)
+        assertFalse(PhotoReviewEvent.Leave in events)
+        vm.leave()
         assertTrue(PhotoReviewEvent.Leave in events)
     }
 
@@ -333,28 +337,99 @@ class PhotoReviewViewModelTest {
         assertEquals(1, submits)
         assertTrue(vm.publishing.value)
         vm.dismissModal()
-        assertNotNull(vm.state.modal)
+        assertNull(vm.state.modal)
+        assertTrue(vm.publishOutcome.value is PublishOutcome.Submitting)
         gate.complete(Unit)
         assertFalse(vm.publishing.value)
     }
 
-    @Test fun failedPublishUnlocksRetryWithoutLosingReview() = runTest(dispatcher) {
+    @Test fun networkFailureChecksSameImportBeforeRetrying() = runTest(dispatcher) {
         val base = MockPhotoReviewRepository(MockPhotoReviewScenario.READY)
         var attempts = 0
+        var published = false
         val source = object : PhotoReviewRepository by base {
             override suspend fun publish(state: PhotoReviewState) {
                 attempts++
-                if (attempts == 1) error("테스트 네트워크 실패")
+                if (attempts == 1) throw BottleMapApiException(
+                    code = "NETWORK_ERROR", message = "offline")
+                published = true
             }
+            override suspend fun checkPublishedStatus(): Boolean = published
         }
         val vm = PhotoReviewViewModel(source)
         vm.requestPublish()
         vm.confirmPublish()
         assertFalse(vm.publishing.value)
-        assertNotNull(vm.state)
+        assertEquals(PublishFailure.NETWORK,
+            (vm.publishOutcome.value as PublishOutcome.Failed).reason)
         vm.requestPublish()
         vm.confirmPublish()
+        assertEquals(1, attempts) // no second POST without a GET
+        vm.checkPublishStatus(retryWhenReady = true)
         assertEquals(2, attempts)
+        assertTrue(vm.publishOutcome.value is PublishOutcome.Success)
+    }
+
+    @Test fun unknownResultNeverSubmitsTwiceWithoutStatusConfirmation() = runTest(dispatcher) {
+        val base = MockPhotoReviewRepository(MockPhotoReviewScenario.READY)
+        var attempts = 0
+        val source = object : PhotoReviewRepository by base {
+            override suspend fun publish(state: PhotoReviewState) {
+                attempts++
+                throw BottleMapApiException(httpStatus = 500, code = "HTTP_500", message = "error")
+            }
+            override suspend fun checkPublishedStatus(): Boolean? = null
+        }
+        val vm = PhotoReviewViewModel(source)
+        vm.requestPublish()
+        vm.confirmPublish()
+        assertEquals(PublishFailure.SERVER,
+            (vm.publishOutcome.value as PublishOutcome.Failed).reason)
+        vm.checkPublishStatus()
+        assertEquals(PublishFailure.UNKNOWN,
+            (vm.publishOutcome.value as PublishOutcome.Failed).reason)
+        assertEquals(1, attempts)
+        vm.returnToReview()
+        assertEquals(1, attempts)
+        assertTrue(vm.publishOutcome.value is PublishOutcome.Failed)
+    }
+
+    @Test fun appliedStatusReturnsSuccessWithoutNewPost() = runTest(dispatcher) {
+        val base = MockPhotoReviewRepository(MockPhotoReviewScenario.READY)
+        var attempts = 0
+        val source = object : PhotoReviewRepository by base {
+            override suspend fun publish(state: PhotoReviewState) {
+                attempts++
+                throw BottleMapApiException(httpStatus = 500, code = "HTTP_500", message = "error")
+            }
+            override suspend fun checkPublishedStatus(): Boolean = true
+        }
+        val vm = PhotoReviewViewModel(source)
+        vm.requestPublish()
+        vm.confirmPublish()
+        vm.checkPublishStatus()
+        assertTrue(vm.publishOutcome.value is PublishOutcome.Success)
+        assertEquals(1, attempts)
+    }
+
+    @Test fun authAndConflictFailuresPreserveReviewState() = runTest(dispatcher) {
+        val base = MockPhotoReviewRepository(MockPhotoReviewScenario.READY)
+        val source = object : PhotoReviewRepository by base {
+            override suspend fun publish(state: PhotoReviewState) {
+                throw BottleMapApiException(httpStatus = 401, code = "HTTP_401", message = "auth")
+            }
+        }
+        val vm = PhotoReviewViewModel(source)
+        val before = vm.state.items
+        vm.requestPublish()
+        vm.confirmPublish()
+        assertEquals(PublishFailure.AUTH,
+            (vm.publishOutcome.value as PublishOutcome.Failed).reason)
+        vm.returnToReview()
+        assertNull(vm.publishOutcome.value)
+        assertEquals(before, vm.state.items)
+        assertEquals(PublishFailure.CONFLICT, classifyPublishFailure(
+            BottleMapApiException(httpStatus = 409, code = "VERSION_CONFLICT", message = "conflict")))
     }
 
 }
