@@ -422,9 +422,8 @@ internal fun OwnerManualMenuScreen(
                 else -> {
                     val brandFromName = manualBrandProposal(brands,name,"",null)
                     val fallbackBrand = brandFromName?.name
-                        ?: manualBrandSearchQuery(name,"").ifBlank {
-                            if (whisky) "기타 브랜드" else alcoholKind.trim().ifEmpty { category }
-                        }
+                        ?: if (whisky) "기타 브랜드"
+                           else alcoholKind.trim().ifEmpty { category }
                     val reusedBrandId = confirmedBrandId?.takeIf { id ->
                         brands.any { it.brandId==id }
                     } ?: brandFromName?.brandId ?: brands.firstOrNull {
@@ -444,9 +443,7 @@ internal fun OwnerManualMenuScreen(
             }
             val brand = brands.firstOrNull { it.brandId == p.brandId }
                 ?: MockBrand(p.brandId, manualBrandProposal(brands,name,"",null)?.name
-                    ?: manualBrandSearchQuery(name,"").ifBlank {
-                        if (whisky) "기타 브랜드" else alcoholKind.trim().ifEmpty { category }
-                    })
+                    ?: if (whisky) "기타 브랜드" else alcoholKind.trim().ifEmpty { category })
             val stagedItem = MockBarMenuItem(old?.barMenuItemId ?: manualId("local-menu-"),
                 bar.barId, p.productId, options, soldOut = old?.soldOut ?: false,
                 displayNameOverride = if ((p.catalogMatched || sharedLocal) &&
