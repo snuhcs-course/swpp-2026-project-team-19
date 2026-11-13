@@ -169,6 +169,9 @@ internal fun mapConfirmedReviewDecision(
     existingBrands: Map<String, String>,
 ): MockReviewDecision {
     if (card.excluded) return MockReviewDecision(MockDecisionKind.EXCLUDE)
+    require(card.name.trim().length in 1..200) {
+        "메뉴 이름은 1~200자로 입력해 주세요."
+    }
     val raw = extracted.options.sortedBy { it.optionOrder }
     // Both whisky and other preserve every reviewer-edited OCR option, not
     // a hidden, uneditable reconstruction from the initial server response.
