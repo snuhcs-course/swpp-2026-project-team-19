@@ -24,7 +24,12 @@ import kotlinx.coroutines.withContext
  * latest GET /api/menu-imports/{id} on restore and graft fresh source URLs back.
  * A reviewVersion mismatch automatically discards the obsolete local draft.
  */
-internal class OwnerPhotoReviewDraftStore(context: Context) {
+internal class OwnerPhotoReviewDraftStore(
+    context: Context,
+    private val accessToken: suspend () -> String? = {
+        AppAuth.gateway.currentAccessTokenOrNull()
+    },
+) {
     private val folder = File(context.applicationContext.noBackupFilesDir, "owner-review-drafts")
     private val json = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
         .adapter(DraftEnvelope::class.java)
@@ -38,7 +43,7 @@ internal class OwnerPhotoReviewDraftStore(context: Context) {
 
     /** SDK access token remains in Supabase; only its stable JWT subject is hashed. */
     private suspend fun scopedFile(importId: String): File? {
-        val jwt = AppAuth.gateway.currentAccessTokenOrNull() ?: return null
+        val jwt = accessToken() ?: return null
         val sub = runCatching {
             val chunk = jwt.split('.').getOrNull(1) ?: return@runCatching null
             val decoded = Base64.decode(chunk, Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING)
