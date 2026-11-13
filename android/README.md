@@ -71,8 +71,11 @@ on the deployed server.
 - A same-size glass `잔 30ml` **is the same serving** as `샷 30ml`.
   Only `pourMl` distinguishes non-bottle options: prices for the same ml
   must be reconciled before publishing. Bottle is one separate serving.
-  Newly reviewed sized glasses send `optionLabel=null` with the actual
-  `pourMl` so the existing server receives a stable representation.
+  Newly created sized glass options send `optionLabel=null` with their
+  `pourMl`. When updating an existing bar option, Android reuses that saved
+  option's exact server label/pour to prevent a duplicate under #164's
+  legacy (label,pour) constraint. Ambiguous historical duplicate sizes are
+  blocked rather than silently overwritten.
 - The merged Backend #164 persists literal option labels. Android does not
   retroactively rename existing database rows or claim a server migration.
 - v18 OCR mock scenarios, preview-only repositories, demo shared preferences,
