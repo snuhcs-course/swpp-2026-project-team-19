@@ -132,6 +132,8 @@ data class BarMenuItemDto(
     val brandName: String? = null,
     val category: String = "whisky",
     val soldOut: Boolean = false,
+    val catalogMatched: Boolean = true,
+    val catalogReviewStatus: String? = null,
 )
 
 data class BarMenuResponseDto(
