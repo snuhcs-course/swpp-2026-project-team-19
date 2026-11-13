@@ -187,7 +187,7 @@ class UxV18ComposeTest {
         rule.onNodeWithText("매장 기본 잔 용량을 입력해주세요.").assertIsDisplayed()
     }
 
-    @Test fun publishConfirmLeavesForMenuManagement() {
+    @Test fun publishConfirmShowsResultBeforeMenuManagement() {
         val repo = MockPhotoReviewRepository(MockPhotoReviewScenario.READY)
         var left = false
         review(repo = repo, onLeave = { left = true })
@@ -201,8 +201,13 @@ class UxV18ComposeTest {
         rule.onNodeWithText("여러 줄을 합친 위스키", substring = true).assertDoesNotExist()
         rule.onNodeWithTag("review-publish-sheet-confirm").performClick()
         rule.waitForIdle()
-        assertTrue(left)
+        assertFalse(left)
+        rule.onNodeWithTag("review-publish-result").assertExists()
+        rule.onNodeWithText("메뉴를 추가했어요.").assertIsDisplayed()
         assertTrue(repo.published != null)
+        rule.onNodeWithTag("review-result-leave").performClick()
+        rule.waitForIdle()
+        assertTrue(left)
     }
 
     @Test fun laterLeavesWithoutPublishing() {

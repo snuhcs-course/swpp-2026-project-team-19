@@ -828,6 +828,10 @@ class OwnerManualMenuComposeTest {
         }
         compose.onNodeWithTag("manual-menu-row-poured-bottle-row").performClick()
         compose.onNodeWithTag("manual-menu-row-edit").performClick()
+        // Bottle's serving identity deliberately has no editable ml field.
+        // Convert to a glass serving explicitly before changing the pour.
+        compose.onNodeWithTag("manual-menu-ml-0").assertDoesNotExist()
+        compose.onNodeWithText("Bottle 판매").performClick()
         compose.onNodeWithTag("manual-menu-ml-0").performScrollTo().performTextReplacement("700")
         compose.onNodeWithTag("manual-menu-save").performScrollTo().performClick()
         compose.runOnIdle {

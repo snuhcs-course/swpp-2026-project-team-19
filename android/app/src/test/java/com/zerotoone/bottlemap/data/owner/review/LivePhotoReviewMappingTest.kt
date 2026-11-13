@@ -233,11 +233,14 @@ class LivePhotoReviewMappingTest {
             option("opt-b",null,22000).copy(optionOrder=2))
         val card=mapServerPhotoReview(response(item(options=options)),fixture()).items.single()
         assertEquals(30.0,card.volume,0.0)
-        assertEquals(30.0,card.options.single().volume,0.0)
+        // Two OCR prices without ml both inherit 30ml: the same serving
+        // is ONE option with a required price choice, not two 30ml rows.
+        assertTrue(card.options.isEmpty())
+        assertEquals(2, card.priceCandidates.size)
+        assertEquals(setOf(18000,22000),card.priceCandidates.map { it.priceKrw }.toSet())
+        assertEquals(1,PhotoReviewRules.pendingPriceServings(card).size)
         assertEquals("30",PhotoReviewRules.optionFieldText(card,
             PhotoReviewRules.OptionField.VOLUME,null))
-        assertEquals("30",PhotoReviewRules.optionFieldText(card,
-            PhotoReviewRules.OptionField.VOLUME,0))
     }
 
     @Test fun newWhiskyIsPublishedUnlinkedEvenWhenBrandIsMissing() {
