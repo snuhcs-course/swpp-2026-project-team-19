@@ -82,10 +82,21 @@ class LivePhotoReviewRepository(
         val state = mapServerPhotoReview(response, current)
         val local = draftStore.load(id, requireNotNull(response.reviewVersion),
             state.items.map { it.id })
+        // A draft created before the per-product grouping migration has the
+        // same raw OCR IDs but incompatible card semantics. Never restore that
+        // obsolete ungrouped state over a newly grouped, price-conflicted card.
+        // Compatible drafts retain all owner edits after process recreation.
+        fun compatible(candidate: PhotoReviewState?): Boolean =
+            candidate != null &&
+                candidate.items.map { it.id } == state.items.map { it.id } &&
+                candidate.items.zip(state.items).all { (saved, fresh) ->
+                    saved.mergedInto == fresh.mergedInto &&
+                        saved.priceCandidates == fresh.priceCandidates &&
+                        saved.volumeChoices == fresh.volumeChoices
+                }
         val chosen = inMemoryDraft.takeIf {
-            loaded?.reviewVersion == response.reviewVersion &&
-                it?.items?.map { item -> item.id } == state.items.map { item -> item.id }
-        } ?: local ?: state
+            loaded?.reviewVersion == response.reviewVersion && compatible(it)
+        } ?: local.takeIf(::compatible) ?: state
         // Signed URLs expire, and source observations belong to the server.
         // Restore only owner edits; rebind fresh data to the current response.
         val currentItems = state.items.associateBy { it.id }
