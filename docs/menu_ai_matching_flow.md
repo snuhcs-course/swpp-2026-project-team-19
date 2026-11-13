@@ -1552,7 +1552,7 @@ products
 7. 확정된 결과를 기준으로 최종 변경 계산
 8. 현재 메뉴판에 변경 적용(품절과 할인 이어 받기), menu_boards.version 증가
 9. menu_import_changes 결정과 review_confirmed_at 저장
-10. menu_imports.status = applied 및 completed_at 저장
+10. menu_imports.status = applied 및 completed_at 저장, 검수 초안(review_draft) 지우기
 ```
 
 서로 다른 업장의 최종 확정 요청이 같은 신규 브랜드나 상품을 동시에 등록하면 양쪽 모두 최초 중복 조회에서 `없음`을 볼 수 있다. `SERIALIZABLE` 격리 수준에서는 DB가 두 트랜잭션을 순서대로 실행한 것과 같은 결과를 만들 수 없는 경우 하나를 직렬화 충돌로 중단한다. 백엔드는 중단된 트랜잭션을 완전히 롤백하고 다음처럼 처음부터 다시 실행한다.

@@ -12,6 +12,7 @@
 - 처리 상태 polling
 - 추출 항목·옵션·상품 후보·임시 diff 통합 조회
 - 검수 중 브랜드와 상품 검색
+- 검수 중 입력의 초안 저장과 불러오기
 - 모든 검수 결정의 일괄 제출과 메뉴 반영
 - 현재 메뉴판 항목의 직접 추가, 수정, 삭제와 초기화, 품절, 기간 할인, 판매 정보 확인
 - 매장 정보(한 줄 소개, 태그, 정규 영업시간), 임시 휴무, 매장 사진
@@ -26,7 +27,6 @@
 - 백엔드와 국세청 사업자등록정보 API 사이의 요청
 - 작업 큐와 AI 워커 내부 통신
 - 운영자용 카탈로그 일반 CRUD
-- 중간 검수 결과 자동 저장
 - SSE와 WebSocket
 
 메뉴 등록은 MVP에서 다음 흐름을 사용한다.
@@ -124,7 +124,7 @@ GET 주변 업장 조회 (위치 + 반경)
 | `PUT /api/bars/{barId}/menu/items/{barMenuItemId}/sold-out`, `POST /api/bars/{barId}/menu/confirm` | | | O | O |
 | `PUT /api/bars/{barId}/operating-exception`, `DELETE /api/bars/{barId}/operating-exception` | | | O | O |
 | `POST /api/bars/{barId}/photos`, `DELETE .../photos/{photoId}`, `PUT .../photos/order` | | | O | O |
-| `GET /api/menu-imports/{menuImportId}`, `POST .../review-and-apply`, `POST .../cancel` | | | 해당 업장의 작업만 | O |
+| `GET /api/menu-imports/{menuImportId}`, `PUT .../review-draft`, `POST .../review-and-apply`, `POST .../cancel` | | | 해당 업장의 작업만 | O |
 | `GET /api/catalog/brands`, `GET /api/catalog/products` | | | 업장이 하나 이상이면 O | O |
 | `POST /api/auth/temp-login` | 임시 로그인이 켜진 서버에서만 O (3.1.3) | 같음 | 같음 | 같음 |
 | `GET /health` | O | O | O | O |
@@ -273,6 +273,7 @@ ignore
 | `GET` | `/api/menu-imports/{menuImportId}` | 처리 상태 또는 통합 검수 데이터 조회 |
 | `GET` | `/api/catalog/brands` | 검수 중 기존 브랜드 검색 |
 | `GET` | `/api/catalog/products` | 검수 중 기존 상품 검색 |
+| `PUT` | `/api/menu-imports/{menuImportId}/review-draft` | 검수 중 입력의 초안 저장 |
 | `POST` | `/api/menu-imports/{menuImportId}/review-and-apply` | 전체 검수 결정 제출과 원자적 반영 |
 | `POST` | `/api/menu-imports/{menuImportId}/cancel` | 미완료 메뉴 등록 작업 취소 |
 | `POST` | `/api/bars/{barId}/menu/items` | 메뉴 항목 직접 추가 (필요하면 신규 상품 생성) |
@@ -4006,6 +4007,23 @@ HTTP 요청 자체는 성공했지만 비동기 작업이 최종 실패한 경�
       ]
     }
   ],
+  "reviewDraft": {
+    "draftVersion": 3,
+    "reviewVersion": 3,
+    "savedAt": "2026-10-04T09:05:00Z",
+    "content": {
+      "itemDecisions": [
+        {
+          "extractedItemId": "10000000-0000-4000-8000-000000000007",
+          "finalLineType": "product",
+          "action": "select_existing_product",
+          "productId": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb1"
+        }
+      ],
+      "changeDecisions": [],
+      "clientState": { "expandedItemIds": ["10000000-0000-4000-8000-000000000007"] }
+    }
+  },
   "proposedChanges": [
     {
       "changeId": "30000000-0000-4000-8000-000000000001",
@@ -4061,6 +4079,7 @@ HTTP 요청 자체는 성공했지만 비동기 작업이 최종 실패한 경�
 - 제안 상품이 없는 줄(`proposedProductId = null`, 보통 `unmatched`)은 상품 없이 게시하는 것으로 보고 비교한다. 현재 메뉴판에 이름 키(3.14.1)가 같은 미연결 항목이 있으면 그 항목과 비교해 `update`이거나 변경 없음이고, 없으면 `add`다. 이 변경의 `after.productId`는 `null`이다. 검수자가 그 줄에서 기존 상품을 고르거나 새 상품을 만들면 그 상품으로, 상품 없이 게시하면(8.10) 미연결 항목으로 반영된다. 그 줄을 비상품으로 확정하거나 제외하면 이 변경은 `ignore`로 보낸다(8.7의 `CHANGE_WITHOUT_PRODUCT`).
 - 현재 메뉴판의 미연결 항목(3.9의 `productId = null`)도 다른 항목처럼 비교한다. `before.productId`는 `null`이고, 전체 교체(`full_replace`)에서 새 사진에 이름 키가 같은 줄이 없으면 `remove`가 된다.
 - `summary`는 표시용 문구이며 검증이나 반영 기준으로 사용하지 않는다.
+- `reviewDraft`는 이 작업에 저장된 검수 초안(5.9)이다. 저장된 초안이 없으면 `null`이다. 프론트엔드는 검수 화면을 열 때 이 초안의 결정을 화면에 다시 채운다. 초안의 `reviewVersion`이 응답의 `reviewVersion`과 다르면 검수 데이터가 다시 만들어진 것이므로, `extractedItemId`와 `extractedOptionId`가 지금 응답에 있는 결정만 다시 적용하고 `changeDecisions`는 버린다(9.4). 초안의 `draftVersion`은 다음 저장(5.9)에 그대로 보낸다.
 
 `before`와 `after` 규칙:
 
@@ -4120,7 +4139,7 @@ operator와 작업 대상 업장의 현재 업주가 호출할 수 있다. 요�
 | `404` | `MENU_IMPORT_NOT_FOUND` | 작업이 없거나 `menuImportId`가 UUID 형식이 아님 | 작업 목록으로 이동 |
 | `409` | `INVALID_IMPORT_STATE` | `applied` 또는 `failed`인 작업. `details.menuImportId`, `details.status`에 현재 상태 | 작업 상세 재조회 |
 
-프론트엔드는 취소 전에 확인을 받는다. `ready_for_review`에서 취소하면 검수 중 입력한 결정은 모두 사라진다.
+프론트엔드는 취소 전에 확인을 받는다. `ready_for_review`에서 취소하면 검수 중 입력한 결정은 모두 사라진다. 서버에 저장된 검수 초안(5.9)도 같은 트랜잭션에서 지운다.
 
 ### 5.8 실제 응답 예시와 호출자별 결과
 
@@ -4329,6 +4348,106 @@ operator와 작업 대상 업장의 현재 업주가 호출할 수 있다. 요�
 | `GET /api/menu-imports/{menuImportId}` (없는 ID) | `401` | `404` | `404` | `404` | `404` |
 | `POST /api/menu-imports/{menuImportId}/cancel` | `401` | `403` | `403` | `200` | `200` |
 
+### 5.9 검수 초안 저장
+
+업주가 게시하기 전까지 검수 화면에서 입력한 내용(맞아요, 후보 선택, 이름, 가격과 용량 수정, 제외 등)을 서버에 저장한다. "나중에 하기"로 나갔다가 다른 기기나 operator 웹에서 같은 검수를 이어 할 수 있게 하기 위해서다. 저장한 초안은 통합 검수 응답(5.4)의 `reviewDraft`로 불러온다.
+
+```http
+PUT /api/menu-imports/{menuImportId}/review-draft
+Authorization: Bearer <access-token>
+Content-Type: application/json
+```
+
+```json
+{
+  "draftVersion": 3,
+  "reviewVersion": 3,
+  "content": {
+    "itemDecisions": [
+      {
+        "extractedItemId": "10000000-0000-4000-8000-000000000007",
+        "finalLineType": "product",
+        "action": "select_existing_product",
+        "productId": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb1",
+        "options": [
+          { "extractedOptionId": "20000000-0000-4000-8000-000000000001", "optionLabel": null, "pourMl": 15, "priceKrw": 8000 }
+        ]
+      },
+      {
+        "extractedItemId": "10000000-0000-4000-8000-000000000004",
+        "finalLineType": "product",
+        "action": "reject"
+      }
+    ],
+    "changeDecisions": [
+      { "changeId": "30000000-0000-4000-8000-000000000001", "decision": "apply" }
+    ],
+    "clientState": { "expandedItemIds": [] }
+  }
+}
+```
+
+operator와 작업 대상 업장의 현재 업주가 호출할 수 있다(검수 제출과 같다).
+
+| 필드 | 타입 | 필수 | 규칙 |
+|---|---|---|---|
+| `draftVersion` | 정수 | 예 | 마지막으로 읽은 초안의 버전(5.4의 `reviewDraft.draftVersion`, 또는 직전 저장 응답의 값). 저장된 초안이 없으면 `0`. 0 이상 |
+| `reviewVersion` | 정수 | 예 | 이 초안을 입력한 검수 응답의 `reviewVersion`. 1 이상. 현재 값과 달라도 저장한다 |
+| `content` | 객체 | 예 | 초안 내용. 아래 형식 |
+
+`content` 형식. 앱과 operator 웹이 같은 초안을 읽기 위한 형식이다.
+
+| 필드 | 설명 |
+|---|---|
+| `itemDecisions` | 배열. 검수 제출(8.1)의 `itemDecisions[]`와 같은 형식이되, `extractedItemId` 외의 모든 필드를 생략할 수 있다. 아직 결정하지 않은 줄은 넣지 않는다. 입력 중인 값은 제출 형식의 필드에 담는다(예: 고르기 전의 `action` 없이 고친 `correctedProductName`과 `options`만) |
+| `changeDecisions` | 배열. 검수 제출의 `changeDecisions[]`와 같은 형식. 결정한 변경만 넣는다 |
+| `clientState` | 객체. 화면 상태(펼친 카드, 입력 중인 기본 잔 용량 등)를 담는 클라이언트 전용 칸. 서버와 다른 클라이언트는 해석하지 않으며, 다른 클라이언트의 `clientState`는 무시한다 |
+
+세 필드 모두 선택이다. 정의하지 않은 최상위 필드도 거부하지 않고 그대로 저장한다.
+
+저장 규칙:
+
+- **검증**: 초안은 미완성이므로 검수 제출만큼 검사하지 않는다. `content`가 JSON 객체인지와 크기만 확인하고 내용은 그대로 저장한다. 결정의 실제 검증은 제출(8.7) 때 한다. `content`를 JSON으로 쓴 크기가 256KB(262,144바이트)를 넘으면 `413 REVIEW_DRAFT_TOO_LARGE`(`details.maxBytes`)다.
+- **상태**: 작업이 `ready_for_review`일 때만 저장한다. 아니면 `409 INVALID_IMPORT_STATE`(`details.menuImportId`, `details.status`)다.
+- **동시 수정**: 요청의 `draftVersion`이 서버의 현재 초안 버전과 다르면 아무것도 저장하지 않고 `409 REVIEW_DRAFT_OUTDATED`다. 같은 검수를 두 기기에서, 또는 업주와 operator가 함께 고칠 때 서로의 입력을 덮어쓰지 않게 하기 위해서다. 같으면 초안을 바꾸고 버전을 1 올린다.
+- **잠금**: 메뉴판을 바꾸지 않으므로 업장 행은 잠그지 않는다. 작업 행만 잠그고 상태와 버전을 확인한다. 그래서 검수 제출, 취소와 동시에 와도 차례로 처리되고, 제출이나 취소가 먼저 끝나면 저장은 `409 INVALID_IMPORT_STATE`다.
+- **지우기**: 검수 제출(8)이나 취소(5.7)가 성공하면 같은 트랜잭션에서 초안을 지운다. 초안 버전은 그대로 둔다. 검수 데이터가 다시 만들어져도(`REVIEW_OUTDATED`, 9.4) 초안은 지우지 않는다. 사용자가 그 입력을 다시 적용해야 하기 때문이다.
+- **검사 순서**: 인증(`401`) → 요청 형식(`422`), 크기(`413`) → 작업(`404 MENU_IMPORT_NOT_FOUND`) → 권한(`403`) → 작업 행 잠금 → 상태(`409 INVALID_IMPORT_STATE`) → 초안 버전(`409 REVIEW_DRAFT_OUTDATED`).
+
+`200 OK`
+
+```json
+{
+  "menuImportId": "77777777-7777-4777-8777-777777777777",
+  "draftVersion": 4,
+  "savedAt": "2026-10-04T09:06:00Z"
+}
+```
+
+| HTTP | code | 발생 조건 | 프론트엔드 처리 |
+|---|---|---|---|
+| `401` | `UNAUTHENTICATED` | 3.1.5 | 3.1.5 |
+| `403` | `FORBIDDEN` | operator도 작업 대상 업장의 업주도 아님 | 3.1.5 |
+| `404` | `MENU_IMPORT_NOT_FOUND` | 작업이 없거나 `menuImportId`가 UUID 형식이 아님 | 작업 목록으로 이동 |
+| `409` | `INVALID_IMPORT_STATE` | 작업이 `ready_for_review`가 아님. 다른 곳에서 제출되었거나 취소됨 | 작업 상세를 다시 조회해 상태에 맞는 화면으로 이동 |
+| `409` | `REVIEW_DRAFT_OUTDATED` | 다른 기기나 다른 사람이 먼저 저장함. `details.currentDraftVersion`, `details.savedAt`, `details.reviewUrl` | 아래 |
+| `413` | `REVIEW_DRAFT_TOO_LARGE` | `content`가 256KB를 넘음. `details.maxBytes` | 기기에만 저장하고 서버 저장은 멈춤. 앱 버그로 보고 기록 |
+| `422` | `VALIDATION_FAILED` | `draftVersion`, `reviewVersion`이 범위 밖이거나, `content`가 객체가 아님 | 앱 버그로 보고 기록 |
+
+프론트엔드 처리:
+
+- 입력이 멈추고 몇 초 뒤, 그리고 "나중에 하기"로 검수 화면을 나갈 때 저장한다. 성공 응답의 `draftVersion`을 다음 저장에 보낸다.
+- 서버 저장이 실패해도(네트워크 오류, `5xx`) 입력은 기기에 남겨 두고 다시 보낸다. 화면에는 "이 기기에는 저장됐어요"를 보여 주고 재시도를 제공한다.
+- `REVIEW_DRAFT_OUTDATED`를 받으면 `details.reviewUrl`로 최신 검수 응답(5.4)을 다시 받아, 다른 곳에서 저장된 초안(`reviewDraft`)을 보여 주고 그 초안으로 이어 할지, 이 기기의 입력으로 덮어쓸지 고르게 한다. 덮어쓰면 새로 받은 `draftVersion`으로 다시 저장한다.
+
+**호출자별 결과**. 대상은 `ready_for_review`인 관악 위스키 바의 작업이다.
+
+| API | 비로그인 | customer | 다른 업장의 업주 | 해당 업장의 업주 | operator |
+|---|---|---|---|---|---|
+| `PUT /api/menu-imports/{menuImportId}/review-draft` | `401` | `403` | `403` | `200` | `200` |
+
+이 표는 구현 전에 권한 규칙(2.2)으로 적은 값이다. 구현한 뒤 2.4의 방법으로 받아 확인한다.
+
 ## 6. 검수 보조 브랜드 검색
 
 신규 상품 등록 중 기존 브랜드를 선택하기 위한 읽기 전용 API다.
@@ -4422,7 +4541,7 @@ Content-Type: application/json
 | `itemDecisions` | 배열 | 예 | 모든 추출 항목의 최종 결정 |
 | `changeDecisions` | 배열 | 예 | 모든 임시 diff의 적용 또는 무시 결정 |
 
-한 화면의 결정을 한 번에 제출하며 중간 항목 저장 API는 사용하지 않는다. operator와 작업 대상 업장의 현재 업주가 호출할 수 있다.
+한 화면의 결정을 한 번에 제출한다. 제출 전까지의 입력은 검수 초안(5.9)으로 저장하며, 초안은 메뉴판과 카탈로그를 바꾸지 않는다. 제출에 성공하면 초안을 지운다. operator와 작업 대상 업장의 현재 업주가 호출할 수 있다.
 
 모든 객체는 정의하지 않은 필드를 받지 않는다(`EXTRA_FORBIDDEN`). 예를 들어 `confirm_non_product`에 `options`를 보내면 거부한다. 문자열 필드는 앞뒤 공백을 지운 뒤 길이를 검사한다.
 
@@ -4974,9 +5093,11 @@ API가 보내는 오류는 예상하지 못한 서버 오류(`500 INTERNAL_ERROR
 | `409` | `PHOTOS_OUTDATED` | 순서 변경에 보낸 사진 ID가 현재 사진과 다름. `details.photos` (3.16.4) | `details.photos`로 화면을 바꾸고 다시 정렬하게 함 |
 | `409` | `INVALID_CHECK_STATE` | 이미 `resolved` 또는 `dismissed`인 메뉴 항목 확인을 처리함. `details.checkId`, `details.status` (3.18.3) | 확인 목록 다시 조회 |
 | `409` | `INVALID_IMPORT_STATE` | 현재 상태에서 요청 불가. 예: `ready_for_review`가 아닌 작업의 검수 제출, `applied`·`failed` 작업의 취소. `details.menuImportId`, `details.status`에 현재 상태 | 상태 재조회 |
+| `409` | `REVIEW_DRAFT_OUTDATED` | 검수 초안 저장(5.9)의 `draftVersion`이 현재 초안 버전과 다름. `details.currentDraftVersion`, `details.savedAt`, `details.reviewUrl` | 최신 검수 응답을 다시 받아 어느 초안을 쓸지 고르게 함 |
 | `409` | `REVIEW_OUTDATED` | `reviewVersion` 불일치, 또는 검수 데이터를 만든 뒤 현재 메뉴판이 바뀜 | `details.reviewUrl`로 최신 검수 데이터 재조회 |
 | `409` | `DUPLICATE_BRAND_FOUND` | 신규 브랜드와 동일할 수 있는 브랜드 발견 (검수 또는 직접 추가) | 기존 브랜드 선택 화면 표시 |
 | `409` | `DUPLICATE_PRODUCT_FOUND` | 신규 상품과 동일한 상품 발견, 또는 제출한 이름·별칭이 기존 상품의 별칭과 일치 | 기존 상품 선택 화면 표시. 다른 상품이면 겹치는 별칭을 빼고 다시 제출. `existingProduct.isActive = false`이면 상품 검색으로 안내 (9.5) |
+| `413` | `REVIEW_DRAFT_TOO_LARGE` | 검수 초안(5.9)의 `content`가 256KB를 넘음. `details.maxBytes` | 기기에만 저장하고 서버 저장을 멈춤 |
 | `413` | `UPLOAD_TOO_LARGE` | 파일 개수 또는 크기 초과 | 이미지 축소 또는 개수 조정 |
 | `415` | `UNSUPPORTED_IMAGE_TYPE` | 지원하지 않는 이미지 형식 | 지원 형식 안내 |
 | `422` | `VALIDATION_FAILED` | 필드 값이나 옵션 구성이 잘못됨 | `fieldErrors` 표시 |
@@ -5018,7 +5139,7 @@ API가 보내는 오류는 예상하지 못한 서버 오류(`500 INTERNAL_ERROR
 
 ### 9.4 검수 버전 충돌
 
-`REVIEW_OUTDATED`가 발생하면 최종 반영은 전부 롤백된다. 프론트엔드는 사용자의 로컬 입력을 즉시 버리지 말고 최신 검수 응답을 받은 뒤 항목 ID 기준으로 재적용 가능한 수정값을 보여줄 수 있다. 사용자는 바뀐 diff를 확인하고 다시 제출해야 한다.
+`REVIEW_OUTDATED`가 발생하면 최종 반영은 전부 롤백된다. 서버에 저장된 검수 초안(5.9)은 지우지 않는다. 프론트엔드는 사용자의 로컬 입력을 즉시 버리지 말고 최신 검수 응답을 받은 뒤 항목 ID 기준으로 재적용 가능한 수정값을 보여줄 수 있다. 사용자는 바뀐 diff를 확인하고 다시 제출해야 한다.
 
 ### 9.5 신규 브랜드와 상품 중복 발견
 
@@ -5140,7 +5261,8 @@ canceled
 - 후보 `evidence`에 새 키가 추가되어도 프론트엔드가 깨지지 않아야 한다.
 - 임시 diff는 최신 버전만 유효하다.
 - 모든 변경 요청은 현재 `reviewVersion`을 포함한다.
-- `review-and-apply` 성공 전에는 카탈로그와 현재 메뉴판이 변경되지 않는다.
+- `review-and-apply` 성공 전에는 카탈로그와 현재 메뉴판이 변경되지 않는다. 검수 초안 저장(5.9)도 바꾸지 않는다.
+- 검수 초안의 `content`는 서버가 해석하지 않는다. 결정의 형식은 제출(8.1)과 같고, `clientState`는 저장한 클라이언트만 해석한다.
 - 최종 요청에서 AI를 다시 호출하지 않는다. 이름을 고친 줄의 다시 매칭(8.11)은 규칙 매처만 쓴다.
 - 최종 요청은 부분 성공하지 않는다. 하나라도 실패하면 전체 롤백한다.
 - 메뉴 직접 편집(3.14)은 항목을 `barMenuItemId`로만 가리킨다. `menuBoardEntryId`와 `menuEntryOptionId`는 메뉴판이 바뀌면 달라질 수 있다.
