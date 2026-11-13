@@ -39,17 +39,40 @@ class OwnerUxConsistencyComposeTest {
         ))
     }
 
-    @Test fun welcomePinIsQuarterSizeAndCenteredAtQuarterOfScreenWidth() {
+    @Test fun welcomePinIsHalfSizeQuarterScreenCenteredAndTouchesHeadlineTop() {
         compose.setContent { MaterialTheme {
             WelcomeScreen(onBrowseAsGuest = {}, onGoogle = {}, onOwner = {})
         } }
         val root = compose.onNodeWithTag("welcome-screen").getUnclippedBoundsInRoot()
         val pin = compose.onNodeWithTag("welcome-pin").getUnclippedBoundsInRoot()
+        val headline = compose.onNodeWithTag("welcome-headline").getUnclippedBoundsInRoot()
         val horizontalCenter = (pin.left + pin.right) / 2
         val expectedCenter = root.left + root.width / 4
         org.junit.Assert.assertTrue(
             kotlin.math.abs((horizontalCenter - expectedCenter).value) <= 1.5f)
-        org.junit.Assert.assertTrue(pin.width.value <= 40f)
+        org.junit.Assert.assertTrue(kotlin.math.abs(pin.width.value - 79f) <= 1f)
+        org.junit.Assert.assertTrue(kotlin.math.abs(pin.bottom.value - headline.top.value) <= 1.5f)
+    }
+
+    @Test fun approvedBarAlwaysOffersManagementEvenIfInitialReviewPending() {
+        val snapshot = OwnerMockFixtures.registeredBar()
+        val bar = snapshot.bars.first()
+        var managedBar: String? = null
+        compose.setContent { MaterialTheme {
+            OwnerRegistrationDashboard(
+                snapshot = snapshot,
+                onRegister = {},
+                onManage = { managedBar = it.barId },
+                onViewApplication = {},
+                onCancel = {},
+                onDismiss = {},
+                onReapply = {},
+            )
+        } }
+        compose.onNodeWithText("매장 관리하기").assertIsDisplayed()
+        compose.onNodeWithText("메뉴 검수하기").assertDoesNotExist()
+        compose.onNodeWithText("매장 관리하기").performClick()
+        compose.runOnIdle { assertEquals(bar.barId, managedBar) }
     }
 
     @Test fun readyImportWithNoCachedOcrLinesShowsReviewImmediately() {
