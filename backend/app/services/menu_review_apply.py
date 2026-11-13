@@ -53,7 +53,7 @@ from app.schemas.menu_review import (
     ReviewResult,
     SelectExistingProduct,
 )
-from app.services.bar_access import can_manage_bar, forbidden
+from app.services.bar_access import can_manage_bar, forbidden, is_operator
 from app.services.bar_menu import bar_not_found
 from app.services.menu_draft import build_draft, replace_draft
 from app.services.menu_publish import AppliedChange, review_plan, write_board
@@ -249,6 +249,19 @@ def _apply_once(
         raise _outdated(menu_import, request.reviewVersion)
 
     review = validate_review(session, menu_import, request)
+    # Review-and-apply currently writes directly into global products/aliases.
+    # A bar owner must not mutate the shared catalog without operator approval.
+    # Explicitly reject instead of silently publishing unapproved identities.
+    if not is_operator(session, principal) and any(
+        isinstance(entry.decision, CreateProduct)
+        or (isinstance(entry.decision, SelectExistingProduct) and entry.decision.aliasesToAdd)
+        for entry in review.items
+    ):
+        raise ApiError(
+            403,
+            "CATALOG_APPROVAL_REQUIRED",
+            "신규 상품과 별칭은 관리자 승인 후 카탈로그에 등록할 수 있어요. 기존 상품만 연결해 주세요.",
+        )
     catalog = create_catalog_entries(
         session, menu_import, review, created_by_user_id=caller_user_id(session, principal)
     )
