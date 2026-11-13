@@ -25,6 +25,7 @@ import com.zerotoone.bottlemap.data.owner.sampledBitmapSize
 import com.zerotoone.bottlemap.ui.common.UxColor
 import com.zerotoone.bottlemap.ui.common.uxText
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.withContext
 import java.net.HttpURLConnection
 import java.net.URL
@@ -41,15 +42,27 @@ internal fun RealReviewSourceVisual(
     height: Dp,
     large: Boolean,
     modifier: Modifier = Modifier,
+    refreshSourceUrl: (suspend () -> String?)? = null,
 ) {
-    val image by produceState<Bitmap?>(
-        initialValue = null, key1 = sourceUrl, key2 = box, key3 = large,
+    val loaded by produceState<Pair<Boolean, Bitmap?>>(
+        initialValue = false to null, key1 = sourceUrl, key2 = box, key3 = large,
     ) {
-        value = withContext(Dispatchers.IO) {
-            runCatching { retrieveSignedReviewBitmap(sourceUrl, if (large) null else box) }
-                .getOrNull()
+        try {
+            val photo = withContext(Dispatchers.IO) {
+                retrieveSignedReviewBitmap(sourceUrl, if (large) null else box)
+            } ?: refreshSourceUrl?.invoke()?.takeIf { it != sourceUrl }?.let { fresh ->
+                withContext(Dispatchers.IO) {
+                    retrieveSignedReviewBitmap(fresh, if (large) null else box)
+                }
+            }
+            value = true to photo
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (_: Exception) {
+            value = true to null
         }
     }
+    val image = loaded.second
     val shape = RoundedCornerShape(8.dp)
     Box(
         modifier.fillMaxWidth().height(height)
@@ -66,7 +79,8 @@ internal fun RealReviewSourceVisual(
                 contentScale = if (large) ContentScale.Fit else ContentScale.Crop,
             )
         } else {
-            Text("원본 사진을 불러오고 있어요.",
+            Text(if (loaded.first) "원본 사진을 열 수 없어요."
+                else "원본 사진을 불러오고 있어요.",
                 style = uxText(11f, 400, UxColor.sub))
         }
     }
