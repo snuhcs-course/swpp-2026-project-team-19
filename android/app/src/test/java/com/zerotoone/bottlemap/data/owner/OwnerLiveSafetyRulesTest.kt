@@ -90,7 +90,7 @@ class OwnerLiveSafetyRulesTest {
         assertTrue(reviewedServingsByProduct(job, setOf("other")).isEmpty())
     }
 
-    @Test fun bottleLanguagesShareOneServingButGlassLabelsRemainSeparate() {
+    @Test fun bottleLanguagesAndMatchingGlassVolumesShareServingIdentity() {
         fun line(id: String, label: String, price: Int): MockExtractedLine {
             val option = MockMenuOption("option-$id", label = label, pourMl = null,
                 priceKrw = price)
@@ -109,10 +109,11 @@ class OwnerLiveSafetyRulesTest {
         val priced = reviewedServingsByProduct(job, setOf("lagavulin"))
         // Android normalizes Korean/English bottle to the one Bottle identity.
         assertEquals(1, priced.getValue("lagavulin").size)
-        assertEquals("label:bottle|ml:none", reviewServingKey(null, priced.getValue("lagavulin")[0].label))
-        assertEquals("label:bottle|ml:none", reviewServingKey(null, "  BOTTLE  "))
-        assertEquals("label:잔|ml:30", reviewServingKey(30, "잔"))
-        assertEquals("label:double|ml:30", reviewServingKey(30, "Double"))
+        assertEquals("bottle", reviewServingKey(null, priced.getValue("lagavulin")[0].label))
+        assertEquals("bottle", reviewServingKey(null, "  BOTTLE  "))
+        assertEquals("ml:30", reviewServingKey(30, "잔"))
+        assertEquals("ml:30", reviewServingKey(30, "Double"))
+        assertEquals("ml:60", reviewServingKey(60, "잔"))
     }
 
     @Test fun failedReplacementNeverDeletesExistingPhoto() {
