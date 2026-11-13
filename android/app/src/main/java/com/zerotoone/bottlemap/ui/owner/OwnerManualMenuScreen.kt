@@ -172,6 +172,7 @@ internal fun OwnerManualMenuScreen(
     onNewPhoto: () -> Unit,
     onExistingJob: (MockImportStatus) -> Unit,
     nowEpochMs: Long = rememberOwnerNow(),
+    onNotice: (String) -> Unit = {},
 ) {
     val snapshot = when (state) {
         is MockOwnerLoadState.Ready -> state.snapshot
@@ -763,7 +764,7 @@ internal fun OwnerManualMenuScreen(
                             }
                             if (editId != null) ManualTopButton("삭제", true) {
                                 if (activePhotoImport)
-                                    error = "사진 등록 작업이 끝난 뒤 수정할 수 있어요."
+                                    onNotice("사진으로 메뉴 등록 작업 중에는 메뉴를 수정할 수 없어요.")
                                 else confirm = "delete"
                             }
                         }
