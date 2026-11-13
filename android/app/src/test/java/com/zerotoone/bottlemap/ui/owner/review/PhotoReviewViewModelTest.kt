@@ -495,4 +495,44 @@ class PhotoReviewViewModelTest {
         assertFalse(PhotoReviewRules.stats(vm.state).canPublish) // same catalog product must be relinked
     }
 
+    @Test fun leaveWaitsForLastDraftEvenWhenAnEarlierSaveIsSlow() = runTest(dispatcher) {
+        val firstSave = CompletableDeferred<Unit>()
+        val snapshots = mutableListOf<PhotoReviewState>()
+        var writes = 0
+        val mock = MockPhotoReviewRepository(MockPhotoReviewScenario.BASIC)
+        val repo = object : PhotoReviewRepository by mock {
+            override suspend fun saveDraft(state: PhotoReviewState) {
+                writes++
+                if (writes == 1) firstSave.await()
+                snapshots += state
+            }
+        }
+        val vm = PhotoReviewViewModel(repo)
+        val events = vm.collectEvents(backgroundScope)
+        vm.typeInlinePrice("glen15", "12000")
+        vm.typeInlinePrice("glen15", "24000")
+        vm.leave()
+        assertFalse(PhotoReviewEvent.Leave in events)
+        firstSave.complete(Unit)
+        assertTrue(PhotoReviewEvent.Leave in events)
+        assertEquals("24000", snapshots.last().items.first { it.id == "glen15" }.draftPriceText)
+        assertEquals("24000", vm.state.items.first { it.id == "glen15" }.draftPriceText)
+    }
+
+    @Test fun failedFinalDraftSavePreventsSilentExit() = runTest(dispatcher) {
+        val mock = MockPhotoReviewRepository(MockPhotoReviewScenario.BASIC)
+        val repo = object : PhotoReviewRepository by mock {
+            override suspend fun saveDraft(state: PhotoReviewState) {
+                error("out of space")
+            }
+        }
+        val vm = PhotoReviewViewModel(repo)
+        val events = vm.collectEvents(backgroundScope)
+        vm.leave()
+        assertFalse(PhotoReviewEvent.Leave in events)
+        assertTrue(PhotoReviewEvent.Toast(
+            "임시 검수 기록을 저장하지 못했어요. 다시 시도해 주세요."
+        ) in events)
+    }
+
 }

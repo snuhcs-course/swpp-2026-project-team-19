@@ -16,6 +16,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 sealed interface PhotoReviewLoad {
     data object Loading : PhotoReviewLoad
@@ -71,6 +73,10 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
     val publishing: StateFlow<Boolean> = _publishing.asStateFlow()
     private val _publishOutcome = MutableStateFlow<PublishOutcome?>(null)
     val publishOutcome: StateFlow<PublishOutcome?> = _publishOutcome.asStateFlow()
+
+    private val draftSaveMutex = Mutex()
+    private var latestDraftRevision = 0L
+    private var leaving = false
 
     private val _events = Channel<PhotoReviewEvent>(Channel.BUFFERED)
     val events = _events.receiveAsFlow()
@@ -144,16 +150,56 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
         set(s.copy(items = s.items.map { if (it.id == id) change(it) else it }))
     }
 
+    /** Serialized, latest-state-only writes. An older suspended snapshot
+     * cannot overwrite an owner's more recent edit when its IO completes.
+     */
     private fun saveDraft(state: PhotoReviewState) {
-        viewModelScope.launch { runCatching { repository.saveDraft(state) } }
+        val revision = ++latestDraftRevision
+        viewModelScope.launch {
+            draftSaveMutex.withLock {
+                if (revision == latestDraftRevision) {
+                    try {
+                        repository.saveDraft(state)
+                    } catch (cancelled: CancellationException) {
+                        throw cancelled
+                    } catch (_: Exception) {
+                        // The final save on Leave will retry and surface errors.
+                    }
+                }
+            }
+        }
     }
 
     // ---- Screen-level actions ----
 
     fun leave() {
-        if (_publishing.value) return
-        if (_publishOutcome.value == null) review?.let { set(it.copy(modal = null)) }
-        _events.trySend(PhotoReviewEvent.Leave)
+        if (_publishing.value || leaving) return
+        leaving = true
+        val final = review?.takeIf { _publishOutcome.value == null }?.copy(modal = null)
+        if (final == null) {
+            _events.trySend(PhotoReviewEvent.Leave)
+            return
+        }
+        // Do not pop the ViewModel until its final draft is durably saved.
+        _load.value = PhotoReviewLoad.Ready(final)
+        ++latestDraftRevision // invalidate any queued older save
+        viewModelScope.launch {
+            val saved = draftSaveMutex.withLock {
+                try {
+                    repository.saveDraft(final)
+                    true
+                } catch (cancelled: CancellationException) {
+                    throw cancelled
+                } catch (_: Exception) {
+                    false
+                }
+            }
+            if (saved) _events.send(PhotoReviewEvent.Leave)
+            else {
+                leaving = false
+                toast("임시 검수 기록을 저장하지 못했어요. 다시 시도해 주세요.")
+            }
+        }
     }
 
     fun toggleGroup(group: ReviewGroup) {
