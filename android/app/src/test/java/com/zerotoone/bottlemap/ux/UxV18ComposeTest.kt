@@ -24,6 +24,7 @@ import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewScreen
 import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewViewModel
 import com.zerotoone.bottlemap.ui.owner.review.ReviewGroup
 import com.zerotoone.bottlemap.ui.theme.BottleMapTheme
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
