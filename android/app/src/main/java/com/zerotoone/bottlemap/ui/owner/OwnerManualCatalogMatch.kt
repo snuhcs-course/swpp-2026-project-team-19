@@ -59,6 +59,22 @@ internal fun inactiveOwnerCatalogMatch(
             normalizeOwnerCatalogName(it.matchedAlias.orEmpty()) == normalized) }
 }
 
+/** Fresh server name check must never block a local beer with an old canonical beer row. */
+internal fun manualFreshCatalogExactMatch(
+    products: List<MockCatalogProduct>, name: String,
+    category: String, rejectedProductId: String?,
+): MockCatalogProduct? {
+    if (category != "위스키") return null
+    val normalized = normalizeOwnerCatalogName(name)
+    if (normalized.isBlank()) return null
+    return products.firstOrNull {
+        it.isActive && it.catalogMatched && it.category == "whisky" &&
+            it.productId != rejectedProductId &&
+            (normalizeOwnerCatalogName(it.displayName) == normalized ||
+                normalizeOwnerCatalogName(it.matchedAlias.orEmpty()) == normalized)
+    }
+}
+
 /** After brand confirmation, propose the single catalog product with matching age. */
 internal fun manualProductProposal(
     products: List<MockCatalogProduct>, menuName: String, category: String,
