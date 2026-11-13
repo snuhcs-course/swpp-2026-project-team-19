@@ -226,8 +226,53 @@ class LivePhotoReviewMappingTest {
         assertEquals("맥주 1",decision.newProduct?.name)
         assertEquals(1,decision.correctedOptions!!.size)
         assertEquals("beer-1",decision.correctedOptions!!.single().optionId)
-        assertNull(decision.correctedOptions!!.single().pourMl)
+        // "잔" with a missing OCR pour inherits the displayed bar default.
+        assertEquals(30,decision.correctedOptions!!.single().pourMl)
+        assertEquals("잔",decision.correctedOptions!!.single().label)
         assertEquals(8000,decision.correctedOptions!!.single().priceKrw)
+    }
+
+    @Test fun originalKoreanBottleLabelIsNotTranslatedDuringPublish() {
+        val dto=item(options=listOf(ReviewOptionDto("ocr-bottle",1,"병",null,88000)),
+            status="unmatched",proposedId=null)
+        val card=mapServerPhotoReview(response(dto),fixture()).items.single()
+        val mapped=mapConfirmedReviewDecision(card,dto,30.0,emptyMap())
+        val option=requireNotNull(mapped.correctedOptions).single()
+        assertEquals("병",option.label)
+        assertNull(option.pourMl)
+        assertEquals("ocr-bottle",option.optionId)
+    }
+
+    @Test fun unknownOtherLabelCanSavePriceWithoutInventingPour() {
+        val dto=item(options=listOf(ReviewOptionDto("ocr-other",1,null,null,1500)),
+            status="unmatched",proposedId=null)
+            .copy(extractedKind="other",candidates=emptyList(),newProductDraft=null)
+        val card=mapServerPhotoReview(response(dto),fixture()).items.single()
+        assertTrue(card.volume.isNaN())
+        val option=requireNotNull(mapConfirmedReviewDecision(card,dto,30.0,emptyMap())
+            .correctedOptions).single()
+        assertNull(option.label)
+        assertNull(option.pourMl)
+    }
+
+    @Test fun overlongNameIsRejectedRatherThanTruncatedOrPublished() {
+        val dto=item(status="unmatched",proposedId=null)
+        val longName="가".repeat(201)
+        val card=mapServerPhotoReview(response(dto),fixture()).items.single()
+            .copy(name=longName,nameSaved=true,newConfirmed=true)
+        assertTrue(com.zerotoone.bottlemap.ui.owner.review.ReviewIssue.NAME in
+            PhotoReviewRules.problems(card))
+        try {
+            mapConfirmedReviewDecision(card,dto,30.0,emptyMap())
+            fail("overlong name must not be sent to the server")
+        } catch (_: IllegalArgumentException) { }
+    }
+
+    @Test fun statusRecoveryOnlyAcceptsAppliedStatusForTheSameImport() {
+        val applied=response(item()).copy(status="applied")
+        assertTrue(isAppliedReviewImport(applied,"import-1"))
+        assertFalse(isAppliedReviewImport(applied,"other-import"))
+        assertFalse(isAppliedReviewImport(applied.copy(status="ready_for_review"),"import-1"))
     }
 
     @Test fun nonWhiskyOcrMultiplePricesArePreservedInsteadOfTruncated() {
