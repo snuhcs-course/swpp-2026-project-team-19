@@ -511,8 +511,11 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         newBrand: MockBrand?, before: MockOwnerSnapshot,
     ) {
         val old = before.menuItems.firstOrNull { it.barMenuItemId == item.barMenuItemId }
-        require(item.options.size in 1..3) {
-            "직접 메뉴 수정은 옵션 1~3개만 지원해요. 기존 옵션은 자동으로 지우지 않습니다."
+        // New direct entries use the approved 1-3 option editor; existing
+        // OCR-published items may already have 4-10 options. Preserve them
+        // rather than refusing a name/price edit or deleting the overflow.
+        require(item.options.size in 1..(if (old == null) 3 else 10)) {
+            "메뉴 옵션 수를 확인해 주세요. 기존 옵션은 자동으로 삭제하지 않습니다."
         }
         val optionBodies = item.options.map { option ->
             mapOf(
@@ -547,13 +550,10 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                 "menuVersion" to version, "displayName" to display,
                 "options" to optionBodies,
             )
-            if (newProduct != null || item.productId.startsWith("unlinked:")) {
-                // PR #164: owner creates a bar-only menu item. Never send newProduct
-                // or create an unapproved global product/brand.
-                body["kind"] = requestedKind
-            } else {
-                body["productId"] = item.productId
-            }
+            // A candidate fetched by catalog search may be staged only in
+            // newProduct (not in before.products). Use catalogMatched to choose
+            // productId vs kind, never the presence of the staging object.
+            body.putAll(ownerAddMenuIdentity(item.productId, newProduct, previousProduct))
             remote.addMenuItem(item.barId, body)
         }
     }
