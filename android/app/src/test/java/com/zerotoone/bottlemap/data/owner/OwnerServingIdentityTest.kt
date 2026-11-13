@@ -18,17 +18,18 @@ class OwnerServingIdentityTest {
         assertEquals(servingIdentityKey(700, "병"), servingIdentityKey(null, "Bottle"))
     }
 
-    @Test fun samePourDoesNotEraseDistinctGlassOptionNames() {
+    @Test fun glassIdentityIsOnlyPourVolumeRegardlessOfLabel() {
         assertFalse(isBottleServingLabel("잔"))
         assertFalse(isBottleServingLabel("샷"))
         assertEquals("잔", canonicalServingLabel("잔"))
-        assertTrue(servingIdentityKey(30, "잔") != servingIdentityKey(30, "샷"))
+        assertEquals(servingIdentityKey(30, "잔"), servingIdentityKey(30, "샷"))
         assertTrue(servingIdentityKey(30, "잔") != servingIdentityKey(60, "잔"))
     }
 
     @Test fun missingOrCustomNonBottleLabelsAreNotInvented() {
         assertEquals(null, canonicalServingLabel(null))
         assertEquals("하프잔", canonicalServingLabel(" 하프잔 "))
-        assertEquals("label:|ml:none", servingIdentityKey(null, null))
+        assertEquals("ml:unspecified", servingIdentityKey(null, null))
+        assertEquals(servingIdentityKey(null, "잔"), servingIdentityKey(null, "샷"))
     }
 }
