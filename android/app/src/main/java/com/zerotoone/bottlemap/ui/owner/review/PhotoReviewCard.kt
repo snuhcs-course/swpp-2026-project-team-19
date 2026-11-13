@@ -130,6 +130,8 @@ private fun SourceCrop(state: PhotoReviewState, x: ReviewItem, vm: PhotoReviewVi
             raw = x.raw.ifBlank { x.name },
             hasBox = x.hasSourceBox,
             height = if (x.hasSourceBox) 70.dp else 90.dp,
+            sourcePhotoUrl = x.sourcePhotoUrl,
+            sourceBox = x.sourceBox,
             modifier = Modifier.quietClick { vm.openSourcePhoto(x.id) }
                 .semantics { contentDescription = "$location 원본 사진 크게 보기" }
                 .testTag("review-source-${x.id}"),
