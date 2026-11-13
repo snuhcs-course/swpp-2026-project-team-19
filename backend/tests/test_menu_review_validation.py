@@ -65,6 +65,36 @@ def test_option_corrections_replace_only_the_values_sent(db_session, review, gle
     assert [(o.label, o.pour_ml, o.price_krw) for o in exact.options] == [("잔", 15, 9500), (None, 30, 17000)]
 
 
+def test_excluding_a_reviewed_option_retains_only_selected_prices(db_session, review, glenfiddich):
+    body = valid_body(review, glenfiddich)
+    extracted = review[1][1]
+    removed = str(extracted.options[0].id)
+    body["itemDecisions"][1]["excludedOptionIds"] = [removed]
+    final = validate(db_session, review, body).items[1]
+    assert len(final.options) == 1
+    assert final.options[0].option.id == extracted.options[1].id
+    assert final.priced_options == final.options
+
+
+def test_excluded_options_reject_unknown_duplicate_and_conflicting_corrections(
+    db_session, review, glenfiddich
+):
+    body = valid_body(review, glenfiddich)
+    extracted = review[1][1]
+    option_id = str(extracted.options[0].id)
+    body["itemDecisions"][1]["excludedOptionIds"] = [
+        str(uuid4()), option_id, option_id,
+    ]
+    body["itemDecisions"][1]["optionDecisions"] = [
+        {"extractedOptionId": option_id, "correctedPriceKrw": 9500}
+    ]
+    assert field_errors(db_session, review, body) == {
+        ("itemDecisions[1].excludedOptionIds[0]", "UNKNOWN_OPTION"),
+        ("itemDecisions[1].excludedOptionIds[2]", "DUPLICATE_OPTION"),
+        ("itemDecisions[1].excludedOptionIds", "EXCLUDED_OPTION_CORRECTED"),
+    }
+
+
 def test_items_and_changes_must_each_be_decided_once(db_session, review, glenfiddich):
     body = valid_body(review, glenfiddich)
     body["itemDecisions"][4]["extractedItemId"] = str(uuid4())
