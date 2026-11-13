@@ -237,7 +237,7 @@ private fun MenuConfirmRow(
 private fun NameEditorRow(label: String, x: ReviewItem, vm: PhotoReviewViewModel, focus: ReviewFocus) {
     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(label, style = uxText(12f, 680, UxColor.sub, lineHeight = 1.45f))
-        val value = x.reviewNameDraft ?: if (x.match == ReviewMatch.NEW) x.newProductName ?: x.name else x.name
+        val value = x.reviewNameDraft ?: x.name
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             ReviewField(
                 value = value,
@@ -347,7 +347,8 @@ private fun IssueRowFor(x: ReviewItem, issue: ReviewIssue, vm: PhotoReviewViewMo
             "메뉴를 확인해 주세요", x.candidates.firstOrNull()?.name ?: "추천 상품 없음",
             "맞아요" to { vm.confirmMatch(id) }, "아니에요" to { vm.startCatalogSearch(id) }, "review-match-$id",
         )
-        ReviewIssue.NAME -> if (x.nameEditMode || x.name.isBlank()) NameEditorRow("메뉴 이름을 입력해 주세요", x, vm, focus)
+        ReviewIssue.NAME -> if (x.nameEditMode || x.name.trim().length !in 1..200)
+            NameEditorRow("메뉴 이름을 1~200자로 입력해 주세요", x, vm, focus)
         else MenuConfirmRow("메뉴를 확인해 주세요", x.name.ifBlank { "이름 입력 필요" },
             "맞아요" to { vm.confirmName(id) }, "아니에요" to { vm.editReviewName(id) }, "review-name-$id")
         ReviewIssue.NEW -> if (x.nameEditMode) NameEditorRow("새로운 메뉴예요", x, vm, focus)
