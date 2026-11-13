@@ -786,6 +786,88 @@ def test_repeated_conflicts_are_503_and_roll_everything_back(client, db_session,
 
 # ---- Bar-only entries / operator moderation (#152) ----
 
+@pytest.mark.parametrize(
+    "category,name,pour_ml,expected_status",
+    [
+        ("whisky", "신규 위스키 12", 30, "pending"),
+        ("맥주", "맥주 1", None, None),
+        ("cocktail", "진토닉", 45, None),
+        ("snack", "모둠 안주", None, None),
+        ("리큐르", "신규 리큐르", 30, None),
+    ],
+)
+def test_owner_local_menu_end_to_end_add_edit_reload_delete_without_catalog_mutation(
+    client, db_session, supabase, bar, category, name, pour_ml, expected_status
+):
+    """The actual JSON that the Android Owner menu adapter sends on POST/PUT."""
+    from app.models import BarLocalMenuItem
+
+    owner = owner_of(db_session, supabase, bar)
+    before_catalog_count = db_session.scalar(select(func.count()).select_from(Product))
+    created = add(client, bar.id, {
+        "menuVersion": 4,
+        "localItem": {"category": category},
+        "displayName": name,
+        "options": [
+            {"optionLabel": None, "pourMl": pour_ml, "priceKrw": 18000, "discount": None}
+        ],
+    }, owner)
+    assert created.status_code == 201, created.text
+    added = next(row for row in created.json()["items"] if row["displayName"] == name)
+    assert created.json()["menuVersion"] == 5
+    assert added["catalogMatched"] is False
+    assert added["catalogReviewStatus"] == expected_status
+    assert added["category"] == category
+    assert added["options"][0]["pourMl"] == pour_ml
+    assert db_session.get(BarLocalMenuItem, UUID(added["barMenuItemId"])) is not None
+    assert db_session.scalar(select(func.count()).select_from(Product)) == before_catalog_count
+    assert client.get("/api/search/bars", params={
+        "productId": added["productId"],
+    }).json()["items"] == []
+
+    modified = edit(client, bar.id, added["barMenuItemId"], {
+        "menuVersion": 5, "displayName": name + " 수정",
+        "category": category,
+        "options": [
+            {"optionLabel": None, "pourMl": pour_ml, "priceKrw": 19000, "discount": None}
+        ],
+    }, owner)
+    assert modified.status_code == 200, modified.text
+    assert modified.json()["menuVersion"] == 6
+    reloaded = menu_of(client, bar, owner)
+    changed = next(row for row in reloaded["items"] if row["barMenuItemId"] == added["barMenuItemId"])
+    assert changed["displayName"] == name + " 수정"
+    assert changed["options"][0]["priceKrw"] == 19000
+    assert changed["category"] == category
+    assert db_session.scalar(select(func.count()).select_from(Product)) == before_catalog_count
+    assert delete(client, bar.id, added["barMenuItemId"], 6, owner).status_code == 200
+    assert all(row["barMenuItemId"] != added["barMenuItemId"]
+               for row in menu_of(client, bar, owner)["items"])
+
+
+def test_owner_local_multi_option_nonwhisky_accepted_and_fourth_rejected(client, db_session, supabase, bar):
+    owner = owner_of(db_session, supabase, bar)
+    options = [
+        {"optionLabel": "잔", "pourMl": 30, "priceKrw": 9000, "discount": None},
+        {"optionLabel": "큰 잔", "pourMl": 60, "priceKrw": 15000, "discount": None},
+        {"optionLabel": "병", "pourMl": None, "priceKrw": 69000, "discount": None},
+    ]
+    body = {"menuVersion": 4, "localItem": {"category": "맥주"},
+            "displayName": "수제 맥주", "options": options}
+    too_many = add(client, bar.id, {**body, "options": options + [
+        {"optionLabel": "테이스팅", "pourMl": 90, "priceKrw": 20000}
+    ]}, owner)
+    assert error(too_many) == (422, "VALIDATION_FAILED")
+    assert ("options", "TOO_LONG") in field_errors(too_many)
+    posted = add(client, bar.id, body, owner)
+    assert posted.status_code == 201, posted.text
+    menu = next(x for x in posted.json()["items"] if x["displayName"] == "수제 맥주")
+    assert len(menu["options"]) == 3
+    assert [x["pourMl"] for x in menu["options"]] == [30, 60, None]
+
+
+
+
 
 def test_owner_beer_is_bar_local_and_never_catalog_searchable(client, db_session, supabase, bar):
     from app.models import BarLocalMenuItem
