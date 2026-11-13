@@ -1,4 +1,5 @@
 // Operator dashboard for owner applications (API spec 3.11.4, 3.11.6-3.11.8, 3.11.13).
+// The menu item check tab (3.18) is in checks.js, which uses the helpers here.
 // Data from the API is always put on the page as text (textContent), never as HTML.
 "use strict";
 
@@ -227,6 +228,7 @@ function clearDashboard() {
   setListStatus("");
   $("load-more").hidden = true;
   closeDetail();
+  clearChecks();
 }
 
 async function loginWithGoogle() {
@@ -263,6 +265,7 @@ async function start() {
   }
   showView("dashboard");
   loadList(true);
+  if (location.hash === "#checks") selectTab("checks");
 }
 
 // ---------- list (3.11.6) ----------
@@ -1064,4 +1067,5 @@ $("filters").addEventListener("change", (event) => {
 $("refresh").addEventListener("click", () => loadList(true));
 $("load-more").addEventListener("click", () => loadList(false));
 
-start();
+// After every deferred script ran, so the menu check tab (checks.js) is ready too.
+document.addEventListener("DOMContentLoaded", start);
