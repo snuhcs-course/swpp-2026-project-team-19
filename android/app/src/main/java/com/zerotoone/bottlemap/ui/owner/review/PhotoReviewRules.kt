@@ -35,6 +35,21 @@ object PhotoReviewRules {
             .values.filter { it.size > 1 }
             .flatMap { group -> group.map { it.id } }.toSet()
 
+    /**
+     * #164 also deduplicates all product-less menu proposals by the bar's
+     * normalized name key, regardless of whisky/other kind. Block exact
+     * normalized name collisions on the client rather than silently losing
+     * a second line's unique price options. Do not guess a catalog product.
+     */
+    fun duplicateUnlinkedNames(state: PhotoReviewState): Set<String> =
+        state.items.filter { !it.excluded && it.linkedProductId == null &&
+            it.name.isNotBlank()
+        }.groupBy { item ->
+            java.text.Normalizer.normalize(item.name, java.text.Normalizer.Form.NFKC)
+                .lowercase().filter(Char::isLetterOrDigit)
+        }.filterKeys { it.isNotBlank() }.values.filter { it.size > 1 }
+            .flatMap { group -> group.map { it.id } }.toSet()
+
     fun duplicatePhotoPriceConflicts(state: PhotoReviewState): Map<String, Set<String>> {
         data class Entry(val itemId: String, val price: Double, val servingLabel: String)
         val buckets = mutableMapOf<String, MutableList<Entry>>()
@@ -112,6 +127,8 @@ object PhotoReviewRules {
                 p += ReviewIssue.DUPLICATE_PRICE
             if (x.id in duplicateCatalogProductLines(state))
                 p += ReviewIssue.DUPLICATE_PRODUCT
+            if (x.id in duplicateUnlinkedNames(state))
+                p += ReviewIssue.DUPLICATE_MENU_NAME
         }
         return p.distinct()
     }
