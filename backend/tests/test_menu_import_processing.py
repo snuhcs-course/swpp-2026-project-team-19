@@ -405,6 +405,11 @@ def test_line_naming_two_products_is_stored_as_ambiguous(client, db_session, ima
     # I4-P18: no brand, age or edition is read from a line of two products ("Buffalo Trace" with the
     # edition "/ Maker's Mark" would be a draft that fuses them)
     assert (item.extracted_brand_name, item.extracted_age_years, item.extracted_edition_name) == (None, None, None)
+    # and the whole line is not suggested as an alias: saved on one of the two products, it would
+    # resolve to that product alone on the next import
+    [shown] = client.get(f"/api/menu-imports/{menu_import.id}", headers=operator).json()["images"][0]["items"]
+    assert shown["newProductDraft"]["aliasSuggestions"] == []
+    assert shown["newProductDraft"]["displayName"] == "Buffalo Trace / Maker's Mark"
 
 
 # ---- I4-P18: product parts read from an unconfirmed line fill the new-product form ----

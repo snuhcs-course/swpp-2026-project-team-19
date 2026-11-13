@@ -29,6 +29,7 @@ import re
 from dataclasses import dataclass
 from uuid import UUID
 
+from app.core.normalize import normalize
 from app.matching.staged import (
     _AGE_WITH_UNIT,
     _BARE_AGE,
@@ -116,11 +117,13 @@ MAX_ALIAS_LENGTH = 200  # ProductAliasInput.aliasText
 def alias_suggestions(name: str | None) -> list[str]:
     """Spellings of a menu line worth saving as aliases of its product: one per script when the
     line writes the whole name twice, otherwise the name as written. A partial spelling is never
-    suggested (see `spellings` above)."""
+    suggested (see `spellings` above). Every suggestion can be sent back as it is: text the review
+    validation would reject (nothing left after normalizing, such as "!!", or too long) is left out."""
     source = _SPACES.sub(" ", name or "").strip()
     if not source:
         return []
-    return [text for text in (whole_spellings(source) or (source,)) if len(text) <= MAX_ALIAS_LENGTH]
+    return [text for text in (whole_spellings(source) or (source,))
+            if len(text) <= MAX_ALIAS_LENGTH and normalize(text)]
 
 
 def draft_from_name(name: str | None, catalog: CatalogLookup) -> ProductDraft | None:

@@ -198,6 +198,10 @@ def test_a_draft_never_confirms_a_line(catalog):
     ("Blair Athol Sangiovese Cask (블레어 아쏠)", ["Blair Athol Sangiovese Cask (블레어 아쏠)"]),  # never the partial
     ("글렌그란트 18년 / Glen Grant 15Y", ["글렌그란트 18년 / Glen Grant 15Y"]),
     (None, []), ("   ", []), ("가" * 201, []),
+    ("!!", []), ("( )", []),                              # nothing is left after normalizing: review would reject it
+    # brackets in the same script are not a second spelling, so "12년 셰리 오크" is never suggested
+    ("맥캘란 (12년) 셰리 오크", ["맥캘란 (12년) 셰리 오크"]),
+    ("Macallan (Sherry Oak) 12 Years", ["Macallan (Sherry Oak) 12 Years"]),
 ])
 def test_alias_suggestions(name, suggestions):
     from app.matching.product_draft import alias_suggestions

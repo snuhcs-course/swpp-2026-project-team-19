@@ -139,6 +139,15 @@ def source_boxes(raw_output: Any) -> dict[int, list[int]]:
     return boxes
 
 
+def _alias_suggestions(item: ExtractedItem) -> list[str]:
+    """Nothing for a line naming two products (`evidence.multiProduct`): saved as an alias of the
+    product the reviewer picks, the whole line would resolve to that one product on the next
+    import and the other product would be lost."""
+    if any((candidate.evidence or {}).get("multiProduct") for candidate in item.candidates):
+        return []
+    return alias_suggestions(item.extracted_product_name)
+
+
 def _review_item(item: ExtractedItem, products: dict[UUID, Product], boxes: dict[int, list[int]]) -> ReviewItem:
     effective = item.corrected_line_type or item.extracted_line_type
     return ReviewItem(
@@ -176,7 +185,7 @@ def _review_item(item: ExtractedItem, products: dict[UUID, Product], boxes: dict
                 ageYears=item.extracted_age_years,
                 editionName=item.extracted_edition_name,
                 abv=_float(item.extracted_abv),
-                aliasSuggestions=alias_suggestions(item.extracted_product_name),
+                aliasSuggestions=_alias_suggestions(item),
             )
             if effective == LineType.PRODUCT
             else None
