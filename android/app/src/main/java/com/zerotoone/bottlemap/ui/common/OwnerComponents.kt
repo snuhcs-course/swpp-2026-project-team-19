@@ -158,12 +158,10 @@ fun OwnerConfirmationDialog(
     onDismiss: () -> Unit,
 ) {
     if (!visible) return
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(title) },
-        text = { Text(message) },
-        confirmButton = { TextButton(onClick = onConfirm) { Text(confirmLabel) } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("취소") } },
+    OwnerBottomConfirmSheet(
+        title = title, message = message, confirmLabel = confirmLabel,
+        onConfirm = onConfirm, onDismiss = onDismiss,
+        tag = "owner-confirmation-sheet",
     )
 }
 
