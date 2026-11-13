@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
+import com.zerotoone.bottlemap.ui.common.OwnerBottomConfirmSheet
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
@@ -501,59 +501,69 @@ internal fun OwnerManualMenuScreen(
     }
 
     if(cancelPhotoConfirm && activeJob!=null) {
-        AlertDialog(
-            onDismissRequest={cancelPhotoConfirm=false},
-            title={Text("메뉴판 사진 등록을 취소할까요?")},
-            text={Text("선택한 사진과 검수한 내용이 모두 삭제돼요.")},
-            confirmButton={TextButton(onClick={
+        OwnerBottomConfirmSheet(
+            title = "메뉴판 사진 등록을 취소할까요?",
+            message = "선택한 사진과 검수한 내용이 모두 삭제돼요.",
+            confirmLabel = "작업 취소하기",
+            cancelLabel = "돌아가기",
+            tag = "owner-cancel-photo-sheet",
+            enabled = !saving,
+            onDismiss = { cancelPhotoConfirm = false },
+            onConfirm = {
                 // Never erase a photo still referenced by any published job.
-                val removedIds=unpublishedRetryChainIds(
-                    requireNotNull(snapshot),activeJob.menuImportId)
-                val removed=snapshot.imports.filter {it.menuImportId in removedIds}
-                val retainedUris=snapshot?.imports.orEmpty().filterNot {
-                    it in removed
-                }.flatMap{it.images.map {image->image.sourceUri}}.toSet()
-                val photoCopies=removed.flatMap{it.images}.distinctBy{it.sourceUri}
-                    .filter {it.sourceUri !in retainedUris}
-                    .map {MockPhoto(it.imageId,it.sourceUri,MockPhotoKind.MENU_CAPTURE)}
-                if(!saving) {
-                    saving=true
+                val removedIds = unpublishedRetryChainIds(
+                    requireNotNull(snapshot), activeJob.menuImportId)
+                val removed = snapshot.imports.filter { it.menuImportId in removedIds }
+                val retainedUris = snapshot.imports.filterNot { it in removed }
+                    .flatMap { it.images.map { image -> image.sourceUri } }.toSet()
+                val photoCopies = removed.flatMap { it.images }.distinctBy { it.sourceUri }
+                    .filter { it.sourceUri !in retainedUris }
+                    .map { MockPhoto(it.imageId, it.sourceUri, MockPhotoKind.MENU_CAPTURE) }
+                if (!saving) {
+                    saving = true
                     saveScope.launch {
                         try {
                             viewModel.cancelPhotoImportLive(activeJob.menuImportId)
-                            cancelPhotoConfirm=false
-                            error=null
-                            screen="list"
-                            // Only delete local photos after server confirmed the cancellation.
+                            cancelPhotoConfirm = false
+                            error = null
+                            screen = "list"
                             photoCopies.forEach(photoStore::delete)
-                        } catch(cancelled: CancellationException) {
+                        } catch (cancelled: CancellationException) {
                             throw cancelled
-                        } catch(e: Exception) {
-                            error=e.message ?: "사진 등록 작업을 취소하지 못했어요."
-                        } finally { saving=false }
+                        } catch (e: Exception) {
+                            error = e.message ?: "사진 등록 작업을 취소하지 못했어요."
+                        } finally { saving = false }
                     }
                 }
-            }){Text("작업 취소하기",color=Color(0xFFFFB4AB))}},
-            dismissButton={TextButton(onClick={cancelPhotoConfirm=false}){Text("돌아가기")}}
+            },
         )
     }
     if (confirm != null) {
         val action = requireNotNull(confirm)
         val target = items.firstOrNull { it.barMenuItemId == action.removePrefix("stock:") }
-        AlertDialog(onDismissRequest = { confirm = null; error = null },
-            title = { Text(when(action) {
+        OwnerBottomConfirmSheet(
+            title = when(action) {
                 "delete" -> "메뉴를 삭제할까요?"
                 "reset" -> "전체 메뉴를 초기화할까요?"
                 else -> if (target?.soldOut == true) "판매를 재개할까요?" else "품절 처리할까요?"
-            }) },
-            text = { Column { Text(when(action) {
+            },
+            message = when(action) {
                 "delete" -> "삭제하면 고객 메뉴에서도 바로 사라집니다."
                 "reset" -> "모든 메뉴와 용량·가격 정보가 삭제됩니다."
                 else -> "품절 메뉴는 고객에게 숨겨지며 판매 재개 시 다시 공개됩니다."
-            }); error?.let { Text(it, color = Color(0xFFFFB4AB)) } } },
-            confirmButton = { TextButton(onClick = {
-                if(!saving) {
-                    saving=true
+            },
+            confirmLabel = when(action) {
+                "delete" -> "삭제하기"
+                "reset" -> "초기화"
+                else -> "상태 변경"
+            },
+            tag = "owner-menu-action-sheet",
+            error = error,
+            enabled = !saving,
+            onDismiss = { confirm = null; error = null },
+            onConfirm = {
+                if (!saving) {
+                    saving = true
                     saveScope.launch {
                         try {
                             when(action) {
@@ -563,21 +573,18 @@ internal fun OwnerManualMenuScreen(
                                     viewModel.setSoldOutLive(it.barMenuItemId, !it.soldOut)
                                 }
                             }
-                            confirm=null
-                            error=null
-                            selectedId=null
-                            screen="list"
-                        } catch(cancelled: CancellationException) {
+                            confirm = null
+                            error = null
+                            selectedId = null
+                            screen = "list"
+                        } catch (cancelled: CancellationException) {
                             throw cancelled
-                        } catch(e: Exception) {
-                            error=e.message ?: "서버 변경에 실패했어요."
-                        } finally { saving=false }
+                        } catch (e: Exception) {
+                            error = e.message ?: "서버 변경에 실패했어요."
+                        } finally { saving = false }
                     }
                 }
-            }, enabled = !saving) { Text(when(action) {
-                "delete" -> "삭제하기"; "reset" -> "초기화"; else -> "상태 변경"
-            }) } },
-            dismissButton = { TextButton(onClick = { confirm = null; error = null }) { Text("취소") } }
+            },
         )
     }
     Column(Modifier.fillMaxSize().background(V4Color.background)
