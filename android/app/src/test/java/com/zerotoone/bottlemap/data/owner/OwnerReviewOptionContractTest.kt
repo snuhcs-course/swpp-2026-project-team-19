@@ -180,4 +180,34 @@ class OwnerReviewOptionContractTest {
         assertEquals(700, result.single()["pourMl"])
     }
 
+    @Test fun partialUpdateKeepsUnphotographedServingsAndTheirServerIdentity() {
+        val decision = MockReviewDecision(MockDecisionKind.SELECT_PRODUCT,
+            correctedOptions = listOf(MockMenuOption(firstId, "잔", 30, 22000)))
+        val saved = listOf(
+            MockMenuOption("saved-30", "잔", 30, 18000),
+            MockMenuOption("saved-60", "샷", 60, 34000,
+                discount = MockDiscount(30000, 100L, 900L)),
+            MockMenuOption("saved-bottle", "병", 700, 130000),
+        )
+        val final = ownerFinalReviewOptions(item(), decision, 30, whisky = true,
+            existingOptions = saved)
+        assertEquals(3, final.size)
+        assertEquals(listOf("잔","샷","병"), final.map { it["optionLabel"] })
+        assertEquals(listOf(30,60,700), final.map { it["pourMl"] })
+        assertEquals(listOf(22000,34000,130000), final.map { it["priceKrw"] })
+        assertEquals(listOf(firstId,null,null), final.map { it["extractedOptionId"] })
+    }
+
+    @Test fun partialUpdateRefusesToDropServingIfCombinedOptionsExceedBackendLimit() {
+        val decision = MockReviewDecision(MockDecisionKind.SELECT_PRODUCT,
+            correctedOptions = listOf(MockMenuOption(firstId, "잔", 30, 22000)))
+        val saved = (1..10).map { i ->
+            MockMenuOption("saved-$i", "잔", i * 30 + 30, 10000 + i)
+        }
+        assertThrows(IllegalArgumentException::class.java) {
+            ownerFinalReviewOptions(item(), decision, 30, whisky = true,
+                existingOptions = saved)
+        }
+    }
+
 }

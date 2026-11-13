@@ -63,11 +63,33 @@ internal fun ownerFinalReviewOptions(
             "priceKrw" to option.priceKrw,
         )
     }
-    val keys = finalOptions.map { option ->
+    // In partial_update the backend replaces the entire option tuple for an
+    // existing product. Retain unphotographed sizes exactly (including the
+    // literal label and list price), otherwise a 30ml OCR photo deletes 60ml
+    // and can clear the discount whose backend identity includes that tuple.
+    val reviewedKeys = finalOptions.mapTo(mutableSetOf()) { option ->
+        servingIdentityKey(option["pourMl"] as Int?, option["optionLabel"] as String?)
+    }
+    val untouched = existingOptions.filter { option ->
+        servingIdentityKey(option.pourMl, option.label) !in reviewedKeys
+    }.map { option ->
+        require(option.priceKrw in 1..99_999_999) { "기존 메뉴 가격을 확인해 주세요." }
+        mapOf<String, Any?>(
+            "extractedOptionId" to null,
+            "optionLabel" to option.label,
+            "pourMl" to option.pourMl,
+            "priceKrw" to option.priceKrw,
+        )
+    }
+    val allOptions = finalOptions + untouched
+    require(allOptions.size <= 10) {
+        "기존 용량을 보존하면 서버 최대 옵션 10개를 넘어요. 메뉴 관리에서 확인해 주세요."
+    }
+    val keys = allOptions.map { option ->
         servingIdentityKey(option["pourMl"] as Int?, option["optionLabel"] as String?)
     }
     require(keys.distinct().size == keys.size) {
         "같은 용량의 옵션이 중복됐어요. 가격을 하나로 정리해 주세요."
     }
-    return finalOptions
+    return allOptions
 }

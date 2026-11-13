@@ -114,6 +114,12 @@ fun PhotoReviewScreen(
     val state = (load as? PhotoReviewLoad.Ready)?.review
     val rows = remember(state) { state?.let(::buildRows).orEmpty() }
 
+    // The app may be killed after the server applied the import but before
+    // Leave was delivered. Never display an inert retry for an applied job.
+    LaunchedEffect(load) {
+        if (load is PhotoReviewLoad.Applied) onLeave()
+    }
+
     LaunchedEffect(vm) {
         vm.events.collect { event ->
             when (event) {
@@ -181,6 +187,11 @@ fun PhotoReviewScreen(
                 onLogin = onReauthenticate,
             )
         } else when (val current = load) {
+            PhotoReviewLoad.Applied -> Box(Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center) {
+                Text("게시된 메뉴판이에요. 메뉴 관리로 돌아가고 있어요.",
+                    style = uxText(13f, 400, UxColor.sub))
+            }
             PhotoReviewLoad.Loading -> Column(Modifier.fillMaxSize()) {
                 ReviewAppBar(vm::leave)
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

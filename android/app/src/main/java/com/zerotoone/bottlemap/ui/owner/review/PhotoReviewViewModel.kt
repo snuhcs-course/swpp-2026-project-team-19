@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.zerotoone.bottlemap.network.BottleMapApiException
 import com.zerotoone.bottlemap.network.menuWriteErrorText
 import com.zerotoone.bottlemap.data.owner.review.PhotoReviewRepository
+import com.zerotoone.bottlemap.data.owner.review.ReviewAlreadyAppliedException
 import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewRules.OptionField
 import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewRules.RematchOutcome
 import kotlinx.coroutines.CancellationException
@@ -18,6 +19,7 @@ import kotlinx.coroutines.launch
 
 sealed interface PhotoReviewLoad {
     data object Loading : PhotoReviewLoad
+    data object Applied : PhotoReviewLoad
     data class Error(val message: String) : PhotoReviewLoad
     data class Ready(val review: PhotoReviewState) : PhotoReviewLoad
 }
@@ -83,6 +85,8 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
         viewModelScope.launch {
             _load.value = try {
                 PhotoReviewLoad.Ready(repository.loadReview())
+            } catch (applied: ReviewAlreadyAppliedException) {
+                PhotoReviewLoad.Applied
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (error: Exception) {
@@ -338,7 +342,14 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
     /** Decision 7: link at once; a conflicting age or edition goes to the operator. */
     private fun linkChosen(x: ReviewItem, product: CatalogProduct) {
         viewModelScope.launch {
-            val operatorCheck = runCatching { repository.needsOperatorCheck(x, product) }.getOrDefault(false)
+            val operatorCheck = try {
+                repository.needsOperatorCheck(x, product)
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                toast("상품 연결 여부를 확인하지 못했어요. 다시 시도해 주세요.")
+                return@launch
+            }
             mutateItem(x.id) { PhotoReviewRules.linkChosenProduct(it, product, operatorCheck) }
             if (operatorCheck) toast("위스키를 연결했어요. 운영자 확인 대상으로 전달돼요.")
         }
@@ -419,7 +430,16 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
             return
         }
         viewModelScope.launch {
-            val matches = runCatching { repository.exactMatches(name) }.getOrDefault(emptyList())
+            val matches = try {
+                repository.exactMatches(name)
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                // A failed search is NOT evidence that the product no longer
+                // exists. Keep the linked ID and unfinished owner edit intact.
+                toast("위스키 검색에 실패했어요. 연결을 유지하고 다시 시도해 주세요.")
+                return@launch
+            }
             var outcome = RematchOutcome.OTHER
             mutateItem(id) {
                 val (rematched, result) = PhotoReviewRules.applyRematch(rename(it), matches)

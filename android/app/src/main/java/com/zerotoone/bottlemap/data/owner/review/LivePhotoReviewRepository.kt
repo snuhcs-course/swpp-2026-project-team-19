@@ -29,6 +29,9 @@ import java.text.Normalizer
  * Real OCR, reviewed product IDs and version are always loaded from the
  * owner-authenticated server; never substitute the BASIC demo scenario.
  */
+/** Only GET for this exact import may establish that publishing already completed. */
+class ReviewAlreadyAppliedException : IllegalStateException("이미 게시된 메뉴판 작업이에요.")
+
 class LivePhotoReviewRepository(
     private val owner: OwnerMockViewModel,
     private val importId: String?,
@@ -67,10 +70,14 @@ class LivePhotoReviewRepository(
         val id = resolveImportId()
         activeImportId = id
         val status = owner.pollPhotoImportLive(id)
+        val response = remote.getMenuImport(id)
+        if (isAppliedReviewImport(response, id)) {
+            finishPublishedDraft(id)
+            throw ReviewAlreadyAppliedException()
+        }
         require(status == MockImportStatus.READY_FOR_REVIEW) {
             "메뉴판 분석이 아직 완료되지 않았어요."
         }
-        val response = remote.getMenuImport(id)
         require(response.menuImportId == id &&
             response.status == "ready_for_review" && response.reviewVersion != null) {
             "검수할 수 없는 메뉴판 작업이에요."
@@ -108,7 +115,9 @@ class LivePhotoReviewRepository(
                 // server snapshot; a saved draft must not mask a price conflict.
                 existingPriceByProductId = fresh.existingPriceByProductId,
                 mergeSources = fresh.mergeSources,
-                primarySourceOptionId = old.primarySourceOptionId ?: fresh.primarySourceOptionId)
+                // A removed OCR primary must not regain its extractedOptionId
+                // when an owner later adds a manual replacement with null ID.
+                primarySourceOptionId = old.primarySourceOptionId)
         }, modal = null, typingSnapshots = emptyMap())
         loaded = response
         return restored

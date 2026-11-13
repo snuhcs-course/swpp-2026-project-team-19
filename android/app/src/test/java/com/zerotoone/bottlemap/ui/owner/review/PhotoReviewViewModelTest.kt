@@ -3,6 +3,7 @@ package com.zerotoone.bottlemap.ui.owner.review
 import com.zerotoone.bottlemap.data.owner.review.MockPhotoReviewRepository
 import com.zerotoone.bottlemap.data.owner.review.MockPhotoReviewScenario
 import com.zerotoone.bottlemap.data.owner.review.PhotoReviewRepository
+import com.zerotoone.bottlemap.data.owner.review.ReviewAlreadyAppliedException
 import com.zerotoone.bottlemap.network.BottleMapApiException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
@@ -432,6 +433,32 @@ class PhotoReviewViewModelTest {
         assertEquals(before, vm.state.items)
         assertEquals(PublishFailure.CONFLICT, classifyPublishFailure(
             BottleMapApiException(httpStatus = 409, code = "VERSION_CONFLICT", message = "conflict")))
+    }
+
+    @Test fun failedRematchDoesNotClearExistingProductLink() = runTest(dispatcher) {
+        val mock = MockPhotoReviewRepository(MockPhotoReviewScenario.LINKED_NAME)
+        val repo = object : PhotoReviewRepository by mock {
+            override suspend fun exactMatches(name: String): List<CatalogProduct> =
+                error("offline")
+        }
+        val vm = PhotoReviewViewModel(repo)
+        val beforeId = vm.item("glen12").linkedProductId
+        vm.editDetailName("glen12")
+        vm.typeDetailName("glen12", "다른 이름")
+        vm.saveDetailName("glen12")
+        assertEquals(beforeId, vm.item("glen12").linkedProductId)
+        assertTrue(vm.item("glen12").detailNameEditing)
+        assertEquals("다른 이름", vm.item("glen12").detailNameDraft)
+    }
+
+    @Test fun restoredAppliedImportIsNotADeadEndError() = runTest(dispatcher) {
+        val mock = MockPhotoReviewRepository(MockPhotoReviewScenario.READY)
+        val repo = object : PhotoReviewRepository by mock {
+            override suspend fun loadReview(): PhotoReviewState =
+                throw ReviewAlreadyAppliedException()
+        }
+        val vm = PhotoReviewViewModel(repo)
+        assertEquals(PhotoReviewLoad.Applied, vm.load.value)
     }
 
 }
