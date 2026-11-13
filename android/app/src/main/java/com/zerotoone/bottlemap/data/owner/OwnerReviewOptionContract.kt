@@ -56,7 +56,10 @@ internal fun ownerFinalReviewOptions(
         mapOf(
             "extractedOptionId" to option.optionId.takeIf(rawIds::contains),
             "optionLabel" to label,
-            "pourMl" to pour,
+            // Legacy bottles may have a stored capacity even though new
+            // Bottle options use null pour. Preserve that exact server key
+            // when updating an existing row instead of creating a twin.
+            "pourMl" to (sameVolume.singleOrNull()?.pourMl ?: pour),
             "priceKrw" to option.priceKrw,
         )
     }
