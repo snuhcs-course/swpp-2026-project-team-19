@@ -9,6 +9,9 @@ class OwnerServingIdentityTest {
     @Test fun koreanAndEnglishBottleShareTheSameIdentity() {
         assertEquals("Bottle", canonicalServingLabel("병"))
         assertEquals("Bottle", canonicalServingLabel(" bottle "))
+        assertEquals("Bottle", canonicalServingLabel("병 500ml"))
+        assertEquals("Bottle", canonicalServingLabel("Bottle 700ml"))
+        assertEquals("Bottle", canonicalServingLabel("병(330ml)"))
         assertTrue(isBottleServingLabel("병"))
         assertTrue(isBottleServingLabel("BOTTLE"))
         assertEquals(servingIdentityKey(null, "병"), servingIdentityKey(null, "Bottle"))
