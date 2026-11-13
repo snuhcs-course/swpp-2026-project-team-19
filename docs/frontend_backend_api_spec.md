@@ -2622,7 +2622,7 @@ GET /api/search/map-bars?south=37.470&west=126.940&north=37.490&east=126.970
   - 상품 P에 연결된 항목을 Q로 바꾸기: 줄을 Q의 항목으로 옮긴다. 메뉴판에 없는 예전 Q 항목이 있으면 그 항목을, 없으면 새 항목을 쓴다. P의 항목은 메뉴판에서 빠진 채로 남아 나중에 다시 쓰인다.
   - 상품 P에 연결된 항목의 연결 풀기: 줄을 새 미연결 위스키 항목(`kind = whisky`, 이름 키는 줄의 이름)으로 옮긴다. P의 항목은 메뉴판에서 빠진 채로 남는다.
   - 줄을 옮겨도 이름(`displayName`), 메뉴판의 위치, 옵션과 할인, 품절 상태는 그대로 옮긴다. 줄의 열린 확인(3.18)도 옮긴 항목으로 옮긴다.
-  - Q가 이미 현재 메뉴판의 다른 줄이면 두 줄을 하나로 합친다. 남는 줄은 원래 Q에 연결되어 있던 줄이고, 이름, 위치, 품절 상태는 그 줄의 것을 쓴다. 옵션 합치기 규칙은 4번 항목에서 정의한다.
+  - Q가 이미 현재 메뉴판의 다른 줄이면 두 줄을 하나로 합친다. 남는 줄은 원래 Q에 연결되어 있던 줄이고, 이름, 위치, 품절 상태는 그 줄의 것을 쓴다. 옵션은 남는 줄의 옵션 뒤에 옮겨 오는 줄의 옵션을 붙이며, 표기(`optionLabel`)와 용량(`pourMl`)이 같은 옵션은 하나만 남긴다. 가격이 다르면 남는 줄의 가격(이미 그 상품으로 손님에게 보이던 가격)과 할인을 쓴다. 이렇게 가격을 버린 경우, 직접 수정의 다시 매칭(3.14.4)이면 합친 항목을 운영자 확인(3.18, 사유 `price_conflict`)에 올리고, 운영자의 연결(3.18.3)이면 운영자가 처리하는 중이므로 올리지 않는다. 합친 옵션은 3개를 넘을 수 있다(3.14.2의 개수 제한은 직접 추가와 수정의 요청에만 적용된다).
   - 줄이 다른 항목으로 옮겨 가면 그 줄의 `barMenuItemId`가 바뀐다. 프론트엔드는 응답(3.9 형식)으로 화면을 바꾼다.
 - **미완료 작업이 있을 때**: 업장에 미완료 메뉴 등록 작업(`uploaded`, `processing`, `ready_for_review`)이 있으면 추가, 수정, 삭제, 초기화는 모두 `409 ACTIVE_IMPORT_EXISTS`(`details.menuImportId`, `details.status`)다. 따라서 이 상황에서는 메뉴 편집이 불가능하고, 작업이 `applied`, `failed`, `canceled`가 되면 다시 편집할 수 있다. 검수 중에 메뉴판이 바뀌면 검수자가 오래된 메뉴판을 보고 결정하게 되기 때문이다.
 - **메뉴판 버전**: 모든 편집 요청은 3.9에서 받은 `menuVersion`을 보낸다. 메뉴판이 없으면 `null`이다. 서버의 현재 값과 다르면 아무것도 바꾸지 않고 `409 MENU_OUTDATED`(`details.submittedMenuVersion`, `details.currentMenuVersion`)다. 성공한 편집은 `menuVersion`을 1 올리고, 메뉴판이 없을 때의 첫 추가는 메뉴판을 만들고 `menuVersion = 1`이 된다. 검수 반영(8)도 `menuVersion`을 올린다.
@@ -3565,7 +3565,7 @@ GET /api/search/popular-products?limit=10
 | `relinked_by_name` | 업주가 이름을 고쳐 다시 매칭한 결과 다른 상품에 연결됨. 상품 없던 항목이 연결된 경우도 같다 | 나온다 | 검수 제출(8.11), 직접 수정(3.14.4) |
 | `unlinked_by_name` | 업주가 이름을 고쳐 다시 매칭한 결과 연결이 풀림 | 나오지 않는다 | 검수 제출(8.11), 직접 수정(3.14.4) |
 | `attribute_conflict` | 고른 상품의 연수나 에디션이 사진과 다름 | 나온다 | 6번 항목에서 정의 |
-| `price_conflict` | 다시 매칭으로 같은 상품의 줄이 여럿이 되어 같은 용량의 가격이 부딪침 | 나온다 | 검수 제출(8.11). 처리 규칙은 4번 항목에서 정의 |
+| `price_conflict` | 다시 매칭으로 같은 상품의 줄이 여럿이 되어 같은 용량의 가격이 부딪침 | 나온다 | 검수 제출(8.11, 8.12), 직접 수정의 다시 매칭(3.14.1, 3.14.4) |
 
 - 현재 메뉴판에 있는 상품 없는 위스키 항목에는 항상 `unlinked` 또는 `unlinked_by_name` 사유의 열린 확인이 있다. 검수 반영이나 직접 추가로 그런 항목이 생기거나, 위스키가 아닌 메뉴가 다음 검수에서 `kind = whisky`로 바뀌면 같은 트랜잭션에서 확인을 만든다.
 - `kind = other`인 항목에는 확인을 만들지 않는다.
@@ -4012,6 +4012,7 @@ HTTP 요청 자체는 성공했지만 비동기 작업이 최종 실패한 경�
       "changeType": "add",
       "barMenuItemId": null,
       "extractedItemId": "10000000-0000-4000-8000-000000000007",
+      "extractedItemIds": ["10000000-0000-4000-8000-000000000007"],
       "before": null,
       "after": {
         "productId": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb1",
@@ -4055,6 +4056,7 @@ HTTP 요청 자체는 성공했지만 비동기 작업이 최종 실패한 경�
 - `newProductDraft`는 화면 입력을 돕는 계산값이며 실제 카탈로그 행이 아니다.
 - `evidence`는 설명용 보조 정보다. 프론트엔드는 알 수 없는 키를 무시해야 한다.
 - `before`와 `after`가 최종 diff 비교의 구조화된 값이다.
+- `extractedItemIds`는 이 변경에 합쳐진 모든 추출 항목이다. 같은 상품(상품이 없으면 같은 이름 키)을 제안받은 줄이 여럿이면 옵션을 합쳐 변경 하나로 만들며(8.12), 메뉴 순서대로 담는다. `extractedItemId`는 그 첫 줄이다. 추출 항목이 없는 변경(`remove`)은 `[]`다. 이 변경을 `ignore`하면 담긴 줄 모두 메뉴판을 바꾸지 않는다.
 - `before`와 `after`의 `kind`는 그 메뉴 항목의 종류(2.3)다. `before`는 현재 항목의 값이고, `after`는 AI가 추출한 상품 줄이므로 `whisky`다. 검수자가 그 줄을 위스키가 아닌 메뉴로 게시하면(8.10) 반영 결과는 `other`가 된다.
 - 제안 상품이 없는 줄(`proposedProductId = null`, 보통 `unmatched`)은 상품 없이 게시하는 것으로 보고 비교한다. 현재 메뉴판에 이름 키(3.14.1)가 같은 미연결 항목이 있으면 그 항목과 비교해 `update`이거나 변경 없음이고, 없으면 `add`다. 이 변경의 `after.productId`는 `null`이다. 검수자가 그 줄에서 기존 상품을 고르거나 새 상품을 만들면 그 상품으로, 상품 없이 게시하면(8.10) 미연결 항목으로 반영된다. 그 줄을 비상품으로 확정하거나 제외하면 이 변경은 `ignore`로 보낸다(8.7의 `CHANGE_WITHOUT_PRODUCT`).
 - 현재 메뉴판의 미연결 항목(3.9의 `productId = null`)도 다른 항목처럼 비교한다. `before.productId`는 `null`이고, 전체 교체(`full_replace`)에서 새 사진에 이름 키가 같은 줄이 없으면 `remove`가 된다.
@@ -4127,7 +4129,7 @@ operator와 작업 대상 업장의 현재 업주가 호출할 수 있다. 요�
 **통합 검수 응답 (5.4)**. 관악 위스키 바의 업주 신청을 승인할 때(3.11.7) 신청 메뉴판 사진 두 장으로 만들어진 작업이다. 그래서 `imageUrl`이 신청 사진의 경로이고, mock 추출이라 `sourceBox`가 `null`이다. 두 사진의 추출 결과가 같으므로 둘째 사진(`images[1]`)과 첫째 사진의 설명 줄(`itemOrder = 5`), 둘째 사진의 변경 하나를 생략했다.
 
 - 2번 줄은 별칭이 정확히 맞아 `exact_match`다.
-- 3번 줄은 같은 상품 후보가 있지만 연수가 달라(`evidence.ageConflict`) `ambiguous`다. 같은 상품을 2번 줄이 먼저 제안했으므로 이 줄의 변경은 없다.
+- 3번 줄은 같은 상품 후보가 있지만 연수가 달라(`evidence.ageConflict`) `ambiguous`다. 같은 상품을 2번 줄이 먼저 제안했으므로 이 줄의 변경은 없다. 이 예시는 옵션 합치기(8.12) 전에 받은 응답이며, 지금 규칙에서는 2번 줄의 변경에 3번 줄이 합쳐진다(`extractedItemIds`). 구현한 뒤 다시 받아 바꾼다.
 - 4번 줄은 후보가 없어 `unmatched`이며, 그 변경의 `after.productId`가 `null`이다. 이 줄을 `reject`하고 그 변경을 `apply`로 보내면 `CHANGE_WITHOUT_PRODUCT`다(8.9).
 
 ```json
@@ -4675,6 +4677,7 @@ OCR 잡음, 중복 인식 또는 사용할 수 없는 항목에 사용한다.
 - 변경의 `extractedItemId` 항목을 `confirm_non_product`나 `reject`로 결정했으면 그 변경은 `ignore`여야 한다. `apply`이면 `fieldErrors[].path = changeDecisions[i].decision`, `code = CHANGE_WITHOUT_PRODUCT`다. `extractedItemId`가 없는 변경(`remove`)에는 이 규칙이 없다.
 - `finalLineType = product`이면 `select_existing_product`, `create_product`, `publish_without_product` 중 하나여야 한다.
 - 게시할 메뉴 항목에는 가격이 있는 유효 옵션이 최소 하나 있어야 한다. 상품 없이 게시하는 항목도 같다.
+- 같은 상품(상품 없는 줄은 같은 이름 키)으로 게시하는 줄이 여럿이면 옵션을 합쳐 한 항목으로 게시한다(8.12). 업주가 제출한 대로 같은 상품인 줄끼리 표기와 용량이 같은 옵션의 가격이 다르면 `fieldErrors[].code = OPTION_PRICE_CONFLICT`다(8.12).
 - `publish_without_product`의 메뉴판 이름(`correctedProductName ?? extractedProductName`)이 없거나, 정규화한 이름 키(3.14.1)가 빈 값이면 `fieldErrors[].path = itemDecisions[i].correctedProductName`, `code = NOT_NORMALIZABLE`이다.
 - 기존 상품은 존재하고 연결 가능한 상태여야 한다.
 - 이름을 고친 위스키 줄은 이 이름으로 다시 매칭하고, 그 결과로 연결할 상품을 정한다(8.11). 제출한 `productId`와 달라져도 거부하지 않는다.
@@ -4741,7 +4744,7 @@ HTTP/1.1 200 OK
 }
 ```
 
-**성공 응답**. 같은 상품의 두 줄 중 첫 줄만 게시되어 `added = 1`이다. 같은 요청을 다시 보내도 같은 응답이다.
+**성공 응답**. 같은 상품의 두 줄이 한 항목으로 게시되어 `added = 1`이다. 같은 요청을 다시 보내도 같은 응답이다. 이 응답은 옵션 합치기(8.12) 전의 규칙(첫 줄만 게시)으로 받은 것이며, 구현한 뒤 다시 받아 바꾼다.
 
 ```json
 {
@@ -4824,7 +4827,7 @@ HTTP/1.1 200 OK
 
 - 메뉴판 이름은 `correctedProductName ?? extractedProductName`이다.
 - 현재 메뉴판에 이름 키(3.14.1)가 같은 미연결 항목이 있으면 그 항목을 갱신한다. `barMenuItemId`와 품절 상태는 그대로이고, 종류는 이번에 보낸 `kind`로 바뀐다. 없으면 새 미연결 항목을 만든다. 현재 메뉴판에서 빠진 예전 미연결 항목은 다시 쓰지 않는다.
-- 같은 제출에서 이름 키가 같은 줄이 여럿이면 같은 항목으로 본다. 같은 상품에 연결한 줄이 여럿일 때와 같은 규칙을 따른다(8.9).
+- 같은 제출에서 이름 키가 같은 줄이 여럿이면 같은 항목으로 본다. 같은 상품에 연결한 줄이 여럿일 때와 같은 규칙을 따른다(8.12).
 - `kind = whisky`인 항목은 메뉴판에 바로 보이지만, 운영자가 상품에 연결하기 전까지 고객 검색과 인기 위스키에 나오지 않는다(3.9, 3.10.2). 반영과 같은 트랜잭션에서 운영자 확인(3.18, 사유 `unlinked`)을 만든다. `kind = other`인 항목은 상품에 연결하지 않으며 메뉴판에만 보인다.
 - 추출 항목에는 `selected_product_id = null`로 저장한다. `finalLineType`이 `product`이므로 `confirm_non_product`와 구분된다. `selectedMatchMethod`와 `matchConfidence`도 `null`이다.
 - 반영 응답의 `result`는 다른 항목과 같이 센다. `createdProducts`에는 세지 않는다.
@@ -4860,8 +4863,40 @@ HTTP/1.1 200 OK
 - 연결이 바뀐 줄의 추출 항목에는 최종 상품을 `selected_product_id`에 저장하고 `selectedMatchMethod = manual`, `matchConfidence = null`로 둔다. 사람이 이름을 고쳐 결과가 달라졌기 때문이다. 연결이 풀린 줄은 `publish_without_product`와 같다(8.10).
 - `aliasesToAdd`는 제출한 상품이 그대로 연결될 때만 저장한다. 연결이 바뀌거나 풀리면 저장하지 않는다. 운영자가 확인할 때 별칭을 넣는다(3.18.3).
 - **원래 항목을 대신한다**: 그 줄이 임시 diff에서 현재 메뉴판의 항목 X와 비교되었고(`update`이거나 변경 없음) 그 변경을 무시하지 않았는데, 다시 매칭으로 X와 다른 상품이 되거나 연결이 풀리면 새 항목이 X의 자리를 대신한다. X는 `remove` 변경 없이도 메뉴판에서 빠지며, 위치와 품절 상태는 새 항목으로 옮긴다(3.14.1의 연결 바꾸기). 업주는 카드 하나를 고쳤으므로 메뉴판에도 한 줄만 남아야 하기 때문이다. 업주가 다른 후보나 검색 결과를 직접 골라 상품이 달라진 경우는 지금처럼 X가 남는다(8.7).
-- 다시 매칭으로 같은 상품의 줄이 여럿이 되면 같은 상품의 여러 줄 규칙(4번 항목에서 정의)을 따른다. 같은 용량과 표기에 가격이 다르면 사유 `price_conflict`로 운영자 확인에 올린다.
+- 다시 매칭으로 같은 상품의 줄이 여럿이 되면 옵션을 합친다(8.12). 그 때문에 같은 표기와 용량에 가격이 부딪치면 거부하지 않고 운영자 확인(3.18, 사유 `price_conflict`)에 올린다(8.12).
 - 반영 응답의 `result`는 최종 결과로 센다. 연결이 풀린 줄은 `unlinkedWhisky`에 들어간다(8.8).
+
+### 8.12 같은 상품의 여러 줄
+
+같은 위스키가 메뉴판의 여러 줄에 나오면(잔 메뉴와 보틀 코너, 추천 코너, 두 사진에 찍힌 같은 줄) 게시된 메뉴에는 한 항목만 두고, 모든 줄의 옵션을 모은다. 메뉴판을 섹션으로 나눠 보여 주지 않으므로 같은 위스키가 두 번 보이면 헷갈리지만, 둘째 줄의 가격과 옵션도 실제 판매 정보라 버리면 안 되기 때문이다.
+
+예: "글렌피딕 12 잔 15,000"과 보틀 코너의 "글렌피딕 12 병 180,000"은 잔 15,000과 병 180,000 옵션을 가진 한 항목이 된다.
+
+**같은 항목으로 보는 줄**: 최종 상품이 같은 줄이다. 상품 없이 게시하는 줄은 이름 키(3.14.1)가 같으면 같은 항목이다. 최종 상품은 업주의 결정과 다시 매칭(8.11)을 거친 결과다.
+
+**합치는 규칙**:
+
+- 항목의 메뉴판 이름과 위치는 메뉴 순서(사진 순서, 그 안의 줄 순서)에서 첫 줄의 것이다. 상품 없이 게시하는 줄의 `kind`도 첫 줄의 것이다.
+- 옵션은 첫 줄의 옵션, 그다음 줄의 옵션 순서로 이어 붙인다.
+- 표기(`optionLabel`)와 용량(`pourMl`)이 같고 가격도 같은 옵션은 하나만 남긴다(같은 메뉴판을 두 번 찍은 경우).
+- 합친 옵션은 3개를 넘을 수 있다. 검수 반영에는 옵션 개수 제한이 없다(3.14.2).
+- 할인은 지금처럼 표기, 용량, 정가가 같은 옵션에 이어진다(8.7).
+
+**같은 표기와 용량에 가격이 다를 때**:
+
+| 언제 | 처리 |
+|---|---|
+| 업주가 제출한 대로 같은 상품인 줄끼리 부딪침 | 거부한다. `422 VALIDATION_FAILED`이고, 부딪친 옵션마다 `fieldErrors[].path`가 뒤에 오는 줄의 그 옵션(`itemDecisions[i].optionDecisions[j]`), `code = OPTION_PRICE_CONFLICT`다. 아무것도 반영하지 않는다 |
+| 다시 매칭(8.11) 때문에 같은 상품이 된 줄끼리 부딪침 | 거부하지 않는다. 업주는 이 충돌을 화면에서 볼 수 없었기 때문이다. 이름을 고치지 않은 줄의 가격을 쓰고, 둘 다 고쳤으면 메뉴 순서가 앞선 줄의 가격을 쓴다. 합친 항목을 운영자 확인(3.18, 사유 `price_conflict`)에 올린다 |
+
+**프론트엔드 처리**: 업주가 제출한 충돌은 프론트엔드가 제출 전에 막는다는 전제다. 서버의 `OPTION_PRICE_CONFLICT`는 그 전제가 깨졌을 때의 안전장치다.
+
+- 검수 화면은 같은 상품(상품 없이 게시하는 줄은 같은 메뉴판 이름)으로 정해진 카드를 "같은 위스키가 두 줄 있어 하나로 합쳤어요"로 묶고, 합친 옵션을 보여 준다. 같은 상품의 줄은 임시 diff 변경의 `extractedItemIds`(5.4)로도 알 수 있다. 업주가 후보나 검색에서 상품을 고르면 그 결과로 다시 묶는다.
+- 같은 표기와 용량에 가격이 다른 옵션이 있으면 업주가 하나를 고르게 하고, 고르기 전에는 게시 버튼을 막는다. 고르지 않은 옵션은 그 줄에서 빼고 제출한다(옵션 목록을 제출하는 형식은 5번 항목에서 정의).
+- 묶인 카드는 서로 다른 위스키가 같은 상품으로 잘못 매칭된 것을 업주가 알아챌 기회이기도 하다. 업주가 한 줄의 상품을 바꾸면 묶음에서 빠진다.
+- 그래도 `OPTION_PRICE_CONFLICT`를 받으면 해당 카드의 묶음을 열어 다시 고르게 한다.
+
+**임시 diff와 검수 응답**: 처리 단계의 임시 diff(5.4)도 같은 상품을 제안받은 줄을 합쳐 변경 하나로 만든다. 변경의 `after.options`는 합친 옵션이고, `extractedItemIds`는 합친 모든 줄이다. 그 변경을 `ignore`하면 합친 줄 모두 메뉴판을 바꾸지 않는다.
 
 ## 9. 오류 응답
 
@@ -4958,7 +4993,7 @@ API가 보내는 오류는 예상하지 못한 서버 오류(`500 INTERNAL_ERROR
 `fieldErrors`의 `code`와 `message`는 두 종류다.
 
 - **요청 형식 검증**(필수값, 길이, 숫자 범위, 허용 값 등): Pydantic 오류 종류를 대문자로 바꾼 값을 `code`로 쓴다. 예: `MISSING`, `STRING_TOO_LONG`, `STRING_TOO_SHORT`, `TOO_SHORT`, `TOO_LONG`, `GREATER_THAN`, `GREATER_THAN_EQUAL`, `LESS_THAN_EQUAL`, `LITERAL_ERROR`, `UUID_PARSING`, `INT_PARSING`, `FLOAT_PARSING`, `BOOL_TYPE`, `DATE_TYPE`, `DATE_FROM_DATETIME_PARSING`, `EXTRA_FORBIDDEN`, `UNION_TAG_NOT_FOUND`, `UNION_TAG_INVALID`, `TIMEZONE_AWARE`. `message`는 Pydantic의 영어 기본 문구다.
-- **업무 규칙 검증**: 백엔드가 정한 `code`와 한국어 `message`를 쓴다. 예: `BLANK`, `NOT_SEARCHABLE`, `LAT_LNG_REQUIRED_TOGETHER`, `INVALID_CURSOR`, `MISSING_ITEM`, `DUPLICATE_ITEM`, `UNKNOWN_ITEM`, `MISSING_CHANGE`, `DUPLICATE_CHANGE`, `UNKNOWN_CHANGE`, `UNKNOWN_OPTION`, `DUPLICATE_OPTION`, `DUPLICATE_OPTION_VALUES`, `EXACTLY_ONE_REQUIRED`, `NO_PRICED_OPTION`, `PRODUCT_NOT_FOUND`, `PRODUCT_INACTIVE`, `BRAND_NOT_FOUND`, `CHANGE_WITHOUT_PRODUCT`, `NOT_NORMALIZABLE`, `INVALID_BUSINESS_NUMBER`, `DATE_IN_FUTURE`, `COORDINATES_REQUIRED`, `BOUNDS_INVERTED`, `BOUNDS_TOO_LARGE`, `INVALID_CHARACTER`, `DUPLICATE_TAG`, `DUPLICATE_DAY`, `INVALID_TIME`, `SAME_OPEN_CLOSE`, `TIME_ON_CLOSED_DAY`, `DATE_IN_PAST`, `DATE_NOT_TODAY`, `END_BEFORE_START`, `IMAGE_DIMENSIONS_TOO_LARGE`, `DISCOUNT_NOT_LOWER`, `DISCOUNT_ENDED`, `RESOLUTION_NOT_ALLOWED`.
+- **업무 규칙 검증**: 백엔드가 정한 `code`와 한국어 `message`를 쓴다. 예: `BLANK`, `NOT_SEARCHABLE`, `LAT_LNG_REQUIRED_TOGETHER`, `INVALID_CURSOR`, `MISSING_ITEM`, `DUPLICATE_ITEM`, `UNKNOWN_ITEM`, `MISSING_CHANGE`, `DUPLICATE_CHANGE`, `UNKNOWN_CHANGE`, `UNKNOWN_OPTION`, `DUPLICATE_OPTION`, `DUPLICATE_OPTION_VALUES`, `EXACTLY_ONE_REQUIRED`, `NO_PRICED_OPTION`, `PRODUCT_NOT_FOUND`, `PRODUCT_INACTIVE`, `BRAND_NOT_FOUND`, `CHANGE_WITHOUT_PRODUCT`, `NOT_NORMALIZABLE`, `INVALID_BUSINESS_NUMBER`, `DATE_IN_FUTURE`, `COORDINATES_REQUIRED`, `BOUNDS_INVERTED`, `BOUNDS_TOO_LARGE`, `INVALID_CHARACTER`, `DUPLICATE_TAG`, `DUPLICATE_DAY`, `INVALID_TIME`, `SAME_OPEN_CLOSE`, `TIME_ON_CLOSED_DAY`, `DATE_IN_PAST`, `DATE_NOT_TODAY`, `END_BEFORE_START`, `IMAGE_DIMENSIONS_TOO_LARGE`, `DISCOUNT_NOT_LOWER`, `DISCOUNT_ENDED`, `RESOLUTION_NOT_ALLOWED`, `OPTION_PRICE_CONFLICT`.
 
 ### 9.4 검수 버전 충돌
 
