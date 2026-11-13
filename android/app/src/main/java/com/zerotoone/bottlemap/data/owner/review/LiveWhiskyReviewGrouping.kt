@@ -91,13 +91,10 @@ internal fun groupLiveWhiskyReview(
                 existing = true,
             )
         }
-        // Show an inline price chooser only if there are competing prices for
-        // an actual OCR serving. An unrelated existing serving is not a choice.
-        val offered = firstByServing.keys
-        val conflicts = candidates.groupBy { it.servingKey }
-            .filter { (key, list) ->
-                key in offered && list.map { it.priceKrw }.distinct().size > 1
-            }.values.flatten()
+        // Keep every OCR candidate (including nonconflicting sizes) so a
+        // product linked later can compare its EXISTING bar price without
+        // losing the original 잔/샷 source labels. Only differing prices
+        // become a visible issue via pendingPriceServings().
         val tooMany = unique.size > 3
         val first = unique.first()
         val master = head.copy(
@@ -112,7 +109,7 @@ internal fun groupLiveWhiskyReview(
             // the prior PRICE_CHOICE/PHOTO_CONFLICT/DUPLICATE_PRODUCT rows.
             oldPrice = null, priceChoice = PriceChoice.PHOTO,
             photoPrice = null, conflictPrices = emptyList(), conflictChoice = null,
-            priceCandidates = conflicts,
+            priceCandidates = candidates,
             chosenServingPrices = emptyMap(),
             volumeChoices = if (tooMany) unique else emptyList(),
             chosenVolumeKeys = emptySet(),
