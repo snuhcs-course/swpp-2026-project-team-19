@@ -25,7 +25,7 @@ from sqlalchemy import (
     func,
     text,
 )
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import Uuid
 
@@ -135,7 +135,8 @@ class MenuImport(Base):
     owner_note: Mapped[str | None] = mapped_column(Text, nullable=True)
     review_confirmed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     # The reviewer's unfinished input (API spec 5.9), not interpreted by the server; cleared on apply or cancel.
-    review_draft: Mapped[dict[str, Any] | None] = mapped_column(JSONB, nullable=True)
+    # json rather than jsonb: kept as sent, so any valid JSON fits (jsonb refuses U+0000) and keys keep order.
+    review_draft: Mapped[dict[str, Any] | None] = mapped_column(postgresql.JSON, nullable=True)
     # Raised on every draft save; a save sends the version it read. Not reset when the draft is cleared.
     review_draft_version: Mapped[int] = mapped_column(
         Integer, nullable=False, default=0, server_default=text("0")

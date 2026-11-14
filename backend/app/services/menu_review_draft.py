@@ -61,17 +61,20 @@ def save_review_draft(
             },
         )
     saved_by = caller_user_id(session, principal)
+    # The response is built from this save's own values: after the commit the row is read again, and
+    # another editor's save could already be there.
+    response = ReviewDraftSavedResponse(
+        menuImportId=menu_import.id,
+        draftVersion=menu_import.review_draft_version + 1,
+        savedAt=session.scalar(select(func.clock_timestamp())),
+    )
     menu_import.review_draft = request.content
     menu_import.review_draft_review_version = request.reviewVersion
-    menu_import.review_draft_version += 1
+    menu_import.review_draft_version = response.draftVersion
     menu_import.review_draft_saved_by_user_id = saved_by
-    menu_import.review_draft_saved_at = session.scalar(select(func.clock_timestamp()))
+    menu_import.review_draft_saved_at = response.savedAt
     session.commit()
-    return ReviewDraftSavedResponse(
-        menuImportId=menu_import.id,
-        draftVersion=menu_import.review_draft_version,
-        savedAt=menu_import.review_draft_saved_at,
-    )
+    return response
 
 
 def review_draft_of(menu_import: MenuImport) -> ReviewDraft | None:

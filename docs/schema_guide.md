@@ -731,7 +731,7 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 | `review_version` | `integer`, NOT NULL, 기본 `0` | `3` | 통합 검수 응답을 다시 생성할 때 증가한다. 운영자가 본 버전과 제출 시점의 버전을 비교해 오래된 화면에서의 반영을 막는다. |
 | `owner_note` | `text`, nullable | `업장 허가 후 9월 메뉴 촬영` | 업장 허가 출처 특이사항 등의 운영 메모다. 현재 이름은 향후 업주 흐름을 고려한 표현이다. |
 | `review_confirmed_at` | `timestamptz`, nullable | `2026-09-28T04:30:00Z` | 항목·옵션·상품 매칭·신규 등록 제안·메뉴 diff를 한 번에 최종 승인한 시점이다. |
-| `review_draft` | `jsonb`, nullable | `{"itemDecisions": [...], "changeDecisions": [...], "clientState": {...}}` | 제출 전까지 검수 화면에서 입력한 내용(API 명세 5.9)이다. 다른 기기나 운영자 웹에서 같은 검수를 이어 하기 위해 저장한다. 서버는 내용을 해석하지 않고 크기(256KB)만 제한한다. 반영이나 취소에 성공하면 `null`로 지운다. |
+| `review_draft` | `json`, nullable | `{"itemDecisions": [...], "changeDecisions": [...], "clientState": {...}}` | 제출 전까지 검수 화면에서 입력한 내용(API 명세 5.9)이다. 다른 기기나 운영자 웹에서 같은 검수를 이어 하기 위해 저장한다. 서버는 내용을 해석하지 않고 크기(256KB)만 제한한다. 반영이나 취소에 성공하면 `null`로 지운다. `jsonb`가 아니라 `json`이다. 받은 JSON을 그대로 저장해야 하는데, `jsonb`는 문자열 안의 NUL 문자(U+0000)를 받지 않고 객체의 키 순서도 바꾸기 때문이다. |
 | `review_draft_version` | `integer`, NOT NULL, 기본 `0` | `4` | 초안을 저장할 때마다 1씩 올린다. 저장 요청은 읽은 버전을 보내고, 다르면 거부해 두 사람이 서로의 입력을 덮어쓰지 않게 한다. 초안을 지워도 되돌리지 않는다. |
 | `review_draft_review_version` | `integer`, nullable | `3` | 초안을 입력한 검수 데이터의 `review_version`(API 명세 5.9 요청의 `reviewVersion`)이다. 초안과 함께 돌려주어, 클라이언트가 그 뒤 검수 데이터가 다시 만들어졌는지 알 수 있게 한다(API 명세 5.4). 초안이 없으면 `null`이다. |
 | `review_draft_saved_at` | `timestamptz`, nullable | `2026-10-04T09:06:00Z` | 초안을 마지막으로 저장한 시각이다. |
