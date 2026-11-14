@@ -1,0 +1,721 @@
+{
+  "condition": "hybrid",
+  "model": "gemini-3.5-flash-lite",
+  "thinking_level": "medium",
+  "source_image": "010_sui_05.jpeg",
+  "photo_id": "010_수이_05",
+  "prompt_version": "hybrid-v2",
+  "prompt_sha256": "35556ae6559dc2eacf722e45dba29f4f1b006bcbaad908b537eb6c283c6519ea",
+  "started_at": "2026-11-13T04:22:47.069995+00:00",
+  "latency_ms": 67886,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 6004,
+  "output_tokens": 2127,
+  "thought_tokens": 1842,
+  "total_tokens": 9973,
+  "output": {
+    "items": [
+      {
+        "raw_name": "메이커스마크",
+        "price_krw": 150000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "듀어스12년",
+        "price_krw": 150000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "몽키숄더",
+        "price_krw": 150000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "라프로윅 10년",
+        "price_krw": 220000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "탈리스커 10년",
+        "price_krw": 220000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "글렌모렌지 오리지널",
+        "price_krw": 230000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "글렌드로낙 12년",
+        "price_krw": 230000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "헤네시 VSOP",
+        "price_krw": 240000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "글렌피딕12년",
+        "price_krw": 250000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "탐듀 12년",
+        "price_krw": 250000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "달모어 12년",
+        "price_krw": 270000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "맥캘란 12년 더블",
+        "price_krw": 270000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "맥캘란 12년 쉐리",
+        "price_krw": 320000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "발베니 12년",
+        "price_krw": 280000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "글렌알라키 12년",
+        "price_krw": 280000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "조니블루",
+        "price_krw": 700000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "글렌모렌지 시그넷",
+        "price_krw": 700000,
+        "pour_ml": null,
+        "unit": "bottle"
+      }
+    ]
+  },
+  "other_items": [
+    {
+      "itemOrder": 1,
+      "rawText": "하몽을 곁들인 감자튀김.",
+      "category": "food",
+      "options": [
+        {
+          "optionLabel": null,
+          "pourMl": null,
+          "priceKrw": 15000
+        }
+      ],
+      "nameLines": [
+        "L038"
+      ],
+      "priceLines": [
+        "L039"
+      ],
+      "box": [
+        62,
+        532,
+        703,
+        587
+      ]
+    },
+    {
+      "itemOrder": 2,
+      "rawText": "과일·치즈 플레이트",
+      "category": "food",
+      "options": [
+        {
+          "optionLabel": null,
+          "pourMl": null,
+          "priceKrw": 33000
+        }
+      ],
+      "nameLines": [
+        "L040"
+      ],
+      "priceLines": [
+        "L041"
+      ],
+      "box": [
+        64,
+        589,
+        698,
+        638
+      ]
+    },
+    {
+      "itemOrder": 3,
+      "rawText": "교자",
+      "category": "food",
+      "options": [
+        {
+          "optionLabel": null,
+          "pourMl": null,
+          "priceKrw": 15000
+        }
+      ],
+      "nameLines": [
+        "L042"
+      ],
+      "priceLines": [
+        "L043"
+      ],
+      "box": [
+        67,
+        642,
+        705,
+        697
+      ]
+    },
+    {
+      "itemOrder": 4,
+      "rawText": "훈제굴 플레이트",
+      "category": "food",
+      "options": [
+        {
+          "optionLabel": null,
+          "pourMl": null,
+          "priceKrw": 15000
+        }
+      ],
+      "nameLines": [
+        "L044"
+      ],
+      "priceLines": [
+        "L045"
+      ],
+      "box": [
+        66,
+        694,
+        706,
+        750
+      ]
+    },
+    {
+      "itemOrder": 5,
+      "rawText": "안키모와 바게트",
+      "category": "food",
+      "options": [
+        {
+          "optionLabel": null,
+          "pourMl": null,
+          "priceKrw": 15000
+        }
+      ],
+      "nameLines": [
+        "L046"
+      ],
+      "priceLines": [
+        "L047"
+      ],
+      "box": [
+        74,
+        754,
+        719,
+        809
+      ]
+    }
+  ],
+  "other_items_dropped": 0,
+  "raw_text": "{\"items\": [{\"raw_name\": \"메이커스마크\", \"price_krw\": 150000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L003\"], \"price\": [\"L012\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"듀어스12년\", \"price_krw\": 150000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L004\"], \"price\": [\"L013\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"몽키숄더\", \"price_krw\": 150000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L005\"], \"price\": [\"L014\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"라프로윅 10년\", \"price_krw\": 220000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L006\"], \"price\": [\"L015\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"탈리스커 10년\", \"price_krw\": 220000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L007\"], \"price\": [\"L016\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"글렌모렌지 오리지널\", \"price_krw\": 230000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L008\"], \"price\": [\"L017\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"글렌드로낙 12년\", \"price_krw\": 230000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L009\"], \"price\": [\"L018\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"헤네시 VSOP\", \"price_krw\": 240000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L010\"], \"price\": [\"L019\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"글렌피딕12년\", \"price_krw\": 250000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L011\"], \"price\": [\"L020\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"탐듀 12년\", \"price_krw\": 250000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L021\"], \"price\": [\"L029\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"달모어 12년\", \"price_krw\": 270000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L022\"], \"price\": [\"L030\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"맥캘란 12년 더블\", \"price_krw\": 270000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L023\"], \"price\": [\"L031\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"맥캘란 12년 쉐리\", \"price_krw\": 320000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L024\"], \"price\": [\"L032\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"발베니 12년\", \"price_krw\": 280000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L025\"], \"price\": [\"L033\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"글렌알라키 12년\", \"price_krw\": 280000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L026\"], \"price\": [\"L034\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"조니블루\", \"price_krw\": 700000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L027\"], \"price\": [\"L035\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"글렌모렌지 시그넷\", \"price_krw\": 700000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L028\"], \"price\": [\"L036\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"하몽을 곁들인 감자튀김.\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": null, \"source_lines\": {\"name\": [\"L038\"], \"price\": [\"L039\"]}, \"category\": \"food\"}, {\"raw_name\": \"과일·치즈 플레이트\", \"price_krw\": 33000, \"pour_ml\": null, \"unit\": null, \"source_lines\": {\"name\": [\"L040\"], \"price\": [\"L041\"]}, \"category\": \"food\"}, {\"raw_name\": \"교자\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": null, \"source_lines\": {\"name\": [\"L042\"], \"price\": [\"L043\"]}, \"category\": \"food\"}, {\"raw_name\": \"훈제굴 플레이트\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": null, \"source_lines\": {\"name\": [\"L044\"], \"price\": [\"L045\"]}, \"category\": \"food\"}, {\"raw_name\": \"안키모와 바게트\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": null, \"source_lines\": {\"name\": [\"L046\"], \"price\": [\"L047\"]}, \"category\": \"food\"}]}",
+  "ocr_lines": [
+    {
+      "id": "L001",
+      "box": [
+        313,
+        49,
+        697,
+        84
+      ],
+      "text": "BOTTLE SELECTION"
+    },
+    {
+      "id": "L002",
+      "box": [
+        419,
+        87,
+        584,
+        108
+      ],
+      "text": "바틀 세트 / 단품 리스트"
+    },
+    {
+      "id": "L003",
+      "box": [
+        105,
+        158,
+        202,
+        176
+      ],
+      "text": "메이커스마크"
+    },
+    {
+      "id": "L004",
+      "box": [
+        105,
+        181,
+        186,
+        198
+      ],
+      "text": "듀어스12년"
+    },
+    {
+      "id": "L005",
+      "box": [
+        104,
+        204,
+        168,
+        222
+      ],
+      "text": "몽키숄더"
+    },
+    {
+      "id": "L006",
+      "box": [
+        103,
+        226,
+        201,
+        242
+      ],
+      "text": "라프로윅 10년"
+    },
+    {
+      "id": "L007",
+      "box": [
+        104,
+        250,
+        201,
+        267
+      ],
+      "text": "탈리스커 10년"
+    },
+    {
+      "id": "L008",
+      "box": [
+        102,
+        272,
+        246,
+        290
+      ],
+      "text": "글렌모렌지 오리지널"
+    },
+    {
+      "id": "L009",
+      "box": [
+        100,
+        295,
+        215,
+        313
+      ],
+      "text": "글렌드로낙 12년"
+    },
+    {
+      "id": "L010",
+      "box": [
+        100,
+        319,
+        198,
+        336
+      ],
+      "text": "헤네시 VSOP"
+    },
+    {
+      "id": "L011",
+      "box": [
+        99,
+        342,
+        196,
+        360
+      ],
+      "text": "글렌피딕12년"
+    },
+    {
+      "id": "L012",
+      "box": [
+        446,
+        148,
+        484,
+        164
+      ],
+      "text": "15만"
+    },
+    {
+      "id": "L013",
+      "box": [
+        446,
+        172,
+        484,
+        188
+      ],
+      "text": "15만"
+    },
+    {
+      "id": "L014",
+      "box": [
+        446,
+        196,
+        482,
+        210
+      ],
+      "text": "15만"
+    },
+    {
+      "id": "L015",
+      "box": [
+        446,
+        220,
+        482,
+        234
+      ],
+      "text": "22만"
+    },
+    {
+      "id": "L016",
+      "box": [
+        444,
+        243,
+        484,
+        259
+      ],
+      "text": "22만"
+    },
+    {
+      "id": "L017",
+      "box": [
+        444,
+        268,
+        481,
+        282
+      ],
+      "text": "23만"
+    },
+    {
+      "id": "L018",
+      "box": [
+        444,
+        292,
+        482,
+        307
+      ],
+      "text": "23만"
+    },
+    {
+      "id": "L019",
+      "box": [
+        444,
+        316,
+        482,
+        332
+      ],
+      "text": "24만"
+    },
+    {
+      "id": "L020",
+      "box": [
+        444,
+        340,
+        481,
+        354
+      ],
+      "text": "25만"
+    },
+    {
+      "id": "L021",
+      "box": [
+        521,
+        146,
+        594,
+        164
+      ],
+      "text": "탐듀 12년"
+    },
+    {
+      "id": "L022",
+      "box": [
+        519,
+        169,
+        609,
+        188
+      ],
+      "text": "달모어 12년"
+    },
+    {
+      "id": "L023",
+      "box": [
+        519,
+        192,
+        649,
+        211
+      ],
+      "text": "맥캘란 12년 더블"
+    },
+    {
+      "id": "L024",
+      "box": [
+        519,
+        217,
+        649,
+        236
+      ],
+      "text": "맥캘란 12년 쉐리"
+    },
+    {
+      "id": "L025",
+      "box": [
+        519,
+        242,
+        611,
+        259
+      ],
+      "text": "발베니 12년"
+    },
+    {
+      "id": "L026",
+      "box": [
+        517,
+        265,
+        646,
+        283
+      ],
+      "text": "글렌알라키 12년"
+    },
+    {
+      "id": "L027",
+      "box": [
+        517,
+        290,
+        588,
+        307
+      ],
+      "text": "조니블루"
+    },
+    {
+      "id": "L028",
+      "box": [
+        517,
+        315,
+        660,
+        332
+      ],
+      "text": "글렌모렌지 시그넷"
+    },
+    {
+      "id": "L029",
+      "box": [
+        889,
+        141,
+        927,
+        155
+      ],
+      "text": "25만"
+    },
+    {
+      "id": "L030",
+      "box": [
+        889,
+        165,
+        931,
+        181
+      ],
+      "text": "27만"
+    },
+    {
+      "id": "L031",
+      "box": [
+        889,
+        190,
+        931,
+        206
+      ],
+      "text": "27만"
+    },
+    {
+      "id": "L032",
+      "box": [
+        889,
+        214,
+        931,
+        230
+      ],
+      "text": "32만"
+    },
+    {
+      "id": "L033",
+      "box": [
+        889,
+        238,
+        929,
+        254
+      ],
+      "text": "28만"
+    },
+    {
+      "id": "L034",
+      "box": [
+        891,
+        263,
+        932,
+        280
+      ],
+      "text": "28만"
+    },
+    {
+      "id": "L035",
+      "box": [
+        891,
+        288,
+        932,
+        305
+      ],
+      "text": "70만"
+    },
+    {
+      "id": "L036",
+      "box": [
+        891,
+        312,
+        932,
+        329
+      ],
+      "text": "70만"
+    },
+    {
+      "id": "L037",
+      "box": [
+        382,
+        481,
+        661,
+        524
+      ],
+      "text": "Dish Menu"
+    },
+    {
+      "id": "L038",
+      "box": [
+        62,
+        532,
+        535,
+        581
+      ],
+      "text": "하몽을 곁들인 감자튀김."
+    },
+    {
+      "id": "L039",
+      "box": [
+        573,
+        539,
+        703,
+        587
+      ],
+      "text": "1.5만"
+    },
+    {
+      "id": "L040",
+      "box": [
+        64,
+        589,
+        460,
+        633
+      ],
+      "text": "과일·치즈 플레이트"
+    },
+    {
+      "id": "L041",
+      "box": [
+        573,
+        594,
+        698,
+        638
+      ],
+      "text": "3.3만"
+    },
+    {
+      "id": "L042",
+      "box": [
+        67,
+        642,
+        151,
+        683
+      ],
+      "text": "교자"
+    },
+    {
+      "id": "L043",
+      "box": [
+        576,
+        655,
+        705,
+        697
+      ],
+      "text": "1.5만"
+    },
+    {
+      "id": "L044",
+      "box": [
+        66,
+        694,
+        401,
+        745
+      ],
+      "text": "훈제굴 플레이트"
+    },
+    {
+      "id": "L045",
+      "box": [
+        580,
+        709,
+        706,
+        750
+      ],
+      "text": "1.5만"
+    },
+    {
+      "id": "L046",
+      "box": [
+        74,
+        754,
+        427,
+        800
+      ],
+      "text": "안키모와 바게트"
+    },
+    {
+      "id": "L047",
+      "box": [
+        590,
+        765,
+        719,
+        809
+      ],
+      "text": "1.5만"
+    }
+  ],
+  "ocr_cache_same_bytes": true,
+  "run": 10
+}

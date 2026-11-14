@@ -15,8 +15,10 @@ Two things are checked against baseline.json.
 
 Extraction replay. The model's recorded answers for these photos (ai/runs/.../<stem>_r<k>.json,
 `raw_text`) go through the server's own code after the model call (HybridExtraction ->
-to_flow_items -> ExtractionItems, backend/app/extraction), are flattened back to one row per
-price option, and are scored against the fixture with ai/eval/score.py. The number of items
+to_flow_items -> ExtractionItems, backend/app/extraction; hybrid_v2.convert_output for a prompt
+v2 record, whose non-whisky lines are counted as other_items), are flattened back to one row per
+price option, and are scored against the fixture with ai/eval/score.py. score.py does not read
+the pour size, so the paired rows' pour sizes are compared here too (pour_wrong). The number of items
 the server makes is kept too, since it shows how glass and bottle rows were grouped. The input is fixed, so
 the score must equal the baseline exactly: a difference means the schema, the conversion or the
 scorer changed. This does not call the model, so it cannot see a prompt or model change; for
@@ -47,7 +49,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(REPO_ROOT / "ai" / "eval"))
 
 import i3_match_eval as harness  # noqa: E402
-from score import normalize, score_photo  # noqa: E402
+from score import match_photo, normalize, score_photo  # noqa: E402
 
 SELECTION = HERE / "selection.json"
 FIXTURE_DIR = HERE / "fixtures"
@@ -116,16 +118,34 @@ def load_fixtures() -> list[dict]:
 
 # ---- extraction replay ----------------------------------------------------------------------
 
-def server_items(raw_text: str) -> list[dict]:
-    """A recorded model answer through the server code that follows the model call (hybrid.py)."""
+def server_output(record: dict) -> dict:
+    """A recorded model answer through the server code that follows the model call.
+
+    Returns {"items": flow items sent to matching, "otherItems": non-whisky lines kept aside}.
+    A prompt v2 record (prompt_version "hybrid-v2") goes through hybrid_v2.convert_output; any
+    other record is prompt v1 output, which has no non-whisky lines.
+    """
     sys.path.insert(0, str(REPO_ROOT / "backend"))
+    from app.extraction import hybrid_v2
     from app.extraction.convert import to_flow_items
     from app.extraction.hybrid import HybridExtraction
     from app.extraction.schema import ExtractionItems
 
+    raw_text = record.get("raw_text") or ""
+    if record.get("prompt_version") == hybrid_v2.PROMPT_VERSION:
+        out = hybrid_v2.convert_output(raw_text, record.get("ocr_lines") or [])
+        return {"items": out["items"], "otherItems": out["otherItems"]}
     hybrid = HybridExtraction.model_validate_json(raw_text).model_dump()
     v1_items = [{k: v for k, v in item.items() if k != "source_lines"} for item in hybrid["items"]]
-    return ExtractionItems.model_validate({"items": to_flow_items(v1_items)}).model_dump(mode="json")["items"]
+    items = ExtractionItems.model_validate({"items": to_flow_items(v1_items)}).model_dump(mode="json")["items"]
+    return {"items": items, "otherItems": []}
+
+
+def match_items(be, flow_items: list[dict], catalog) -> list[tuple[str, object]]:
+    """What the import does after extraction (menu_import_processing._resolve_and_draft): every
+    product line, and nothing else, goes to the rule matcher. Returns (name, result) per line."""
+    return [(item["productName"], be.resolve(item["productName"], catalog))
+            for item in flow_items if item["lineType"] == "product"]
 
 
 def flatten(flow_items: list[dict]) -> list[dict]:
@@ -156,14 +176,21 @@ def score_rows(fixture: dict, rows: list[dict]) -> dict:
     errors = [{"type": e["type"], "expected": (e.get("gt") or {}).get("raw_name"),
                "got": (e.get("out") or {}).get("raw_name")}
               for e in s["errors"] if not e.get("counted_correct")]
-    return {**{k: s[k] for k in SCORE_KEYS}, "duplicates": duplicates(rows), "errors": errors}
+    # score.py pairs rows by name and unit and checks the price; it never reads the pour size
+    pairs, _, _ = match_photo(fixture["expected_items"], rows, lenient=True)
+    pour_wrong = [(fixture["expected_items"][gi], rows[oi]) for gi, oi, _ in pairs
+                  if fixture["expected_items"][gi]["pour_ml"] != rows[oi]["pour_ml"]]
+    errors += [{"type": "pour size", "expected": f"{g['raw_name']} {g['pour_ml']}ml",
+                "got": f"{o['raw_name']} {o['pour_ml']}ml"} for g, o in pour_wrong]
+    return {**{k: s[k] for k in SCORE_KEYS}, "pour_wrong": len(pour_wrong), "duplicates": duplicates(rows),
+            "errors": errors}
 
 
-def record_items(record: dict) -> list[dict] | None:
-    """Flow items of one run record, or None when the server would reject the answer."""
+def record_output(record: dict) -> dict | None:
+    """server_output of one run record, or None when the server would reject the answer."""
     from pydantic import ValidationError
     try:
-        return server_items(record.get("raw_text") or "")
+        return server_output(record)
     except ValidationError:
         return None
 
@@ -179,11 +206,13 @@ def replay(fixtures: list[dict], run_dirs: dict[str, tuple[str, ...]] | None = N
                 m = RUN_FILE.match(f.name)
                 if not m or m["stem"] != stem or (run is not None and int(m["run"]) != run):
                     continue
-                items = record_items(json.loads(f.read_text(encoding="utf-8")))
+                output = record_output(json.loads(f.read_text(encoding="utf-8")))
+                items = output["items"] if output else []
                 # flow_items pins the glass/bottle grouping, which flatten() undoes
                 out[f"{Path(run_dir).as_posix()}/{f.name}"] = {
-                    "photo_id": fx["photo_id"], "rejected": items is None, "flow_items": len(items or []),
-                    **score_rows(fx, flatten(items or []))}
+                    "photo_id": fx["photo_id"], "rejected": output is None, "flow_items": len(items),
+                    "other_items": len(output["otherItems"]) if output else 0,
+                    **score_rows(fx, flatten(items))}
     return out
 
 
@@ -240,6 +269,12 @@ def compare_matching(baseline: dict, current: dict) -> tuple[list[str], list[str
                 worse.append(f"{condition} {pid}: the expected lines differ from the baseline (run --update)")
                 continue
             for b, c in zip(base_rows, cur_rows):
+                if c["kind"] != b["kind"]:
+                    # e.g. known -> absent: the product left the catalog, and an unmatched line would
+                    # otherwise look as right as the correct line it replaced
+                    worse.append(f"{condition} {pid}: {c['name']!r} (gold {c['gold']}) was {b['kind']} and is "
+                                 f"{c['kind']} now: the catalog changed (run --update if that is intended)")
+                    continue
                 if severity(c) == severity(b):
                     continue
                 text = (f"{condition} {pid}: {c['name']!r} (gold {c['gold']}) "
@@ -289,7 +324,7 @@ def check_photos(data_dir: Path, fixtures: list[dict]) -> list[str]:
 
 
 def print_table(fixtures: list[dict], state: dict) -> None:
-    print(f"{'photo':18} {'items':>5} {'runs':>4} {'extra':>5} {'missed':>6} {'price':>5} {'unit':>4} {'dup':>3}  "
+    print(f"{'photo':18} {'items':>5} {'runs':>4} {'extra':>5} {'missed':>6} {'price':>5} {'pour':>4} {'unit':>4} {'dup':>3}  "
           f"{'deployed ok/known':>17} {'heldout ok/known':>16} {'FM':>3} {'wrong':>5}")
     for fx in fixtures:
         pid = fx["photo_id"]
@@ -298,6 +333,7 @@ def print_table(fixtures: list[dict], state: dict) -> None:
         held = matching_counts(state["matching"]["heldout"][pid])
         print(f"{pid:18} {len(fx['expected_items']):5d} {len(recs):4d} {sum(r['fp'] for r in recs):5d} "
               f"{sum(r['fn'] for r in recs):6d} {sum(r['priced'] - r['price_correct'] for r in recs):5d} "
+              f"{sum(r['pour_wrong'] for r in recs):4d} "
               f"{sum(r['unit_confusion'] for r in recs):4d} {sum(r['duplicates'] for r in recs):3d}  "
               f"{dep['known_correct']:>8d}/{dep['known']:<8d} {held['known_correct']:>7d}/{held['known']:<8d} "
               f"{dep['false_merge'] + held['false_merge']:3d} {dep['wrong_candidates'] + held['wrong_candidates']:5d}")
@@ -333,7 +369,8 @@ def main(argv=None) -> int:
         for path, s in scores.items():
             print(f"{s['photo_id']:18} {Path(path).name:28} out {s['n_out']:3d} correct {s['correct']:3d}/{s['n_gt']:<3d} "
                   f"extra {s['fp']:2d} missed {s['fn']:2d} price {s['priced'] - s['price_correct']:2d} "
-                  f"unit {s['unit_confusion']:2d} dup {s['duplicates']:2d}{'  REJECTED' if s['rejected'] else ''}")
+                  f"pour {s['pour_wrong']:2d} unit {s['unit_confusion']:2d} dup {s['duplicates']:2d} "
+                  f"other {s['other_items']:2d}{'  REJECTED' if s['rejected'] else ''}")
         found = {s["photo_id"] for s in scores.values()}
         missing = [fx["photo_id"] for fx in fixtures if fx["photo_id"] not in found]
         if missing:

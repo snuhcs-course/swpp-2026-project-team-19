@@ -1,0 +1,1562 @@
+{
+  "condition": "hybrid",
+  "model": "gemini-3.5-flash-lite",
+  "thinking_level": "medium",
+  "source_image": "011_mirabeau_06.jpeg",
+  "photo_id": "011_미라보_06",
+  "prompt_version": "hybrid-v2",
+  "prompt_sha256": "35556ae6559dc2eacf722e45dba29f4f1b006bcbaad908b537eb6c283c6519ea",
+  "started_at": "2026-11-13T04:08:57.873224+00:00",
+  "latency_ms": 27863,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 8100,
+  "output_tokens": 4613,
+  "thought_tokens": 0,
+  "total_tokens": 12713,
+  "output": {
+    "items": [
+      {
+        "raw_name": "발베니(Balvenie) 12년 더블 우드",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "발베니(Balvenie) 12년 아메리칸 오크",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "발베니(Balvenie) 12년 싱글 배럴",
+        "price_krw": 23000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "발베니(Balvenie) 14년 캐리비안 캐스크",
+        "price_krw": 23000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "발베니(Balvenie) 14년 위크 오브 피트",
+        "price_krw": 25000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "발베니(Balvenie) 15년 마데이라 캐스크",
+        "price_krw": 35000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "발베니(Balvenie) 16년 프렌치 오크",
+        "price_krw": 37000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "발베니(Balvenie) 18년 페드로 히메네즈 캐스크",
+        "price_krw": 47000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "발베니(Balvenie) 21년 포트 우드",
+        "price_krw": 70000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "맥켈란(Maccallan) 12년 더블 캐스크",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "맥켈란(Maccallan) 12년 셰리 캐스크",
+        "price_krw": 21000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "맥켈란(Maccallan) 15년 더블 캐스크",
+        "price_krw": 27000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "맥켈란(Maccallan) 클래식컷 2025",
+        "price_krw": 28000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "맥켈란(Maccallan) 18년 더블캐스크",
+        "price_krw": 48000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "맥켈란(Maccallan) 18년 셰리 캐스크",
+        "price_krw": 55000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌리벳(Glenrivet) 12년 더블 오크",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌리벳(Glenrivet) 15년 프렌치 오크",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌리벳(Glenrivet) 18년",
+        "price_krw": 26000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌피딕(Glenfiddich) 12년",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌피딕(Glenfiddich) 12년 아몬티야또 셰리 피니시",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌피딕(Glenfiddich) 14년",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌피딕(Glenfiddich) 15년",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌피딕(Glenfiddich) 18년",
+        "price_krw": 28000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌피딕(Glenfiddich) 21년 그란 르제르바",
+        "price_krw": 43000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌피딕(Glenfiddich) 23년 그랑 크루",
+        "price_krw": 64000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌그란트(Glengrant) 12년",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌그란트(Glengrant) 15년",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌그란트(Glengrant) 18년",
+        "price_krw": 32000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "모틀락(Mortlach) 16년",
+        "price_krw": 25000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "올트모어(Aultmore) 12년",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "올트모어(Aultmore) 18년",
+        "price_krw": 30000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "올트모어(Aultmore) 21년",
+        "price_krw": 45000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌알라키(Glenallachie) 8년",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌알라키(Glenallachie) 12년",
+        "price_krw": 19000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌알라키(Glenallachie) 10년 캐스크 스트랭스",
+        "price_krw": 22000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌알라키(Glenallachie) 9년 퀴베 캐스크 피니시",
+        "price_krw": 22000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌알라키(Glenallachie) 8년 스코티시 오크 피니시",
+        "price_krw": 23000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌알라키(Glenallachie) 10년 루비포트 캐스크 피니시",
+        "price_krw": 23000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌알라키(Glenallachie) 12년 모스카텔 캐스크 피니시",
+        "price_krw": 23000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌알라키(Glenallachie) 10년 스페니시 오크 피니시",
+        "price_krw": 25000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌알라키(Glenallachie) 15년",
+        "price_krw": 27000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌알라키(Glenallachie) 18년",
+        "price_krw": 42000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌알라키(Glenallachie) 18년 PX 펀천",
+        "price_krw": 68000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "에버펠디(Aberfeldy) 12년",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "에버펠디(Aberfeldy) 16년",
+        "price_krw": 23000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "발렌타인 글렌버기(Glenburgie) 12년",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "발렌타인 글렌버기(Glenburgie) 15년",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌로티스(Glenrothes) 12년",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌로티스(Glenrothes) WMC",
+        "price_krw": 22000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌로티스(Glenrothes) 18년",
+        "price_krw": 31000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "탐두(Tamdhu) 12년",
+        "price_krw": 17000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "탐두(Tamdhu) 배치스트랭스 8",
+        "price_krw": 26000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "탐두(Tamdhu) 15년",
+        "price_krw": 29000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "탐두(Tamdhu) 18년",
+        "price_krw": 48000,
+        "pour_ml": null,
+        "unit": "glass"
+      }
+    ]
+  },
+  "other_items": [],
+  "other_items_dropped": 0,
+  "raw_text": "{\"items\": [{\"raw_name\": \"발베니(Balvenie) 12년 더블 우드\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L002\", \"L003\"], \"price\": [\"L012\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"발베니(Balvenie) 12년 아메리칸 오크\", \"price_krw\": 20000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L002\", \"L004\"], \"price\": [\"L013\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"발베니(Balvenie) 12년 싱글 배럴\", \"price_krw\": 23000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L002\", \"L005\"], \"price\": [\"L014\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"발베니(Balvenie) 14년 캐리비안 캐스크\", \"price_krw\": 23000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L002\", \"L006\"], \"price\": [\"L015\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"발베니(Balvenie) 14년 위크 오브 피트\", \"price_krw\": 25000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L002\", \"L007\"], \"price\": [\"L016\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"발베니(Balvenie) 15년 마데이라 캐스크\", \"price_krw\": 35000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L002\", \"L008\"], \"price\": [\"L017\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"발베니(Balvenie) 16년 프렌치 오크\", \"price_krw\": 37000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L002\", \"L009\"], \"price\": [\"L018\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"발베니(Balvenie) 18년 페드로 히메네즈 캐스크\", \"price_krw\": 47000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L002\", \"L010\"], \"price\": [\"L019\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"발베니(Balvenie) 21년 포트 우드\", \"price_krw\": 70000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L002\", \"L011\"], \"price\": [\"L020\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"맥켈란(Maccallan) 12년 더블 캐스크\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L021\", \"L022\"], \"price\": [\"L029\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"맥켈란(Maccallan) 12년 셰리 캐스크\", \"price_krw\": 21000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L021\", \"L023\"], \"price\": [\"L030\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"맥켈란(Maccallan) 15년 더블 캐스크\", \"price_krw\": 27000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L021\", \"L024\"], \"price\": [\"L031\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"맥켈란(Maccallan) 클래식컷 2025\", \"price_krw\": 28000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L021\", \"L025\"], \"price\": [\"L032\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"맥켈란(Maccallan) 18년 더블캐스크\", \"price_krw\": 48000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L021\", \"L026\"], \"price\": [\"L033\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"맥켈란(Maccallan) 18년 셰리 캐스크\", \"price_krw\": 55000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L021\", \"L027\"], \"price\": [\"L034\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"글렌리벳(Glenrivet) 12년 더블 오크\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L038\", \"L035\"], \"price\": [\"L039\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"글렌리벳(Glenrivet) 15년 프렌치 오크\", \"price_krw\": 20000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L038\", \"L036\"], \"price\": [\"L040\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"글렌리벳(Glenrivet) 18년\", \"price_krw\": 26000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L038\", \"L037\"], \"price\": [\"L041\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"글렌피딕(Glenfiddich) 12년\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L028\", \"L042\"], \"price\": [\"L049\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"글렌피딕(Glenfiddich) 12년 아몬티야또 셰리 피니시\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L028\", \"L043\"], \"price\": [\"L050\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"글렌피딕(Glenfiddich) 14년\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L028\", \"L044\"], \"price\": [\"L051\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"글렌피딕(Glenfiddich) 15년\", \"price_krw\": 20000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L028\", \"L045\"], \"price\": [\"L052\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"글렌피딕(Glenfiddich) 18년\", \"price_krw\": 28000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L028\", \"L046\"], \"price\": [\"L053\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"글렌피딕(Glenfiddich) 21년 그란 르제르바\", \"price_krw\": 43000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L028\", \"L047\"], \"price\": [\"L054\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"글렌피딕(Glenfiddich) 23년 그랑 크루\", \"price_krw\": 64000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L028\", \"L048\"], \"price\": [\"L055\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"글렌그란트(Glengrant) 12년\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L056\", \"L062\"], \"price\": [\"L071\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"글렌그란트(Glengrant) 15년\", \"price_krw\": 20000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L056\", \"L063\"], \"price\": [\"L072\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"글렌그란트(Glengrant) 18년\", \"price_krw\": 32000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L056\", \"L064\"], \"price\": [\"L073\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"모틀락(Mortlach) 16년\", \"price_krw\": 25000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L065\", \"L061\"], \"price\": [\"L070\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"올트모어(Aultmore) 12년\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L066\", \"L058\"], \"price\": [\"L067\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"올트모어(Aultmore) 18년\", \"price_krw\": 30000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L066\", \"L059\"], \"price\": [\"L068\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"올트모어(Aultmore) 21년\", \"price_krw\": 45000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L066\", \"L060\"], \"price\": [\"L069\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"글렌알라키(Glenallachie) 8년\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L057\", \"L074\"], \"price\": [\"L085\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"글렌알라키(Glenallachie) 12년\", \"price_krw\": 19000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L057\", \"L075\"], \"price\": [\"L086\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"글렌알라키(Glenallachie) 10년 캐스크 스트랭스\", \"price_krw\": 22000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L057\", \"L076\"], \"price\": [\"L087\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"글렌알라키(Glenallachie) 9년 퀴베 캐스크 피니시\", \"price_krw\": 22000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L057\", \"L077\"], \"price\": [\"L088\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"글렌알라키(Glenallachie) 8년 스코티시 오크 피니시\", \"price_krw\": 23000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L057\", \"L078\"], \"price\": [\"L089\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"글렌알라키(Glenallachie) 10년 루비포트 캐스크 피니시\", \"price_krw\": 23000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L057\", \"L079\"], \"price\": [\"L090\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"글렌알라키(Glenallachie) 12년 모스카텔 캐스크 피니시\", \"price_krw\": 23000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L057\", \"L080\"], \"price\": [\"L091\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"글렌알라키(Glenallachie) 10년 스페니시 오크 피니시\", \"price_krw\": 25000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L057\", \"L081\"], \"price\": [\"L092\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"글렌알라키(Glenallachie) 15년\", \"price_krw\": 27000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L057\", \"L082\"], \"price\": [\"L093\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"글렌알라키(Glenallachie) 18년\", \"price_krw\": 42000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L057\", \"L083\"], \"price\": [\"L094\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"글렌알라키(Glenallachie) 18년 PX 펀천\", \"price_krw\": 68000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L057\", \"L084\"], \"price\": [\"L095\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"에버펠디(Aberfeldy) 12년\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L096\", \"L098\"], \"price\": [\"L100\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"에버펠디(Aberfeldy) 16년\", \"price_krw\": 23000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L096\", \"L099\"], \"price\": [\"L101\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"발렌타인 글렌버기(Glenburgie) 12년\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L097\", \"L102\"], \"price\": [\"L104\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"발렌타인 글렌버기(Glenburgie) 15년\", \"price_krw\": 20000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L097\", \"L103\"], \"price\": [\"L105\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"글렌로티스(Glenrothes) 12년\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L106\", \"L108\"], \"price\": [\"L111\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"글렌로티스(Glenrothes) WMC\", \"price_krw\": 22000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L106\", \"L109\"], \"price\": [\"L112\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"글렌로티스(Glenrothes) 18년\", \"price_krw\": 31000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L106\", \"L110\"], \"price\": [\"L113\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"탐두(Tamdhu) 12년\", \"price_krw\": 17000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L107\", \"L114\"], \"price\": [\"L118\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"탐두(Tamdhu) 배치스트랭스 8\", \"price_krw\": 26000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L107\", \"L115\"], \"price\": [\"L119\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"탐두(Tamdhu) 15년\", \"price_krw\": 29000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L107\", \"L116\"], \"price\": [\"L120\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"탐두(Tamdhu) 18년\", \"price_krw\": 48000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L107\", \"L117\"], \"price\": [\"L121\"]}, \"category\": \"whisky\"}]}",
+  "ocr_lines": [
+    {
+      "id": "L001",
+      "box": [
+        135,
+        39,
+        367,
+        60
+      ],
+      "text": "스페이사이드(Speyside)"
+    },
+    {
+      "id": "L002",
+      "box": [
+        131,
+        70,
+        273,
+        92
+      ],
+      "text": "발베니(Balvenie)"
+    },
+    {
+      "id": "L003",
+      "box": [
+        126,
+        93,
+        253,
+        111
+      ],
+      "text": "12년 더블 우드"
+    },
+    {
+      "id": "L004",
+      "box": [
+        124,
+        109,
+        290,
+        127
+      ],
+      "text": "12년 아메리칸 오크"
+    },
+    {
+      "id": "L005",
+      "box": [
+        123,
+        126,
+        252,
+        145
+      ],
+      "text": "12년 싱글 배럴"
+    },
+    {
+      "id": "L006",
+      "box": [
+        119,
+        141,
+        306,
+        162
+      ],
+      "text": "14년 캐리비안 캐스크"
+    },
+    {
+      "id": "L007",
+      "box": [
+        117,
+        158,
+        292,
+        176
+      ],
+      "text": "14년 위크 오브 피트"
+    },
+    {
+      "id": "L008",
+      "box": [
+        114,
+        175,
+        304,
+        195
+      ],
+      "text": "15년 마데이라 캐스크"
+    },
+    {
+      "id": "L009",
+      "box": [
+        110,
+        192,
+        264,
+        212
+      ],
+      "text": "16년 프렌치 오크"
+    },
+    {
+      "id": "L010",
+      "box": [
+        108,
+        209,
+        366,
+        230
+      ],
+      "text": "18년 페드로 히메네즈 캐스크"
+    },
+    {
+      "id": "L011",
+      "box": [
+        105,
+        227,
+        243,
+        247
+      ],
+      "text": "21년 포트 우드"
+    },
+    {
+      "id": "L012",
+      "box": [
+        413,
+        96,
+        451,
+        108
+      ],
+      "text": "18.0"
+    },
+    {
+      "id": "L013",
+      "box": [
+        413,
+        112,
+        449,
+        124
+      ],
+      "text": "20.0"
+    },
+    {
+      "id": "L014",
+      "box": [
+        413,
+        127,
+        449,
+        139
+      ],
+      "text": "23.0"
+    },
+    {
+      "id": "L015",
+      "box": [
+        411,
+        143,
+        449,
+        156
+      ],
+      "text": "23.0"
+    },
+    {
+      "id": "L016",
+      "box": [
+        411,
+        160,
+        449,
+        173
+      ],
+      "text": "25.0"
+    },
+    {
+      "id": "L017",
+      "box": [
+        410,
+        177,
+        449,
+        190
+      ],
+      "text": "35.0"
+    },
+    {
+      "id": "L018",
+      "box": [
+        410,
+        194,
+        449,
+        207
+      ],
+      "text": "37.0"
+    },
+    {
+      "id": "L019",
+      "box": [
+        410,
+        212,
+        449,
+        225
+      ],
+      "text": "47.0"
+    },
+    {
+      "id": "L020",
+      "box": [
+        410,
+        230,
+        449,
+        243
+      ],
+      "text": "70.0"
+    },
+    {
+      "id": "L021",
+      "box": [
+        509,
+        71,
+        660,
+        87
+      ],
+      "text": "맥켈란(Maccallan)"
+    },
+    {
+      "id": "L022",
+      "box": [
+        512,
+        94,
+        654,
+        109
+      ],
+      "text": "12년 더블 캐스크"
+    },
+    {
+      "id": "L023",
+      "box": [
+        512,
+        109,
+        656,
+        125
+      ],
+      "text": "12년 셰리 캐스크"
+    },
+    {
+      "id": "L024",
+      "box": [
+        512,
+        124,
+        656,
+        141
+      ],
+      "text": "15년 더블 캐스크"
+    },
+    {
+      "id": "L025",
+      "box": [
+        514,
+        142,
+        637,
+        159
+      ],
+      "text": "클래식컷 2025"
+    },
+    {
+      "id": "L026",
+      "box": [
+        514,
+        157,
+        658,
+        174
+      ],
+      "text": "18년 더블캐스크"
+    },
+    {
+      "id": "L027",
+      "box": [
+        513,
+        172,
+        662,
+        192
+      ],
+      "text": "18년 셰리 캐스크"
+    },
+    {
+      "id": "L028",
+      "box": [
+        514,
+        200,
+        706,
+        220
+      ],
+      "text": "글렌피딕(Glenfiddich)"
+    },
+    {
+      "id": "L029",
+      "box": [
+        797,
+        96,
+        835,
+        108
+      ],
+      "text": "18.0"
+    },
+    {
+      "id": "L030",
+      "box": [
+        799,
+        113,
+        837,
+        125
+      ],
+      "text": "21.0"
+    },
+    {
+      "id": "L031",
+      "box": [
+        802,
+        129,
+        840,
+        142
+      ],
+      "text": "27.0"
+    },
+    {
+      "id": "L032",
+      "box": [
+        804,
+        146,
+        844,
+        157
+      ],
+      "text": "28.0"
+    },
+    {
+      "id": "L033",
+      "box": [
+        807,
+        163,
+        845,
+        174
+      ],
+      "text": "48.0"
+    },
+    {
+      "id": "L034",
+      "box": [
+        811,
+        180,
+        849,
+        191
+      ],
+      "text": "55.0"
+    },
+    {
+      "id": "L035",
+      "box": [
+        92,
+        286,
+        234,
+        306
+      ],
+      "text": "12년 더블 오크"
+    },
+    {
+      "id": "L036",
+      "box": [
+        90,
+        306,
+        252,
+        326
+      ],
+      "text": "15년 프렌치 오크"
+    },
+    {
+      "id": "L037",
+      "box": [
+        86,
+        325,
+        134,
+        343
+      ],
+      "text": "18년"
+    },
+    {
+      "id": "L038",
+      "box": [
+        95,
+        257,
+        276,
+        281
+      ],
+      "text": "글렌리벳(Glenrivet)"
+    },
+    {
+      "id": "L039",
+      "box": [
+        410,
+        290,
+        449,
+        303
+      ],
+      "text": "16.0"
+    },
+    {
+      "id": "L040",
+      "box": [
+        408,
+        310,
+        449,
+        323
+      ],
+      "text": "20.0"
+    },
+    {
+      "id": "L041",
+      "box": [
+        408,
+        329,
+        449,
+        342
+      ],
+      "text": "26.0"
+    },
+    {
+      "id": "L042",
+      "box": [
+        516,
+        228,
+        559,
+        245
+      ],
+      "text": "12년"
+    },
+    {
+      "id": "L043",
+      "box": [
+        515,
+        245,
+        771,
+        264
+      ],
+      "text": "12년 아몬티야또 셰리 피니시"
+    },
+    {
+      "id": "L044",
+      "box": [
+        516,
+        264,
+        561,
+        282
+      ],
+      "text": "14년"
+    },
+    {
+      "id": "L045",
+      "box": [
+        516,
+        284,
+        561,
+        301
+      ],
+      "text": "15년"
+    },
+    {
+      "id": "L046",
+      "box": [
+        517,
+        303,
+        561,
+        320
+      ],
+      "text": "18년"
+    },
+    {
+      "id": "L047",
+      "box": [
+        517,
+        321,
+        698,
+        341
+      ],
+      "text": "21년 그란 르제르바"
+    },
+    {
+      "id": "L048",
+      "box": [
+        517,
+        341,
+        660,
+        361
+      ],
+      "text": "23년 그랑 크루"
+    },
+    {
+      "id": "L049",
+      "box": [
+        816,
+        229,
+        856,
+        242
+      ],
+      "text": "16.0"
+    },
+    {
+      "id": "L050",
+      "box": [
+        817,
+        247,
+        859,
+        260
+      ],
+      "text": "16.0"
+    },
+    {
+      "id": "L051",
+      "box": [
+        821,
+        266,
+        863,
+        279
+      ],
+      "text": "18.0"
+    },
+    {
+      "id": "L052",
+      "box": [
+        824,
+        284,
+        866,
+        297
+      ],
+      "text": "20.0"
+    },
+    {
+      "id": "L053",
+      "box": [
+        828,
+        303,
+        868,
+        316
+      ],
+      "text": "28.0"
+    },
+    {
+      "id": "L054",
+      "box": [
+        831,
+        321,
+        871,
+        336
+      ],
+      "text": "43.0"
+    },
+    {
+      "id": "L055",
+      "box": [
+        833,
+        341,
+        877,
+        355
+      ],
+      "text": "64.0"
+    },
+    {
+      "id": "L056",
+      "box": [
+        79,
+        354,
+        298,
+        382
+      ],
+      "text": "글렌그란트(Glengrant)"
+    },
+    {
+      "id": "L057",
+      "box": [
+        517,
+        372,
+        750,
+        395
+      ],
+      "text": "글렌알라키(Glenallachie)"
+    },
+    {
+      "id": "L058",
+      "box": [
+        49,
+        577,
+        99,
+        596
+      ],
+      "text": "12년"
+    },
+    {
+      "id": "L059",
+      "box": [
+        42,
+        599,
+        97,
+        621
+      ],
+      "text": "18년"
+    },
+    {
+      "id": "L060",
+      "box": [
+        40,
+        624,
+        94,
+        646
+      ],
+      "text": "21년"
+    },
+    {
+      "id": "L061",
+      "box": [
+        59,
+        500,
+        109,
+        519
+      ],
+      "text": "16년"
+    },
+    {
+      "id": "L062",
+      "box": [
+        74,
+        387,
+        123,
+        405
+      ],
+      "text": "12년"
+    },
+    {
+      "id": "L063",
+      "box": [
+        71,
+        407,
+        121,
+        426
+      ],
+      "text": "15년"
+    },
+    {
+      "id": "L064",
+      "box": [
+        69,
+        430,
+        118,
+        448
+      ],
+      "text": "18년"
+    },
+    {
+      "id": "L065",
+      "box": [
+        62,
+        466,
+        241,
+        489
+      ],
+      "text": "모틀락(Mortlach)"
+    },
+    {
+      "id": "L066",
+      "box": [
+        50,
+        539,
+        259,
+        564
+      ],
+      "text": "올트모어(Aultmore)"
+    },
+    {
+      "id": "L067",
+      "box": [
+        403,
+        577,
+        448,
+        594
+      ],
+      "text": "18.0"
+    },
+    {
+      "id": "L068",
+      "box": [
+        401,
+        600,
+        448,
+        617
+      ],
+      "text": "30.0"
+    },
+    {
+      "id": "L069",
+      "box": [
+        401,
+        625,
+        448,
+        643
+      ],
+      "text": "45.0"
+    },
+    {
+      "id": "L070",
+      "box": [
+        404,
+        504,
+        451,
+        519
+      ],
+      "text": "25.0"
+    },
+    {
+      "id": "L071",
+      "box": [
+        408,
+        391,
+        451,
+        406
+      ],
+      "text": "16.0"
+    },
+    {
+      "id": "L072",
+      "box": [
+        406,
+        411,
+        449,
+        426
+      ],
+      "text": "20.0"
+    },
+    {
+      "id": "L073",
+      "box": [
+        406,
+        432,
+        449,
+        445
+      ],
+      "text": "32.0"
+    },
+    {
+      "id": "L074",
+      "box": [
+        521,
+        405,
+        556,
+        423
+      ],
+      "text": "8년"
+    },
+    {
+      "id": "L075",
+      "box": [
+        521,
+        426,
+        567,
+        444
+      ],
+      "text": "12년"
+    },
+    {
+      "id": "L076",
+      "box": [
+        522,
+        445,
+        732,
+        465
+      ],
+      "text": "10년 캐스크 스트랭스"
+    },
+    {
+      "id": "L077",
+      "box": [
+        522,
+        466,
+        746,
+        487
+      ],
+      "text": "9년 퀴베 캐스크 피니시"
+    },
+    {
+      "id": "L078",
+      "box": [
+        522,
+        488,
+        769,
+        509
+      ],
+      "text": "8년 스코티시 오크 피니시"
+    },
+    {
+      "id": "L079",
+      "box": [
+        523,
+        509,
+        806,
+        531
+      ],
+      "text": "10년 루비포트 캐스크 피니시"
+    },
+    {
+      "id": "L080",
+      "box": [
+        524,
+        532,
+        809,
+        554
+      ],
+      "text": "12년 모스카텔 캐스크 피니시"
+    },
+    {
+      "id": "L081",
+      "box": [
+        523,
+        553,
+        788,
+        576
+      ],
+      "text": "10년 스페니시 오크 피니시"
+    },
+    {
+      "id": "L082",
+      "box": [
+        526,
+        579,
+        573,
+        600
+      ],
+      "text": "15년"
+    },
+    {
+      "id": "L083",
+      "box": [
+        524,
+        603,
+        574,
+        624
+      ],
+      "text": "18년"
+    },
+    {
+      "id": "L084",
+      "box": [
+        524,
+        625,
+        665,
+        648
+      ],
+      "text": "18년 PX 펀천"
+    },
+    {
+      "id": "L085",
+      "box": [
+        844,
+        404,
+        887,
+        418
+      ],
+      "text": "16.0"
+    },
+    {
+      "id": "L086",
+      "box": [
+        847,
+        424,
+        891,
+        439
+      ],
+      "text": "19.0"
+    },
+    {
+      "id": "L087",
+      "box": [
+        851,
+        445,
+        894,
+        460
+      ],
+      "text": "22.0"
+    },
+    {
+      "id": "L088",
+      "box": [
+        854,
+        467,
+        899,
+        483
+      ],
+      "text": "22.0"
+    },
+    {
+      "id": "L089",
+      "box": [
+        857,
+        488,
+        903,
+        505
+      ],
+      "text": "23.0"
+    },
+    {
+      "id": "L090",
+      "box": [
+        859,
+        510,
+        906,
+        527
+      ],
+      "text": "23.0"
+    },
+    {
+      "id": "L091",
+      "box": [
+        863,
+        534,
+        910,
+        549
+      ],
+      "text": "23.0"
+    },
+    {
+      "id": "L092",
+      "box": [
+        866,
+        556,
+        913,
+        573
+      ],
+      "text": "25.0"
+    },
+    {
+      "id": "L093",
+      "box": [
+        870,
+        579,
+        917,
+        596
+      ],
+      "text": "27.0"
+    },
+    {
+      "id": "L094",
+      "box": [
+        875,
+        603,
+        920,
+        620
+      ],
+      "text": "42.0"
+    },
+    {
+      "id": "L095",
+      "box": [
+        877,
+        627,
+        924,
+        644
+      ],
+      "text": "68.0"
+    },
+    {
+      "id": "L096",
+      "box": [
+        35,
+        663,
+        253,
+        686
+      ],
+      "text": "에버펠디(Aberfeldy)"
+    },
+    {
+      "id": "L097",
+      "box": [
+        524,
+        664,
+        840,
+        690
+      ],
+      "text": "발렌타인 글렌버기(Glenburgie)"
+    },
+    {
+      "id": "L098",
+      "box": [
+        33,
+        700,
+        88,
+        724
+      ],
+      "text": "12년"
+    },
+    {
+      "id": "L099",
+      "box": [
+        29,
+        726,
+        85,
+        750
+      ],
+      "text": "16년"
+    },
+    {
+      "id": "L100",
+      "box": [
+        399,
+        700,
+        448,
+        719
+      ],
+      "text": "16.0"
+    },
+    {
+      "id": "L101",
+      "box": [
+        397,
+        726,
+        446,
+        745
+      ],
+      "text": "23.0"
+    },
+    {
+      "id": "L102",
+      "box": [
+        524,
+        703,
+        578,
+        725
+      ],
+      "text": "12년"
+    },
+    {
+      "id": "L103",
+      "box": [
+        526,
+        729,
+        580,
+        752
+      ],
+      "text": "15년"
+    },
+    {
+      "id": "L104",
+      "box": [
+        887,
+        703,
+        936,
+        720
+      ],
+      "text": "15.0"
+    },
+    {
+      "id": "L105",
+      "box": [
+        891,
+        728,
+        939,
+        746
+      ],
+      "text": "20.0"
+    },
+    {
+      "id": "L106",
+      "box": [
+        21,
+        769,
+        279,
+        795
+      ],
+      "text": "글렌로티스(Glenrothes)"
+    },
+    {
+      "id": "L107",
+      "box": [
+        529,
+        772,
+        688,
+        798
+      ],
+      "text": "탐두(Tamdhu)"
+    },
+    {
+      "id": "L108",
+      "box": [
+        19,
+        810,
+        76,
+        835
+      ],
+      "text": "12년"
+    },
+    {
+      "id": "L109",
+      "box": [
+        19,
+        839,
+        90,
+        861
+      ],
+      "text": "WMC"
+    },
+    {
+      "id": "L110",
+      "box": [
+        14,
+        866,
+        71,
+        891
+      ],
+      "text": "18년"
+    },
+    {
+      "id": "L111",
+      "box": [
+        396,
+        811,
+        444,
+        831
+      ],
+      "text": "16.0"
+    },
+    {
+      "id": "L112",
+      "box": [
+        394,
+        839,
+        444,
+        857
+      ],
+      "text": "22.0"
+    },
+    {
+      "id": "L113",
+      "box": [
+        394,
+        866,
+        444,
+        885
+      ],
+      "text": "31.0"
+    },
+    {
+      "id": "L114",
+      "box": [
+        533,
+        812,
+        587,
+        836
+      ],
+      "text": "12년"
+    },
+    {
+      "id": "L115",
+      "box": [
+        534,
+        838,
+        705,
+        864
+      ],
+      "text": "배치스트랭스 8"
+    },
+    {
+      "id": "L116",
+      "box": [
+        533,
+        867,
+        588,
+        891
+      ],
+      "text": "15년"
+    },
+    {
+      "id": "L117",
+      "box": [
+        534,
+        896,
+        590,
+        919
+      ],
+      "text": "18년"
+    },
+    {
+      "id": "L118",
+      "box": [
+        903,
+        809,
+        949,
+        827
+      ],
+      "text": "17.0"
+    },
+    {
+      "id": "L119",
+      "box": [
+        904,
+        836,
+        953,
+        854
+      ],
+      "text": "26.0"
+    },
+    {
+      "id": "L120",
+      "box": [
+        908,
+        863,
+        958,
+        881
+      ],
+      "text": "29.0"
+    },
+    {
+      "id": "L121",
+      "box": [
+        911,
+        891,
+        962,
+        910
+      ],
+      "text": "48.0"
+    }
+  ],
+  "ocr_cache_same_bytes": true,
+  "run": 2
+}

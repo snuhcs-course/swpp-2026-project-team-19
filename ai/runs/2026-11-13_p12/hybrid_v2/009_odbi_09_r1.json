@@ -1,0 +1,675 @@
+{
+  "condition": "hybrid",
+  "model": "gemini-3.5-flash-lite",
+  "thinking_level": "medium",
+  "source_image": "009_odbi_09.jpeg",
+  "photo_id": "009_오드비_09",
+  "prompt_version": "hybrid-v2",
+  "prompt_sha256": "35556ae6559dc2eacf722e45dba29f4f1b006bcbaad908b537eb6c283c6519ea",
+  "started_at": "2026-11-13T03:38:35.855219+00:00",
+  "latency_ms": 21291,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 6128,
+  "output_tokens": 1391,
+  "thought_tokens": 2577,
+  "total_tokens": 10096,
+  "output": {
+    "items": [
+      {
+        "raw_name": "몰트맨 싱글몰트 페터캐른37 / 행사",
+        "price_krw": 70000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "와일드터키 아카이브 골드포일16 / 행사",
+        "price_krw": 50000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌알라키19 엑스 솔레라 / 한정파 행사",
+        "price_krw": 60000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "시그나토리 노스 브리티쉬 싱글그레인34 / 행사",
+        "price_krw": 50000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "아일라 싱글몰트 보모어21 셰리 / 행사",
+        "price_krw": 40000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "믹터스 토스티드 배럴 피니쉬 / 행사",
+        "price_krw": 60000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "더 노스스타 아드모어26 / 행사",
+        "price_krw": 50000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "카발란 증류소 킹 카 위스키 올드보틀",
+        "price_krw": 28000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "하이랜드파크CS R.4",
+        "price_krw": 25000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "발베니12 골드캐스크",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "벤리악 쿼터캐스크",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "로크로몬드12",
+        "price_krw": 14000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "로크로몬드18",
+        "price_krw": 31000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "신도 더 블렌디드",
+        "price_krw": 17000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "라프로익15",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      }
+    ]
+  },
+  "other_items": [
+    {
+      "itemOrder": 1,
+      "rawText": "기네스 병",
+      "category": "other",
+      "options": [
+        {
+          "optionLabel": "병",
+          "pourMl": null,
+          "priceKrw": 12000
+        }
+      ],
+      "nameLines": [
+        "L039"
+      ],
+      "priceLines": [
+        "L043"
+      ],
+      "box": [
+        152,
+        829,
+        863,
+        861
+      ]
+    },
+    {
+      "itemOrder": 2,
+      "rawText": "산미구엘 병",
+      "category": "other",
+      "options": [
+        {
+          "optionLabel": "병",
+          "pourMl": null,
+          "priceKrw": 9000
+        }
+      ],
+      "nameLines": [
+        "L040"
+      ],
+      "priceLines": [
+        "L044"
+      ],
+      "box": [
+        154,
+        856,
+        863,
+        888
+      ]
+    },
+    {
+      "itemOrder": 3,
+      "rawText": "아사히 병",
+      "category": "other",
+      "options": [
+        {
+          "optionLabel": "병",
+          "pourMl": null,
+          "priceKrw": 8000
+        }
+      ],
+      "nameLines": [
+        "L041"
+      ],
+      "priceLines": [
+        "L045"
+      ],
+      "box": [
+        154,
+        882,
+        861,
+        916
+      ]
+    },
+    {
+      "itemOrder": 4,
+      "rawText": "코로나 병 + 라임(선택)",
+      "category": "other",
+      "options": [
+        {
+          "optionLabel": "병",
+          "pourMl": null,
+          "priceKrw": 7000
+        }
+      ],
+      "nameLines": [
+        "L042"
+      ],
+      "priceLines": [
+        "L046"
+      ],
+      "box": [
+        154,
+        910,
+        861,
+        943
+      ]
+    }
+  ],
+  "other_items_dropped": 0,
+  "raw_text": "{\"items\": [{\"raw_name\": \"몰트맨 싱글몰트 페터캐른37 / 행사\", \"price_krw\": 70000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L003\"], \"price\": [\"L010\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"와일드터키 아카이브 골드포일16 / 행사\", \"price_krw\": 50000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L004\"], \"price\": [\"L011\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"글렌알라키19 엑스 솔레라 / 한정파 행사\", \"price_krw\": 60000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L005\"], \"price\": [\"L012\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"시그나토리 노스 브리티쉬 싱글그레인34 / 행사\", \"price_krw\": 50000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L006\"], \"price\": [\"L013\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"아일라 싱글몰트 보모어21 셰리 / 행사\", \"price_krw\": 40000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L007\"], \"price\": [\"L014\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"믹터스 토스티드 배럴 피니쉬 / 행사\", \"price_krw\": 60000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L008\"], \"price\": [\"L015\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"더 노스스타 아드모어26 / 행사\", \"price_krw\": 50000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L009\"], \"price\": [\"L016\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"카발란 증류소 킹 카 위스키 올드보틀\", \"price_krw\": 28000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L023\"], \"price\": [\"L031\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"하이랜드파크CS R.4\", \"price_krw\": 25000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L024\"], \"price\": [\"L032\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"발베니12 골드캐스크\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L025\"], \"price\": [\"L033\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"벤리악 쿼터캐스크\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L026\"], \"price\": [\"L034\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"로크로몬드12\", \"price_krw\": 14000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L027\"], \"price\": [\"L035\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"로크로몬드18\", \"price_krw\": 31000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L028\"], \"price\": [\"L036\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"신도 더 블렌디드\", \"price_krw\": 17000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L029\"], \"price\": [\"L037\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"라프로익15\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L030\"], \"price\": [\"L038\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"기네스 병\", \"price_krw\": 12000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L039\"], \"price\": [\"L043\"]}, \"category\": \"other\"}, {\"raw_name\": \"산미구엘 병\", \"price_krw\": 9000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L040\"], \"price\": [\"L044\"]}, \"category\": \"other\"}, {\"raw_name\": \"아사히 병\", \"price_krw\": 8000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L041\"], \"price\": [\"L045\"]}, \"category\": \"other\"}, {\"raw_name\": \"코로나 병 + 라임(선택)\", \"price_krw\": 7000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L042\"], \"price\": [\"L046\"]}, \"category\": \"other\"}]}",
+  "ocr_lines": [
+    {
+      "id": "L001",
+      "box": [
+        357,
+        0,
+        672,
+        38
+      ],
+      "text": "IVIENU"
+    },
+    {
+      "id": "L002",
+      "box": [
+        367,
+        52,
+        657,
+        86
+      ],
+      "text": "행사 & 새로온 친구들"
+    },
+    {
+      "id": "L003",
+      "box": [
+        141,
+        90,
+        500,
+        112
+      ],
+      "text": "몰트맨 싱글몰트 페터캐른37 / 행사"
+    },
+    {
+      "id": "L004",
+      "box": [
+        139,
+        118,
+        540,
+        143
+      ],
+      "text": "와일드터키 아카이브 골드포일16 / 행사"
+    },
+    {
+      "id": "L005",
+      "box": [
+        141,
+        148,
+        550,
+        173
+      ],
+      "text": "글렌알라키19 엑스 솔레라 / 한정파 행사"
+    },
+    {
+      "id": "L006",
+      "box": [
+        142,
+        178,
+        611,
+        203
+      ],
+      "text": "시그나토리 노스 브리티쉬 싱글그레인34 / 행사"
+    },
+    {
+      "id": "L007",
+      "box": [
+        144,
+        208,
+        529,
+        230
+      ],
+      "text": "아일라 싱글몰트 보모어21 셰리 / 행사"
+    },
+    {
+      "id": "L008",
+      "box": [
+        144,
+        237,
+        505,
+        259
+      ],
+      "text": "믹터스 토스티드 배럴 피니쉬 / 행사"
+    },
+    {
+      "id": "L009",
+      "box": [
+        144,
+        268,
+        458,
+        288
+      ],
+      "text": "더 노스스타 아드모어26 / 행사"
+    },
+    {
+      "id": "L010",
+      "box": [
+        797,
+        103,
+        875,
+        120
+      ],
+      "text": "* 70,000"
+    },
+    {
+      "id": "L011",
+      "box": [
+        793,
+        131,
+        873,
+        148
+      ],
+      "text": "*50,000"
+    },
+    {
+      "id": "L012",
+      "box": [
+        795,
+        160,
+        873,
+        177
+      ],
+      "text": "*60,000"
+    },
+    {
+      "id": "L013",
+      "box": [
+        795,
+        189,
+        873,
+        206
+      ],
+      "text": "*50,000"
+    },
+    {
+      "id": "L014",
+      "box": [
+        793,
+        217,
+        873,
+        234
+      ],
+      "text": "*40,000"
+    },
+    {
+      "id": "L015",
+      "box": [
+        793,
+        246,
+        871,
+        263
+      ],
+      "text": "*60,000"
+    },
+    {
+      "id": "L016",
+      "box": [
+        793,
+        275,
+        871,
+        290
+      ],
+      "text": "*50,000"
+    },
+    {
+      "id": "L017",
+      "box": [
+        144,
+        328,
+        425,
+        347
+      ],
+      "text": "올드풀티니 3종 세트 / 행사"
+    },
+    {
+      "id": "L018",
+      "box": [
+        146,
+        356,
+        550,
+        376
+      ],
+      "text": "사부로마루 피트 위스키 5종 세트 / 행사"
+    },
+    {
+      "id": "L019",
+      "box": [
+        146,
+        386,
+        456,
+        406
+      ],
+      "text": "아르마냑 가호 5종 세트 / 행사"
+    },
+    {
+      "id": "L020",
+      "box": [
+        792,
+        331,
+        870,
+        347
+      ],
+      "text": "*60,000"
+    },
+    {
+      "id": "L021",
+      "box": [
+        779,
+        359,
+        871,
+        376
+      ],
+      "text": "*160,000"
+    },
+    {
+      "id": "L022",
+      "box": [
+        779,
+        388,
+        870,
+        405
+      ],
+      "text": "*140,000"
+    },
+    {
+      "id": "L023",
+      "box": [
+        146,
+        445,
+        516,
+        464
+      ],
+      "text": "카발란 증류소 킹 카 위스키 올드보틀"
+    },
+    {
+      "id": "L024",
+      "box": [
+        147,
+        474,
+        349,
+        492
+      ],
+      "text": "하이랜드파크CS R.4"
+    },
+    {
+      "id": "L025",
+      "box": [
+        147,
+        502,
+        351,
+        522
+      ],
+      "text": "발베니12 골드캐스크"
+    },
+    {
+      "id": "L026",
+      "box": [
+        147,
+        530,
+        330,
+        551
+      ],
+      "text": "벤리악 쿼터캐스크"
+    },
+    {
+      "id": "L027",
+      "box": [
+        147,
+        560,
+        281,
+        578
+      ],
+      "text": "로크로몬드12"
+    },
+    {
+      "id": "L028",
+      "box": [
+        149,
+        588,
+        281,
+        607
+      ],
+      "text": "로크로몬드18"
+    },
+    {
+      "id": "L029",
+      "box": [
+        149,
+        617,
+        319,
+        637
+      ],
+      "text": "신도 더 블렌디드"
+    },
+    {
+      "id": "L030",
+      "box": [
+        149,
+        646,
+        260,
+        665
+      ],
+      "text": "라프로익15"
+    },
+    {
+      "id": "L031",
+      "box": [
+        800,
+        444,
+        870,
+        461
+      ],
+      "text": "28,000"
+    },
+    {
+      "id": "L032",
+      "box": [
+        800,
+        471,
+        868,
+        488
+      ],
+      "text": "25,000"
+    },
+    {
+      "id": "L033",
+      "box": [
+        800,
+        500,
+        868,
+        517
+      ],
+      "text": "18,000"
+    },
+    {
+      "id": "L034",
+      "box": [
+        800,
+        527,
+        866,
+        544
+      ],
+      "text": "15,000"
+    },
+    {
+      "id": "L035",
+      "box": [
+        800,
+        556,
+        866,
+        573
+      ],
+      "text": "14,000"
+    },
+    {
+      "id": "L036",
+      "box": [
+        799,
+        583,
+        866,
+        600
+      ],
+      "text": "31,000"
+    },
+    {
+      "id": "L037",
+      "box": [
+        799,
+        611,
+        866,
+        627
+      ],
+      "text": "17,000"
+    },
+    {
+      "id": "L038",
+      "box": [
+        799,
+        638,
+        866,
+        655
+      ],
+      "text": "18,000"
+    },
+    {
+      "id": "L039",
+      "box": [
+        152,
+        842,
+        248,
+        861
+      ],
+      "text": "기네스 병"
+    },
+    {
+      "id": "L040",
+      "box": [
+        154,
+        869,
+        269,
+        888
+      ],
+      "text": "산미구엘 병"
+    },
+    {
+      "id": "L041",
+      "box": [
+        154,
+        896,
+        246,
+        916
+      ],
+      "text": "아사히 병"
+    },
+    {
+      "id": "L042",
+      "box": [
+        154,
+        923,
+        378,
+        943
+      ],
+      "text": "코로나 병 + 라임(선택)"
+    },
+    {
+      "id": "L043",
+      "box": [
+        798,
+        829,
+        863,
+        846
+      ],
+      "text": "12,000"
+    },
+    {
+      "id": "L044",
+      "box": [
+        807,
+        856,
+        863,
+        874
+      ],
+      "text": "9,000"
+    },
+    {
+      "id": "L045",
+      "box": [
+        805,
+        882,
+        861,
+        900
+      ],
+      "text": "8,000"
+    },
+    {
+      "id": "L046",
+      "box": [
+        805,
+        910,
+        861,
+        927
+      ],
+      "text": "7,000"
+    }
+  ],
+  "ocr_cache_same_bytes": true,
+  "run": 1
+}

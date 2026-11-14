@@ -136,14 +136,14 @@ def test_duplicates_counts_repeated_rows_only():
     assert reg.duplicates([a, {**a, "raw_name": "a  12"}, {**a, "unit": "bottle"}, {**a, "price_krw": 1}]) == 1
 
 
-def test_server_items_groups_a_glass_and_bottle_pair_and_record_rows_handles_a_rejected_answer():
+def test_server_output_groups_a_glass_and_bottle_pair_and_a_rejected_answer_is_none():
     item = {"raw_name": "A", "price_krw": 9000, "pour_ml": None, "unit": "glass", "source_lines": {"name": [], "price": []}}
     text = json.dumps({"items": [item, {**item, "unit": "bottle", "price_krw": 90000}]})
-    assert [len(i["options"]) for i in reg.server_items(text)] == [2]
-    assert len(reg.flatten(reg.record_items({"raw_text": text}))) == 2
-    assert reg.record_items({"raw_text": "not json"}) is None
-    assert reg.record_items({"raw_text": json.dumps({"items": [{**item, "price_krw": -1}]})}) is None
-    assert reg.record_items({}) is None
+    assert [len(i["options"]) for i in reg.server_output({"raw_text": text})["items"]] == [2]
+    assert len(reg.flatten(reg.record_output({"raw_text": text})["items"])) == 2
+    assert reg.record_output({"raw_text": "not json"}) is None
+    assert reg.record_output({"raw_text": json.dumps({"items": [{**item, "price_krw": -1}]})}) is None
+    assert reg.record_output({}) is None
 
 
 def test_check_passes_on_the_baseline_and_reports_a_changed_score(capsys):
@@ -189,3 +189,38 @@ def test_update_rewrites_the_same_files(tmp_path, monkeypatch, capsys):
         assert len(list((tmp_path / "fixtures").glob("*.json"))) == 15
     finally:
         reg.BASELINE.unlink(missing_ok=True)
+
+
+def test_a_known_product_that_leaves_the_catalog_is_a_regression():
+    # known/correct and absent/unmatched have the same severity; the kind change must still fail
+    before = {"deployed": {"p": [{"name": "A 12", "gold": "a-12", "kind": "known", "outcome": "correct", "rank1": "a-12"}]}}
+    after = {"deployed": {"p": [{"name": "A 12", "gold": "a-12", "kind": "absent", "outcome": "unmatched", "rank1": None}]}}
+    assert reg.severity(before["deployed"]["p"][0]) == reg.severity(after["deployed"]["p"][0])
+    worse, better = reg.compare_matching(before, after)
+    assert len(worse) == 1 and "was known and is absent now" in worse[0] and not better
+
+
+def test_removing_a_product_from_the_catalog_fails_the_matching_check():
+    seed = reg.load_seed()
+    fx = FIXTURES[0]
+    gone = next(i["gold"] for i in fx["expected_items"] if i["gold"] in {p["key"] for p in seed["products"]})
+    smaller = {**seed, "products": [p for p in seed["products"] if p["key"] != gone]}
+    now = reg.match_lines([fx], smaller)
+    worse, _ = reg.compare_matching({c: {fx["photo_id"]: BASELINE["matching"][c][fx["photo_id"]]} for c in reg.CONDITIONS}, now)
+    assert len(worse) >= 2 and all("was known and is absent now" in line and gone in line for line in worse)
+
+
+def test_replay_compares_pour_sizes():
+    fx = next(f for f in FIXTURES if any(i["pour_ml"] for i in f["expected_items"]))
+    rows = [{k: i[k] for k in ("raw_name", "price_krw", "pour_ml", "unit")} for i in fx["expected_items"]]
+    assert reg.score_rows(fx, rows)["pour_wrong"] == 0
+    target = next(r for r in rows if r["pour_ml"])
+    target["pour_ml"] *= 2
+    score = reg.score_rows(fx, rows)
+    assert score["pour_wrong"] == 1 and score["correct"] == len(rows)  # score.py alone sees nothing
+    assert [e["type"] for e in score["errors"]] == ["pour size"]
+    # a pour size the menu does not print must not be made up either
+    fx = next(f for f in FIXTURES if any(i["pour_ml"] is None for i in f["expected_items"]))
+    rows = [{k: i[k] for k in ("raw_name", "price_krw", "pour_ml", "unit")} for i in fx["expected_items"]]
+    next(r for r in rows if r["pour_ml"] is None)["pour_ml"] = 30
+    assert reg.score_rows(fx, rows)["pour_wrong"] == 1

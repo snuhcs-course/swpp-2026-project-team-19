@@ -1,0 +1,608 @@
+{
+  "condition": "hybrid",
+  "model": "gemini-3.5-flash-lite",
+  "thinking_level": "medium",
+  "source_image": "009_odbi_04.png",
+  "photo_id": "009_오드비_04",
+  "prompt_version": "hybrid-v2",
+  "prompt_sha256": "35556ae6559dc2eacf722e45dba29f4f1b006bcbaad908b537eb6c283c6519ea",
+  "started_at": "2026-11-13T04:18:37.055940+00:00",
+  "latency_ms": 10256,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 6017,
+  "output_tokens": 1950,
+  "thought_tokens": 1409,
+  "total_tokens": 9376,
+  "output": {
+    "items": [
+      {
+        "raw_name": "와일드터키81",
+        "price_krw": 8000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "와일드터키라이",
+        "price_krw": 8000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "와일드터키8 101",
+        "price_krw": 9000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "와일드터키 레어브리드",
+        "price_krw": 12000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "바질헤이든",
+        "price_krw": 14000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "메이커스마크",
+        "price_krw": 8000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "불렛버번",
+        "price_krw": 10000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "불렛라이",
+        "price_krw": 10000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "우드포드리저브",
+        "price_krw": 12000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "우드포드리저브 더블오크",
+        "price_krw": 20000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "포로지스",
+        "price_krw": 8000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "포로지스 싱글베럴",
+        "price_krw": 12000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "러셀 싱글베럴",
+        "price_krw": 15000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "러셀 싱글베럴 라이",
+        "price_krw": 16000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "부커스",
+        "price_krw": 28000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "놉크릭 버번",
+        "price_krw": 10000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "에반윌리암스",
+        "price_krw": 8000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "1776 제임스 E.페퍼",
+        "price_krw": 13000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "잭다니엘",
+        "price_krw": 8000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "잭다니엘 애플",
+        "price_krw": 8000,
+        "pour_ml": 30,
+        "unit": "glass"
+      }
+    ]
+  },
+  "other_items": [],
+  "other_items_dropped": 0,
+  "raw_text": "{\"items\": [{\"raw_name\": \"와일드터키81\", \"price_krw\": 8000, \"pour_ml\": 30, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L006\"], \"price\": [\"L027\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"와일드터키라이\", \"price_krw\": 8000, \"pour_ml\": 30, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L007\"], \"price\": [\"L028\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"와일드터키8 101\", \"price_krw\": 9000, \"pour_ml\": 30, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L008\"], \"price\": [\"L029\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"와일드터키 레어브리드\", \"price_krw\": 12000, \"pour_ml\": 30, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L009\"], \"price\": [\"L030\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"바질헤이든\", \"price_krw\": 14000, \"pour_ml\": 30, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L010\"], \"price\": [\"L031\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"메이커스마크\", \"price_krw\": 8000, \"pour_ml\": 30, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L011\"], \"price\": [\"L032\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"불렛버번\", \"price_krw\": 10000, \"pour_ml\": 30, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L012\"], \"price\": [\"L033\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"불렛라이\", \"price_krw\": 10000, \"pour_ml\": 30, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L013\"], \"price\": [\"L034\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"우드포드리저브\", \"price_krw\": 12000, \"pour_ml\": 30, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L014\"], \"price\": [\"L035\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"우드포드리저브 더블오크\", \"price_krw\": 20000, \"pour_ml\": 30, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L015\"], \"price\": [\"L036\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"포로지스\", \"price_krw\": 8000, \"pour_ml\": 30, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L016\"], \"price\": [\"L037\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"포로지스 싱글베럴\", \"price_krw\": 12000, \"pour_ml\": 30, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L017\"], \"price\": [\"L038\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"러셀 싱글베럴\", \"price_krw\": 15000, \"pour_ml\": 30, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L018\"], \"price\": [\"L039\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"러셀 싱글베럴 라이\", \"price_krw\": 16000, \"pour_ml\": 30, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L019\"], \"price\": [\"L040\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"부커스\", \"price_krw\": 28000, \"pour_ml\": 30, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L020\"], \"price\": [\"L041\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"놉크릭 버번\", \"price_krw\": 10000, \"pour_ml\": 30, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L021\"], \"price\": [\"L042\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"에반윌리암스\", \"price_krw\": 8000, \"pour_ml\": 30, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L022\"], \"price\": [\"L043\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"1776 제임스 E.페퍼\", \"price_krw\": 13000, \"pour_ml\": 30, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L023\"], \"price\": [\"L044\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"잭다니엘\", \"price_krw\": 8000, \"pour_ml\": 30, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L024\"], \"price\": [\"L045\"]}, \"category\": \"whisky\"}, {\"raw_name\": \"잭다니엘 애플\", \"price_krw\": 8000, \"pour_ml\": 30, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L025\"], \"price\": [\"L046\"]}, \"category\": \"whisky\"}]}",
+  "ocr_lines": [
+    {
+      "id": "L001",
+      "box": [
+        98,
+        25,
+        217,
+        44
+      ],
+      "text": "21:07"
+    },
+    {
+      "id": "L002",
+      "box": [
+        776,
+        27,
+        838,
+        43
+      ],
+      "text": "LTE"
+    },
+    {
+      "id": "L003",
+      "box": [
+        861,
+        27,
+        903,
+        40
+      ],
+      "text": "42"
+    },
+    {
+      "id": "L004",
+      "box": [
+        880,
+        101,
+        928,
+        124
+      ],
+      "text": "X"
+    },
+    {
+      "id": "L005",
+      "box": [
+        152,
+        211,
+        265,
+        223
+      ],
+      "text": "-버번위스키"
+    },
+    {
+      "id": "L006",
+      "box": [
+        152,
+        228,
+        277,
+        239
+      ],
+      "text": "와일드터키81"
+    },
+    {
+      "id": "L007",
+      "box": [
+        152,
+        245,
+        293,
+        256
+      ],
+      "text": "와일드터키라이"
+    },
+    {
+      "id": "L008",
+      "box": [
+        152,
+        260,
+        310,
+        272
+      ],
+      "text": "와일드터키8 101"
+    },
+    {
+      "id": "L009",
+      "box": [
+        152,
+        277,
+        364,
+        289
+      ],
+      "text": "와일드터키 레어브리드"
+    },
+    {
+      "id": "L010",
+      "box": [
+        152,
+        294,
+        256,
+        306
+      ],
+      "text": "바질헤이든"
+    },
+    {
+      "id": "L011",
+      "box": [
+        152,
+        311,
+        277,
+        323
+      ],
+      "text": "메이커스마크"
+    },
+    {
+      "id": "L012",
+      "box": [
+        152,
+        327,
+        234,
+        338
+      ],
+      "text": "불렛버번"
+    },
+    {
+      "id": "L013",
+      "box": [
+        152,
+        344,
+        234,
+        355
+      ],
+      "text": "불렛라이"
+    },
+    {
+      "id": "L014",
+      "box": [
+        152,
+        359,
+        296,
+        371
+      ],
+      "text": "우드포드리저브"
+    },
+    {
+      "id": "L015",
+      "box": [
+        152,
+        376,
+        383,
+        388
+      ],
+      "text": "우드포드리저브 더블오크"
+    },
+    {
+      "id": "L016",
+      "box": [
+        152,
+        393,
+        237,
+        405
+      ],
+      "text": "포로지스"
+    },
+    {
+      "id": "L017",
+      "box": [
+        152,
+        410,
+        321,
+        422
+      ],
+      "text": "포로지스 싱글베럴"
+    },
+    {
+      "id": "L018",
+      "box": [
+        152,
+        426,
+        285,
+        437
+      ],
+      "text": "러셀 싱글베럴"
+    },
+    {
+      "id": "L019",
+      "box": [
+        152,
+        442,
+        332,
+        454
+      ],
+      "text": "러셀 싱글베럴 라이"
+    },
+    {
+      "id": "L020",
+      "box": [
+        152,
+        459,
+        217,
+        470
+      ],
+      "text": "부커스"
+    },
+    {
+      "id": "L021",
+      "box": [
+        152,
+        475,
+        265,
+        487
+      ],
+      "text": "놉크릭 버번"
+    },
+    {
+      "id": "L022",
+      "box": [
+        152,
+        492,
+        277,
+        504
+      ],
+      "text": "에반윌리암스"
+    },
+    {
+      "id": "L023",
+      "box": [
+        155,
+        509,
+        338,
+        521
+      ],
+      "text": "1776 제임스 E.페퍼"
+    },
+    {
+      "id": "L024",
+      "box": [
+        152,
+        525,
+        234,
+        536
+      ],
+      "text": "잭다니엘"
+    },
+    {
+      "id": "L025",
+      "box": [
+        152,
+        541,
+        285,
+        553
+      ],
+      "text": "잭다니엘 애플"
+    },
+    {
+      "id": "L026",
+      "box": [
+        796,
+        212,
+        846,
+        221
+      ],
+      "text": "30ml"
+    },
+    {
+      "id": "L027",
+      "box": [
+        787,
+        228,
+        846,
+        238
+      ],
+      "text": "8,000"
+    },
+    {
+      "id": "L028",
+      "box": [
+        787,
+        245,
+        846,
+        255
+      ],
+      "text": "8,000"
+    },
+    {
+      "id": "L029",
+      "box": [
+        790,
+        263,
+        846,
+        272
+      ],
+      "text": "9,000"
+    },
+    {
+      "id": "L030",
+      "box": [
+        779,
+        279,
+        846,
+        288
+      ],
+      "text": "12,000"
+    },
+    {
+      "id": "L031",
+      "box": [
+        779,
+        295,
+        846,
+        304
+      ],
+      "text": "14,000"
+    },
+    {
+      "id": "L032",
+      "box": [
+        790,
+        312,
+        846,
+        322
+      ],
+      "text": "8,000"
+    },
+    {
+      "id": "L033",
+      "box": [
+        776,
+        327,
+        846,
+        338
+      ],
+      "text": "10,000"
+    },
+    {
+      "id": "L034",
+      "box": [
+        776,
+        344,
+        846,
+        354
+      ],
+      "text": "10,000"
+    },
+    {
+      "id": "L035",
+      "box": [
+        779,
+        362,
+        846,
+        371
+      ],
+      "text": "12,000"
+    },
+    {
+      "id": "L036",
+      "box": [
+        776,
+        378,
+        846,
+        388
+      ],
+      "text": "20,000"
+    },
+    {
+      "id": "L037",
+      "box": [
+        790,
+        394,
+        846,
+        403
+      ],
+      "text": "8,000"
+    },
+    {
+      "id": "L038",
+      "box": [
+        779,
+        411,
+        846,
+        421
+      ],
+      "text": "12,000"
+    },
+    {
+      "id": "L039",
+      "box": [
+        775,
+        426,
+        847,
+        437
+      ],
+      "text": "15,000"
+    },
+    {
+      "id": "L040",
+      "box": [
+        776,
+        442,
+        846,
+        453
+      ],
+      "text": "16,000"
+    },
+    {
+      "id": "L041",
+      "box": [
+        779,
+        461,
+        846,
+        470
+      ],
+      "text": "28,000"
+    },
+    {
+      "id": "L042",
+      "box": [
+        779,
+        478,
+        846,
+        487
+      ],
+      "text": "10,000"
+    },
+    {
+      "id": "L043",
+      "box": [
+        787,
+        492,
+        846,
+        502
+      ],
+      "text": "8,000"
+    },
+    {
+      "id": "L044",
+      "box": [
+        776,
+        509,
+        846,
+        520
+      ],
+      "text": "13,000"
+    },
+    {
+      "id": "L045",
+      "box": [
+        787,
+        526,
+        846,
+        536
+      ],
+      "text": "8,000"
+    },
+    {
+      "id": "L046",
+      "box": [
+        787,
+        541,
+        846,
+        553
+      ],
+      "text": "8,000"
+    }
+  ],
+  "ocr_cache_same_bytes": true,
+  "run": 3
+}
