@@ -501,6 +501,7 @@ object PhotoReviewRules {
         val changed = if (prev != null && prev.type == target) {
             x.copy(
                 volume = prev.volume, volumeSource = prev.volumeSource, bottle = prev.bottle,
+                price = prev.primaryPrice ?: x.price,
                 primaryHasOption = prev.primaryHasOption, options = prev.options,
                 primarySourceOptionId = prev.primarySourceOptionId,
                 primaryOptionLabel = prev.primaryOptionLabel, match = prev.match,
@@ -519,15 +520,29 @@ object PhotoReviewRules {
                 newProductName = x.newProductName, candidates = x.candidates,
                 rawOptionEdits = x.rawOptionEdits,
                 primarySourceOptionId = x.primarySourceOptionId,
-                primaryOptionLabel = x.primaryOptionLabel,
+                primaryOptionLabel = x.primaryOptionLabel, primaryPrice = x.price,
             )
             if (target == ReviewItemType.OTHER) {
+                fun explicitGlass(label: String?): Boolean {
+                    val text = label?.trim()?.lowercase().orEmpty()
+                    return text.startsWith("잔") || text.startsWith("샷") ||
+                        text.startsWith("glass") || text.startsWith("shot")
+                }
                 x.copy(
                     classificationSnapshot = snapshot,
-                    volume = if (x.bottle) 0.0 else x.volume.takeIf(::validVolume) ?: Double.NaN,
-                    // Keep OCR option identities and all prices when changing type.
-                    // No extra pour-size input is required for non-whisky.
-                    options = x.options, primarySourceOptionId = x.primarySourceOptionId,
+                    // A bar-default pour inferred for an unlabeled whisky must
+                    // NOT become a real sized Other option (wire pourMl=null).
+                    volume = if (x.bottle) 0.0
+                        else if (x.volumeSource == VolumeSource.DEFAULT &&
+                            !explicitGlass(x.primaryOptionLabel)) Double.NaN
+                        else x.volume.takeIf(::validVolume) ?: Double.NaN,
+                    // Preserve OCR/manual pour and explicitly labeled glass sizes,
+                    // but never inherit a synthetic default for an unlabeled Other.
+                    options = x.options.map { option ->
+                        if (option.volumeFromDefault && !explicitGlass(option.label) &&
+                            !option.bottle) option.copy(volume = Double.NaN)
+                        else option
+                    }, primarySourceOptionId = x.primarySourceOptionId,
                     primaryOptionLabel = x.primaryOptionLabel,
                     primaryHasOption = x.primaryHasOption, bottle = x.bottle,
                     // A non-whisky is never linked to the canonical whisky catalog.

@@ -370,18 +370,29 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
      * can undo the inferred grouping without losing either source line.
      * Already-confirmed prices are intentionally restored to their OCR values.
      */
-    fun splitMerged(id: String) = mutate { state ->
-        val master = state.items.firstOrNull { it.id == id } ?: return@mutate state
-        if (master.mergeSources.isEmpty()) return@mutate state
+    fun splitMerged(id: String) {
+        val loaded = review ?: return
+        val master = loaded.items.firstOrNull { it.id == id } ?: return
+        if (master.mergeSources.isEmpty()) return
+        val allChildren = loaded.items.filter { it.mergedInto == id }.map { it.id }.toSet()
+        if (allChildren.isEmpty()) return
+        val localPrices = try {
+            loaded.items.filter { (it.id == id || it.id in allChildren) &&
+                it.linkedProductId == null
+            }.associate { it.id to repository.existingUnlinkedServingPrices(it.name) }
+        } catch (_: Exception) {
+            toast("기존 메뉴 가격을 확인하지 못했어요. 다시 시도해 주세요.")
+            return
+        }
+        mutate { state ->
         val original = master.preMergeOptions
         val first = original.firstOrNull()
-        val allChildren = state.items.filter { it.mergedInto == id }.map { it.id }.toSet()
-        if (allChildren.isEmpty()) return@mutate state
         state.copy(
             show = state.show.copy(pending = true, ready = true),
             items = state.items.map { item ->
                 when {
-                    item.id == id -> item.copy(
+                    item.id == id -> {
+                        val split = item.copy(
                         mergeSources = emptyList(),
                         manuallySplitGroup = true,
                         preMergeOptions = emptyList(),
@@ -400,15 +411,27 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                         chosenVolumeKeys = emptySet(),
                         volumeChoicesConfirmed = true,
                         expanded = false,
-                    )
-                    item.id in allChildren -> item.copy(
-                        mergedInto = null, excluded = false, required = true,
-                        manuallySplitGroup = true, expanded = false,
-                    )
+                        )
+                        if (split.linkedProductId == null)
+                            PhotoReviewRules.rebindUnlinkedPrices(
+                                split, localPrices[split.id].orEmpty())
+                        else split
+                    }
+                    item.id in allChildren -> {
+                        val split = item.copy(
+                            mergedInto = null, excluded = false, required = true,
+                            manuallySplitGroup = true, expanded = false,
+                        )
+                        if (split.linkedProductId == null)
+                            PhotoReviewRules.rebindUnlinkedPrices(
+                                split, localPrices[split.id].orEmpty())
+                        else split
+                    }
                     else -> item
                 }
             },
         )
+        }
     }
 
     fun toggleBottle(id: String, index: Int?) {

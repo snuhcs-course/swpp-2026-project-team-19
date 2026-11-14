@@ -103,6 +103,7 @@ internal class OwnerPhotoReviewDraftStore(
                     classificationSnapshot = item.classificationSnapshot?.let { snapshot ->
                         snapshot.copy(
                             volume = snapshot.volume.takeIf { it.isFinite() } ?: 0.0,
+                            primaryPrice = snapshot.primaryPrice?.takeIf { it.isFinite() },
                             options = snapshot.options.map(::sanitizeReviewOption),
                         )
                     },

@@ -43,9 +43,11 @@ internal fun mapServerPhotoReview(
         ?: error("검수할 매장 정보를 불러오지 못했어요.")
     val defaultPour = bar.defaultPourMl ?: 30
     val extracted = response.images.sortedBy { it.imageOrder }.flatMap { image ->
-        image.items.sortedBy { it.itemOrder }.mapIndexed { index, dto ->
+        image.items.sortedBy { it.itemOrder }.map { dto ->
+            // Server itemOrder may be non-contiguous; do not synthesize a
+            // displayed line number from the list index.
             dto to mapServerReviewItem(
-                dto, image.imageOrder, index + 1, image.imageUrl, bar, snapshot, defaultPour
+                dto, image.imageOrder, dto.itemOrder, image.imageUrl, bar, snapshot, defaultPour
             )
         }
     }

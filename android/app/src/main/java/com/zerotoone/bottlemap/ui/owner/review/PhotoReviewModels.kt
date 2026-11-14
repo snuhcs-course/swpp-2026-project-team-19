@@ -91,6 +91,8 @@ data class ClassificationSnapshot(
     val rawOptionEdits: Map<String, String>,
     val primarySourceOptionId: String? = null,
     val primaryOptionLabel: String? = null,
+    /** Nullable for drafts saved before this field existed. */
+    val primaryPrice: Double? = null,
 )
 
 data class ReviewItem(
