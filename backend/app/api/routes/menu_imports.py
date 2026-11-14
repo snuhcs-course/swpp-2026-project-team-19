@@ -1,14 +1,14 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, Header, Request, Response, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Body, Depends, File, Form, Header, Request, Response, UploadFile
 from pydantic import WithJsonSchema
 from sqlalchemy.orm import Session
 
 from app.adapters.extraction import MenuExtractor
 from app.adapters.storage import ImageStorage
 from app.api.deps import get_image_storage, get_matching_llm_layer, get_menu_extractor
-from app.api.permissions import require_active_bar_manager, require_import_manager
+from app.api.permissions import MenuImportId, require_active_bar_manager, require_import_manager
 from app.core.security import Principal, get_current_user
 from app.db.session import get_serializable_session_factory, get_session, get_session_factory
 from app.matching.tool_config import MatchingLayerConfig
@@ -17,7 +17,9 @@ from app.schemas.errors import AUTH_UNAVAILABLE, AUTH_UNAVAILABLE_DESCRIPTION, e
 from app.schemas.menu_import import ImportCanceledResponse, MenuImportAcceptedResponse, MenuImportStatusResponse
 from app.schemas.menu_review import ReviewAndApplyRequest, ReviewAppliedResponse
 from app.services import menu_import_upload as upload
+from app.schemas.review_draft import ReviewDraftRequest, ReviewDraftSavedResponse
 from app.services.menu_import_cancel import cancel_menu_import
+from app.services.menu_review_draft import check_draft_size, save_review_draft
 from app.services.menu_import_processing import SessionFactory, start_processing
 from app.services.menu_import_review import POLL_AFTER_MS, get_menu_import_status
 from app.services.menu_import_upload import ImageUpload, create_menu_import
@@ -239,3 +241,43 @@ def cancel_import(
     import_id: UUID = Depends(require_import_manager),
 ) -> ImportCanceledResponse:
     return cancel_menu_import(session, import_id)
+
+
+@router.put(
+    "/menu-imports/{menuImportId}/review-draft",
+    response_model=ReviewDraftSavedResponse,
+    summary="Save the review draft",
+    description=(
+        "Operator or the bar's owner (spec 5.9). Saves the unfinished review input, so the review can go on "
+        "later or from another device or the operator web; the review data returns it as `reviewDraft` "
+        "(5.4). The menu board and the catalog do not change.\n\n"
+        "The content is not checked beyond being an object of at most 256 KB as JSON; the submission checks "
+        "the decisions (8.7). `draftVersion` is the version last read (0 before the first save); another "
+        "version is `REVIEW_DRAFT_OUTDATED`, so two editors do not overwrite each other. A saved draft is "
+        "cleared when the import is applied or canceled, and kept when the review data is rebuilt."
+    ),
+    responses=error_responses(
+        (401, "`UNAUTHENTICATED`: missing, invalid or expired token."),
+        (403, "`FORBIDDEN`: the caller is neither an operator nor the bar's current owner."),
+        AUTH_UNAVAILABLE,
+        (404, "`MENU_IMPORT_NOT_FOUND`: no such import or a malformed id."),
+        (
+            409,
+            "`INVALID_IMPORT_STATE` (not `ready_for_review`; `details.status`); `REVIEW_DRAFT_OUTDATED` "
+            "(saved elsewhere first: `details.currentDraftVersion`, `savedAt`, `reviewUrl`).",
+        ),
+        (413, "`REVIEW_DRAFT_TOO_LARGE`: the content is over 256 KB as JSON; `details.maxBytes`."),
+        (422, "`VALIDATION_FAILED`: `draftVersion` below 0, `reviewVersion` below 1, or `content` not an object."),
+    ),
+)
+def save_draft(
+    menu_import_id: MenuImportId,
+    body: Annotated[ReviewDraftRequest, Body()],
+    session: Session = Depends(get_session),
+    principal: Principal = Depends(get_current_user),
+) -> ReviewDraftSavedResponse:
+    # The request's own rules first (422, then 413), then the import (404) and the caller (403), as spec
+    # 5.9 orders them; a dependency would run before the body is checked.
+    check_draft_size(body)
+    import_id = require_import_manager(menu_import_id, principal, session)
+    return save_review_draft(session, principal, import_id, body)
