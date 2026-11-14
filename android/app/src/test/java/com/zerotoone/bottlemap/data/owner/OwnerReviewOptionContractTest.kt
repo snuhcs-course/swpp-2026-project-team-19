@@ -257,4 +257,68 @@ class OwnerReviewOptionContractTest {
             grouped.copy(changeType = "remove"), setOf("line-a", "line-b")))
     }
 
+    @Test fun groupedOtherRetentionDoesNotReintroduceOldPriceInBottleLine() {
+        val saved = listOf(
+            MockMenuOption("old-30", "샷", 30, 8_000),
+            MockMenuOption("old-60", "잔", 60, 20_000),
+        )
+        val group = listOf("photo-30", "photo-bottle")
+        val keys = mapOf(
+            "photo-30" to setOf("ml:30"),
+            "photo-bottle" to setOf("bottle"),
+        )
+        val retained30 = ownerRetainedOptionsForGroupedLine(
+            "photo-30", group, keys, saved)
+        val retainedBottle = ownerRetainedOptionsForGroupedLine(
+            "photo-bottle", group, keys, saved)
+        assertEquals(listOf("old-30", "old-60"), retained30.map { it.optionId })
+        assertTrue(retainedBottle.isEmpty())
+        // The first line can overwrite 30ml while preserving 60ml's discount
+        // identity. The second Bottle-only line must not re-add old 30ml.
+        val photo30 = item().copy(options = listOf(
+            ReviewOptionDto(firstId, 1, "잔", 30, 9_000),
+        ))
+        val firstDecision = MockReviewDecision(
+            MockDecisionKind.CREATE_PRODUCT,
+            correctedOptions = listOf(MockMenuOption(firstId, "잔", 30, 9_000)),
+        )
+        val posted30 = ownerFinalReviewOptions(
+            photo30, firstDecision, 30, false, retained30)
+        assertEquals(setOf(9_000, 20_000),
+            posted30.map { it["priceKrw"] as Int }.toSet())
+        assertTrue(posted30.none { it["priceKrw"] == 8_000 })
+        assertTrue(retainedBottle.isEmpty())
+    }
+
+    @Test fun catalogLinkToExistingUnlinkedMenuRetainsUnseenOptions() {
+        val row = MockBarMenuItem("existing-x", "bar-1", "unlinked:existing-x",
+            listOf(
+                MockMenuOption("old-30", "샷", 30, 12_000),
+                MockMenuOption("old-bottle", "병", null, 130_000),
+            ))
+        val snapshot = MockOwnerSnapshot(menuItems = listOf(row))
+        val original = com.zerotoone.bottlemap.network.MenuImportStatusDto(
+            menuImportId = "import-1", barId = "bar-1",
+            status = "ready_for_review", reviewVersion = 4,
+            proposedChanges = listOf(com.zerotoone.bottlemap.network.ProposedChangeDto(
+                changeId = "change-1", changeType = "update",
+                barMenuItemId = "existing-x", extractedItemId = "photo-30",
+                extractedItemIds = listOf("photo-30", "photo-bottle"),
+                summary = "상품 연결", decision = "apply",
+            )),
+        )
+        val options = ownerPhotoSelectionExistingOptions(
+            snapshot, original, "bar-1", "photo-bottle", "catalog-p")
+        assertEquals(listOf("old-30", "old-bottle"), options.map { it.optionId })
+        val changed = ownerFinalReviewOptions(
+            item().copy(options = listOf(ReviewOptionDto(firstId, 1, "잔", 30, 15_000))),
+            MockReviewDecision(MockDecisionKind.SELECT_PRODUCT,
+                productId = "catalog-p",
+                correctedOptions = listOf(MockMenuOption(firstId, "잔", 30, 15_000))),
+            30, true, options)
+        assertEquals(2, changed.size)
+        assertEquals(130_000, changed.last()["priceKrw"])
+        assertEquals("병", changed.last()["optionLabel"])
+    }
+
 }
