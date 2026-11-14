@@ -720,4 +720,52 @@ class PhotoReviewViewModelTest {
     }
 
 
+
+    @Test fun staleCatalogSearchResponseCannotReplaceNewerQueryOrSelection() = runTest(dispatcher) {
+        val requestA = CompletableDeferred<List<CatalogProduct>>()
+        val requestB = CompletableDeferred<List<CatalogProduct>>()
+        val source = MockPhotoReviewRepository(MockPhotoReviewScenario.BASIC)
+        val repo = object : PhotoReviewRepository by source {
+            override suspend fun searchCatalog(query: String): List<CatalogProduct> =
+                when (query) {
+                    "A" -> requestA.await()
+                    "B" -> requestB.await()
+                    else -> emptyList()
+                }
+        }
+        val vm = PhotoReviewViewModel(repo)
+        vm.startCatalogSearch("hakushu")
+        vm.typeCatalogQuery("hakushu", "A")
+        vm.searchCatalog("hakushu")
+        vm.typeCatalogQuery("hakushu", "B")
+        vm.searchCatalog("hakushu")
+        requestB.complete(listOf(CatalogProduct("new-b", "위스키 B")))
+        requestA.complete(listOf(CatalogProduct("stale-a", "위스키 A")))
+        assertEquals("B", vm.item("hakushu").searchDraft)
+        assertEquals(listOf("new-b"),
+            vm.item("hakushu").searchResults?.map { it.productId })
+        vm.selectSearchResult("hakushu", "stale-a")
+        assertNull(vm.item("hakushu").selectedSearchId)
+        vm.selectSearchResult("hakushu", "new-b")
+        assertEquals("new-b", vm.item("hakushu").selectedSearchId)
+    }
+
+    @Test fun inactiveCatalogProductIsVisibleButCannotBeConfirmed() = runTest(dispatcher) {
+        val source = MockPhotoReviewRepository(MockPhotoReviewScenario.BASIC)
+        val repo = object : PhotoReviewRepository by source {
+            override suspend fun searchCatalog(query: String) =
+                listOf(CatalogProduct("inactive-p", "비활성 위스키", isActive = false))
+        }
+        val vm = PhotoReviewViewModel(repo)
+        vm.startCatalogSearch("hakushu")
+        vm.typeCatalogQuery("hakushu", "비활성")
+        vm.searchCatalog("hakushu")
+        assertEquals(false, vm.item("hakushu").searchResults?.single()?.isActive)
+        vm.selectSearchResult("hakushu", "inactive-p")
+        assertNull(vm.item("hakushu").selectedSearchId)
+        vm.confirmSelectedSearch("hakushu")
+        assertFalse(vm.item("hakushu").linkedProductId == "inactive-p")
+    }
+
+
 }

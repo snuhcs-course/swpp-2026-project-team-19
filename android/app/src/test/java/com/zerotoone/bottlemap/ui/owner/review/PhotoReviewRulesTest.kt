@@ -448,4 +448,21 @@ class PhotoReviewRulesTest {
         assertFalse(PhotoReviewRules.stats(PhotoReviewState(items=listOf(bad))).canPublish)
     }
 
+
+    @Test fun otherGlassAndShotSamePourAreOneWireServingForConflictCheck() {
+        val a = ReviewItem(id = "a", name = "메뉴 A", type = ReviewItemType.OTHER,
+            linkedProductId = null, volume = 30.0, price = 9000.0,
+            primaryOptionLabel = "잔")
+        val b = ReviewItem(id = "b", name = "메뉴A", type = ReviewItemType.OTHER,
+            linkedProductId = null, volume = 30.0, price = 11000.0,
+            primaryOptionLabel = "샷")
+        val review = PhotoReviewState(items = listOf(a, b))
+        assertEquals(setOf("a", "b"), PhotoReviewRules.duplicateOtherPrices(review))
+        assertFalse(PhotoReviewRules.stats(review).canPublish)
+        val corrected = review.copy(items = listOf(a, b.copy(price = 9000.0)))
+        assertTrue(PhotoReviewRules.duplicateOtherPrices(corrected).isEmpty())
+        assertTrue(PhotoReviewRules.stats(corrected).canPublish)
+    }
+
+
 }
