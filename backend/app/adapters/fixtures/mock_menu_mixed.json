@@ -1,0 +1,88 @@
+{
+  "mock": "A short menu with a whisky and two non-whisky menus the AI marks kind other (flow doc 4.3), for the non-whisky path.",
+  "items": [
+    {
+      "itemOrder": 1,
+      "rawText": "WHISKY",
+      "lineType": "section_header",
+      "productName": null,
+      "brandText": null,
+      "ageYears": null,
+      "editionName": null,
+      "abv": null,
+      "options": [],
+      "confidence": 0.98,
+      "kind": null
+    },
+    {
+      "itemOrder": 2,
+      "rawText": "글렌피딕 12년 30ml 17,000",
+      "lineType": "product",
+      "productName": "글렌피딕 12년",
+      "brandText": "글렌피딕",
+      "ageYears": 12,
+      "editionName": null,
+      "abv": null,
+      "options": [
+        {
+          "optionLabel": null,
+          "pourMl": 30,
+          "priceKrw": 17000
+        }
+      ],
+      "confidence": 0.93,
+      "kind": "whisky"
+    },
+    {
+      "itemOrder": 3,
+      "rawText": "COCKTAIL",
+      "lineType": "section_header",
+      "productName": null,
+      "brandText": null,
+      "ageYears": null,
+      "editionName": null,
+      "abv": null,
+      "options": [],
+      "confidence": 0.97,
+      "kind": null
+    },
+    {
+      "itemOrder": 4,
+      "rawText": "글렌피딕 하이볼 12,000",
+      "lineType": "product",
+      "productName": "글렌피딕 하이볼",
+      "brandText": null,
+      "ageYears": null,
+      "editionName": null,
+      "abv": null,
+      "options": [
+        {
+          "optionLabel": "잔",
+          "pourMl": null,
+          "priceKrw": 12000
+        }
+      ],
+      "confidence": 0.9,
+      "kind": "other"
+    },
+    {
+      "itemOrder": 5,
+      "rawText": "치즈 플래터 25,000",
+      "lineType": "product",
+      "productName": "치즈 플래터",
+      "brandText": null,
+      "ageYears": null,
+      "editionName": null,
+      "abv": null,
+      "options": [
+        {
+          "optionLabel": null,
+          "pourMl": null,
+          "priceKrw": 25000
+        }
+      ],
+      "confidence": 0.92,
+      "kind": "other"
+    }
+  ]
+}

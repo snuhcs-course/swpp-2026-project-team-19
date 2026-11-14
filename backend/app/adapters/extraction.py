@@ -11,7 +11,7 @@ from functools import cache
 from pathlib import Path
 from typing import Any, Protocol
 
-from app.models import ExtractionApproach, LineType
+from app.models import ExtractionApproach, LineType, MenuItemKind
 
 FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures"
 
@@ -52,6 +52,9 @@ class ExtractedItemData:
     abv: Decimal | None = None
     confidence: Decimal | None = None
     options: tuple[ExtractedOptionData, ...] = field(default_factory=tuple)
+    # The AI's kind of a product line (flow doc 4.3): whisky, or other for a non-whisky menu. None for
+    # the other line types.
+    kind: MenuItemKind | None = None
 
 
 @dataclass(frozen=True)
@@ -127,6 +130,8 @@ def parse_extraction_response(payload: Any) -> list[ExtractedItemData]:
         except ValueError:
             raise ExtractionError(f"{where}.lineType is not one of {[t.value for t in LineType]}") from None
 
+        kind = _kind(raw.get("kind"), line_type, where)
+
         raw_options = raw.get("options") or []
         if not isinstance(raw_options, list):
             raise ExtractionError(f"{where}.options must be an array")
@@ -155,9 +160,24 @@ def parse_extraction_response(payload: Any) -> list[ExtractedItemData]:
                 abv=_decimal(raw.get("abv"), f"{where}.abv", maximum=100, places="0.01"),
                 confidence=_decimal(raw.get("confidence"), f"{where}.confidence", maximum=1, places="0.0001"),
                 options=tuple(options),
+                kind=kind,
             )
         )
     return items
+
+
+def _kind(value: Any, line_type: LineType, where: str) -> MenuItemKind | None:
+    """A product line's kind, whisky when the response leaves it out (flow doc 4.3); other lines have none."""
+    if line_type != LineType.PRODUCT:
+        if value is not None:
+            raise ExtractionError(f"{where}.kind must be null for a {line_type.value} line")
+        return None
+    if value is None:
+        return MenuItemKind.WHISKY
+    try:
+        return MenuItemKind(value)
+    except ValueError:
+        raise ExtractionError(f"{where}.kind is not one of {[k.value for k in MenuItemKind]}") from None
 
 
 @cache
@@ -171,6 +191,7 @@ class MockMenuExtractor:
     - name contains "fail": raises ExtractionError (to exercise the failed state)
     - name contains "sample": a short menu with an exact match, an age conflict,
       an unknown product, a section header and a description
+    - name contains "mixed": a short menu with a whisky, a cocktail and a dish (kind other)
     - otherwise: a real labeled menu photo (8 whiskies and 2 cognacs) plus a header
       and a description line
     """
@@ -184,5 +205,5 @@ class MockMenuExtractor:
         name = (filename or "").lower()
         if "fail" in name:
             raise ExtractionError("Mock extraction failure requested by the file name")
-        payload = load_fixture("sample" if "sample" in name else "label")
+        payload = load_fixture("sample" if "sample" in name else "mixed" if "mixed" in name else "label")
         return ExtractionResult(items=parse_extraction_response(payload), raw_output=payload)
