@@ -63,7 +63,11 @@ class AuthViewModel(
                     AuthSessionEvent.Guest -> {
                         // A definitive SDK sign-out always wins over a prior
                         // SignInError; a temporary backend 503 does not emit Guest.
-                        if (!signingIn) {
+                        if (!signingIn &&
+                            !(logoutInProgress && _state.value == AuthUiState.SigningOut)
+                        ) {
+                            // Owner account switching remains non-interactive
+                            // until the logout suspend function actually returns.
                             if (!logoutInProgress) generation++
                             _state.value = AuthUiState.Guest
                         }

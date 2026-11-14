@@ -334,6 +334,12 @@ class AuthViewModelTest {
         assertFalse(vm.beginGoogleSignIn())
         advanceUntilIdle()
         assertEquals(AuthUiState.SigningOut, vm.state.value)
+        // SDK may emit Guest BEFORE gateway.logout() finishes. That event
+        // must not re-enable Google account selection prematurely.
+        fake.events.value = AuthSessionEvent.Guest
+        advanceUntilIdle()
+        assertEquals(AuthUiState.SigningOut, vm.state.value)
+        assertFalse(vm.beginGoogleSignIn())
 
         finishLogout.complete(Unit)
         advanceUntilIdle()
