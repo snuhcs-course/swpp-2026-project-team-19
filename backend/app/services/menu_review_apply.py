@@ -62,7 +62,9 @@ from app.services.bar_access import can_manage_bar, forbidden, is_operator
 from app.services.bar_menu import bar_not_found
 from app.services.menu_checks import dismiss_open_checks, raise_check, settle_linked
 from app.services.menu_draft import build_draft, replace_draft
-from app.services.menu_publish import AppliedChange, PublishPlan, review_plan, write_board
+from app.matching.db_catalog import DbCatalog
+from app.matching.rematch import attribute_conflict, name_corrected
+from app.services.menu_publish import AppliedChange, BoardEntry, PublishPlan, review_plan, write_board
 from app.services.menu_review_catalog import CatalogResult, create_catalog_entries
 from app.services.menu_review_validation import ReviewedItem, ValidatedReview, pending_changes, validate_review
 from app.services.serializable import SessionFactory, run_serializable, write_conflict
@@ -295,6 +297,8 @@ def _settle_checks(
     linked to a product loses its unlinked reasons; an item that left the board or became other has no
     open check."""
     unlinked_lines = {entry.item.id for entry in review.items if entry.is_unlinked}
+    catalog = DbCatalog(session)
+    reviewed_by_id = review.by_id
     for entry, item in zip(plan.entries, items):
         if entry.bar_menu_item_id in plan.linked_items:
             settle_linked(session, entry.bar_menu_item_id, item, entry.display_name)
@@ -313,7 +317,42 @@ def _settle_checks(
                 )
         if entry.extracted_item_id in plan.discarded:
             _raise_price_conflict(session, menu_import, item, entry.display_name, plan.discarded[entry.extracted_item_id])
+        _raise_attribute_conflicts(session, menu_import, reviewed_by_id, plan, entry, item, catalog)
     dismiss_open_checks(session, old_item_ids - {item.id for item in items} - plan.linked_items)
+
+
+def _raise_attribute_conflicts(
+    session: Session,
+    menu_import: MenuImport,
+    reviewed_by_id: dict[UUID, ReviewedItem],
+    plan: PublishPlan,
+    entry: BoardEntry,
+    item: BarMenuItem,
+    catalog: DbCatalog,
+) -> None:
+    """A chosen product whose age or edition conflicts with what the AI read from the line (spec 8.7):
+    published as chosen, and shown to an operator with the line as source. Only lines published with an
+    existing product the reviewer chose without correcting the name; a corrected name is matched again
+    (8.11), and a new product or a line without one is not compared. Whoever submitted it."""
+    if item.product_id is None or entry.extracted_item_id is None:
+        return
+    for line in plan.entry_lines.get(entry.extracted_item_id, ()):
+        reviewed = reviewed_by_id[line]
+        decision = reviewed.decision
+        if not isinstance(decision, SelectExistingProduct):
+            continue
+        if name_corrected(decision.correctedProductName, reviewed.item.extracted_product_name):
+            continue
+        source = reviewed.item
+        if attribute_conflict(item.product_id, source.extracted_age_years, source.extracted_edition_name, catalog):
+            raise_check(
+                session,
+                item,
+                entry.display_name,
+                CheckReason.ATTRIBUTE_CONFLICT,
+                source_menu_import_id=menu_import.id,
+                source_extracted_item_id=line,
+            )
 
 
 def _raise_price_conflict(

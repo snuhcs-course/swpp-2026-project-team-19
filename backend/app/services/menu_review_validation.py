@@ -98,6 +98,10 @@ class ValidatedReview:
     # Each change's lines in menu order (see change_lines).
     change_lines: dict[UUID, tuple[UUID, ...]] = field(default_factory=dict)
 
+    @property
+    def by_id(self) -> dict[UUID, ReviewedItem]:
+        return {entry.item.id: entry for entry in self.items}
+
 
 def load_items(session: Session, menu_import: MenuImport) -> list[ExtractedItem]:
     """Every extracted item of the import in menu order, with options and candidates."""
