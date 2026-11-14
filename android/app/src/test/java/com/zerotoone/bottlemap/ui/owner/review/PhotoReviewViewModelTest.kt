@@ -151,15 +151,12 @@ class PhotoReviewViewModelTest {
         val x = vm.item("glen12")
         assertEquals("gf15", x.linkedProductId)
         assertEquals(OperatorReason.CHANGED, x.operatorReason)
-        // Another OCR card (glen15) is already linked to gf15. Backend #164
-        // keeps only the first proposal, so the owner must explicitly merge
-        // servings and exclude one duplicate before publishing.
-        assertEquals(ReviewGroup.PENDING, vm.group("glen12"))
-        assertTrue(ReviewIssue.DUPLICATE_PRODUCT in
-            PhotoReviewRules.problems(x, vm.state))
-        vm.requestExclude("glen15")
-        vm.confirmExclude("glen15")
+        // §8.12 merges lines that end at the same final product.
+        // No manual copying or exclusion is required. The other OCR line
+        // still needs its own missing price fixed independently.
         assertEquals(ReviewGroup.READY, vm.group("glen12"))
+        assertFalse(PhotoReviewRules.duplicatePhotoPriceConflicts(vm.state).containsKey("glen12"))
+        assertEquals(ReviewGroup.PENDING, vm.group("glen15"))
     }
 
     @Test fun conflictPriceChoice() = runTest(dispatcher) {
