@@ -262,8 +262,8 @@ def _store_item(session: Session, run: ExtractionRun, data: ExtractedItemData) -
         item_order=data.item_order,
         raw_text=data.raw_text,
         extracted_line_type=data.line_type,
-        # Extraction returns whisky lines only for now; the AI's own kind comes later (matching flow 4.4).
-        extracted_kind=MenuItemKind.WHISKY if data.line_type == LineType.PRODUCT else None,
+        # The AI's kind of a product line (flow doc 4.3), whisky when it gives none; null for other lines.
+        extracted_kind=(data.kind or MenuItemKind.WHISKY) if data.line_type == LineType.PRODUCT else None,
         extracted_product_name=data.product_name,
         extracted_brand_name=data.brand_text,
         extracted_age_years=data.age_years,
@@ -290,9 +290,15 @@ def _store_item(session: Session, run: ExtractionRun, data: ExtractedItemData) -
 MATCHING_STAGES = frozenset({"S1", "S2", "S2b", "S3"})
 
 
+def _whisky_items(session: Session, menu_import: MenuImport) -> list[ExtractedItem]:
+    """The product lines to match: the AI's whisky lines. A line it read as another menu (kind other) is not
+    matched and keeps no resolution status; the review publishes it without a product (spec 8.10)."""
+    return [item for item in product_items(session, menu_import) if item.extracted_kind != MenuItemKind.OTHER]
+
+
 def _resolve_and_draft(session: Session, menu_import: MenuImport, llm_layer: MatchingLayerConfig | None = None) -> None:
     catalog = DbCatalog(session)
-    items = product_items(session, menu_import)
+    items = _whisky_items(session, menu_import)
     results = {
         item.id: resolve_product_staged(
             ExtractedProduct(
@@ -310,7 +316,7 @@ def _resolve_and_draft(session: Session, menu_import: MenuImport, llm_layer: Mat
     if llm_layer is not None and any(result.status not in CONFIRMED for result in results.values()):
         results = _apply_llm_layer(session, menu_import.id, items, results, llm_layer)
         # The layer ended the read transaction, which expired the loaded rows; load them again.
-        items = product_items(session, menu_import)
+        items = _whisky_items(session, menu_import)
     embedding = get_embedding_step()
     if embedding is not None:
         results = _apply_embedding(session, menu_import.id, items, results, embedding)

@@ -11,7 +11,7 @@ from app.adapters.extraction import (
     load_fixture,
     parse_extraction_response,
 )
-from app.models import LineType
+from app.models import LineType, MenuItemKind
 
 LABELS_PATH = Path(__file__).resolve().parents[2] / "eval" / "labels_v1.json"
 
@@ -37,10 +37,18 @@ def test_parses_the_spec_format():
     assert [(o.option_label, o.pour_ml, o.price_krw) for o in item.options] == [(None, 15, 8000)]
 
 
+@pytest.mark.parametrize(("kind", "expected"), [(None, MenuItemKind.WHISKY), ("whisky", MenuItemKind.WHISKY), ("other", MenuItemKind.OTHER)])
+def test_a_product_lines_kind_defaults_to_whisky(kind, expected):
+    """Flow doc 4.3: a product line's kind is whisky when the response leaves it out."""
+    [item] = parse_extraction_response({"items": [{**VALID_ITEM, "kind": kind}]})
+
+    assert item.kind == expected
+
+
 def test_optional_fields_may_be_missing():
     [item] = parse_extraction_response({"items": [{"itemOrder": 3, "rawText": "SINGLE MALT", "lineType": "section_header"}]})
 
-    assert (item.product_name, item.options, item.confidence) == (None, (), None)
+    assert (item.product_name, item.options, item.confidence, item.kind) == (None, (), None, None)
 
 
 @pytest.mark.parametrize(
@@ -61,6 +69,8 @@ def test_optional_fields_may_be_missing():
         {"options": [{"pourMl": 0}]},
         {"options": "15ml"},
         {"options": ["15ml"]},
+        {"kind": "cocktail"},
+        {"kind": "whisky", "lineType": "section_header", "productName": None, "options": []},
     ],
 )
 def test_invalid_items_are_rejected(change):
@@ -81,7 +91,13 @@ def test_repeated_item_order_is_rejected():
 
 @pytest.mark.parametrize(
     ("filename", "fixture"),
-    [("menu.jpg", "label"), (None, "label"), ("SAMPLE-1.png", "sample"), ("my_sample.jpeg", "sample")],
+    [
+        ("menu.jpg", "label"),
+        (None, "label"),
+        ("SAMPLE-1.png", "sample"),
+        ("my_sample.jpeg", "sample"),
+        ("mixed.jpg", "mixed"),
+    ],
 )
 def test_mock_chooses_the_fixture_by_file_name(filename, fixture):
     result = MockMenuExtractor().extract(b"image", "image/jpeg", filename)

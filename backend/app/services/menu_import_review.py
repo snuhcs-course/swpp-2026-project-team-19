@@ -43,6 +43,7 @@ from app.schemas.menu_import import (
     ReviewItem,
     ReviewOption,
 )
+from app.services.menu_review_draft import review_draft_of
 from app.services.menu_review_validation import change_lines
 
 POLL_AFTER_MS = 3000
@@ -330,6 +331,7 @@ def _review(session: Session, menu_import: MenuImport, storage: ImageStorage, ba
         status="ready_for_review",
         reviewVersion=menu_import.review_version,
         images=images,
+        reviewDraft=review_draft_of(menu_import),
         proposedChanges=[change for _, change in proposed],
     )
 

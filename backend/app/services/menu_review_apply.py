@@ -66,6 +66,7 @@ from app.matching.db_catalog import DbCatalog
 from app.matching.rematch import attribute_conflict, name_corrected
 from app.services.menu_publish import AppliedChange, BoardEntry, PublishPlan, review_plan, write_board
 from app.services.menu_review_catalog import CatalogResult, create_catalog_entries
+from app.services.menu_review_draft import clear_review_draft
 from app.services.menu_review_validation import ReviewedItem, ValidatedReview, pending_changes, validate_review
 from app.services.serializable import SessionFactory, run_serializable, write_conflict
 from app.services.users import caller_user_id
@@ -463,6 +464,8 @@ def _apply_once(
     ]
     _record_changes(session, menu_import, review, changes)
     menu_import.status = ImportStatus.APPLIED
+    # The draft has done its job; its version stays (spec 5.9).
+    clear_review_draft(menu_import)
     menu_import.review_confirmed_at = published_at
     menu_import.completed_at = published_at
     session.flush()
