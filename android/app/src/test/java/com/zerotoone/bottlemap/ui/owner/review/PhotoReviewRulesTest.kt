@@ -487,4 +487,46 @@ class PhotoReviewRulesTest {
         assertTrue(PhotoReviewRules.sourceLocation(reordered,middle).contains("2번째 줄"))
     }
 
+
+    @Test fun defaultOnlyWhiskyPourDoesNotBecomeAnOtherServingSize() {
+        val whisky = ReviewItem(
+            id = "unsized", name = "기존 메뉴",
+            type = ReviewItemType.WHISKY,
+            linkedProductId = "catalog-w",
+            volume = 30.0, volumeSource = VolumeSource.DEFAULT,
+            price = 15000.0, primaryOptionLabel = null,
+        )
+        val other = PhotoReviewRules.reclassify(whisky, 30.0)
+        assertTrue(other.volume.isNaN())
+        assertEquals("ml:unspecified", PhotoReviewRules.servingKey(
+            PhotoReviewRules.optionSummary(other).single()))
+        val saved = listOf(ReviewPriceCandidate(
+            servingKey = "ml:unspecified", priceKrw = 12000, existing = true,
+        ))
+        val rebound = PhotoReviewRules.rebindUnlinkedPrices(other, saved)
+        assertEquals(setOf("ml:unspecified"), PhotoReviewRules.pendingPriceServings(rebound))
+        val selected = PhotoReviewRules.chooseServingPrice(rebound, "ml:unspecified", 12000)
+        val undone = PhotoReviewRules.reclassify(selected, 30.0)
+        assertEquals(ReviewItemType.WHISKY, undone.type)
+        assertEquals(30.0, undone.volume, 0.0)
+        assertEquals(15000.0, undone.price, 0.0)
+        assertEquals("catalog-w", undone.linkedProductId)
+    }
+
+    @Test fun explicitGlassAndManualPourRemainSizedInOtherMenu() {
+        val fromGlass = ReviewItem(id = "g", name = "잔 메뉴",
+            volume = 30.0, volumeSource = VolumeSource.DEFAULT,
+            primaryOptionLabel = "잔", price = 15000.0)
+        val fromManual = fromGlass.copy(id = "m", primaryOptionLabel = null,
+            volumeSource = VolumeSource.MANUAL)
+        assertEquals(30.0, PhotoReviewRules.reclassify(fromGlass, 30.0).volume, 0.0)
+        assertEquals(30.0, PhotoReviewRules.reclassify(fromManual, 30.0).volume, 0.0)
+        val unknownOption = fromGlass.copy(options = listOf(
+            ReviewOption(30.0, 22000.0, label = null, volumeFromDefault = true),
+        ))
+        assertTrue(PhotoReviewRules.reclassify(unknownOption, 30.0)
+            .options.single().volume.isNaN())
+    }
+
+
 }

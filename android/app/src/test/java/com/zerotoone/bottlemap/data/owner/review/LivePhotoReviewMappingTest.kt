@@ -488,4 +488,23 @@ class LivePhotoReviewMappingTest {
             PhotoReviewRules.problems(selected))
     }
 
+
+    @Test fun sourceLineUsesServerItemOrderEvenWhenItIsNotContiguous() {
+        val seven = item().copy(
+            extractedItemId = "line-seven", itemOrder = 7,
+            extractedKind = "other", candidates = emptyList(),
+            proposedProductId = null, newProductDraft = null,
+        )
+        val eleven = seven.copy(
+            extractedItemId = "line-eleven", itemOrder = 11,
+            extractedProductName = "다른 메뉴",
+        )
+        val mapped = mapServerPhotoReview(response(seven, eleven), fixture())
+        assertEquals(7, mapped.items.single { it.id == "line-seven" }.sourceLine)
+        assertEquals(11, mapped.items.single { it.id == "line-eleven" }.sourceLine)
+        assertEquals(11, PhotoReviewRules.photoLine(mapped,
+            mapped.items.single { it.id == "line-eleven" }))
+    }
+
+
 }

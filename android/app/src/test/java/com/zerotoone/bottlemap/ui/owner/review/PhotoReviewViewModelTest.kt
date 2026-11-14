@@ -795,4 +795,46 @@ class PhotoReviewViewModelTest {
         assertTrue(vm.item("item").priceCandidates.none { it.existing })
     }
 
+
+    @Test fun splitUnlinkedGroupKeepsMastersExistingPriceConflict() = runTest(dispatcher) {
+        val master = ReviewItem(
+            id = "master", name = "글렌피딕 12년",
+            type = ReviewItemType.WHISKY,
+            match = ReviewMatch.NEW, newConfirmed = true, nameSaved = true,
+            price = 15000.0, volume = 30.0,
+            preMergeOptions = listOf(ReviewOption(
+                30.0, 15000.0, sourceOptionId = "ocr-main", label = "잔")),
+            mergeSources = listOf(MergedLine(
+                1, "다른 메뉴", "다른 메뉴 60ml", emptyList(), sourceItemId = "child")),
+            options = listOf(ReviewOption(60.0, 20000.0)),
+            priceCandidates = listOf(ReviewPriceCandidate(
+                "ml:30", 30, label = "잔", priceKrw = 15000, sourceItemId = "master")),
+        )
+        val child = ReviewItem(id = "child", name = "다른 메뉴",
+            price = 20000.0, volume = 60.0, excluded = true,
+            mergedInto = "master", match = ReviewMatch.NEW,
+            newConfirmed = true, nameSaved = true)
+        val fake = MockPhotoReviewRepository(MockPhotoReviewScenario.READY)
+        val repo = object : PhotoReviewRepository by fake {
+            override suspend fun loadReview() =
+                PhotoReviewState(items = listOf(master, child))
+            override fun existingUnlinkedServingPrices(name: String) =
+                if (name == "글렌피딕 12년") listOf(
+                    ReviewPriceCandidate("ml:30", 30, label = "샷",
+                        priceKrw = 12000, existing = true))
+                else emptyList()
+        }
+        val vm = PhotoReviewViewModel(repo)
+        vm.splitMerged("master")
+        assertEquals(2, vm.state.items.count { it.mergedInto == null })
+        assertEquals(setOf("ml:30"),
+            PhotoReviewRules.pendingPriceServings(vm.item("master")))
+        assertEquals(setOf(12000, 15000),
+            PhotoReviewRules.priceCandidatesForServing(vm.item("master"), "ml:30")
+                .map { it.priceKrw }.toSet())
+        assertTrue(vm.item("child").priceCandidates.none { it.existing })
+        assertFalse(PhotoReviewRules.stats(vm.state).canPublish)
+    }
+
+
 }
