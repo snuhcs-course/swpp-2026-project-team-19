@@ -99,3 +99,75 @@ def test_swapped_values_are_both_updated():
     plan = plan_renormalization([first, second])
 
     assert plan.updates == {first.id: "b", second.id: "a"}
+
+
+# ---- name keys of unlinked bar menu items (schema guide 7.1) ----
+
+from app.models import BarMenuItem, MenuImport  # noqa: E402
+from scripts.renormalize_aliases import (  # noqa: E402
+    NameKeyRow,
+    apply_name_keys,
+    imports_in_review,
+    load_name_key_rows,
+    plan_name_keys,
+    rebuild_drafts,
+)
+
+BAR, OTHER_BAR = UUID(int=900), UUID(int=901)
+
+
+def key_row(n: int, name: str, key: str, bar: UUID = BAR) -> NameKeyRow:
+    return NameKeyRow(UUID(int=n), bar, key, name)
+
+
+def test_name_keys_follow_the_board_lines_name():
+    rows = [key_row(1, "Glen Allachie 10", "glenallachie10"), key_row(2, "하이볼", "old-하이볼")]
+
+    plan = plan_name_keys(rows, lambda text: text.replace(" ", "").lower())
+
+    assert (plan.updates, plan.blocked) == ({UUID(int=2): "하이볼"}, False)
+
+
+def test_lines_of_one_board_meeting_on_a_key_block_the_run():
+    rows = [
+        key_row(1, "글렌알라키 10 CS", "a"),
+        key_row(2, "글렌알라키10CS", "b"),
+        key_row(3, "글렌알라키10CS", "c", bar=OTHER_BAR),  # another bar may have the same key
+        key_row(4, "!!", "d"),
+    ]
+
+    plan = plan_name_keys(rows, normalize)
+
+    assert list(plan.collisions) == [(BAR, normalize("글렌알라키 10 CS"))]
+    assert [row.item_id for row in plan.collisions[(BAR, normalize("글렌알라키 10 CS"))]] == [UUID(int=1), UUID(int=2)]
+    assert [row.item_id for row in plan.empty] == [UUID(int=4)]
+    assert plan.blocked
+
+
+def test_the_database_parts(client, db_session, image_storage, token_for):
+    """Only unlinked items on a board are read and updated; imports in review get a rebuilt draft."""
+    from tests.review_support import make_glenfiddich, upload_sample_review
+
+    operator = {"Authorization": f"Bearer {token_for('operator')}"}
+    sample = upload_sample_review(client, db_session, operator, make_glenfiddich(db_session))
+    board = sample.board
+    on_board = BarMenuItem(bar_id=sample.bar.id, name_key="stale")
+    off_board = BarMenuItem(bar_id=sample.bar.id, name_key="left")
+    db_session.add_all([on_board, off_board])
+    db_session.flush()
+    from app.models import MenuBoardEntry
+
+    board.entries.append(MenuBoardEntry(bar_menu_item_id=on_board.id, display_name="Mystery Cask", sort_order=9))
+    db_session.flush()
+    conn = db_session.connection()
+
+    rows = load_name_key_rows(conn)
+    assert [(row.item_id, row.display_name) for row in rows] == [(on_board.id, "Mystery Cask")]
+    apply_name_keys(conn, plan_name_keys(rows))
+    assert imports_in_review(conn) == [sample.menu_import.id]
+    rebuild_drafts(conn, [sample.menu_import.id])
+
+    db_session.expire_all()
+    assert db_session.get(BarMenuItem, on_board.id).name_key == "mysterycask"
+    assert db_session.get(BarMenuItem, off_board.id).name_key == "left"
+    assert db_session.get(MenuImport, sample.menu_import.id).review_version == 2
