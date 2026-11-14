@@ -163,7 +163,13 @@ class AuthViewModel(
     fun prepareOwnerReauthentication() = signOutToGuest(blockFreshLogin = true)
 
     private fun signOutToGuest(blockFreshLogin: Boolean) {
-        if (logoutInProgress) return
+        if (logoutInProgress) {
+            // A 401/profile recovery may already be signing out as Guest.
+            // If Owner reauthentication arrives during that logout, keep
+            // its login UI gated until the ORIGINAL sign-out finishes too.
+            if (blockFreshLogin) _state.value = AuthUiState.SigningOut
+            return
+        }
         // Immediately invalidate in-flight profile/sign-in work and hide the
         // old identity; do not wait for an SDK event or remote sign-out.
         val operationGeneration = ++generation
