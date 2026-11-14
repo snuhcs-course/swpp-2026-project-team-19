@@ -61,8 +61,6 @@ class ExtractedItem(BaseModel):
     abv: float | None = Field(gt=0, le=100)
     options: list[ExtractedOption]
     confidence: float | None = Field(ge=0, le=1)
-    # A product line's kind (flow doc 4.3); null means whisky. Other line types have none.
-    kind: Literal["whisky", "other"] | None = None
 
     @model_validator(mode="after")
     def _fields_match_line_type(self) -> "ExtractedItem":
@@ -73,7 +71,7 @@ class ExtractedItem(BaseModel):
             if len(keys) != len(set(keys)):
                 raise ValueError("options repeat the same optionLabel and pourMl")
         else:
-            product_fields = (self.productName, self.brandText, self.ageYears, self.editionName, self.abv, self.kind)
+            product_fields = (self.productName, self.brandText, self.ageYears, self.editionName, self.abv)
             if self.options or any(v is not None for v in product_fields):
                 raise ValueError(f"a {self.lineType} line must have no options and no product fields")
         return self

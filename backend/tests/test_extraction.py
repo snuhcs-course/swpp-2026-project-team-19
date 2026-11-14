@@ -179,8 +179,6 @@ def test_extract_menu_returns_flow_items_and_meta():
                 {"optionLabel": "병", "pourMl": None, "priceKrw": 570000},
             ],
             "confidence": None,
-            # Prompt v1 returns whisky lines only and leaves the kind out, which means whisky (flow doc 4.3).
-            "kind": None,
         },
         {
             "itemOrder": 2,
@@ -193,7 +191,6 @@ def test_extract_menu_returns_flow_items_and_meta():
             "abv": None,
             "options": [{"optionLabel": "잔", "pourMl": None, "priceKrw": 39000}],
             "confidence": None,
-            "kind": None,
         },
     ]
     meta = result["meta"]
@@ -346,14 +343,11 @@ def test_valid_flow_items():
         {"lineType": "section_header", "productName": None, "brandText": None, "ageYears": None, "abv": None},
         {"lineType": "description", "productName": None, "ageYears": None, "abv": None, "options": []},
         {"itemOrder": 0},
-        {"kind": "cocktail"},
-        {"lineType": "section_header", "productName": None, "brandText": None, "ageYears": None, "abv": None,
-         "options": [], "kind": "other"},
     ],
     ids=[
         "bad-line-type", "product-without-name", "confidence-over-1", "age-0", "abv-over-100",
         "empty-option", "duplicate-option", "extra-option-key", "header-with-options",
-        "description-with-product-fields", "order-0", "bad-kind", "header-with-kind",
+        "description-with-product-fields", "order-0",
     ],
 )
 def test_invalid_flow_items(overrides):
