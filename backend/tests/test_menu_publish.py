@@ -421,3 +421,50 @@ def test_a_line_not_matched_again_keeps_its_price_over_an_earlier_rematched_one(
     assert [(o["priceKrw"], o["extractedItemId"]) for o in result.discarded[renamed_first.extracted_item_id]] == [
         (21000, str(renamed_first.extracted_item_id))
     ]
+
+
+def test_unlinked_lines_keep_the_earlier_price_even_when_it_was_matched_again():
+    """Lines without a product under one name key keep the menu-order earlier price (spec 8.12); the
+    preference for a line not matched again is only for lines rematching joined to one product."""
+    first = replace(unlinked_proposal("glenallachie10cs", 26000), rematched=True)
+    later = unlinked_proposal("glenallachie10cs", 28000)
+
+    result = plan([first, later], [])
+
+    assert [o.price_krw for o in result.entries[0].options] == [26000]
+    assert [o["priceKrw"] for o in result.discarded[first.extracted_item_id]] == [28000]
+
+
+def test_merged_lines_replace_every_item_they_were_compared_with():
+    """Two lines compared with the 12 and the 15, both renamed to the 18 (spec 8.11): the 18 takes the 12's
+    slot and the 15 leaves the board, recorded as an applied remove."""
+    twelve, fifteen = on_board(A, 1), on_board(B, 2)
+    first = replace(proposal(C, 3), rematched=True, replaces=(twelve.bar_menu_item_id,))
+    second = replace(proposal(C, 4, item=uuid4()), rematched=True, replaces=(fifteen.bar_menu_item_id,))
+    second = replace(second, options=(opt(4, pour=60),))
+
+    result = plan([first, second], [twelve, fifteen], mode=PARTIAL)
+
+    assert [(e.product_id, e.bar_menu_item_id) for e in result.entries] == [(C, twelve.bar_menu_item_id)]
+    assert result.replaced == {
+        twelve.bar_menu_item_id: first.extracted_item_id,
+        fifteen.bar_menu_item_id: first.extracted_item_id,
+    }
+    assert [(c.change_type, c.bar_menu_item_id) for c in result.changes] == [
+        (MenuChangeType.REMOVE, fifteen.bar_menu_item_id),
+        (MenuChangeType.UPDATE, twelve.bar_menu_item_id),
+    ]
+
+
+def test_an_item_left_for_an_unchanged_entry_is_recorded_as_removed():
+    """The renamed line joins the 15 already on the board with the same options: the 15 is unchanged, and
+    the 12 it replaced still leaves the board with a record of it."""
+    twelve, fifteen = on_board(A, 1), on_board(B, 2)
+    line = replace(proposal(B, 2), rematched=True, replaces=(twelve.bar_menu_item_id,))
+
+    result = plan([line], [twelve, fifteen], mode=PARTIAL)
+
+    assert [e.product_id for e in result.entries] == [B]
+    assert [(c.change_type, c.bar_menu_item_id) for c in result.changes] == [
+        (MenuChangeType.REMOVE, twelve.bar_menu_item_id)
+    ]

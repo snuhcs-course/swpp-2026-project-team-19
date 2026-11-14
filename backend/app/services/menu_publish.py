@@ -101,9 +101,9 @@ class Proposal:
     line_ids: tuple[UUID, ...] = ()
     # Matched again by a corrected name (spec 8.11): in a price conflict, a line not matched again wins.
     rematched: bool = False
-    # The current item the line was compared with in the draft, when rematching changed the line's link:
-    # the line takes that item's place (spec 8.11).
-    replaces: UUID | None = None
+    # The current items the lines were compared with in the draft, when rematching changed their link:
+    # the line takes their place (spec 8.11). Several when merged lines each replaced one.
+    replaces: tuple[UUID, ...] = ()
 
     @property
     def key(self) -> ItemKey:
@@ -136,9 +136,10 @@ def merge_proposals(proposals: list[Proposal]) -> tuple[list[Proposal], dict[UUI
             index = next(i for i, o in enumerate(options) if (o.label, o.pour_ml) == label_and_pour)
             if options[index].price_krw == option.price_krw:
                 continue
-            # The earlier price stays, unless only it came from a line matched again (spec 8.12).
+            # The earlier price stays (spec 8.12). Lines rematching joined to one product keep the price of
+            # the line not matched again; lines without a product keep the earlier one in any case.
             dropped, dropped_from = option, proposal
-            if owner.rematched and not proposal.rematched:
+            if proposal.key[0] == "product" and owner.rematched and not proposal.rematched:
                 dropped, dropped_from = options[index], owner
                 options[index], owners[label_and_pour] = option, proposal
             discarded.setdefault(into.extracted_item_id, []).append(
@@ -155,7 +156,7 @@ def merge_proposals(proposals: list[Proposal]) -> tuple[list[Proposal], dict[UUI
             options=tuple(options),
             kind=MenuItemKind.WHISKY if MenuItemKind.WHISKY in (into.kind, proposal.kind) else MenuItemKind.OTHER,
             line_ids=(*into.line_ids, proposal.extracted_item_id),
-            replaces=into.replaces or proposal.replaces,
+            replaces=(*into.replaces, *(r for r in proposal.replaces if r not in into.replaces)),
         )
     return list(merged.values()), discarded
 
@@ -214,18 +215,25 @@ def plan_publish(
     for proposal in merged:
         on_board = current_by_key.get(proposal.key)
         taken = None
-        # A line rematching moved takes the place of the item it was compared with (spec 8.11): in that
-        # item's slot when the new key is not on the board, else it joins the entry of the new key and the
-        # item leaves. Not while another line still publishes the item's own key.
-        displaced = current_by_item.get(proposal.replaces) if proposal.replaces else None
-        if displaced is not None and (displaced.bar_menu_item_id in slots or displaced.key in published_keys):
-            displaced = None
-        if displaced is not None:
-            replaced[displaced.bar_menu_item_id] = proposal.extracted_item_id
-            if on_board is None:
-                taken = on_board = displaced
-            else:
+        # A line rematching moved takes the place of the item it was compared with (spec 8.11): the first
+        # such item's slot when the new key is not on the board; any other such item leaves the board, as
+        # does every one when the line joins the entry of the new key. Not while another line still
+        # publishes the item's own key. An item that leaves this way is recorded as an applied remove.
+        displaced_items = [
+            current_by_item[item_id]
+            for item_id in proposal.replaces
+            if item_id in current_by_item
+            and item_id not in slots
+            and current_by_item[item_id].key not in published_keys
+        ]
+        if displaced_items:
+            for displaced in displaced_items:
+                replaced[displaced.bar_menu_item_id] = proposal.extracted_item_id
+                if on_board is None:
+                    taken = on_board = displaced
+                    continue
                 slots[displaced.bar_menu_item_id] = None
+                changes.append(AppliedChange(MenuChangeType.REMOVE, bar_menu_item_id=displaced.bar_menu_item_id))
         elif on_board is None and proposal.product_id is not None:
             taken = current_by_item.get(
                 next((takeovers[line] for line in proposal.line_ids if line in takeovers), None)
@@ -362,7 +370,7 @@ def proposals_from_review(
             "options": options,
             "name_corrected": entry.decision.correctedProductName is not None,
             "rematched": item.id in review.rematched,
-            "replaces": compared.get(item.id) if review.relinked(entry) else None,
+            "replaces": (compared[item.id],) if review.relinked(entry) and item.id in compared else (),
         }
         if product_id is None:
             kind = MenuItemKind(entry.decision.kind) if entry.is_unlinked else MenuItemKind.WHISKY

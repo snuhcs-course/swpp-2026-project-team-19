@@ -14,7 +14,9 @@ from app.models import (
     CheckReason,
     ExtractedItem,
     MatchMethod,
+    MenuChangeDecision,
     MenuChangeType,
+    MenuImportChange,
     MenuItemCheck,
     MenuItemKind,
     ProductAlias,
@@ -81,8 +83,17 @@ def test_a_name_naming_another_product_links_that_product_and_is_checked(
 ):
     exact = sample.items[1]
     body = renamed(sample, glenfiddich, "글렌피딕 15년", aliasesToAdd=[{"aliasText": "글렌피딕 15년 잔"}])
+    twelve = sample.board.entries[0].bar_menu_item_id
 
-    apply(client, sample, body, operator)
+    result = apply(client, sample, body, operator)
+
+    # The 12 leaving is recorded as an applied remove and counted.
+    assert result["result"]["removed"] == 1
+    db_session.expire_all()
+    rows = db_session.scalars(select(MenuImportChange).where(MenuImportChange.menu_import_id == sample.menu_import.id))
+    assert (MenuChangeType.REMOVE, MenuChangeDecision.APPLY, twelve) in {
+        (r.change_type, r.decision, r.bar_menu_item_id) for r in rows
+    }
 
     # The line now names the 15, already on the board: it joins the 15, and the 12 it was compared with
     # leaves, since the owner changed one card (spec 8.11).
