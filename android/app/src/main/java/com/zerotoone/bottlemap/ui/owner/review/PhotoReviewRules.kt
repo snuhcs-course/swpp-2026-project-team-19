@@ -118,13 +118,10 @@ object PhotoReviewRules {
      * never silently publish two separate OCR lines for one catalog whisky:
      * ask the owner to consolidate prices and exclude extra lines.
      */
-    fun duplicateCatalogProductLines(state: PhotoReviewState): Set<String> =
-        state.items.filter { !it.excluded && it.type == ReviewItemType.WHISKY &&
-            !it.linkedProductId.isNullOrBlank()
-        }.groupBy { it.linkedProductId }
-            .values.filter { it.size > 1 }
-            .flatMap { group -> group.map { it.id } }.toSet()
-
+    // §8.12 merges late-linked products during review-and-apply. Do not
+    // force owners to copy/exclude one of their original OCR rows: that loses
+    // source-linked options. Different prices for the same ml remain blocked
+    // separately by duplicatePhotoPriceConflicts().
     /** §8.12 merges product-less rows by normalized name. Original whisky
      * groups are reviewed together; pure OTHER groups with separate servings
      * must be allowed through instead of forcing an exclusion/rename.
@@ -278,8 +275,6 @@ object PhotoReviewRules {
             if (x.id in duplicatePhotoPriceConflicts(state) ||
                 x.id in duplicateOtherPrices(state))
                 p += ReviewIssue.DUPLICATE_PRICE
-            if (x.id in duplicateCatalogProductLines(state))
-                p += ReviewIssue.DUPLICATE_PRODUCT
             if (x.id in duplicateUnlinkedNames(state))
                 p += ReviewIssue.DUPLICATE_MENU_NAME
         }
