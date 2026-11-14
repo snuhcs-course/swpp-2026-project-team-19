@@ -145,3 +145,78 @@ def test_the_request_is_checked_before_the_import(client, operator):
     big = client.put(url, json={"draftVersion": 0, "reviewVersion": 1, "content": {"x": "가" * 90_000}}, headers=operator)
 
     assert (bad.status_code, big.status_code) == (422, 413)
+
+
+# ---- the draft in the review data, and when it goes (spec 5.4, 5.9) ----
+
+
+def review(client, sample, headers) -> dict:
+    return client.get(f"/api/menu-imports/{sample.menu_import.id}", headers=headers).json()
+
+
+def test_the_review_data_returns_the_saved_draft(client, sample, operator):
+    assert review(client, sample, operator)["reviewDraft"] is None
+    saved = save(client, sample, operator, review_version=1).json()
+
+    draft = review(client, sample, operator)["reviewDraft"]
+
+    assert draft == {"draftVersion": 1, "reviewVersion": 1, "savedAt": saved["savedAt"], "content": CONTENT}
+
+
+def test_applying_clears_the_draft_and_keeps_its_version(client, db_session, sample, operator, glenfiddich):
+    from tests.review_support import valid_body
+
+    save(client, sample, operator)
+    applied = client.post(
+        f"/api/menu-imports/{sample.menu_import.id}/review-and-apply",
+        json=valid_body(sample, glenfiddich),
+        headers=operator,
+    )
+    assert applied.status_code == 200, applied.text
+
+    menu_import = stored(db_session, sample)
+    assert (menu_import.review_draft, menu_import.review_draft_review_version, menu_import.review_draft_version) == (
+        None,
+        None,
+        1,
+    )
+
+
+def test_canceling_clears_the_draft(client, db_session, sample, operator):
+    save(client, sample, operator)
+
+    assert client.post(f"/api/menu-imports/{sample.menu_import.id}/cancel", headers=operator).status_code == 200
+
+    assert stored(db_session, sample).review_draft is None
+
+
+def test_a_rebuilt_review_keeps_the_draft(client, db_session, sample, operator, glenfiddich):
+    """The board changed, so submitting rebuilds the review data (REVIEW_OUTDATED); the owner's input stays,
+    entered on the old version (spec 9.4)."""
+    from app.models import MenuEntryOption
+    from tests.review_support import valid_body
+
+    save(client, sample, operator)
+    entry_12 = sample.board.entries[0]
+    db_session.execute(
+        MenuEntryOption.__table__.update()
+        .where(MenuEntryOption.menu_board_entry_id == entry_12.id, MenuEntryOption.pour_ml == 15)
+        .values(price_krw=9000)
+    )
+    # Now the 12 has both lines' options, so the draft's update of it goes away.
+    db_session.add(MenuEntryOption(menu_board_entry_id=entry_12.id, pour_ml=30, price_krw=21000, sort_order=3))
+    db_session.commit()
+    outdated = client.post(
+        f"/api/menu-imports/{sample.menu_import.id}/review-and-apply",
+        json=valid_body(sample, glenfiddich),
+        headers=operator,
+    )
+    assert outdated.json()["error"]["code"] == "REVIEW_OUTDATED"
+
+    data = review(client, sample, operator)
+
+    assert (data["reviewVersion"], data["reviewDraft"]["reviewVersion"], data["reviewDraft"]["content"]) == (
+        2,
+        1,
+        CONTENT,
+    )

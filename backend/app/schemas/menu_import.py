@@ -13,6 +13,7 @@ from app.models import (
     MenuItemKind,
     ResolutionStatus,
 )
+from app.schemas.review_draft import ReviewDraft
 from app.schemas.common import UtcDateTime
 
 
@@ -184,6 +185,13 @@ class ImportReviewResponse(BaseModel):
     status: Literal["ready_for_review"]
     reviewVersion: int = Field(description="Send this back with the review; a newer version rejects older submissions")
     images: list[ReviewImage]
+    reviewDraft: ReviewDraft | None = Field(
+        description=(
+            "The saved review draft (spec 5.9), null when none. When its reviewVersion differs from this "
+            "response's, the review data was rebuilt: reapply only the decisions whose lines and options are "
+            "still here, and drop changeDecisions (9.4)"
+        )
+    )
     proposedChanges: list[ProposedChange] = Field(
         description="add/update in menu order, then remove in current board order"
     )
