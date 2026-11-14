@@ -163,7 +163,7 @@ private fun mapServerReviewItem(
     // Existing product-less rows update by normalized bar-local menu name, NOT
     // by a catalog productId. Show their saved prices during review, not just
     // during final wire serialization where a discount could be cleared.
-    val oldUnlinked = if (linkedId == null && !nonProduct && displayName.isNotBlank())
+    val oldUnlinked = if (linkedId == null && displayName.isNotBlank())
         ownerExistingUnlinkedOptions(snapshot, bar.barId, displayName) else emptyList()
     val unlinkedCandidates = if (oldUnlinked.isEmpty()) emptyList() else
         options.mapNotNull { option ->

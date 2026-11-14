@@ -4,6 +4,7 @@ import androidx.activity.ComponentActivity
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Density
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.test.assertIsDisplayed
@@ -180,10 +181,10 @@ class OwnerUxConsistencyComposeTest {
         val touch = compose.onNodeWithTag("owner-hour-touch").getUnclippedBoundsInRoot()
         val visible = compose.onNodeWithTag("owner-hour-visual",
             useUnmergedTree = true).getUnclippedBoundsInRoot()
-        org.junit.Assert.assertTrue(touch.height.value >= 47.5f)
-        org.junit.Assert.assertTrue(touch.width.value >= 47.5f)
-        org.junit.Assert.assertTrue(visible.height < touch.height)
-        org.junit.Assert.assertTrue(visible.width <= touch.width)
+        org.junit.Assert.assertTrue((touch.bottom - touch.top).value >= 47.5f)
+        org.junit.Assert.assertTrue((touch.right - touch.left).value >= 47.5f)
+        org.junit.Assert.assertTrue((visible.bottom - visible.top) < (touch.bottom - touch.top))
+        org.junit.Assert.assertTrue((visible.right - visible.left) <= (touch.right - touch.left))
     }
 
 }

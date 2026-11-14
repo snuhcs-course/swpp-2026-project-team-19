@@ -166,10 +166,12 @@ object PhotoReviewRules {
             val options = group.flatMap { item ->
                 optionSummary(item).filter { validPrice(it.price) }.map { opt ->
                     val bottle = opt.bottle || isBottleServingLabel(opt.label)
-                    val label = if (bottle) "Bottle" else canonicalServingLabel(opt.label)
                     val pour = if (bottle) null
                         else opt.volume.takeIf(::validVolume)?.toInt()
-                    Triple(item.id, label to pour, opt.price)
+                    // Keep the owner's one-serving-per-ml policy: 잔 == 샷.
+                    // The wire serializer also emits a null label for new glasses.
+                    val key = servingIdentityKey(pour, if (bottle) "Bottle" else opt.label)
+                    Triple(item.id, key, opt.price)
                 }
             }
             options.groupBy { it.second }.values.forEach { candidates ->

@@ -128,8 +128,16 @@ class LivePhotoReviewRepository(
         // Signed URLs expire, and source observations belong to the server.
         // Restore only owner edits; rebind fresh data to the current response.
         val currentItems = state.items.associateBy { it.id }
+        // Restoring a corrected name must use *that* name's saved row.
+        // The fresh OCR name could refer to a different menu item and would
+        // otherwise erase the owner's unresolved saved-versus-photo conflict.
+        loaded = response
         val restored = chosen.copy(items = chosen.items.map { old ->
             val fresh = currentItems.getValue(old.id)
+            val savedPrices = if (old.linkedProductId == null && old.name.isNotBlank())
+                existingUnlinkedServingPrices(old.name)
+            else fresh.priceCandidates.filter { it.existing }
+            val previousSaved = old.priceCandidates.filter { it.existing }
             old.copy(sourcePhotoUrl = fresh.sourcePhotoUrl, sourceBox = fresh.sourceBox,
                 raw = fresh.raw, recognizedOffers = fresh.recognizedOffers,
                 // Candidate prices and OCR identities always come from the current
@@ -140,9 +148,9 @@ class LivePhotoReviewRepository(
                     else fresh.mergeSources,
                 // Existing prices are refreshed from the server; the OCR
                 // candidates are retained even after a late product relink.
-                priceCandidates = old.priceCandidates.filterNot { it.existing } +
-                    fresh.priceCandidates.filter { it.existing },
-                chosenServingPrices = if (old.existingServingPricesByProductId ==
+                priceCandidates = old.priceCandidates.filterNot { it.existing } + savedPrices,
+                chosenServingPrices = if (previousSaved == savedPrices &&
+                    old.existingServingPricesByProductId ==
                     fresh.existingServingPricesByProductId) old.chosenServingPrices
                     else emptyMap(),
                 // A removed OCR primary must not regain its extractedOptionId

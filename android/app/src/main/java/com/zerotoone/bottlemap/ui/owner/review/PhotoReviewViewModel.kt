@@ -81,6 +81,7 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
     private var latestDraftRevision = 0L
     private var leaving = false
     private val latestRematchRequest = mutableMapOf<String, Int>()
+    private val latestCatalogSearchRequest = mutableMapOf<String, Int>()
 
     private val _events = Channel<PhotoReviewEvent>(Channel.BUFFERED)
     val events = _events.receiveAsFlow()
@@ -582,8 +583,10 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
             selectedCandidateId = null, selectedSearchId = null, nameEditMode = false)
     }
 
-    fun typeCatalogQuery(id: String, text: String) =
+    fun typeCatalogQuery(id: String, text: String) {
+        latestCatalogSearchRequest[id] = (latestCatalogSearchRequest[id] ?: 0) + 1
         setItem(id) { it.copy(searchDraft = text, searchResults = null, selectedSearchId = null) }
+    }
 
     fun searchCatalog(id: String) {
         val x = item(id) ?: return
@@ -592,12 +595,22 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
             toast("검색할 위스키 이름을 입력해 주세요.")
             return
         }
+        val generation = (latestCatalogSearchRequest[id] ?: 0) + 1
+        latestCatalogSearchRequest[id] = generation
         viewModelScope.launch {
-            val results = runCatching { repository.searchCatalog(query) }.getOrElse {
-                toast("검색하지 못했어요. 다시 시도해 주세요.")
+            val results = try {
+                repository.searchCatalog(query)
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                if (latestCatalogSearchRequest[id] == generation)
+                    toast("검색하지 못했어요. 다시 시도해 주세요.")
                 return@launch
             }
-            mutateItem(id) { it.copy(searchDraft = query, searchResults = results, selectedSearchId = null) }
+            val current = item(id) ?: return@launch
+            if (latestCatalogSearchRequest[id] != generation ||
+                !current.searchMode || current.searchDraft.trim() != query) return@launch
+            mutateItem(id) { it.copy(searchResults = results, selectedSearchId = null) }
         }
     }
 
