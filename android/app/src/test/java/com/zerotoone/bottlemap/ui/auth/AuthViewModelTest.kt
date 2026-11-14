@@ -319,4 +319,55 @@ class AuthViewModelTest {
             events.value = AuthSessionEvent.Guest
         }
     }
+    @Test
+    fun ownerReauthenticationKeepsGoogleSignInDisabledUntilSignOutCompletes() = runTest(dispatcher) {
+        val fake = FakeAuthGateway()
+        val finishLogout = CompletableDeferred<Unit>()
+        fake.pendingLogout = finishLogout
+        fake.events.value = AuthSessionEvent.Authenticated
+        val vm = AuthViewModel(fake)
+        advanceUntilIdle()
+        assertTrue(vm.state.value is AuthUiState.SignedIn)
+
+        vm.prepareOwnerReauthentication()
+        assertEquals(AuthUiState.SigningOut, vm.state.value)
+        assertFalse(vm.beginGoogleSignIn())
+        advanceUntilIdle()
+        assertEquals(AuthUiState.SigningOut, vm.state.value)
+        // SDK may emit Guest BEFORE gateway.logout() finishes. That event
+        // must not re-enable Google account selection prematurely.
+        fake.events.value = AuthSessionEvent.Guest
+        advanceUntilIdle()
+        assertEquals(AuthUiState.SigningOut, vm.state.value)
+        assertFalse(vm.beginGoogleSignIn())
+
+        finishLogout.complete(Unit)
+        advanceUntilIdle()
+        assertEquals(AuthUiState.Guest, vm.state.value)
+        assertTrue(vm.beginGoogleSignIn())
+    }
+
+    @Test
+    fun ownerReauthenticationAlsoBlocksAnAlreadyRunningGuestLogout() = runTest(dispatcher) {
+        val fake = FakeAuthGateway()
+        val finishing = CompletableDeferred<Unit>()
+        fake.pendingLogout = finishing
+        fake.events.value = AuthSessionEvent.Authenticated
+        val vm = AuthViewModel(fake)
+        advanceUntilIdle()
+
+        vm.continueAsGuest()
+        assertEquals(AuthUiState.Guest, vm.state.value)
+        advanceUntilIdle()
+        vm.prepareOwnerReauthentication()
+        assertEquals(AuthUiState.SigningOut, vm.state.value)
+        assertFalse(vm.beginGoogleSignIn())
+
+        finishing.complete(Unit)
+        advanceUntilIdle()
+        assertEquals(AuthUiState.Guest, vm.state.value)
+        assertTrue(vm.beginGoogleSignIn())
+        assertEquals(1, fake.logouts)
+    }
+
 }

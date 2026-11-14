@@ -1,5 +1,7 @@
 package com.zerotoone.bottlemap.ui.owner
 
+import com.zerotoone.bottlemap.ui.common.OwnerBottomConfirmSheet
+
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -154,12 +156,13 @@ internal fun OwnerStoredPhoto(
 @Composable
 private fun OwnerDiscardPrompt(visible: Boolean, onDiscard: () -> Unit, onStay: () -> Unit) {
     if (!visible) return
-    AlertDialog(
-        onDismissRequest = onStay,
-        title = { Text("변경을 취소할까요?") },
-        text = { Text("저장하지 않은 변경 사항은 반영되지 않아요.") },
-        confirmButton = { TextButton(onClick = onDiscard) { Text("저장하지 않고 나가기") } },
-        dismissButton = { TextButton(onClick = onStay) { Text("계속 편집") } },
+    OwnerBottomConfirmSheet(
+        title = "변경을 취소할까요?",
+        message = "저장하지 않은 변경 사항은 반영되지 않아요.",
+        confirmLabel = "저장하지 않고 나가기",
+        cancelLabel = "계속 편집",
+        tag = "owner-editor-discard-sheet",
+        onConfirm = onDiscard, onDismiss = onStay,
     )
 }
 
@@ -330,17 +333,16 @@ fun OwnerBarPhotoEditorScreen(
         draft = (photos + added).take(15).map(::encodePhoto)
     }
     if (deleteId != null) {
-        AlertDialog(
-            onDismissRequest = { deleteId = null },
-            title = { Text("사진을 삭제할까요?") },
-            text = { Text("저장하면 고객 미리보기에서도 사진이 제거돼요.") },
-            confirmButton = {
-                TextButton(onClick = {
-                    draft = photos.filterNot { it.photoId == deleteId }.map(::encodePhoto)
-                    deleteId = null
-                }) { Text("삭제") }
+        OwnerBottomConfirmSheet(
+            title = "사진을 삭제할까요?",
+            message = "저장하면 고객 미리보기에서도 사진이 제거돼요.",
+            confirmLabel = "삭제",
+            tag = "owner-editor-photo-delete-sheet",
+            onDismiss = { deleteId = null },
+            onConfirm = {
+                draft = photos.filterNot { it.photoId == deleteId }.map(::encodePhoto)
+                deleteId = null
             },
-            dismissButton = { TextButton(onClick = { deleteId = null }) { Text("취소") } }
         )
     }
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
@@ -547,10 +549,23 @@ fun OwnerBarHoursEditorScreen(
     val weekdays = listOf("월", "화", "수", "목", "금", "토", "일")
     if (copyingDay != 0) {
         val copySource = hours.firstOrNull { it.isoDayOfWeek == copyingDay }
-        AlertDialog(
-            onDismissRequest = { copyingDay = 0 },
-            title = { Text("다른 요일에 영업시간 복사") },
-            text = {
+        OwnerBottomConfirmSheet(
+            title = "다른 요일에 영업시간 복사",
+            message = "복사할 요일을 선택해 주세요.",
+            confirmLabel = "복사",
+            tag = "owner-hours-copy-sheet",
+            enabled = copyDays.isNotEmpty(),
+            onDismiss = { copyingDay = 0; copyDays = emptyList() },
+            onConfirm = {
+                if (copySource != null) {
+                    val copied = copyDays.map { copySource.copy(isoDayOfWeek = it) }
+                    encoded = (hours.filterNot { it.isoDayOfWeek in copyDays } + copied)
+                        .sortedBy { it.isoDayOfWeek }.map(::encodeHours)
+                }
+                copyingDay = 0
+                copyDays = emptyList()
+            },
+            extraContent = {
                 Column {
                     weekdays.forEachIndexed { index, label ->
                         val day = index + 1
@@ -567,18 +582,6 @@ fun OwnerBarHoursEditorScreen(
                     }
                 }
             },
-            confirmButton = {
-                TextButton(onClick = {
-                    if (copySource != null) {
-                        val copied = copyDays.map { copySource.copy(isoDayOfWeek = it) }
-                        encoded = (hours.filterNot { it.isoDayOfWeek in copyDays } + copied)
-                            .sortedBy { it.isoDayOfWeek }.map(::encodeHours)
-                    }
-                    copyingDay = 0
-                    copyDays = emptyList()
-                }, enabled = copyDays.isNotEmpty()) { Text("복사") }
-            },
-            dismissButton = { TextButton(onClick = { copyingDay = 0 }) { Text("취소") } }
         )
     }
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {

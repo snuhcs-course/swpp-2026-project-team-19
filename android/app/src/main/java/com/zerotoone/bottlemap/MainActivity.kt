@@ -20,6 +20,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import com.zerotoone.bottlemap.ui.common.dismissKeyboardOnOutsideTap
 import com.zerotoone.bottlemap.navigation.BottleMapNavHost
+import com.zerotoone.bottlemap.BuildConfig
 import com.zerotoone.bottlemap.ui.theme.BottleMapTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -39,7 +40,11 @@ class MainActivity : ComponentActivity() {
                         .dismissKeyboardOnOutsideTap(),
                     color = MaterialTheme.colorScheme.background,
                 ) {
-                    BottleMapNavHost()
+                    // QA-only first-launch reset; no preview/mock OCR route.
+                    BottleMapNavHost(
+                        resetWelcome = BuildConfig.DEBUG &&
+                            intent?.getBooleanExtra("bm_ux_reset_welcome", false) == true,
+                    )
                 }
                 }
             }

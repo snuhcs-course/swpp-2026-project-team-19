@@ -28,12 +28,8 @@ private fun sameReviewProduct(a: MockExtractedLine, b: MockExtractedLine): Boole
 }
 
 /** Stable serving identity across OCR lines, reviewed options and saved menu rows. */
-internal fun reviewServingKey(pourMl: Int?, label: String?): String {
-    if(pourMl != null) return "ml:$pourMl"
-    val normalized = label.orEmpty().trim().lowercase()
-    return if(normalized == "bottle" || normalized == "병") "bottle"
-        else "label:$normalized"
-}
+internal fun reviewServingKey(pourMl: Int?, label: String?): String =
+    servingIdentityKey(pourMl, label)
 
 private fun reviewServing(option: MockMenuOption): String =
     reviewServingKey(option.pourMl, option.label)
@@ -109,7 +105,8 @@ internal fun conflictingReviewedPhotoPrices(job: MockMenuImport): Set<String> {
         for(option in (decision.correctedOptions ?: line.options)) {
             val id=decision.productId ?: continue
             if(option.priceKrw>0 && all.any { other ->
-                other.decision?.productId==id &&
+                other.extractedItemId != line.extractedItemId &&
+                    other.decision?.productId==id &&
                     (other.decision?.correctedOptions ?: other.options).any {
                         candidate -> reviewServing(candidate)==reviewServing(option) &&
                             candidate.priceKrw>0 && candidate.priceKrw!=option.priceKrw

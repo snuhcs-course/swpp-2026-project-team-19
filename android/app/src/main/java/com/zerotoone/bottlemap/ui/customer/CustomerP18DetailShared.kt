@@ -172,6 +172,13 @@ internal fun P18OwnerParityMenuRow(
     val measurer=rememberTextMeasurer()
     val density=LocalDensity.current
     val timestamp=now.toInstant()
+    val fontScale=density.fontScale.coerceAtLeast(1f)
+    val pourWidth=with(density) {
+        maxOf(30.dp,(item.options.maxOfOrNull { option ->
+            measurer.measure(servingDisplayLabel(option.pourMl,option.label),
+                style=TextStyle(fontSize=10.sp),maxLines=1).size.width
+        } ?: 0).toDp())
+    }
     val measuredPricePx=item.options.maxOfOrNull { option ->
         measurer.measure(
             p18Price(option.priceKrw?.let{
@@ -181,10 +188,10 @@ internal fun P18OwnerParityMenuRow(
         ).size.width
     } ?: 0
     val priceWidth=with(density) {
-        maxOf(129.dp,measuredPricePx.toDp()+27.dp+30.dp+10.dp)
+        maxOf(129.dp,measuredPricePx.toDp()+27.dp+pourWidth+10.dp)
     }
     // Owner's currently published menu and Customer use the same compact row.
-    val rowHeight=maxOf(66,item.options.size*16+10).dp
+    val rowHeight=(maxOf(66f,(item.options.size*16+10).toFloat())*fontScale).dp
     Box(Modifier.fillMaxWidth().height(rowHeight)) {
         if(highlighted) {
             // Extend the highlight BEYOND the fixed content slots, not into them.
@@ -252,7 +259,7 @@ internal fun P18OwnerParityMenuRow(
                             }
                         }
                         Text(servingDisplayLabel(option.pourMl,option.label),
-                            Modifier.width(30.dp),color=P18Text,fontSize=10.sp,
+                            Modifier.width(pourWidth),color=P18Text,fontSize=10.sp,
                             maxLines=1,textAlign=TextAlign.End)
                         Text(option.priceKrw?.let{
                             p18Price(p18EffectivePrice(it,option.discount,timestamp))

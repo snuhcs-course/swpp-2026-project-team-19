@@ -1,0 +1,675 @@
+package com.zerotoone.bottlemap.ui.owner.review
+
+import com.zerotoone.bottlemap.data.owner.isBottleServingLabel
+import com.zerotoone.bottlemap.data.owner.servingIdentityKey
+import com.zerotoone.bottlemap.data.owner.canonicalServingLabel
+
+/**
+ * Pure review rules ported from BottleMap_Minimal_UX_v18.html (problems(), itemGroup(),
+ * stats(), optionSummary() and the card actions). No Android or repository code here,
+ * so every rule is unit tested on the JVM.
+ */
+object PhotoReviewRules {
+    // Backend #164 allows up to 10, but the Owner-confirmed whisky UX
+    // requires a maximum of THREE distinct serving sizes.
+    const val MAX_OPTIONS = 10
+
+    fun optionSummary(x: ReviewItem): List<ReviewOption> =
+        (if (x.primaryHasOption) listOf(ReviewOption(x.volume, x.price, x.bottle,
+            x.primarySourceOptionId, x.primaryOptionLabel,
+            x.volumeSource == VolumeSource.DEFAULT)) else emptyList()) + x.options
+
+    fun countOptions(x: ReviewItem): Int = (if (x.primaryHasOption) 1 else 0) + x.options.size
+
+    const val MAX_PICKED_VOLUMES = 3
+
+    /** Same ml is one serving regardless of whether OCR wrote 잔/샷. */
+    fun servingKey(option: ReviewOption): String = servingIdentityKey(
+        if (option.bottle) null else option.volume.takeIf(::validVolume)?.toInt(),
+        if (option.bottle) "Bottle" else option.label,
+    )
+
+    /** Reconcile live OCR choices with the full saved menu for the currently
+     * selected product. A manual volume/Bottle edit changes the serving key;
+     * the current edited price remains a New choice at that new key.
+     */
+    fun priceCandidatesForServing(x: ReviewItem, key: String): List<ReviewPriceCandidate> {
+        val options = optionSummary(x)
+        val current = options.firstOrNull { servingKey(it) == key }
+        val candidates = x.priceCandidates.filter { it.servingKey == key }.toMutableList()
+        val product = x.linkedProductId
+        if (product != null) {
+            x.existingServingPricesByProductId[product].orEmpty()
+                .filter { it.servingKey == key }
+                .forEach { saved ->
+                    if (candidates.none { it.existing && it.priceKrw == saved.priceKrw })
+                        candidates += saved
+                }
+        }
+        if (current != null && validPrice(current.price) &&
+            candidates.none { !it.existing && it.priceKrw == current.price.toInt() }) {
+            candidates += ReviewPriceCandidate(
+                servingKey = key,
+                volumeMl = current.volume.takeIf(::validVolume)?.toInt(),
+                bottle = current.bottle,
+                label = current.label,
+                priceKrw = current.price.toInt(),
+                sourceItemId = x.id,
+            )
+        }
+        return candidates
+    }
+
+    fun pendingPriceServings(x: ReviewItem): Set<String> {
+        if (!x.volumeChoicesConfirmed) return emptySet()
+        return optionSummary(x).map(::servingKey).toSet().filter { key ->
+            val candidates = priceCandidatesForServing(x, key)
+            val current = optionSummary(x).firstOrNull { servingKey(it) == key }
+            candidates.map { it.priceKrw }.distinct().size > 1 &&
+                x.chosenServingPrices[key] != current?.price?.toInt()
+        }.toSet()
+    }
+
+    fun chooseServingPrice(x: ReviewItem, key: String, price: Int): ReviewItem {
+        require(priceCandidatesForServing(x,key).any { it.priceKrw == price })
+        val primary = x.copy(chosenServingPrices = x.chosenServingPrices + (key to price))
+        return if (x.primaryHasOption && servingKey(optionSummary(x).first()) == key)
+            primary.copy(price = price.toDouble(), priceChoice = PriceChoice.MANUAL)
+        else primary.copy(options = x.options.map { option ->
+            if (servingKey(option) == key) option.copy(price = price.toDouble()) else option
+        })
+    }
+
+    fun confirmVolumeChoices(x: ReviewItem): ReviewItem {
+        val picked = x.volumeChoices.filter { servingKey(it) in x.chosenVolumeKeys }
+        if (picked.isEmpty() || picked.size > MAX_PICKED_VOLUMES) return x
+        val first = picked.first()
+        return x.copy(
+            primaryHasOption = true,
+            bottle = first.bottle, volume = first.volume, price = first.price,
+            primarySourceOptionId = first.sourceOptionId,
+            primaryOptionLabel = first.label,
+            options = picked.drop(1),
+            volumeChoicesConfirmed = true,
+            expanded = true,
+        )
+    }
+
+    /** Rebind every OCR/default-derived glass, including already valid volumes. */
+    fun applyDefaultPour(x: ReviewItem, defaultPour: Double): ReviewItem = x.copy(
+        volume = if (x.primaryHasOption && !x.bottle &&
+            x.volumeSource == VolumeSource.DEFAULT) defaultPour else x.volume,
+        options = x.options.map { option ->
+            if (option.volumeFromDefault && !option.bottle)
+                option.copy(volume = defaultPour) else option
+        },
+    )
+
+    /**
+     * The Backend #164 post-review preflight disallows two selected catalog
+     * lines with different prices for the same product and serving. Detect the
+     * problem BEFORE enabling Publish, without guessing identities from names.
+     * Returns the conflicting serving labels for each OCR line (including a
+     * separate photo). No server model or catalog data is modified.
+     */
+    /**
+     * Merged Backend #164 deduplicates proposals by canonical productId and
+     * keeps only the first line's options. Until A4 adds server-side merge,
+     * never silently publish two separate OCR lines for one catalog whisky:
+     * ask the owner to consolidate prices and exclude extra lines.
+     */
+    // §8.12 merges late-linked products during review-and-apply. Do not
+    // force owners to copy/exclude one of their original OCR rows: that loses
+    // source-linked options. Different prices for the same ml remain blocked
+    // separately by duplicatePhotoPriceConflicts().
+    /** §8.12 merges product-less rows by normalized name. Original whisky
+     * groups are reviewed together; pure OTHER groups with separate servings
+     * must be allowed through instead of forcing an exclusion/rename.
+     */
+    /** Mirrors Backend #164's app.core.normalize.normalize name key for
+     * preflight ONLY; the server remains the authority on unique names.
+     */
+    internal fun normalizedUnlinkedMenuName(value: String): String =
+        java.text.Normalizer.normalize(value, java.text.Normalizer.Form.NFKC)
+            .replace(Regex("[‐-‒–—―−]"), "-")
+            .lowercase(java.util.Locale.ROOT)
+            .replace(Regex("""\s+"""), " ").trim()
+            .replace(Regex("""(?<=\d) ?(?:years? old|years?|yo|y|년|年)(?![a-z])"""), "")
+            .replace(Regex("""[^\p{L}\p{N}\s.\-]|_"""), "")
+            .replace(Regex("""(?<!\d)\.|\.(?!\d)"""), "")
+            .replace(Regex("""\s+"""), "")
+
+    // §8.12 merges all product-less same-name final lines, including
+    // whisky+other groups. Their original OCR IDs remain independent.
+    /** §8.12: the server merges same-name OTHER lines, but a conflict on
+     * the exact option label + pour tuple returns 422. Check such conflicts
+     * before publishing, while allowing different sizes/labels to merge.
+     */
+    fun duplicateOtherPrices(state: PhotoReviewState): Set<String> {
+        val collisions = mutableSetOf<String>()
+        val sameName = state.items.filter { item ->
+            !item.excluded && item.mergedInto == null &&
+                item.type == ReviewItemType.OTHER && item.linkedProductId == null &&
+                normalizedUnlinkedMenuName(item.name).isNotEmpty()
+        }.groupBy { normalizedUnlinkedMenuName(it.name) }
+        sameName.values.filter { it.size > 1 }.forEach { group ->
+            val options = group.flatMap { item ->
+                optionSummary(item).filter { validPrice(it.price) }.map { opt ->
+                    val bottle = opt.bottle || isBottleServingLabel(opt.label)
+                    val pour = if (bottle) null
+                        else opt.volume.takeIf(::validVolume)?.toInt()
+                    // Keep the owner's one-serving-per-ml policy: 잔 == 샷.
+                    // The wire serializer also emits a null label for new glasses.
+                    val key = servingIdentityKey(pour, if (bottle) "Bottle" else opt.label)
+                    Triple(item.id, key, opt.price)
+                }
+            }
+            options.groupBy { it.second }.values.forEach { candidates ->
+                if (candidates.map { it.first }.distinct().size > 1 &&
+                    candidates.map { it.third }.distinct().size > 1
+                ) collisions += candidates.map { it.first }
+            }
+        }
+        return collisions
+    }
+
+    fun duplicatePhotoPriceConflicts(state: PhotoReviewState): Map<String, Set<String>> {
+        data class Entry(val itemId: String, val price: Double, val servingLabel: String)
+        val buckets = mutableMapOf<String, MutableList<Entry>>()
+        state.items.filter { !it.excluded &&
+            it.type == ReviewItemType.WHISKY && it.linkedProductId != null
+        }.forEach { item ->
+            optionSummary(item).forEach { option ->
+                val bottle = option.bottle || isBottleServingLabel(option.label)
+                if (!validPrice(option.price) ||
+                    (!bottle && !validVolume(option.volume))) return@forEach
+                val serving = if (bottle) "Bottle" else "${option.volume.toInt()}ml"
+                val key = "${item.linkedProductId}|" +
+                    servingIdentityKey(if (bottle) null else option.volume.toInt(),
+                        option.label ?: if (bottle) "Bottle" else null)
+                buckets.getOrPut(key) { mutableListOf() }
+                    .add(Entry(item.id, option.price, serving))
+            }
+        }
+        val conflicts = mutableMapOf<String, MutableSet<String>>()
+        buckets.values.forEach { values ->
+            if (values.map { it.itemId }.distinct().size > 1 &&
+                values.map { it.price }.distinct().size > 1
+            ) values.forEach { item ->
+                conflicts.getOrPut(item.itemId) { mutableSetOf() }.add(item.servingLabel)
+            }
+        }
+        return conflicts
+    }
+
+    fun problems(x: ReviewItem, state: PhotoReviewState? = null): List<ReviewIssue> {
+        if (x.excluded) return emptyList()
+        val p = mutableListOf<ReviewIssue>()
+        if (x.detailNameEditing) p += ReviewIssue.DETAIL_NAME
+        if (x.type == ReviewItemType.WHISKY) {
+            when {
+                x.searchMode -> p += ReviewIssue.CATALOG_SEARCH
+                x.match == ReviewMatch.AMBIGUOUS && !x.nameSaved -> p += ReviewIssue.MATCH
+                x.match == ReviewMatch.CANDIDATE && !x.matchConfirmed -> p += ReviewIssue.CANDIDATE
+                x.match == ReviewMatch.NEW && !x.nameSaved -> p += ReviewIssue.NEW
+            }
+            if (x.priceCandidates.isNotEmpty() ||
+                x.existingServingPricesByProductId[x.linkedProductId].orEmpty().isNotEmpty()) {
+                if (pendingPriceServings(x).isNotEmpty()) p += ReviewIssue.PRICE_CHOICE
+            } else {
+                if (x.oldPrice != null && x.photoPrice != null && x.oldPrice != x.photoPrice &&
+                    x.priceChoice == PriceChoice.NONE) p += ReviewIssue.PRICE_CHOICE
+                if (x.conflictPrices.isNotEmpty() && x.conflictChoice == null)
+                    p += ReviewIssue.PHOTO_CONFLICT
+            }
+            val entries = optionSummary(x)
+            if (!x.volumeChoicesConfirmed && x.volumeChoices.isNotEmpty()) {
+                p += ReviewIssue.OPTION
+            } else if (entries.isEmpty()) {
+                p += ReviewIssue.PRICE
+            } else {
+                if (entries.any { !it.bottle && !validVolume(it.volume) }) p += ReviewIssue.VOLUME
+                if (entries.any { !validPrice(it.price) }) p += ReviewIssue.PRICE
+                if (entries.size > MAX_PICKED_VOLUMES) p += ReviewIssue.OPTION
+                // Owner defines a serving by pour size only:
+                // '잔 30ml' and '샷 30ml' are duplicate options.
+                val keys = entries.map {
+                    servingIdentityKey(
+                        if (it.bottle) null else it.volume.toInt(),
+                        it.label ?: if (it.bottle) "Bottle" else null
+                    )
+                }
+                if (keys.size != keys.toSet().size) p += ReviewIssue.OPTION
+            }
+        } else {
+            // A product-less 'other' row also updates existing prices by
+            // normalized menu name; require explicit selection on conflicts.
+            if (x.priceCandidates.isNotEmpty() &&
+                pendingPriceServings(x).isNotEmpty()) p += ReviewIssue.PRICE_CHOICE
+            // Non-whisky OCR lines may also contain multiple price options.
+            // Every price must be editable and valid *before* publishing.
+            val entries = optionSummary(x)
+            if (entries.isEmpty() || entries.any { !validPrice(it.price) }) p += ReviewIssue.PRICE
+            if (entries.size > MAX_OPTIONS) p += ReviewIssue.OPTION
+            // Price-only (unsized) non-whisky has one unspecified serving.
+            // Different words do not make duplicate ml options independent.
+            val keys = entries.map {
+                servingIdentityKey(
+                    if (validVolume(it.volume)) it.volume.toInt() else null, it.label
+                )
+            }
+            if (keys.distinct().size != keys.size) p += ReviewIssue.OPTION
+        }
+        if (x.typo && !x.nameSaved) p += ReviewIssue.NAME
+        if ((x.name.trim().length !in 1..200 ||
+            normalizedUnlinkedMenuName(x.name).isBlank()) &&
+            ReviewIssue.NAME !in p) p += ReviewIssue.NAME
+        if (state != null) {
+            if (x.id in duplicatePhotoPriceConflicts(state) ||
+                x.id in duplicateOtherPrices(state))
+                p += ReviewIssue.DUPLICATE_PRICE
+        }
+        return p.distinct()
+    }
+
+    fun itemGroup(x: ReviewItem, state: PhotoReviewState? = null): ReviewGroup = when {
+        x.excluded -> ReviewGroup.EXCLUDED
+        problems(x, state).isNotEmpty() -> ReviewGroup.PENDING
+        x.type == ReviewItemType.OTHER -> ReviewGroup.OTHER
+        else -> ReviewGroup.READY
+    }
+
+    /** The group a card is drawn in: frozen while one of its fields is being typed in. */
+    fun displayGroup(state: PhotoReviewState, x: ReviewItem): ReviewGroup =
+        itemGroup(state.typingSnapshots[x.id] ?: x, state)
+
+    fun stats(state: PhotoReviewState): ReviewStats {
+        // Secondary OCR lines are represented inside the master product card;
+        // never show a second Review/Excluded card for an already grouped line.
+        val all = state.items.filter { it.mergedInto == null }
+        val byGroup = all.groupBy { displayGroup(state, it) }
+        val required = all.filter { it.required || problems(it, state).isNotEmpty() }
+        val done = required.count { it.excluded || problems(it, state).isEmpty() }
+        val total = required.size
+        val noDefault = !validVolume(state.defaultPour)
+        val pending = byGroup[ReviewGroup.PENDING].orEmpty()
+        val ready = byGroup[ReviewGroup.READY].orEmpty()
+        val other = byGroup[ReviewGroup.OTHER].orEmpty()
+        return ReviewStats(
+            pending = pending,
+            ready = ready,
+            other = other,
+            excluded = byGroup[ReviewGroup.EXCLUDED].orEmpty(),
+            total = total,
+            done = done,
+            percent = if (total > 0) Math.round(done.toDouble() / total * 100).toInt() else 100,
+            canPublish = pending.isEmpty() && (ready.size + other.size) > 0 && !noDefault,
+            noDefault = noDefault,
+        )
+    }
+
+    /** Collapsed cards show the first valid price; nothing while a price conflict is open. */
+    fun itemDisplayPrice(x: ReviewItem): Double? =
+        if (x.conflictPrices.isNotEmpty() && x.conflictChoice == null) null
+        else optionSummary(x).firstOrNull { validPrice(it.price) }?.price ?: x.price
+
+    /** Grouping changes card order, never the original OCR line number. */
+    fun photoLine(state: PhotoReviewState, x: ReviewItem): Int =
+        x.sourceLine.takeIf { it > 0 } ?:
+            (state.items.filter { it.photoIndex == x.photoIndex }
+                .indexOfFirst { it.id == x.id } + 1)
+
+    fun sourceLocation(state: PhotoReviewState, x: ReviewItem): String =
+        if (x.hasSourceBox) "${x.photoIndex}번째 장 ${photoLine(state, x)}번째 줄"
+        else "${x.photoIndex}번째 장 · 위치 정보 없음"
+
+    private val koreanCounts = mapOf(2 to "두", 3 to "세", 4 to "네", 5 to "다섯", 6 to "여섯",
+        7 to "일곱", 8 to "여덟", 9 to "아홉", 10 to "열")
+
+    /** "같은 위스키가 두 줄 있어 하나로 합쳤어요." with the real number of merged lines. */
+    fun mergedNotice(x: ReviewItem): String? {
+        val count = 1 + x.mergeSources.size
+        if (count < 2) return null
+        val label = koreanCounts[count]?.let { "$it 줄" } ?: "${count}줄"
+        return "같은 위스키가 $label 있어 하나로 합쳤어요."
+    }
+
+    /** The OCR snapshot shown under the photo: recognised volumes and prices. */
+    fun recognizedOffers(x: ReviewItem): List<RecognizedOffer> {
+        val source = x.recognizedOffers + x.mergeSources.flatMap { it.offers }
+        val sameVolumeConflict = x.mergeSources.isNotEmpty() && x.conflictPrices.isNotEmpty() &&
+            x.conflictChoice == null
+        val entries = if (sameVolumeConflict) {
+            source.associateBy { o ->
+                when {
+                    o.bottle -> "Bottle"
+                    (o.volumeMl ?: 0) > 0 -> "${o.volumeMl}ml"
+                    else -> "none"
+                }
+            }.values.toList()
+        } else source
+        return entries.ifEmpty { listOf(RecognizedOffer()) }
+    }
+
+    /** Show the configured bar pour beside the OCR price when the photo omits size. */
+    fun offerVolumeLabel(o: RecognizedOffer, defaultPourMl: Double? = null): String = when {
+        o.bottle -> "Bottle"
+        (o.volumeMl ?: 0) > 0 -> "${o.volumeMl}ml"
+        defaultPourMl != null && validVolume(defaultPourMl) ->
+            "${defaultPourMl.toInt()}ml"
+        else -> ""
+    }
+
+    /** Price text of a recognised offer, or null when the conflict hides it. */
+    fun offerPriceLabel(x: ReviewItem, o: RecognizedOffer): String? {
+        val sameVolumeConflict = x.mergeSources.isNotEmpty() && x.conflictPrices.isNotEmpty() &&
+            x.conflictChoice == null
+        if (sameVolumeConflict) return null
+        return when {
+            x.conflictPrices.isNotEmpty() && x.conflictChoice == null -> "-"
+            (o.priceKrw ?: 0) > 0 -> won(o.priceKrw!!.toDouble())
+            else -> "가격 미인식"
+        }
+    }
+
+    // ---- Product link transitions (decisions 1, 2, 7) ----
+
+    fun markLinked(x: ReviewItem, product: CatalogProduct): ReviewItem {
+        val old = x.existingPriceByProductId[product.productId]
+        val photo = x.photoPrice ?: optionSummary(x).firstOrNull()?.price
+        val changed = old != null && photo != null && old != photo
+        // The grouped Live review has candidate prices rather than the old
+        // two-button PriceChoice. Add the chosen catalog product's stored 30ml
+        // price to that SAME serving's inline chooser after manual linking.
+        val active = optionSummary(x).map(::servingKey).toSet()
+        val photoCandidates = x.priceCandidates.filterNot { it.existing }
+        val savedCandidates = x.existingServingPricesByProductId[product.productId].orEmpty()
+            .filter { it.servingKey in active }
+        val combined = photoCandidates + savedCandidates
+        return x.copy(
+        priceCandidates = combined,
+        chosenServingPrices = emptyMap(),
+        oldPrice = old,
+        priceChoice = if (x.priceChoice == PriceChoice.MANUAL) PriceChoice.MANUAL
+            else if (combined.isNotEmpty()) PriceChoice.PHOTO
+            else if (changed) PriceChoice.NONE else PriceChoice.PHOTO,
+        price = if (x.priceChoice == PriceChoice.MANUAL) x.price else photo ?: x.price,
+        linkedProductId = product.productId,
+        linkedProductName = product.name,
+        match = ReviewMatch.EXACT,
+        matchConfirmed = true,
+        nameSaved = true,
+        newConfirmed = false,
+        searchMode = false,
+        searchResults = null,
+        searchDraft = "",
+        selectedCandidateId = null,
+        selectedSearchId = null,
+        nameEditMode = false,
+        operatorPending = false,
+        operatorReason = null,
+        // The photo text and the menu-board name are never overwritten.
+    )
+    }
+
+    /** After a corrected menu name, saved unlinked prices must be rebound to
+     * that NEW name key (the same key the publish adapter uses). Never carry
+     * price candidates from the previous menu's saved options into the new
+     * identity, and require a fresh choice for any genuine price collision.
+     */
+    fun rebindUnlinkedPrices(
+        item: ReviewItem, saved: List<ReviewPriceCandidate>,
+    ): ReviewItem {
+        val active = optionSummary(item).map(::servingKey).toSet()
+        val fromPhoto = item.priceCandidates.filter { !it.existing && it.servingKey in active }
+        val updated = (saved.filter { it.servingKey in active } + fromPhoto)
+            .distinctBy { Triple(it.servingKey, it.priceKrw, it.existing) }
+        return item.copy(
+            priceCandidates = updated,
+            chosenServingPrices = emptyMap(),
+            oldPrice = null,
+            priceChoice = PriceChoice.PHOTO,
+        )
+    }
+
+    /** "찾는 위스키가 없어요": publish without a product; an operator links it later. */
+    fun markAsNewForOperator(x: ReviewItem, typed: String): ReviewItem {
+        val name = typed.trim().ifBlank { x.newProductName ?: x.name }
+        return x.copy(
+            linkedProductId = null,
+            linkedProductName = null,
+            match = ReviewMatch.NEW,
+            newConfirmed = false,
+            nameSaved = false,
+            matchConfirmed = false,
+            operatorPending = true,
+            operatorReason = OperatorReason.NEW,
+            newProductName = name,
+            searchMode = false,
+            searchResults = null,
+            searchDraft = "",
+            selectedCandidateId = null,
+            selectedSearchId = null,
+            nameEditMode = true,
+            reviewNameDraft = name,
+        )
+    }
+
+    enum class RematchOutcome { SAME, CHANGED, OPERATOR, OTHER }
+
+    /**
+     * Decision 2: after the owner renames a whisky line, match the new name again.
+     * One exact product keeps or changes the link (a change goes to the operator);
+     * none or several leave the line unlinked for the operator.
+     */
+    fun applyRematch(x: ReviewItem, exactMatches: List<CatalogProduct>): Pair<ReviewItem, RematchOutcome> {
+        if (x.type != ReviewItemType.WHISKY) return x to RematchOutcome.OTHER
+        val oldProductId = x.linkedProductId
+        if (exactMatches.size == 1) {
+            val linked = markLinked(x, exactMatches[0])
+            return if (oldProductId != null && oldProductId != exactMatches[0].productId) {
+                linked.copy(operatorPending = true, operatorReason = OperatorReason.CHANGED) to RematchOutcome.CHANGED
+            } else linked to RematchOutcome.SAME
+        }
+        return x.copy(
+            linkedProductId = null,
+            linkedProductName = null,
+            match = ReviewMatch.NEW,
+            newProductName = x.name,
+            newConfirmed = true,
+            matchConfirmed = true,
+            nameSaved = true,
+            operatorPending = true,
+            operatorReason = if (oldProductId != null) OperatorReason.UNLINKED else OperatorReason.NEW,
+            searchMode = false,
+            searchResults = null,
+            searchDraft = "",
+        ) to RematchOutcome.OPERATOR
+    }
+
+    /** API §8.7: apply the owner's chosen catalog link. The server
+     * detects conflicting OCR attributes and queues operator review atomically.
+     */
+    fun linkChosenProduct(x: ReviewItem, product: CatalogProduct, operatorCheck: Boolean): ReviewItem =
+        markLinked(x, product)
+
+    // ---- Classification ----
+
+    fun reclassify(x: ReviewItem, defaultPour: Double): ReviewItem {
+        val target = if (x.type == ReviewItemType.WHISKY) ReviewItemType.OTHER else ReviewItemType.WHISKY
+        val prev = x.classificationSnapshot
+        val changed = if (prev != null && prev.type == target) {
+            x.copy(
+                volume = prev.volume, volumeSource = prev.volumeSource, bottle = prev.bottle,
+                price = prev.primaryPrice ?: x.price,
+                primaryHasOption = prev.primaryHasOption, options = prev.options,
+                primarySourceOptionId = prev.primarySourceOptionId,
+                primaryOptionLabel = prev.primaryOptionLabel, match = prev.match,
+                matchConfirmed = prev.matchConfirmed, nameSaved = prev.nameSaved,
+                newConfirmed = prev.newConfirmed, linkedProductId = prev.linkedProductId,
+                linkedProductName = prev.linkedProductName, newProductName = prev.newProductName,
+                candidates = prev.candidates, rawOptionEdits = prev.rawOptionEdits,
+                classificationSnapshot = null,
+            )
+        } else {
+            val snapshot = ClassificationSnapshot(
+                type = x.type, volume = x.volume, volumeSource = x.volumeSource, bottle = x.bottle,
+                primaryHasOption = x.primaryHasOption, options = x.options, match = x.match,
+                matchConfirmed = x.matchConfirmed, nameSaved = x.nameSaved, newConfirmed = x.newConfirmed,
+                linkedProductId = x.linkedProductId, linkedProductName = x.linkedProductName,
+                newProductName = x.newProductName, candidates = x.candidates,
+                rawOptionEdits = x.rawOptionEdits,
+                primarySourceOptionId = x.primarySourceOptionId,
+                primaryOptionLabel = x.primaryOptionLabel, primaryPrice = x.price,
+            )
+            if (target == ReviewItemType.OTHER) {
+                fun explicitGlass(label: String?): Boolean {
+                    val text = label?.trim()?.lowercase().orEmpty()
+                    return text.startsWith("잔") || text.startsWith("샷") ||
+                        text.startsWith("glass") || text.startsWith("shot")
+                }
+                x.copy(
+                    classificationSnapshot = snapshot,
+                    // A bar-default pour inferred for an unlabeled whisky must
+                    // NOT become a real sized Other option (wire pourMl=null).
+                    volume = if (x.bottle) 0.0
+                        else if (x.volumeSource == VolumeSource.DEFAULT &&
+                            !explicitGlass(x.primaryOptionLabel)) Double.NaN
+                        else x.volume.takeIf(::validVolume) ?: Double.NaN,
+                    // Preserve OCR/manual pour and explicitly labeled glass sizes,
+                    // but never inherit a synthetic default for an unlabeled Other.
+                    options = x.options.map { option ->
+                        if (option.volumeFromDefault && !explicitGlass(option.label) &&
+                            !option.bottle) option.copy(volume = Double.NaN)
+                        else option
+                    }, primarySourceOptionId = x.primarySourceOptionId,
+                    primaryOptionLabel = x.primaryOptionLabel,
+                    primaryHasOption = x.primaryHasOption, bottle = x.bottle,
+                    // A non-whisky is never linked to the canonical whisky catalog.
+                    // The classification snapshot restores the prior link on undo.
+                    linkedProductId = null, linkedProductName = null,
+                    match = ReviewMatch.NEW, matchConfirmed = true, newConfirmed = true,
+                    nameSaved = true, operatorPending = false, operatorReason = null,
+                )
+            } else {
+                // OTHER -> WHISKY must retain the original OCR option IDs and
+                // prices, even when the owner still needs to supply volumes.
+                val sourceOptions = x.options.map { option ->
+                    if (option.bottle || validVolume(option.volume)) option
+                    else option.copy(volume = defaultPour)
+                }
+                x.copy(classificationSnapshot = snapshot,
+                    volume = if (x.bottle) 0.0 else
+                        x.volume.takeIf(::validVolume) ?: defaultPour,
+                    volumeSource = if (validVolume(x.volume)) x.volumeSource
+                        else VolumeSource.DEFAULT,
+                    options = sourceOptions,
+                    primaryHasOption = x.primaryHasOption,
+                    primarySourceOptionId = x.primarySourceOptionId,
+                    primaryOptionLabel = x.primaryOptionLabel,
+                    bottle = x.bottle, match = ReviewMatch.NEW,
+                    newConfirmed = false, nameSaved = false, matchConfirmed = false,
+                    linkedProductId = null, linkedProductName = null,
+                    newProductName = x.name)
+            }
+        }
+        return changed.copy(type = target, expanded = false)
+    }
+
+    // ---- Option editing ----
+
+    fun rawKey(field: OptionField, index: Int?): String =
+        if (index == null) "${field.key}:main" else "option-${field.key}:$index"
+
+    enum class OptionField(val key: String) { VOLUME("volume"), PRICE("price") }
+
+    /** Applies one keystroke in an option field; invalid text stays visible in [ReviewItem.rawOptionEdits]. */
+    fun editOption(x: ReviewItem, field: OptionField, index: Int?, text: String): ReviewItem {
+        val n = if (field == OptionField.PRICE) priceValue(text) else readNumeric(text)
+        val valid = if (field == OptionField.PRICE) validPrice(n) else validVolume(n)
+        val key = rawKey(field, index)
+        val raw = if (valid) x.rawOptionEdits - key else x.rawOptionEdits + (key to text)
+        val edited = x.copy(rawOptionEdits = raw)
+        if (x.type != ReviewItemType.WHISKY) {
+            if (field != OptionField.PRICE) return edited
+            return if (index == null) edited.copy(price = n, primaryHasOption = true)
+            else {
+                val previous = x.options.getOrNull(index) ?: return edited
+                edited.copy(options = x.options.toMutableList().also {
+                    it[index] = previous.copy(price = n)
+                })
+            }
+        }
+        return when {
+            index == null && field == OptionField.PRICE -> edited.copy(
+                price = n,
+                priceChoice = if (x.oldPrice != null) (if (validPrice(n)) PriceChoice.MANUAL else PriceChoice.NONE)
+                else x.priceChoice,
+            )
+            index == null -> edited.copy(volume = n, volumeSource = VolumeSource.MANUAL)
+            else -> {
+                val option = x.options.getOrNull(index) ?: return edited
+                val updated = if (field == OptionField.PRICE) option.copy(price = n)
+                    else option.copy(volume = n, volumeFromDefault = false)
+                edited.copy(options = x.options.toMutableList().also { it[index] = updated })
+            }
+        }
+    }
+
+    /** Text shown in an option field: the invalid text if any, otherwise the stored number. */
+    fun optionFieldText(x: ReviewItem, field: OptionField, index: Int?): String {
+        x.rawOptionEdits[rawKey(field, index)]?.let { return it }
+        val value = when {
+            index == null && field == OptionField.PRICE -> x.price
+            index == null -> x.volume
+            field == OptionField.PRICE -> x.options.getOrNull(index)?.price ?: Double.NaN
+            else -> x.options.getOrNull(index)?.volume ?: Double.NaN
+        }
+        return numberText(value)
+    }
+
+    fun toggleBottle(x: ReviewItem, index: Int?, defaultPour: Double): ReviewItem {
+        if (index == null) {
+            val bottle = !x.bottle
+            return if (bottle) x.copy(bottle = true, volume = 0.0,
+                volumeSource = VolumeSource.MANUAL,
+                rawOptionEdits = x.rawOptionEdits - "volume:main")
+            else x.copy(bottle = false, volume = if (x.volume > 0) x.volume else defaultPour,
+                volumeSource = if (x.volume > 0) x.volumeSource else VolumeSource.DEFAULT)
+        }
+        val op = x.options.getOrNull(index) ?: return x
+        val bottle = !op.bottle
+        val updated = if (bottle) op.copy(bottle = true, volume = 0.0,
+            volumeFromDefault = false) else op.copy(bottle = false,
+            volume = if (op.volume > 0) op.volume else defaultPour,
+            volumeFromDefault = op.volume <= 0)
+        val raw = if (bottle) x.rawOptionEdits - "option-volume:$index" else x.rawOptionEdits
+        return x.copy(options = x.options.toMutableList().also { it[index] = updated }, rawOptionEdits = raw)
+    }
+
+    fun addOption(x: ReviewItem, defaultPour: Double): ReviewItem =
+        if (x.type == ReviewItemType.OTHER) {
+            if (!x.primaryHasOption) x.copy(primaryHasOption = true, price = 0.0, expanded = true)
+            else x.copy(options = x.options + ReviewOption(volume = Double.NaN, price = 0.0),
+                expanded = true)
+        } else if (!x.primaryHasOption) {
+            x.copy(primaryHasOption = true, bottle = false, volume = defaultPour,
+                volumeSource = VolumeSource.DEFAULT, price = 0.0, expanded = true)
+        } else x.copy(options = x.options + ReviewOption(), expanded = true)
+
+    fun removeOption(x: ReviewItem, index: Int?): ReviewItem =
+        if (index == null) x.copy(primaryHasOption = false, primarySourceOptionId = null,
+            primaryOptionLabel = null, expanded = true)
+        else x.copy(options = x.options.filterIndexed { i, _ -> i != index }, expanded = true)
+
+    // ---- Publish summary ----
+
+    data class PublishSummary(val changedPrices: Int, val unlinkedNew: Int, val merged: Int, val operatorChecks: Int)
+
+    fun publishSummary(state: PhotoReviewState) = PublishSummary(
+        changedPrices = state.items.count { it.priceChoice == PriceChoice.PHOTO },
+        unlinkedNew = state.items.count { it.match == ReviewMatch.NEW && !it.excluded && it.linkedProductId == null },
+        merged = state.items.count { it.mergeSources.isNotEmpty() && !it.excluded },
+        operatorChecks = state.items.count { it.operatorPending && !it.excluded },
+    )
+}

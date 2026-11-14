@@ -3,7 +3,6 @@ package com.zerotoone.bottlemap.ui.customer
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.widget.Toast
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
@@ -73,6 +72,7 @@ import com.kakao.vectormap.label.LabelStyle
 import com.kakao.vectormap.label.LabelTextBuilder
 import com.zerotoone.bottlemap.BuildConfig
 import com.zerotoone.bottlemap.ui.common.DelayedLoading
+import com.zerotoone.bottlemap.ui.common.UxToast
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.delay
 
@@ -99,6 +99,13 @@ fun BarLocationMapScreen(
     // synchronously BEFORE changing the back stack.
     var activeMapView by remember { mutableStateOf<MapView?>(null) }
     var leavingMap by remember { mutableStateOf(false) }
+    var copyNotice by remember(barId) { mutableStateOf<Pair<Long, String>?>(null) }
+    LaunchedEffect(copyNotice) {
+        if (copyNotice != null) {
+            delay(2500)
+            copyNotice = null
+        }
+    }
     fun exitMap() {
         if (leavingMap) return
         leavingMap = true
@@ -108,6 +115,7 @@ fun BarLocationMapScreen(
     BackHandler(enabled = !leavingMap, onBack = ::exitMap)
 
     I2CustomerSearchTheme {
+        Box(Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
         ) {
@@ -141,6 +149,9 @@ fun BarLocationMapScreen(
                         // outgoing GL surface after Back was requested.
                         if (leavingMap) view?.let(::hideMapSurface)
                     },
+                    onAddressCopied = {
+                        copyNotice = System.nanoTime() to "주소를 복사했어요."
+                    },
                 )
                 is BarDetailUiState.Empty -> BarLocationContent(
                     barId, detailState.bar,
@@ -150,8 +161,15 @@ fun BarLocationMapScreen(
                         // outgoing GL surface after Back was requested.
                         if (leavingMap) view?.let(::hideMapSurface)
                     },
+                    onAddressCopied = {
+                        copyNotice = System.nanoTime() to "주소를 복사했어요."
+                    },
                 )
             }
+        }
+        copyNotice?.let { (_, message) ->
+            UxToast(message, Modifier.align(Alignment.TopCenter))
+        }
         }
     }
 }
@@ -161,6 +179,7 @@ private fun BarLocationContent(
     barId: String,
     bar: BarDetailUiModel,
     onMapViewChanged: (MapView?) -> Unit,
+    onAddressCopied: () -> Unit,
 ) {
     if (barId != bar.barId) {
         MapStatusMessage("선택한 바의 정보가 일치하지 않습니다.")
@@ -216,7 +235,7 @@ private fun BarLocationContent(
                             as ClipboardManager
                         clipboard.setPrimaryClip(
                             ClipData.newPlainText("Bar Address", address))
-                        Toast.makeText(context, "주소가 복사되었습니다.", Toast.LENGTH_SHORT).show()
+                        onAddressCopied()
                     },
                 color = MaterialTheme.colorScheme.surface,
                 shape = RoundedCornerShape(15.dp),

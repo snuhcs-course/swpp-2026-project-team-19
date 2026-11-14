@@ -58,7 +58,7 @@ internal fun P18Back(onClick: () -> Unit, dark: Boolean = false, modifier: Modif
         .then(if (dark) Modifier.background(P18Bg, RoundedCornerShape(12.dp)) else Modifier)
         .clickable(onClick = onClick).testTag("customer-back"),
         contentAlignment = Alignment.Center) {
-        BmIcon(BmIconId.BACK, "뒤로", Modifier.size(24.dp), tint = P18Text)
+        BmIcon(BmIconId.BACK, "뒤로가기", Modifier.size(24.dp), tint = P18Text)
     }
 }
 

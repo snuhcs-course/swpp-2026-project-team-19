@@ -65,6 +65,23 @@ android {
         compose = true
         buildConfig = true
     }
+
+    // Robolectric UX screenshots are an opt-in visual artifact, NOT regular
+    // unit tests. Exclude the class from normal CI instead of silently
+    // counting three Assume skips, which violates our test-inventory policy.
+    // Keep the original explicit command:
+    // ./gradlew :app:testDebugUnitTest --tests '*UxV18ScreenshotTest*' -PbmUxScreenshots=true
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
+        unitTests.all {
+            val screenshots = providers.gradleProperty("bmUxScreenshots").orNull == "true"
+            if (!screenshots) {
+                it.filter.excludeTestsMatching("com.zerotoone.bottlemap.ux.UxV18ScreenshotTest")
+            }
+            it.systemProperty("bm.ux.screenshots", screenshots.toString())
+            it.systemProperty("bm.ux.screenshotDir", layout.buildDirectory.dir("ux-screenshots").get().asFile.path)
+        }
+    }
 }
 
 dependencies {
@@ -98,6 +115,9 @@ dependencies {
 
     testImplementation(libs.junit4)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation("org.robolectric:robolectric:4.17")
+    testImplementation(platform(libs.androidx.compose.bom))
+    testImplementation("androidx.compose.ui:ui-test-junit4")
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")

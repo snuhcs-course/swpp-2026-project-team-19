@@ -59,18 +59,26 @@ internal fun OwnerMenuFlatRow(
     // Imported menus may carry four or more existing portions. They remain visible
     // even though the direct editor limits new entries to three portions.
     // Selection never changes the height for a given menu item.
-    val rowHeight = maxOf(66, item.options.size * 16 + 10).dp
     // The v4 slot remains 129dp for ordinary prices. Longer existing prices
     // and larger text scales get the real measured space they need. Stage 7
     // prevents NEW extracted prices above eight digits; legacy rows remain legible.
     val measurer = rememberTextMeasurer()
     val density = LocalDensity.current
+    // Keep the original compact visual at 1x but provide vertical room for scaled fonts.
+    val fontScale = density.fontScale.coerceAtLeast(1f)
+    val rowHeight = (maxOf(66f, (item.options.size * 16 + 10).toFloat()) * fontScale).dp
+    val pourWidth = with(density) {
+        maxOf(30.dp, (item.options.maxOfOrNull { option ->
+            measurer.measure(servingDisplayLabel(option.pourMl, option.label),
+                style = TextStyle(fontSize = 10.sp), maxLines = 1).size.width
+        } ?: 0).toDp())
+    }
     val measuredPricePx = item.options.maxOfOrNull {
         measurer.measure("%,d원".format(it.displayPrice(nowEpochMs)),
             style = TextStyle(fontSize = 10.sp), maxLines = 1).size.width
     } ?: 0
     val priceSlotWidth = with(density) {
-        maxOf(ownerMenuPriceSlotWidth, measuredPricePx.toDp() + 27.dp + 30.dp + 10.dp)
+        maxOf(ownerMenuPriceSlotWidth, measuredPricePx.toDp() + 27.dp + pourWidth + 10.dp)
     }
     Box(Modifier.fillMaxWidth().height(rowHeight)
         .background(V4Color.background)
@@ -115,7 +123,7 @@ internal fun OwnerMenuFlatRow(
                 horizontalAlignment = Alignment.End,
                 verticalArrangement = Arrangement.spacedBy(3.dp)) {
                 item.options.forEach { option ->
-                    OwnerMenuPriceLine(option, nowEpochMs, soldOut)
+                    OwnerMenuPriceLine(option, nowEpochMs, soldOut, pourWidth)
                 }
                 if (item.options.isEmpty()) Text("가격 없음", color = secondary, fontSize = 10.sp)
             }
@@ -140,7 +148,7 @@ internal fun OwnerMenuFlatRow(
 
 /** Discount badge is in a reserved leading slot: ml and right-edge prices never move. */
 @Composable
-internal fun OwnerMenuPriceLine(option: MockMenuOption, atEpochMs: Long, soldOut: Boolean = false) {
+internal fun OwnerMenuPriceLine(option: MockMenuOption, atEpochMs: Long, soldOut: Boolean = false, pourWidth: androidx.compose.ui.unit.Dp = 30.dp) {
     val active = ownerOptionDiscountActive(option, atEpochMs)
     val textColor = if (soldOut) Color(0xFF999999) else V4Color.text
     val priceColor = if (soldOut) Color(0xFF999999) else V4Color.sub
@@ -160,7 +168,7 @@ internal fun OwnerMenuPriceLine(option: MockMenuOption, atEpochMs: Long, soldOut
             }
         }
         Text(servingDisplayLabel(option.pourMl, option.label),
-            modifier = Modifier.width(30.dp), color = textColor,
+            modifier = Modifier.width(pourWidth), color = textColor,
             fontSize = 10.sp, maxLines = 1, textAlign = TextAlign.End)
         Text("%,d원".format(option.displayPrice(atEpochMs)),
             modifier = Modifier.weight(1f),
