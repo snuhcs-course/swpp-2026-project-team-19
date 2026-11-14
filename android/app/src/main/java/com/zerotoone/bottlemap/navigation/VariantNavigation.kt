@@ -50,6 +50,7 @@ internal const val variantStartDestination = "customer"
 internal fun NavGraphBuilder.registerVariantRoutes(
     navController: NavHostController,
     onNotice: (String) -> Unit = {},
+    onForceOwnerReauthentication: () -> Unit,
 ) {
     // Shared by both ends of the Owner manage <-> preview round trip.
     val previewSwitchCooldown = OwnerPreviewSwitchCooldown()
@@ -225,11 +226,7 @@ internal fun NavGraphBuilder.registerVariantRoutes(
                                     }
                                 }
                                     },
-                                    onReauthenticate = {
-                                        navController.navigate("customer/login") {
-                                            launchSingleTop = true
-                                        }
-                                    },
+                                    onReauthenticate = onForceOwnerReauthentication,
                                 )
                             }
                             mockState == MockOwnerLoadState.Loading -> {

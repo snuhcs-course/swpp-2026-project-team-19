@@ -13,4 +13,7 @@ object OwnerRuntime {
     fun repository(context: Context): OwnerMockRepository = instance ?: synchronized(this) {
         instance ?: LiveOwnerScreenRepository(context.applicationContext).also { instance = it }
     }
+
+    /** Never reuse cached owner bars or imports after an account change. */
+    fun invalidateForAccountChange() = synchronized(this) { instance = null }
 }

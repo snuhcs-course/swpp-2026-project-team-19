@@ -34,6 +34,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.zerotoone.bottlemap.data.owner.OwnerRuntime
 import com.zerotoone.bottlemap.ui.auth.AccountScreen
 import com.zerotoone.bottlemap.ui.auth.AuthUiState
 import com.zerotoone.bottlemap.ui.auth.AuthViewModel
@@ -276,6 +277,7 @@ private fun NavGraphBuilder.accountGraph(
                 // One tap opens Google account selection; no separate login screen (UX v18).
                 onOpenLogin = { if (navController.currentDestination?.route == Routes.CUSTOMER_ACCOUNT) signIn() },
                 onLogout = {
+                    OwnerRuntime.invalidateForAccountChange()
                     authViewModel.logout()
                     showToast("로그아웃했어요.")
                 },
@@ -298,7 +300,18 @@ private fun NavGraphBuilder.accountGraph(
                 },
             )
         }
-        registerVariantRoutes(navController, showToast)
+        registerVariantRoutes(navController, showToast,
+            onForceOwnerReauthentication = {
+                // Drop previous owner's ViewModels AND cached repository before
+                // permitting a different Google account to sign in.
+                OwnerRuntime.invalidateForAccountChange()
+                authViewModel.continueAsGuest()
+                navController.navigate(Routes.CUSTOMER_LOGIN) {
+                    popUpTo(OwnerRoutes.GRAPH) { inclusive = true }
+                    launchSingleTop = true
+                }
+            },
+        )
     }
 }
 
