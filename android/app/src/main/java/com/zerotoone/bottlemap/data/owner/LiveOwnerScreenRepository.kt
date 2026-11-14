@@ -79,6 +79,50 @@ internal fun photoImportNeedsApply(
     return true
 }
 
+/** When a photo selects a catalog P to replace a previously unlinked X,
+ * §5.4 names X by barMenuItemId. Preserve X's complete option tuple.
+ * An already-linked P row takes precedence over the proposed source row.
+ */
+internal fun ownerPhotoSelectionExistingOptions(
+    current: MockOwnerSnapshot,
+    response: MenuImportStatusDto,
+    barId: String,
+    extractedItemId: String,
+    productId: String,
+): List<MockMenuOption> {
+    val linked = current.menuItems.firstOrNull {
+        it.barId == barId && it.productId == productId
+    }
+    if (linked != null) return linked.options
+    val proposedRowId = response.proposedChanges.firstOrNull { change ->
+        val ids = change.extractedItemIds.ifEmpty { listOfNotNull(change.extractedItemId) }
+        extractedItemId in ids
+    }?.barMenuItemId
+    return current.menuItems.firstOrNull {
+        it.barId == barId && it.barMenuItemId == proposedRowId
+    }?.options.orEmpty()
+}
+
+/** §8.12 merges same-name or same-product lines AFTER reviewing them.
+ * A previously saved option belongs only on the OCR lines that update that
+ * serving; untouched saved options are carried once by the first line.
+ * This prevents a later Bottle-only line from reintroducing an old 30ml price.
+ */
+internal fun ownerRetainedOptionsForGroupedLine(
+    lineId: String,
+    groupLineIds: List<String>,
+    reviewedKeys: Map<String, Set<String>>,
+    saved: List<MockMenuOption>,
+): List<MockMenuOption> {
+    val lines = groupLineIds.ifEmpty { listOf(lineId) }
+    return saved.filter { old ->
+        val key = servingIdentityKey(old.pourMl, old.label)
+        val updating = lines.filter { key in reviewedKeys[it].orEmpty() }
+        if (updating.isEmpty()) lineId == lines.first()
+        else lineId in updating
+    }
+}
+
 class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
     private val app = context.applicationContext
     private val local = LocalOwnerMockRepository(InMemoryMockOwnerStateStore())
@@ -985,8 +1029,55 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         val decisions = job.images.flatMap { it.lines }.associateBy { it.extractedItemId }
         val defaultPour = current.bars.firstOrNull { it.barId == job.barId }
             ?.defaultPourMl ?: 30
+        // Server §8.12 merges all lines targeting the same catalog product or
+        // normalized bar-local name. Compute serving ownership for that group
+        // before retaining any of the existing menu tuples.
+        val originalItems = original.images.flatMap { it.items }
+        val targetByLine = originalItems.mapNotNull { source ->
+            val chosen = decisions[source.extractedItemId]?.decision
+                ?: return@mapNotNull null
+            val target = when (chosen.kind) {
+                MockDecisionKind.SELECT_PRODUCT -> "product:" + requireNotNull(chosen.productId)
+                MockDecisionKind.CREATE_PRODUCT -> {
+                    val name = chosen.displayNameOverride ?: chosen.newProduct?.name
+                        ?: source.extractedProductName.orEmpty()
+                    "name:" + PhotoReviewRules.normalizedUnlinkedMenuName(name)
+                }
+                else -> null
+            }
+            target?.let { source.extractedItemId to it }
+        }.toMap()
+        val groupLines = originalItems.mapNotNull { source ->
+            targetByLine[source.extractedItemId]?.let { it to source.extractedItemId }
+        }.groupBy({ it.first }, { it.second })
+        val reviewedKeys = originalItems.filter {
+            it.extractedItemId in targetByLine
+        }.associate { source ->
+            val chosen = requireNotNull(decisions[source.extractedItemId]?.decision)
+            val whisky = when (chosen.kind) {
+                MockDecisionKind.SELECT_PRODUCT -> true
+                MockDecisionKind.CREATE_PRODUCT -> chosen.newProduct?.category == "whisky"
+                else -> false
+            }
+            source.extractedItemId to ownerFinalReviewOptions(
+                source, chosen, defaultPour, whisky,
+            ).map { option ->
+                servingIdentityKey(
+                    option["pourMl"] as Int?, option["optionLabel"] as String?,
+                )
+            }.toSet()
+        }
+        fun retainedFor(
+            itemId: String, existing: List<MockMenuOption>,
+        ): List<MockMenuOption> {
+            val key = targetByLine[itemId] ?: return existing
+            return ownerRetainedOptionsForGroupedLine(
+                itemId, groupLines[key].orEmpty(), reviewedKeys, existing,
+            )
+        }
+
         // Validate the COMPLETE request before the first network write.
-        val itemDecisions = original.images.flatMap { it.items }.map { item ->
+        val itemDecisions = originalItems.map { item ->
             val chosen = decisions[item.extractedItemId]?.decision
                 ?: error("확인하지 않은 메뉴가 있어요.")
             when(chosen.kind) {
@@ -998,9 +1089,12 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                     "correctedProductName" to chosen.displayNameOverride,
                     "options" to ownerFinalReviewOptions(
                         item, chosen, defaultPour, true,
-                        current.menuItems.firstOrNull { saved ->
-                            saved.barId == job.barId && saved.productId == chosen.productId
-                        }?.options.orEmpty(),
+                        retainedFor(item.extractedItemId,
+                            ownerPhotoSelectionExistingOptions(
+                                current, original, job.barId, item.extractedItemId,
+                                requireNotNull(chosen.productId),
+                            )),
+
                     ),
                 )
                 MockDecisionKind.CREATE_PRODUCT -> {
@@ -1022,7 +1116,9 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                         "correctedProductName" to name.trim(),
                         "options" to ownerFinalReviewOptions(
                             item, chosen, defaultPour, kind == "whisky",
-                            existingOptions = ownerExistingUnlinkedOptions(current, job.barId, name.trim()),
+                            existingOptions = retainedFor(item.extractedItemId,
+                                ownerExistingUnlinkedOptions(current, job.barId, name.trim())),
+
                         ),
                     )
                 }
