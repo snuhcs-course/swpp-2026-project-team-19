@@ -319,4 +319,26 @@ class AuthViewModelTest {
             events.value = AuthSessionEvent.Guest
         }
     }
+    @Test
+    fun ownerReauthenticationKeepsGoogleSignInDisabledUntilSignOutCompletes() = runTest(dispatcher) {
+        val fake = FakeAuthGateway()
+        val finishLogout = CompletableDeferred<Unit>()
+        fake.pendingLogout = finishLogout
+        fake.events.value = AuthSessionEvent.Authenticated
+        val vm = AuthViewModel(fake)
+        advanceUntilIdle()
+        assertTrue(vm.state.value is AuthUiState.SignedIn)
+
+        vm.prepareOwnerReauthentication()
+        assertEquals(AuthUiState.SigningOut, vm.state.value)
+        assertFalse(vm.beginGoogleSignIn())
+        advanceUntilIdle()
+        assertEquals(AuthUiState.SigningOut, vm.state.value)
+
+        finishLogout.complete(Unit)
+        advanceUntilIdle()
+        assertEquals(AuthUiState.Guest, vm.state.value)
+        assertTrue(vm.beginGoogleSignIn())
+    }
+
 }

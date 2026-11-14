@@ -20,6 +20,8 @@ sealed interface AuthUiState {
     data object Initializing : AuthUiState
     data object Guest : AuthUiState
     data object SigningIn : AuthUiState
+    /** Owner AUTH recovery: disable Google sign-in until sign-out finishes. */
+    data object SigningOut : AuthUiState
     data class SignedIn(val user: CurrentUserDto) : AuthUiState
     /** Retry account sync only when a potentially valid Supabase session remains. */
     data class SignInError(
@@ -149,7 +151,14 @@ class AuthViewModel(
     /** Called on composition disposal (back, recreation) before token exchange. */
     fun cancelCredentialSelectionIfPending() = googleCancelled()
 
-    fun continueAsGuest() {
+    fun continueAsGuest() = signOutToGuest(blockFreshLogin = false)
+
+    /** The old owner graph is destroyed immediately, but a new account must
+     * never start authenticating before Supabase clears the old credentials.
+     */
+    fun prepareOwnerReauthentication() = signOutToGuest(blockFreshLogin = true)
+
+    private fun signOutToGuest(blockFreshLogin: Boolean) {
         if (logoutInProgress) return
         // Immediately invalidate in-flight profile/sign-in work and hide the
         // old identity; do not wait for an SDK event or remote sign-out.
@@ -159,7 +168,8 @@ class AuthViewModel(
         signingIn = false
         awaitingGoogleCredential = false
         signInJob?.cancel()
-        _state.value = AuthUiState.Guest
+        _state.value = if (blockFreshLogin)
+            AuthUiState.SigningOut else AuthUiState.Guest
 
         viewModelScope.launch {
             try {
@@ -169,7 +179,11 @@ class AuthViewModel(
             } catch (_: Exception) {
                 // Gateway clears local Supabase credentials even if remote fails.
             } finally {
-                if (generation == operationGeneration) logoutInProgress = false
+                if (generation == operationGeneration) {
+                    logoutInProgress = false
+                    if (_state.value == AuthUiState.SigningOut)
+                        _state.value = AuthUiState.Guest
+                }
             }
         }
     }

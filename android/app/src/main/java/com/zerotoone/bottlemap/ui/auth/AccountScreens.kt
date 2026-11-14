@@ -230,7 +230,9 @@ fun GoogleLoginScreen(
                         fontSize=14.sp,lineHeight=21.sp,color=Color(0xFFFFB4AB))
                 }
             }
-            if(state is AuthUiState.Initializing || state is AuthUiState.SigningIn) {
+            if(state is AuthUiState.SigningOut) {
+                Text("이전 계정 연결을 정리하고 있어요.",color=P18Muted)
+            } else if(state is AuthUiState.Initializing || state is AuthUiState.SigningIn) {
                 // Static state copy only; never animate a spinner under Google picker.
                 Text("로그인 중이에요",color=P18Muted)
             }

@@ -305,7 +305,7 @@ private fun NavGraphBuilder.accountGraph(
                 // Drop previous owner's ViewModels AND cached repository before
                 // permitting a different Google account to sign in.
                 OwnerRuntime.invalidateForAccountChange()
-                authViewModel.continueAsGuest()
+                authViewModel.prepareOwnerReauthentication()
                 navController.navigate(Routes.CUSTOMER_LOGIN) {
                     popUpTo(OwnerRoutes.GRAPH) { inclusive = true }
                     launchSingleTop = true

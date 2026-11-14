@@ -118,7 +118,7 @@ internal fun signInOutcome(state: AuthUiState): SignInOutcome? = when (state) {
     is AuthUiState.SignedIn -> SignInOutcome.SUCCESS
     AuthUiState.Guest -> SignInOutcome.CANCELLED
     is AuthUiState.SignInError -> SignInOutcome.FAILED
-    AuthUiState.Initializing, AuthUiState.SigningIn -> null
+    AuthUiState.Initializing, AuthUiState.SigningIn, AuthUiState.SigningOut -> null
 }
 
 /**
