@@ -4177,7 +4177,7 @@ operator와 작업 대상 업장의 현재 업주가 호출할 수 있다. 요�
 - 그래서 세 줄은 변경 하나로 합쳐진다(8.12). 변경의 `extractedItemIds`가 세 줄이고, `after.options`는 세 줄의 옵션을 메뉴 순서로 이은 것이다. 둘째 사진 줄의 30ml 17,000은 첫 줄의 옵션과 같아 하나만 남았다. 30ml에 17,000과 21,000이 함께 있으므로 업주가 하나를 골라야 한다(8.12, 8.9의 오류 예시).
 - 첫째 사진의 4번 줄은 후보가 없어 `unmatched`이며, 그 변경(생략)의 `after.productId`가 `null`이다.
 - 둘째 사진의 하이볼 줄은 AI가 위스키가 아닌 메뉴로 읽어(`extractedKind = other`) 매칭하지 않았다. `initialResolutionStatus`, `proposedProductId`가 `null`이고 후보가 없으며, 그 변경의 `after.kind`가 `other`다.
-- `reviewDraft`는 업주가 저장한 초안이다. 서버는 `content`를 해석하지 않고 저장한 대로 돌려주지만, 객체 안의 키 순서는 지키지 않는다(PostgreSQL `jsonb`).
+- `reviewDraft`는 업주가 저장한 초안이다. 서버는 `content`를 해석하지 않고 보낸 그대로(키 순서 포함) 돌려준다.
 
 ```json
 {
@@ -4425,21 +4425,21 @@ operator와 작업 대상 업장의 현재 업주가 호출할 수 있다. 요�
   "reviewDraft": {
     "draftVersion": 1,
     "reviewVersion": 1,
-    "savedAt": "2026-11-14T11:41:59.918884Z",
+    "savedAt": "2026-11-14T12:29:56.168822Z",
     "content": {
-      "clientState": {
-        "expandedItemIds": ["10000000-0000-4000-8000-000000000002"]
-      },
       "itemDecisions": [
         {
-          "action": "select_existing_product",
-          "productId": "44444444-4444-4444-8444-444444444441",
+          "extractedItemId": "10000000-0000-4000-8000-000000000002",
           "finalLineType": "product",
-          "extractedItemId": "10000000-0000-4000-8000-000000000002"
+          "action": "select_existing_product",
+          "productId": "44444444-4444-4444-8444-444444444441"
         },
-        { "action": "reject", "finalLineType": "product", "extractedItemId": "10000000-0000-4000-8000-000000000004" }
+        { "extractedItemId": "10000000-0000-4000-8000-000000000004", "finalLineType": "product", "action": "reject" }
       ],
-      "changeDecisions": []
+      "changeDecisions": [],
+      "clientState": {
+        "expandedItemIds": ["10000000-0000-4000-8000-000000000002"]
+      }
     }
   },
   "proposedChanges": [
@@ -4492,7 +4492,7 @@ operator와 작업 대상 업장의 현재 업주가 호출할 수 있다. 요�
   "menuImportId": "77777777-7777-4777-8777-777777777772",
   "barId": "22222222-2222-4222-8222-222222222222",
   "status": "canceled",
-  "canceledAt": "2026-11-14T11:42:00.378248Z"
+  "canceledAt": "2026-11-14T12:29:56.717263Z"
 }
 ```
 
@@ -4569,7 +4569,7 @@ operator와 작업 대상 업장의 현재 업주가 호출할 수 있다(검수
 
 저장 규칙:
 
-- **검증**: 초안은 미완성이므로 검수 제출만큼 검사하지 않는다. `content`가 JSON 객체인지와 크기만 확인하고 내용은 그대로 저장한다. 결정의 실제 검증은 제출(8.7) 때 한다. `content`를 JSON으로 쓴 크기가 256KB(262,144바이트)를 넘으면 `413 REVIEW_DRAFT_TOO_LARGE`(`details.maxBytes`)다.
+- **검증**: 초안은 미완성이므로 검수 제출만큼 검사하지 않는다. `content`가 JSON 객체인지와 크기만 확인하고 내용은 그대로 저장한다. 문자열 안의 NUL 문자(`\u0000`)처럼 올바른 JSON이면 무엇이든 받고, 키 순서도 그대로 돌려준다. 결정의 실제 검증은 제출(8.7) 때 한다. `content`를 JSON으로 쓴 크기가 256KB(262,144바이트)를 넘으면 `413 REVIEW_DRAFT_TOO_LARGE`(`details.maxBytes`)다.
 - **상태**: 작업이 `ready_for_review`일 때만 저장한다. 아니면 `409 INVALID_IMPORT_STATE`(`details.menuImportId`, `details.status`)다.
 - **동시 수정**: 요청의 `draftVersion`이 서버의 현재 초안 버전과 다르면 아무것도 저장하지 않고 `409 REVIEW_DRAFT_OUTDATED`다. 같은 검수를 두 기기에서, 또는 업주와 operator가 함께 고칠 때 서로의 입력을 덮어쓰지 않게 하기 위해서다. 같으면 초안을 바꾸고 버전을 1 올린다.
 - **잠금**: 메뉴판을 바꾸지 않으므로 업장 행은 잠그지 않는다. 작업 행만 잠그고 상태와 버전을 확인한다. 그래서 검수 제출, 취소와 동시에 와도 차례로 처리되고, 제출이나 취소가 먼저 끝나면 저장은 `409 INVALID_IMPORT_STATE`다.
@@ -4613,13 +4613,13 @@ operator와 작업 대상 업장의 현재 업주가 호출할 수 있다(검수
 **실제 응답 (2.4)**. 5.8의 작업에 업주가 처음 저장한 응답이다.
 
 ```json
-{ "menuImportId": "77777777-7777-4777-8777-777777777771", "draftVersion": 1, "savedAt": "2026-11-14T11:41:59.918884Z" }
+{ "menuImportId": "77777777-7777-4777-8777-777777777771", "draftVersion": 1, "savedAt": "2026-11-14T12:29:56.168822Z" }
 ```
 
 업주가 저장한 뒤 operator가 `draftVersion = 0`으로 저장했을 때 (`409`). 저장 응답의 `savedAt`과 같은 시각이며, `details.savedAt`은 초 단위까지 온다.
 
 ```json
-{"error": {"code": "REVIEW_DRAFT_OUTDATED", "message": "다른 곳에서 먼저 저장한 초안이 있습니다. 최신 내용을 다시 확인해 주세요.", "details": {"currentDraftVersion": 1, "savedAt": "2026-11-14T11:41:59Z", "reviewUrl": "/api/menu-imports/77777777-7777-4777-8777-777777777771"}, "fieldErrors": []}}
+{"error": {"code": "REVIEW_DRAFT_OUTDATED", "message": "다른 곳에서 먼저 저장한 초안이 있습니다. 최신 내용을 다시 확인해 주세요.", "details": {"currentDraftVersion": 1, "savedAt": "2026-11-14T12:29:56Z", "reviewUrl": "/api/menu-imports/77777777-7777-4777-8777-777777777771"}, "fieldErrors": []}}
 ```
 
 `content`가 256KB를 넘을 때 (`413`)
@@ -5125,7 +5125,7 @@ HTTP/1.1 200 OK
   "menuImportId": "77777777-7777-4777-8777-777777777771",
   "status": "applied",
   "reviewVersion": 1,
-  "appliedAt": "2026-11-14T11:42:00.200863Z",
+  "appliedAt": "2026-11-14T12:29:56.500862Z",
   "menuBoardId": "66666666-6666-4666-8666-666666666661",
   "result": { "added": 4, "updated": 0, "removed": 0, "ignored": 0, "createdBrands": 0, "createdProducts": 0, "unlinkedWhisky": 1 }
 }

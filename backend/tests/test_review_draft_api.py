@@ -220,3 +220,40 @@ def test_a_rebuilt_review_keeps_the_draft(client, db_session, sample, operator, 
         1,
         CONTENT,
     )
+
+
+def test_any_valid_json_is_kept_as_sent(client, db_session, sample, operator):
+    """A NUL character in a string (from pasted text) is valid JSON, and keys come back in their order."""
+    content = {"zeta": 1, "clientState": {"note": "붙여 넣은\x00글"}, "alpha": [3, 1]}
+
+    saved = save(client, sample, operator, content=content)
+
+    assert saved.status_code == 200, saved.text
+    draft = review(client, sample, operator)["reviewDraft"]
+    assert list(draft["content"]) == ["zeta", "clientState", "alpha"]
+    assert draft["content"]["clientState"]["note"] == "붙여 넣은\x00글"
+
+
+def test_the_response_has_this_saves_version_even_if_another_save_follows(db_session, sample, monkeypatch):
+    """The answer is built before the commit, so a save committed right after cannot leak into it."""
+    from app.core.security import Principal
+    from app.schemas.review_draft import ReviewDraftRequest
+    from app.services import menu_review_draft
+
+    def commit_then_another_save():
+        real_commit()
+        db_session.execute(
+            MenuImport.__table__.update()
+            .where(MenuImport.id == sample.menu_import.id)
+            .values(review_draft_version=99)
+        )
+
+    real_commit = db_session.commit
+    monkeypatch.setattr(db_session, "commit", commit_then_another_save)
+    request = ReviewDraftRequest(draftVersion=0, reviewVersion=1, content={})
+
+    response = menu_review_draft.save_review_draft(
+        db_session, Principal(kind="temporary", subject="operator", claims={}), sample.menu_import.id, request
+    )
+
+    assert response.draftVersion == 1

@@ -20,6 +20,11 @@ nothing, stop `--apply` before anything is written: an operator tidies them with
 3.14) and runs it again. Imports in review then get their draft diff rebuilt with a new reviewVersion,
 since the lines it merges are grouped by name key (spec 8.12).
 
+The old backend keeps serving while this runs, so `--apply` first locks every bar row and then the imports
+in review, in the order every menu request locks them (API spec 3.14.1), and reads what it writes only
+after that: a name edit, a publish or a cancel waits until the run commits instead of being overwritten.
+A dry run takes no lock.
+
     cd backend
     uv run --env-file .env python scripts/renormalize_aliases.py           # dry run
     uv run --env-file .env python scripts/renormalize_aliases.py --apply
@@ -220,8 +225,16 @@ def report_name_keys(plan: NameKeyPlan, bar_names: dict[UUID, str]) -> None:
         print(f"  empty key in {bar_names.get(row.bar_id, row.bar_id)}: {row.display_name!r}")
 
 
-def imports_in_review(conn: Connection) -> list[UUID]:
-    return list(conn.scalars(select(MenuImport.id).where(MenuImport.status == ImportStatus.READY_FOR_REVIEW)))
+def lock_menus(conn: Connection) -> None:
+    """Lock every bar row, in id order, as a menu request locks its bar first (spec 3.14.1)."""
+    conn.execute(select(Bar.id).order_by(Bar.id).with_for_update())
+
+
+def imports_in_review(conn: Connection, *, lock: bool = False) -> list[UUID]:
+    """Imports in review; with `lock`, their rows are locked (after the bars) and the status is read again
+    once a cancel holding one has finished."""
+    query = select(MenuImport.id).where(MenuImport.status == ImportStatus.READY_FOR_REVIEW).order_by(MenuImport.id)
+    return list(conn.scalars(query.with_for_update() if lock else query))
 
 
 def rebuild_drafts(conn: Connection, import_ids: list[UUID]) -> None:
@@ -243,9 +256,11 @@ def main() -> None:
     )
     # One transaction for everything; it is committed only with --apply.
     with get_engine().connect() as conn:
+        if args.apply:
+            lock_menus(conn)
         name_keys = plan_name_keys(load_name_key_rows(conn))
         report_name_keys(name_keys, dict(conn.execute(select(Bar.id, Bar.name)).all()))
-        in_review = imports_in_review(conn)
+        in_review = imports_in_review(conn, lock=args.apply)
         print(f"menu imports in review: {len(in_review)}, their draft diff is rebuilt with a new reviewVersion")
         if args.apply and name_keys.blocked:
             print("\nnot applied: tidy the lines above with a manual edit first. Nothing was written.")

@@ -8,6 +8,8 @@ API spec 5.9; schema guide 8.1 (menu_imports).
 
 - review_draft: the reviewer's unfinished input, saved before submission so the review can go on from
   another device or the operator web. The server does not interpret it. Cleared on apply or cancel.
+  json, not jsonb: the text is kept as sent, so any valid JSON is accepted (jsonb refuses U+0000 in a
+  string) and the keys come back in their order.
 - review_draft_version: raised on every save; a save sends the version it read, so two editors do not
   overwrite each other. Not reset when the draft is cleared.
 - review_draft_review_version: the reviewVersion of the review data the draft was entered on, sent back
@@ -30,7 +32,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.add_column("menu_imports", sa.Column("review_draft", postgresql.JSONB(), nullable=True))
+    op.add_column("menu_imports", sa.Column("review_draft", postgresql.JSON(), nullable=True))
     op.add_column(
         "menu_imports",
         sa.Column("review_draft_version", sa.Integer(), nullable=False, server_default=sa.text("0")),

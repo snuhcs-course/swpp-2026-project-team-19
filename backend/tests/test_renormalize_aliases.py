@@ -109,6 +109,7 @@ from scripts.renormalize_aliases import (  # noqa: E402
     apply_name_keys,
     imports_in_review,
     load_name_key_rows,
+    lock_menus,
     plan_name_keys,
     rebuild_drafts,
 )
@@ -171,3 +172,16 @@ def test_the_database_parts(client, db_session, image_storage, token_for):
     assert db_session.get(BarMenuItem, on_board.id).name_key == "mysterycask"
     assert db_session.get(BarMenuItem, off_board.id).name_key == "left"
     assert db_session.get(MenuImport, sample.menu_import.id).review_version == 2
+
+
+def test_apply_locks_the_bars_before_the_imports(db_session):
+    """The order every menu request locks in (spec 3.14.1), so the run cannot deadlock with one."""
+    from tests.sql_support import recorded_statements
+
+    conn = db_session.connection()
+    with recorded_statements(db_session) as statements:
+        lock_menus(conn)
+        imports_in_review(conn, lock=True)
+
+    locks = [sql for sql in statements if "FOR UPDATE" in sql]
+    assert ["FROM bars" in locks[0], "FROM menu_imports" in locks[1]] == [True, True]
