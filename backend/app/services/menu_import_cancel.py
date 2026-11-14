@@ -14,6 +14,7 @@ from app.core.errors import ApiError
 from app.models import ImportStatus, MenuImport, PipelineStatus
 from app.schemas.menu_import import ImportCanceledResponse
 from app.services.menu_import_review import canceled_response
+from app.services.menu_review_draft import clear_review_draft
 from app.services.menu_import_upload import UNFINISHED_STATUSES
 
 
@@ -40,5 +41,7 @@ def cancel_menu_import(session: Session, import_id: UUID) -> ImportCanceledRespo
             run.completed_at = now
     menu_import.status = ImportStatus.CANCELED
     menu_import.completed_at = now
+    # Whatever was entered in review goes with the import (spec 5.7, 5.9).
+    clear_review_draft(menu_import)
     session.commit()
     return canceled_response(menu_import)
