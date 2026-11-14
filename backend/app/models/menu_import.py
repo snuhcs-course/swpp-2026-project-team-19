@@ -25,6 +25,7 @@ from sqlalchemy import (
     func,
     text,
 )
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import Uuid
 
@@ -114,6 +115,7 @@ class MenuImport(Base):
         Index("ix_menu_imports_bar_id_created_at", "bar_id", "created_at"),
         Index("ix_menu_imports_bar_id_status", "bar_id", "status"),
         CheckConstraint("recovery_count >= 0", name="ck_menu_imports_recovery_count"),
+        CheckConstraint("review_draft_version >= 0", name="ck_menu_imports_review_draft_version"),
     )
 
     id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid4)
@@ -132,6 +134,17 @@ class MenuImport(Base):
     review_version: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default=text("0"))
     owner_note: Mapped[str | None] = mapped_column(Text, nullable=True)
     review_confirmed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    # The reviewer's unfinished input (API spec 5.9), not interpreted by the server; cleared on apply or cancel.
+    review_draft: Mapped[dict[str, Any] | None] = mapped_column(JSONB, nullable=True)
+    # Raised on every draft save; a save sends the version it read. Not reset when the draft is cleared.
+    review_draft_version: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0, server_default=text("0")
+    )
+    review_draft_saved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    # Null for a temporary-login operator without a users row.
+    review_draft_saved_by_user_id: Mapped[UUID | None] = mapped_column(
+        Uuid(as_uuid=True), ForeignKey("users.id"), nullable=True
+    )
     # How many times processing was resumed after a server restart; past the limit the import fails.
     recovery_count: Mapped[int] = mapped_column(SmallInteger, nullable=False, default=0, server_default=text("0"))
     created_at: Mapped[datetime] = _now_column()
