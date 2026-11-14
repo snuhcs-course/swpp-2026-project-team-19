@@ -99,6 +99,11 @@ class Proposal:
     name_corrected: bool = False
     # Every line merged into this one (merge_proposals), in menu order; the first is extracted_item_id.
     line_ids: tuple[UUID, ...] = ()
+    # Matched again by a corrected name (spec 8.11): in a price conflict, a line not matched again wins.
+    rematched: bool = False
+    # The current item the line was compared with in the draft, when rematching changed the line's link:
+    # the line takes that item's place (spec 8.11).
+    replaces: UUID | None = None
 
     @property
     def key(self) -> ItemKey:
@@ -110,33 +115,47 @@ def merge_proposals(proposals: list[Proposal]) -> tuple[list[Proposal], dict[UUI
     for a price conflict, by the merged proposal's first line, in the `discardedOptions` shape (3.18.2)."""
     merged: dict[ItemKey, Proposal] = {}
     discarded: dict[UUID, list[dict]] = {}
+    # Which line each option of a merged proposal came from, by (label, pour).
+    owners_by_key: dict[ItemKey, dict[tuple, Proposal]] = {}
     for proposal in proposals:
         into = merged.get(proposal.key)
         if into is None:
             merged[proposal.key] = replace(proposal, line_ids=(proposal.extracted_item_id,))
             continue
         options = list(into.options)
-        by_label_and_pour = {(o.label, o.pour_ml): o for o in options}
+        owners = owners_by_key.setdefault(
+            proposal.key, {(o.label, o.pour_ml): into for o in into.options}
+        )
         for option in proposal.options:
-            kept = by_label_and_pour.get((option.label, option.pour_ml))
-            if kept is None:
+            label_and_pour = (option.label, option.pour_ml)
+            owner = owners.get(label_and_pour)
+            if owner is None:
                 options.append(option)
-                by_label_and_pour[(option.label, option.pour_ml)] = option
-            elif kept.price_krw != option.price_krw:
-                discarded.setdefault(into.extracted_item_id, []).append(
-                    {
-                        "optionLabel": option.label,
-                        "pourMl": option.pour_ml,
-                        "priceKrw": option.price_krw,
-                        "displayName": proposal.display_name,
-                        "extractedItemId": str(proposal.extracted_item_id),
-                    }
-                )
+                owners[label_and_pour] = proposal
+                continue
+            index = next(i for i, o in enumerate(options) if (o.label, o.pour_ml) == label_and_pour)
+            if options[index].price_krw == option.price_krw:
+                continue
+            # The earlier price stays, unless only it came from a line matched again (spec 8.12).
+            dropped, dropped_from = option, proposal
+            if owner.rematched and not proposal.rematched:
+                dropped, dropped_from = options[index], owner
+                options[index], owners[label_and_pour] = option, proposal
+            discarded.setdefault(into.extracted_item_id, []).append(
+                {
+                    "optionLabel": dropped.label,
+                    "pourMl": dropped.pour_ml,
+                    "priceKrw": dropped.price_krw,
+                    "displayName": dropped_from.display_name,
+                    "extractedItemId": str(dropped_from.extracted_item_id),
+                }
+            )
         merged[proposal.key] = replace(
             into,
             options=tuple(options),
             kind=MenuItemKind.WHISKY if MenuItemKind.WHISKY in (into.kind, proposal.kind) else MenuItemKind.OTHER,
             line_ids=(*into.line_ids, proposal.extracted_item_id),
+            replaces=into.replaces or proposal.replaces,
         )
     return list(merged.values()), discarded
 
@@ -160,6 +179,9 @@ class PublishPlan:
     discarded: dict[UUID, list[dict]] = field(default_factory=dict)
     # Every line merged into a published entry, by the entry's first line.
     entry_lines: dict[UUID, tuple[UUID, ...]] = field(default_factory=dict)
+    # Current items a rematched line took the place of, with the first line of the entry the line went to;
+    # their open checks move there (spec 3.18.1).
+    replaced: dict[UUID, UUID] = field(default_factory=dict)
 
 
 def _same_options(a: tuple[PublishedOption, ...], b: tuple[PublishedOption, ...]) -> bool:
@@ -181,16 +203,30 @@ def plan_publish(
     current_by_key = {entry.key: entry for entry in current}
     current_by_item = {entry.bar_menu_item_id: entry for entry in current}
     published: dict[ItemKey, BoardEntry] = {}  # by key, in menu order
-    # What each current entry becomes, when a line is published in its place.
-    slots: dict[UUID, BoardEntry] = {}
+    # What each current entry becomes, when a line is published in its place (None: it leaves the board).
+    slots: dict[UUID, BoardEntry | None] = {}
     linked_items: set[UUID] = set()
     changes: list[AppliedChange] = []
 
     merged, discarded = merge_proposals([p for p in proposals if p.extracted_item_id not in ignored_items])
+    published_keys = {proposal.key for proposal in merged}
+    replaced: dict[UUID, UUID] = {}
     for proposal in merged:
         on_board = current_by_key.get(proposal.key)
         taken = None
-        if on_board is None and proposal.product_id is not None:
+        # A line rematching moved takes the place of the item it was compared with (spec 8.11): in that
+        # item's slot when the new key is not on the board, else it joins the entry of the new key and the
+        # item leaves. Not while another line still publishes the item's own key.
+        displaced = current_by_item.get(proposal.replaces) if proposal.replaces else None
+        if displaced is not None and (displaced.bar_menu_item_id in slots or displaced.key in published_keys):
+            displaced = None
+        if displaced is not None:
+            replaced[displaced.bar_menu_item_id] = proposal.extracted_item_id
+            if on_board is None:
+                taken = on_board = displaced
+            else:
+                slots[displaced.bar_menu_item_id] = None
+        elif on_board is None and proposal.product_id is not None:
             taken = current_by_item.get(
                 next((takeovers[line] for line in proposal.line_ids if line in takeovers), None)
             )
@@ -217,7 +253,7 @@ def plan_publish(
         published[proposal.key] = replace(entry, extracted_item_id=proposal.extracted_item_id)
         if on_board is not None:
             slots[on_board.bar_menu_item_id] = published[proposal.key]
-        if taken is not None:
+        if taken is not None and taken.product_id is None and proposal.product_id is not None:
             linked_items.add(taken.bar_menu_item_id)
         if unchanged:
             continue
@@ -249,7 +285,12 @@ def plan_publish(
     if mode == ImportMode.FULL_REPLACE:
         entries = [*published.values(), *kept]
     else:
-        in_place = [slots.get(e.bar_menu_item_id, e) for e in current if e.bar_menu_item_id not in removed_ids]
+        # A slot of None is an item a line left for an entry already on the board.
+        in_place = [
+            slots.get(e.bar_menu_item_id, e)
+            for e in current
+            if e.bar_menu_item_id not in removed_ids and slots.get(e.bar_menu_item_id, e) is not None
+        ]
         entries = [*in_place, *(e for e in published.values() if e.bar_menu_item_id is None)]
     return PublishPlan(
         entries=entries,
@@ -257,6 +298,7 @@ def plan_publish(
         linked_items=linked_items,
         discarded=discarded,
         entry_lines={proposal.extracted_item_id: proposal.line_ids for proposal in merged},
+        replaced=replaced,
     )
 
 
@@ -287,13 +329,23 @@ def load_board(session: Session, bar_id: UUID) -> tuple[MenuBoard | None, list[B
     ]
 
 
-def proposals_from_review(session: Session, review: ValidatedReview, catalog: CatalogResult) -> list[Proposal]:
-    """The lines published as menu items, in menu order. The menu name is the corrected name, else the
-    extracted name, else the product's name (a line retyped as a product may have none). A line published
-    without a product (spec 8.10) is keyed by its menu name."""
+def proposals_from_review(
+    session: Session, review: ValidatedReview, catalog: CatalogResult, compared: dict[UUID, UUID] | None = None
+) -> list[Proposal]:
+    """The lines published as menu items, in menu order, with their final products after rematching
+    (spec 8.11). The menu name is the corrected name, else the extracted name, else the product's name (a
+    line retyped as a product may have none). A line published without a product (spec 8.10), or left
+    without one by rematching, is keyed by its menu name. `compared` maps a line to the current item the
+    draft compared it with, which a line whose link rematching changed takes the place of."""
+    compared = compared or {}
+    final_products = {
+        entry.item.id: review.final_product(entry, catalog.product_ids.get(entry.item.id))
+        for entry in review.items
+        if entry.is_product
+    }
     product_names = dict(
         session.execute(
-            select(Product.id, Product.display_name).where(Product.id.in_(set(catalog.product_ids.values())))
+            select(Product.id, Product.display_name).where(Product.id.in_({p for p in final_products.values() if p}))
         ).all()
     )
     proposals = []
@@ -304,37 +356,42 @@ def proposals_from_review(session: Session, review: ValidatedReview, catalog: Ca
         options = tuple(
             PublishedOption(o.label, o.pour_ml, o.price_krw, o.option.id if o.option else None) for o in entry.options
         )
-        name_corrected = entry.decision.correctedProductName is not None
-        if entry.is_unlinked:
+        product_id = final_products[item.id]
+        common = {
+            "extracted_item_id": item.id,
+            "options": options,
+            "name_corrected": entry.decision.correctedProductName is not None,
+            "rematched": item.id in review.rematched,
+            "replaces": compared.get(item.id) if review.relinked(entry) else None,
+        }
+        if product_id is None:
+            kind = MenuItemKind(entry.decision.kind) if entry.is_unlinked else MenuItemKind.WHISKY
             proposals.append(
                 Proposal(
-                    extracted_item_id=item.id,
                     product_id=None,
                     display_name=entry.menu_name,
-                    options=options,
-                    kind=MenuItemKind(entry.decision.kind),
+                    kind=kind,
                     name_key=name_key(entry.menu_name),
-                    name_corrected=name_corrected,
+                    **common,
                 )
             )
             continue
-        product_id = catalog.product_ids[item.id]
         proposals.append(
-            Proposal(
-                extracted_item_id=item.id,
-                product_id=product_id,
-                display_name=entry.menu_name or product_names[product_id],
-                options=options,
-                name_corrected=name_corrected,
-            )
+            Proposal(product_id=product_id, display_name=entry.menu_name or product_names[product_id], **common)
         )
     return proposals
 
 
 def review_plan(
-    session: Session, bar_id: UUID, mode: ImportMode, review: ValidatedReview, catalog: CatalogResult
+    session: Session,
+    bar_id: UUID,
+    mode: ImportMode,
+    review: ValidatedReview,
+    catalog: CatalogResult,
+    compared: dict[UUID, UUID] | None = None,
 ) -> tuple[MenuBoard | None, PublishPlan]:
-    """(board or None, plan) for a validated review whose catalog entries exist."""
+    """(board or None, plan) for a validated review whose catalog entries exist. `compared`: the current
+    item each line was compared with in the draft (menu_draft.draft_compared_items)."""
     board, current = load_board(session, bar_id)
     decisions = review.change_decisions
     approved = {
@@ -349,8 +406,16 @@ def review_plan(
         if c.change_type == MenuChangeType.UPDATE and decisions[c.id] == MenuChangeDecision.APPLY
         for line in review.change_lines.get(c.id, ())
     }
+    # A line whose change was ignored keeps out of the item it was compared with (spec 8.11).
+    ignored_change_lines = {
+        line
+        for c in review.changes
+        if decisions[c.id] == MenuChangeDecision.IGNORE
+        for line in review.change_lines.get(c.id, ())
+    }
+    compared = {line: item for line, item in (compared or {}).items() if line not in ignored_change_lines}
     plan = plan_publish(
-        proposals_from_review(session, review, catalog),
+        proposals_from_review(session, review, catalog, compared),
         current,
         mode=mode,
         ignored_items=review.ignored_lines,
@@ -406,6 +471,16 @@ def _option(option: PublishedOption, sort_order: int, discount: tuple | None) ->
     )
 
 
+def _product_item(session: Session, bar_id: UUID, product_id: UUID) -> BarMenuItem:
+    """The bar's item of the product, kept for good once the bar has sold it, or a new one."""
+    item = session.scalar(select(BarMenuItem).where(BarMenuItem.bar_id == bar_id, BarMenuItem.product_id == product_id))
+    if item is None:
+        item = BarMenuItem(bar_id=bar_id, product_id=product_id)
+        session.add(item)
+        session.flush()
+    return item
+
+
 def _item_for(session: Session, bar_id: UUID, entry: BoardEntry, items: dict[UUID, BarMenuItem]) -> BarMenuItem:
     """The bar menu item `entry` is written with.
 
@@ -416,15 +491,25 @@ def _item_for(session: Session, bar_id: UUID, entry: BoardEntry, items: dict[UUI
     """
     current = items.get(entry.bar_menu_item_id) if entry.bar_menu_item_id else None
     if entry.product_id is None:
-        if current is not None:
+        if current is not None and current.product_id is None and current.name_key == entry.name_key:
             current.kind = entry.kind
             return current
+        # A new unlinked item, also when the line takes the place of an item of another product or name
+        # (spec 8.11): that item stays as it is and the sold-out mark moves to the new one.
         item = BarMenuItem(bar_id=bar_id, kind=entry.kind, name_key=entry.name_key)
+        if current is not None:
+            item.sold_out_at = current.sold_out_at
         session.add(item)
         session.flush()
         return item
     if current is not None and current.product_id == entry.product_id:
         return current
+    if current is not None and current.product_id is not None:
+        # An item linked to a product never changes product (spec 3.14.1): the line moves to the item of
+        # the new product with the sold-out mark.
+        moved_to = _product_item(session, bar_id, entry.product_id)
+        moved_to.sold_out_at = current.sold_out_at
+        return moved_to
     sold_before = session.scalar(
         select(BarMenuItem).where(BarMenuItem.bar_id == bar_id, BarMenuItem.product_id == entry.product_id)
     )

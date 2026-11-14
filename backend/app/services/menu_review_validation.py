@@ -43,6 +43,9 @@ from app.schemas.menu_review import (
     ReviewAndApplyRequest,
     SelectExistingProduct,
 )
+from app.matching.db_catalog import DbCatalog
+from app.matching.rematch import name_corrected
+from app.matching.rematch import rematch_name as rematch_product
 from app.services.menu_diff import group_lines
 from app.services.menu_items import ItemKey, item_key, name_key
 
@@ -97,6 +100,26 @@ class ValidatedReview:
     ignored_lines: set[UUID] = field(default_factory=set)
     # Each change's lines in menu order (see change_lines).
     change_lines: dict[UUID, tuple[UUID, ...]] = field(default_factory=dict)
+    # Lines matched again by their corrected name (spec 8.11): the product the rule matcher confirmed,
+    # or None when it confirmed none. Only lines that are matched again are in it.
+    rematched: dict[UUID, UUID | None] = field(default_factory=dict)
+
+    def final_product(self, entry: "ReviewedItem", created: UUID | None = None) -> UUID | None:
+        """The product a line is published with: the rematch result when matched again, else the chosen or
+        created product (`created`, from the catalog step), else None."""
+        if entry.item.id in self.rematched:
+            return self.rematched[entry.item.id]
+        if isinstance(entry.decision, SelectExistingProduct):
+            return entry.decision.productId
+        return created
+
+    def relinked(self, entry: "ReviewedItem") -> bool:
+        """Whether rematching changed what the line is linked to (spec 8.11): another product, or none for a
+        line sent with one, or one for a line sent without one."""
+        if entry.item.id not in self.rematched:
+            return False
+        sent = entry.decision.productId if isinstance(entry.decision, SelectExistingProduct) else None
+        return self.rematched[entry.item.id] != sent
 
     @property
     def by_id(self) -> dict[UUID, ReviewedItem]:
@@ -186,20 +209,29 @@ def change_lines(changes: list[MenuImportChange], items: list[ExtractedItem]) ->
     }
 
 
-def _check_merged_prices(errors: _Errors, reviewed: list[ReviewedItem], ignored: set[UUID]) -> None:
+def _check_merged_prices(
+    errors: _Errors, reviewed: list[ReviewedItem], ignored: set[UUID], rematched: dict[UUID, UUID | None]
+) -> None:
     """Lines published as one item whose options meet at another price, where the reviewer could see the
     group (spec 8.7, 8.12): lines sent with the same productId, and lines without a product under the
     same name key when none of them is a whisky. Each later option at another price than an earlier
     one of the same label and pour is OPTION_PRICE_CONFLICT. A merged group of unlinked lines with a
-    whisky is not refused: the server keeps the earlier price and the operator sees the other."""
+    whisky is not refused: the server keeps the earlier price and the operator sees the other. Neither is
+    a line whose product rematching changed (spec 8.11): the reviewer could not see where it would go."""
     groups: dict[ItemKey, list[ReviewedItem]] = {}
     for entry in reviewed:
         if entry.item.id in ignored:
             continue
         decision = entry.decision
         if isinstance(decision, SelectExistingProduct):
+            if rematched.get(entry.item.id, decision.productId) != decision.productId:
+                continue
             groups.setdefault(item_key(decision.productId, None), []).append(entry)
-        elif isinstance(decision, PublishWithoutProduct) and (key := name_key(entry.menu_name or "")):
+        elif (
+            isinstance(decision, PublishWithoutProduct)
+            and rematched.get(entry.item.id) is None
+            and (key := name_key(entry.menu_name or ""))
+        ):
             groups.setdefault(item_key(None, key), []).append(entry)
     for key, entries in groups.items():
         if key[0] == "name" and any(e.decision.kind == MenuItemKind.WHISKY for e in entries):
@@ -220,14 +252,46 @@ def _check_merged_prices(errors: _Errors, reviewed: list[ReviewedItem], ignored:
                 prices.setdefault(label_and_pour, price)
 
 
-def _final_key(item: ExtractedItem, decision: ItemDecision) -> ItemKey | None:
-    """What the reviewer decided the line is; None when it is no menu item or a product still to be created
-    (a new product is never what the draft proposed)."""
+def rematch_name(item: ExtractedItem, decision: ItemDecision) -> str | None:
+    """The name a line is matched again with (spec 8.11), or None when it is not matched again: a whisky
+    line whose name was corrected, published with a chosen product or without one, and a line the AI
+    read as other that is published as a whisky without a product (never matched while processing)."""
+    if isinstance(decision, SelectExistingProduct):
+        corrected = name_corrected(decision.correctedProductName, item.extracted_product_name)
+        return decision.correctedProductName if corrected else None
+    if isinstance(decision, PublishWithoutProduct) and decision.kind == MenuItemKind.WHISKY:
+        if name_corrected(decision.correctedProductName, item.extracted_product_name):
+            return decision.correctedProductName
+        if item.extracted_kind == MenuItemKind.OTHER:
+            return decision.correctedProductName or item.extracted_product_name
+    return None
+
+
+def _final_key(item: ExtractedItem, decision: ItemDecision, rematched: dict[UUID, UUID | None]) -> ItemKey | None:
+    """What the line is published as, after rematching; None when it is no menu item or a product still to
+    be created (a new product is never what the draft proposed)."""
+    menu_name = decision.correctedProductName if isinstance(decision, PRODUCT_DECISIONS) else None
+    unlinked = item_key(None, name_key(menu_name or item.extracted_product_name or ""))
+    if item.id in rematched:
+        product = rematched[item.id]
+        return item_key(product, None) if product is not None else unlinked
     if isinstance(decision, SelectExistingProduct):
         return item_key(decision.productId, None)
     if isinstance(decision, PublishWithoutProduct):
-        return item_key(None, name_key(decision.correctedProductName or item.extracted_product_name or ""))
+        return unlinked
     return None
+
+
+def _rematch(
+    session: Session, items_by_id: dict[UUID, ExtractedItem], decided: dict[UUID, tuple[int, ItemDecision]]
+) -> dict[UUID, UUID | None]:
+    """Every line matched again (rematch_name) with the product the rule matcher confirms for its name."""
+    names = {item_id: rematch_name(items_by_id[item_id], decision) for item_id, (_, decision) in decided.items()}
+    targets = {item_id: name for item_id, name in names.items() if name}
+    if not targets:
+        return {}
+    catalog = DbCatalog(session)
+    return {item_id: rematch_product(name, catalog) for item_id, name in targets.items()}
 
 
 def _board_keys(session: Session, bar_id: UUID) -> dict[UUID, ItemKey]:
@@ -307,11 +371,15 @@ def validate_review(
     # A line whose ignored change still targets what it was decided to be is not published, so its options
     # are not compared.
     lines_of = change_lines(changes, items)
+    rematched = _rematch(session, items_by_id, decided)
     ignored_items = ignored_lines(
         changes,
         lines_of,
         change_decisions,
-        {item_id: _final_key(items_by_id[item_id], decision) for item_id, (_, decision) in decided.items()},
+        {
+            item_id: _final_key(items_by_id[item_id], decision, rematched)
+            for item_id, (_, decision) in decided.items()
+        },
         {item.id: proposal_key(item) for item in items},
         _board_keys(session, menu_import.bar_id),
     )
@@ -370,7 +438,7 @@ def validate_review(
             _check_aliases(errors, f"{path}.aliases", decision.aliases)
         reviewed.append(entry)
 
-    _check_merged_prices(errors, reviewed, ignored_items)
+    _check_merged_prices(errors, reviewed, ignored_items, rematched)
     reviewed_by_id = {entry.item.id: entry for entry in reviewed}
     for change_id, decision in change_decisions.items():
         # A change of several lines may be applied while any of them is published (spec 8.7).
@@ -391,4 +459,5 @@ def validate_review(
         products=products,
         ignored_lines=ignored_items,
         change_lines=lines_of,
+        rematched=rematched,
     )

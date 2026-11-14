@@ -21,7 +21,13 @@ from app.models import (
     MenuImportChange,
     ResolutionCandidate,
 )
-from app.services.menu_diff import CurrentEntry, DraftChange, ProposedEntry, compute_draft_changes
+from app.services.menu_diff import (
+    CurrentEntry,
+    DraftChange,
+    ProposedEntry,
+    compared_items,
+    compute_draft_changes,
+)
 from app.services.menu_items import name_key
 
 
@@ -60,8 +66,7 @@ def current_board(session: Session, bar_id: UUID) -> list[CurrentEntry]:
     ]
 
 
-def build_draft(session: Session, menu_import: MenuImport) -> list[DraftChange]:
-    """The draft changes as of now. Reads only."""
+def _proposed(session: Session, menu_import: MenuImport) -> list[ProposedEntry]:
     items = product_items(session, menu_import)
     # Read candidates with a query rather than item.candidates, which may have been loaded
     # before processing added them in this session.
@@ -73,7 +78,7 @@ def build_draft(session: Session, menu_import: MenuImport) -> list[DraftChange]:
             )
         ).all()
     )
-    proposed = [
+    return [
         ProposedEntry(
             extracted_item_id=item.id,
             product_id=proposed_products.get(item.id),
@@ -82,7 +87,19 @@ def build_draft(session: Session, menu_import: MenuImport) -> list[DraftChange]:
         )
         for item in items
     ]
-    return compute_draft_changes(proposed, current_board(session, menu_import.bar_id), menu_import.mode)
+
+
+def build_draft(session: Session, menu_import: MenuImport) -> list[DraftChange]:
+    """The draft changes as of now. Reads only."""
+    return compute_draft_changes(
+        _proposed(session, menu_import), current_board(session, menu_import.bar_id), menu_import.mode
+    )
+
+
+def draft_compared_items(session: Session, menu_import: MenuImport) -> dict[UUID, UUID]:
+    """The current board item each line was compared with in the draft (menu_diff.compared_items). Reads
+    only; a review is applied only while the draft is still current."""
+    return compared_items(_proposed(session, menu_import), current_board(session, menu_import.bar_id))
 
 
 def replace_draft(session: Session, menu_import: MenuImport) -> None:

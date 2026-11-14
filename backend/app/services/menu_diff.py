@@ -75,32 +75,22 @@ def _key(entry: ProposedEntry) -> tuple[str, object] | None:
     return ("name", entry.name_key) if entry.name_key else None
 
 
-def compute_draft_changes(
-    proposed: list[ProposedEntry], current: list[CurrentEntry], mode: ImportMode
-) -> list[DraftChange]:
-    """Rules (API spec 5.4 and 8.12, matching flow 13):
+@dataclass(frozen=True)
+class _Comparison:
+    lines: tuple[UUID, ...]
+    entries: list[ProposedEntry]
+    on_board: CurrentEntry | None
+    taking_over: bool
 
-    - `proposed` is in menu order. Lines proposed as the same product, or without a product under the
-      same name key, make one change with their options merged (`group_lines`, `merge_options`). A
-      group with a product is compared with that product's entry; one without is published without a
-      product, so it is compared with the current unlinked entry of the same name key.
-    - A group whose product is not on the board, but one of whose lines has the name key of a current
-      unlinked entry, is compared with that entry: it is the same menu, now matched to a product
-      (publishing it with a product links the entry instead of adding a second line).
-    - add: nothing on the board to compare with, a line without a usable name key, or an entry another
-      group was already compared with.
-    - update: the compared entry's options differ from the merged ones, or a group takes over an
-      unlinked entry.
-    - remove: only for full_replace, a board entry no group was compared with.
-    - Same entry with the same options: no change.
-    """
+
+def _compare(proposed: list[ProposedEntry], current: list[CurrentEntry]) -> list[_Comparison]:
+    """Each group of lines (group_lines) with the current entry it is compared with, in menu order."""
     by_product = {entry.product_id: entry for entry in current if entry.product_id is not None}
     unlinked_by_key = {entry.name_key: entry for entry in current if entry.product_id is None}
     by_line = {entry.extracted_item_id: entry for entry in proposed}
     compared: set[UUID] = set()
-    changes: list[DraftChange] = []
-
-    for first, lines in group_lines((entry.extracted_item_id, _key(entry)) for entry in proposed).items():
+    comparisons = []
+    for lines in group_lines((entry.extracted_item_id, _key(entry)) for entry in proposed).values():
         entries = [by_line[line] for line in lines]
         head = entries[0]
         taking_over = False
@@ -122,13 +112,54 @@ def compute_draft_changes(
         else:
             on_board = None
         if on_board is not None and on_board.bar_menu_item_id in compared:
-            on_board = None
+            on_board, taking_over = None, False
+        if on_board is not None:
+            compared.add(on_board.bar_menu_item_id)
+        comparisons.append(_Comparison(lines, entries, on_board, taking_over))
+    return comparisons
+
+
+def compared_items(proposed: list[ProposedEntry], current: list[CurrentEntry]) -> dict[UUID, UUID]:
+    """The current entry (bar menu item) each line was compared with, whether that made an update or no
+    change; lines added have none. A line that rematching turns into something else takes this entry's
+    place (spec 8.11)."""
+    return {
+        line: comparison.on_board.bar_menu_item_id
+        for comparison in _compare(proposed, current)
+        if comparison.on_board is not None
+        for line in comparison.lines
+    }
+
+
+def compute_draft_changes(
+    proposed: list[ProposedEntry], current: list[CurrentEntry], mode: ImportMode
+) -> list[DraftChange]:
+    """Rules (API spec 5.4 and 8.12, matching flow 13):
+
+    - `proposed` is in menu order. Lines proposed as the same product, or without one under the
+      same name key, make one change with their options merged (`group_lines`, `merge_options`). A
+      group with a product is compared with that product's entry; one without is published without a
+      product, so it is compared with the current unlinked entry of the same name key.
+    - A group whose product is not on the board, but one of whose lines has the name key of a current
+      unlinked entry, is compared with that entry: it is the same menu, now matched to a product
+      (publishing it with a product links the entry instead of adding a second line).
+    - add: nothing on the board to compare with, a line without a usable name key, or an entry another
+      group was already compared with.
+    - update: the compared entry's options differ from the merged ones, or a group takes over an
+      unlinked entry.
+    - remove: only for full_replace, a board entry no group was compared with.
+    - Same entry with the same options: no change.
+    """
+    changes: list[DraftChange] = []
+    compared: set[UUID] = set()
+    for comparison in _compare(proposed, current):
+        first, lines, on_board = comparison.lines[0], comparison.lines, comparison.on_board
         if on_board is None:
             changes.append(DraftChange(MenuChangeType.ADD, extracted_item_id=first, extracted_item_ids=lines))
             continue
         compared.add(on_board.bar_menu_item_id)
         # Linking the unlinked entry is a change even with the same options.
-        if taking_over or on_board.options != merge_options(e.options for e in entries):
+        if comparison.taking_over or on_board.options != merge_options(e.options for e in comparison.entries):
             changes.append(
                 DraftChange(
                     MenuChangeType.UPDATE,

@@ -407,3 +407,17 @@ def test_other_lines_of_one_name_key_are_other():
     result = plan([unlinked_proposal("하이볼", 1, MenuItemKind.OTHER), unlinked_proposal("하이볼", 1, MenuItemKind.OTHER)], [])
 
     assert [(e.kind, len(e.options)) for e in result.entries] == [(MenuItemKind.OTHER, 1)]
+
+
+def test_a_line_not_matched_again_keeps_its_price_over_an_earlier_rematched_one():
+    """Rematching joined two lines (spec 8.12): the line whose name was not corrected sets the price."""
+    renamed_first = replace(proposal(A, 21000), rematched=True)
+    kept = proposal(A, 17000)
+
+    result = plan([renamed_first, kept], [])
+
+    [entry] = result.entries
+    assert [o.price_krw for o in entry.options] == [17000]
+    assert [(o["priceKrw"], o["extractedItemId"]) for o in result.discarded[renamed_first.extracted_item_id]] == [
+        (21000, str(renamed_first.extracted_item_id))
+    ]
