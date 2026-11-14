@@ -733,6 +733,7 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 | `review_confirmed_at` | `timestamptz`, nullable | `2026-09-28T04:30:00Z` | 항목·옵션·상품 매칭·신규 등록 제안·메뉴 diff를 한 번에 최종 승인한 시점이다. |
 | `review_draft` | `jsonb`, nullable | `{"itemDecisions": [...], "changeDecisions": [...], "clientState": {...}}` | 제출 전까지 검수 화면에서 입력한 내용(API 명세 5.9)이다. 다른 기기나 운영자 웹에서 같은 검수를 이어 하기 위해 저장한다. 서버는 내용을 해석하지 않고 크기(256KB)만 제한한다. 반영이나 취소에 성공하면 `null`로 지운다. |
 | `review_draft_version` | `integer`, NOT NULL, 기본 `0` | `4` | 초안을 저장할 때마다 1씩 올린다. 저장 요청은 읽은 버전을 보내고, 다르면 거부해 두 사람이 서로의 입력을 덮어쓰지 않게 한다. 초안을 지워도 되돌리지 않는다. |
+| `review_draft_review_version` | `integer`, nullable | `3` | 초안을 입력한 검수 데이터의 `review_version`(API 명세 5.9 요청의 `reviewVersion`)이다. 초안과 함께 돌려주어, 클라이언트가 그 뒤 검수 데이터가 다시 만들어졌는지 알 수 있게 한다(API 명세 5.4). 초안이 없으면 `null`이다. |
 | `review_draft_saved_at` | `timestamptz`, nullable | `2026-10-04T09:06:00Z` | 초안을 마지막으로 저장한 시각이다. |
 | `review_draft_saved_by_user_id` | `uuid`, nullable, FK → `users.id` | 업주 ID | 초안을 마지막으로 저장한 사용자다. 다른 사람이 먼저 저장했다고 안내할 때 쓴다. `users` 행이 없는 임시 로그인 운영자면 `null`이다. |
 | `recovery_count` | `smallint`, NOT NULL, 기본 `0` | `1` | 서버 재시작으로 끊긴 처리를 이어서 처리한 횟수다. 3번을 넘으면 더 이어서 처리하지 않고 `failed`로 바꾼다. 특정 사진 때문에 재시작이 반복되는 것을 막는다. 0 이상이어야 한다(CHECK). |

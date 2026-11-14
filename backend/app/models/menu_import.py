@@ -140,6 +140,8 @@ class MenuImport(Base):
     review_draft_version: Mapped[int] = mapped_column(
         Integer, nullable=False, default=0, server_default=text("0")
     )
+    # The reviewVersion the draft was entered on (spec 5.4); null without a draft.
+    review_draft_review_version: Mapped[int | None] = mapped_column(Integer, nullable=True)
     review_draft_saved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     # Null for a temporary-login operator without a users row.
     review_draft_saved_by_user_id: Mapped[UUID | None] = mapped_column(

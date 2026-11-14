@@ -484,6 +484,7 @@ Table menu_imports {
   review_confirmed_at timestamptz
   review_draft jsonb [note: 'Review input saved before submission (API spec 5.9); not interpreted by the server. Cleared on apply or cancel']
   review_draft_version integer [not null, default: 0, note: 'Raised on every draft save; a save must send the version it read']
+  review_draft_review_version integer [note: 'reviewVersion of the review data the draft was entered on (API spec 5.4); null without a draft']
   review_draft_saved_at timestamptz
   review_draft_saved_by_user_id uuid [ref: > users.id, note: 'Null for a temporary-login operator without a users row']
   recovery_count smallint [not null, default: 0, note: 'Times processing was resumed after a server restart; past 3 the import fails instead (CHECK >= 0)']

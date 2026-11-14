@@ -10,6 +10,8 @@ API spec 5.9; schema guide 8.1 (menu_imports).
   another device or the operator web. The server does not interpret it. Cleared on apply or cancel.
 - review_draft_version: raised on every save; a save sends the version it read, so two editors do not
   overwrite each other. Not reset when the draft is cleared.
+- review_draft_review_version: the reviewVersion of the review data the draft was entered on, sent back
+  with the draft so a client can tell the review data was rebuilt since (spec 5.4).
 - review_draft_saved_at, review_draft_saved_by_user_id: who saved it last, and when.
 
 Existing imports get no draft and version 0. The downgrade drops the columns and any saved drafts.
@@ -33,6 +35,7 @@ def upgrade() -> None:
         "menu_imports",
         sa.Column("review_draft_version", sa.Integer(), nullable=False, server_default=sa.text("0")),
     )
+    op.add_column("menu_imports", sa.Column("review_draft_review_version", sa.Integer(), nullable=True))
     op.add_column("menu_imports", sa.Column("review_draft_saved_at", sa.DateTime(timezone=True), nullable=True))
     op.add_column(
         "menu_imports",
@@ -52,5 +55,6 @@ def downgrade() -> None:
     op.drop_constraint("ck_menu_imports_review_draft_version", "menu_imports", type_="check")
     op.drop_column("menu_imports", "review_draft_saved_by_user_id")
     op.drop_column("menu_imports", "review_draft_saved_at")
+    op.drop_column("menu_imports", "review_draft_review_version")
     op.drop_column("menu_imports", "review_draft_version")
     op.drop_column("menu_imports", "review_draft")
