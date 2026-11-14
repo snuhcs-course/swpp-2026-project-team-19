@@ -403,3 +403,42 @@ def test_an_ignored_change_of_two_lines_skips_each_line_still_its_target(db_sess
     # A line the reviewer decided to be another product follows that decision.
     _select(body, 2, glenfiddich[15], conflict)
     assert validate(db_session, review, body).ignored_lines == {exact.id}
+
+
+# ---- prices of merged lines (spec 8.7, 8.12) ----
+
+
+def _priced(body, index, prices):
+    """The line's options replaced with (pour, price) pairs."""
+    body["itemDecisions"][index]["options"] = [{"pourMl": pour, "priceKrw": price} for pour, price in prices]
+
+
+def test_lines_sent_with_one_product_may_not_disagree_on_a_price(db_session, review, glenfiddich):
+    _, exact, conflict, *_ = review[1]
+    body = valid_body(review, glenfiddich)
+    _select(body, 2, glenfiddich[12], conflict)
+    _priced(body, 2, [(60, 30000), (30, 21000)])
+
+    # The exact line has 30 ml at 17,000: the later line's option is the one reported.
+    assert field_errors(db_session, review, body) == {("itemDecisions[2].options[1]", "OPTION_PRICE_CONFLICT")}
+    _priced(body, 2, [(60, 30000), (30, 17000)])  # the same price is the same option
+    validate(db_session, review, body)
+
+
+def test_unlinked_lines_of_one_name_key_are_refused_only_when_none_is_a_whisky(db_session, review, glenfiddich):
+    body = valid_body(review, glenfiddich)
+    for index in (1, 3):
+        line = review[1][index]
+        body["itemDecisions"][index] = {
+            "action": "publish_without_product",
+            "extractedItemId": str(line.id),
+            "finalLineType": "product",
+            "kind": "other",
+            "correctedProductName": "하이볼",
+            "options": [{"pourMl": 30, "priceKrw": 9000 if index == 1 else 12000}],
+        }
+    assert field_errors(db_session, review, body) == {("itemDecisions[3].options[0]", "OPTION_PRICE_CONFLICT")}
+
+    # With a whisky among them the server keeps the earlier price and the operator sees the other.
+    body["itemDecisions"][3]["kind"] = "whisky"
+    validate(db_session, review, body)

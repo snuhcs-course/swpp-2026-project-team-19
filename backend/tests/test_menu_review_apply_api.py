@@ -131,7 +131,18 @@ def test_review_to_customer_search(client, db_session, sample, operator, glenfid
     assert prices_found(client, "글렌피딕 15년") == [[21000]]
     assert customer_search(client, "Unknown Distillery 25")["matchType"] == "none"
 
-    body = applied(client, sample, body_from_review(review), operator)
+    accepted = body_from_review(review)
+    # Both 12 lines are the same product with 30 ml at 17,000 and 21,000; accepted as they are, they are
+    # refused (spec 8.12), so the client has the owner keep one price. Here the first line's, and the
+    # second line has no other option, so it is left out.
+    conflicting = submit(client, sample.menu_import.id, accepted, operator)
+    assert conflicting.status_code == 422
+    assert [(e["path"], e["code"]) for e in conflicting.json()["error"]["fieldErrors"]] == [
+        ("itemDecisions[2].options[0]", "OPTION_PRICE_CONFLICT")
+    ]
+    accepted["itemDecisions"][2] = {**accepted["itemDecisions"][2], "action": "reject"}
+    del accepted["itemDecisions"][2]["options"], accepted["itemDecisions"][2]["productId"]
+    body = applied(client, sample, accepted, operator)
 
     assert body["status"] == "applied"
     assert body["reviewVersion"] == 1

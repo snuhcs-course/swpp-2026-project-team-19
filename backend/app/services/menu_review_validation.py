@@ -26,6 +26,7 @@ from app.models import (
     ExtractionRun,
     LineType,
     MenuBoard,
+    MenuItemKind,
     MenuBoardEntry,
     MenuChangeDecision,
     MenuImage,
@@ -181,6 +182,40 @@ def change_lines(changes: list[MenuImportChange], items: list[ExtractedItem]) ->
     }
 
 
+def _check_merged_prices(errors: _Errors, reviewed: list[ReviewedItem], ignored: set[UUID]) -> None:
+    """Lines published as one item whose options meet at another price, where the reviewer could see the
+    group (spec 8.7, 8.12): lines sent with the same productId, and lines without a product under the
+    same name key when none of them is a whisky. Each later option at another price than an earlier
+    one of the same label and pour is OPTION_PRICE_CONFLICT. A merged group of unlinked lines with a
+    whisky is not refused: the server keeps the earlier price and the operator sees the other."""
+    groups: dict[ItemKey, list[ReviewedItem]] = {}
+    for entry in reviewed:
+        if entry.item.id in ignored:
+            continue
+        decision = entry.decision
+        if isinstance(decision, SelectExistingProduct):
+            groups.setdefault(item_key(decision.productId, None), []).append(entry)
+        elif isinstance(decision, PublishWithoutProduct) and (key := name_key(entry.menu_name or "")):
+            groups.setdefault(item_key(None, key), []).append(entry)
+    for key, entries in groups.items():
+        if key[0] == "name" and any(e.decision.kind == MenuItemKind.WHISKY for e in entries):
+            continue
+        prices: dict[tuple[str | None, int | None], int] = {}
+        for entry in entries:
+            later = {}
+            for j, option in enumerate(entry.options):
+                price = prices.get((option.label, option.pour_ml))
+                if price is not None and price != option.price_krw:
+                    errors.add(
+                        f"itemDecisions[{entry.index}].options[{j}]",
+                        "OPTION_PRICE_CONFLICT",
+                        "같은 메뉴의 다른 줄에 같은 표기와 용량의 가격이 다르게 있습니다. 하나만 남겨 주세요.",
+                    )
+                later.setdefault((option.label, option.pour_ml), option.price_krw)
+            for label_and_pour, price in later.items():
+                prices.setdefault(label_and_pour, price)
+
+
 def _final_key(item: ExtractedItem, decision: ItemDecision) -> ItemKey | None:
     """What the reviewer decided the line is; None when it is no menu item or a product still to be created
     (a new product is never what the draft proposed)."""
@@ -331,6 +366,7 @@ def validate_review(
             _check_aliases(errors, f"{path}.aliases", decision.aliases)
         reviewed.append(entry)
 
+    _check_merged_prices(errors, reviewed, ignored_items)
     reviewed_by_id = {entry.item.id: entry for entry in reviewed}
     for change_id, decision in change_decisions.items():
         # A change of several lines may be applied while any of them is published (spec 8.7).

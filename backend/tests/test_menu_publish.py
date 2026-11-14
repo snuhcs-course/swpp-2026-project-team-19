@@ -103,13 +103,35 @@ def test_ignored_items_are_not_published():
     assert change_types(result) == [MenuChangeType.ADD]
 
 
-def test_first_line_of_a_product_wins():
-    first, second = proposal(A, 1), proposal(A, 2)
+def test_lines_of_one_product_are_one_entry_with_every_lines_options():
+    """A glass line and a bottle-corner line (spec 8.12): the first line's name and position, the options one
+    after another, an equal option kept once."""
+    first = Proposal(uuid4(), A, "글렌피딕 12년", (opt(15000, label="잔"), opt(9000, pour=15)))
+    other = proposal(B, 5)
+    second = Proposal(uuid4(), A, "Glenfiddich 12", (opt(180000, pour=None, label="병"), opt(9000, pour=15)))
 
-    result = plan([first, second], [])
+    result = plan([first, other, second], [])
 
-    assert [e.options[0].price_krw for e in result.entries] == [1]
-    assert result.changes[0].extracted_item_id == first.extracted_item_id
+    assert products(result) == [A, B]
+    merged = result.entries[0]
+    assert (merged.display_name, merged.extracted_item_id) == ("글렌피딕 12년", first.extracted_item_id)
+    assert [(o.label, o.pour_ml, o.price_krw) for o in merged.options] == [
+        ("잔", 30, 15000),
+        (None, 15, 9000),
+        ("병", None, 180000),
+    ]
+    assert result.changes[0].extracted_item_ids == (first.extracted_item_id, second.extracted_item_id)
+    assert result.discarded == {}
+
+
+def test_an_ignored_line_is_left_out_of_the_merge():
+    first, second = proposal(A, 1), Proposal(uuid4(), A, "menu", (opt(2, pour=60),))
+
+    result = plan([first, second], [], ignored=[first.extracted_item_id])
+
+    assert [(e.extracted_item_id, [o.price_krw for o in e.options]) for e in result.entries] == [
+        (second.extracted_item_id, [2])
+    ]
 
 
 def test_partial_update_keeps_board_order_and_appends_adds():
@@ -356,3 +378,32 @@ def test_a_corrected_name_replaces_the_boards_name_even_with_the_same_options():
     assert change_types(plan([corrected], [a])) == [MenuChangeType.UPDATE]
     assert plan([corrected], [a]).entries[0].display_name == "menu read differently"
     assert plan([same_name], [a]).changes == []
+
+
+def test_unlinked_whisky_lines_of_one_name_key_keep_the_earlier_price():
+    """The server's name key can join lines the reviewer saw apart (spec 8.12): no refusal, the earlier
+    price stays and the other is kept for the operator."""
+    first = unlinked_proposal("glenallachie10cs", 26000)
+    second = replace(unlinked_proposal("glenallachie10cs", 28000, kind=MenuItemKind.OTHER), display_name="글렌알라키10CS")
+
+    result = plan([first, second], [])
+
+    [entry] = result.entries
+    assert ([o.price_krw for o in entry.options], entry.kind) == ([26000], MenuItemKind.WHISKY)
+    assert result.discarded == {
+        first.extracted_item_id: [
+            {
+                "optionLabel": None,
+                "pourMl": 30,
+                "priceKrw": 28000,
+                "displayName": "글렌알라키10CS",
+                "extractedItemId": str(second.extracted_item_id),
+            }
+        ]
+    }
+
+
+def test_other_lines_of_one_name_key_are_other():
+    result = plan([unlinked_proposal("하이볼", 1, MenuItemKind.OTHER), unlinked_proposal("하이볼", 1, MenuItemKind.OTHER)], [])
+
+    assert [(e.kind, len(e.options)) for e in result.entries] == [(MenuItemKind.OTHER, 1)]

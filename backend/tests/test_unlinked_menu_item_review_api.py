@@ -16,8 +16,10 @@ from app.models import (
     CheckReason,
     CheckStatus,
     ExtractedItem,
+    MenuChangeDecision,
     MenuChangeType,
     MenuImport,
+    MenuImportChange,
     MenuItemCheck,
     MenuItemKind,
     ReviewStatus,
@@ -464,3 +466,72 @@ def test_an_ignored_add_of_a_proposed_product_skips_the_line_only_while_it_is_th
 
     assert ignored_lines_when_line_is(proposed) == {items[3].id}
     assert ignored_lines_when_line_is(glenfiddich[15].id) == set()
+
+
+# ---- lines of one item (spec 8.12) ----
+
+
+def test_unlinked_whiskies_of_one_name_key_keep_the_earlier_price_for_the_operator(
+    client, db_session, sample, operator, glenfiddich
+):
+    _, exact, _, unknown, _ = sample.items
+    body = valid_body(sample, glenfiddich)
+    # The 12 line and the unknown line, both published without a product under one name key.
+    for index, line, price in ((1, exact, 26000), (3, unknown, 28000)):
+        body["itemDecisions"][index] = {
+            "action": "publish_without_product",
+            "extractedItemId": str(line.id),
+            "finalLineType": "product",
+            "kind": "whisky",
+            "correctedProductName": "글렌알라키 10 CS" if index == 1 else "글렌알라키10CS",
+            "options": [{"pourMl": 30, "priceKrw": price}],
+        }
+
+    result = apply(client, sample.menu_import.id, body, operator)
+
+    assert result["result"]["unlinkedWhisky"] == 1
+    [item] = [i for i in menu_items(client, sample.bar) if i[1] is None]
+    assert (item[0], item[3]) == ("글렌알라키 10 CS", [26000])
+    db_session.expire_all()
+    check = db_session.scalar(select(MenuItemCheck).where(MenuItemCheck.bar_id == sample.bar.id))
+    # Both lines are sources of unlinked; the one that lost its price is the source of price_conflict.
+    assert [(r.reason, r.source_extracted_item_id) for r in check.reasons] == [
+        (CheckReason.UNLINKED, exact.id),
+        (CheckReason.UNLINKED, unknown.id),
+        (CheckReason.PRICE_CONFLICT, unknown.id),
+    ]
+    assert check.discarded_options == [
+        {
+            "optionLabel": None,
+            "pourMl": 30,
+            "priceKrw": 28000,
+            "displayName": "글렌알라키10CS",
+            "extractedItemId": str(unknown.id),
+        }
+    ]
+
+
+def test_a_merged_change_is_recorded_on_the_line_still_published(client, db_session, sample, operator, glenfiddich):
+    """The draft's update of 12 has both 12 lines and is stored with the first. Rejecting the first and
+    publishing the second keeps the row, now on the second line."""
+    _, exact, conflict, *_ = sample.items
+    update = sample.changes[MenuChangeType.UPDATE]
+    body = valid_body(sample, glenfiddich)
+    body["itemDecisions"][1] = {"action": "reject", "extractedItemId": str(exact.id), "finalLineType": "product"}
+    body["itemDecisions"][2] = {
+        "action": "select_existing_product",
+        "extractedItemId": str(conflict.id),
+        "finalLineType": "product",
+        "productId": str(glenfiddich[12].id),
+        "options": options_of(conflict),
+    }
+
+    apply(client, sample.menu_import.id, body, operator)
+
+    db_session.expire_all()
+    row = db_session.get(MenuImportChange, update.id)
+    assert (row.change_type, row.decision, row.extracted_item_id) == (
+        MenuChangeType.UPDATE,
+        MenuChangeDecision.APPLY,
+        conflict.id,
+    )

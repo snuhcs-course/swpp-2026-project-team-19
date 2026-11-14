@@ -182,22 +182,40 @@ def _record_changes(
 
     A draft row keeps its id and takes the final type when the reviewer's decisions changed it
     (e.g. an add became an update). An applied draft row that ended up changing nothing is
-    deleted, and a change the draft did not have is inserted.
+    deleted, and a change the draft did not have is inserted. A draft row of merged lines is the
+    final change of any of its lines (spec 8.12), since the first line may not be published.
     """
-    applied_by_key = {_change_key(c.change_type, c.extracted_item_id, c.bar_menu_item_id): c for c in applied}
+    applied_by_key = {}
+    for change in applied:
+        lines = change.extracted_item_ids or (change.extracted_item_id,)
+        keys = [_change_key(change.change_type, line, change.bar_menu_item_id) for line in lines]
+        applied_by_key.update(dict.fromkeys(keys, change))
+    taken: set[int] = set()
     for row in review.changes:
         row.decision = review.change_decisions[row.id]
         row.reviewed_at = func.now()
         if row.decision == MenuChangeDecision.IGNORE:
             continue
-        final = applied_by_key.pop(_change_key(row.change_type, row.extracted_item_id, row.bar_menu_item_id), None)
+        lines = review.change_lines.get(row.id) or (row.extracted_item_id,)
+        final = next(
+            (
+                change
+                for line in lines
+                if (change := applied_by_key.get(_change_key(row.change_type, line, row.bar_menu_item_id)))
+                and id(change) not in taken
+            ),
+            None,
+        )
         if final is None:
             session.delete(row)
             continue
+        taken.add(id(final))
         row.change_type = final.change_type
         row.extracted_item_id = final.extracted_item_id
         row.bar_menu_item_id = final.bar_menu_item_id
-    for change in applied_by_key.values():
+    for change in applied:
+        if id(change) in taken:
+            continue
         session.add(
             MenuImportChange(
                 menu_import_id=menu_import.id,
@@ -273,7 +291,7 @@ def _settle_checks(
     old_item_ids: set[UUID],
 ) -> None:
     """Keep the operator checks right after the board was written (spec 3.18.1): a whisky published
-    without a product opens or adds an unlinked check with its line as source; an unlinked item a line
+    without a product opens or adds an unlinked check with each of its lines as a source; an unlinked item a line
     linked to a product loses its unlinked reasons; an item that left the board or became other has no
     open check."""
     unlinked_lines = {entry.item.id for entry in review.items if entry.is_unlinked}
@@ -283,15 +301,37 @@ def _settle_checks(
         elif item.product_id is None and item.kind == MenuItemKind.OTHER:
             dismiss_open_checks(session, {item.id})
         elif item.product_id is None and entry.extracted_item_id in unlinked_lines:
-            raise_check(
-                session,
-                item,
-                entry.display_name,
-                CheckReason.UNLINKED,
-                source_menu_import_id=menu_import.id,
-                source_extracted_item_id=entry.extracted_item_id,
-            )
+            # Every line merged into the item is a source (spec 8.12): each shows the operator a spelling.
+            for line in plan.entry_lines.get(entry.extracted_item_id, (entry.extracted_item_id,)):
+                raise_check(
+                    session,
+                    item,
+                    entry.display_name,
+                    CheckReason.UNLINKED,
+                    source_menu_import_id=menu_import.id,
+                    source_extracted_item_id=line,
+                )
+        if entry.extracted_item_id in plan.discarded:
+            _raise_price_conflict(session, menu_import, item, entry.display_name, plan.discarded[entry.extracted_item_id])
     dismiss_open_checks(session, old_item_ids - {item.id for item in items} - plan.linked_items)
+
+
+def _raise_price_conflict(
+    session: Session, menu_import: MenuImport, item: BarMenuItem, display_name: str, discarded: list[dict]
+) -> None:
+    """Merged lines whose prices met (spec 8.12): the earlier price was kept, and the dropped options wait
+    for an operator, each line that lost one as a source of `price_conflict`."""
+    check = None
+    for line in dict.fromkeys(option["extractedItemId"] for option in discarded):
+        check = raise_check(
+            session,
+            item,
+            display_name,
+            CheckReason.PRICE_CONFLICT,
+            source_menu_import_id=menu_import.id,
+            source_extracted_item_id=UUID(line),
+        )
+    check.discarded_options = [*check.discarded_options, *discarded]
 
 
 # ---- the transaction ----

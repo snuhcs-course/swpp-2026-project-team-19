@@ -4,8 +4,12 @@ The reviewer's decisions are final, with one safeguard: nothing leaves the board
 reviewer approved its removal.
 
 - Every product decision is published with its product and final priced options, unless the
-  reviewer ignored the item's proposed change. When a product appears more than once, the
-  first line wins.
+  reviewer ignored the item's proposed change. Lines of the same product, or without one under the
+  same name key, are one item (spec 8.12): the first line's name and position, the options of every
+  line one after another with an equal option kept once, and whisky when any line is a whisky. Where
+  a later line has the same label and pour at another price, the earlier price stays and the dropped
+  option is kept for the operator (`price_conflict`); validation has already refused the conflicts the
+  reviewer could see (spec 8.7).
 - Compared with the current board that is an add (not on the board), an update (options
   differ) or no change. Changes the draft did not show, such as an update caused only by a
   price correction or an add after picking another product, are still the reviewer's own
@@ -93,10 +97,48 @@ class Proposal:
     # The reviewer sent the menu name (correctedProductName); it replaces the board's name even when the
     # options are the same (spec 8.7). A name only read differently by the AI keeps the board's name.
     name_corrected: bool = False
+    # Every line merged into this one (merge_proposals), in menu order; the first is extracted_item_id.
+    line_ids: tuple[UUID, ...] = ()
 
     @property
     def key(self) -> ItemKey:
         return item_key(self.product_id, self.name_key)
+
+
+def merge_proposals(proposals: list[Proposal]) -> tuple[list[Proposal], dict[UUID, list[dict]]]:
+    """One proposal per key, in the order of each key's first line (spec 8.12), and the options dropped
+    for a price conflict, by the merged proposal's first line, in the `discardedOptions` shape (3.18.2)."""
+    merged: dict[ItemKey, Proposal] = {}
+    discarded: dict[UUID, list[dict]] = {}
+    for proposal in proposals:
+        into = merged.get(proposal.key)
+        if into is None:
+            merged[proposal.key] = replace(proposal, line_ids=(proposal.extracted_item_id,))
+            continue
+        options = list(into.options)
+        by_label_and_pour = {(o.label, o.pour_ml): o for o in options}
+        for option in proposal.options:
+            kept = by_label_and_pour.get((option.label, option.pour_ml))
+            if kept is None:
+                options.append(option)
+                by_label_and_pour[(option.label, option.pour_ml)] = option
+            elif kept.price_krw != option.price_krw:
+                discarded.setdefault(into.extracted_item_id, []).append(
+                    {
+                        "optionLabel": option.label,
+                        "pourMl": option.pour_ml,
+                        "priceKrw": option.price_krw,
+                        "displayName": proposal.display_name,
+                        "extractedItemId": str(proposal.extracted_item_id),
+                    }
+                )
+        merged[proposal.key] = replace(
+            into,
+            options=tuple(options),
+            kind=MenuItemKind.WHISKY if MenuItemKind.WHISKY in (into.kind, proposal.kind) else MenuItemKind.OTHER,
+            line_ids=(*into.line_ids, proposal.extracted_item_id),
+        )
+    return list(merged.values()), discarded
 
 
 @dataclass(frozen=True)
@@ -104,6 +146,8 @@ class AppliedChange:
     change_type: MenuChangeType
     extracted_item_id: UUID | None = None
     bar_menu_item_id: UUID | None = None
+    # Every line of the published item, for matching the draft's row (which has its first line).
+    extracted_item_ids: tuple[UUID, ...] = field(default=(), compare=False)
 
 
 @dataclass(frozen=True)
@@ -112,6 +156,10 @@ class PublishPlan:
     changes: list[AppliedChange]
     # Unlinked items a line linked to a product (taken over, see plan_publish).
     linked_items: set[UUID] = field(default_factory=set)
+    # Options dropped by merging lines (merge_proposals), by the published entry's first line.
+    discarded: dict[UUID, list[dict]] = field(default_factory=dict)
+    # Every line merged into a published entry, by the entry's first line.
+    entry_lines: dict[UUID, tuple[UUID, ...]] = field(default_factory=dict)
 
 
 def _same_options(a: tuple[PublishedOption, ...], b: tuple[PublishedOption, ...]) -> bool:
@@ -138,13 +186,14 @@ def plan_publish(
     linked_items: set[UUID] = set()
     changes: list[AppliedChange] = []
 
-    for proposal in proposals:
-        if proposal.extracted_item_id in ignored_items or proposal.key in published:
-            continue
+    merged, discarded = merge_proposals([p for p in proposals if p.extracted_item_id not in ignored_items])
+    for proposal in merged:
         on_board = current_by_key.get(proposal.key)
         taken = None
         if on_board is None and proposal.product_id is not None:
-            taken = current_by_item.get(takeovers.get(proposal.extracted_item_id))
+            taken = current_by_item.get(
+                next((takeovers[line] for line in proposal.line_ids if line in takeovers), None)
+            )
             if taken is not None and (taken.product_id is not None or taken.bar_menu_item_id in slots):
                 taken = None
             on_board = taken
@@ -173,13 +222,20 @@ def plan_publish(
         if unchanged:
             continue
         if on_board is None:
-            changes.append(AppliedChange(MenuChangeType.ADD, extracted_item_id=proposal.extracted_item_id))
+            changes.append(
+                AppliedChange(
+                    MenuChangeType.ADD,
+                    extracted_item_id=proposal.extracted_item_id,
+                    extracted_item_ids=proposal.line_ids,
+                )
+            )
         else:
             changes.append(
                 AppliedChange(
                     MenuChangeType.UPDATE,
                     extracted_item_id=proposal.extracted_item_id,
                     bar_menu_item_id=on_board.bar_menu_item_id,
+                    extracted_item_ids=proposal.line_ids,
                 )
             )
 
@@ -195,7 +251,13 @@ def plan_publish(
     else:
         in_place = [slots.get(e.bar_menu_item_id, e) for e in current if e.bar_menu_item_id not in removed_ids]
         entries = [*in_place, *(e for e in published.values() if e.bar_menu_item_id is None)]
-    return PublishPlan(entries=entries, changes=changes, linked_items=linked_items)
+    return PublishPlan(
+        entries=entries,
+        changes=changes,
+        linked_items=linked_items,
+        discarded=discarded,
+        entry_lines={proposal.extracted_item_id: proposal.line_ids for proposal in merged},
+    )
 
 
 def load_board(session: Session, bar_id: UUID) -> tuple[MenuBoard | None, list[BoardEntry]]:
