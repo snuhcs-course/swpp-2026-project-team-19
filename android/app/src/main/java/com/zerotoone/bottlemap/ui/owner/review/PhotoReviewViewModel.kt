@@ -720,9 +720,9 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
         val pour = review?.defaultPour ?: return
         val original = item(id) ?: return
         val revised = PhotoReviewRules.reclassify(original, pour)
-        val update = if (revised.type == ReviewItemType.OTHER) {
-            // Clearing the catalog link changes the identity to a bar-local
-            // menu name. Refresh prices before a publish can overwrite it.
+        val update = if (revised.linkedProductId == null) {
+            // Without a catalog link, publishing resolves the target by name,
+            // whether the owner switched to OTHER or back to unlinked WHISKY.
             val existing = try {
                 repository.existingUnlinkedServingPrices(revised.name)
             } catch (_: Exception) {
@@ -730,7 +730,14 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                 return
             }
             PhotoReviewRules.rebindUnlinkedPrices(revised, existing)
-        } else revised
+        } else {
+            // Undoing reclassification restores the old catalog link. Do not
+            // carry price candidates from an unrelated bar-local menu name.
+            revised.copy(
+                priceCandidates = revised.priceCandidates.filterNot { it.existing },
+                chosenServingPrices = emptyMap(),
+            )
+        }
         mutate { s ->
             val group = if (original.type == ReviewItemType.WHISKY)
                 ReviewGroup.OTHER else ReviewGroup.PENDING

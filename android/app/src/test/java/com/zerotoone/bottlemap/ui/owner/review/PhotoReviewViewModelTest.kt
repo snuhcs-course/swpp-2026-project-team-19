@@ -765,4 +765,34 @@ class PhotoReviewViewModelTest {
     }
 
 
+    @Test fun reclassifyingLinkedWhiskyToOtherRechecksSavedUnlinkedDiscountPrice() = runTest(dispatcher) {
+        val original = ReviewItem(
+            id = "item", name = "바 메뉴 1", type = ReviewItemType.WHISKY,
+            linkedProductId = "whisky-p", linkedProductName = "위스키 P",
+            volume = 30.0, price = 15000.0, primaryOptionLabel = "잔",
+        )
+        val fake = MockPhotoReviewRepository(MockPhotoReviewScenario.READY)
+        val repo = object : PhotoReviewRepository by fake {
+            override suspend fun loadReview() = PhotoReviewState(items = listOf(original))
+            override fun existingUnlinkedServingPrices(name: String) =
+                listOf(ReviewPriceCandidate(
+                    servingKey = "ml:30", volumeMl = 30, label = "샷",
+                    priceKrw = 12000, existing = true,
+                ))
+        }
+        val vm = PhotoReviewViewModel(repo)
+        vm.reclassify("item")
+        val other = vm.item("item")
+        assertEquals(ReviewItemType.OTHER, other.type)
+        assertNull(other.linkedProductId)
+        assertEquals(30.0, other.volume, 0.0)
+        assertEquals(setOf("ml:30"), PhotoReviewRules.pendingPriceServings(other))
+        assertFalse(PhotoReviewRules.stats(vm.state).canPublish)
+        vm.chooseServingPrice("item", "ml:30", 12000)
+        assertTrue(PhotoReviewRules.pendingPriceServings(vm.item("item")).isEmpty())
+        vm.reclassify("item")
+        assertEquals("whisky-p", vm.item("item").linkedProductId)
+        assertTrue(vm.item("item").priceCandidates.none { it.existing })
+    }
+
 }
