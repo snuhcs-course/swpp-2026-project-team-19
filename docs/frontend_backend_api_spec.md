@@ -219,12 +219,12 @@ ignore
 
 ### 2.4 실제 응답 예시
 
-3.11.18, 3.14.10, 3.15.7, 3.16.7, 5.8, 8.9의 예시는 2026-11-09에 로컬 서버(`uvicorn`, PostgreSQL, mock 메뉴 추출기)를 띄우고 HTTP로 호출해 받은 응답이다. 다른 절의 예시는 설명을 위해 손으로 쓴 값이다.
+3.11.18, 3.14.10, 3.15.7, 3.16.7의 예시는 2026-11-09에 로컬 서버(`uvicorn`, PostgreSQL, mock 메뉴 추출기)를 띄우고 HTTP로 호출해 받은 응답이다. 5.8, 5.9, 8.9의 예시는 2026-11-14에 같은 구성(PostgreSQL, mock 메뉴 추출기, 아래의 사용자)으로 백엔드 앱을 FastAPI 테스트 클라이언트로 호출해 다시 받았다. 응답은 HTTP로 받은 것과 같다. 다른 절의 예시는 설명을 위해 손으로 쓴 값이다.
 
 - 바꾼 값은 다음뿐이다. 나머지(필드, 순서, 시각, 문구, 숫자)는 받은 그대로다.
   - **ID**: 문서의 자리표시 ID로 바꾸었다. 첫 글자로 종류를 나눈다: 사용자 `1111…`, 업장 `2222…`, 상품 `4444…`, 메뉴 항목 `5555…`, 메뉴판 `6666…`, 메뉴 등록 작업 `7777…`, 업주 신청 `cccc…`, 브랜드 `dddd…`, 매장 사진 `aaaa…`, 추출 항목 `1000…`, 추출 옵션 `2000…`, 변경 `3000…`, 저장소 경로에만 나오는 ID `ffff…`. 같은 ID는 문서 전체에서 같은 값이다.
-  - **호스트**: `http://127.0.0.1:8000/`을 `https://bottlemap.o-r.kr/`로 바꾸었다.
-  - **비공개 사진 URL**: 로컬 저장소의 `http://127.0.0.1:8000/media/...`을 `https://storage.example.com/signed/...`로 바꾸었다. 로컬 저장소는 만료되지 않는 URL을 주므로 `imageUrlExpiresAt`이 `null`이다. 배포 서버(S3)에서는 만료 시각이 들어 있다.
+  - **호스트**: `http://127.0.0.1:8000/`(테스트 클라이언트는 `http://testserver/`)을 `https://bottlemap.o-r.kr/`로 바꾸었다.
+  - **비공개 사진 URL**: 로컬 저장소의 `http://127.0.0.1:8000/media/...`(테스트 클라이언트는 `http://testserver/media/...`)을 `https://storage.example.com/signed/...`로 바꾸었다. 로컬 저장소는 만료되지 않는 URL을 주므로 `imageUrlExpiresAt`이 `null`이다. 배포 서버(S3)에서는 만료 시각이 들어 있다.
 - 국세청 진위확인(3.11.2, 3.11.13, 3.11.16)만 가짜 검증기로 바꾸어 `matched`, `not_matched`, 연결 실패를 만들었다. 사업자등록증 OCR(3.11.12)은 서버에 설정이 없는 상태의 응답이다.
 - 호출자별 결과 표의 열은 다음 사용자다. 칸의 값은 실제로 받은 HTTP 상태 코드다.
   - **비로그인**: `Authorization` 헤더 없음
@@ -4171,11 +4171,13 @@ operator와 작업 대상 업장의 현재 업주가 호출할 수 있다. 요�
 
 2.4의 방법으로 받은 응답이다. 5.4의 예시는 필드 설명을 위해 손으로 쓴 값이고, 이 절은 mock 추출기로 처리한 실제 작업이다.
 
-**통합 검수 응답 (5.4)**. 관악 위스키 바의 업주 신청을 승인할 때(3.11.7) 신청 메뉴판 사진 두 장으로 만들어진 작업이다. 그래서 `imageUrl`이 신청 사진의 경로이고, mock 추출이라 `sourceBox`가 `null`이다. 두 사진의 추출 결과가 같으므로 둘째 사진(`images[1]`)과 첫째 사진의 설명 줄(`itemOrder = 5`), 둘째 사진의 변경 하나를 생략했다.
+**통합 검수 응답 (5.4)**. 관악 위스키 바의 업주가 빈 메뉴판에 메뉴판 사진 두 장(mock 추출기의 `sample`과 `mixed`)을 올려 만든 작업으로, 업주가 검수 초안(5.9)을 한 번 저장한 뒤 받았다. mock 추출이라 `sourceBox`가 `null`이다. 첫째 사진의 설명 줄(`itemOrder = 5`), 둘째 사진의 머리말 두 줄과 치즈 플래터 줄, 그리고 Unknown Distillery 25 줄과 치즈 플래터 줄의 변경은 생략했다.
 
-- 2번 줄은 별칭이 정확히 맞아 `exact_match`다.
-- 3번 줄은 같은 상품 후보가 있지만 연수가 달라(`evidence.ageConflict`) `ambiguous`다. 같은 상품을 2번 줄이 먼저 제안했으므로 이 줄의 변경은 없다. 이 예시는 옵션 합치기(8.12) 전에 받은 응답이며, 지금 규칙에서는 2번 줄의 변경에 3번 줄이 합쳐진다(`extractedItemIds`). 이 예시를 받은 뒤에 더한 필드(`extractedKind`, 변경의 `kind`와 `extractedItemIds`, `reviewDraft`)도 아직 없다. 구현한 뒤 다시 받아 바꾼다.
-- 4번 줄은 후보가 없어 `unmatched`이며, 그 변경의 `after.productId`가 `null`이다. 이 줄을 `reject`하고 그 변경을 `apply`로 보내면 `CHANGE_WITHOUT_PRODUCT`다(8.9).
+- 첫째 사진의 2번 줄은 별칭이 정확히 맞아 `exact_match`다. 3번 줄은 같은 상품 후보가 있지만 연수가 달라(`evidence.ageConflict`) `ambiguous`다. 둘째 사진의 "글렌피딕 12년" 줄도 같은 상품을 제안받았다.
+- 그래서 세 줄은 변경 하나로 합쳐진다(8.12). 변경의 `extractedItemIds`가 세 줄이고, `after.options`는 세 줄의 옵션을 메뉴 순서로 이은 것이다. 둘째 사진 줄의 30ml 17,000은 첫 줄의 옵션과 같아 하나만 남았다. 30ml에 17,000과 21,000이 함께 있으므로 업주가 하나를 골라야 한다(8.12, 8.9의 오류 예시).
+- 첫째 사진의 4번 줄은 후보가 없어 `unmatched`이며, 그 변경(생략)의 `after.productId`가 `null`이다.
+- 둘째 사진의 하이볼 줄은 AI가 위스키가 아닌 메뉴로 읽어(`extractedKind = other`) 매칭하지 않았다. `initialResolutionStatus`, `proposedProductId`가 `null`이고 후보가 없으며, 그 변경의 `after.kind`가 `other`다.
+- `reviewDraft`는 업주가 저장한 초안이다. 서버는 `content`를 해석하지 않고 저장한 대로 돌려주지만, 객체 안의 키 순서는 지키지 않는다(PostgreSQL `jsonb`).
 
 ```json
 {
@@ -4188,7 +4190,7 @@ operator와 작업 대상 업장의 현재 업주가 호출할 수 있다. 요�
     {
       "imageId": "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee1",
       "imageOrder": 1,
-      "imageUrl": "https://storage.example.com/signed/owner-applications/cccccccc-cccc-4ccc-8ccc-ccccccccccc1/ffffffff-ffff-4fff-8fff-fffffffffff2/page-1.jpg",
+      "imageUrl": "https://storage.example.com/signed/menus/22222222-2222-4222-8222-222222222222/77777777-7777-4777-8777-777777777771/page-1.jpg",
       "imageUrlExpiresAt": null,
       "items": [
         {
@@ -4197,6 +4199,7 @@ operator와 작업 대상 업장의 현재 업주가 호출할 수 있다. 요�
           "rawText": "SINGLE MALT",
           "sourceBox": null,
           "extractedLineType": "section_header",
+          "extractedKind": null,
           "correctedLineType": null,
           "effectiveLineType": "section_header",
           "initialResolutionStatus": null,
@@ -4217,6 +4220,7 @@ operator와 작업 대상 업장의 현재 업주가 호출할 수 있다. 요�
           "rawText": "글렌피딕 12년 15ml 9.0 / 30ml 17.0",
           "sourceBox": null,
           "extractedLineType": "product",
+          "extractedKind": "whisky",
           "correctedLineType": null,
           "effectiveLineType": "product",
           "initialResolutionStatus": "exact_match",
@@ -4228,8 +4232,20 @@ operator와 작업 대상 업장의 현재 업주가 호출할 수 있다. 요�
           "extractionConfidence": 0.93,
           "proposedProductId": "44444444-4444-4444-8444-444444444441",
           "options": [
-            { "extractedOptionId": "20000000-0000-4000-8000-000000000001", "optionOrder": 1, "extractedOptionLabel": null, "extractedPourMl": 15, "extractedPriceKrw": 9000 },
-            { "extractedOptionId": "20000000-0000-4000-8000-000000000002", "optionOrder": 2, "extractedOptionLabel": null, "extractedPourMl": 30, "extractedPriceKrw": 17000 }
+            {
+              "extractedOptionId": "20000000-0000-4000-8000-000000000001",
+              "optionOrder": 1,
+              "extractedOptionLabel": null,
+              "extractedPourMl": 15,
+              "extractedPriceKrw": 9000
+            },
+            {
+              "extractedOptionId": "20000000-0000-4000-8000-000000000002",
+              "optionOrder": 2,
+              "extractedOptionLabel": null,
+              "extractedPourMl": 30,
+              "extractedPriceKrw": 17000
+            }
           ],
           "candidates": [
             {
@@ -4255,6 +4271,7 @@ operator와 작업 대상 업장의 현재 업주가 호출할 수 있다. 요�
           "rawText": "Glenfiddich 12 (15yo) 30ml 21.0",
           "sourceBox": null,
           "extractedLineType": "product",
+          "extractedKind": "whisky",
           "correctedLineType": null,
           "effectiveLineType": "product",
           "initialResolutionStatus": "ambiguous",
@@ -4266,7 +4283,13 @@ operator와 작업 대상 업장의 현재 업주가 호출할 수 있다. 요�
           "extractionConfidence": 0.71,
           "proposedProductId": "44444444-4444-4444-8444-444444444441",
           "options": [
-            { "extractedOptionId": "20000000-0000-4000-8000-000000000003", "optionOrder": 1, "extractedOptionLabel": null, "extractedPourMl": 30, "extractedPriceKrw": 21000 }
+            {
+              "extractedOptionId": "20000000-0000-4000-8000-000000000003",
+              "optionOrder": 1,
+              "extractedOptionLabel": null,
+              "extractedPourMl": 30,
+              "extractedPriceKrw": 21000
+            }
           ],
           "candidates": [
             {
@@ -4292,6 +4315,7 @@ operator와 작업 대상 업장의 현재 업주가 호출할 수 있다. 요�
           "rawText": "Unknown Distillery 25yo 잔 45,000",
           "sourceBox": null,
           "extractedLineType": "product",
+          "extractedKind": "whisky",
           "correctedLineType": null,
           "effectiveLineType": "product",
           "initialResolutionStatus": "unmatched",
@@ -4303,67 +4327,179 @@ operator와 작업 대상 업장의 현재 업주가 호출할 수 있다. 요�
           "extractionConfidence": 0.88,
           "proposedProductId": null,
           "options": [
-            { "extractedOptionId": "20000000-0000-4000-8000-000000000004", "optionOrder": 1, "extractedOptionLabel": "잔", "extractedPourMl": null, "extractedPriceKrw": 45000 }
+            {
+              "extractedOptionId": "20000000-0000-4000-8000-000000000004",
+              "optionOrder": 1,
+              "extractedOptionLabel": "잔",
+              "extractedPourMl": null,
+              "extractedPriceKrw": 45000
+            }
           ],
           "candidates": [],
           "newProductDraft": { "brandText": "Unknown Distillery", "category": "whisky", "displayName": "Unknown Distillery 25", "ageYears": 25, "editionName": null, "abv": 48.0 }
         }
       ]
+    },
+    {
+      "imageId": "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee2",
+      "imageOrder": 2,
+      "imageUrl": "https://storage.example.com/signed/menus/22222222-2222-4222-8222-222222222222/77777777-7777-4777-8777-777777777771/page-2.jpg",
+      "imageUrlExpiresAt": null,
+      "items": [
+        {
+          "extractedItemId": "10000000-0000-4000-8000-000000000007",
+          "itemOrder": 2,
+          "rawText": "글렌피딕 12년 30ml 17,000",
+          "sourceBox": null,
+          "extractedLineType": "product",
+          "extractedKind": "whisky",
+          "correctedLineType": null,
+          "effectiveLineType": "product",
+          "initialResolutionStatus": "exact_match",
+          "extractedProductName": "글렌피딕 12년",
+          "extractedBrandName": "글렌피딕",
+          "extractedAgeYears": 12,
+          "extractedEditionName": null,
+          "extractedAbv": null,
+          "extractionConfidence": 0.93,
+          "proposedProductId": "44444444-4444-4444-8444-444444444441",
+          "options": [
+            {
+              "extractedOptionId": "20000000-0000-4000-8000-000000000005",
+              "optionOrder": 1,
+              "extractedOptionLabel": null,
+              "extractedPourMl": 30,
+              "extractedPriceKrw": 17000
+            }
+          ],
+          "candidates": [
+            {
+              "productId": "44444444-4444-4444-8444-444444444441",
+              "candidateRank": 1,
+              "displayName": "Glenfiddich 12",
+              "brandId": "dddddddd-dddd-4ddd-8ddd-ddddddddddd1",
+              "brandName": "Glenfiddich",
+              "category": "whisky",
+              "ageYears": 12,
+              "editionName": null,
+              "abv": null,
+              "matchMethod": "alias",
+              "score": 1.0,
+              "evidence": { "aliasExact": true, "matchedAlias": "글렌피딕12", "ageExact": true, "rule": "alias" }
+            }
+          ],
+          "newProductDraft": { "brandText": "글렌피딕", "category": "whisky", "displayName": "글렌피딕 12년", "ageYears": 12, "editionName": null, "abv": null }
+        },
+        {
+          "extractedItemId": "10000000-0000-4000-8000-000000000009",
+          "itemOrder": 4,
+          "rawText": "글렌피딕 하이볼 12,000",
+          "sourceBox": null,
+          "extractedLineType": "product",
+          "extractedKind": "other",
+          "correctedLineType": null,
+          "effectiveLineType": "product",
+          "initialResolutionStatus": null,
+          "extractedProductName": "글렌피딕 하이볼",
+          "extractedBrandName": null,
+          "extractedAgeYears": null,
+          "extractedEditionName": null,
+          "extractedAbv": null,
+          "extractionConfidence": 0.9,
+          "proposedProductId": null,
+          "options": [
+            {
+              "extractedOptionId": "20000000-0000-4000-8000-000000000006",
+              "optionOrder": 1,
+              "extractedOptionLabel": "잔",
+              "extractedPourMl": null,
+              "extractedPriceKrw": 12000
+            }
+          ],
+          "candidates": [],
+          "newProductDraft": { "brandText": null, "category": "whisky", "displayName": "글렌피딕 하이볼", "ageYears": null, "editionName": null, "abv": null }
+        }
+      ]
     }
   ],
+  "reviewDraft": {
+    "draftVersion": 1,
+    "reviewVersion": 1,
+    "savedAt": "2026-11-14T11:41:59.918884Z",
+    "content": {
+      "clientState": {
+        "expandedItemIds": ["10000000-0000-4000-8000-000000000002"]
+      },
+      "itemDecisions": [
+        {
+          "action": "select_existing_product",
+          "productId": "44444444-4444-4444-8444-444444444441",
+          "finalLineType": "product",
+          "extractedItemId": "10000000-0000-4000-8000-000000000002"
+        },
+        { "action": "reject", "finalLineType": "product", "extractedItemId": "10000000-0000-4000-8000-000000000004" }
+      ],
+      "changeDecisions": []
+    }
+  },
   "proposedChanges": [
     {
       "changeId": "30000000-0000-4000-8000-000000000001",
       "changeType": "add",
       "barMenuItemId": null,
       "extractedItemId": "10000000-0000-4000-8000-000000000002",
+      "extractedItemIds": ["10000000-0000-4000-8000-000000000002", "10000000-0000-4000-8000-000000000003", "10000000-0000-4000-8000-000000000007"],
       "before": null,
       "after": {
         "productId": "44444444-4444-4444-8444-444444444441",
+        "kind": "whisky",
         "displayName": "Glenfiddich 12",
         "options": [
           { "extractedOptionId": "20000000-0000-4000-8000-000000000001", "optionLabel": null, "pourMl": 15, "priceKrw": 9000 },
-          { "extractedOptionId": "20000000-0000-4000-8000-000000000002", "optionLabel": null, "pourMl": 30, "priceKrw": 17000 }
+          { "extractedOptionId": "20000000-0000-4000-8000-000000000002", "optionLabel": null, "pourMl": 30, "priceKrw": 17000 },
+          { "extractedOptionId": "20000000-0000-4000-8000-000000000003", "optionLabel": null, "pourMl": 30, "priceKrw": 21000 }
         ]
       },
-      "summary": "Glenfiddich 12 추가 (가격 옵션 2개)",
+      "summary": "Glenfiddich 12 추가 (가격 옵션 3개)",
       "decision": "pending"
     },
     {
-      "changeId": "30000000-0000-4000-8000-000000000002",
+      "changeId": "30000000-0000-4000-8000-000000000003",
       "changeType": "add",
       "barMenuItemId": null,
-      "extractedItemId": "10000000-0000-4000-8000-000000000004",
+      "extractedItemId": "10000000-0000-4000-8000-000000000009",
+      "extractedItemIds": ["10000000-0000-4000-8000-000000000009"],
       "before": null,
       "after": {
         "productId": null,
-        "displayName": "Unknown Distillery 25",
+        "kind": "other",
+        "displayName": "글렌피딕 하이볼",
         "options": [
-          { "extractedOptionId": "20000000-0000-4000-8000-000000000004", "optionLabel": "잔", "pourMl": null, "priceKrw": 45000 }
+          { "extractedOptionId": "20000000-0000-4000-8000-000000000006", "optionLabel": "잔", "pourMl": null, "priceKrw": 12000 }
         ]
       },
-      "summary": "Unknown Distillery 25 추가 (가격 옵션 1개)",
+      "summary": "글렌피딕 하이볼 추가 (가격 옵션 1개)",
       "decision": "pending"
     }
   ]
 }
 ```
 
-**취소 (5.7)**. 위 작업을 취소한 응답이다.
+**취소 (5.7)**. 같은 업장에 사진을 다시 올려 만든 `ready_for_review` 작업을 취소한 응답이다. 저장된 검수 초안이 있었다면 같은 트랜잭션에서 지워진다(5.9).
 
 ```json
 {
-  "menuImportId": "77777777-7777-4777-8777-777777777771",
+  "menuImportId": "77777777-7777-4777-8777-777777777772",
   "barId": "22222222-2222-4222-8222-222222222222",
   "status": "canceled",
-  "canceledAt": "2026-11-09T12:46:03.982990Z"
+  "canceledAt": "2026-11-14T11:42:00.378248Z"
 }
 ```
 
-반영이 끝난 작업을 취소했을 때 (`409`)
+반영이 끝난 위 작업을 취소했을 때 (`409`)
 
 ```json
-{"error": {"code": "INVALID_IMPORT_STATE", "message": "이미 끝난 메뉴 등록 작업은 취소할 수 없습니다.", "details": {"menuImportId": "77777777-7777-4777-8777-777777777773", "status": "applied"}, "fieldErrors": []}}
+{"error": {"code": "INVALID_IMPORT_STATE", "message": "이미 끝난 메뉴 등록 작업은 취소할 수 없습니다.", "details": {"menuImportId": "77777777-7777-4777-8777-777777777771", "status": "applied"}, "fieldErrors": []}}
 ```
 
 **호출자별 결과**. 대상은 관악 위스키 바의 메뉴 등록 작업이다. 취소 행은 `ready_for_review` 작업에 차례로 보냈으므로 operator의 `200`은 이미 취소된 작업의 같은 응답이다(5.7).
@@ -4472,7 +4608,25 @@ operator와 작업 대상 업장의 현재 업주가 호출할 수 있다(검수
 |---|---|---|---|---|---|
 | `PUT /api/menu-imports/{menuImportId}/review-draft` | `401` | `403` | `403` | `200` | `200` |
 
-이 표는 구현 전에 권한 규칙(2.2)으로 적은 값이다. 구현한 뒤 2.4의 방법으로 받아 확인한다.
+2.4의 방법으로 5.8의 작업에 받은 값이다. 왼쪽 열부터 차례로 보냈고, 각 호출자는 마지막으로 읽은 `draftVersion`을 보냈다.
+
+**실제 응답 (2.4)**. 5.8의 작업에 업주가 처음 저장한 응답이다.
+
+```json
+{ "menuImportId": "77777777-7777-4777-8777-777777777771", "draftVersion": 1, "savedAt": "2026-11-14T11:41:59.918884Z" }
+```
+
+업주가 저장한 뒤 operator가 `draftVersion = 0`으로 저장했을 때 (`409`). 저장 응답의 `savedAt`과 같은 시각이며, `details.savedAt`은 초 단위까지 온다.
+
+```json
+{"error": {"code": "REVIEW_DRAFT_OUTDATED", "message": "다른 곳에서 먼저 저장한 초안이 있습니다. 최신 내용을 다시 확인해 주세요.", "details": {"currentDraftVersion": 1, "savedAt": "2026-11-14T11:41:59Z", "reviewUrl": "/api/menu-imports/77777777-7777-4777-8777-777777777771"}, "fieldErrors": []}}
+```
+
+`content`가 256KB를 넘을 때 (`413`)
+
+```json
+{"error": {"code": "REVIEW_DRAFT_TOO_LARGE", "message": "검수 초안이 너무 큽니다.", "details": {"maxBytes": 262144}, "fieldErrors": []}}
+```
 
 ## 6. 검수 보조 브랜드 검색
 
@@ -4895,48 +5049,106 @@ HTTP/1.1 200 OK
 
 ### 8.9 실제 응답 예시와 호출자별 결과
 
-2.4의 방법으로 받은 응답이다. 5.8의 작업을 취소한 뒤 메뉴판 사진 한 장을 다시 올려(4장) 만든 작업으로, mock 추출 결과는 5.8의 첫째 사진과 같다.
+2.4의 방법으로 받은 응답이다. 대상은 5.8의 작업이다.
 
-**요청**. 머리말과 설명 줄은 비상품으로 확정하고, 2번과 3번 줄은 같은 상품(Glenfiddich 12)에 연결하고, 후보가 없는 4번 줄은 제외했다. 변경은 2번 줄의 `add`를 적용하고 4번 줄의 `add`는 무시했다. 이 요청은 옵션 목록 전체 제출(8.1의 `options`) 전의 형식이라 지금 규칙에서는 `options`가 없어 거부된다. 구현한 뒤 새 형식으로 다시 받아 바꾼다.
+**요청**. 머리말과 설명 줄은 비상품으로 확정했다. 같은 상품으로 합쳐진 세 줄 중 첫째 사진의 2번 줄과 둘째 사진의 "글렌피딕 12년" 줄은 Glenfiddich 12로 게시하고, 30ml가 21,000원으로 다른 3번 줄은 제외했다. 업주가 17,000원을 고르면 그 줄에는 옵션이 남지 않기 때문이다(8.12). 후보가 없는 4번 줄은 상품 없는 위스키로, 하이볼과 치즈 플래터는 위스키가 아닌 메뉴로 게시했다(8.10). 변경은 모두 적용했다.
 
 ```json
 {
   "reviewVersion": 1,
   "itemDecisions": [
-    { "extractedItemId": "10000000-0000-4000-8000-000000000011", "finalLineType": "section_header", "action": "confirm_non_product" },
-    { "extractedItemId": "10000000-0000-4000-8000-000000000012", "finalLineType": "product", "action": "select_existing_product", "productId": "44444444-4444-4444-8444-444444444441" },
-    { "extractedItemId": "10000000-0000-4000-8000-000000000013", "finalLineType": "product", "action": "select_existing_product", "productId": "44444444-4444-4444-8444-444444444441" },
-    { "extractedItemId": "10000000-0000-4000-8000-000000000014", "finalLineType": "product", "action": "reject" },
-    { "extractedItemId": "10000000-0000-4000-8000-000000000015", "finalLineType": "description", "action": "confirm_non_product" }
+    { "extractedItemId": "10000000-0000-4000-8000-000000000001", "finalLineType": "section_header", "action": "confirm_non_product" },
+    {
+      "extractedItemId": "10000000-0000-4000-8000-000000000002",
+      "finalLineType": "product",
+      "action": "select_existing_product",
+      "productId": "44444444-4444-4444-8444-444444444441",
+      "options": [
+        { "extractedOptionId": "20000000-0000-4000-8000-000000000001", "optionLabel": null, "pourMl": 15, "priceKrw": 9000 },
+        { "extractedOptionId": "20000000-0000-4000-8000-000000000002", "optionLabel": null, "pourMl": 30, "priceKrw": 17000 }
+      ]
+    },
+    { "extractedItemId": "10000000-0000-4000-8000-000000000003", "finalLineType": "product", "action": "reject" },
+    {
+      "extractedItemId": "10000000-0000-4000-8000-000000000004",
+      "finalLineType": "product",
+      "action": "publish_without_product",
+      "kind": "whisky",
+      "options": [
+        { "extractedOptionId": "20000000-0000-4000-8000-000000000004", "optionLabel": "잔", "pourMl": null, "priceKrw": 45000 }
+      ]
+    },
+    { "extractedItemId": "10000000-0000-4000-8000-000000000005", "finalLineType": "description", "action": "confirm_non_product" },
+    { "extractedItemId": "10000000-0000-4000-8000-000000000006", "finalLineType": "section_header", "action": "confirm_non_product" },
+    {
+      "extractedItemId": "10000000-0000-4000-8000-000000000007",
+      "finalLineType": "product",
+      "action": "select_existing_product",
+      "productId": "44444444-4444-4444-8444-444444444441",
+      "options": [
+        { "extractedOptionId": "20000000-0000-4000-8000-000000000005", "optionLabel": null, "pourMl": 30, "priceKrw": 17000 }
+      ]
+    },
+    { "extractedItemId": "10000000-0000-4000-8000-000000000008", "finalLineType": "section_header", "action": "confirm_non_product" },
+    {
+      "extractedItemId": "10000000-0000-4000-8000-000000000009",
+      "finalLineType": "product",
+      "action": "publish_without_product",
+      "kind": "other",
+      "options": [
+        { "extractedOptionId": "20000000-0000-4000-8000-000000000006", "optionLabel": "잔", "pourMl": null, "priceKrw": 12000 }
+      ]
+    },
+    {
+      "extractedItemId": "10000000-0000-4000-8000-000000000010",
+      "finalLineType": "product",
+      "action": "publish_without_product",
+      "kind": "other",
+      "options": [
+        { "extractedOptionId": "20000000-0000-4000-8000-000000000007", "optionLabel": null, "pourMl": null, "priceKrw": 25000 }
+      ]
+    }
   ],
   "changeDecisions": [
-    { "changeId": "30000000-0000-4000-8000-000000000004", "decision": "apply" },
-    { "changeId": "30000000-0000-4000-8000-000000000005", "decision": "ignore" }
+    { "changeId": "30000000-0000-4000-8000-000000000001", "decision": "apply" },
+    { "changeId": "30000000-0000-4000-8000-000000000002", "decision": "apply" },
+    { "changeId": "30000000-0000-4000-8000-000000000003", "decision": "apply" },
+    { "changeId": "30000000-0000-4000-8000-000000000004", "decision": "apply" }
   ]
 }
 ```
 
-**성공 응답**. 같은 상품의 두 줄이 한 항목으로 게시되어 `added = 1`이다. 같은 요청을 다시 보내도 같은 응답이다. 이 응답은 옵션 합치기(8.12) 전의 규칙(첫 줄만 게시)으로 받은 것이며, 구현한 뒤 다시 받아 바꾼다.
+**성공 응답**. 합쳐진 Glenfiddich 12 한 항목, 상품 없는 위스키 Unknown Distillery 25(`unlinkedWhisky = 1`), 위스키가 아닌 메뉴 두 항목이 추가되어 `added = 4`다. 같은 요청을 다시 보내도 같은 응답이다.
 
 ```json
 {
-  "menuImportId": "77777777-7777-4777-8777-777777777773",
+  "menuImportId": "77777777-7777-4777-8777-777777777771",
   "status": "applied",
   "reviewVersion": 1,
-  "appliedAt": "2026-11-09T12:46:34.781545Z",
+  "appliedAt": "2026-11-14T11:42:00.200863Z",
   "menuBoardId": "66666666-6666-4666-8666-666666666661",
-  "result": {
-    "added": 1,
-    "updated": 0,
-    "removed": 0,
-    "ignored": 1,
-    "createdBrands": 0,
-    "createdProducts": 0
-  }
+  "result": { "added": 4, "updated": 0, "removed": 0, "ignored": 0, "createdBrands": 0, "createdProducts": 0, "unlinkedWhisky": 1 }
 }
 ```
 
 **대표 오류**
+
+3번 줄도 Glenfiddich 12로 보냈을 때 (`422`, 8.12). 같은 상품의 두 줄이 30ml에 다른 가격을 갖는다. 뒤에 오는 줄의 그 옵션을 가리킨다.
+
+```json
+{
+  "error": {
+    "code": "VALIDATION_FAILED",
+    "message": "입력값을 확인해 주세요.",
+    "details": null,
+    "fieldErrors": [
+      { "path": "itemDecisions[2].options[0]", "code": "OPTION_PRICE_CONFLICT", "message": "같은 메뉴의 다른 줄에 같은 표기와 용량의 가격이 다르게 있습니다. 하나만 남겨 주세요." }
+    ]
+  }
+}
+```
+
+다음 두 예시는 2026-11-09에 받은 응답이다. 형식은 지금도 같다.
 
 첫 항목의 결정을 빼고, 제외한 4번 줄의 변경(과 둘째 사진의 같은 변경)을 `apply`로 보냈을 때 (`422`). 문제가 모두 한 응답에 온다.
 
