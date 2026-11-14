@@ -35,13 +35,14 @@ def built(db_session, menu_import):
 
 @pytest.fixture
 def imported(client, db_session, image_storage, operator, glenfiddich):
-    """A sample import (exact 12, ambiguous 12, unknown) for a bar selling 12 at the menu price and 15."""
+    """A sample import (exact 12, ambiguous 12, unknown) for a bar selling 12 at the menu price and 15.
+    Both 12 lines are one change, so the board's 12 has their merged options (spec 8.12)."""
     bar = make_bar(db_session)
     board = publish_menu(
         db_session,
         bar,
         [
-            (glenfiddich[12], "글렌피딕 12년", [(None, 15, 9000), (None, 30, 17000)]),
+            (glenfiddich[12], "글렌피딕 12년", [(None, 15, 9000), (None, 30, 17000), (None, 30, 21000)]),
             (glenfiddich[15], "글렌피딕 15년", [(None, 30, 21000)]),
         ],
     )

@@ -16,13 +16,16 @@ from app.models import (
     CheckReason,
     CheckStatus,
     ExtractedItem,
+    MenuChangeDecision,
     MenuChangeType,
     MenuImport,
+    MenuImportChange,
     MenuItemCheck,
     MenuItemKind,
     ReviewStatus,
 )
-from app.services.menu_review_validation import load_items, pending_changes
+from app.schemas.menu_review import ReviewAndApplyRequest
+from app.services.menu_review_validation import load_items, pending_changes, validate_review
 from tests.factories import make_product
 from tests.review_support import JPEG, make_glenfiddich, options_of, upload_sample_review, valid_body
 
@@ -176,8 +179,9 @@ def test_the_same_menu_again_finds_the_unlinked_item_by_its_name_key(
     client, db_session, sample, operator, glenfiddich, published
 ):
     menu_import, items, changes = upload_again(client, db_session, sample.bar, operator)
-    # Nothing changed on the photo, so the unlinked item needs no change.
-    assert [(c.change_type, c.bar_menu_item_id) for c in changes] == []
+    # Nothing changed on the photo, so the unlinked item needs no change. (The 12 is updated: its two lines
+    # now make one change with both lines' options, spec 8.12.)
+    assert published.id not in {c.bar_menu_item_id for c in changes}
 
     body = accept_all(
         items,
@@ -395,3 +399,139 @@ def test_a_corrected_spelling_of_an_unlinked_item_is_published(
     assert menu_items(client, sample.bar)[-1][0] == "UnknownDistillery 25"
     db_session.expire_all()
     assert db_session.get(BarMenuItem, published.id).name_key == "unknowndistillery25"
+
+
+@pytest.mark.parametrize("decided_as", ["as_proposed", "renamed", "product"])
+def test_an_ignored_add_of_a_line_without_a_proposed_product_follows_its_target(
+    client, db_session, sample, operator, glenfiddich, decided_as
+):
+    """The unknown line was proposed without a product, so its target is its name key (spec 8.7). Kept as
+    proposed, the ignored add skips it; with another name key or a product, it follows the decision."""
+    unknown = sample.items[3]
+    decision = {
+        "as_proposed": {"action": "publish_without_product", "kind": "whisky"},
+        "renamed": {"action": "publish_without_product", "kind": "whisky", "correctedProductName": "Old Distillery 30"},
+        "product": {"action": "select_existing_product", "productId": str(glenfiddich[15].id)},
+    }[decided_as]
+    body = ignore(valid_body(sample, glenfiddich), sample.changes[MenuChangeType.ADD])
+    body["itemDecisions"][3] = {
+        "extractedItemId": str(unknown.id),
+        "finalLineType": "product",
+        "options": options_of(unknown),
+        **decision,
+    }
+
+    apply(client, sample.menu_import.id, body, operator)
+
+    names = [(name, product) for name, product, *_ in menu_items(client, sample.bar)]
+    assert names[0] == ("글렌피딕 12년", str(glenfiddich[12].id))
+    assert names[1:] == {
+        "as_proposed": [],
+        "renamed": [("Old Distillery 30", None)],
+        "product": [("Unknown Distillery 25", str(glenfiddich[15].id))],
+    }[decided_as]
+
+
+def test_an_ignored_add_of_a_proposed_product_skips_the_line_only_while_it_is_that_product(
+    client, db_session, sample, operator, glenfiddich
+):
+    """A line proposed as a product not on the board makes an add with no board item to compare."""
+    # The catalog gets Unknown Distillery 25 and the bar stops selling it.
+    apply(client, sample.menu_import.id, valid_body(sample, glenfiddich), operator)
+    menu = client.get(f"/api/bars/{sample.bar.id}/menu").json()
+    unknown_item = next(i["barMenuItemId"] for i in menu["items"] if i["displayName"] == "Unknown Distillery 25")
+    deleted = client.delete(
+        f"/api/bars/{sample.bar.id}/menu/items/{unknown_item}",
+        params={"menuVersion": menu["menuVersion"]},
+        headers=operator,
+    )
+    assert deleted.status_code == 200, deleted.text
+    menu_import, items, changes = upload_again(client, db_session, sample.bar, operator)
+    [add] = [c for c in changes if c.change_type == MenuChangeType.ADD]
+    assert (add.extracted_item_id, add.bar_menu_item_id) == (items[3].id, None)
+    proposed = items[3].candidates[0].product_id
+
+    def ignored_lines_when_line_is(product_id):
+        body = accept_all(
+            items,
+            changes,
+            {
+                1: {"action": "select_existing_product", "productId": str(glenfiddich[12].id)},
+                3: {"action": "select_existing_product", "productId": str(product_id)},
+            },
+        )
+        ignore(body, add)
+        request = ReviewAndApplyRequest.model_validate(body)
+        return validate_review(db_session, menu_import, request, operator=True).ignored_lines
+
+    assert ignored_lines_when_line_is(proposed) == {items[3].id}
+    assert ignored_lines_when_line_is(glenfiddich[15].id) == set()
+
+
+# ---- lines of one item (spec 8.12) ----
+
+
+def test_unlinked_whiskies_of_one_name_key_keep_the_earlier_price_for_the_operator(
+    client, db_session, sample, operator, glenfiddich
+):
+    _, exact, _, unknown, _ = sample.items
+    body = valid_body(sample, glenfiddich)
+    # The 12 line and the unknown line, both published without a product under one name key.
+    for index, line, price in ((1, exact, 26000), (3, unknown, 28000)):
+        body["itemDecisions"][index] = {
+            "action": "publish_without_product",
+            "extractedItemId": str(line.id),
+            "finalLineType": "product",
+            "kind": "whisky",
+            "correctedProductName": "글렌알라키 10 CS" if index == 1 else "글렌알라키10CS",
+            "options": [{"pourMl": 30, "priceKrw": price}],
+        }
+
+    result = apply(client, sample.menu_import.id, body, operator)
+
+    assert result["result"]["unlinkedWhisky"] == 1
+    [item] = [i for i in menu_items(client, sample.bar) if i[1] is None]
+    assert (item[0], item[3]) == ("글렌알라키 10 CS", [26000])
+    db_session.expire_all()
+    check = db_session.scalar(select(MenuItemCheck).where(MenuItemCheck.bar_id == sample.bar.id))
+    # Both lines are sources of unlinked; the one that lost its price is the source of price_conflict.
+    assert [(r.reason, r.source_extracted_item_id) for r in check.reasons] == [
+        (CheckReason.UNLINKED, exact.id),
+        (CheckReason.UNLINKED, unknown.id),
+        (CheckReason.PRICE_CONFLICT, unknown.id),
+    ]
+    assert check.discarded_options == [
+        {
+            "optionLabel": None,
+            "pourMl": 30,
+            "priceKrw": 28000,
+            "displayName": "글렌알라키10CS",
+            "extractedItemId": str(unknown.id),
+        }
+    ]
+
+
+def test_a_merged_change_is_recorded_on_the_line_still_published(client, db_session, sample, operator, glenfiddich):
+    """The draft's update of 12 has both 12 lines and is stored with the first. Rejecting the first and
+    publishing the second keeps the row, now on the second line."""
+    _, exact, conflict, *_ = sample.items
+    update = sample.changes[MenuChangeType.UPDATE]
+    body = valid_body(sample, glenfiddich)
+    body["itemDecisions"][1] = {"action": "reject", "extractedItemId": str(exact.id), "finalLineType": "product"}
+    body["itemDecisions"][2] = {
+        "action": "select_existing_product",
+        "extractedItemId": str(conflict.id),
+        "finalLineType": "product",
+        "productId": str(glenfiddich[12].id),
+        "options": options_of(conflict),
+    }
+
+    apply(client, sample.menu_import.id, body, operator)
+
+    db_session.expire_all()
+    row = db_session.get(MenuImportChange, update.id)
+    assert (row.change_type, row.decision, row.extracted_item_id) == (
+        MenuChangeType.UPDATE,
+        MenuChangeDecision.APPLY,
+        conflict.id,
+    )

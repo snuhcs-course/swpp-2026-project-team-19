@@ -145,7 +145,7 @@ def test_draft_diff_against_an_empty_board(client, db_session, image_storage, op
     menu_import = load_import(db_session, upload(client, bar, operator))
 
     _, exact, _, unknown, _ = items_of(menu_import)
-    # The age-conflict line proposes Glenfiddich 12 again, so only its first occurrence counts.
+    # The age-conflict line proposes Glenfiddich 12 again, so it is merged into the first line's change.
     assert changes_of(db_session, menu_import) == sorted(
         [(MenuChangeType.ADD, exact.id, None), (MenuChangeType.ADD, unknown.id, None)]
     )
@@ -172,7 +172,8 @@ def test_draft_diff_against_a_published_board(
         db_session,
         bar,
         [
-            (glenfiddich[12], "글렌피딕 12년", [(None, 15, board_price), (None, 30, 17000)]),
+            # The options of both 12 lines, which make one change (spec 8.12).
+            (glenfiddich[12], "글렌피딕 12년", [(None, 15, board_price), (None, 30, 17000), (None, 30, 21000)]),
             (glenfiddich[15], "글렌피딕 15년", [(None, 30, 21000)]),
         ],
     )

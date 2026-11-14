@@ -60,9 +60,11 @@ from app.schemas.menu_review import (
 )
 from app.services.bar_access import can_manage_bar, forbidden, is_operator
 from app.services.bar_menu import bar_not_found
-from app.services.menu_checks import dismiss_open_checks, raise_check, settle_linked
-from app.services.menu_draft import build_draft, replace_draft
-from app.services.menu_publish import AppliedChange, PublishPlan, review_plan, write_board
+from app.services.menu_checks import dismiss_open_checks, move_open_check, raise_check, settle_linked
+from app.services.menu_draft import build_draft, draft_compared_items, replace_draft
+from app.matching.db_catalog import DbCatalog
+from app.matching.rematch import attribute_conflict, name_corrected
+from app.services.menu_publish import AppliedChange, BoardEntry, PublishPlan, review_plan, write_board
 from app.services.menu_review_catalog import CatalogResult, create_catalog_entries
 from app.services.menu_review_validation import ReviewedItem, ValidatedReview, pending_changes, validate_review
 from app.services.serializable import SessionFactory, run_serializable, write_conflict
@@ -125,7 +127,7 @@ def _record_options(entry: ReviewedItem) -> bool:
     return changed or kept_ids != {option.id for option in entry.item.options}
 
 
-def _record_item(entry: ReviewedItem, catalog: CatalogResult) -> None:
+def _record_item(entry: ReviewedItem, catalog: CatalogResult, review: ValidatedReview) -> None:
     item, decision = entry.item, entry.decision
     final_type = decision.finalLineType
     item.corrected_line_type = None if final_type == item.extracted_line_type else final_type
@@ -145,6 +147,15 @@ def _record_item(entry: ReviewedItem, catalog: CatalogResult) -> None:
     final_kind = MenuItemKind(decision.kind) if isinstance(decision, PublishWithoutProduct) else MenuItemKind.WHISKY
     item.corrected_kind = final_kind if final_kind != (item.extracted_kind or MenuItemKind.WHISKY) else None
     options_corrected = _record_options(entry)
+    product_id = review.final_product(entry, catalog.product_ids.get(item.id))
+    if review.relinked(entry):
+        # The reviewer corrected the name and rematching decided the link (spec 8.11): a person's change,
+        # so the link is manual with no score; a link it undid is stored like a line without a product.
+        item.selected_product_id = product_id
+        item.selected_match_method = MatchMethod.MANUAL if product_id is not None else None
+        item.match_confidence = None
+        item.review_status = ReviewStatus.CORRECTED
+        return
     if isinstance(decision, PublishWithoutProduct):
         item.selected_product_id = item.selected_match_method = item.match_confidence = None
         # Publishing an unmatched line as it was read accepts the system's result (no product found).
@@ -157,7 +168,6 @@ def _record_item(entry: ReviewedItem, catalog: CatalogResult) -> None:
         item.review_status = ReviewStatus.CONFIRMED if unchanged and not options_corrected else ReviewStatus.CORRECTED
         return
 
-    product_id = catalog.product_ids[item.id]
     candidates = {c.product_id: c for c in item.candidates}
     top = item.candidates[0] if item.candidates else None
     kept_top = isinstance(decision, SelectExistingProduct) and top is not None and top.product_id == product_id
@@ -182,22 +192,40 @@ def _record_changes(
 
     A draft row keeps its id and takes the final type when the reviewer's decisions changed it
     (e.g. an add became an update). An applied draft row that ended up changing nothing is
-    deleted, and a change the draft did not have is inserted.
+    deleted, and a change the draft did not have is inserted. A draft row of merged lines is the
+    final change of any of its lines (spec 8.12), since the first line may not be published.
     """
-    applied_by_key = {_change_key(c.change_type, c.extracted_item_id, c.bar_menu_item_id): c for c in applied}
+    applied_by_key = {}
+    for change in applied:
+        lines = change.extracted_item_ids or (change.extracted_item_id,)
+        keys = [_change_key(change.change_type, line, change.bar_menu_item_id) for line in lines]
+        applied_by_key.update(dict.fromkeys(keys, change))
+    taken: set[int] = set()
     for row in review.changes:
         row.decision = review.change_decisions[row.id]
         row.reviewed_at = func.now()
         if row.decision == MenuChangeDecision.IGNORE:
             continue
-        final = applied_by_key.pop(_change_key(row.change_type, row.extracted_item_id, row.bar_menu_item_id), None)
+        lines = review.change_lines.get(row.id) or (row.extracted_item_id,)
+        final = next(
+            (
+                change
+                for line in lines
+                if (change := applied_by_key.get(_change_key(row.change_type, line, row.bar_menu_item_id)))
+                and id(change) not in taken
+            ),
+            None,
+        )
         if final is None:
             session.delete(row)
             continue
+        taken.add(id(final))
         row.change_type = final.change_type
         row.extracted_item_id = final.extracted_item_id
         row.bar_menu_item_id = final.bar_menu_item_id
-    for change in applied_by_key.values():
+    for change in applied:
+        if id(change) in taken:
+            continue
         session.add(
             MenuImportChange(
                 menu_import_id=menu_import.id,
@@ -272,26 +300,102 @@ def _settle_checks(
     items: list[BarMenuItem],
     old_item_ids: set[UUID],
 ) -> None:
-    """Keep the operator checks right after the board was written (spec 3.18.1): a whisky published
-    without a product opens or adds an unlinked check with its line as source; an unlinked item a line
-    linked to a product loses its unlinked reasons; an item that left the board or became other has no
-    open check."""
-    unlinked_lines = {entry.item.id for entry in review.items if entry.is_unlinked}
+    """Keep the operator checks right after the board was written (spec 3.18.1, 8.11):
+
+    - an item a rematched line took the place of passes its open check to the line's item;
+    - an unlinked item a line linked to a product loses its unlinked reasons;
+    - a line whose link rematching changed raises relinked_by_name, or unlinked_by_name when it was left
+      without a product; a whisky published without a product raises unlinked, each line a source;
+    - an item that became other, or left the board, has no open check.
+    """
+    catalog = DbCatalog(session)
+    reviewed_by_id = review.by_id
+    displaced_into: dict[UUID, list[UUID]] = {}
+    for displaced, first_line in plan.replaced.items():
+        displaced_into.setdefault(first_line, []).append(displaced)
     for entry, item in zip(plan.entries, items):
+        for displaced in displaced_into.get(entry.extracted_item_id, ()):
+            if displaced != item.id and displaced not in plan.linked_items:
+                move_open_check(session, displaced, item, entry.display_name)
         if entry.bar_menu_item_id in plan.linked_items:
             settle_linked(session, entry.bar_menu_item_id, item, entry.display_name)
-        elif item.product_id is None and item.kind == MenuItemKind.OTHER:
+        if item.product_id is None and item.kind == MenuItemKind.OTHER:
             dismiss_open_checks(session, {item.id})
-        elif item.product_id is None and entry.extracted_item_id in unlinked_lines:
+            continue
+        for line in plan.entry_lines.get(entry.extracted_item_id, ()):
+            reviewed = reviewed_by_id[line]
+            if review.relinked(reviewed):
+                reason = CheckReason.RELINKED_BY_NAME if item.product_id else CheckReason.UNLINKED_BY_NAME
+            elif item.product_id is None and reviewed.is_unlinked:
+                reason = CheckReason.UNLINKED
+            else:
+                continue
             raise_check(
                 session,
                 item,
                 entry.display_name,
-                CheckReason.UNLINKED,
+                reason,
                 source_menu_import_id=menu_import.id,
-                source_extracted_item_id=entry.extracted_item_id,
+                source_extracted_item_id=line,
             )
-    dismiss_open_checks(session, old_item_ids - {item.id for item in items} - plan.linked_items)
+        if entry.extracted_item_id in plan.discarded:
+            _raise_price_conflict(session, menu_import, item, entry.display_name, plan.discarded[entry.extracted_item_id])
+        _raise_attribute_conflicts(session, menu_import, reviewed_by_id, plan, entry, item, catalog)
+    dismiss_open_checks(
+        session, old_item_ids - {item.id for item in items} - plan.linked_items - set(plan.replaced)
+    )
+
+
+def _raise_attribute_conflicts(
+    session: Session,
+    menu_import: MenuImport,
+    reviewed_by_id: dict[UUID, ReviewedItem],
+    plan: PublishPlan,
+    entry: BoardEntry,
+    item: BarMenuItem,
+    catalog: DbCatalog,
+) -> None:
+    """A chosen product whose age or edition conflicts with what the AI read from the line (spec 8.7):
+    published as chosen, and shown to an operator with the line as source. Only lines published with an
+    existing product the reviewer chose without correcting the name; a corrected name is matched again
+    (8.11), and a new product or a line without one is not compared. Whoever submitted it."""
+    if item.product_id is None or entry.extracted_item_id is None:
+        return
+    for line in plan.entry_lines.get(entry.extracted_item_id, ()):
+        reviewed = reviewed_by_id[line]
+        decision = reviewed.decision
+        if not isinstance(decision, SelectExistingProduct):
+            continue
+        if name_corrected(decision.correctedProductName, reviewed.item.extracted_product_name):
+            continue
+        source = reviewed.item
+        if attribute_conflict(item.product_id, source.extracted_age_years, source.extracted_edition_name, catalog):
+            raise_check(
+                session,
+                item,
+                entry.display_name,
+                CheckReason.ATTRIBUTE_CONFLICT,
+                source_menu_import_id=menu_import.id,
+                source_extracted_item_id=line,
+            )
+
+
+def _raise_price_conflict(
+    session: Session, menu_import: MenuImport, item: BarMenuItem, display_name: str, discarded: list[dict]
+) -> None:
+    """Merged lines whose prices met (spec 8.12): the earlier price was kept, and the dropped options wait
+    for an operator, each line that lost one as a source of `price_conflict`."""
+    check = None
+    for line in dict.fromkeys(option["extractedItemId"] for option in discarded):
+        check = raise_check(
+            session,
+            item,
+            display_name,
+            CheckReason.PRICE_CONFLICT,
+            source_menu_import_id=menu_import.id,
+            source_extracted_item_id=UUID(line),
+        )
+    check.discarded_options = [*check.discarded_options, *discarded]
 
 
 # ---- the transaction ----
@@ -341,8 +445,9 @@ def _apply_once(
         session, menu_import, review, created_by_user_id=caller_user_id(session, principal)
     )
     for entry in review.items:
-        _record_item(entry, catalog)
-    board, plan = review_plan(session, menu_import.bar_id, menu_import.mode, review, catalog)
+        _record_item(entry, catalog, review)
+    compared = draft_compared_items(session, menu_import)
+    board, plan = review_plan(session, menu_import.bar_id, menu_import.mode, review, catalog, compared)
     old_item_ids = {entry.bar_menu_item_id for entry in board.entries} if board is not None else set()
     _, items = write_board(session, board, menu_import.bar_id, menu_import.id, plan.entries, published_at=published_at)
     _settle_checks(session, menu_import, review, plan, items, old_item_ids)

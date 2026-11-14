@@ -227,7 +227,10 @@ def create_catalog_entries(
     for entry in review.items:
         decision = entry.decision
         if isinstance(decision, SelectExistingProduct):
-            writer.add_product_aliases(decision.productId, decision.aliasesToAdd)
+            # Only while the chosen product is still linked: rematching may link another or none (spec 8.11),
+            # and an operator adds the spelling when checking it (3.18.3).
+            if not review.relinked(entry):
+                writer.add_product_aliases(decision.productId, decision.aliasesToAdd)
             result.product_ids[entry.item.id] = decision.productId
         elif isinstance(decision, CreateProduct):
             result.product_ids[entry.item.id] = writer.create_product(

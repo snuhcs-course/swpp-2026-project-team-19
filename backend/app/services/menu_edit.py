@@ -39,9 +39,18 @@ from app.schemas.menu import BarMenuResponse
 from app.schemas.menu_edit import MenuItemAddRequest, MenuItemUpdateRequest, MenuOptionInput, MenuResetRequest
 from app.services.bar_access import can_manage_bar, forbidden, is_operator
 from app.services.bar_menu import bar_not_found, get_bar_menu
-from app.services.menu_checks import dismiss_open_checks, raise_check, rename_open_check
+from app.matching.db_catalog import DbCatalog
+from app.matching.rematch import name_corrected, rematch_name
+from app.services.menu_checks import (
+    dismiss_open_checks,
+    move_open_check,
+    raise_check,
+    rename_open_check,
+    settle_linked,
+)
 from app.services.menu_import_upload import check_no_unfinished_import
 from app.services.menu_items import name_key, unlinked_entry_with_key
+from app.services.menu_links import link_entry, unlink_entry
 from app.services.menu_publish import clear_sold_out
 from app.services.menu_review_catalog import create_new_product
 from app.services.serializable import SessionFactory, run_serializable, write_conflict
@@ -310,21 +319,49 @@ def _update_once(
     board = _open_board(session, principal, bar_id, body.menuVersion)
     entry = board_entry(board, bar_menu_item_id)
     item = entry.bar_menu_item
-    if item.product_id is None:
-        # An unlinked item is known by its name, so a new name is a new key (spec 3.14.4).
-        key = name_key(body.displayName)
+    # A whisky renamed to another name is matched again (spec 3.14.4, the rules of 8.11).
+    product_id = item.product_id
+    if item.kind == MenuItemKind.WHISKY and name_corrected(body.displayName, entry.display_name):
+        product_id = rematch_name(body.displayName, DbCatalog(session))
+    key = name_key(body.displayName)
+    if product_id is None:
+        # An item without a product is known by its name, so a new name is a new key (spec 3.14.4).
         if not key:
             raise validation_failed("displayName", "NOT_NORMALIZABLE", "이름으로 쓸 수 있는 글자가 없습니다.")
         if (same := unlinked_entry_with_key(board.entries, key, except_item_id=item.id)) is not None:
             raise _item_exists(same.bar_menu_item_id, unlinked=True)
-        item.name_key = key
+        if item.product_id is None:
+            item.name_key = key
     rename_open_check(session, item.id, body.displayName)
     entry.display_name = body.displayName
     # Delete the old options before inserting the new ones, which reuse their sort orders.
     entry.options.clear()
     session.flush()
     entry.options.extend(_options(body.options))
+    session.flush()
+    if product_id != item.product_id:
+        _relink(session, board, entry, product_id, key)
     return _publish(session, board, base_url)
+
+
+def _relink(session: Session, board: MenuBoard, entry: MenuBoardEntry, product_id: UUID | None, key: str) -> None:
+    """Rematching changed the line's link (spec 3.14.4): move it by the rule of 3.14.1, take its open check
+    along, and show the change to an operator. A reason raised by a manual edit has no source line."""
+    old = entry.bar_menu_item
+    was_unlinked = old.product_id is None
+    result = link_entry(session, board, entry, product_id) if product_id else unlink_entry(session, entry, key)
+    now_on = result.entry.bar_menu_item
+    name = result.entry.display_name
+    if was_unlinked and now_on.product_id is not None:
+        settle_linked(session, old.id, now_on, name)
+    else:
+        move_open_check(session, old.id, now_on, name)
+    reason = CheckReason.RELINKED_BY_NAME if now_on.product_id else CheckReason.UNLINKED_BY_NAME
+    raise_check(session, now_on, name, reason)
+    if result.discarded:
+        # Merged into the line already of that product: its prices stayed (spec 3.14.1).
+        check = raise_check(session, now_on, name, CheckReason.PRICE_CONFLICT)
+        check.discarded_options = [*check.discarded_options, *result.discarded]
 
 
 def _delete_once(
