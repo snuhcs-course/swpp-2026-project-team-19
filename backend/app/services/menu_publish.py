@@ -280,10 +280,12 @@ def review_plan(
         for c in review.changes
         if c.change_type == MenuChangeType.REMOVE and decisions[c.id] == MenuChangeDecision.APPLY
     }
+    # Every line of an applied update may be the one published in the compared entry's place.
     takeovers = {
-        c.extracted_item_id: c.bar_menu_item_id
+        line: c.bar_menu_item_id
         for c in review.changes
-        if c.change_type == MenuChangeType.UPDATE and c.extracted_item_id and decisions[c.id] == MenuChangeDecision.APPLY
+        if c.change_type == MenuChangeType.UPDATE and decisions[c.id] == MenuChangeDecision.APPLY
+        for line in review.change_lines.get(c.id, ())
     }
     plan = plan_publish(
         proposals_from_review(session, review, catalog),

@@ -228,11 +228,19 @@ def test_choosing_another_candidate_is_manual_with_its_score(client, db_session,
 
 def test_changes_left_are_the_applied_and_ignored_ones(client, db_session, sample, operator, glenfiddich):
     """Picking Glenfiddich 15 for the 12 line turns the draft's update of 12 into an update of
-    15; the approved removal of 15 changes nothing, so its row goes; 12 stays on the board."""
+    15; the approved removal of 15 changes nothing, so its row goes; 12 stays on the board. The unknown
+    line is kept as proposed (without a product, same name), so its ignored add skips it."""
     _, exact, _, unknown, _ = sample.items
     entry_12, entry_15 = sample.board.entries
     body = valid_body(sample, glenfiddich)
     body["itemDecisions"][1]["productId"] = str(glenfiddich[15].id)
+    body["itemDecisions"][3] = {
+        "action": "publish_without_product",
+        "extractedItemId": str(unknown.id),
+        "finalLineType": "product",
+        "kind": "whisky",
+        "options": body["itemDecisions"][3]["options"],
+    }
     set_decision(body, sample.changes[MenuChangeType.ADD], "ignore")
 
     result = applied(client, sample, body, operator)
@@ -248,8 +256,8 @@ def test_changes_left_are_the_applied_and_ignored_ones(client, db_session, sampl
         "updated": 1,
         "removed": 0,
         "ignored": 1,
-        "createdBrands": 1,
-        "createdProducts": 1,
+        "createdBrands": 0,
+        "createdProducts": 0,
         "unlinkedWhisky": 0,
     }
     menu = client.get(f"/api/bars/{sample.bar.id}/menu").json()
@@ -287,13 +295,15 @@ def test_an_old_review_version_is_outdated(client, sample, operator, glenfiddich
 
 
 def test_a_board_change_rebuilds_the_draft(client, db_session, sample, operator, glenfiddich):
-    # The board now has the menu's price for 12, so the proposed update is stale.
+    # The board now has the menu's options for 12 (both 12 lines merged, spec 8.12), so the proposed
+    # update is stale.
     entry_12 = sample.board.entries[0]
     db_session.execute(
         MenuEntryOption.__table__.update()
         .where(MenuEntryOption.menu_board_entry_id == entry_12.id, MenuEntryOption.pour_ml == 15)
         .values(price_krw=9000)
     )
+    db_session.add(MenuEntryOption(menu_board_entry_id=entry_12.id, pour_ml=30, price_krw=21000, sort_order=3))
     db_session.commit()
 
     response = submit(client, sample.menu_import.id, valid_body(sample, glenfiddich), operator)
@@ -307,7 +317,9 @@ def test_a_board_change_rebuilds_the_draft(client, db_session, sample, operator,
     body = valid_body(sample, glenfiddich)
     body["reviewVersion"] = 2
     body["changeDecisions"] = [{"changeId": c["changeId"], "decision": "apply"} for c in review["proposedChanges"]]
-    assert applied(client, sample, body, operator)["result"]["updated"] == 0
+    # The reviewer rejected the second 12 line, so its 30 ml at 21,000 leaves the board: a change the
+    # draft did not have, recorded as applied.
+    assert applied(client, sample, body, operator)["result"]["updated"] == 1
 
 
 def test_errors_roll_back_everything(client, db_session, sample, operator, glenfiddich):

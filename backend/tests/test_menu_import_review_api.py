@@ -190,16 +190,21 @@ def test_review_payload(client, db_session, image_storage, operator, glenfiddich
     )
     assert update["before"]["displayName"] == update["after"]["displayName"] == "Glenfiddich 12"
     assert [(o["pourMl"], o["priceKrw"]) for o in update["before"]["options"]] == [(15, 8000), (30, 17000)]
-    assert [(o["pourMl"], o["priceKrw"]) for o in update["after"]["options"]] == [(15, 9000), (30, 17000)]
+    # The age-conflict line was proposed as the same product too, so it is merged into this change (8.12).
+    assert update["extractedItemIds"] == [exact["extractedItemId"], conflict["extractedItemId"]]
+    assert [(o["pourMl"], o["priceKrw"]) for o in update["after"]["options"]] == [(15, 9000), (30, 17000), (30, 21000)]
+    assert update["after"]["options"][2]["extractedOptionId"] == conflict["options"][0]["extractedOptionId"]
     assert update["after"]["options"][0]["extractedOptionId"] == exact["options"][0]["extractedOptionId"]
     assert update["summary"] == "Glenfiddich 12 가격·용량 변경"
 
     assert (add["changeType"], add["before"], add["barMenuItemId"]) == ("add", None, None)
+    assert add["extractedItemIds"] == [add["extractedItemId"]]
     assert add["after"]["productId"] is None
     assert add["after"]["displayName"] == "Unknown Distillery 25"
     assert add["summary"] == "Unknown Distillery 25 추가 (가격 옵션 1개)"
 
     assert (remove["changeType"], remove["after"], remove["extractedItemId"]) == ("remove", None, None)
+    assert remove["extractedItemIds"] == []
     assert remove["barMenuItemId"] == str(fifteen_entry.bar_menu_item_id)
     assert remove["before"]["options"][0]["optionLabel"] == "잔"
     assert remove["summary"] == "Glenfiddich 15 삭제"

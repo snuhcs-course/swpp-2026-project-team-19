@@ -111,14 +111,22 @@ def test_published_options_need_distinct_label_and_pour(db_session, review, glen
 
 
 def test_an_ignored_items_options_are_not_compared(db_session, review, glenfiddich):
+    """The unknown line is kept as proposed (without a product, same name), so its ignored add skips it."""
     body = valid_body(review, glenfiddich)
-    body["itemDecisions"][3]["options"] = [{"pourMl": 30, "priceKrw": 9000}, {"pourMl": 30, "priceKrw": 17000}]
+    unknown = review[1][3]
+    body["itemDecisions"][3] = {
+        "action": "publish_without_product",
+        "extractedItemId": str(unknown.id),
+        "finalLineType": "product",
+        "kind": "whisky",
+        "options": [{"pourMl": 30, "priceKrw": 9000}, {"pourMl": 30, "priceKrw": 17000}],
+    }
     add = review[2][MenuChangeType.ADD]
     for decision in body["changeDecisions"]:
         if decision["changeId"] == str(add.id):
             decision["decision"] = "ignore"
 
-    validate(db_session, review, body)
+    assert validate(db_session, review, body).ignored_lines == {unknown.id}
 
 
 # ---- publishing without a product (spec 8.10) ----
@@ -350,3 +358,48 @@ def test_names_are_trimmed_and_blank_names_rejected():
     body["itemDecisions"][0]["product"]["displayName"] = " New Distillery 12 "
     decision = ReviewAndApplyRequest.model_validate(body).itemDecisions[0]
     assert (decision.brand.canonicalName, decision.product.displayName) == ("New Distillery", "New Distillery 12")
+
+
+# ---- a change of several lines (spec 5.4, 8.7, 8.12) ----
+
+
+def _select(body, index, product, item):
+    body["itemDecisions"][index] = {
+        "action": "select_existing_product",
+        "extractedItemId": str(item.id),
+        "finalLineType": "product",
+        "productId": str(product.id),
+        "options": [
+            {"extractedOptionId": str(o.id), "pourMl": o.extracted_pour_ml, "priceKrw": o.extracted_price_krw}
+            for o in item.options
+        ],
+    }
+
+
+def test_a_change_of_two_lines_applies_while_either_line_is_published(db_session, review, glenfiddich):
+    """Both 12 lines were proposed as Glenfiddich 12, so they are one change."""
+    _, exact, conflict, *_ = review[1]
+    update = review[2][MenuChangeType.UPDATE]
+    body = valid_body(review, glenfiddich)
+    body["itemDecisions"][1] = {"action": "reject", "extractedItemId": str(exact.id), "finalLineType": "product"}
+    _select(body, 2, glenfiddich[12], conflict)
+
+    result = validate(db_session, review, body)
+
+    assert result.change_lines[update.id] == (exact.id, conflict.id)
+    assert result.change_lines[review[2][MenuChangeType.REMOVE].id] == ()
+
+
+def test_an_ignored_change_of_two_lines_skips_each_line_still_its_target(db_session, review, glenfiddich):
+    _, exact, conflict, *_ = review[1]
+    update = review[2][MenuChangeType.UPDATE]
+    body = valid_body(review, glenfiddich)
+    _select(body, 2, glenfiddich[12], conflict)
+    for decision in body["changeDecisions"]:
+        if decision["changeId"] == str(update.id):
+            decision["decision"] = "ignore"
+
+    assert validate(db_session, review, body).ignored_lines == {exact.id, conflict.id}
+    # A line the reviewer decided to be another product follows that decision.
+    _select(body, 2, glenfiddich[15], conflict)
+    assert validate(db_session, review, body).ignored_lines == {exact.id}

@@ -43,6 +43,7 @@ from app.schemas.menu_import import (
     ReviewItem,
     ReviewOption,
 )
+from app.services.menu_review_validation import change_lines
 
 POLL_AFTER_MS = 3000
 
@@ -200,8 +201,30 @@ def _summary(change_type: MenuChangeType, name: str | None, option_count: int) -
     return f"{name} 삭제"
 
 
+def _merged_options(lines: list[ExtractedItem]) -> list[ChangeAfterOption]:
+    """The options of a change's lines one after another, one equal to an earlier one left out (spec 8.12),
+    as the draft compared them (app.services.menu_diff.merge_options)."""
+    seen: set[tuple] = set()
+    options = []
+    for line in lines:
+        for o in line.options:
+            key = (o.extracted_option_label, o.extracted_pour_ml, o.extracted_price_krw)
+            if key not in seen:
+                seen.add(key)
+                options.append(
+                    ChangeAfterOption(
+                        extractedOptionId=o.id,
+                        optionLabel=o.extracted_option_label,
+                        pourMl=o.extracted_pour_ml,
+                        priceKrw=o.extracted_price_krw,
+                    )
+                )
+    return options
+
+
 def _review(session: Session, menu_import: MenuImport, storage: ImageStorage, base_url: str) -> ImportReviewResponse:
-    items = {item.id: item for image in menu_import.images for item in image.extraction_run.items}
+    ordered = [item for image in menu_import.images for item in image.extraction_run.items]
+    items = {item.id: item for item in ordered}
     menu_order = {
         item.id: (image.image_order, item.item_order) for image in menu_import.images for item in image.extraction_run.items
     }
@@ -227,9 +250,11 @@ def _review(session: Session, menu_import: MenuImport, storage: ImageStorage, ba
         )
     }
 
+    lines_of = change_lines(changes, ordered)
     proposed = []
     for change in changes:
-        item = items.get(change.extracted_item_id) if change.extracted_item_id else None
+        lines = [items[line] for line in lines_of[change.id]]
+        item = lines[0] if lines else None
         entry = board_entries.get(change.bar_menu_item_id) if change.bar_menu_item_id else None
         before = (
             ChangeBefore(
@@ -254,19 +279,12 @@ def _review(session: Session, menu_import: MenuImport, storage: ImageStorage, ba
         after = None
         if item is not None:
             product_id = item.candidates[0].product_id if item.candidates else None
+            kinds = {extracted_kind(line) or MenuItemKind.WHISKY for line in lines}
             after = ChangeAfter(
                 productId=product_id,
-                kind=extracted_kind(item) or MenuItemKind.WHISKY,
+                kind=MenuItemKind.WHISKY if MenuItemKind.WHISKY in kinds else MenuItemKind.OTHER,
                 displayName=products[product_id].display_name if product_id else item.extracted_product_name,
-                options=[
-                    ChangeAfterOption(
-                        extractedOptionId=o.id,
-                        optionLabel=o.extracted_option_label,
-                        pourMl=o.extracted_pour_ml,
-                        priceKrw=o.extracted_price_krw,
-                    )
-                    for o in item.options
-                ],
+                options=_merged_options(lines),
             )
         # add/update follow the photos (image, line); removes come last in board order.
         if item is not None:
@@ -282,6 +300,7 @@ def _review(session: Session, menu_import: MenuImport, storage: ImageStorage, ba
                     changeType=change.change_type,
                     barMenuItemId=change.bar_menu_item_id,
                     extractedItemId=change.extracted_item_id,
+                    extractedItemIds=[line.id for line in lines],
                     before=before,
                     after=after,
                     summary=_summary(change.change_type, name, len(after.options) if after else 0),
