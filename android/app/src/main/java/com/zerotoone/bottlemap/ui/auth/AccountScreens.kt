@@ -1,6 +1,7 @@
 
 package com.zerotoone.bottlemap.ui.auth
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -106,7 +107,8 @@ fun AccountScreen(
             verticalArrangement=Arrangement.spacedBy(0.dp)) {
             val user=(state as? AuthUiState.SignedIn)?.user
             Row(Modifier.fillMaxWidth().heightIn(min=56.dp)
-                .then(if(user==null)Modifier.clickable(onClick=onOpenLogin) else Modifier),
+                .then(if(user==null && state !is AuthUiState.SigningOut)
+                    Modifier.clickable(onClick=onOpenLogin) else Modifier),
                 verticalAlignment=Alignment.CenterVertically,
                 horizontalArrangement=Arrangement.spacedBy(14.dp)) {
                 Box(Modifier.size(48.dp).background(P18Elevated,CircleShape),
@@ -116,9 +118,10 @@ fun AccountScreen(
                 Column(Modifier.weight(1f),verticalArrangement=Arrangement.spacedBy(2.dp)) {
                     Text(user?.displayName?.takeIf{it.isNotBlank()}
                         ?:user?.email?.substringBefore('@')?.takeIf{it.isNotBlank()}
-                        ?: "로그인하기",
+                        ?: if(state is AuthUiState.SigningOut) "로그아웃 처리 중" else "로그인하기",
                         fontSize=22.sp,lineHeight=30.sp,fontWeight=FontWeight.Bold,color=P18Text)
-                    Text(user?.email ?: "Google 계정으로 로그인",
+                    Text(user?.email ?: if(state is AuthUiState.SigningOut)
+                        "이전 계정 연결을 정리하고 있어요." else "Google 계정으로 로그인",
                         fontSize=14.sp,lineHeight=20.sp,color=P18Muted)
                 }
                 if(user==null) Text("›",color=P18Muted,fontSize=22.sp)
@@ -214,8 +217,12 @@ fun GoogleLoginScreen(
     onBack: () -> Unit,
     onContinueGuest: () -> Unit,
 ) {
+    val isSigningOut = state is AuthUiState.SigningOut
+    // Avoid returning to a clickable Account login row before old credentials
+    // are removed. Both system Back and the header action are gated.
+    BackHandler(enabled = isSigningOut) { }
     Column(Modifier.fillMaxSize().background(P18Bg).testTag("customer-google-login")) {
-        AccountHeader("로그인",onBack)
+        AccountHeader("로그인", onBack, backEnabled = !isSigningOut)
         Column(Modifier.fillMaxSize().padding(horizontal=20.dp,vertical=12.dp),
             verticalArrangement=Arrangement.spacedBy(20.dp)) {
             Text("Google 계정으로 선택적으로 로그인해요.",
@@ -242,8 +249,10 @@ fun GoogleLoginScreen(
                 Box(Modifier.fillMaxWidth().height(52.dp)
                     .border(1.dp,com.zerotoone.bottlemap.ui.theme.BottleMapPalette.outline,
                         RoundedCornerShape(12.dp))
-                    .clickable(onClick=onContinueGuest),contentAlignment=Alignment.Center) {
-                    Text("취소하고 Guest로 계속",color=P18Text,fontSize=15.sp,
+                    .clickable(enabled = !isSigningOut, onClick=onContinueGuest),
+                    contentAlignment=Alignment.Center) {
+                    Text("취소하고 Guest로 계속",
+                        color=if(isSigningOut) P18Muted else P18Text,fontSize=15.sp,
                         fontWeight=FontWeight.SemiBold)
                 }
             }
@@ -253,12 +262,12 @@ fun GoogleLoginScreen(
 
 /** Explicit P18 correction: back icon consumes 48dp at the exact original x=8. */
 @Composable
-internal fun AccountHeader(title:String,onBack:()->Unit) {
+internal fun AccountHeader(title:String,onBack:()->Unit,backEnabled:Boolean=true) {
     Row(Modifier.fillMaxWidth().height(72.dp)
         .padding(start=8.dp,end=20.dp,top=8.dp,bottom=8.dp),
         verticalAlignment=Alignment.CenterVertically,
         horizontalArrangement=Arrangement.spacedBy(4.dp)) {
-        P18Back(onBack)
+        if(backEnabled) P18Back(onBack) else Spacer(Modifier.size(48.dp))
         Text(title,color=P18Text,fontSize=18.sp,lineHeight=26.sp,
             fontFamily=MaterialTheme.typography.headlineSmall.fontFamily,
             fontWeight=FontWeight.Bold)
