@@ -30,7 +30,7 @@ enum class ReviewGroup { PENDING, READY, OTHER, EXCLUDED }
 /** One problem shown as an inline row on a card that still needs the owner. */
 enum class ReviewIssue {
     DETAIL_NAME, CATALOG_SEARCH, MATCH, CANDIDATE, NEW, PRICE_CHOICE, PHOTO_CONFLICT,
-    PRICE, VOLUME, OPTION, NAME, DUPLICATE_PRICE, DUPLICATE_MENU_NAME,
+    PRICE, VOLUME, OPTION, NAME, DUPLICATE_PRICE,
 }
 
 data class CatalogProduct(val productId: String, val name: String, val isActive: Boolean = true)

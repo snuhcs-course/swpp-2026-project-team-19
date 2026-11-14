@@ -139,15 +139,8 @@ object PhotoReviewRules {
             .replace(Regex("""(?<!\d)\.|\.(?!\d)"""), "")
             .replace(Regex("""\s+"""), "")
 
-    fun duplicateUnlinkedNames(state: PhotoReviewState): Set<String> =
-        state.items.filter { !it.excluded && it.linkedProductId == null &&
-            it.name.isNotBlank()
-        }.groupBy { normalizedUnlinkedMenuName(it.name) }
-            .filterKeys { it.isNotBlank() }.values.filter { group ->
-                group.size > 1 && group.any { it.type != ReviewItemType.OTHER }
-            }
-            .flatMap { group -> group.map { it.id } }.toSet()
-
+    // §8.12 merges all product-less same-name final lines, including
+    // whisky+other groups. Their original OCR IDs remain independent.
     /** §8.12: the server merges same-name OTHER lines, but a conflict on
      * the exact option label + pour tuple returns 422. Check such conflicts
      * before publishing, while allowing different sizes/labels to merge.
@@ -275,8 +268,6 @@ object PhotoReviewRules {
             if (x.id in duplicatePhotoPriceConflicts(state) ||
                 x.id in duplicateOtherPrices(state))
                 p += ReviewIssue.DUPLICATE_PRICE
-            if (x.id in duplicateUnlinkedNames(state))
-                p += ReviewIssue.DUPLICATE_MENU_NAME
         }
         return p.distinct()
     }
@@ -322,9 +313,11 @@ object PhotoReviewRules {
         if (x.conflictPrices.isNotEmpty() && x.conflictChoice == null) null
         else optionSummary(x).firstOrNull { validPrice(it.price) }?.price ?: x.price
 
-    /** Position of the line among the lines of the same photo, from 1. */
+    /** Grouping changes card order, never the original OCR line number. */
     fun photoLine(state: PhotoReviewState, x: ReviewItem): Int =
-        state.items.filter { it.photoIndex == x.photoIndex }.indexOfFirst { it.id == x.id } + 1
+        x.sourceLine.takeIf { it > 0 } ?:
+            (state.items.filter { it.photoIndex == x.photoIndex }
+                .indexOfFirst { it.id == x.id } + 1)
 
     fun sourceLocation(state: PhotoReviewState, x: ReviewItem): String =
         if (x.hasSourceBox) "${x.photoIndex}번째 장 ${photoLine(state, x)}번째 줄"
@@ -530,12 +523,13 @@ object PhotoReviewRules {
             )
             if (target == ReviewItemType.OTHER) {
                 x.copy(
-                    classificationSnapshot = snapshot, volume = Double.NaN,
+                    classificationSnapshot = snapshot,
+                    volume = if (x.bottle) 0.0 else x.volume.takeIf(::validVolume) ?: Double.NaN,
                     // Keep OCR option identities and all prices when changing type.
                     // No extra pour-size input is required for non-whisky.
                     options = x.options, primarySourceOptionId = x.primarySourceOptionId,
                     primaryOptionLabel = x.primaryOptionLabel,
-                    primaryHasOption = x.primaryHasOption, bottle = false,
+                    primaryHasOption = x.primaryHasOption, bottle = x.bottle,
                     // A non-whisky is never linked to the canonical whisky catalog.
                     // The classification snapshot restores the prior link on undo.
                     linkedProductId = null, linkedProductName = null,

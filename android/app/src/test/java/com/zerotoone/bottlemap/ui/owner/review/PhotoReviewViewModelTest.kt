@@ -485,7 +485,7 @@ class PhotoReviewViewModelTest {
         assertEquals("ocr-main", vm.item("main-line").primarySourceOptionId)
         assertTrue(vm.item("main-line").options.isEmpty())
         assertEquals(60.0, vm.item("child-line").volume,0.0)
-        assertFalse(PhotoReviewRules.stats(vm.state).canPublish) // same catalog product must be relinked
+        assertTrue(PhotoReviewRules.stats(vm.state).canPublish) // §8.12 merges distinct servings
     }
 
     @Test fun leaveWaitsForLastDraftEvenWhenAnEarlierSaveIsSlow() = runTest(dispatcher) {

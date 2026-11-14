@@ -541,21 +541,7 @@ private fun IssueRowFor(x: ReviewItem, issue: ReviewIssue, vm: PhotoReviewViewMo
             ReviewChoice("가격 수정", { vm.toggleExpanded(id) },
                 testTag = "review-duplicate-price-edit-$id")
         }
-        ReviewIssue.DUPLICATE_MENU_NAME -> Column(
-            Modifier.fillMaxWidth().padding(vertical = 6.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            Text("같은 이름의 미연결 메뉴가 여러 줄 있어요. 서버는 한 줄만 남길 수 있으므로 가격·용량을 확인한 뒤 이름을 구분하거나 중복된 줄을 제외해 주세요.",
-                style = uxText(11f, 450, UxColor.sub, lineHeight = 1.5f))
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                ReviewChoice("이름 수정", { vm.editReviewName(id) },
-                    modifier = Modifier.weight(1f),
-                    testTag = "review-duplicate-name-edit-$id")
-                ReviewChoice("이 줄 제외", { vm.requestExclude(id) },
-                    modifier = Modifier.weight(1f),
-                    testTag = "review-duplicate-name-exclude-$id")
-            }
-        }
+
     }
 }
 

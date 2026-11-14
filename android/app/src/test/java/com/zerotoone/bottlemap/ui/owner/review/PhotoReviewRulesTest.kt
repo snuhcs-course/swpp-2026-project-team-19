@@ -324,7 +324,6 @@ class PhotoReviewRulesTest {
             type=ReviewItemType.OTHER,linkedProductId=null,
             primaryOptionLabel="병",bottle=true,volume=0.0,price=25000.0)
         val review=PhotoReviewState(items=listOf(first,second))
-        assertTrue(PhotoReviewRules.duplicateUnlinkedNames(review).isEmpty())
         assertTrue(PhotoReviewRules.duplicateOtherPrices(review).isEmpty())
         assertTrue(PhotoReviewRules.stats(review).canPublish)
     }
@@ -464,5 +463,28 @@ class PhotoReviewRulesTest {
         assertTrue(PhotoReviewRules.stats(corrected).canPublish)
     }
 
+
+    @Test fun sameUnlinkedWhiskyNameAndDifferentServingsCanServerMerge() {
+        val one = ReviewItem(id="line-a",name="글렌피딕 12",linkedProductId=null,
+            match=ReviewMatch.NEW,newConfirmed=true,nameSaved=true,
+            volume=30.0,price=12000.0)
+        val bottle = ReviewItem(id="line-b",name="글렌피딕12",linkedProductId=null,
+            match=ReviewMatch.NEW,newConfirmed=true,nameSaved=true,
+            bottle=true,volume=0.0,price=150000.0)
+        val both = PhotoReviewState(items=listOf(one,bottle))
+        assertTrue(PhotoReviewRules.stats(both).canPublish)
+        assertFalse(ReviewIssue.DUPLICATE_PRICE in PhotoReviewRules.problems(one,both))
+    }
+
+    @Test fun groupingNeverChangesThePhotoExtractionLineNumber() {
+        val master=ReviewItem(id="first",name="위스키 A",photoIndex=1,sourceLine=1)
+        val groupedChild=ReviewItem(id="third",name="위스키 A",
+            photoIndex=1,sourceLine=3,mergedInto="first")
+        val middle=ReviewItem(id="second",name="위스키 B",photoIndex=1,sourceLine=2)
+        val reordered=PhotoReviewState(items=listOf(master,groupedChild,middle))
+        assertEquals(2,PhotoReviewRules.photoLine(reordered,middle))
+        assertEquals(3,PhotoReviewRules.photoLine(reordered,groupedChild))
+        assertTrue(PhotoReviewRules.sourceLocation(reordered,middle).contains("2번째 줄"))
+    }
 
 }

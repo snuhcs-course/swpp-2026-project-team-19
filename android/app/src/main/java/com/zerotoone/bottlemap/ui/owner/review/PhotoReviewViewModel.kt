@@ -718,10 +718,23 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
 
     fun reclassify(id: String) {
         val pour = review?.defaultPour ?: return
+        val original = item(id) ?: return
+        val revised = PhotoReviewRules.reclassify(original, pour)
+        val update = if (revised.type == ReviewItemType.OTHER) {
+            // Clearing the catalog link changes the identity to a bar-local
+            // menu name. Refresh prices before a publish can overwrite it.
+            val existing = try {
+                repository.existingUnlinkedServingPrices(revised.name)
+            } catch (_: Exception) {
+                toast("기존 메뉴 가격을 확인하지 못했어요. 다시 시도해 주세요.")
+                return
+            }
+            PhotoReviewRules.rebindUnlinkedPrices(revised, existing)
+        } else revised
         mutate { s ->
-            val target = item(id)?.type ?: return@mutate s
-            val group = if (target == ReviewItemType.WHISKY) ReviewGroup.OTHER else ReviewGroup.PENDING
-            s.copy(items = s.items.map { if (it.id == id) PhotoReviewRules.reclassify(it, pour) else it },
+            val group = if (original.type == ReviewItemType.WHISKY)
+                ReviewGroup.OTHER else ReviewGroup.PENDING
+            s.copy(items = s.items.map { if (it.id == id) update else it },
                 show = s.show.with(group, true))
         }
     }
