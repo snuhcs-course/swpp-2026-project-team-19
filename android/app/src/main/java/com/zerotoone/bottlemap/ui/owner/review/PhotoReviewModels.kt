@@ -33,7 +33,7 @@ enum class ReviewIssue {
     PRICE, VOLUME, OPTION, NAME, DUPLICATE_PRICE, DUPLICATE_PRODUCT, DUPLICATE_MENU_NAME,
 }
 
-data class CatalogProduct(val productId: String, val name: String)
+data class CatalogProduct(val productId: String, val name: String, val isActive: Boolean = true)
 
 /** A value read from the photo. Read-only: owner corrections never overwrite it. */
 data class RecognizedOffer(val volumeMl: Int? = null, val bottle: Boolean = false, val priceKrw: Int? = null)

@@ -440,14 +440,16 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
 
     fun selectSearchResult(id: String, productId: String) {
         val x = item(id) ?: return
-        if (x.searchResults?.any { it.productId == productId } == true) {
+        if (x.searchResults?.any { it.productId == productId && it.isActive } == true) {
             mutateItem(id) { it.copy(selectedSearchId = productId) }
         }
     }
 
     fun confirmSelectedSearch(id: String) {
         val x = item(id) ?: return
-        val product = x.searchResults?.firstOrNull { it.productId == x.selectedSearchId }
+        val product = x.searchResults?.firstOrNull {
+            it.productId == x.selectedSearchId && it.isActive
+        }
         if (product == null) toast("위스키를 먼저 선택해 주세요.") else linkChosen(x, product)
     }
 

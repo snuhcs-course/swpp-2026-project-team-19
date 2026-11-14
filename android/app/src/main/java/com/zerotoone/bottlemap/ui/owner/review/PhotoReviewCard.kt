@@ -333,20 +333,24 @@ private fun SecondaryActions(actions: List<Pair<String, () -> Unit>>) {
 
 @Composable
 private fun SelectableRow(text: String, selected: Boolean, onClick: () -> Unit, minHeight: Int, fontSize: Float,
-    radius: Int, padV: Int, tag: String, weight: Int = 700) {
+    radius: Int, padV: Int, tag: String, weight: Int = 700, enabled: Boolean = true) {
     val shape = RoundedCornerShape(radius.dp)
     Box(
         Modifier.fillMaxWidth().heightIn(min = minHeight.dp)
             .background(if (selected) ReviewColor.selectedBg else UxColor.elevated, shape)
             .border(if (selected) 2.dp else 1.dp, if (selected) UxColor.gold else
                 if (fontSize >= 13f) UxColor.outline else UxColor.line, shape)
-            .quietClick(onClick = onClick)
+            .quietClick(enabled = enabled, onClick = onClick)
             .padding(horizontal = if (fontSize >= 13f) 15.dp else 13.dp, vertical = padV.dp)
-            .semantics { contentDescription = text + if (selected) ", 선택됨" else "" }
+            .semantics {
+                contentDescription = text + if (!enabled) ", 비활성 상품, 운영자에게 문의하세요"
+                    else if (selected) ", 선택됨" else ""
+            }
             .testTag(tag),
         contentAlignment = Alignment.CenterStart,
     ) {
-        Text(text, style = uxText(fontSize, weight, if (selected) ReviewColor.selectedText else UxColor.text))
+        Text(text, style = uxText(fontSize, weight,
+            if (!enabled) UxColor.muted else if (selected) ReviewColor.selectedText else UxColor.text))
     }
 }
 
@@ -602,9 +606,13 @@ private fun CatalogSearch(x: ReviewItem, vm: PhotoReviewViewModel) {
                 Column(Modifier.fillMaxWidth().padding(top = 7.dp), verticalArrangement = Arrangement.spacedBy(7.dp)) {
                     if (results.isNotEmpty()) {
                         results.forEach { p ->
-                            SelectableRow(p.name, x.selectedSearchId == p.productId,
+                            SelectableRow(
+                                if (p.isActive) p.name else p.name + " · 비활성 (운영자 문의)",
+                                p.isActive && x.selectedSearchId == p.productId,
                                 { vm.selectSearchResult(id, p.productId) }, 50, 12f, 9, 10,
-                                "review-search-result-$id-${p.productId}", weight = 400)
+                                "review-search-result-$id-${p.productId}",
+                                weight = 400, enabled = p.isActive,
+                            )
                         }
                     } else {
                         Row(Modifier.fillMaxWidth().heightIn(min = 52.dp).padding(horizontal = 2.dp, vertical = 3.dp),
