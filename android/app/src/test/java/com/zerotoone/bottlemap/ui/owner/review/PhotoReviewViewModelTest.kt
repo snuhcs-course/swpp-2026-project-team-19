@@ -232,6 +232,22 @@ class PhotoReviewViewModelTest {
         assertTrue(vm.state.show.ready)
     }
 
+    @Test fun ownerCanEnter1000MlServingButNot1000MlBarDefault() = runTest(dispatcher) {
+        val vm = vm(MockPhotoReviewScenario.READY)
+        val events = vm.collectEvents(backgroundScope)
+        val originalDefault = vm.state.defaultPour
+        vm.typeInlineVolume("glen12", "1000")
+        vm.commitInlineVolume("glen12")
+        assertEquals(1000.0, vm.item("glen12").volume, 0.0)
+        vm.typeInlineVolume("glen12", "32768")
+        vm.commitInlineVolume("glen12")
+        assertEquals(1000.0, vm.item("glen12").volume, 0.0)
+        assertTrue(PhotoReviewEvent.Toast("1 ~ 32767 사이의 숫자를 입력해주세요.") in events)
+        vm.saveDefaultPour("1000")
+        assertEquals(originalDefault, vm.state.defaultPour, 0.0)
+        assertTrue(PhotoReviewEvent.Toast("1 ~ 999 사이의 숫자를 입력해주세요.") in events)
+    }
+
     @Test fun optionAddRemoveAndLimit() = runTest(dispatcher) {
         val vm = vm(MockPhotoReviewScenario.WHISKY_OPTIONS)
         val events = vm.collectEvents(backgroundScope)
