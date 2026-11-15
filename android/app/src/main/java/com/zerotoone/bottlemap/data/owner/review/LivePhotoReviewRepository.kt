@@ -291,6 +291,32 @@ class LivePhotoReviewRepository(
                 // working copy. Clear both only on exact content match.
                 runCatching { pendingStore.clear(id) }
                 runCatching { workingStore.clear(id) }
+            } else if (!draftConflict &&
+                pending.canRebaseAfterLostResponse(saved, reviewVersion) &&
+                pending.itemIds == state.items.map { it.id }) {
+                // Our previous PUT was committed, but its response was lost
+                // after a later edit was checkpointed. This is NOT a foreign
+                // CAS conflict: replay the newer device state against the
+                // proven server version, never silently discard it.
+                val latest = working ?: pending
+                val recovered = ServerReviewDraftCodec.decode(ReviewDraftDto(
+                    latest.expectedDraftVersion, latest.reviewVersion,
+                    "1970-01-01T00:00:00Z", latest.content,
+                ))
+                if (compatible(recovered)) {
+                    pendingStore.write(id, pending.copy(
+                        expectedDraftVersion = requireNotNull(saved).draftVersion,
+                        inFlightContent = null, inFlightDraftVersion = null,
+                    ))
+                    chosen = requireNotNull(recovered)
+                    pendingLocally = true
+                    pendingOversized = ServerReviewDraftCodec.exceedsServerLimit(latest.content)
+                    draftNotice = "이 기기에 저장된 변경사항을 복원했어요. 서버에 다시 저장해 주세요."
+                } else {
+                    draftConflict = true
+                    pendingDraftConflict = true
+                    draftNotice = "기기 초안이 최신 검수 항목과 달라요. 원본을 보관했어요."
+                }
             } else if (!draftConflict && pending.canReplay(saved, reviewVersion) &&
                 pending.itemIds == state.items.map { it.id }) {
                 val local = ServerReviewDraftCodec.decode(ReviewDraftDto(
@@ -572,9 +598,12 @@ class LivePhotoReviewRepository(
                     itemIds = state.items.map { it.id }))
             } else {
                 DraftSaveSafety.assertWritable(draftConflict)
+                val previous = pendingStore.read(id)
                 pendingStore.write(id, PendingReviewDraftStore.Envelope(
                     reviewVersion = version, expectedDraftVersion = draftVersion,
                     itemIds = state.items.map { it.id }, content = content,
+                    inFlightContent = previous?.inFlightContent,
+                    inFlightDraftVersion = previous?.inFlightDraftVersion,
                 ))
             }
             pendingLocally = true
@@ -601,7 +630,10 @@ class LivePhotoReviewRepository(
                 else -> {
                     // A later edit may have been checkpointed while this PUT
                     // was in flight. Rebase it onto the acknowledged CAS.
-                    pendingStore.write(id, pending.copy(expectedDraftVersion = version))
+                    pendingStore.write(id, pending.copy(
+                        expectedDraftVersion = version,
+                        inFlightContent = null, inFlightDraftVersion = null,
+                    ))
                     pendingLocally = true
                     pendingOversized = ServerReviewDraftCodec.exceedsServerLimit(pending.content)
                 }
@@ -655,6 +687,16 @@ class LivePhotoReviewRepository(
             val request = ReviewDraftSaveRequestDto(
                 draftVersion = draftVersion, reviewVersion = version, content = content,
             )
+            // Mark the exact in-flight request in the device backup BEFORE
+            // network IO. It lets a later process detect a lost 200 response
+            // without mistaking this device's last edit for a foreign conflict.
+            checkpointMutex.withLock {
+                val onDisk = pendingStore.read(id)
+                    ?: error("서버 전송 전 기기 초안을 확인할 수 없어요.")
+                pendingStore.write(id, onDisk.copy(
+                    inFlightContent = content, inFlightDraftVersion = draftVersion,
+                ))
+            }
             val saved = try {
                 remote.saveMenuReviewDraft(id, request)
             } catch (cancelled: CancellationException) {
