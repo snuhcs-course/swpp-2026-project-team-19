@@ -9,6 +9,7 @@ import com.zerotoone.bottlemap.data.owner.review.PhotoReviewRepository
 import com.zerotoone.bottlemap.data.owner.review.ReviewAlreadyAppliedException
 import com.zerotoone.bottlemap.data.owner.review.ReviewVersionConflictException
 import com.zerotoone.bottlemap.data.owner.review.ReviewDraftConflictException
+import com.zerotoone.bottlemap.data.owner.review.ReviewDraftTooLargeLocalException
 import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewRules.OptionField
 import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewRules.RematchOutcome
 import kotlinx.coroutines.CancellationException
@@ -86,6 +87,8 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
     private val _draftResolving = MutableStateFlow(false)
     val draftResolving: StateFlow<Boolean> = _draftResolving.asStateFlow()
     private val localOnlyNotice = "이 기기에는 저장됐어요. 서버 저장을 다시 시도해 주세요."
+    private val oversizedNotice =
+        "이 기기에는 저장됐어요. 서버 256KB 제한을 초과했어요. 입력 내용을 줄이면 서버에 저장할 수 있어요."
     private val _publishOutcome = MutableStateFlow<PublishOutcome?>(null)
     val publishOutcome: StateFlow<PublishOutcome?> = _publishOutcome.asStateFlow()
 
@@ -115,10 +118,12 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                     repository.loadReview().let { fresh ->
                         _draftConflictChoice.value = repository.hasPendingDraftConflict()
                         _draftRetryable.value = repository.hasPendingLocalDraft() &&
-                            !_draftConflictChoice.value
+                            !_draftConflictChoice.value &&
+                            !repository.hasOversizedPendingDraft()
                         _draftProblem.value = when {
                             _draftConflictChoice.value ->
-                                "서버 초안과 이 기기의 미저장 초안이 충돌해요. 어느 쪽을 사용할지 선택해 주세요."
+                                "최신 서버 초안을 불러왔어요. 화면에 표시된 서버 초안과 이 기기의 미저장 초안 중 선택해 주세요."
+                            repository.hasOversizedPendingDraft() -> oversizedNotice
                             _draftRetryable.value -> localOnlyNotice
                             else -> null
                         }
@@ -201,12 +206,17 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                     } catch (cancelled: CancellationException) {
                         throw cancelled
                     } catch (error: ReviewDraftConflictException) {
-                        // Never silently ignore a remote CAS failure. New edits
-                        // cannot be published until the owner reloads the draft.
-                        if (_draftProblem.value == null) toast(error.message.orEmpty())
                         _draftProblem.value = error.message
                         _draftRetryable.value = false
-                        _draftConflictChoice.value = repository.hasPendingDraftConflict()
+                        _draftConflictChoice.value = false
+                        // §5.9: do not offer discard/overwrite actions against
+                        // stale content. Refresh and DISPLAY the newer draft first.
+                        if (repository.hasPendingDraftConflict()) reload()
+                        else toast(error.message.orEmpty())
+                    } catch (error: ReviewDraftTooLargeLocalException) {
+                        _draftProblem.value = oversizedNotice
+                        _draftRetryable.value = false
+                        toast(oversizedNotice)
                     } catch (error: BottleMapApiException) {
                         // Transient disconnects are retried on Leave; permanent
                         // permission/size/state errors block publication.
@@ -265,6 +275,13 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                 reload()
             } catch (cancelled: CancellationException) {
                 throw cancelled
+            } catch (error: ReviewDraftConflictException) {
+                // A third party saved again while the owner was choosing.
+                // Keep the local backup, refresh the remote draft and require
+                // a NEW affirmative choice against the new CAS version.
+                _draftConflictChoice.value = false
+                toast(error.message.orEmpty())
+                reload()
             } catch (error: Exception) {
                 _draftProblem.value = error.message
                     ?: "초안 선택에 실패했어요. 최신 서버 검수를 확인해 주세요."
@@ -295,15 +312,26 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                     true
                 } catch (cancelled: CancellationException) {
                     throw cancelled
+                } catch (error: ReviewDraftTooLargeLocalException) {
+                    // §5.9 allows device-only storage above the server limit.
+                    // Leave is safe ONLY after the local AtomicFile was written.
+                    _draftRetryable.value = false
+                    _draftProblem.value = oversizedNotice
+                    repository.hasPendingLocalDraft() &&
+                        repository.hasOversizedPendingDraft()
                 } catch (error: Exception) {
                     _draftRetryable.value = repository.hasPendingLocalDraft() &&
-                        error !is ReviewDraftConflictException
+                        error !is ReviewDraftConflictException &&
+                        !repository.hasOversizedPendingDraft()
                     _draftProblem.value = if (_draftRetryable.value) localOnlyNotice
                         else error.message ?: "검수 초안 저장에 실패했어요."
                     false
                 }
             }
-            if (saved) _events.send(PhotoReviewEvent.Leave)
+            if (saved) {
+                if (repository.hasOversizedPendingDraft()) toast(oversizedNotice)
+                _events.send(PhotoReviewEvent.Leave)
+            }
             else {
                 leaving = false
                 toast(_draftProblem.value ?: "검수 초안 저장에 실패했어요. 다시 시도해 주세요.")
