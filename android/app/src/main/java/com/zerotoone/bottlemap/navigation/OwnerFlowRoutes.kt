@@ -84,13 +84,6 @@ object OwnerRoutes {
     const val ENTRY = "owner/entry"
     const val ADD_BAR = "owner/add-bar"
     const val COMPONENTS = "owner/components"
-    const val LEGACY_UPLOAD = "owner/menu-upload"
-    const val LEGACY_REVIEW = "owner/extraction-review/{menuImportId}"
-
-    // Only the Debug APK exposes the temporary operator integration entry.
-    internal fun legacyDebugEntryRoute(debugBuild: Boolean): String? =
-        if (debugBuild) LEGACY_UPLOAD else null
-
     fun groupStart(group: OwnerFlowGroup): String =
         requireNotNull(OwnerPage.entries.firstOrNull { it.group == group }).route
 }

@@ -226,6 +226,14 @@ interface OwnerApi {
         @Path("menuImportId") menuImportId: String,
     ): MenuImportStatusDto
 
+    /** Server accepts incomplete decisions and uses draftVersion CAS (PR #171). */
+    @retrofit2.http.PUT("api/menu-imports/{menuImportId}/review-draft")
+    suspend fun saveMenuReviewDraft(
+        @Header("Authorization") authorization: String,
+        @Path("menuImportId") menuImportId: String,
+        @Body request: ReviewDraftSaveRequestDto,
+    ): ReviewDraftSavedResponseDto
+
     @POST("api/menu-imports/{menuImportId}/review-and-apply")
     suspend fun reviewAndApply(
         @Header("Authorization") authorization: String,

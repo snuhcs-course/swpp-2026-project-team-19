@@ -1,25 +1,33 @@
 package com.zerotoone.bottlemap.navigation
 
-import android.net.Uri
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Text
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
 import com.zerotoone.bottlemap.data.owner.MockOwnerLoadState
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.zerotoone.bottlemap.data.owner.OwnerMockRuntime
+import com.zerotoone.bottlemap.data.owner.OwnerRuntime
 import com.zerotoone.bottlemap.ui.owner.OwnerMockViewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
-import androidx.navigation.navArgument
-import com.zerotoone.bottlemap.BuildConfig
-import com.zerotoone.bottlemap.ui.owner.ExtractionReviewScreen
-import com.zerotoone.bottlemap.ui.owner.MenuUploadScreen
+import com.zerotoone.bottlemap.data.owner.review.LivePhotoReviewRepository
+import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewScreen
+import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewViewModel
 import com.zerotoone.bottlemap.ui.owner.OwnerOnboardingScreen
 import com.zerotoone.bottlemap.ui.owner.OwnerManagementHomeScreen
 import com.zerotoone.bottlemap.ui.owner.OwnerMenuPhotoSelectionScreen
@@ -39,7 +47,11 @@ import com.zerotoone.bottlemap.ui.owner.OwnerSkeletonScreen
 internal const val variantStartDestination = "customer"
 
 @OptIn(ExperimentalMaterial3Api::class)
-internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostController) {
+internal fun NavGraphBuilder.registerVariantRoutes(
+    navController: NavHostController,
+    onNotice: (String) -> Unit = {},
+    onForceOwnerReauthentication: () -> Unit,
+) {
     // Shared by both ends of the Owner manage <-> preview round trip.
     val previewSwitchCooldown = OwnerPreviewSwitchCooldown()
     navigation(route = OwnerRoutes.GRAPH, startDestination = OwnerRoutes.ENTRY) {
@@ -48,27 +60,13 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                     LocalRippleConfiguration provides null,
                 ) {
             val ownerViewModel: OwnerMockViewModel = viewModel(factory = OwnerMockViewModel.Factory(
-                OwnerMockRuntime.repository(LocalContext.current)))
+                OwnerRuntime.repository(LocalContext.current)))
             LaunchedEffect(ownerViewModel) { ownerViewModel.retry() }
-            val mockState = ownerViewModel.state.collectAsStateWithLifecycle().value
-            val snapshot = when (mockState) {
-                is MockOwnerLoadState.Ready -> mockState.snapshot
-                is MockOwnerLoadState.Empty -> mockState.snapshot
-                else -> null
-            }
             // Always show the owned-bar list. One or many bars use the same flow;
             // the user explicitly selects which bar to manage.
             OwnerOnboardingScreen(
                 viewModel = ownerViewModel,
                 onBack = { navController.popBackStack() },
-                onFirstReview = { status ->
-                    val next=when(status) {
-                        MockImportStatus.READY_FOR_REVIEW -> OwnerPage.MGR_REVIEW
-                        MockImportStatus.UPLOADED, MockImportStatus.PROCESSING -> OwnerPage.MGR_JOB
-                        else -> OwnerPage.MGR_PHOTO
-                    }
-                    navController.navigate(next.route)
-                },
                 onManagerPreview = { navController.navigate(OwnerPage.MGR_HOME.route) },
             )
             }
@@ -79,25 +77,17 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                 ) {
             OwnerOnboardingScreen(
                 viewModel = viewModel(factory = OwnerMockViewModel.Factory(
-                    OwnerMockRuntime.repository(LocalContext.current))),
+                    OwnerRuntime.repository(LocalContext.current))),
                 onBack = { navController.popBackStack() },
-                onFirstReview = { status ->
-                    val next=when(status) {
-                        MockImportStatus.READY_FOR_REVIEW -> OwnerPage.MGR_REVIEW
-                        MockImportStatus.UPLOADED, MockImportStatus.PROCESSING -> OwnerPage.MGR_JOB
-                        else -> OwnerPage.MGR_PHOTO
-                    }
-                    navController.navigate(next.route)
-                },
                 onManagerPreview = { navController.navigate(OwnerPage.MGR_HOME.route) },
                 startRegistration = true,
             )
             }
         }
         OwnerPage.entries.forEach { page ->
-            composable(page.route) {
+            composable(page.route) { reviewEntry ->
                 val data: OwnerMockViewModel = viewModel(factory = OwnerMockViewModel.Factory(
-                    OwnerMockRuntime.repository(LocalContext.current)))
+                    OwnerRuntime.repository(LocalContext.current)))
                 val mockState = data.state.collectAsStateWithLifecycle().value
                 // Owner-wide policy: no transient bright/ripple feedback on press.
                 // Stateful selected/checked indicators are intentionally preserved.
@@ -155,6 +145,7 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                         onRetry = data::retry,
                         onBack = { navController.popBackStack() },
                         onNewPhoto = { navController.navigate(OwnerPage.MGR_PHOTO.route) },
+                        onNotice = onNotice,
                         onExistingJob = { status ->
                             navController.currentBackStackEntry?.savedStateHandle
                                 ?.set("resumeOwnerImport",status==MockImportStatus.READY_FOR_REVIEW)
@@ -183,16 +174,83 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
                             }
                         }
                     )
-                    OwnerPage.MGR_REVIEW -> OwnerPhotoStage8Screen(
-                        state = mockState, vm = data,
-                        resumeFromMenu = navController.previousBackStackEntry?.savedStateHandle
-                            ?.get<Boolean>("resumeOwnerImport") == true,
-                        onBack = { navController.popBackStack() },
-                        onHome = { navController.navigate(OwnerPage.MGR_MENU.route) {
-                            popUpTo(OwnerPage.MGR_HOME.route) { inclusive = false }
-                            launchSingleTop = true
-                        } }
-                    )
+                    OwnerPage.MGR_REVIEW -> {
+                        val snapshot = when (mockState) {
+                            is MockOwnerLoadState.Ready -> mockState.snapshot
+                            is MockOwnerLoadState.Empty -> mockState.snapshot
+                            else -> null
+                        }
+                        val activeBar = snapshot?.selectedBarId
+                            ?: snapshot?.bars?.firstOrNull()?.barId
+                        val latestJob = snapshot?.imports?.lastOrNull {
+                            it.barId == activeBar && it.status == MockImportStatus.READY_FOR_REVIEW
+                        }
+                        // Keep the import ID tied to this navigation entry.
+                        // After review-and-apply commits, the import leaves
+                        // READY_FOR_REVIEW; recomposing must NOT create a new
+                        // "owner-review-fixture" ViewModel that fails to load.
+                        var capturedImportId by rememberSaveable(reviewEntry.id) {
+                            mutableStateOf<String?>(null)
+                        }
+                        val selectedImportId = capturedImportId ?: latestJob?.menuImportId
+                        if (capturedImportId == null && latestJob != null) {
+                            SideEffect {
+                                if (capturedImportId == null)
+                                    capturedImportId = latestJob.menuImportId
+                            }
+                        }
+                        when {
+                            selectedImportId != null -> {
+                                val repository = LivePhotoReviewRepository(
+                                    owner = data, importId = selectedImportId,
+                                    context = LocalContext.current.applicationContext,
+                                )
+                                val reviewVm: PhotoReviewViewModel = viewModel(
+                                    key = "owner-review-$selectedImportId",
+                                    factory = PhotoReviewViewModel.Factory(repository),
+                                )
+                                PhotoReviewScreen(
+                                    vm = reviewVm,
+                                    onLeave = {
+                                // The v22 result page already confirms publication;
+                                // do not show a second popup on menu management.
+                                data.consumePhotoPublishWarning()
+                                if (!navController.popBackStack(
+                                        OwnerPage.MGR_MENU.route, inclusive = false
+                                    )) {
+                                    navController.navigate(OwnerPage.MGR_MENU.route) {
+                                        popUpTo(OwnerPage.MGR_REVIEW.route) {
+                                            inclusive = true
+                                        }
+                                        launchSingleTop = true
+                                    }
+                                }
+                                    },
+                                    onReauthenticate = onForceOwnerReauthentication,
+                                )
+                            }
+                            mockState == MockOwnerLoadState.Loading -> {
+                                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                    CircularProgressIndicator()
+                                }
+                            }
+                            else -> {
+                                // No pending import: there is nothing to retry.
+                                // Leave the dead-end instead of spinning forever.
+                                LaunchedEffect(reviewEntry.id) {
+                                    if (!navController.popBackStack(OwnerPage.MGR_MENU.route, false))
+                                        navController.navigate(OwnerPage.MGR_MENU.route) {
+                                            popUpTo(OwnerPage.MGR_REVIEW.route) { inclusive = true }
+                                            launchSingleTop = true
+                                        }
+                                    onNotice("검수할 메뉴판 작업이 없어요. 메뉴 관리에서 새로 시작해 주세요.")
+                                }
+                                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                    Text("메뉴 관리로 돌아가는 중이에요.")
+                                }
+                            }
+                        }
+                    }
                     else -> OwnerSkeletonScreen(
                         page = page,
                         mockState = mockState,
@@ -211,26 +269,6 @@ internal fun NavGraphBuilder.registerVariantRoutes(navController: NavHostControl
             }
         }
 
-        // Keep the earlier developer integration test routes available in DEBUG builds
-        // only. They use temp operator login and must not be exposed from production UX.
-        if (BuildConfig.DEBUG) {
-            composable(OwnerRoutes.LEGACY_UPLOAD) {
-                MenuUploadScreen(
-                    onOpenReview = { id ->
-                        navController.navigate("owner/extraction-review/" + Uri.encode(id))
-                    },
-                )
-            }
-            composable(
-                route = OwnerRoutes.LEGACY_REVIEW,
-                arguments = listOf(navArgument("menuImportId") { type = NavType.StringType }),
-            ) { entry ->
-                ExtractionReviewScreen(
-                    menuImportId = entry.arguments?.getString("menuImportId").orEmpty(),
-                    onBack = { navController.popBackStack() },
-                )
-            }
-        }
     }
 }
 

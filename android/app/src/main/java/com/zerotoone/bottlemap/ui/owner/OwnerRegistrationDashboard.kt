@@ -57,8 +57,7 @@ internal fun OwnerRegistrationDashboard(
                 Text(bar.address,color=RegistrationV4.secondary,fontSize=14.sp,lineHeight=21.sp)
                 Spacer(Modifier.height(8.dp))
                 RegistrationDashboardAction(
-                    if(snapshot.hasPublishedInitialReview(bar.barId)) "매장 관리하기"
-                    else "메뉴 검수하기",
+                    "매장 관리하기",
                     primary=true,onClick={onManage(bar)}
                 )
             }

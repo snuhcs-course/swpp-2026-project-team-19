@@ -54,6 +54,51 @@ class BarMenuDtoContractTest {
     }
 
     @Test
+    fun pr164UnlinkedNonWhiskyMenuDecodesAndRendersWithoutCatalogId() {
+        val json = """
+            {
+              "barId":"22222222-2222-4222-8222-222222222222",
+              "name":"관악 바",
+              "address":"관악로 1",
+              "latitude":37.478321,
+              "longitude":126.951234,
+              "phone":null,
+              "menuBoardId":"66666666-6666-4666-8666-666666666666",
+              "publishedAt":"2026-11-13T08:00:00Z",
+              "items":[{
+                "menuBoardEntryId":"88888888-8888-4888-8888-888888888881",
+                "barMenuItemId":"99999999-9999-4999-8999-999999999991",
+                "productId":null,
+                "productName":null,
+                "brandId":null,
+                "brandName":null,
+                "category":null,
+                "kind":"other",
+                "displayName":"맥주 1",
+                "sortOrder":1,
+                "soldOut":false,
+                "options":[{
+                  "menuEntryOptionId":"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+                  "optionLabel":null,
+                  "pourMl":null,
+                  "priceKrw":8000,
+                  "sortOrder":1
+                }]
+              }]
+            }
+        """.trimIndent()
+        val response = requireNotNull(adapter.fromJson(json))
+        val item = response.items.single()
+        assertNull(item.productId)
+        assertNull(item.category)
+        assertEquals("other", item.kind)
+        val display = response.toBarDetailUiState() as BarDetailUiState.Success
+        assertNull(display.bar.items.single().productId)
+        assertEquals("맥주 1", display.bar.items.single().menuDisplayName)
+        assertEquals("otherAlcohol", display.bar.items.single().category)
+    }
+
+    @Test
     fun decodesBarWithoutPublishedMenu() {
         val json = """
             {

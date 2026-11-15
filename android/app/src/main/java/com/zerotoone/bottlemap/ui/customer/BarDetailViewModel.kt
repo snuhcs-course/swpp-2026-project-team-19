@@ -60,7 +60,7 @@ data class BarDetailUiModel(
 
 data class BarMenuItemUiModel(
     val menuBoardEntryId: String,
-    val productId: String,
+    val productId: String?,
     // This is the published menu label, NOT the canonical catalog product name.
     val menuDisplayName: String,
     val options: List<BarMenuOptionUiModel>,
@@ -178,7 +178,7 @@ internal fun BarMenuResponseDto.toBarDetailUiState(): BarDetailUiState {
                 productId = item.productId,
                 menuDisplayName = item.displayName,
                 brandName = item.brandName,
-                category = item.category,
+                category = item.category ?: if (item.kind == "whisky") "whisky" else "otherAlcohol",
                 options = item.options.map { option ->
                     BarMenuOptionUiModel(
                         text = formatBarMenuOption(

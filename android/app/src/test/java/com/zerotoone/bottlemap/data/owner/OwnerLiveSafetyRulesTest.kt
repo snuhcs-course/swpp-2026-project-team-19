@@ -63,8 +63,11 @@ class OwnerLiveSafetyRulesTest {
 
     @Test fun unsupportedOptionFieldClearingIsRejected() {
         val extracted = MockMenuOption("opt", label = "잔", pourMl = 30, priceKrw = 17000)
-        rejects { validateReviewOptionClearing(extracted.copy(label = null), extracted) }
+        // Label is presentation only when the ml survives.
+        validateReviewOptionClearing(extracted.copy(label = null), extracted)
         rejects { validateReviewOptionClearing(extracted.copy(pourMl = null), extracted) }
+        // Glass -> Bottle intentionally removes extracted ml.
+        validateReviewOptionClearing(extracted.copy(label = "Bottle", pourMl = null), extracted)
         validateReviewOptionClearing(extracted.copy(priceKrw = 18000), extracted)
         validateReviewOptionClearing(extracted.copy(pourMl = 60, label = "더블"), extracted)
     }
@@ -90,7 +93,7 @@ class OwnerLiveSafetyRulesTest {
         assertTrue(reviewedServingsByProduct(job, setOf("other")).isEmpty())
     }
 
-    @Test fun canonicalBottleLabelsAreDeduplicatedAcrossImages() {
+    @Test fun bottleLanguagesAndMatchingGlassVolumesShareServingIdentity() {
         fun line(id: String, label: String, price: Int): MockExtractedLine {
             val option = MockMenuOption("option-$id", label = label, pourMl = null,
                 priceKrw = price)
@@ -107,11 +110,13 @@ class OwnerLiveSafetyRulesTest {
                 MockPhotoExtraction("second", "content://second", 2,
                     listOf(line("bottle-en", "Bottle", 150000)))))
         val priced = reviewedServingsByProduct(job, setOf("lagavulin"))
+        // Android normalizes Korean/English bottle to the one Bottle identity.
         assertEquals(1, priced.getValue("lagavulin").size)
-        assertEquals("bottle", reviewServingKey(null, priced.getValue("lagavulin").single().label))
+        assertEquals("bottle", reviewServingKey(null, priced.getValue("lagavulin")[0].label))
         assertEquals("bottle", reviewServingKey(null, "  BOTTLE  "))
         assertEquals("ml:30", reviewServingKey(30, "잔"))
         assertEquals("ml:30", reviewServingKey(30, "Double"))
+        assertEquals("ml:60", reviewServingKey(60, "잔"))
     }
 
     @Test fun failedReplacementNeverDeletesExistingPhoto() {

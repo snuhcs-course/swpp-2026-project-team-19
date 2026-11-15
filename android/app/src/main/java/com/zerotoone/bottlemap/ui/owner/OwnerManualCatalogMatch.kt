@@ -34,6 +34,20 @@ internal fun manualBrandProposal(
         }.maxByOrNull { normalizeOwnerCatalogName(it.matchedAlias ?: it.name).length }
 }
 
+/** The menu editor only exposes the four top-level UI categories.
+ * Custom alcohol labels (e.g. "맥주") remain the stored product category.
+ */
+internal fun manualEditorCategory(product: MockCatalogProduct): String =
+    manualMenuCategoryLabel(product.category).takeIf {
+        it in com.zerotoone.bottlemap.data.owner.MANUAL_MENU_CATEGORIES
+    } ?: "기타 주류"
+
+internal fun manualEditorAlcoholKind(product: MockCatalogProduct): String =
+    product.otherAlcoholKind?.takeIf { it.isNotBlank() } ?: if (
+        manualEditorCategory(product) == "기타 주류" &&
+        product.category != "otherAlcohol"
+    ) ownerV4Category(product) else ""
+
 /** An inactive server catalogue match stays visible but cannot be selected. */
 internal fun inactiveOwnerCatalogMatch(
     products: List<MockCatalogProduct>, menuName: String,
@@ -58,10 +72,11 @@ internal fun manualProductProposal(
     val available=products.filter {
         (it.catalogMatched && it.isActive || !it.catalogMatched) &&
             it.productId!=rejectedProductId &&
-            manualMenuCategoryLabel(it.category)==category
+            manualEditorCategory(it)==category
     }
     val exact=available.firstOrNull {
-        normalizeOwnerCatalogName(it.displayName)==name
+        normalizeOwnerCatalogName(it.displayName)==name ||
+            normalizeOwnerCatalogName(it.matchedAlias.orEmpty())==name
     }
     if(exact!=null) return exact
     val near=available.filter {

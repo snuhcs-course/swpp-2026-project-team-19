@@ -58,6 +58,7 @@ import com.zerotoone.bottlemap.network.BarOperatingExceptionDto
 import com.zerotoone.bottlemap.network.BarWeeklyHoursDto
 import com.zerotoone.bottlemap.ui.common.BmIcon
 import com.zerotoone.bottlemap.ui.common.BmIconId
+import com.zerotoone.bottlemap.ui.common.UxToast
 import com.zerotoone.bottlemap.ui.theme.BottleMapPalette
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -145,6 +146,13 @@ internal fun P18RemoteBarPhoto(url:String?,modifier:Modifier=Modifier,
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
+/** Null route highlight must not match a product-less (null productId) row. */
+internal fun p18HighlightedCategory(
+    items: List<BarMenuItemUiModel>, highlightProductId: String?,
+): String? = highlightProductId?.let { id ->
+    items.firstOrNull { it.productId == id }?.category
+}
+
 internal fun p18InitiallyCollapsedCategories(highlightCategory: String?): Set<String> {
     val defaults = setOf("cocktail","food","snack","brandy","gin","rum","wine",
         "beer","otheralcohol","other")
@@ -164,6 +172,13 @@ internal fun CustomerP18BarDetail(
 ) {
     val context=LocalContext.current
     val clipboard=LocalClipboardManager.current
+    var copyNotice by remember(bar.barId) { mutableStateOf<Pair<Long, String>?>(null) }
+    LaunchedEffect(copyNotice) {
+        if (copyNotice != null) {
+            delay(2500)
+            copyNotice = null
+        }
+    }
     val scroll=rememberScrollState()
     val anchorPx=with(LocalDensity.current){160.dp.roundToPx()}
     var highlightTarget by remember(bar.barId,highlightProductId) {
@@ -180,9 +195,9 @@ internal fun CustomerP18BarDetail(
     var menuQuery by rememberSaveable(bar.barId) {mutableStateOf("")}
     // Product-search navigation opens only the matching category. Once opened,
     // the regular category accordion still closes and reopens on user taps.
-    val highlightedCategory = bar.items.firstOrNull {
-        it.productId == highlightProductId
-    }?.category
+    // A normal bar visit has no search target. Product-less rows also
+    // have null productId and must never be treated as a highlighted hit.
+    val highlightedCategory = p18HighlightedCategory(bar.items, highlightProductId)
     var collapsed by rememberSaveable(bar.barId, highlightProductId) {
         mutableStateOf(p18InitiallyCollapsedCategories(highlightedCategory))
     }
@@ -333,8 +348,11 @@ internal fun CustomerP18BarDetail(
                         Text(bar.address,color=P18Text,fontSize=12.sp,
                             modifier=Modifier.weight(1f))
                         P18PreviewCopy({
-                            clipboard.setText(AnnotatedString(bar.address))
-                        })
+                            if (bar.address.isNotBlank()) {
+                                clipboard.setText(AnnotatedString(bar.address))
+                                copyNotice = System.nanoTime() to "주소를 복사했어요."
+                            }
+                        },enabled=bar.address.isNotBlank())
                     }
                 }
             }
@@ -348,7 +366,10 @@ internal fun CustomerP18BarDetail(
                     Text(bar.phone ?: "전화번호 정보 없음",
                         color=P18Text,fontSize=12.sp,modifier=Modifier.weight(1f))
                     P18PreviewCopy({
-                        clipboard.setText(AnnotatedString(bar.phone.orEmpty()))
+                        bar.phone?.takeIf { it.isNotBlank() }?.let { phone ->
+                            clipboard.setText(AnnotatedString(phone))
+                            copyNotice = System.nanoTime() to "전화번호를 복사했어요."
+                        }
                     },enabled=!bar.phone.isNullOrBlank())
                 }
             }
@@ -435,6 +456,9 @@ internal fun CustomerP18BarDetail(
       }
       P18ScrollTopButton(scroll,Modifier.align(Alignment.BottomEnd)
           .padding(end=16.dp,bottom=18.dp))
+      copyNotice?.let { (_, message) ->
+          UxToast(message, Modifier.align(Alignment.TopCenter))
+      }
     }
 }
 

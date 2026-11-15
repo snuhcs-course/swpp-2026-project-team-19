@@ -29,14 +29,3 @@ class AndroidOwnerMockStateStore(context: Context) : MockOwnerStateStore {
         }
     }
 }
-
-/** Manual DI seam; one shared Repository instance for Owner and mock Customer Preview. */
-object OwnerMockRuntime {
-    @Volatile private var instance: OwnerMockRepository? = null
-
-    fun repository(context: Context): OwnerMockRepository = instance ?: synchronized(this) {
-        instance ?: LiveOwnerScreenRepository(context.applicationContext).also {
-            instance = it
-        }
-    }
-}

@@ -122,7 +122,7 @@ data class BarOperatingExceptionDto(
 data class BarMenuItemDto(
     val menuBoardEntryId: String,
     val barMenuItemId: String,
-    val productId: String,
+    val productId: String?,
     // Published menu label, NOT the canonical catalog product name.
     val displayName: String,
     val sortOrder: Int,
@@ -130,7 +130,9 @@ data class BarMenuItemDto(
     val productName: String? = null,
     val brandId: String? = null,
     val brandName: String? = null,
-    val category: String = "whisky",
+    // No canonical category exists until an operator links a whisky.
+    val category: String? = null,
+    val kind: String = "whisky",
     val soldOut: Boolean = false,
 )
 

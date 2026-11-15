@@ -85,6 +85,8 @@ data class ReviewItemDto(
     val rawText: String,
     val sourceBox: List<Int>? = null,
     val extractedLineType: String,
+    val extractedKind: String? = null,
+    val correctedKind: String? = null,
     val correctedLineType: String? = null,
     val effectiveLineType: String,
     val initialResolutionStatus: String? = null,
@@ -111,6 +113,7 @@ data class ReviewImageDto(
 data class ChangeAfterDto(
     val productId: String? = null,
     val displayName: String? = null,
+    val kind: String = "whisky",
 )
 
 data class ProposedChangeDto(
@@ -121,6 +124,28 @@ data class ProposedChangeDto(
     val after: ChangeAfterDto? = null,
     val summary: String,
     val decision: String,
+    /** §5.4/§8.12: every OCR line grouped into this one proposed change. */
+    val extractedItemIds: List<String> = emptyList(),
+)
+
+/** PR #171 / API §5.9: versioned server-owned, cross-device review draft. */
+data class ReviewDraftDto(
+    val draftVersion: Int,
+    val reviewVersion: Int,
+    val savedAt: String,
+    val content: Map<String, Any?> = emptyMap(),
+)
+
+data class ReviewDraftSaveRequestDto(
+    val draftVersion: Int,
+    val reviewVersion: Int,
+    val content: Map<String, Any?>,
+)
+
+data class ReviewDraftSavedResponseDto(
+    val menuImportId: String,
+    val draftVersion: Int,
+    val savedAt: String,
 )
 
 data class MenuImportStatusDto(
@@ -134,6 +159,7 @@ data class MenuImportStatusDto(
     val failure: ImportFailureDto? = null,
     val images: List<ReviewImageDto> = emptyList(),
     val proposedChanges: List<ProposedChangeDto> = emptyList(),
+    val reviewDraft: ReviewDraftDto? = null,
     val appliedAt: String? = null,
     val menuBoardId: String? = null,
 )
@@ -156,6 +182,7 @@ data class ReviewResultDto(
     val ignored: Int,
     val createdBrands: Int,
     val createdProducts: Int,
+    val unlinkedWhisky: Int = 0,
 )
 
 data class ReviewAppliedResponseDto(

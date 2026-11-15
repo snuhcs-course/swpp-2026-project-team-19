@@ -1,5 +1,7 @@
 package com.zerotoone.bottlemap.ui.owner
 
+import com.zerotoone.bottlemap.ui.common.OwnerBottomConfirmSheet
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -153,19 +155,14 @@ fun OwnerInfoHtmlV4Screen(
     fun requestExit() { if (hasEdits) discardPrompt = true else onBack() }
     BackHandler { requestExit() }
     if (discardPrompt) {
-        AlertDialog(
-            onDismissRequest = { discardPrompt = false },
-            containerColor = V4Color.surface,
-            titleContentColor = V4Color.text,
-            textContentColor = V4Color.sub,
-            title = { Text("변경을 취소할까요?") },
-            text = { Text("저장하지 않은 수정 사항은 사라집니다.") },
-            confirmButton = { TextButton(onClick = { discardPrompt = false; onBack() }) {
-                Text("변경 취소", color = V4Color.primary)
-            } },
-            dismissButton = { TextButton(onClick = { discardPrompt = false }) {
-                Text("계속 편집", color = V4Color.text)
-            } },
+        OwnerBottomConfirmSheet(
+            title = "변경을 취소할까요?",
+            message = "저장하지 않은 수정 사항은 사라집니다.",
+            confirmLabel = "변경 취소",
+            cancelLabel = "계속 편집",
+            tag = "owner-info-discard-sheet",
+            onDismiss = { discardPrompt = false },
+            onConfirm = { discardPrompt = false; onBack() },
         )
     }
 

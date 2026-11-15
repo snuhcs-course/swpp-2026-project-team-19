@@ -1,5 +1,7 @@
 package com.zerotoone.bottlemap.ui.owner
 
+import com.zerotoone.bottlemap.ui.common.OwnerBottomConfirmSheet
+
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -109,22 +111,19 @@ fun OwnerPhotoHtmlV4Screen(
         }
     }
     if (bar != null && deletePhotoId != null) {
-        AlertDialog(
-            onDismissRequest = { deletePhotoId = null },
-            title = { Text("사진을 삭제할까요?") },
-            text = { Text("삭제한 사진은 고객 화면에서도 바로 사라집니다.") },
-            confirmButton = {
-                TextButton(onClick = {
-                    if (bar.gallery.size <= 1) {
-                        error = "마지막 사진은 삭제할 수 없어요."
-                    } else {
-                        commit(bar.gallery.filterNot { it.photoId == deletePhotoId })
-                    }
-                    deletePhotoId = null
-                }) { Text("삭제하기") }
-            },
-            dismissButton = {
-                TextButton(onClick = { deletePhotoId = null }) { Text("취소") }
+        OwnerBottomConfirmSheet(
+            title = "사진을 삭제할까요?",
+            message = "삭제한 사진은 고객 화면에서도 바로 사라집니다.",
+            confirmLabel = "삭제하기",
+            tag = "owner-photo-delete-sheet",
+            onDismiss = { deletePhotoId = null },
+            onConfirm = {
+                if (bar.gallery.size <= 1) {
+                    error = "마지막 사진은 삭제할 수 없어요."
+                } else {
+                    commit(bar.gallery.filterNot { it.photoId == deletePhotoId })
+                }
+                deletePhotoId = null
             },
         )
     }

@@ -31,11 +31,17 @@ internal fun needsReviewDetailReload(previous: MockMenuImport?, serverVersion: I
 internal fun validateReviewOptionClearing(
     edited: MockMenuOption, extracted: MockMenuOption,
 ) {
-    require(edited.pourMl != null || extracted.pourMl == null) {
-        "추출된 용량은 비울 수 없어요."
+    // An OCR glass with an extracted ml may legitimately be reclassified
+    // as Bottle (pourMl=null). Likewise the reviewed glass label can be
+    // cleared because the Owner's option identity is the ml, not "잔"/"샷".
+    // Preserve extractedOptionId; the server validates the final options[].
+    require(edited.pourMl != null || extracted.pourMl == null ||
+        isBottleServingLabel(edited.label)) {
+        "용량을 입력하거나 Bottle 판매를 선택해 주세요."
     }
-    require(edited.label != null || extracted.label == null) {
-        "추출된 옵션 이름은 비울 수 없어요."
+    require(edited.label != null || extracted.label == null ||
+        edited.pourMl != null) {
+        "용량이 없는 옵션은 종류를 확인해 주세요."
     }
 }
 

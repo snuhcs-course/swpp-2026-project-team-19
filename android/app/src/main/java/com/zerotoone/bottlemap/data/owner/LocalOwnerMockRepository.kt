@@ -493,7 +493,11 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             require(error == null) { error ?: "잘못된 가격 옵션" }
             require(item.options.all { it.optionId.isNotBlank() } &&
                 item.options.map { it.optionId }.distinct().size == item.options.size &&
-                item.options.distinctBy { it.identityKey() }.size == item.options.size &&
+                // Old imported rows may contain multiple label-only servings
+                // without a pour size. Keep their unchanged overflow intact,
+                // while applying the new ml-only rule to editable options.
+                directOptions.distinctBy { servingIdentityKey(it.pourMl, it.label) }
+                    .size == directOptions.size &&
                 item.options.all(::validMockMenuOption)) { "잘못된 저장 옵션입니다." }
             if (state.products.none { it.productId == product.productId }) {
                 require(newBrand != null && newBrand.brandId == product.brandId ||
@@ -775,6 +779,40 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
             nextLocalId = nextSequence) to nextId
     }
 
+    /**
+     * Production review staging only: these DTO-adapter decisions are later
+     * validated atomically by POST review-and-apply (Backend #164).
+     * The legacy mock decideLine() validates CREATE_PRODUCT as a *catalog*
+     * creation requiring a brand; that is deliberately not the Owner API
+     * contract, where the same internal enum means publish_without_product.
+     *
+     * Stage EXACTLY this OCR line. Never cascade EXCLUDE to other lines:
+     * the owner sees and confirms every line independently in the review UI.
+     */
+    internal fun stageLiveReviewDecision(
+        importId: String, extractedItemId: String, expectedVersion: Int,
+        decision: MockReviewDecision,
+    ) {
+        change { state ->
+            val job = state.imports.firstOrNull { it.menuImportId == importId }
+                ?: error("검수 작업을 찾지 못했어요.")
+            require(job.status == MockImportStatus.READY_FOR_REVIEW &&
+                job.reviewVersion == expectedVersion) { "REVIEW_OUTDATED" }
+            require(job.images.any { image ->
+                image.lines.any { it.extractedItemId == extractedItemId }
+            }) { "검수 항목이 변경됐어요. 다시 불러와 주세요." }
+            val next = job.copy(images = job.images.map { image ->
+                image.copy(lines = image.lines.map { line ->
+                    if (line.extractedItemId == extractedItemId)
+                        line.copy(decision = decision) else line
+                })
+            })
+            state.copy(imports = state.imports.map {
+                if (it.menuImportId == importId) next else it
+            }) to Unit
+        }
+    }
+
     override fun decideLine(
         importId: String, extractedItemId: String, expectedVersion: Int, decision: MockReviewDecision,
     ) {
@@ -969,15 +1007,4 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
         val visible = s.menuItems.filter { it.barId == barId && !it.soldOut }
         MockPreview(bar, visible, s.products.filter { p -> visible.any { it.productId == p.productId } }, nowEpochMs)
     }
-}
-
-/** Explicit fixtures: initial installation is always Empty, not a fabricated registered bar. */
-object OwnerMockFixtures {
-    fun empty() = MockOwnerSnapshot()
-    fun registeredBar(): MockOwnerSnapshot {
-        val bar = MockBar(barId = "fixture-bar", name = "테스트 매장", address = "테스트 주소")
-        return MockOwnerSnapshot(bars = listOf(bar), selectedBarId = bar.barId)
-    }
-    fun imageFixtures(byUri: Map<String, List<MockExtractedLine>>): MockPhotoExtractionSource =
-        MockPhotoExtractionSource { uri -> byUri[uri].orEmpty() }
 }

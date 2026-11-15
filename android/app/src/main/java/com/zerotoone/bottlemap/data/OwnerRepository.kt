@@ -8,6 +8,8 @@ import com.zerotoone.bottlemap.network.MenuImportAcceptedDto
 import com.zerotoone.bottlemap.network.MenuImportStatusDto
 import com.zerotoone.bottlemap.network.ReviewAndApplyRequestDto
 import com.zerotoone.bottlemap.network.ReviewAppliedResponseDto
+import com.zerotoone.bottlemap.network.ReviewDraftSaveRequestDto
+import com.zerotoone.bottlemap.network.ReviewDraftSavedResponseDto
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -219,6 +221,13 @@ class OwnerRepository {
             images = imageParts,
             mode = mode.toRequestBody("text/plain".toMediaType()),
         )
+    }
+
+    suspend fun saveMenuReviewDraft(
+        menuImportId: String,
+        request: ReviewDraftSaveRequestDto,
+    ): ReviewDraftSavedResponseDto = withOwnerAuth { authorization ->
+        OwnerEndpoint.api.saveMenuReviewDraft(authorization, menuImportId, request)
     }
 
     suspend fun reviewAndApply(

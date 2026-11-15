@@ -363,4 +363,17 @@ class OwnerManualMenuRulesTest {
             snapshot(r).menuItems.single { it.barId == "other-bar" }.displayNameOverride)
     }
 
+    @Test fun ownerMenuSearchFindsUnlinkedBarOnlyWhiskyByNameNotCatalog() {
+        val row=MockBarMenuItem(
+            barMenuItemId="bar-only-row",barId="fixture-bar",
+            productId="unlinked:bar-only-row",
+            options=listOf(MockMenuOption("price-1",pourMl=30,priceKrw=15000)),
+            displayNameOverride="위스키 1",
+        )
+        assertTrue(manualMenuMatches(row,null,"","위스키1"))
+        assertTrue(manualMenuMatches(row,null,"","위스키 1"))
+        assertTrue(manualMenuMatches(row,null,"","위스키"))
+        assertFalse(manualMenuMatches(row,null,"","다른 위스키"))
+    }
+
 }

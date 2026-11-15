@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.lazy.LazyRow
@@ -270,13 +271,13 @@ private fun SearchContent(
             ) {
                 if (nearbyBars.isNotEmpty()) {
                     LazyRow(
-                        modifier = Modifier.weight(2f).height(136.dp),
+                        modifier = Modifier.weight(2f).heightIn(min = 136.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         items(nearbyBars, key = { it.barId }) { bar ->
                             OutlinedCard(
                                 onClick = { onSelectNearbyBar(bar.barId) },
-                                modifier = Modifier.width(186.dp).height(136.dp),
+                                modifier = Modifier.width(186.dp).heightIn(min = 136.dp),
                                 border = BorderStroke(
                                     if (bar.barId == selectedNearbyBarId) 2.dp else 1.dp,
                                     if (bar.barId == selectedNearbyBarId)
@@ -300,7 +301,7 @@ private fun SearchContent(
                     }
                 } else {
                     // Intentionally non-interactive: no nearby data => no carousel card.
-                    OutlinedCard(modifier = Modifier.weight(2f).height(136.dp)) {
+                    OutlinedCard(modifier = Modifier.weight(2f).heightIn(min = 136.dp)) {
                         Box(Modifier.fillMaxSize().padding(12.dp),
                             contentAlignment = Alignment.Center) {
                             Text(emptyNearbyText,
@@ -311,7 +312,7 @@ private fun SearchContent(
                 }
                 OutlinedCard(
                     onClick = onOpenNearby,
-                    modifier = Modifier.weight(1.1f).height(136.dp),
+                    modifier = Modifier.weight(1.1f).heightIn(min = 136.dp),
                 ) {
                     Column(
                         modifier = Modifier.fillMaxSize().padding(10.dp),

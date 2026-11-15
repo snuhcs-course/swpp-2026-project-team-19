@@ -42,6 +42,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.rememberDatePickerState
+import com.zerotoone.bottlemap.ui.auth.AccountHeader
 import com.zerotoone.bottlemap.ui.theme.BottleMapShapes
 import com.zerotoone.bottlemap.ui.theme.BottleMapSizes
 import com.zerotoone.bottlemap.ui.theme.BottleMapSpacing
@@ -52,22 +53,9 @@ import com.zerotoone.bottlemap.ui.theme.BottleMapSpacing
  */
 @Composable
 fun OwnerHeader(title: String, onBack: () -> Unit, modifier: Modifier = Modifier) {
-    Row(
-        modifier = modifier.fillMaxWidth().defaultMinSize(minHeight = BottleMapSizes.minTouchTarget)
-            .padding(horizontal = BottleMapSpacing.sm, vertical = BottleMapSpacing.xs),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        IconButton(onClick = onBack) {
-            BmIcon(BmIconId.BACK, contentDescription = "뒤로가기")
-        }
-        Text(
-            text = title,
-            style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.weight(1f).padding(end = BottleMapSpacing.md),
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-        )
+    // Same exact hit area, left inset, baseline and type as the My Info tab.
+    androidx.compose.foundation.layout.Box(modifier) {
+        AccountHeader(title, onBack)
     }
 }
 
@@ -170,12 +158,10 @@ fun OwnerConfirmationDialog(
     onDismiss: () -> Unit,
 ) {
     if (!visible) return
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(title) },
-        text = { Text(message) },
-        confirmButton = { TextButton(onClick = onConfirm) { Text(confirmLabel) } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("취소") } },
+    OwnerBottomConfirmSheet(
+        title = title, message = message, confirmLabel = confirmLabel,
+        onConfirm = onConfirm, onDismiss = onDismiss,
+        tag = "owner-confirmation-sheet",
     )
 }
 
