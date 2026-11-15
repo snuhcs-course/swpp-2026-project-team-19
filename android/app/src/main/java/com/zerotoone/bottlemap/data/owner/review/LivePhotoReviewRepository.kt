@@ -1,5 +1,10 @@
 package com.zerotoone.bottlemap.data.owner.review
 
+import android.content.Context
+import java.io.File
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+
 import com.zerotoone.bottlemap.data.OwnerRepository
 import com.zerotoone.bottlemap.data.owner.MockImportStatus
 import com.zerotoone.bottlemap.data.owner.MockOwnerLoadState
@@ -59,8 +64,10 @@ internal fun reviewerCandidateConflicts(
 class LivePhotoReviewRepository(
     private val owner: OwnerMockViewModel,
     private val importId: String?,
+    context: Context,
     private val remote: OwnerRepository = OwnerRepository(),
 ) : PhotoReviewRepository {
+    private val appContext = context.applicationContext
     private var loaded: MenuImportStatusDto? = null
     private var activeImportId: String? = null
     private val draftMutex = Mutex()
@@ -94,6 +101,11 @@ class LivePhotoReviewRepository(
     }
 
     override suspend fun loadReview(): PhotoReviewState {
+        // PR #171 replaced the private device draft. Delete legacy files so
+        // pre-upgrade drafts cannot remain on this phone after account switches.
+        withContext(Dispatchers.IO) {
+            File(appContext.noBackupFilesDir, "owner-review-drafts").deleteRecursively()
+        }
         val id = resolveImportId()
         activeImportId = id
         val status = owner.pollPhotoImportLive(id)
@@ -140,9 +152,14 @@ class LivePhotoReviewRepository(
                     else old.mergedInto == fresh.mergedInto &&
                         old.volumeChoices == fresh.volumeChoices
                 }
+        val canRestore = compatible(parsed)
         val chosen = parsed.takeIf(::compatible) ?: state
-        if (parsed != null && !compatible(parsed))
-            draftNotice = "검수 항목 구성이 변경돼 저장된 초안을 자동 적용하지 않았어요."
+        if (saved != null && !canRestore) {
+            // Preserve remote edits: do not silently overwrite an operator's
+            // different-schema draft or an incompatible saved OCR grouping.
+            draftConflict = true
+            draftNotice = "서버 초안의 일부 내용을 복원할 수 없어요. 담당자에게 확인해 주세요."
+        }
         // Signed URLs expire, and source observations belong to the server.
         // Restore only owner edits; rebind fresh data to the current response.
         val currentItems = state.items.associateBy { it.id }

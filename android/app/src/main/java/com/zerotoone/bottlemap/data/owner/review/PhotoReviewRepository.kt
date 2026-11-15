@@ -11,7 +11,7 @@ import com.zerotoone.bottlemap.ui.owner.review.ReviewPriceCandidate
  * The screen and ViewModel use this interface. LivePhotoReviewRepository
  * implements the approved #164 server review-and-apply contract; development
  * fixtures are isolated in src/debug and never replace real Owner review.
- * Local draft persistence is device-only; no server draft API is assumed.
+ * Live uses PR #171's server draft/version API; Mock only uses in-memory data.
  */
 interface PhotoReviewRepository {
     /** The review to show, mapped into the screen model. A saved draft is restored here. */
@@ -40,8 +40,11 @@ interface PhotoReviewRepository {
     /** Saves the bar's default glass size (spec 3.7 `defaultPourMl`, 1..999). */
     suspend fun saveDefaultPour(ml: Int)
 
-    /** Saves the on-device in-progress review; no Backend A5 draft API exists yet. */
+    /** Version-checked remote draft; errors must be visible before leaving. */
     suspend fun saveDraft(state: PhotoReviewState)
+
+    /** Optional message when a server draft needs operator review/reconciliation. */
+    fun consumeDraftNotice(): String? = null
 
     /** Refresh a short-lived signed photo URL after expiry/403 (contract §5.4).
      * Mock scenarios do not have remote image URLs.
