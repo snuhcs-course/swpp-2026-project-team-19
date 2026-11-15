@@ -565,7 +565,13 @@ OCR LLM과 Vision LLM은 메뉴에서 인식한 모든 상품 또는 비상품 �
 - 섹션 제목, 열 제목, 설명, 세트 메뉴, 비위스키 섹션(칵테일·와인·맥주·음식 등)은 프롬프트가 반환하지 않게 한다.
 - 한 줄에 잔·병 가격이 모두 있으면 두 항목으로 나눠 반환한다. 어댑터(`backend/app/extraction/convert.py`)는 이름이 같은 인접한 잔·병 항목을 옵션 두 개(`잔`, `병`)를 가진 한 항목으로 묶어 4.3 형식으로 바꾼다.
 - 따라서 현재 모든 항목의 `lineType`은 `product`이고, `brandText`, `ageYears`, `editionName`, `abv`, `confidence`는 항상 `null`이다. 이름에 적힌 연수(예: `12년`)는 7장 정규화로 별칭 조회 키에 반영되지만, 10장의 연수·에디션 비교는 추출값이 없어 동작하지 않는다.
-- prompt v1은 위스키 줄만 반환하므로 어댑터는 모든 항목을 `kind = whisky`로 둔다. 위스키가 아닌 메뉴 줄도 `kind = other`로 반환하게 하는 것은 추출 프롬프트의 후속 작업이다(AI 담당). 백엔드의 저장, 매칭 생략, 검수 응답과 게시는 그 전에도 4.3 형식의 `kind`를 받으면 동작한다. 다만 Gemini와 하이브리드 어댑터가 자기 출력을 검증하는 모델(`backend/app/extraction/schema.py`의 `ExtractedItem`)에는 아직 `kind`가 없다. 이 파일은 AI 평가(P30, `ai/eval/p30_extract.py`의 `FROZEN_CODE`)가 SHA-256으로 고정한 파일이므로, 비위스키 줄을 내는 프롬프트의 어댑터를 연결할 때 AI 담당이 그 고정값과 함께 바꾼다.
+- prompt v1은 위스키 줄만 반환하므로 어댑터는 모든 항목을 `kind = whisky`로 둔다.
+- prompt v2(`EXTRACTION_HYBRID_PROMPT=v2`, I4-P12, 기본값은 v1)는 위스키가 아닌 메뉴 줄도 읽는다. 하이브리드 어댑터(`backend/app/adapters/hybrid_extraction.py`의 `in_menu_order`)는 그 줄을 `lineType = product`, `kind = other`인 항목으로 만들어 위스키 줄과 함께 메뉴판에 적힌 순서로 반환한다. 이름과 가격 옵션만 채우고 `brandText`, `ageYears`, `editionName`은 `null`이다.
+  - 순서: v2 변환(`backend/app/extraction/hybrid_v2.py`의 `convert_output`)은 위스키 줄(`items`)과 그 외 줄(`otherItems`)에 번호를 따로 매기고, 줄마다 전체 줄 가운데 몇 번째인지(`menuOrder`)를 남긴다. 어댑터는 이 값으로 두 목록을 합쳐 `itemOrder`를 다시 매긴다. 이름이나 옵션이 저장 한도를 넘어 버려진 줄은 순서에서 빠진다.
+  - 영역: `raw_output.itemSources`는 합친 뒤의 `itemOrder` 기준으로 모든 줄의 OCR 줄과 영역(`box`)을 가진다. 검수 응답의 `sourceBox`가 위스키가 아닌 줄에도 나온다.
+  - `raw_output.otherItems`에는 추출이 준 그대로의 줄이 종류(`cocktail`, `food`, `other`)와 함께 남는다. 이 종류는 저장하는 `kind`에는 반영하지 않는다.
+  - AI 평가가 SHA-256으로 고정한 파일(`backend/app/extraction/schema.py`, `hybrid.py`, `convert.py` 등, `ai/eval/p30_extract.py`의 `FROZEN_CODE`)은 바꾸지 않았다. `kind`는 고정된 검증 모델을 거친 뒤 어댑터에서 붙인다. 평가 스크립트가 쓰는 `convert_output`의 `items`는 그대로 위스키 줄만이다.
+  - OCR이 실패해 Gemini 단독으로 되돌아간 사진은 v1과 같이 위스키 줄만 나온다.
 - 4.3 형식 전체를 채우는 prompt v2는 후속 과제다. v1과 결과가 달라지므로 새 평가 실행으로 정확도를 확인한 뒤 v1을 대체한다.
 
 ## 5 extracted_items와 extracted_options 저장

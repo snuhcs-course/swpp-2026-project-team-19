@@ -125,3 +125,57 @@ def test_other_lines_are_published_without_a_product_and_unchecked(
     stored = db_session.get(MenuImport, menu_import.id)
     lines = [item for image in stored.images for item in image.extraction_run.items]
     assert [line.corrected_kind for line in lines] == [None] * 5
+
+
+def test_a_photo_read_with_prompt_v2_gives_the_other_lines_in_menu_order_with_their_boxes(
+    client, db_session, image_storage, operator, glenfiddich, monkeypatch
+):
+    """The real hybrid extractor with prompt v2 (CLOVA and Gemini faked) through the import: the
+    non-whisky lines of the photo are stored as kind other where the menu has them, are not matched,
+    and the review shows each line's box."""
+    import json
+    from types import SimpleNamespace
+
+    from app.adapters.hybrid_extraction import HybridMenuExtractor
+    from app.api.deps import get_menu_extractor
+    from app.extraction import gemini, hybrid
+    from app.main import app
+    from tests.test_hybrid_extraction_adapter import CLOVA, OCR_RESPONSE, SETTINGS, FakeInteractions, jpeg
+
+    def row(name, category, price, name_lines=(), price_lines=()):
+        return {"raw_name": name, "price_krw": price, "pour_ml": 30 if category == "whisky" else None, "unit": "glass",
+                "source_lines": {"name": list(name_lines), "price": list(price_lines)}, "category": category}
+
+    output = {"items": [row("치즈 플래터", "food", 25000, ["L001"]),
+                        row("글렌피딕 12년", "whisky", 15000, ["L002"], ["L003"]),
+                        row("글렌피딕 하이볼", "cocktail", 12000)]}
+    fake = SimpleNamespace(interactions=FakeInteractions(json.dumps(output)))
+    monkeypatch.setattr(gemini, "make_client", lambda settings: fake)
+    monkeypatch.setattr(hybrid, "call_ocr", lambda *args, **kwargs: {
+        "response": OCR_RESPONSE, "sentSize": [1000, 2000], "latencyMs": 900, "attempts": 1})
+    app.dependency_overrides[get_menu_extractor] = lambda: HybridMenuExtractor(SETTINGS, CLOVA, prompt="v2")
+    bar = make_bar(db_session)
+    db_session.commit()
+    try:
+        response = client.post(
+            f"/api/bars/{bar.id}/menu-imports",
+            headers={**operator, "Idempotency-Key": str(uuid4())},
+            data={"mode": "full_replace"},
+            files=[("images", ("menu.jpg", jpeg(), "image/jpeg"))],  # a picture the extractor can open
+        )
+    finally:
+        app.dependency_overrides.pop(get_menu_extractor, None)
+    assert response.status_code == 202, response.text
+
+    review = client.get(f"/api/menu-imports/{response.json()['menuImportId']}", headers=operator).json()
+
+    assert review.get("status") == "ready_for_review", review
+    [image] = review["images"]
+    assert [(line["itemOrder"], line["rawText"], line["extractedKind"]) for line in image["items"]] == [
+        (1, "치즈 플래터", "other"), (2, "글렌피딕 12년", "whisky"), (3, "글렌피딕 하이볼", "other")]
+    cheese, whisky, highball = image["items"]
+    assert cheese["sourceBox"] == [100, 10, 260, 30] and whisky["sourceBox"] == [100, 100, 880, 120]
+    assert highball["sourceBox"] is None and highball["options"][0]["extractedPriceKrw"] == 12000
+    assert (cheese["proposedProductId"], cheese["candidates"], cheese["newProductDraft"]) == (None, [], None)
+    assert (highball["initialResolutionStatus"], highball["candidates"]) == (None, [])  # names the brand, not matched
+    assert whisky["proposedProductId"] == str(glenfiddich[12].id)
