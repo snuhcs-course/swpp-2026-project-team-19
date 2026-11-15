@@ -667,7 +667,7 @@ internal fun OwnerMenuPhotoSelectionScreen(
     }
     photoLimitNotice?.let {
         UxToast("사진은 최대 15장까지 선택할 수 있어요.",
-            Modifier.align(Alignment.TopCenter).testTag("stage7-photo-limit-toast"))
+            Modifier.align(Alignment.TopCenter))
     }
     }
 }
