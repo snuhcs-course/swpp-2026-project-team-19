@@ -46,6 +46,19 @@ interface PhotoReviewRepository {
     /** Always check the server's latest draftVersion before the atomic publication. */
     suspend fun flushBeforePublish(state: PhotoReviewState) = saveDraft(state)
 
+    /** True when an unsynced device draft conflicts with a newer remote draft. */
+    fun hasPendingDraftConflict(): Boolean = false
+
+    /** Explicit choice: discard the protected local copy and reload the remote draft. */
+    suspend fun chooseServerDraft() {
+        error("이 검수 저장소에서는 서버 초안 선택을 지원하지 않아요.")
+    }
+
+    /** Explicit choice: overwrite the just-reviewed remote CAS with a compatible local copy. */
+    suspend fun chooseLocalDraft() {
+        error("이 검수 저장소에서는 이 기기 초안 선택을 지원하지 않아요.")
+    }
+
     /** True if an account-scoped device copy is loaded but not yet server-acknowledged. */
     fun hasPendingLocalDraft(): Boolean = false
 
