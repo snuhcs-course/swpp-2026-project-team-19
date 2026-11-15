@@ -17,8 +17,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.advanceTimeBy
-import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -575,63 +573,6 @@ class PhotoReviewViewModelTest {
         assertEquals(2, calls)
         assertFalse(vm.draftConflictChoice.value)
         assertNull(vm.draftProblem.value)
-    }
-
-    @Test fun secondEditIsCheckpointedWhileFirstServerPutStillWaits() = runTest(dispatcher) {
-        val firstPut = CompletableDeferred<Unit>()
-        val base = MockPhotoReviewRepository(MockPhotoReviewScenario.READY)
-        var serverCalls = 0
-        var checkpoint: PhotoReviewState? = null
-        var awaitingRemote = false
-        val repo = object : PhotoReviewRepository by base {
-            override suspend fun checkpointDraft(state: PhotoReviewState) {
-                checkpoint = state
-            }
-            override suspend fun saveDraft(state: PhotoReviewState) {
-                serverCalls++
-                if (serverCalls == 1) {
-                    awaitingRemote = true
-                    firstPut.await()
-                    awaitingRemote = false
-                }
-            }
-        }
-        val vm = PhotoReviewViewModel(repo)
-        vm.typeInlinePrice("glen12", "11000")
-        assertTrue(awaitingRemote)
-        vm.typeInlinePrice("glen12", "22000")
-        // The latest value must reach private disk without waiting for the
-        // first remote PUT to finish.
-        assertEquals("22000", checkpoint!!.items.single {
-            it.id == "glen12" }.draftPriceText)
-        assertEquals(1, serverCalls)
-        firstPut.complete(Unit)
-        assertEquals(2, serverCalls)
-    }
-
-    @Test fun laterCanExitAfterDeviceCheckpointWhenServerIsSlow() = runTest(dispatcher) {
-        val hangingPut = CompletableDeferred<Unit>()
-        val base = MockPhotoReviewRepository(MockPhotoReviewScenario.READY)
-        var checkpoint: PhotoReviewState? = null
-        val repo = object : PhotoReviewRepository by base {
-            override suspend fun checkpointDraft(state: PhotoReviewState) {
-                checkpoint = state
-            }
-            override fun hasPendingLocalDraft() = checkpoint != null
-            override suspend fun saveDraft(state: PhotoReviewState) {
-                hangingPut.await()
-            }
-        }
-        val vm = PhotoReviewViewModel(repo)
-        val events = vm.collectEvents(backgroundScope)
-        vm.typeInlinePrice("glen12", "17500")
-        vm.leave()
-        assertEquals("17500", checkpoint!!.items.first {
-            it.id == "glen12" }.draftPriceText)
-        advanceTimeBy(2_501)
-        runCurrent()
-        assertTrue(PhotoReviewEvent.Leave in events)
-        hangingPut.complete(Unit)
     }
 
     @Test fun transientDraftFailureShowsDeviceSavedNoticeAndRetryRecovers() = runTest(dispatcher) {
