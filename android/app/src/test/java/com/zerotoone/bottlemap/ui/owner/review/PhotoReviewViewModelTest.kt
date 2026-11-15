@@ -6,6 +6,7 @@ import com.zerotoone.bottlemap.data.owner.review.PhotoReviewRepository
 import com.zerotoone.bottlemap.data.owner.review.ReviewAlreadyAppliedException
 import com.zerotoone.bottlemap.data.owner.review.ReviewVersionConflictException
 import com.zerotoone.bottlemap.data.owner.review.ReviewDraftConflictException
+import com.zerotoone.bottlemap.data.owner.review.ReviewDraftTooLargeLocalException
 import com.zerotoone.bottlemap.network.BottleMapApiException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
@@ -324,6 +325,74 @@ class PhotoReviewViewModelTest {
         vm.leave()
         assertTrue(PhotoReviewEvent.Leave in events)
     }
+
+    @Test fun autosaveConflictLoadsAndShowsNewServerDraftBeforeAllowingChoice() =
+        runTest(dispatcher) {
+            val base = MockPhotoReviewRepository(MockPhotoReviewScenario.READY)
+            var reads = 0
+            var conflicted = false
+            var explicitOverwrites = 0
+            val repo = object : PhotoReviewRepository by base {
+                override suspend fun loadReview(): PhotoReviewState {
+                    reads++
+                    val state = base.loadReview()
+                    return if (reads == 1) state else state.copy(
+                        items = state.items.map { if (it.id == "glen12")
+                            it.copy(name = "다른 기기에서 고친 최신 이름") else it },
+                    )
+                }
+                override fun hasPendingDraftConflict() = conflicted
+                override suspend fun saveDraft(state: PhotoReviewState) {
+                    conflicted = true
+                    throw ReviewDraftConflictException()
+                }
+                override suspend fun chooseLocalDraft() {
+                    assertEquals("Must see the competing server draft before choosing", 2, reads)
+                    explicitOverwrites++
+                    conflicted = false
+                }
+            }
+            val vm = PhotoReviewViewModel(repo)
+            assertEquals(1, reads)
+            vm.typeInlinePrice("glen12", "22000")
+            assertEquals(2, reads)
+            assertTrue(vm.draftConflictChoice.value)
+            assertEquals("다른 기기에서 고친 최신 이름",
+                vm.state.items.first { it.id == "glen12" }.name)
+            assertTrue(vm.draftProblem.value.orEmpty().contains("최신 서버 초안"))
+            vm.resolveDraftConflict(useLocal = true)
+            assertEquals(1, explicitOverwrites)
+            assertFalse(vm.draftConflictChoice.value)
+        }
+
+    @Test fun oversizedDeviceOnlyDraftBlocksPublishButAllowsSafeLeave() =
+        runTest(dispatcher) {
+            val base = MockPhotoReviewRepository(MockPhotoReviewScenario.READY)
+            var savedLocally = false
+            var attempted = 0
+            val repo = object : PhotoReviewRepository by base {
+                override fun hasPendingLocalDraft() = savedLocally
+                override fun hasOversizedPendingDraft() = savedLocally
+                override suspend fun saveDraft(state: PhotoReviewState) {
+                    attempted++
+                    savedLocally = true
+                    throw ReviewDraftTooLargeLocalException()
+                }
+            }
+            val vm = PhotoReviewViewModel(repo)
+            val events = vm.collectEvents(backgroundScope)
+            vm.typeInlinePrice("glen12", "9".repeat(270_000))
+            assertEquals(1, attempted)
+            assertFalse(vm.draftRetryable.value)
+            assertTrue(vm.draftProblem.value.orEmpty().contains("256KB"))
+            vm.requestPublish()
+            assertNull(vm.publishOutcome.value)
+            vm.retryDraftSave()
+            assertEquals(1, attempted)
+            vm.leave()
+            assertEquals(2, attempted)
+            assertTrue(PhotoReviewEvent.Leave in events)
+        }
 
     @Test fun pendingConflictBlocksSavesUntilOwnerExplicitlyChoosesServer() = runTest(dispatcher) {
         val base = MockPhotoReviewRepository(MockPhotoReviewScenario.READY)
