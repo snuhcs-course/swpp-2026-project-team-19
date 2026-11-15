@@ -35,6 +35,7 @@ internal class PendingReviewDraftStore(
     ) {
         fun canReplay(remote: ReviewDraftDto?, activeReviewVersion: Int): Boolean =
             reviewVersion == activeReviewVersion &&
+                (remote == null || remote.reviewVersion == activeReviewVersion) &&
                 expectedDraftVersion == (remote?.draftVersion ?: 0)
     }
 
