@@ -814,6 +814,56 @@ class PhotoReviewViewModelTest {
         assertTrue(PhotoReviewRules.stats(vm.state).canPublish) // §8.12 merges distinct servings
     }
 
+    @Test fun latestDeviceCheckpointIsWrittenBeforeSlowFirstServerSaveFinishes() =
+        runTest(dispatcher) {
+            val serverBlocked = CompletableDeferred<Unit>()
+            val serverStarted = CompletableDeferred<Unit>()
+            val local = mutableListOf<String>()
+            var saves = 0
+            val mock = MockPhotoReviewRepository(MockPhotoReviewScenario.BASIC)
+            val repo = object : PhotoReviewRepository by mock {
+                override suspend fun checkpointDraft(state: PhotoReviewState) {
+                    local += state.items.first { it.id == "glen15" }.draftPriceText
+                }
+                override suspend fun saveDraft(state: PhotoReviewState) {
+                    saves++
+                    if (saves == 1) {
+                        serverStarted.complete(Unit)
+                        serverBlocked.await()
+                    }
+                }
+            }
+            val vm = PhotoReviewViewModel(repo)
+            vm.typeInlinePrice("glen15", "12000")
+            serverStarted.await()
+            vm.typeInlinePrice("glen15", "24000")
+            assertEquals("24000", local.last())
+            assertEquals(1, saves) // the prior remote PUT is still in flight
+            serverBlocked.complete(Unit)
+            assertEquals("24000", vm.state.items.first { it.id == "glen15" }.draftPriceText)
+        }
+
+    @Test fun failedDeviceCheckpointNeverStartsRemotePutOrLeavesScreen() =
+        runTest(dispatcher) {
+            var serverCalls = 0
+            val mock = MockPhotoReviewRepository(MockPhotoReviewScenario.BASIC)
+            val repo = object : PhotoReviewRepository by mock {
+                override suspend fun checkpointDraft(state: PhotoReviewState) {
+                    error("device full")
+                }
+                override suspend fun saveDraft(state: PhotoReviewState) {
+                    serverCalls++
+                }
+            }
+            val vm = PhotoReviewViewModel(repo)
+            val events = vm.collectEvents(backgroundScope)
+            vm.typeInlinePrice("glen15", "24000")
+            vm.leave()
+            assertEquals(0, serverCalls)
+            assertFalse(PhotoReviewEvent.Leave in events)
+            assertTrue(PhotoReviewEvent.Toast("device full") in events)
+        }
+
     @Test fun leaveWaitsForLastDraftEvenWhenAnEarlierSaveIsSlow() = runTest(dispatcher) {
         val firstSave = CompletableDeferred<Unit>()
         val snapshots = mutableListOf<PhotoReviewState>()
