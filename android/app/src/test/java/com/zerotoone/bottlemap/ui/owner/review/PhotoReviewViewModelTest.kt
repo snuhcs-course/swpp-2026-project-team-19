@@ -325,6 +325,61 @@ class PhotoReviewViewModelTest {
         assertTrue(PhotoReviewEvent.Leave in events)
     }
 
+    @Test fun pendingConflictBlocksSavesUntilOwnerExplicitlyChoosesServer() = runTest(dispatcher) {
+        val base = MockPhotoReviewRepository(MockPhotoReviewScenario.READY)
+        var unresolved = true
+        var attempts = 0
+        var choices = 0
+        val repo = object : PhotoReviewRepository by base {
+            override fun hasPendingDraftConflict() = unresolved
+            override suspend fun saveDraft(state: PhotoReviewState) {
+                attempts++
+                if (unresolved) throw ReviewDraftConflictException()
+            }
+            override suspend fun chooseServerDraft() {
+                choices++
+                unresolved = false
+            }
+        }
+        val vm = PhotoReviewViewModel(repo)
+        assertTrue(vm.draftConflictChoice.value)
+        assertNotNull(vm.draftProblem.value)
+        assertFalse(vm.draftRetryable.value)
+        vm.typeInlinePrice("glen12", "21000")
+        assertEquals(1, attempts)
+        assertTrue(vm.draftConflictChoice.value)
+        vm.resolveDraftConflict(useLocal = false)
+        assertEquals(1, choices)
+        assertFalse(vm.draftConflictChoice.value)
+        assertNull(vm.draftProblem.value)
+        vm.typeInlinePrice("glen12", "22000")
+        assertEquals(2, attempts)
+    }
+
+    @Test fun explicitLocalOverwriteConflictStaysBlockedUntilCasSucceeds() = runTest(dispatcher) {
+        val base = MockPhotoReviewRepository(MockPhotoReviewScenario.READY)
+        var unresolved = true
+        var calls = 0
+        val repo = object : PhotoReviewRepository by base {
+            override fun hasPendingDraftConflict() = unresolved
+            override suspend fun chooseLocalDraft() {
+                calls++
+                if (calls == 1) throw ReviewDraftConflictException()
+                unresolved = false
+            }
+        }
+        val vm = PhotoReviewViewModel(repo)
+        assertTrue(vm.draftConflictChoice.value)
+        vm.resolveDraftConflict(useLocal = true)
+        assertEquals(1, calls)
+        assertTrue(vm.draftConflictChoice.value)
+        assertNotNull(vm.draftProblem.value)
+        vm.resolveDraftConflict(useLocal = true)
+        assertEquals(2, calls)
+        assertFalse(vm.draftConflictChoice.value)
+        assertNull(vm.draftProblem.value)
+    }
+
     @Test fun transientDraftFailureShowsDeviceSavedNoticeAndRetryRecovers() = runTest(dispatcher) {
         val base = MockPhotoReviewRepository(MockPhotoReviewScenario.READY)
         var attempts = 0
