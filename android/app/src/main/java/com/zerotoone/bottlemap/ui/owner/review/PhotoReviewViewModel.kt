@@ -159,6 +159,9 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
 
     /** Replaces the state without regrouping (typing, opening a modal). */
     private fun set(state: PhotoReviewState) {
+        // Freeze the reviewed snapshot after the owner confirms a conflict
+        // choice. Late input callbacks must not create edits during CAS.
+        if (_draftResolving.value) return
         _load.value = PhotoReviewLoad.Ready(state)
         // Persist every field change, including unfinished typing, so a
         // process kill never discards the current owner review draft.
@@ -171,6 +174,7 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
      * "확인이 필요해요" group.
      */
     private fun mutate(change: (PhotoReviewState) -> PhotoReviewState) {
+        if (_draftResolving.value) return
         val before = review ?: return
         val pendingBefore = PhotoReviewRules.stats(before).pending.size
         val oldGroups = before.items.associate { it.id to PhotoReviewRules.displayGroup(before, it) }
@@ -306,11 +310,32 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
     /** §5.9: never resolve a local/remote collision without an explicit tap. */
     fun resolveDraftConflict(useLocal: Boolean) {
         if (_publishing.value || !_draftConflictChoice.value || _draftResolving.value) return
+        // Snapshot the user's final visible edit BEFORE invalidating its queued
+        // autosave. Without this, explicit CAS can publish a stale AtomicFile.
+        val unsavedLocal = if (useLocal && _draftEditingLocal.value)
+            review?.copy(modal = null) ?: return
+        else null
         _draftResolving.value = true
-        ++latestDraftRevision // discard any queued autosaves from before the choice
+        ++latestDraftRevision // invalidate queued writes; flush the snapshot under the mutex
         viewModelScope.launch {
             try {
                 draftSaveMutex.withLock {
+                    if (unsavedLocal != null) {
+                        // The Live repository writes the account/import-scoped
+                        // *working* AtomicFile and signals device-only success
+                        // with this typed exception. No server PUT is allowed.
+                        val deviceOnly = try {
+                            repository.saveDraft(unsavedLocal)
+                            false
+                        } catch (_: ReviewDraftLocalEditingException) {
+                            true
+                        }
+                        check(deviceOnly) {
+                            "이 기기 초안 저장을 확인하지 못했어요. 서버 덮어쓰기를 중단했어요."
+                        }
+                    }
+                    // CAS may clear both local files only AFTER the confirmed
+                    // current in-memory review has been durably flushed.
                     if (useLocal) repository.chooseLocalDraft()
                     else repository.chooseServerDraft()
                 }
