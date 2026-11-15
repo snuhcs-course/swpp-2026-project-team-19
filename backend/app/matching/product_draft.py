@@ -26,9 +26,10 @@ making the product stays a decision a person submits.
 """
 
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from uuid import UUID
 
+from app.core.normalize import normalize
 from app.matching.staged import (
     _AGE_WITH_UNIT,
     _BARE_AGE,
@@ -92,9 +93,21 @@ def _says_more(title: str, inner: str) -> bool:
         latin = f" {' '.join(_LATIN_WORD.findall(_CAMEL.sub(' ', inner).lower()))} "
         return any(f" {english} " in latin and not any(korean in title for korean in spellings)
                    for english, spellings in _KOREAN_SPELLINGS.items())
-    plain = "".join(_LATIN_WORD.findall(title.lower()))  # Hangul brackets: a Korean spelling whose English is not
-    return any(korean in inner and english.replace(" ", "") not in plain
+    # Hangul brackets: a Korean spelling, as a word of its own, whose English is not in the title. Inside
+    # a longer word it is not that term: "라이" (rye) in 클라이넬리쉬, "몰트" (malt) in 몰트락.
+    plain = "".join(_LATIN_WORD.findall(title.lower()))
+    return any(english.replace(" ", "") not in plain and _has_word(inner, korean)
                for korean, english in _VOCABULARY.english.items())
+
+
+def _has_word(text: str, korean: str) -> bool:
+    start = text.find(korean)
+    while start >= 0:
+        end = start + len(korean)
+        if not (start and _HANGUL.match(text[start - 1])) and not (end < len(text) and _HANGUL.match(text[end])):
+            return True
+        start = text.find(korean, start + 1)
+    return False
 
 
 def _other_script_brackets(source: str) -> re.Match | None:
@@ -120,6 +133,30 @@ def _second_spelling(source: str) -> re.Match | None:
     """
     match = _other_script_brackets(source)
     return match if match is not None and not _says_more(match["title"], match["inner"]) else None
+
+
+def _edition_reading(source: str, catalog: CatalogLookup) -> str | None:
+    """"아드벡 (Uigeadail) 나머지" read as "아드벡 Uigeadail 나머지" when the brackets, in the other
+    script after a name that starts with a brand, hold an edition the catalog has for that brand.
+
+    Such brackets pass _says_more when the edition is not a vocabulary word. Only an edition the
+    catalog knows is taken: menus also write the brand again in brackets in spellings the catalog
+    does not have ("맥캘란(Maccallan)", "산토리(Santory)", "더 위스키 에이전시(TWA)"), and those
+    must stay second spellings.
+    """
+    match = _other_script_brackets(source)
+    if match is None:
+        return None
+    title, inner = match["title"].strip(), match["inner"].strip()
+    brand = _find_brand(title, catalog)
+    if brand is None or len(brand[0]) != 1:
+        return None
+    wanted = normalize(inner)  # never empty: the brackets have a letter of the other script
+    for product_id in catalog.get_brand_product_ids(brand[0][0]):
+        product = catalog.get_product(product_id)
+        if product is not None and product.edition_name and normalize(product.edition_name) == wanted:
+            return _SPACES.sub(" ", f"{title} {inner} {match['rest']}").strip()
+    return None
 
 
 def _bracket_readings(source: str, catalog: CatalogLookup) -> list[str]:
@@ -156,18 +193,24 @@ def draft_from_name(name: str | None, catalog: CatalogLookup) -> ProductDraft | 
     source = _SPACES.sub(" ", name or "").strip()  # OCR text can have double spaces
     if not source:
         return None
-    spellings = whole_spellings(source)
+    with_edition = _edition_reading(source, catalog)
+    spellings = () if with_edition else whole_spellings(source)
     # the line as a whole is read only when it has no second spelling: with one, the other
     # spelling would be taken for the edition ("발베니 17년 / Balvenie 17Y")
-    readings = list(dict.fromkeys([*_bracket_readings(source, catalog), *spellings])) or [source]
+    bracketed = [with_edition] if with_edition else _bracket_readings(source, catalog)
+    readings = list(dict.fromkeys([*bracketed, *spellings])) or [source]
     best: ProductDraft | None = None
+    drafts: list[ProductDraft] = []
+    brand_alone: tuple[UUID | None, str] | None = None
     for variant in readings:
         found = _find_brand(variant, catalog)
         if found is None:
             continue
         brand_ids, alias, rest = found
         if not rest and variant != source:
-            continue  # this reading is only the brand ("아벨라워" of "Aberlour 12 (아벨라워)")
+            # this reading is only the brand ("아벨라워" of "Aberlour 12 (아벨라워)")
+            brand_alone = brand_alone or (brand_ids[0] if len(brand_ids) == 1 else None, variant)
+            continue
         age, edition = _age_and_edition(rest)
         english = to_english(edition, _VOCABULARY) if edition and _VOCABULARY is not None else edition
         english = _SPACES.sub(" ", english).strip() if english else None
@@ -183,12 +226,33 @@ def draft_from_name(name: str | None, catalog: CatalogLookup) -> ProductDraft | 
         )
         # two spellings of one line can say different amounts ("발베니 16년 / Balvenie 16 French Oak"):
         # the reading with more parts wins, the first one on a tie
+        drafts.append(draft)
         if best is None or _parts(draft) > _parts(best):
             best = draft
     if best is not None:
-        return best
+        return _with_parts_of_the_other_readings(best, drafts)
     match = _AGE_WITH_UNIT.search(source)
-    return ProductDraft(source_text=source, spellings=spellings, age_years=int(match[1]) if match else None)
+    age = int(match[1]) if match else None
+    if brand_alone is not None:
+        # "아드벡 (Corryvreckan)": the other reading has no brand the catalog knows (an edition it
+        # does not have, or the brand in another spelling). The brand is still the brand.
+        return ProductDraft(source_text=source, spellings=spellings, brand_id=brand_alone[0],
+                            brand_text=brand_alone[1], age_years=age)
+    return ProductDraft(source_text=source, spellings=spellings, age_years=age)
+
+
+def _with_parts_of_the_other_readings(best: ProductDraft, drafts: list[ProductDraft]) -> ProductDraft:
+    """The readings of one line can each say a part the other lacks: "발베니 14년 (Balvenie Caribbean
+    Cask)" has the age on one side and the edition on the other. A part the chosen reading lacks
+    is taken from another reading of the same brand; a part it has is never replaced."""
+    for other in drafts:
+        if other is best or best.brand_id is None or other.brand_id != best.brand_id:
+            continue
+        if best.age_years is None and other.age_years is not None:
+            best = replace(best, age_years=other.age_years)
+        if best.edition_text is None and other.edition_text is not None:
+            best = replace(best, edition_text=other.edition_text, edition_english=other.edition_english)
+    return best
 
 
 def _parts(draft: ProductDraft) -> int:
