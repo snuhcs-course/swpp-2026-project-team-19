@@ -47,6 +47,25 @@ class ReviewDraftConflictException : IllegalStateException(
     "다른 기기에서 검수 초안을 변경했어요. 최신 내용을 다시 불러와 확인해 주세요."
 )
 
+/**
+ * Shared save gate for server CAS and the unique device pending copy.
+ * Test this gate independently: a conflict must never reach AtomicFile.write;
+ * an unacknowledged forced PUT must never be optimized away.
+ */
+internal object DraftSaveSafety {
+    fun assertWritable(conflicted: Boolean) {
+        if (conflicted) throw ReviewDraftConflictException()
+    }
+
+    fun canSkip(
+        forced: Boolean,
+        pendingLocally: Boolean,
+        attempted: Map<String, Any?>,
+        acknowledged: Map<String, Any?>?,
+    ): Boolean = !forced && !pendingLocally &&
+        ServerReviewDraftCodec.sameAndroidSnapshot(attempted, acknowledged)
+}
+
 internal fun reviewerCandidateConflicts(
     extractedAge: Int?, extractedEdition: String?,
     candidateAge: Int?, candidateEdition: String?,
@@ -445,12 +464,11 @@ class LivePhotoReviewRepository(
             // The pending file is the ONLY copy of the offline edits when
             // an operator/device has advanced the server CAS. Do not touch it
             // until the owner explicitly resolves the conflict.
-            if (draftConflict) throw ReviewDraftConflictException()
-            // A failed forced prepublish PUT may contain the same bytes as the
-            // last ACK; the presence of a pending file still requires CAS.
-            if (!forceCas && !pendingLocally &&
-                ServerReviewDraftCodec.sameAndroidSnapshot(content, lastSavedContent))
-                return@withLock
+            DraftSaveSafety.assertWritable(draftConflict)
+            // An unacknowledged forced prepublish PUT may have identical
+            // content to the last ACK, but still needs server CAS + cleanup.
+            if (DraftSaveSafety.canSkip(forceCas, pendingLocally,
+                    content, lastSavedContent)) return@withLock
             // Atomic no-backup storage is completed BEFORE network IO so a
             // process kill after a failed PUT cannot silently lose edits.
             pendingStore.write(id, PendingReviewDraftStore.Envelope(
