@@ -168,9 +168,41 @@ internal object ServerReviewDraftCodec {
             val newOptions = liveOptions.filter {
                 it.sourceOptionId != null && it.sourceOptionId !in oldSeen
             }.distinctBy { it.sourceOptionId }
+            // A hidden Whisky/Other undo snapshot can carry OCR option IDs
+            // that were removed by this review regeneration. Sanitize it as
+            // well; otherwise a future classification toggle resurrects IDs.
+            val cleanedSnapshot = old.classificationSnapshot?.let { snapshot ->
+                val keptSecondary = snapshot.options.filter {
+                    it.sourceOptionId == null || it.sourceOptionId in liveIds
+                }
+                val primaryValid = !snapshot.primaryHasOption ||
+                    snapshot.primarySourceOptionId == null ||
+                    snapshot.primarySourceOptionId in liveIds
+                if (primaryValid) snapshot.copy(options = keptSecondary)
+                else {
+                    val promoted = keptSecondary.firstOrNull()
+                    snapshot.copy(
+                        primaryHasOption = promoted != null,
+                        primarySourceOptionId = promoted?.sourceOptionId,
+                        primaryOptionLabel = promoted?.label,
+                        primaryPrice = promoted?.price,
+                        volume = promoted?.volume ?: snapshot.volume,
+                        bottle = promoted?.bottle ?: snapshot.bottle,
+                        volumeSource = if (promoted?.volumeFromDefault == true)
+                            VolumeSource.DEFAULT else VolumeSource.MANUAL,
+                        options = keptSecondary.drop(1),
+                    )
+                }
+            }
+            val snapshotChanged = cleanedSnapshot != old.classificationSnapshot
             val inventoryChanged = kept.size != selected.size ||
-                validChoices.size != old.volumeChoices.size || newOptions.isNotEmpty()
+                validChoices.size != old.volumeChoices.size ||
+                newOptions.isNotEmpty() || snapshotChanged
+            // The current OTHER card has no volume-selection step. Never
+            // silently publish a changed OCR inventory in that UI.
+            if (inventoryChanged && old.type == ReviewItemType.OTHER) return null
             var retained = PhotoReviewRules.applyDefaultPour(old, fresh.defaultPour)
+                .copy(classificationSnapshot = cleanedSnapshot)
             if (inventoryChanged) {
                 val safeRetained = kept.map { option ->
                     if (option.volumeFromDefault && !option.bottle)
