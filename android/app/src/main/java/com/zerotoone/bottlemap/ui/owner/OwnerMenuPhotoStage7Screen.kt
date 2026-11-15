@@ -3,7 +3,7 @@ package com.zerotoone.bottlemap.ui.owner
 import android.net.Uri
 import androidx.core.content.FileProvider
 import java.io.File
-import com.zerotoone.bottlemap.ui.common.BottleMapNoticeDialog
+import com.zerotoone.bottlemap.ui.common.UxToast
 import com.zerotoone.bottlemap.data.owner.MockExtractedLine
 import com.zerotoone.bottlemap.data.owner.MockLineKind
 import com.zerotoone.bottlemap.data.owner.MockMenuOption
@@ -369,7 +369,13 @@ internal fun OwnerMenuPhotoSelectionScreen(
     // An interrupted file-copy coroutine must not restore a permanent busy state.
     var busy by remember { mutableStateOf(false) }
     var error by rememberSaveable { mutableStateOf<String?>(null) }
-    var showPhotoLimitNotice by rememberSaveable { mutableStateOf(false) }
+    var photoLimitNotice by remember { mutableStateOf<Long?>(null) }
+    LaunchedEffect(photoLimitNotice) {
+        if (photoLimitNotice != null) {
+            delay(2500)
+            photoLimitNotice = null
+        }
+    }
     var chooseSource by rememberSaveable { mutableStateOf(false) }
     // TakePicture keeps this path across activity recreation while the camera is open.
     // The app-private temporary JPEG is copied through the SAME validation/store
@@ -515,14 +521,6 @@ internal fun OwnerMenuPhotoSelectionScreen(
         onBack()
     }
     BackHandler(enabled=busy || photos.isNotEmpty()) {leavePicker()}
-    if (showPhotoLimitNotice) {
-        BottleMapNoticeDialog(
-            message = "사진은 최대 15장까지 선택할 수 있어요.",
-            onDismiss = { showPhotoLimitNotice = false },
-            tag = "stage7-photo-limit-dialog",
-            title = "사진 추가 안내",
-        )
-    }
     if(chooseSource) OwnerMenuPhotoSourceDialog(
         onDismiss={chooseSource=false},
         onCamera={chooseSource=false;takePhoto()},
@@ -535,7 +533,8 @@ internal fun OwnerMenuPhotoSelectionScreen(
     val valid = photos.isNotEmpty() && photos.size <= OWNER_MENU_MAX_PHOTOS &&
         photos.all(store::isReadable) &&
         validateMenuPhotoSizes(photos.map(store::size)) == null
-    Column(Modifier.fillMaxSize().background(V4Color.background)) {
+    Box(Modifier.fillMaxSize().background(V4Color.background)) {
+    Column(Modifier.fillMaxSize()) {
         V4Toolbar(null, ::leavePicker)
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState())
             .padding(horizontal = 18.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -612,7 +611,7 @@ internal fun OwnerMenuPhotoSelectionScreen(
                         .border(1.dp, V4Color.line, RoundedCornerShape(7.dp))
                         .background(V4Color.surface, RoundedCornerShape(7.dp))
                         .ownerQuietClick(enabled = !busy && active == null) {
-                            showPhotoLimitNotice = true
+                            photoLimitNotice = System.nanoTime()
                         }
                         .testTag("stage7-photo-add-limit"),
                         verticalArrangement = Arrangement.Center,
@@ -665,6 +664,11 @@ internal fun OwnerMenuPhotoSelectionScreen(
                 }
             }
         }
+    }
+    photoLimitNotice?.let {
+        UxToast("사진은 최대 15장까지 선택할 수 있어요.",
+            Modifier.align(Alignment.TopCenter).testTag("stage7-photo-limit-toast"))
+    }
     }
 }
 
