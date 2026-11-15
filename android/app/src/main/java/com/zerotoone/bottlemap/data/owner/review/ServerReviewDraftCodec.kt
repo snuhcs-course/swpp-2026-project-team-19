@@ -235,7 +235,9 @@ internal object ServerReviewDraftCodec {
      * operation is representable without dropping an explicit changeDecision.
      * Unknown actions/options block restoration instead of being overwritten.
      */
-    fun restoreStandard(saved: ReviewDraftDto, fresh: PhotoReviewState): PhotoReviewState? {
+    fun restoreStandard(
+        saved: ReviewDraftDto, fresh: PhotoReviewState, allowStaleIds: Boolean = false,
+    ): PhotoReviewState? {
         val changes = when (val raw = saved.content["changeDecisions"]) {
             null -> emptyList<Any>()
             is List<*> -> raw
@@ -253,7 +255,11 @@ internal object ServerReviewDraftCodec {
         for (candidate in input) {
             val decision = candidate as? Map<*, *> ?: return null
             val id = decision["extractedItemId"] as? String ?: return null
-            if (id in rows || fresh.items.none { it.id == id }) return null
+            if (id in rows) return null
+            if (fresh.items.none { it.id == id }) {
+                if (!allowStaleIds) return null
+                continue // removed by regenerated OCR: do not recreate a stale line
+            }
             rows[id] = decision
         }
         val restored = fresh.items.map { original ->
@@ -287,7 +293,7 @@ internal object ServerReviewDraftCodec {
                 is List<*> -> raw
                 else -> return null
             }
-            val options = rawOptions?.map { raw ->
+            val options = rawOptions?.mapNotNull { raw ->
                 val obj = raw as? Map<*, *> ?: return null
                 val price = (obj["priceKrw"] as? Number)?.toDouble() ?: return null
                 if (!validPrice(price)) return null
@@ -296,7 +302,10 @@ internal object ServerReviewDraftCodec {
                     PhotoReviewRules.optionSummary(original) + original.volumeChoices +
                     original.preMergeOptions
                 ).mapNotNull { it.sourceOptionId }.toSet()
-                if (originalId != null && originalId !in validIds) return null
+                if (originalId != null && originalId !in validIds) {
+                    if (allowStaleIds) return@mapNotNull null
+                    return null
+                }
                 val label = obj["optionLabel"] as? String
                 val bottle = label.equals("Bottle", ignoreCase = true) || label == "병"
                 val ml = (obj["pourMl"] as? Number)?.toDouble()
