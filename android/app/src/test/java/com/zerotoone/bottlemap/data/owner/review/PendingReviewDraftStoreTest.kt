@@ -138,6 +138,29 @@ class PendingReviewDraftStoreTest {
                 split.items.last().copy(primarySourceOptionId = "unknown-id"))), fresh))
     }
 
+    @Test fun oldServerAckCannotDeleteMoreRecentUnsubmittedWorkingCopy() {
+        fun snapshot(name: String) = ServerReviewDraftCodec.encode(
+            PhotoReviewState(items = listOf(ReviewItem(id = "ocr-1", name = name))),
+        )
+        val original = PendingReviewDraftStore.Envelope(
+            3, 4, listOf("ocr-1"), snapshot("옛 원본"),
+        )
+        val edited = original.copy(content = snapshot("작업 중 변경사항"))
+        fun server(content: Map<String, Any?>, reviewVersion: Int = 3) =
+            ReviewDraftDto(5, reviewVersion, "2026-11-15T00:00:00Z", content)
+        assertFalse(DraftSaveSafety.latestCopyAcknowledged(
+            server(original.content), original, edited))
+        assertTrue(DraftSaveSafety.latestCopyAcknowledged(
+            server(edited.content), original, edited))
+        assertTrue(DraftSaveSafety.latestCopyAcknowledged(
+            server(original.content), original, null))
+        assertFalse(DraftSaveSafety.latestCopyAcknowledged(
+            server(edited.content, 4), original, edited))
+        assertFalse(DraftSaveSafety.latestCopyAcknowledged(
+            ReviewDraftDto(4, 3, "2026-11-15T00:00:00Z", edited.content),
+            original, edited))
+    }
+
     @Test fun interruptedAtomicRewriteKeepsLastCompletedLocalDraft() = runBlocking {
         val store = PendingReviewDraftStore(context) { jwt("owner-recovery") }
         val draft = PendingReviewDraftStore.Envelope(
