@@ -6,6 +6,7 @@ import com.zerotoone.bottlemap.data.owner.review.PhotoReviewRepository
 import com.zerotoone.bottlemap.data.owner.review.ReviewAlreadyAppliedException
 import com.zerotoone.bottlemap.data.owner.review.ReviewVersionConflictException
 import com.zerotoone.bottlemap.data.owner.review.ReviewDraftConflictException
+import com.zerotoone.bottlemap.data.owner.review.ReviewDraftLocalEditingException
 import com.zerotoone.bottlemap.data.owner.review.ReviewDraftTooLargeLocalException
 import com.zerotoone.bottlemap.network.BottleMapApiException
 import kotlinx.coroutines.CompletableDeferred
@@ -392,6 +393,59 @@ class PhotoReviewViewModelTest {
             vm.leave()
             assertEquals(2, attempted)
             assertTrue(PhotoReviewEvent.Leave in events)
+        }
+
+    @Test fun oversizedConflictedLocalDraftCanBeEditedWithoutAutomaticServerPut() =
+        runTest(dispatcher) {
+            val base = MockPhotoReviewRepository(MockPhotoReviewScenario.READY)
+            val originalLocal = base.loadReview().copy(items = base.loadReview().items.map {
+                if (it.id == "glen12") it.copy(name = "기기에서 편집한 메뉴",
+                    draftPriceText = "9".repeat(270_000)) else it
+            })
+            var localEditing = false
+            var oversized = true
+            var working: PhotoReviewState? = null
+            var serverPuts = 0
+            var explicitChoice = 0
+            val repo = object : PhotoReviewRepository by base {
+                override fun hasPendingDraftConflict() = true
+                override fun hasPendingLocalDraft() = true
+                override fun hasOversizedPendingDraft() = oversized
+                override suspend fun startEditingLocalDraft(): PhotoReviewState {
+                    localEditing = true
+                    return originalLocal
+                }
+                override suspend fun saveDraft(state: PhotoReviewState) {
+                    if (!localEditing) throw ReviewDraftConflictException()
+                    working = state // The real repository writes to a separate AtomicFile.
+                    oversized = state.items.first { it.id == "glen12" }.draftPriceText.length > 262_144
+                    throw ReviewDraftLocalEditingException()
+                }
+                override suspend fun chooseLocalDraft() {
+                    assertFalse("Only a reduced local working copy can be sent", oversized)
+                    assertNotNull(working)
+                    assertEquals("기기에서 편집한 메뉴",
+                        working!!.items.first { it.id == "glen12" }.name)
+                    serverPuts++
+                    explicitChoice++
+                }
+            }
+            val vm = PhotoReviewViewModel(repo)
+            assertTrue(vm.draftConflictChoice.value)
+            vm.editConflictedLocalDraft()
+            assertTrue(vm.draftEditingLocal.value)
+            assertTrue(vm.draftOversized.value)
+            assertEquals("기기에서 편집한 메뉴",
+                vm.state.items.first { it.id == "glen12" }.name)
+            assertEquals(0, serverPuts)
+            vm.typeInlinePrice("glen12", "19000")
+            assertNotNull(working)
+            assertFalse(vm.draftOversized.value)
+            assertTrue(vm.draftConflictChoice.value)
+            assertNotNull(vm.draftProblem.value)
+            assertEquals(0, serverPuts)
+            vm.resolveDraftConflict(useLocal = true)
+            assertEquals(1, explicitChoice)
         }
 
     @Test fun pendingConflictBlocksSavesUntilOwnerExplicitlyChoosesServer() = runTest(dispatcher) {
