@@ -409,6 +409,7 @@ private fun PublishFooter(stats: ReviewStats, vm: PhotoReviewViewModel) {
     val draftRetryable by vm.draftRetryable.collectAsStateWithLifecycle()
     val draftOversized by vm.draftOversized.collectAsStateWithLifecycle()
     val draftConflictChoice by vm.draftConflictChoice.collectAsStateWithLifecycle()
+    val draftEditingLocal by vm.draftEditingLocal.collectAsStateWithLifecycle()
     val draftResolving by vm.draftResolving.collectAsStateWithLifecycle()
     var pendingChoice by remember { mutableStateOf<Boolean?>(null) }
     if (pendingChoice != null) {
@@ -466,6 +467,8 @@ private fun PublishFooter(stats: ReviewStats, vm: PhotoReviewViewModel) {
                         "이 기기에는 보관했어요. 검수 입력을 줄여 서버 256KB 제한 이내로 만들면 다시 저장할 수 있어요."
                     draftRetryable ->
                         "현재 변경 내용은 이 기기에 보관했어요. 서버 저장을 재시도할 수 있어요."
+                    draftEditingLocal ->
+                        "현재 화면은 이 기기에만 보관한 초안이에요. 수정해도 서버로 자동 전송되지 않아요."
                     draftConflictChoice ->
                         "현재 화면은 새로 불러온 서버 초안이에요. 기기 초안과 비교한 뒤 명시적으로 선택해 주세요."
                     else -> "최신 서버 검수를 불러오면 이 화면의 미저장 수정은 사라질 수 있어요."
@@ -478,12 +481,22 @@ private fun PublishFooter(stats: ReviewStats, vm: PhotoReviewViewModel) {
                     Text("선택 전까지 두 초안을 자동으로 합치거나 덮어쓰지 않아요.",
                         style = uxText(11f, 400, UxColor.muted))
                     if (!draftResolving) {
+                        if (!draftEditingLocal) {
+                            UxSecondaryButton("이 기기 초안 열어 수정하기",
+                                vm::editConflictedLocalDraft,
+                                Modifier.testTag("review-draft-edit-local"))
+                        }
                         UxSecondaryButton("서버 초안 사용 (기기 수정 삭제)",
                             { pendingChoice = false },
                             Modifier.testTag("review-draft-use-server"))
-                        UxSecondaryButton("이 기기 초안으로 서버 덮어쓰기",
-                            { pendingChoice = true },
-                            Modifier.testTag("review-draft-use-local"))
+                        if (!draftOversized) {
+                            UxSecondaryButton("이 기기 초안으로 서버 덮어쓰기",
+                                { pendingChoice = true },
+                                Modifier.testTag("review-draft-use-local"))
+                        } else {
+                            Text("서버에 반영하려면 이 기기 초안을 256KB 이하로 줄여 주세요.",
+                                style = uxText(11f, 400, UxColor.muted))
+                        }
                     }
                 }
                 UxSecondaryButton("최신 검수 불러오기", vm::reload,
