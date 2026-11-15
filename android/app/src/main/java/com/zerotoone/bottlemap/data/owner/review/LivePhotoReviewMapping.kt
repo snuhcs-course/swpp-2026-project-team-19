@@ -279,8 +279,11 @@ internal fun mapConfirmedReviewDecision(
         // Bottle identity. A cleared "병"/"Bottle" label with a new pour
         // must remain a non-bottle option with its reviewed pour/label.
         // Keep the original extractedOptionId for server traceability.
-        val bottle = chosen.bottle || isBottle(chosen.label)
-        val label = if (bottle) "Bottle" else canonicalServingLabel(chosen.label)
+        val bottle = chosen.bottle
+        // The explicit Bottle checkbox wins over an older OCR label. Once
+        // unchecked, a retained original "병"/"Bottle" must not recreate it.
+        val label = if (bottle) "Bottle" else
+            canonicalServingLabel(chosen.label)?.takeUnless(::isBottle)
         MockMenuOption(
             optionId = source?.extractedOptionId ?: "manual-${card.id}-$index",
             label = label,
