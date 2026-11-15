@@ -261,6 +261,9 @@ class LivePhotoReviewRepository(
     override suspend fun loadReview(): PhotoReviewState {
         val id = resolveImportId()
         activeImportId = id
+        // A newly loaded import must never inherit a count acknowledged for
+        // a different import in this repository instance.
+        committedAddedCount = null
         val status = owner.pollPhotoImportLive(id)
         val response = remote.getMenuImport(id)
         if (isAppliedReviewImport(response, id)) {
@@ -775,6 +778,9 @@ class LivePhotoReviewRepository(
     }
 
     override suspend fun publish(state: PhotoReviewState) {
+        // A retry may discover another client's already-applied import. Until
+        // THIS call gets a 200 with result.added, the count remains unknown.
+        committedAddedCount = null
         require(PhotoReviewRules.stats(state).canPublish) {
             "확인이 필요한 메뉴를 먼저 검수해 주세요."
         }
