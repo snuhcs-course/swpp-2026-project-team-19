@@ -300,14 +300,19 @@ class LivePhotoReviewRepository(
     }
 
     /** §5.9 optimistic concurrency: never silently replace another editor. */
-    override suspend fun saveDraft(state: PhotoReviewState) {
+    override suspend fun saveDraft(state: PhotoReviewState) = saveDraftInternal(state, forceCas = false)
+
+    override suspend fun flushBeforePublish(state: PhotoReviewState) =
+        saveDraftInternal(state, forceCas = true)
+
+    private suspend fun saveDraftInternal(state: PhotoReviewState, forceCas: Boolean) {
         val id = activeImportId ?: error("검수 작업을 먼저 불러와 주세요.")
         val version = loaded?.reviewVersion ?: error("검수 정보를 먼저 불러와 주세요.")
         val content = ServerReviewDraftCodec.encode(state)
         draftMutex.withLock {
             if (published) return@withLock
             if (draftConflict) throw ReviewDraftConflictException()
-            if (ServerReviewDraftCodec.sameAndroidSnapshot(content, lastSavedContent))
+            if (!forceCas && ServerReviewDraftCodec.sameAndroidSnapshot(content, lastSavedContent))
                 return@withLock
             val request = ReviewDraftSaveRequestDto(
                 draftVersion = draftVersion, reviewVersion = version, content = content,
