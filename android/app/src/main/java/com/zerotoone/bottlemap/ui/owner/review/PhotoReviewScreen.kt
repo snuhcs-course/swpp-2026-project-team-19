@@ -432,8 +432,14 @@ private fun PublishFooter(stats: ReviewStats, vm: PhotoReviewViewModel) {
                 style = uxText(15f, 750, if (canSubmit) UxColor.goldOn else UxColor.text))
         }
         when {
-            draftProblem != null -> Text(draftProblem.orEmpty(), style = uxText(12f, 450, UxColor.error),
-                modifier = Modifier.testTag("review-draft-error"))
+            draftProblem != null -> Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(draftProblem.orEmpty(), style = uxText(12f, 450, UxColor.error),
+                    modifier = Modifier.testTag("review-draft-error"))
+                Text("최신 서버 검수를 불러오면 이 화면의 미저장 수정은 사라질 수 있어요.",
+                    style = uxText(11f, 400, UxColor.muted))
+                UxSecondaryButton("최신 검수 불러오기", vm::reload,
+                    Modifier.testTag("review-draft-reload"))
+            }
             savingPour -> Text("기본 잔 용량을 저장하는 중이에요.", style = uxText(12f, 450, UxColor.muted))
             stats.noDefault -> Text("매장 기본 잔 용량을 입력해주세요.", style = uxText(12f, 400, UxColor.error, lineHeight = 1.65f),
                 modifier = Modifier.padding(horizontal = 1.dp, vertical = 4.dp).testTag("review-publish-blocker"))
