@@ -320,6 +320,28 @@ class PhotoReviewViewModelTest {
         assertEquals(PriceChoice.OLD, repo.savedDraft?.items?.first { it.id == "glendronach" }?.priceChoice)
         assertEquals(PriceChoice.OLD, PhotoReviewViewModel(repo).item("glendronach").priceChoice)
     }
+    @Test fun finalPublishUsesExplicitCasFlushAndBlocksOnRemoteConflict() = runTest(dispatcher) {
+        val base = MockPhotoReviewRepository(MockPhotoReviewScenario.READY)
+        var flushes = 0
+        var submissions = 0
+        val repository = object : PhotoReviewRepository by base {
+            override suspend fun flushBeforePublish(state: PhotoReviewState) {
+                flushes++
+                throw ReviewDraftConflictException()
+            }
+            override suspend fun publish(state: PhotoReviewState) {
+                submissions++
+            }
+        }
+        val viewModel = PhotoReviewViewModel(repository)
+        viewModel.requestPublish()
+        viewModel.confirmPublish()
+        assertEquals(1, flushes)
+        assertEquals(0, submissions)
+        assertEquals(PublishFailure.CONFLICT,
+            (viewModel.publishOutcome.value as PublishOutcome.Failed).reason)
+    }
+
     @Test fun doublePublishTapSubmitsExactlyOnceAndDisablesWhileSaving() = runTest(dispatcher) {
         val gate = CompletableDeferred<Unit>()
         val base = MockPhotoReviewRepository(MockPhotoReviewScenario.READY)
