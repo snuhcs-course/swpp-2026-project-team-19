@@ -458,8 +458,7 @@ internal fun CustomerP18BarDetail(
       P18ScrollTopButton(scroll,Modifier.align(Alignment.BottomEnd)
           .padding(end=16.dp,bottom=18.dp))
       addressCopyNotice?.let {
-          UxToast("주소를 복사했어요.", Modifier.align(Alignment.TopCenter)
-              .testTag("customer-bar-address-copied-toast"))
+          UxToast("주소를 복사했어요.", Modifier.align(Alignment.TopCenter))
       }
     }
 }
