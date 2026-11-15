@@ -448,6 +448,78 @@ class PhotoReviewViewModelTest {
             assertEquals(1, explicitChoice)
         }
 
+    @Test fun confirmLocalConflictFlushesLastVisibleEditBeforeCasEvenWhenAutosaveIsQueued() =
+        runTest(dispatcher) {
+            val base = MockPhotoReviewRepository(MockPhotoReviewScenario.READY)
+            val firstSaveGate = CompletableDeferred<Unit>()
+            var localEditing = false
+            var saves = 0
+            var workingCopy: PhotoReviewState? = null
+            var appliedCopy: PhotoReviewState? = null
+            var confirmed = 0
+            val repo = object : PhotoReviewRepository by base {
+                override fun hasPendingDraftConflict() = true
+                override suspend fun startEditingLocalDraft(): PhotoReviewState {
+                    localEditing = true
+                    return base.loadReview()
+                }
+                override suspend fun saveDraft(state: PhotoReviewState) {
+                    if (!localEditing) throw ReviewDraftConflictException()
+                    saves++
+                    if (saves == 1) firstSaveGate.await()
+                    workingCopy = state
+                    throw ReviewDraftLocalEditingException()
+                }
+                override suspend fun chooseLocalDraft() {
+                    confirmed++
+                    appliedCopy = workingCopy
+                }
+            }
+            val vm = PhotoReviewViewModel(repo)
+            vm.editConflictedLocalDraft()
+            assertTrue(vm.draftEditingLocal.value)
+
+            vm.typeInlinePrice("glen12", "21000")
+            assertEquals(1, saves) // first save suspended under draftSaveMutex
+            vm.typeInlinePrice("glen12", "22000") // queued, not yet persisted
+            vm.resolveDraftConflict(useLocal = true)
+            assertEquals(0, confirmed)
+            // The confirmed snapshot is frozen while its working file flushes.
+            vm.typeInlinePrice("glen12", "33000")
+            assertEquals("22000",
+                vm.state.items.first { it.id == "glen12" }.draftPriceText)
+            firstSaveGate.complete(Unit)
+            assertEquals(1, confirmed)
+            assertEquals(2, saves) // stale queued save was skipped, final edit flushed
+            assertEquals("22000",
+                appliedCopy!!.items.first { it.id == "glen12" }.draftPriceText)
+        }
+
+    @Test fun failedWorkingCopyFlushNeverReachesExplicitCas() = runTest(dispatcher) {
+        val base = MockPhotoReviewRepository(MockPhotoReviewScenario.READY)
+        var writes = 0
+        var casCalls = 0
+        val repo = object : PhotoReviewRepository by base {
+            override fun hasPendingDraftConflict() = true
+            override suspend fun startEditingLocalDraft() = base.loadReview()
+            override suspend fun saveDraft(state: PhotoReviewState) {
+                writes++
+                if (writes == 1) throw ReviewDraftLocalEditingException()
+                throw IllegalStateException("기기 저장 공간에 오류가 있어요.")
+            }
+            override suspend fun chooseLocalDraft() { casCalls++ }
+        }
+        val vm = PhotoReviewViewModel(repo)
+        vm.editConflictedLocalDraft()
+        vm.typeInlinePrice("glen12", "20000")
+        assertEquals(1, writes)
+        vm.resolveDraftConflict(useLocal = true)
+        assertEquals(2, writes)
+        assertEquals(0, casCalls)
+        assertTrue(vm.draftConflictChoice.value)
+        assertTrue(vm.draftProblem.value.orEmpty().contains("저장 공간"))
+    }
+
     @Test fun pendingConflictBlocksSavesUntilOwnerExplicitlyChoosesServer() = runTest(dispatcher) {
         val base = MockPhotoReviewRepository(MockPhotoReviewScenario.READY)
         var unresolved = true
