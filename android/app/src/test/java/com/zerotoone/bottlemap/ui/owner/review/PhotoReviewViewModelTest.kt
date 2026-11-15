@@ -769,8 +769,33 @@ class PhotoReviewViewModelTest {
         vm.confirmPublish()
         vm.checkPublishStatus()
         assertTrue(vm.publishOutcome.value is PublishOutcome.Success)
+        assertNull((vm.publishOutcome.value as PublishOutcome.Success).confirmedAddedCount)
         assertEquals(1, attempts)
     }
+
+    @Test fun successfulPublishOnlyDisplaysAddedCountWhenServerConfirmed() =
+        runTest(dispatcher) {
+            val base = MockPhotoReviewRepository(MockPhotoReviewScenario.READY)
+            val noResponseCount = object : PhotoReviewRepository by base {
+                override suspend fun publish(state: PhotoReviewState) = Unit
+                override fun publishedAddedCount(): Int? = null
+            }
+            val vm = PhotoReviewViewModel(noResponseCount)
+            vm.requestPublish()
+            vm.confirmPublish()
+            assertNull((vm.publishOutcome.value as PublishOutcome.Success).confirmedAddedCount)
+
+            val acknowledged = object : PhotoReviewRepository by base {
+                override suspend fun publish(state: PhotoReviewState) = Unit
+                override fun publishedAddedCount(): Int? = 4
+            }
+            val withServerResult = PhotoReviewViewModel(acknowledged)
+            withServerResult.requestPublish()
+            withServerResult.confirmPublish()
+            assertEquals(4,
+                (withServerResult.publishOutcome.value as PublishOutcome.Success)
+                    .confirmedAddedCount)
+        }
 
     @Test fun authAndConflictFailuresPreserveReviewState() = runTest(dispatcher) {
         val base = MockPhotoReviewRepository(MockPhotoReviewScenario.READY)

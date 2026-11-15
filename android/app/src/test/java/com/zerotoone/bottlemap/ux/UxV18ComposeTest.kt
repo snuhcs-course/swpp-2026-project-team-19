@@ -195,10 +195,11 @@ class UxV18ComposeTest {
         rule.onNodeWithTag("photo-review-list").performScrollToNode(hasTestTag("review-publish"))
         rule.onNodeWithTag("review-publish").performClick()
         rule.onNodeWithText("이대로 게시할까요?").assertIsDisplayed()
-        // Only whisky / other menu / excluded counts appear in the confirmation.
-        rule.onNodeWithText("연결 없이 등록할 메뉴", substring = true).assertDoesNotExist()
+        // UAT 4.5 adds a factual breakdown to the existing publication sheet.
+        // Confirming remains a separate step: these counts do not publish.
+        rule.onNodeWithText("연결 없이 등록할 메뉴", substring = true).assertExists()
         rule.onNodeWithText("게시 후 운영자 확인", substring = true).assertDoesNotExist()
-        rule.onNodeWithText("기존 가격 변경", substring = true).assertDoesNotExist()
+        rule.onNodeWithText("기존 가격 변경", substring = true).assertExists()
         rule.onNodeWithText("여러 줄을 합친 위스키", substring = true).assertDoesNotExist()
         rule.onNodeWithTag("review-publish-sheet-confirm").performClick()
         rule.waitForIdle()

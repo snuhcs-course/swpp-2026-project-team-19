@@ -225,11 +225,13 @@ class LivePhotoReviewRepository(
     private val draftMutex = Mutex()
     @Volatile private var draftVersion = 0
     private var published = false
+    private var committedAddedCount: Int? = null
     private var draftConflict = false
     private var pendingDraftConflict = false
     private var lastSavedContent: Map<String, Any?>? = null
     private var draftNotice: String? = null
 
+    override fun publishedAddedCount(): Int? = committedAddedCount
     override fun consumeDraftNotice(): String? = draftNotice.also { draftNotice = null }
     override fun hasPendingLocalDraft(): Boolean = pendingLocally
     override fun hasOversizedPendingDraft(): Boolean = pendingOversized
@@ -259,6 +261,9 @@ class LivePhotoReviewRepository(
     override suspend fun loadReview(): PhotoReviewState {
         val id = resolveImportId()
         activeImportId = id
+        // A newly loaded import must never inherit a count acknowledged for
+        // a different import in this repository instance.
+        committedAddedCount = null
         val status = owner.pollPhotoImportLive(id)
         val response = remote.getMenuImport(id)
         if (isAppliedReviewImport(response, id)) {
@@ -773,6 +778,9 @@ class LivePhotoReviewRepository(
     }
 
     override suspend fun publish(state: PhotoReviewState) {
+        // A retry may discover another client's already-applied import. Until
+        // THIS call gets a 200 with result.added, the count remains unknown.
+        committedAddedCount = null
         require(PhotoReviewRules.stats(state).canPublish) {
             "확인이 필요한 메뉴를 먼저 검수해 주세요."
         }
@@ -816,7 +824,7 @@ class LivePhotoReviewRepository(
         }
         try {
             // The server's #164 endpoint is atomic and idempotent per import.
-            owner.publishPhotoImportLive(id, version)
+            committedAddedCount = owner.publishPhotoImportLive(id, version)
         } catch (cancelled: CancellationException) {
             throw cancelled
         } catch (error: Exception) {

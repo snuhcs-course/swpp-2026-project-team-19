@@ -331,6 +331,12 @@ fun OwnerOnboardingScreen(
         draft.proposedBarName.isNotBlank() &&
             it.name.trim().equals(draft.proposedBarName.trim(),ignoreCase=true)
     }
+    // §3.11.11: hasOwner=true is public, but cannot be claimed. Keep it visible
+    // with an operator-contact explanation instead of silently hiding the bar.
+    val claimedMatches=snapshot?.claimedBarCandidates.orEmpty().filter {
+        draft.proposedBarName.isNotBlank() &&
+            it.name.trim().equals(draft.proposedBarName.trim(),ignoreCase=true)
+    }
     val validContact=draft.contactPhone.isNotBlank()&&validOwnerPhone(draft.contactPhone)
     val businessPrecheck=ownerRegistrationPrecheckError(
         draft.businessNumberDigits, draft.representativeName, draft.openingDateIso)
@@ -356,7 +362,8 @@ fun OwnerOnboardingScreen(
         RegPage.REP->draft.representativeName.trim().length in 1..100
         RegPage.DATE->validOpeningDate(draft.openingDateIso)
         RegPage.BIZCHECK->businessPrecheck==null
-        RegPage.BARNAME->draft.proposedBarName.trim().length in 1..150&&exactMatches.isEmpty()
+        RegPage.BARNAME->draft.proposedBarName.trim().length in 1..150&&
+            exactMatches.isEmpty()&&claimedMatches.isEmpty()
         RegPage.BARPHOTO->draft.applicantGallery.isNotEmpty()
         RegPage.ADDRESS->draft.proposedBarAddress.isNotBlank() &&
             listOf(draft.proposedBarAddress,draft.proposedBarAddressDetail)
@@ -719,6 +726,20 @@ fun OwnerOnboardingScreen(
                             }
                             save(edited)
                         },"예: 몰트 앤 무드",tag="registration-bar-name",highlight=true)
+                        claimedMatches.forEach { candidate ->
+                            Column(Modifier.fillMaxWidth()
+                                .background(RegistrationV4.surface,RoundedCornerShape(16.dp))
+                                .padding(16.dp),
+                                verticalArrangement=Arrangement.spacedBy(6.dp)) {
+                                Text("BottleMap에 이미 등록된 매장이 있어요",
+                                    color=RegistrationV4.text,fontSize=14.sp)
+                                Text(candidate.name + " · " + candidate.address,
+                                    color=RegistrationV4.secondary,fontSize=12.sp)
+                                Text("이미 업주가 등록된 매장입니다. 운영자에게 문의해 주세요.",
+                                    color=RegistrationV4.secondary,fontSize=12.sp,
+                                    modifier=Modifier.testTag("registration-bar-already-owned"))
+                            }
+                        }
                         exactMatches.forEach { candidate ->
                             RegistrationExistingBarCard(candidate.name,candidate.address,
                                 onMine={

@@ -3,6 +3,7 @@ package com.zerotoone.bottlemap.ui.owner
 import android.net.Uri
 import androidx.core.content.FileProvider
 import java.io.File
+import com.zerotoone.bottlemap.ui.common.UxToast
 import com.zerotoone.bottlemap.data.owner.MockExtractedLine
 import com.zerotoone.bottlemap.data.owner.MockLineKind
 import com.zerotoone.bottlemap.data.owner.MockMenuOption
@@ -368,6 +369,13 @@ internal fun OwnerMenuPhotoSelectionScreen(
     // An interrupted file-copy coroutine must not restore a permanent busy state.
     var busy by remember { mutableStateOf(false) }
     var error by rememberSaveable { mutableStateOf<String?>(null) }
+    var photoLimitNotice by remember { mutableStateOf<Long?>(null) }
+    LaunchedEffect(photoLimitNotice) {
+        if (photoLimitNotice != null) {
+            delay(2500)
+            photoLimitNotice = null
+        }
+    }
     var chooseSource by rememberSaveable { mutableStateOf(false) }
     // TakePicture keeps this path across activity recreation while the camera is open.
     // The app-private temporary JPEG is copied through the SAME validation/store
@@ -525,7 +533,8 @@ internal fun OwnerMenuPhotoSelectionScreen(
     val valid = photos.isNotEmpty() && photos.size <= OWNER_MENU_MAX_PHOTOS &&
         photos.all(store::isReadable) &&
         validateMenuPhotoSizes(photos.map(store::size)) == null
-    Column(Modifier.fillMaxSize().background(V4Color.background)) {
+    Box(Modifier.fillMaxSize().background(V4Color.background)) {
+    Column(Modifier.fillMaxSize()) {
         V4Toolbar(null, ::leavePicker)
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState())
             .padding(horizontal = 18.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -596,6 +605,21 @@ internal fun OwnerMenuPhotoSelectionScreen(
                             fontWeight = FontWeight.Light, lineHeight = 28.sp)
                         Text("사진 추가", color = V4Color.sub, fontSize = 13.sp)
                     }
+                } else {
+                    // UAT 4.4: a 16th photo does not open the picker or alter the 15.
+                    Column(Modifier.width(112.dp).height(144.dp)
+                        .border(1.dp, V4Color.line, RoundedCornerShape(7.dp))
+                        .background(V4Color.surface, RoundedCornerShape(7.dp))
+                        .ownerQuietClick(enabled = !busy && active == null) {
+                            photoLimitNotice = System.nanoTime()
+                        }
+                        .testTag("stage7-photo-add-limit"),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("+", color = V4Color.sub, fontSize = 28.sp,
+                            fontWeight = FontWeight.Light, lineHeight = 28.sp)
+                        Text("사진 추가", color = V4Color.sub, fontSize = 13.sp)
+                    }
                 }
             }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween,
@@ -640,6 +664,11 @@ internal fun OwnerMenuPhotoSelectionScreen(
                 }
             }
         }
+    }
+    photoLimitNotice?.let {
+        UxToast("사진은 최대 15장까지 선택할 수 있어요.",
+            Modifier.align(Alignment.TopCenter))
+    }
     }
 }
 

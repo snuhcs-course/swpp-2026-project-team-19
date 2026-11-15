@@ -36,7 +36,8 @@ enum class PublishFailure { NETWORK, SERVER, FORBIDDEN, VALIDATION, CONFLICT, AU
 sealed interface PublishOutcome {
     data class Submitting(val summary: ReviewStats, val newWhisky: Boolean) : PublishOutcome
     data class Checking(val summary: ReviewStats, val newWhisky: Boolean) : PublishOutcome
-    data class Success(val summary: ReviewStats, val newWhisky: Boolean) : PublishOutcome
+    data class Success(val summary: ReviewStats, val newWhisky: Boolean,
+        val confirmedAddedCount: Int? = null) : PublishOutcome
     data class Failed(
         val summary: ReviewStats,
         val newWhisky: Boolean,
@@ -541,7 +542,8 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                 }
                 _draftProblem.value = null
                 repository.publish(state)
-                _publishOutcome.value = PublishOutcome.Success(summary, newWhisky)
+                _publishOutcome.value = PublishOutcome.Success(
+                    summary, newWhisky, repository.publishedAddedCount())
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (error: Exception) {
@@ -578,7 +580,8 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
             try {
                 when (repository.checkPublishedStatus()) {
                     true -> _publishOutcome.value =
-                        PublishOutcome.Success(result.summary, result.newWhisky)
+                        PublishOutcome.Success(result.summary, result.newWhisky,
+                            repository.publishedAddedCount())
                     false -> if (retryWhenReady && result.reason == PublishFailure.NETWORK &&
                         review?.let { PhotoReviewRules.stats(it).canPublish } == true) {
                         _publishing.value = false

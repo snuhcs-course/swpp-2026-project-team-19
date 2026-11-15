@@ -58,7 +58,6 @@ import com.zerotoone.bottlemap.network.BarOperatingExceptionDto
 import com.zerotoone.bottlemap.network.BarWeeklyHoursDto
 import com.zerotoone.bottlemap.ui.common.BmIcon
 import com.zerotoone.bottlemap.ui.common.BmIconId
-import com.zerotoone.bottlemap.ui.common.UxToast
 import com.zerotoone.bottlemap.ui.theme.BottleMapPalette
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -172,13 +171,6 @@ internal fun CustomerP18BarDetail(
 ) {
     val context=LocalContext.current
     val clipboard=LocalClipboardManager.current
-    var copyNotice by remember(bar.barId) { mutableStateOf<Pair<Long, String>?>(null) }
-    LaunchedEffect(copyNotice) {
-        if (copyNotice != null) {
-            delay(2500)
-            copyNotice = null
-        }
-    }
     val scroll=rememberScrollState()
     val anchorPx=with(LocalDensity.current){160.dp.roundToPx()}
     var highlightTarget by remember(bar.barId,highlightProductId) {
@@ -350,7 +342,6 @@ internal fun CustomerP18BarDetail(
                         P18PreviewCopy({
                             if (bar.address.isNotBlank()) {
                                 clipboard.setText(AnnotatedString(bar.address))
-                                copyNotice = System.nanoTime() to "주소를 복사했어요."
                             }
                         },enabled=bar.address.isNotBlank())
                     }
@@ -367,8 +358,9 @@ internal fun CustomerP18BarDetail(
                         color=P18Text,fontSize=12.sp,modifier=Modifier.weight(1f))
                     P18PreviewCopy({
                         bar.phone?.takeIf { it.isNotBlank() }?.let { phone ->
+                            // Android 13+ provides its own clipboard preview.
+                            // No duplicate app toast or modal for phone numbers.
                             clipboard.setText(AnnotatedString(phone))
-                            copyNotice = System.nanoTime() to "전화번호를 복사했어요."
                         }
                     },enabled=!bar.phone.isNullOrBlank())
                 }
@@ -456,9 +448,6 @@ internal fun CustomerP18BarDetail(
       }
       P18ScrollTopButton(scroll,Modifier.align(Alignment.BottomEnd)
           .padding(end=16.dp,bottom=18.dp))
-      copyNotice?.let { (_, message) ->
-          UxToast(message, Modifier.align(Alignment.TopCenter))
-      }
     }
 }
 

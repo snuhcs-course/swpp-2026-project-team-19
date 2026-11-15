@@ -522,7 +522,12 @@ private fun ReviewModalLayer(s: PhotoReviewState, vm: PhotoReviewViewModel, publ
         ReviewModalType.PUBLISH -> {
             val stats = PhotoReviewRules.stats(s)
             val summary = "위스키 ${stats.ready.size} · 그 외 메뉴 ${stats.other.size} · 제외 ${stats.excluded.size}"
-            BottomSheetLayer("이대로 게시할까요?", summary, "게시하기", vm::dismissModal, vm::confirmPublish,
+            val preview = PhotoReviewRules.publicationPreview(s)
+            val previewText = summary +
+                "\n기존 가격 변경 ${preview.changedExistingPrices}건 · " +
+                "연결 없이 등록할 메뉴 ${preview.publishWithoutProduct}건"
+            BottomSheetLayer("이대로 게시할까요?", previewText, "게시하기",
+                vm::dismissModal, vm::confirmPublish,
                 "review-publish-sheet", busy = publishing)
         }
         ReviewModalType.EXCLUDE -> BottomSheetLayer("이번 게시에서 제외할까요?", "기존에 등록된 메뉴는 삭제하지 않아요.", "제외",
@@ -627,11 +632,13 @@ private fun PublicationResultScreen(
         is PublishOutcome.Failed -> result.newWhisky
     }
     val title = when {
-        success -> "메뉴를 추가했어요."
+        success -> (result as? PublishOutcome.Success)?.confirmedAddedCount?.let { added ->
+            if (added > 0) "메뉴에 ${added}개를 더했어요." else "메뉴를 게시했어요."
+        } ?: "메뉴를 추가했어요."
         result is PublishOutcome.Submitting -> "메뉴를 게시하고 있어요."
         result is PublishOutcome.Checking -> "게시 상태를 확인하고 있어요."
         else -> when (failure) {
-            PublishFailure.NETWORK -> "메뉴를 게시하지 못했어요."
+            PublishFailure.NETWORK -> "게시 실패"
             PublishFailure.SERVER, PublishFailure.UNKNOWN -> "게시 결과를 확인하지 못했어요."
             PublishFailure.FORBIDDEN -> "메뉴 게시 권한이 없어요."
             PublishFailure.VALIDATION -> "검수 내용을 다시 확인해 주세요."
@@ -645,7 +652,7 @@ private fun PublicationResultScreen(
         result is PublishOutcome.Submitting -> "메뉴가 반영되는 동안 잠시만 기다려 주세요."
         result is PublishOutcome.Checking -> "게시 요청이 처리되었는지 확인하고 있어요."
         else -> when (failure) {
-            PublishFailure.NETWORK -> "인터넷 연결을 확인한 뒤 다시 시도해 주세요."
+            PublishFailure.NETWORK -> "메뉴에 더하지 못했어요. 인터넷 연결을 확인한 뒤 다시 시도해 주세요."
             PublishFailure.SERVER -> "서버에서 문제가 발생했어요. 이미 반영되었을 수 있으니 게시 상태를 먼저 확인해 주세요."
             PublishFailure.UNKNOWN -> "요청이 이미 처리되었을 수 있어요. 다시 게시하기 전에 게시 상태를 확인해 주세요."
             PublishFailure.FORBIDDEN -> "이 매장의 메뉴를 게시할 권한이 없어요. 매장 관리에서 권한 상태를 확인해 주세요."
@@ -719,8 +726,13 @@ private fun PublicationResultScreen(
                             }
                         }
                     }
+                    (result as? PublishOutcome.Success)?.confirmedAddedCount?.let { added ->
+                        Text("새로 더한 메뉴 ${added}개 · 건너뛴 줄 ${summary.excluded.size}개",
+                            style = uxText(12f, 500, UxColor.sub),
+                            modifier = Modifier.testTag("review-result-added-count"))
+                    }
                     if (newWhisky) PublicationNote("새로운 위스키 안내",
-                        "새로 등록한 위스키는 운영자가 확인한 뒤부터 검색에 나와요.", critical = false)
+                        "새로 등록한 위스키는 운영자가 확인한 뒤부터 위스키 검색에 나와요.", critical = false)
                 }
                 if (failure == PublishFailure.UNKNOWN || failure == PublishFailure.SERVER)
                     PublicationNote(null,

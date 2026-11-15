@@ -2,6 +2,7 @@ package com.zerotoone.bottlemap.data.owner
 
 import com.zerotoone.bottlemap.network.OwnerApplicationBarDto
 import com.zerotoone.bottlemap.network.OwnerApplicationDto
+import com.zerotoone.bottlemap.network.MenuImportStatusDto
 import org.junit.Assert.*
 import org.junit.Test
 
@@ -13,6 +14,18 @@ class OwnerLiveSafetyRulesTest {
         } catch (_: IllegalArgumentException) {
             // Do not perform an unsafe mutation.
         }
+    }
+
+    @Test fun alreadyAppliedImportSkipsSecondPostDuringConcurrentPreflight() {
+        // Between the review screen's first GET and the owner adapter's
+        // final GET, another client may publish the same import.
+        val ready = MenuImportStatusDto(
+            menuImportId = "import-1", status = "ready_for_review",
+            reviewVersion = 9,
+        )
+        val applied = ready.copy(status = "applied")
+        assertTrue(photoImportNeedsApply(ready, "import-1", 9))
+        assertFalse(photoImportNeedsApply(applied, "import-1", 9))
     }
 
     @Test fun changedAddressNeedsNewCoordinates() {

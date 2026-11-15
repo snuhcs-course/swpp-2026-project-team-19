@@ -283,6 +283,35 @@ object PhotoReviewRules {
     fun displayGroup(state: PhotoReviewState, x: ReviewItem): ReviewGroup =
         itemGroup(state.typingSnapshots[x.id] ?: x, state)
 
+    /** UAT 4.5-12: compare the chosen price against the current server menu
+     * for the SAME product and serving. Never infer a price update from OCR
+     * text alone, and never count excluded/merged child lines twice.
+     */
+    fun publicationPreview(state: PhotoReviewState): ReviewPublicationPreview {
+        val approved = state.items.filter { item ->
+            item.mergedInto == null && !item.excluded && problems(item, state).isEmpty()
+        }
+        val updatedExisting = approved.count { item ->
+            val productId = item.linkedProductId ?: return@count false
+            val saved = item.existingServingPricesByProductId[productId].orEmpty()
+                .filter { it.existing }
+            optionSummary(item).any { option ->
+                val key = servingKey(option)
+                val old = saved.firstOrNull { it.servingKey == key }
+                old != null && validPrice(option.price) &&
+                    old.priceKrw != option.price.toInt()
+            }
+        }
+        return ReviewPublicationPreview(
+            changedExistingPrices = updatedExisting,
+            // Other menu rows are already counted separately in the confirmation sheet.
+            // The UAT "unlinked" number refers to new whiskies awaiting operator linking.
+            publishWithoutProduct = approved.count {
+                it.type == ReviewItemType.WHISKY && it.linkedProductId == null
+            },
+        )
+    }
+
     fun stats(state: PhotoReviewState): ReviewStats {
         // Secondary OCR lines are represented inside the master product card;
         // never show a second Review/Excluded card for an already grouped line.

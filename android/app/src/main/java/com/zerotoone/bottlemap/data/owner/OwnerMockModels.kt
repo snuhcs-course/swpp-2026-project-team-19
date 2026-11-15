@@ -17,6 +17,7 @@ data class MockOwnerSnapshot(
     val selectedBarId: String? = null,
     val dismissedApplicationIds: Set<String> = emptySet(), // local-only hidden rejected cards
     val existingBarCandidates: List<MockBar> = emptyList(), // Local-only discovery fixtures, not owned bars
+    val claimedBarCandidates: List<MockBar> = emptyList(), // Public hasOwner=true: show operator inquiry, never select
     val nextLocalId: Long = 1L,
     // Local Mock tombstones: canonical bar + product retains its menu-item ID after deletion/reset.
     val menuItemIdHistory: Map<String, String> = emptyMap(),
