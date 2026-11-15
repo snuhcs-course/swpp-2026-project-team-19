@@ -359,7 +359,13 @@ class LivePhotoReviewRepository(
         val content = ServerReviewDraftCodec.encode(state)
         draftMutex.withLock {
             if (published) return@withLock
-            if (!forceCas && !draftConflict &&
+            // The pending file is the ONLY copy of the offline edits when
+            // an operator/device has advanced the server CAS. Do not touch it
+            // until the owner explicitly resolves the conflict.
+            if (draftConflict) throw ReviewDraftConflictException()
+            // A failed forced prepublish PUT may contain the same bytes as the
+            // last ACK; the presence of a pending file still requires CAS.
+            if (!forceCas && !pendingLocally &&
                 ServerReviewDraftCodec.sameAndroidSnapshot(content, lastSavedContent))
                 return@withLock
             // Atomic no-backup storage is completed BEFORE network IO so a
@@ -369,9 +375,6 @@ class LivePhotoReviewRepository(
                 itemIds = state.items.map { it.id }, content = content,
             ))
             pendingLocally = true
-            // Even a blocked conflict save stays on device, but no old draft
-            // is allowed to pass a newer server CAS version automatically.
-            if (draftConflict) throw ReviewDraftConflictException()
             val request = ReviewDraftSaveRequestDto(
                 draftVersion = draftVersion, reviewVersion = version, content = content,
             )
