@@ -349,8 +349,9 @@ internal fun CustomerP18BarDetail(
                             modifier=Modifier.weight(1f))
                         P18PreviewCopy({
                             if (bar.address.isNotBlank()) {
+                                // Android 13+ shows the system clipboard overlay with the copied address.
+                                // Do not display a second app toast over it (UAT 4.3-7).
                                 clipboard.setText(AnnotatedString(bar.address))
-                                copyNotice = System.nanoTime() to "주소를 복사했어요."
                             }
                         },enabled=bar.address.isNotBlank())
                     }
