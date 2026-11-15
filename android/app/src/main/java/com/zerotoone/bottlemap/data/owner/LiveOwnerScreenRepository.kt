@@ -1026,7 +1026,12 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
     }
 
     /** Apply all item decisions in one backend transaction, and never accept removals. */
-    suspend fun publishPhotoImportLive(importId: String, version: Int): Int {
+    /**
+     * Returns the server-confirmed number of additions only when this call
+     * received a successful review-and-apply response. An import that another
+     * client already applied has no observable count on this request.
+     */
+    suspend fun publishPhotoImportLive(importId: String, version: Int): Int? {
         val current = snapshot()
         val job = current.imports.firstOrNull { it.menuImportId == importId }
             ?: error("메뉴판 작업이 없어요.")
@@ -1034,8 +1039,10 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         if (!photoImportNeedsApply(original, importId, version)) {
             // Another client committed the same import while this client
             // prepared the decisions. Sync best-effort; do not POST again.
+            // Never manufacture a "server-confirmed 0 additions" here:
+            // the actual POST response was never received by this client.
             runCatching { pollPhotoImportLive(importId) }
-            return 0
+            return null
         }
         require(conflictingReviewedPhotoPrices(job).isEmpty()) {
             "같은 메뉴·용량에 다른 가격을 입력했어요. 가격을 하나로 맞춘 후 게시해 주세요."
