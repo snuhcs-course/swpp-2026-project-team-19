@@ -5,6 +5,7 @@ import com.zerotoone.bottlemap.data.owner.review.MockPhotoReviewScenario
 import com.zerotoone.bottlemap.data.owner.review.PhotoReviewRepository
 import com.zerotoone.bottlemap.data.owner.review.ReviewAlreadyAppliedException
 import com.zerotoone.bottlemap.data.owner.review.ReviewVersionConflictException
+import com.zerotoone.bottlemap.data.owner.review.ReviewDraftConflictException
 import com.zerotoone.bottlemap.network.BottleMapApiException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
@@ -836,5 +837,50 @@ class PhotoReviewViewModelTest {
         assertFalse(PhotoReviewRules.stats(vm.state).canPublish)
     }
 
+
+    @Test fun serverDraftVersionConflictPreventsFinalPublish() = runTest(dispatcher) {
+        val base = MockPhotoReviewRepository(MockPhotoReviewScenario.READY)
+        var writes = 0
+        var publishes = 0
+        val repo = object : PhotoReviewRepository by base {
+            override suspend fun saveDraft(state: PhotoReviewState) {
+                writes++
+                if (writes >= 2) throw ReviewDraftConflictException()
+            }
+            override suspend fun publish(state: PhotoReviewState) { publishes++ }
+        }
+        val vm = PhotoReviewViewModel(repo)
+        vm.requestPublish() // first save succeeds
+        vm.confirmPublish() // final pre-submit CAS detects remote conflict
+        assertEquals(0, publishes)
+        assertEquals(PublishFailure.CONFLICT,
+            (vm.publishOutcome.value as PublishOutcome.Failed).reason)
+        assertEquals(2, writes)
+    }
+
+    @Test fun pendingDefaultPourWriteBlocksPublishAndUsesLatestServingSize() = runTest(dispatcher) {
+        val base = MockPhotoReviewRepository(MockPhotoReviewScenario.READY)
+        val held = CompletableDeferred<Unit>()
+        var published: PhotoReviewState? = null
+        val repo = object : PhotoReviewRepository by base {
+            override suspend fun saveDefaultPour(ml: Int) {
+                held.await()
+                base.saveDefaultPour(ml)
+            }
+            override suspend fun publish(state: PhotoReviewState) { published = state }
+        }
+        val vm = PhotoReviewViewModel(repo)
+        vm.saveDefaultPour("60")
+        assertTrue(vm.savingDefaultPour.value)
+        vm.requestPublish()
+        assertNull(vm.state.modal)
+        held.complete(Unit)
+        assertFalse(vm.savingDefaultPour.value)
+        assertEquals(60.0, vm.state.defaultPour, 0.0)
+        vm.requestPublish()
+        assertEquals(ReviewModalType.PUBLISH, vm.state.modal?.type)
+        vm.confirmPublish()
+        assertEquals(60.0, published?.defaultPour ?: -1.0, 0.0)
+    }
 
 }
