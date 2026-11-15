@@ -47,6 +47,11 @@ class ReviewDraftConflictException : IllegalStateException(
     "다른 기기에서 검수 초안을 변경했어요. 최신 내용을 다시 불러와 확인해 주세요."
 )
 
+/** The full edit is safely on-device but §5.9 will reject its JSON size. */
+class ReviewDraftTooLargeLocalException : IllegalStateException(
+    "검수 초안이 서버 256KB 제한을 넘었어요. 이 기기에만 저장했어요. 입력 내용을 줄여 주세요."
+)
+
 /**
  * Shared save gate for server CAS and the unique device pending copy.
  * Test this gate independently: a conflict must never reach AtomicFile.write;
@@ -88,6 +93,7 @@ class LivePhotoReviewRepository(
     private val appContext = context.applicationContext
     private val pendingStore = PendingReviewDraftStore(appContext)
     private var pendingLocally = false
+    private var pendingOversized = false
     private var loaded: MenuImportStatusDto? = null
     private var activeImportId: String? = null
     private val draftMutex = Mutex()
@@ -100,6 +106,7 @@ class LivePhotoReviewRepository(
 
     override fun consumeDraftNotice(): String? = draftNotice.also { draftNotice = null }
     override fun hasPendingLocalDraft(): Boolean = pendingLocally
+    override fun hasOversizedPendingDraft(): Boolean = pendingOversized
     override fun hasPendingDraftConflict(): Boolean = pendingDraftConflict
 
     private fun snapshot(): MockOwnerSnapshot = when (val current = owner.state.value) {
@@ -169,6 +176,7 @@ class LivePhotoReviewRepository(
         var saved = response.reviewDraft
         val pending = pendingStore.read(id)
         pendingLocally = false
+        pendingOversized = false
         var migrated = false
         if (saved == null && pending == null) {
             // One-time upgrade: server is empty, so move compatible, scoped
@@ -250,7 +258,10 @@ class LivePhotoReviewRepository(
                 if (compatible(local)) {
                     chosen = requireNotNull(local)
                     pendingLocally = true
-                    draftNotice = "이 기기에 저장된 변경사항을 복원했어요. 서버에 다시 저장해 주세요."
+                    pendingOversized = ServerReviewDraftCodec.exceedsServerLimit(pending.content)
+                    draftNotice = if (pendingOversized)
+                        "이 기기의 큰 초안을 복원했어요. 서버 256KB 제한에 맞게 입력 내용을 줄여 주세요."
+                    else "이 기기에 저장된 변경사항을 복원했어요. 서버에 다시 저장해 주세요."
                 } else {
                     draftConflict = true
                     pendingDraftConflict = true
@@ -378,11 +389,20 @@ class LivePhotoReviewRepository(
         val id = activeImportId ?: error("검수 작업을 먼저 불러와 주세요.")
         draftMutex.withLock {
             check(pendingDraftConflict) { "선택할 기기 초안 충돌이 없어요." }
+            check(pendingStore.read(id) != null) { "이 기기의 보관 초안을 찾지 못했어요." }
+            // The owner must have seen THIS version. Never discard the only
+            // device copy after another operator saved again.
+            val current = remote.getMenuImport(id)
+            if (current.menuImportId != id ||
+                current.status != "ready_for_review" ||
+                current.reviewVersion != loaded?.reviewVersion ||
+                (current.reviewDraft?.draftVersion ?: 0) != draftVersion) {
+                throw ReviewDraftConflictException()
+            }
             pendingStore.clear(id)
             pendingDraftConflict = false
             pendingLocally = false
-            // A fresh load below re-checks that the server draft can be
-            // represented safely by this Android review screen.
+            pendingOversized = false
             draftConflict = false
         }
     }
@@ -425,6 +445,8 @@ class LivePhotoReviewRepository(
                 }) {
                 "OCR 항목이나 옵션이 변경됐어요. 자동 덮어쓰기를 중단했어요."
             }
+            if (ServerReviewDraftCodec.exceedsServerLimit(pending.content))
+                throw ReviewDraftTooLargeLocalException()
             val result = try {
                 remote.saveMenuReviewDraft(id, ReviewDraftSaveRequestDto(
                     draftVersion = currentDraftVersion,
@@ -444,6 +466,7 @@ class LivePhotoReviewRepository(
             // the local backup survives and can be reconciled on reload.
             pendingStore.clear(id)
             pendingLocally = false
+            pendingOversized = false
             pendingDraftConflict = false
             draftConflict = false
         }
@@ -476,6 +499,10 @@ class LivePhotoReviewRepository(
                 itemIds = state.items.map { it.id }, content = content,
             ))
             pendingLocally = true
+            // A server-rejected large snapshot still survives on device.
+            // Never make a PUT that §5.9 must reject above 256 KiB.
+            pendingOversized = ServerReviewDraftCodec.exceedsServerLimit(content)
+            if (pendingOversized) throw ReviewDraftTooLargeLocalException()
             val request = ReviewDraftSaveRequestDto(
                 draftVersion = draftVersion, reviewVersion = version, content = content,
             )
@@ -484,6 +511,10 @@ class LivePhotoReviewRepository(
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (error: BottleMapApiException) {
+                if (error.code == "REVIEW_DRAFT_TOO_LARGE" || error.httpStatus == 413) {
+                    pendingOversized = true
+                    throw ReviewDraftTooLargeLocalException()
+                }
                 if (error.code == "REVIEW_DRAFT_OUTDATED") {
                     draftConflict = true
                     pendingDraftConflict = true
@@ -500,6 +531,7 @@ class LivePhotoReviewRepository(
                     draftVersion = currentDraft.draftVersion
                     lastSavedContent = content
                     pendingLocally = false
+                    pendingOversized = false
                     runCatching { pendingStore.clear(id) }
                     return@withLock
                 }
@@ -516,6 +548,7 @@ class LivePhotoReviewRepository(
             draftVersion = saved.draftVersion
             lastSavedContent = content
             pendingLocally = false
+            pendingOversized = false
             pendingDraftConflict = false
             runCatching { pendingStore.clear(id) }
         }
@@ -527,6 +560,7 @@ class LivePhotoReviewRepository(
             published = true
             lastSavedContent = null
             pendingLocally = false
+            pendingOversized = false
             runCatching { pendingStore.clear(id) }
         }
     }
