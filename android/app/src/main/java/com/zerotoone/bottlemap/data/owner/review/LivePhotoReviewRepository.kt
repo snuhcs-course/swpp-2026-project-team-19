@@ -225,11 +225,13 @@ class LivePhotoReviewRepository(
     private val draftMutex = Mutex()
     @Volatile private var draftVersion = 0
     private var published = false
+    private var committedAddedCount: Int? = null
     private var draftConflict = false
     private var pendingDraftConflict = false
     private var lastSavedContent: Map<String, Any?>? = null
     private var draftNotice: String? = null
 
+    override fun publishedAddedCount(): Int? = committedAddedCount
     override fun consumeDraftNotice(): String? = draftNotice.also { draftNotice = null }
     override fun hasPendingLocalDraft(): Boolean = pendingLocally
     override fun hasOversizedPendingDraft(): Boolean = pendingOversized
@@ -816,7 +818,7 @@ class LivePhotoReviewRepository(
         }
         try {
             // The server's #164 endpoint is atomic and idempotent per import.
-            owner.publishPhotoImportLive(id, version)
+            committedAddedCount = owner.publishPhotoImportLive(id, version)
         } catch (cancelled: CancellationException) {
             throw cancelled
         } catch (error: Exception) {
