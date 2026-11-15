@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -98,6 +99,8 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
     val publishOutcome: StateFlow<PublishOutcome?> = _publishOutcome.asStateFlow()
 
     private val draftSaveMutex = Mutex()
+    // Device-only writes are independent of the slow remote PUT mutex.
+    private val localCheckpointMutex = Mutex()
     private var latestDraftRevision = 0L
     private var leaving = false
     private val latestRematchRequest = mutableMapOf<String, Int>()
@@ -207,6 +210,21 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
     private fun saveDraft(state: PhotoReviewState) {
         val revision = ++latestDraftRevision
         viewModelScope.launch {
+            // An old in-flight network request must not delay the NEXT input's
+            // durable on-device checkpoint. Only the newest revision writes.
+            try {
+                localCheckpointMutex.withLock {
+                    if (revision != latestDraftRevision) return@launch
+                    repository.checkpointDraft(state)
+                }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: Exception) {
+                _draftProblem.value = error.message ?: "기기 검수 초안 저장에 실패했어요."
+                _draftRetryable.value = false
+                toast(_draftProblem.value.orEmpty())
+                return@launch
+            }
             draftSaveMutex.withLock {
                 if (revision == latestDraftRevision) {
                     try {
@@ -378,7 +396,19 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
         _load.value = PhotoReviewLoad.Ready(final)
         ++latestDraftRevision // invalidate any queued older save
         viewModelScope.launch {
-            val saved = draftSaveMutex.withLock {
+            // "나중에 하기" commits the latest visible edit on-device first.
+            // Remote delivery may be slow, but must not hold navigation hostage.
+            try {
+                localCheckpointMutex.withLock { repository.checkpointDraft(final) }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: Exception) {
+                leaving = false
+                _draftProblem.value = error.message ?: "기기에 검수 초안을 저장하지 못했어요."
+                toast(_draftProblem.value.orEmpty())
+                return@launch
+            }
+            val saved = withTimeoutOrNull(2_500L) { draftSaveMutex.withLock {
                 try {
                     repository.saveDraft(final)
                     _draftProblem.value = null
@@ -408,12 +438,16 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                         else error.message ?: "검수 초안 저장에 실패했어요."
                     false
                 }
-            }
-            if (saved) {
+            } }
+            // An offline/network timeout is safe to leave after the AtomicFile
+            // commit. The next visit will retry the pending server Draft.
+            val localOnly = saved == null && repository.hasPendingLocalDraft() &&
+                !repository.hasPendingDraftConflict()
+            if (saved == true || localOnly) {
+                if (localOnly) _draftProblem.value = localOnlyNotice
                 if (repository.hasOversizedPendingDraft()) toast(oversizedNotice)
                 _events.send(PhotoReviewEvent.Leave)
-            }
-            else {
+            } else {
                 leaving = false
                 toast(_draftProblem.value ?: "검수 초안 저장에 실패했어요. 다시 시도해 주세요.")
             }
