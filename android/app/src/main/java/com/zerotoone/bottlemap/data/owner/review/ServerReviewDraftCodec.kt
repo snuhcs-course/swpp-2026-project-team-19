@@ -147,9 +147,19 @@ internal object ServerReviewDraftCodec {
      * Unknown actions/options block restoration instead of being overwritten.
      */
     fun restoreStandard(saved: ReviewDraftDto, fresh: PhotoReviewState): PhotoReviewState? {
-        val changes = saved.content["changeDecisions"] as? List<*> ?: emptyList<Any>()
+        val changes = when (val raw = saved.content["changeDecisions"]) {
+            null -> emptyList<Any>()
+            is List<*> -> raw
+            else -> return null
+        }
         if (changes.isNotEmpty()) return null // Android cannot edit ignored diffs.
-        val input = saved.content["itemDecisions"] as? List<*> ?: return null
+        // The spec permits a draft with no itemDecisions at all; it is empty,
+        // not malformed. A present non-array value still must be rejected.
+        val input = when (val raw = saved.content["itemDecisions"]) {
+            null -> emptyList<Any>()
+            is List<*> -> raw
+            else -> return null
+        }
         val rows = mutableMapOf<String, Map<*, *>>()
         for (candidate in input) {
             val decision = candidate as? Map<*, *> ?: return null
@@ -164,17 +174,30 @@ internal object ServerReviewDraftCodec {
                     "reject", "confirm_non_product",
                     "select_existing_product", "publish_without_product"
                 )) return null
+            // Android has only an excluded/reject state. Converting an
+            // operator's confirmed header/description to reject destroys intent.
+            if (action == "confirm_non_product") return null
+            if (decision["finalLineType"] != null &&
+                decision["finalLineType"] != "product") return null
             val name = (decision["correctedProductName"] as? String)
                 ?.takeIf { it.isNotBlank() } ?: original.name
             val linked = if (action == "select_existing_product")
                 decision["productId"] as? String ?: return null
                 else if (action == "publish_without_product") null
                 else original.linkedProductId
-            val category = if (action == "publish_without_product")
-                if (decision["kind"] == "other") ReviewItemType.OTHER
-                else ReviewItemType.WHISKY
-                else original.type
-            val rawOptions = decision["options"] as? List<*>
+            val category = if (action == "publish_without_product") {
+                when (decision["kind"]) {
+                    "other" -> ReviewItemType.OTHER
+                    "whisky" -> ReviewItemType.WHISKY
+                    // An incomplete operator choice must remain incomplete.
+                    else -> return null
+                }
+            } else original.type
+            val rawOptions = when (val raw = decision["options"]) {
+                null -> if ("options" in decision) return null else null
+                is List<*> -> raw
+                else -> return null
+            }
             val options = rawOptions?.map { raw ->
                 val obj = raw as? Map<*, *> ?: return null
                 val price = (obj["priceKrw"] as? Number)?.toDouble() ?: return null
@@ -207,15 +230,25 @@ internal object ServerReviewDraftCodec {
                 newConfirmed = action != null || original.newConfirmed,
                 type = category,
             )
-            if (!options.isNullOrEmpty()) {
-                val first = options.first()
-                changed = changed.copy(
-                    price = first.price, volume = first.volume,
-                    bottle = first.bottle, volumeSource = VolumeSource.MANUAL,
-                    primaryOptionLabel = first.label,
-                    primarySourceOptionId = first.sourceOptionId,
-                    options = options.drop(1), priceChoice = PriceChoice.MANUAL,
-                )
+            if (rawOptions != null) {
+                // Explicit [] means the operator removed every OCR serving.
+                // It is different from an omitted options field.
+                if (options!!.isEmpty()) {
+                    changed = changed.copy(
+                        primaryHasOption = false, options = emptyList(),
+                        primaryOptionLabel = null, primarySourceOptionId = null,
+                    )
+                } else {
+                    val first = options.first()
+                    changed = changed.copy(
+                        primaryHasOption = true,
+                        price = first.price, volume = first.volume,
+                        bottle = first.bottle, volumeSource = VolumeSource.MANUAL,
+                        primaryOptionLabel = first.label,
+                        primarySourceOptionId = first.sourceOptionId,
+                        options = options.drop(1), priceChoice = PriceChoice.MANUAL,
+                    )
+                }
             }
             changed
         }
