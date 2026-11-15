@@ -71,6 +71,32 @@ internal object DraftSaveSafety {
         ServerReviewDraftCodec.sameAndroidSnapshot(attempted, acknowledged)
 }
 
+/**
+ * Treat a deliberate split of a previously merged OCR child as compatible.
+ * Fresh OCR source identities must still be present. Used for both normal
+ * draft restore and explicit conflict overwrite; keep their gates identical.
+ */
+internal fun compatibleOwnerReviewDraft(
+    candidate: PhotoReviewState?, freshState: PhotoReviewState,
+): Boolean = candidate != null &&
+    candidate.items.map { it.id } == freshState.items.map { it.id } &&
+    candidate.items.zip(freshState.items).all { (old, fresh) ->
+        val freshIds = (
+            PhotoReviewRules.optionSummary(fresh) + fresh.volumeChoices +
+                fresh.preMergeOptions
+        ).mapNotNull { it.sourceOptionId }.toSet()
+        val savedIds = (
+            PhotoReviewRules.optionSummary(old) + old.volumeChoices +
+                old.preMergeOptions + old.classificationSnapshot?.options.orEmpty()
+        ).mapNotNull { it.sourceOptionId } +
+            listOfNotNull(old.classificationSnapshot?.primarySourceOptionId)
+        savedIds.all { it in freshIds } && (if (old.manuallySplitGroup)
+            fresh.mergedInto != null || fresh.mergeSources.isNotEmpty()
+        else old.mergedInto == fresh.mergedInto &&
+            old.volumeChoices.map { it.sourceOptionId } ==
+                fresh.volumeChoices.map { it.sourceOptionId })
+    }
+
 internal fun reviewerCandidateConflicts(
     extractedAge: Int?, extractedEdition: String?,
     candidateAge: Int?, candidateEdition: String?,
@@ -151,26 +177,10 @@ class LivePhotoReviewRepository(
             it.menuImportId == id && it.reviewVersion == response.reviewVersion
         }) { "검수 버전이 변경됐어요. 다시 불러와 주세요." }
         val state = mapServerPhotoReview(response, current)
-        // Grouping and OCR identities must match before adopting old edits.
+        // One source identity/group compatibility policy for restores and
+        // the explicit device-over-server conflict choice.
         fun compatible(candidate: PhotoReviewState?): Boolean =
-            candidate != null &&
-                candidate.items.map { it.id } == state.items.map { it.id } &&
-                candidate.items.zip(state.items).all { (old, fresh) ->
-                    val freshIds = (
-                        PhotoReviewRules.optionSummary(fresh) + fresh.volumeChoices +
-                        fresh.preMergeOptions
-                    ).mapNotNull { it.sourceOptionId }.toSet()
-                    val savedIds = (
-                        PhotoReviewRules.optionSummary(old) + old.volumeChoices +
-                        old.preMergeOptions + old.classificationSnapshot?.options.orEmpty()
-                    ).mapNotNull { it.sourceOptionId } +
-                        listOfNotNull(old.classificationSnapshot?.primarySourceOptionId)
-                    savedIds.all { it in freshIds } && (if (old.manuallySplitGroup)
-                        fresh.mergedInto != null || fresh.mergeSources.isNotEmpty()
-                    else old.mergedInto == fresh.mergedInto &&
-                        old.volumeChoices.map { it.sourceOptionId } ==
-                            fresh.volumeChoices.map { it.sourceOptionId })
-                }
+            compatibleOwnerReviewDraft(candidate, state)
         val legacy = LegacyReviewDraftReader(appContext)
         val reviewVersion = requireNotNull(response.reviewVersion)
         var saved = response.reviewDraft
@@ -440,19 +450,7 @@ class LivePhotoReviewRepository(
                 pending.content,
             )) ?: error("기기 보관 초안을 안전하게 읽을 수 없어요.")
             require(pending.itemIds == fresh.items.map { it.id } &&
-                local.items.map { it.id } == pending.itemIds &&
-                local.items.zip(fresh.items).all { (old, new) ->
-                    old.mergedInto == new.mergedInto &&
-                        (PhotoReviewRules.optionSummary(old) + old.volumeChoices +
-                            old.preMergeOptions +
-                            old.classificationSnapshot?.options.orEmpty())
-                            .mapNotNull { it.sourceOptionId }
-                            .all { sourceId ->
-                                sourceId in (PhotoReviewRules.optionSummary(new) +
-                                    new.volumeChoices + new.preMergeOptions)
-                                    .mapNotNull { it.sourceOptionId }
-                            }
-                }) {
+                compatibleOwnerReviewDraft(local, fresh)) {
                 "OCR 항목이나 옵션이 변경됐어요. 자동 덮어쓰기를 중단했어요."
             }
             if (ServerReviewDraftCodec.exceedsServerLimit(pending.content))
