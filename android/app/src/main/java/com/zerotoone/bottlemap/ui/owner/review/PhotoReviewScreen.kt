@@ -404,6 +404,7 @@ private fun AllDoneRow(onJump: () -> Unit) {
 private fun PublishFooter(stats: ReviewStats, vm: PhotoReviewViewModel) {
     val savingPour by vm.savingDefaultPour.collectAsStateWithLifecycle()
     val draftProblem by vm.draftProblem.collectAsStateWithLifecycle()
+    val draftRetryable by vm.draftRetryable.collectAsStateWithLifecycle()
     val canSubmit = stats.canPublish && !savingPour && draftProblem == null
     Column(
         Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(bottom = 43.dp)
@@ -435,8 +436,14 @@ private fun PublishFooter(stats: ReviewStats, vm: PhotoReviewViewModel) {
             draftProblem != null -> Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(draftProblem.orEmpty(), style = uxText(12f, 450, UxColor.error),
                     modifier = Modifier.testTag("review-draft-error"))
-                Text("최신 서버 검수를 불러오면 이 화면의 미저장 수정은 사라질 수 있어요.",
+                Text(if (draftRetryable)
+                    "현재 변경 내용은 이 기기에 보관했어요. 서버 저장을 재시도할 수 있어요."
+                    else "최신 서버 검수를 불러오면 이 화면의 미저장 수정은 사라질 수 있어요.",
                     style = uxText(11f, 400, UxColor.muted))
+                if (draftRetryable) {
+                    UxSecondaryButton("서버 저장 다시 시도", vm::retryDraftSave,
+                        Modifier.testTag("review-draft-retry"))
+                }
                 UxSecondaryButton("최신 검수 불러오기", vm::reload,
                     Modifier.testTag("review-draft-reload"))
             }
