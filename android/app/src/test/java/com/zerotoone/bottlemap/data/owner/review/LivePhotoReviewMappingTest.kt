@@ -676,4 +676,74 @@ class LivePhotoReviewMappingTest {
         assertEquals(32767, submitted.pourMl)
         assertEquals("large-glass", submitted.optionId)
     }
+
+    @Test fun clearedOcrBottleLabelUsesReviewedNonBottlePour() {
+        for (oldLabel in listOf("병", "Bottle", "병 700ml")) {
+            val dto = item(
+                options = listOf(ReviewOptionDto(
+                    "ocr-bottle", 1, oldLabel, null, 88000,
+                )),
+                status = "unmatched", proposedId = null,
+            ).copy(extractedKind = "other", candidates = emptyList(),
+                newProductDraft = null, extractedProductName = "바 메뉴")
+            val fresh = mapServerPhotoReview(response(dto), fixture())
+            assertTrue(fresh.items.single().bottle)
+            val saved = com.zerotoone.bottlemap.network.ReviewDraftDto(
+                4, 3, "2026-11-15T00:00:00Z",
+                mapOf("itemDecisions" to listOf(mapOf(
+                    "extractedItemId" to "line-1",
+                    "action" to "publish_without_product",
+                    "kind" to "other",
+                    "options" to listOf(mapOf(
+                        "extractedOptionId" to "ocr-bottle",
+                        "optionLabel" to null,
+                        "pourMl" to 60,
+                        "priceKrw" to 88000,
+                    )),
+                ))),
+            )
+            val restored = requireNotNull(ServerReviewDraftCodec.restoreStandard(
+                saved, fresh)).items.single()
+            val reviewed = PhotoReviewRules.optionSummary(restored).single()
+            assertFalse(reviewed.bottle)
+            assertNull(reviewed.label)
+            assertEquals(60.0, reviewed.volume, 0.0)
+            val published = requireNotNull(mapConfirmedReviewDecision(
+                restored, dto, 30.0, emptyMap()).correctedOptions).single()
+            assertNull("old OCR bottle label must stay cleared: $oldLabel", published.label)
+            assertEquals(60, published.pourMl)
+            assertEquals("ocr-bottle", published.optionId)
+            assertEquals(88000, published.priceKrw)
+        }
+    }
+
+    @Test fun restoredOcrBottleLabelStillPublishesBottleWhenOwnerKeepsIt() {
+        val dto = item(
+            options = listOf(ReviewOptionDto(
+                "ocr-bottle", 1, "병", null, 88000,
+            )),
+            status = "unmatched", proposedId = null,
+        ).copy(extractedKind = "other", candidates = emptyList(),
+            newProductDraft = null, extractedProductName = "바 메뉴")
+        val fresh = mapServerPhotoReview(response(dto), fixture())
+        val saved = com.zerotoone.bottlemap.network.ReviewDraftDto(
+            4, 3, "2026-11-15T00:00:00Z",
+            mapOf("itemDecisions" to listOf(mapOf(
+                "extractedItemId" to "line-1",
+                "action" to "publish_without_product", "kind" to "other",
+                "options" to listOf(mapOf(
+                    "extractedOptionId" to "ocr-bottle",
+                    "optionLabel" to "Bottle", "pourMl" to null,
+                    "priceKrw" to 88000,
+                )),
+            ))),
+        )
+        val restored = requireNotNull(ServerReviewDraftCodec.restoreStandard(
+            saved, fresh)).items.single()
+        val published = requireNotNull(mapConfirmedReviewDecision(
+            restored, dto, 30.0, emptyMap()).correctedOptions).single()
+        assertEquals("Bottle", published.label)
+        assertNull(published.pourMl)
+        assertEquals("ocr-bottle", published.optionId)
+    }
 }
