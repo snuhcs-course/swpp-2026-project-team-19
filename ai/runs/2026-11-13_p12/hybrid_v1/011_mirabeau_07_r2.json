@@ -1,0 +1,1084 @@
+{
+  "condition": "hybrid",
+  "model": "gemini-3.5-flash-lite",
+  "thinking_level": "medium",
+  "source_image": "011_mirabeau_07.jpeg",
+  "photo_id": "011_미라보_07",
+  "prompt_version": "hybrid-v1",
+  "prompt_sha256": "b73f15d2b20460fc9e51dc12926e57d09fe3548a47ef8cfc6771c6a3ebe1ac50",
+  "started_at": "2026-11-13T05:18:11.504222+00:00",
+  "latency_ms": 42377,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 6452,
+  "output_tokens": 3548,
+  "thought_tokens": 3468,
+  "total_tokens": 13468,
+  "output": {
+    "items": [
+      {
+        "raw_name": "메이커스 마크(Maker's Mark) 버번",
+        "price_krw": 12000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "메이커스 마크(Maker's Mark) 46",
+        "price_krw": 14000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "메이커스 마크(Maker's Mark) 캐스크 스트랭스",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "리뎀션(Redemption) 라이",
+        "price_krw": 12000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "놉 크릭(Knob Creek) 버번",
+        "price_krw": 12000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "놉 크릭(Knob Creek) 라이",
+        "price_krw": 13000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "이글레어(Eagle Rare) 10년",
+        "price_krw": 14000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "포로지스(Four Roses) 싱글 배럴",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "러셀(Russel's) 10년 버번",
+        "price_krw": 13000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "러셀(Russel's) 버번 싱글 배럴",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "러셀(Russel's) 라이 싱글 배럴",
+        "price_krw": 17000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "1776제임스 E.페퍼(1776 James E. Pepper) 버번",
+        "price_krw": 14000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "1776제임스 E.페퍼(1776 James E. Pepper) 라이",
+        "price_krw": 14000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "믹터스(Michter's) 버번",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "믹터스(Michter's) 라이",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "사제락(Sazerac) 라이",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "브로큰 배럴(Broken Barrel) 버번 포트 캐스크",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "베이커스(Baker's) 버번",
+        "price_krw": 17000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "바톤 1792(Barton 1792) 1792 풀 프루프",
+        "price_krw": 17000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "우드포드 리저브(Woodford Reserve) 버번",
+        "price_krw": 17000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "우드포드 리저브(Woodford Reserve) 더블오크",
+        "price_krw": 19000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "우드포드 리저브(Woodford Reserve) 더블 X.O",
+        "price_krw": 42000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "윌렛(Willet) 로완스크릭",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "윌렛(Willet) 팟 스틸 리저브",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "윌렛(Willet) 노아스밀",
+        "price_krw": 21000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "윌렛(Willet) 위티드 버번 8년",
+        "price_krw": 70000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "배럴(Barrel) 라이 씨그라스",
+        "price_krw": 25000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "블랑톤(Blanton) 버번 싱글배럴",
+        "price_krw": 25000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "블랑톤(Blanton) SFTB",
+        "price_krw": 62000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "부커스(Booker's) 버번",
+        "price_krw": 35000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "일라이저크레이그(Elijah Craig) 버번 배럴 프루프",
+        "price_krw": 37000,
+        "pour_ml": null,
+        "unit": "glass"
+      }
+    ]
+  },
+  "other_items": null,
+  "other_items_dropped": null,
+  "raw_text": "{\"items\": [{\"raw_name\": \"메이커스 마크(Maker's Mark) 버번\", \"price_krw\": 12000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L002\", \"L003\"], \"price\": [\"L006\"]}}, {\"raw_name\": \"메이커스 마크(Maker's Mark) 46\", \"price_krw\": 14000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L002\", \"L004\"], \"price\": [\"L007\"]}}, {\"raw_name\": \"메이커스 마크(Maker's Mark) 캐스크 스트랭스\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L002\", \"L005\"], \"price\": [\"L008\"]}}, {\"raw_name\": \"리뎀션(Redemption) 라이\", \"price_krw\": 12000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L022\", \"L023\"], \"price\": [\"L024\"]}}, {\"raw_name\": \"놉 크릭(Knob Creek) 버번\", \"price_krw\": 12000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L020\", \"L021\", \"L029\"], \"price\": [\"L031\"]}}, {\"raw_name\": \"놉 크릭(Knob Creek) 라이\", \"price_krw\": 13000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L020\", \"L021\", \"L030\"], \"price\": [\"L032\"]}}, {\"raw_name\": \"이글레어(Eagle Rare) 10년\", \"price_krw\": 14000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L039\", \"L040\"], \"price\": [\"L041\"]}}, {\"raw_name\": \"포로지스(Four Roses) 싱글 배럴\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L043\", \"L044\"], \"price\": [\"L045\"]}}, {\"raw_name\": \"러셀(Russel's) 10년 버번\", \"price_krw\": 13000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L042\", \"L055\"], \"price\": [\"L059\"]}}, {\"raw_name\": \"러셀(Russel's) 버번 싱글 배럴\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L042\", \"L056\"], \"price\": [\"L060\"]}}, {\"raw_name\": \"러셀(Russel's) 라이 싱글 배럴\", \"price_krw\": 17000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L042\", \"L057\"], \"price\": [\"L061\"]}}, {\"raw_name\": \"1776제임스 E.페퍼(1776 James E. Pepper) 버번\", \"price_krw\": 14000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L058\", \"L072\"], \"price\": [\"L066\"]}}, {\"raw_name\": \"1776제임스 E.페퍼(1776 James E. Pepper) 라이\", \"price_krw\": 14000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L058\", \"L073\"], \"price\": [\"L067\"]}}, {\"raw_name\": \"믹터스(Michter's) 버번\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L075\", \"L084\"], \"price\": [\"L076\"]}}, {\"raw_name\": \"믹터스(Michter's) 라이\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L075\", \"L085\"], \"price\": [\"L077\"]}}, {\"raw_name\": \"사제락(Sazerac) 라이\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L074\", \"L086\"], \"price\": [\"L087\"]}}, {\"raw_name\": \"브로큰 배럴(Broken Barrel) 버번 포트 캐스크\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L011\", \"L012\"], \"price\": [\"L013\"]}}, {\"raw_name\": \"베이커스(Baker's) 버번\", \"price_krw\": 17000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L009\", \"L010\"], \"price\": [\"L014\"]}}, {\"raw_name\": \"바톤 1792(Barton 1792) 1792 풀 프루프\", \"price_krw\": 17000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L025\", \"L026\"], \"price\": [\"L028\"]}}, {\"raw_name\": \"우드포드 리저브(Woodford Reserve) 버번\", \"price_krw\": 17000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L027\", \"L033\"], \"price\": [\"L036\"]}}, {\"raw_name\": \"우드포드 리저브(Woodford Reserve) 더블오크\", \"price_krw\": 19000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L027\", \"L034\"], \"price\": [\"L037\"]}}, {\"raw_name\": \"우드포드 리저브(Woodford Reserve) 더블 X.O\", \"price_krw\": 42000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L027\", \"L035\"], \"price\": [\"L038\"]}}, {\"raw_name\": \"윌렛(Willet) 로완스크릭\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L046\", \"L047\"], \"price\": [\"L051\"]}}, {\"raw_name\": \"윌렛(Willet) 팟 스틸 리저브\", \"price_krw\": 20000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L046\", \"L048\"], \"price\": [\"L052\"]}}, {\"raw_name\": \"윌렛(Willet) 노아스밀\", \"price_krw\": 21000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L046\", \"L049\"], \"price\": [\"L053\"]}}, {\"raw_name\": \"윌렛(Willet) 위티드 버번 8년\", \"price_krw\": 70000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L046\", \"L050\"], \"price\": [\"L054\"]}}, {\"raw_name\": \"배럴(Barrel) 라이 씨그라스\", \"price_krw\": 25000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L062\", \"L063\"], \"price\": [\"L065\"]}}, {\"raw_name\": \"블랑톤(Blanton) 버번 싱글배럴\", \"price_krw\": 25000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L064\", \"L068\"], \"price\": [\"L070\"]}}, {\"raw_name\": \"블랑톤(Blanton) SFTB\", \"price_krw\": 62000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L064\", \"L069\"], \"price\": [\"L071\"]}}, {\"raw_name\": \"부커스(Booker's) 버번\", \"price_krw\": 35000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L078\", \"L079\"], \"price\": [\"L082\"]}}, {\"raw_name\": \"일라이저크레이그(Elijah Craig) 버번 배럴 프루프\", \"price_krw\": 37000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L080\", \"L081\"], \"price\": [\"L083\"]}}]}",
+  "ocr_lines": [
+    {
+      "id": "L001",
+      "box": [
+        189,
+        108,
+        639,
+        133
+      ],
+      "text": "스코틀랜드 위스키 (SCOTCH WHISKY)"
+    },
+    {
+      "id": "L002",
+      "box": [
+        161,
+        186,
+        384,
+        202
+      ],
+      "text": "메이커스 마크(Maker's Mark)"
+    },
+    {
+      "id": "L003",
+      "box": [
+        160,
+        207,
+        196,
+        221
+      ],
+      "text": "버번"
+    },
+    {
+      "id": "L004",
+      "box": [
+        156,
+        222,
+        181,
+        234
+      ],
+      "text": "46"
+    },
+    {
+      "id": "L005",
+      "box": [
+        154,
+        237,
+        288,
+        254
+      ],
+      "text": "캐스크 스트랭스"
+    },
+    {
+      "id": "L006",
+      "box": [
+        434,
+        206,
+        470,
+        217
+      ],
+      "text": "12.0"
+    },
+    {
+      "id": "L007",
+      "box": [
+        434,
+        220,
+        470,
+        233
+      ],
+      "text": "14.0"
+    },
+    {
+      "id": "L008",
+      "box": [
+        434,
+        237,
+        470,
+        249
+      ],
+      "text": "16.0"
+    },
+    {
+      "id": "L009",
+      "box": [
+        508,
+        228,
+        649,
+        244
+      ],
+      "text": "베이커스(Baker's)"
+    },
+    {
+      "id": "L010",
+      "box": [
+        512,
+        252,
+        549,
+        268
+      ],
+      "text": "버번"
+    },
+    {
+      "id": "L011",
+      "box": [
+        507,
+        178,
+        715,
+        194
+      ],
+      "text": "브로큰 배럴(Broken Barrel)"
+    },
+    {
+      "id": "L012",
+      "box": [
+        508,
+        199,
+        642,
+        216
+      ],
+      "text": "버번 포트 캐스크"
+    },
+    {
+      "id": "L013",
+      "box": [
+        786,
+        198,
+        823,
+        210
+      ],
+      "text": "15.0"
+    },
+    {
+      "id": "L014",
+      "box": [
+        795,
+        247,
+        833,
+        259
+      ],
+      "text": "17.0"
+    },
+    {
+      "id": "L015",
+      "box": [
+        0,
+        295,
+        9,
+        307
+      ],
+      "text": "0"
+    },
+    {
+      "id": "L016",
+      "box": [
+        0,
+        277,
+        14,
+        289
+      ],
+      "text": "0"
+    },
+    {
+      "id": "L017",
+      "box": [
+        0,
+        260,
+        17,
+        273
+      ],
+      "text": ".0"
+    },
+    {
+      "id": "L018",
+      "box": [
+        0,
+        245,
+        22,
+        256
+      ],
+      "text": "2.0"
+    },
+    {
+      "id": "L019",
+      "box": [
+        0,
+        228,
+        26,
+        240
+      ],
+      "text": "2.0"
+    },
+    {
+      "id": "L020",
+      "box": [
+        140,
+        319,
+        152,
+        335
+      ],
+      "text": "놉"
+    },
+    {
+      "id": "L021",
+      "box": [
+        155,
+        320,
+        314,
+        339
+      ],
+      "text": "크릭(Knob Creek)"
+    },
+    {
+      "id": "L022",
+      "box": [
+        149,
+        267,
+        313,
+        285
+      ],
+      "text": "리뎀션(Redemption)"
+    },
+    {
+      "id": "L023",
+      "box": [
+        147,
+        289,
+        186,
+        306
+      ],
+      "text": "라이"
+    },
+    {
+      "id": "L024",
+      "box": [
+        431,
+        290,
+        469,
+        303
+      ],
+      "text": "12.0"
+    },
+    {
+      "id": "L025",
+      "box": [
+        508,
+        278,
+        696,
+        298
+      ],
+      "text": "바톤 1792(Barton 1792)"
+    },
+    {
+      "id": "L026",
+      "box": [
+        510,
+        303,
+        639,
+        320
+      ],
+      "text": "1792 풀 프루프"
+    },
+    {
+      "id": "L027",
+      "box": [
+        510,
+        331,
+        811,
+        353
+      ],
+      "text": "우드포드 리저브(Woodford Reserve)"
+    },
+    {
+      "id": "L028",
+      "box": [
+        807,
+        301,
+        845,
+        312
+      ],
+      "text": "17.0"
+    },
+    {
+      "id": "L029",
+      "box": [
+        139,
+        345,
+        179,
+        362
+      ],
+      "text": "버번"
+    },
+    {
+      "id": "L030",
+      "box": [
+        137,
+        362,
+        177,
+        379
+      ],
+      "text": "라이"
+    },
+    {
+      "id": "L031",
+      "box": [
+        432,
+        345,
+        470,
+        358
+      ],
+      "text": "12.0"
+    },
+    {
+      "id": "L032",
+      "box": [
+        432,
+        363,
+        470,
+        376
+      ],
+      "text": "13.0"
+    },
+    {
+      "id": "L033",
+      "box": [
+        514,
+        362,
+        552,
+        378
+      ],
+      "text": "버번"
+    },
+    {
+      "id": "L034",
+      "box": [
+        515,
+        378,
+        592,
+        396
+      ],
+      "text": "더블오크"
+    },
+    {
+      "id": "L035",
+      "box": [
+        515,
+        397,
+        592,
+        414
+      ],
+      "text": "더블 X.O"
+    },
+    {
+      "id": "L036",
+      "box": [
+        819,
+        355,
+        857,
+        368
+      ],
+      "text": "17.0"
+    },
+    {
+      "id": "L037",
+      "box": [
+        823,
+        374,
+        861,
+        387
+      ],
+      "text": "19.0"
+    },
+    {
+      "id": "L038",
+      "box": [
+        826,
+        392,
+        861,
+        404
+      ],
+      "text": "420"
+    },
+    {
+      "id": "L039",
+      "box": [
+        130,
+        394,
+        314,
+        414
+      ],
+      "text": "이글레어(Eagle Rare)"
+    },
+    {
+      "id": "L040",
+      "box": [
+        125,
+        420,
+        170,
+        438
+      ],
+      "text": "10년"
+    },
+    {
+      "id": "L041",
+      "box": [
+        433,
+        419,
+        473,
+        435
+      ],
+      "text": "14.0"
+    },
+    {
+      "id": "L042",
+      "box": [
+        111,
+        518,
+        245,
+        538
+      ],
+      "text": "러셀(Russel's)"
+    },
+    {
+      "id": "L043",
+      "box": [
+        120,
+        456,
+        314,
+        474
+      ],
+      "text": "포로지스(Four Roses)"
+    },
+    {
+      "id": "L044",
+      "box": [
+        118,
+        483,
+        208,
+        501
+      ],
+      "text": "싱글 배럴"
+    },
+    {
+      "id": "L045",
+      "box": [
+        434,
+        480,
+        474,
+        495
+      ],
+      "text": "15.0"
+    },
+    {
+      "id": "L046",
+      "box": [
+        514,
+        430,
+        620,
+        451
+      ],
+      "text": "윌렛(Willet)"
+    },
+    {
+      "id": "L047",
+      "box": [
+        515,
+        457,
+        617,
+        477
+      ],
+      "text": "로완스크릭"
+    },
+    {
+      "id": "L048",
+      "box": [
+        517,
+        475,
+        649,
+        496
+      ],
+      "text": "팟 스틸 리저브"
+    },
+    {
+      "id": "L049",
+      "box": [
+        517,
+        496,
+        599,
+        516
+      ],
+      "text": "노아스밀"
+    },
+    {
+      "id": "L050",
+      "box": [
+        519,
+        515,
+        661,
+        535
+      ],
+      "text": "위티드 버번 8년"
+    },
+    {
+      "id": "L051",
+      "box": [
+        837,
+        454,
+        877,
+        467
+      ],
+      "text": "18.0"
+    },
+    {
+      "id": "L052",
+      "box": [
+        840,
+        472,
+        882,
+        487
+      ],
+      "text": "20.0"
+    },
+    {
+      "id": "L053",
+      "box": [
+        844,
+        493,
+        885,
+        506
+      ],
+      "text": "21.0"
+    },
+    {
+      "id": "L054",
+      "box": [
+        847,
+        513,
+        889,
+        527
+      ],
+      "text": "70.0"
+    },
+    {
+      "id": "L055",
+      "box": [
+        107,
+        548,
+        203,
+        568
+      ],
+      "text": "10년 버번"
+    },
+    {
+      "id": "L056",
+      "box": [
+        106,
+        569,
+        246,
+        589
+      ],
+      "text": "버번 싱글 배럴"
+    },
+    {
+      "id": "L057",
+      "box": [
+        102,
+        591,
+        245,
+        611
+      ],
+      "text": "라이 싱글 배럴"
+    },
+    {
+      "id": "L058",
+      "box": [
+        92,
+        626,
+        484,
+        652
+      ],
+      "text": "1776제임스 E.페퍼(1776 James E. Pepper)"
+    },
+    {
+      "id": "L059",
+      "box": [
+        434,
+        545,
+        476,
+        560
+      ],
+      "text": "13.0"
+    },
+    {
+      "id": "L060",
+      "box": [
+        434,
+        566,
+        477,
+        582
+      ],
+      "text": "16.0"
+    },
+    {
+      "id": "L061",
+      "box": [
+        434,
+        587,
+        477,
+        604
+      ],
+      "text": "17.0"
+    },
+    {
+      "id": "L062",
+      "box": [
+        521,
+        552,
+        635,
+        572
+      ],
+      "text": "배럴(Barrel)"
+    },
+    {
+      "id": "L063",
+      "box": [
+        524,
+        580,
+        658,
+        601
+      ],
+      "text": "라이 씨그라스"
+    },
+    {
+      "id": "L064",
+      "box": [
+        522,
+        620,
+        675,
+        642
+      ],
+      "text": "블랑톤(Blanton)"
+    },
+    {
+      "id": "L065",
+      "box": [
+        861,
+        579,
+        904,
+        594
+      ],
+      "text": "25.0"
+    },
+    {
+      "id": "L066",
+      "box": [
+        434,
+        665,
+        477,
+        682
+      ],
+      "text": "14.0"
+    },
+    {
+      "id": "L067",
+      "box": [
+        434,
+        689,
+        479,
+        706
+      ],
+      "text": "14.0"
+    },
+    {
+      "id": "L068",
+      "box": [
+        524,
+        651,
+        661,
+        674
+      ],
+      "text": "버번 싱글배럴"
+    },
+    {
+      "id": "L069",
+      "box": [
+        528,
+        678,
+        587,
+        695
+      ],
+      "text": "SFTB"
+    },
+    {
+      "id": "L070",
+      "box": [
+        875,
+        651,
+        918,
+        667
+      ],
+      "text": "25.0"
+    },
+    {
+      "id": "L071",
+      "box": [
+        878,
+        673,
+        924,
+        690
+      ],
+      "text": "62.0"
+    },
+    {
+      "id": "L072",
+      "box": [
+        88,
+        664,
+        135,
+        686
+      ],
+      "text": "버번"
+    },
+    {
+      "id": "L073",
+      "box": [
+        85,
+        688,
+        134,
+        710
+      ],
+      "text": "라이"
+    },
+    {
+      "id": "L074",
+      "box": [
+        64,
+        841,
+        238,
+        866
+      ],
+      "text": "사제락(Sazerac)"
+    },
+    {
+      "id": "L075",
+      "box": [
+        80,
+        734,
+        257,
+        758
+      ],
+      "text": "믹터스(Michter's)"
+    },
+    {
+      "id": "L076",
+      "box": [
+        436,
+        769,
+        482,
+        788
+      ],
+      "text": "15.0"
+    },
+    {
+      "id": "L077",
+      "box": [
+        436,
+        795,
+        482,
+        812
+      ],
+      "text": "15.0"
+    },
+    {
+      "id": "L078",
+      "box": [
+        526,
+        716,
+        696,
+        740
+      ],
+      "text": "부커스(Booker's)"
+    },
+    {
+      "id": "L079",
+      "box": [
+        529,
+        751,
+        578,
+        775
+      ],
+      "text": "버번"
+    },
+    {
+      "id": "L080",
+      "box": [
+        529,
+        790,
+        844,
+        817
+      ],
+      "text": "일라이저크레이그(Elijah Craig)"
+    },
+    {
+      "id": "L081",
+      "box": [
+        530,
+        827,
+        708,
+        853
+      ],
+      "text": "버번 배럴 프루프"
+    },
+    {
+      "id": "L082",
+      "box": [
+        892,
+        747,
+        939,
+        766
+      ],
+      "text": "35.0"
+    },
+    {
+      "id": "L083",
+      "box": [
+        903,
+        824,
+        954,
+        845
+      ],
+      "text": "37.0"
+    },
+    {
+      "id": "L084",
+      "box": [
+        76,
+        769,
+        127,
+        792
+      ],
+      "text": "버번"
+    },
+    {
+      "id": "L085",
+      "box": [
+        74,
+        793,
+        125,
+        816
+      ],
+      "text": "라이"
+    },
+    {
+      "id": "L086",
+      "box": [
+        62,
+        875,
+        114,
+        900
+      ],
+      "text": "라이"
+    },
+    {
+      "id": "L087",
+      "box": [
+        438,
+        877,
+        486,
+        896
+      ],
+      "text": "15.0"
+    }
+  ],
+  "ocr_cache_same_bytes": true,
+  "run": 2
+}

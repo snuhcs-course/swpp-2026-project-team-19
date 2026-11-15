@@ -1,0 +1,598 @@
+{
+  "condition": "hybrid",
+  "model": "gemini-3.5-flash-lite",
+  "thinking_level": "medium",
+  "source_image": "008_seorosang_01.png",
+  "photo_id": "008_서로상_01",
+  "prompt_version": "hybrid-v1",
+  "prompt_sha256": "b73f15d2b20460fc9e51dc12926e57d09fe3548a47ef8cfc6771c6a3ebe1ac50",
+  "started_at": "2026-11-13T05:26:16.080332+00:00",
+  "latency_ms": 7731,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 5237,
+  "output_tokens": 2222,
+  "thought_tokens": 0,
+  "total_tokens": 7459,
+  "output": {
+    "items": [
+      {
+        "raw_name": "Hennessy vsop / 헤네시vsop",
+        "price_krw": 13000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Hennessy vsop / 헤네시vsop",
+        "price_krw": 210000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "Remy Martin vsop / 레미마틴vsop",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Remy Martin vsop / 레미마틴vsop",
+        "price_krw": 240000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "Jonnie walker black / 조니워커 블랙",
+        "price_krw": 11000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Jonnie walker black / 조니워커 블랙",
+        "price_krw": 150000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "Jonnie walker blue / 조니워커 블루",
+        "price_krw": 36000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Jonnie walker blue / 조니워커 블루",
+        "price_krw": 590000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "Monkey Shoulder / 몽키숄더",
+        "price_krw": 11000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Monkey Shoulder / 몽키숄더",
+        "price_krw": 150000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "Jameson / 제임슨",
+        "price_krw": 10000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Jameson / 제임슨",
+        "price_krw": 110000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "Jack Daniel's / 잭 다니엘스",
+        "price_krw": 11000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Jack Daniel's / 잭 다니엘스",
+        "price_krw": 140000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "1792 Small Batch / 1792 스몰배치",
+        "price_krw": 12000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "1792 Small Batch / 1792 스몰배치",
+        "price_krw": 160000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "Woodford Reserve / 우드포트리저브",
+        "price_krw": 14000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Woodford Reserve / 우드포트리저브",
+        "price_krw": 210000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "Noahsmill / 노아스밀",
+        "price_krw": 23000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Noahsmill / 노아스밀",
+        "price_krw": 370000,
+        "pour_ml": null,
+        "unit": "bottle"
+      }
+    ]
+  },
+  "other_items": null,
+  "other_items_dropped": null,
+  "raw_text": "{\"items\": [{\"raw_name\": \"Hennessy vsop / 헤네시vsop\", \"price_krw\": 13000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L006\", \"L007\"], \"price\": [\"L005\"]}}, {\"raw_name\": \"Hennessy vsop / 헤네시vsop\", \"price_krw\": 210000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L006\", \"L007\"], \"price\": [\"L008\"]}}, {\"raw_name\": \"Remy Martin vsop / 레미마틴vsop\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L010\", \"L011\"], \"price\": [\"L009\"]}}, {\"raw_name\": \"Remy Martin vsop / 레미마틴vsop\", \"price_krw\": 240000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L010\", \"L011\"], \"price\": [\"L012\"]}}, {\"raw_name\": \"Jonnie walker black / 조니워커 블랙\", \"price_krw\": 11000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L014\", \"L015\"], \"price\": [\"L013\"]}}, {\"raw_name\": \"Jonnie walker black / 조니워커 블랙\", \"price_krw\": 150000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L014\", \"L015\"], \"price\": [\"L016\"]}}, {\"raw_name\": \"Jonnie walker blue / 조니워커 블루\", \"price_krw\": 36000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L018\", \"L019\"], \"price\": [\"L017\"]}}, {\"raw_name\": \"Jonnie walker blue / 조니워커 블루\", \"price_krw\": 590000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L018\", \"L019\"], \"price\": [\"L020\"]}}, {\"raw_name\": \"Monkey Shoulder / 몽키숄더\", \"price_krw\": 11000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L022\", \"L023\"], \"price\": [\"L021\"]}}, {\"raw_name\": \"Monkey Shoulder / 몽키숄더\", \"price_krw\": 150000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L022\", \"L023\"], \"price\": [\"L024\"]}}, {\"raw_name\": \"Jameson / 제임슨\", \"price_krw\": 10000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L027\", \"L028\"], \"price\": [\"L025\"]}}, {\"raw_name\": \"Jameson / 제임슨\", \"price_krw\": 110000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L027\", \"L028\"], \"price\": [\"L026\"]}}, {\"raw_name\": \"Jack Daniel's / 잭 다니엘스\", \"price_krw\": 11000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L031\", \"L032\"], \"price\": [\"L030\"]}}, {\"raw_name\": \"Jack Daniel's / 잭 다니엘스\", \"price_krw\": 140000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L031\", \"L032\"], \"price\": [\"L033\"]}}, {\"raw_name\": \"1792 Small Batch / 1792 스몰배치\", \"price_krw\": 12000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L035\", \"L036\"], \"price\": [\"L034\"]}}, {\"raw_name\": \"1792 Small Batch / 1792 스몰배치\", \"price_krw\": 160000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L035\", \"L036\"], \"price\": [\"L037\"]}}, {\"raw_name\": \"Woodford Reserve / 우드포트리저브\", \"price_krw\": 14000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L039\", \"L040\"], \"price\": [\"L038\"]}}, {\"raw_name\": \"Woodford Reserve / 우드포트리저브\", \"price_krw\": 210000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L039\", \"L040\"], \"price\": [\"L041\"]}}, {\"raw_name\": \"Noahsmill / 노아스밀\", \"price_krw\": 23000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L043\", \"L044\"], \"price\": [\"L042\"]}}, {\"raw_name\": \"Noahsmill / 노아스밀\", \"price_krw\": 370000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L043\", \"L044\"], \"price\": [\"L045\"]}}]}",
+  "ocr_lines": [
+    {
+      "id": "L001",
+      "box": [
+        855,
+        27,
+        897,
+        40
+      ],
+      "text": "26"
+    },
+    {
+      "id": "L002",
+      "box": [
+        96,
+        25,
+        220,
+        44
+      ],
+      "text": "22:00"
+    },
+    {
+      "id": "L003",
+      "box": [
+        880,
+        101,
+        928,
+        124
+      ],
+      "text": "X"
+    },
+    {
+      "id": "L004",
+      "box": [
+        22,
+        194,
+        680,
+        212
+      ],
+      "text": "COGNAC / BLENDED / IRISH"
+    },
+    {
+      "id": "L005",
+      "box": [
+        500,
+        252,
+        528,
+        261
+      ],
+      "text": "13"
+    },
+    {
+      "id": "L006",
+      "box": [
+        21,
+        251,
+        183,
+        263
+      ],
+      "text": "Hennessy vsop"
+    },
+    {
+      "id": "L007",
+      "box": [
+        25,
+        265,
+        115,
+        275
+      ],
+      "text": "헤네시vsop"
+    },
+    {
+      "id": "L008",
+      "box": [
+        609,
+        252,
+        649,
+        261
+      ],
+      "text": "210"
+    },
+    {
+      "id": "L009",
+      "box": [
+        500,
+        288,
+        528,
+        297
+      ],
+      "text": "15"
+    },
+    {
+      "id": "L010",
+      "box": [
+        22,
+        286,
+        211,
+        298
+      ],
+      "text": "Remy Martin vsop"
+    },
+    {
+      "id": "L011",
+      "box": [
+        22,
+        299,
+        130,
+        310
+      ],
+      "text": "레미마틴vsop"
+    },
+    {
+      "id": "L012",
+      "box": [
+        606,
+        286,
+        649,
+        297
+      ],
+      "text": "240"
+    },
+    {
+      "id": "L013",
+      "box": [
+        500,
+        322,
+        525,
+        331
+      ],
+      "text": "11"
+    },
+    {
+      "id": "L014",
+      "box": [
+        25,
+        322,
+        231,
+        331
+      ],
+      "text": "Jonnie walker black"
+    },
+    {
+      "id": "L015",
+      "box": [
+        22,
+        333,
+        130,
+        344
+      ],
+      "text": "조니워커 블랙"
+    },
+    {
+      "id": "L016",
+      "box": [
+        609,
+        322,
+        649,
+        331
+      ],
+      "text": "150"
+    },
+    {
+      "id": "L017",
+      "box": [
+        500,
+        355,
+        528,
+        364
+      ],
+      "text": "36"
+    },
+    {
+      "id": "L018",
+      "box": [
+        25,
+        355,
+        220,
+        364
+      ],
+      "text": "Jonnie walker blue"
+    },
+    {
+      "id": "L019",
+      "box": [
+        22,
+        367,
+        130,
+        378
+      ],
+      "text": "조니워커 블루"
+    },
+    {
+      "id": "L020",
+      "box": [
+        606,
+        354,
+        649,
+        364
+      ],
+      "text": "590"
+    },
+    {
+      "id": "L021",
+      "box": [
+        500,
+        392,
+        525,
+        399
+      ],
+      "text": "11"
+    },
+    {
+      "id": "L022",
+      "box": [
+        22,
+        389,
+        205,
+        401
+      ],
+      "text": "Monkey Shoulder"
+    },
+    {
+      "id": "L023",
+      "box": [
+        22,
+        402,
+        90,
+        413
+      ],
+      "text": "몽키숄더"
+    },
+    {
+      "id": "L024",
+      "box": [
+        609,
+        390,
+        649,
+        399
+      ],
+      "text": "150"
+    },
+    {
+      "id": "L025",
+      "box": [
+        500,
+        424,
+        528,
+        433
+      ],
+      "text": "10"
+    },
+    {
+      "id": "L026",
+      "box": [
+        612,
+        424,
+        649,
+        433
+      ],
+      "text": "110"
+    },
+    {
+      "id": "L027",
+      "box": [
+        25,
+        424,
+        121,
+        433
+      ],
+      "text": "Jameson"
+    },
+    {
+      "id": "L028",
+      "box": [
+        22,
+        436,
+        75,
+        448
+      ],
+      "text": "제임슨"
+    },
+    {
+      "id": "L029",
+      "box": [
+        25,
+        496,
+        265,
+        514
+      ],
+      "text": "AMERICAN"
+    },
+    {
+      "id": "L030",
+      "box": [
+        496,
+        554,
+        525,
+        564
+      ],
+      "text": "11"
+    },
+    {
+      "id": "L031",
+      "box": [
+        22,
+        554,
+        164,
+        564
+      ],
+      "text": "Jack Daniel's"
+    },
+    {
+      "id": "L032",
+      "box": [
+        20,
+        566,
+        113,
+        577
+      ],
+      "text": "잭 다니엘스"
+    },
+    {
+      "id": "L033",
+      "box": [
+        609,
+        554,
+        649,
+        564
+      ],
+      "text": "140"
+    },
+    {
+      "id": "L034",
+      "box": [
+        500,
+        588,
+        528,
+        597
+      ],
+      "text": "12"
+    },
+    {
+      "id": "L035",
+      "box": [
+        22,
+        588,
+        203,
+        597
+      ],
+      "text": "1792 Small Batch"
+    },
+    {
+      "id": "L036",
+      "box": [
+        22,
+        600,
+        138,
+        610
+      ],
+      "text": "1792 스몰배치"
+    },
+    {
+      "id": "L037",
+      "box": [
+        609,
+        588,
+        649,
+        597
+      ],
+      "text": "160"
+    },
+    {
+      "id": "L038",
+      "box": [
+        500,
+        625,
+        528,
+        633
+      ],
+      "text": "14"
+    },
+    {
+      "id": "L039",
+      "box": [
+        25,
+        624,
+        217,
+        633
+      ],
+      "text": "Woodford Reserve"
+    },
+    {
+      "id": "L040",
+      "box": [
+        22,
+        637,
+        138,
+        646
+      ],
+      "text": "우드포트리저브"
+    },
+    {
+      "id": "L041",
+      "box": [
+        606,
+        622,
+        649,
+        633
+      ],
+      "text": "210"
+    },
+    {
+      "id": "L042",
+      "box": [
+        500,
+        657,
+        528,
+        667
+      ],
+      "text": "23"
+    },
+    {
+      "id": "L043",
+      "box": [
+        22,
+        656,
+        130,
+        667
+      ],
+      "text": "Noahsmill"
+    },
+    {
+      "id": "L044",
+      "box": [
+        20,
+        669,
+        90,
+        680
+      ],
+      "text": "노아스밀"
+    },
+    {
+      "id": "L045",
+      "box": [
+        606,
+        656,
+        649,
+        667
+      ],
+      "text": "370"
+    }
+  ],
+  "ocr_cache_same_bytes": true,
+  "run": 3
+}

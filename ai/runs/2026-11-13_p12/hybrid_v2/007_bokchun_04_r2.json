@@ -1,0 +1,1500 @@
+{
+  "condition": "hybrid",
+  "model": "gemini-3.5-flash-lite",
+  "thinking_level": "medium",
+  "source_image": "007_bokchun_04.jpg",
+  "photo_id": "007_위스키복춘_04",
+  "prompt_version": "hybrid-v2",
+  "prompt_sha256": "35556ae6559dc2eacf722e45dba29f4f1b006bcbaad908b537eb6c283c6519ea",
+  "started_at": "2026-11-13T04:06:18.825696+00:00",
+  "latency_ms": 17960,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 6479,
+  "output_tokens": 3087,
+  "thought_tokens": 3179,
+  "total_tokens": 12745,
+  "output": {
+    "items": []
+  },
+  "other_items": [
+    {
+      "itemOrder": 1,
+      "rawText": "진토닉",
+      "category": "cocktail",
+      "options": [
+        {
+          "optionLabel": "잔",
+          "pourMl": null,
+          "priceKrw": 12000
+        }
+      ],
+      "nameLines": [
+        "L032"
+      ],
+      "priceLines": [
+        "L030"
+      ],
+      "box": [
+        161,
+        118,
+        415,
+        134
+      ]
+    },
+    {
+      "itemOrder": 2,
+      "rawText": "김렛",
+      "category": "cocktail",
+      "options": [
+        {
+          "optionLabel": "잔",
+          "pourMl": null,
+          "priceKrw": 15000
+        }
+      ],
+      "nameLines": [
+        "L033"
+      ],
+      "priceLines": [
+        "L029"
+      ],
+      "box": [
+        156,
+        144,
+        413,
+        163
+      ]
+    },
+    {
+      "itemOrder": 3,
+      "rawText": "다이퀴리",
+      "category": "cocktail",
+      "options": [
+        {
+          "optionLabel": "잔",
+          "pourMl": null,
+          "priceKrw": 15000
+        }
+      ],
+      "nameLines": [
+        "L034"
+      ],
+      "priceLines": [
+        "L028"
+      ],
+      "box": [
+        151,
+        172,
+        411,
+        190
+      ]
+    },
+    {
+      "itemOrder": 4,
+      "rawText": "드라이 마티니",
+      "category": "cocktail",
+      "options": [
+        {
+          "optionLabel": "잔",
+          "pourMl": null,
+          "priceKrw": 17000
+        }
+      ],
+      "nameLines": [
+        "L035"
+      ],
+      "priceLines": [
+        "L027"
+      ],
+      "box": [
+        147,
+        200,
+        410,
+        219
+      ]
+    },
+    {
+      "itemOrder": 5,
+      "rawText": "보스턴쿨러",
+      "category": "cocktail",
+      "options": [
+        {
+          "optionLabel": "잔",
+          "pourMl": null,
+          "priceKrw": 16000
+        }
+      ],
+      "nameLines": [
+        "L036"
+      ],
+      "priceLines": [
+        "L026"
+      ],
+      "box": [
+        140,
+        229,
+        408,
+        248
+      ]
+    },
+    {
+      "itemOrder": 6,
+      "rawText": "하이랜드쿨러",
+      "category": "cocktail",
+      "options": [
+        {
+          "optionLabel": "잔",
+          "pourMl": null,
+          "priceKrw": 18000
+        }
+      ],
+      "nameLines": [
+        "L037"
+      ],
+      "priceLines": [
+        "L025"
+      ],
+      "box": [
+        137,
+        259,
+        406,
+        278
+      ]
+    },
+    {
+      "itemOrder": 7,
+      "rawText": "코스모폴리탄",
+      "category": "cocktail",
+      "options": [
+        {
+          "optionLabel": "잔",
+          "pourMl": null,
+          "priceKrw": 16000
+        }
+      ],
+      "nameLines": [
+        "L038"
+      ],
+      "priceLines": [
+        "L024"
+      ],
+      "box": [
+        132,
+        289,
+        404,
+        308
+      ]
+    },
+    {
+      "itemOrder": 8,
+      "rawText": "올드패션",
+      "category": "cocktail",
+      "options": [
+        {
+          "optionLabel": "잔",
+          "pourMl": null,
+          "priceKrw": 18000
+        }
+      ],
+      "nameLines": [
+        "L039"
+      ],
+      "priceLines": [
+        "L023"
+      ],
+      "box": [
+        126,
+        320,
+        403,
+        339
+      ]
+    },
+    {
+      "itemOrder": 9,
+      "rawText": "파우스트",
+      "category": "cocktail",
+      "options": [
+        {
+          "optionLabel": "잔",
+          "pourMl": null,
+          "priceKrw": 16000
+        }
+      ],
+      "nameLines": [
+        "L040"
+      ],
+      "priceLines": [
+        "L022"
+      ],
+      "box": [
+        121,
+        352,
+        401,
+        370
+      ]
+    },
+    {
+      "itemOrder": 10,
+      "rawText": "위스키사워",
+      "category": "cocktail",
+      "options": [
+        {
+          "optionLabel": "잔",
+          "pourMl": null,
+          "priceKrw": 18000
+        }
+      ],
+      "nameLines": [
+        "L041"
+      ],
+      "priceLines": [
+        "L021"
+      ],
+      "box": [
+        116,
+        383,
+        399,
+        403
+      ]
+    },
+    {
+      "itemOrder": 11,
+      "rawText": "갓파더",
+      "category": "cocktail",
+      "options": [
+        {
+          "optionLabel": "잔",
+          "pourMl": null,
+          "priceKrw": 18000
+        }
+      ],
+      "nameLines": [
+        "L042"
+      ],
+      "priceLines": [
+        "L020"
+      ],
+      "box": [
+        109,
+        417,
+        397,
+        437
+      ]
+    },
+    {
+      "itemOrder": 12,
+      "rawText": "사이드카",
+      "category": "cocktail",
+      "options": [
+        {
+          "optionLabel": "잔",
+          "pourMl": null,
+          "priceKrw": 18000
+        }
+      ],
+      "nameLines": [
+        "L043"
+      ],
+      "priceLines": [
+        "L019"
+      ],
+      "box": [
+        104,
+        451,
+        396,
+        470
+      ]
+    },
+    {
+      "itemOrder": 13,
+      "rawText": "잭로즈",
+      "category": "cocktail",
+      "options": [
+        {
+          "optionLabel": "잔",
+          "pourMl": null,
+          "priceKrw": 18000
+        }
+      ],
+      "nameLines": [
+        "L044"
+      ],
+      "priceLines": [
+        "L018"
+      ],
+      "box": [
+        97,
+        486,
+        394,
+        504
+      ]
+    },
+    {
+      "itemOrder": 14,
+      "rawText": "진피즈",
+      "category": "cocktail",
+      "options": [
+        {
+          "optionLabel": "잔",
+          "pourMl": null,
+          "priceKrw": 16000
+        }
+      ],
+      "nameLines": [
+        "L045"
+      ],
+      "priceLines": [
+        "L017"
+      ],
+      "box": [
+        92,
+        523,
+        391,
+        542
+      ]
+    },
+    {
+      "itemOrder": 15,
+      "rawText": "에메랄드쿨러",
+      "category": "cocktail",
+      "options": [
+        {
+          "optionLabel": "잔",
+          "pourMl": null,
+          "priceKrw": 16000
+        }
+      ],
+      "nameLines": [
+        "L046"
+      ],
+      "priceLines": [
+        "L016"
+      ],
+      "box": [
+        85,
+        559,
+        389,
+        580
+      ]
+    },
+    {
+      "itemOrder": 16,
+      "rawText": "그래스호퍼",
+      "category": "cocktail",
+      "options": [
+        {
+          "optionLabel": "잔",
+          "pourMl": null,
+          "priceKrw": 16000
+        }
+      ],
+      "nameLines": [
+        "L047"
+      ],
+      "priceLines": [
+        "L015"
+      ],
+      "box": [
+        77,
+        597,
+        387,
+        618
+      ]
+    },
+    {
+      "itemOrder": 17,
+      "rawText": "네그로니",
+      "category": "cocktail",
+      "options": [
+        {
+          "optionLabel": "잔",
+          "pourMl": null,
+          "priceKrw": 16000
+        }
+      ],
+      "nameLines": [
+        "L048"
+      ],
+      "priceLines": [
+        "L014"
+      ],
+      "box": [
+        72,
+        636,
+        385,
+        657
+      ]
+    },
+    {
+      "itemOrder": 18,
+      "rawText": "불바디에",
+      "category": "cocktail",
+      "options": [
+        {
+          "optionLabel": "잔",
+          "pourMl": null,
+          "priceKrw": 18000
+        }
+      ],
+      "nameLines": [
+        "L049"
+      ],
+      "priceLines": [
+        "L031"
+      ],
+      "box": [
+        65,
+        677,
+        384,
+        698
+      ]
+    },
+    {
+      "itemOrder": 19,
+      "rawText": "라스트워드",
+      "category": "cocktail",
+      "options": [
+        {
+          "optionLabel": "잔",
+          "pourMl": null,
+          "priceKrw": 20000
+        }
+      ],
+      "nameLines": [
+        "L050"
+      ],
+      "priceLines": [
+        "L055"
+      ],
+      "box": [
+        58,
+        718,
+        384,
+        741
+      ]
+    },
+    {
+      "itemOrder": 20,
+      "rawText": "헤밍웨이 스페셜",
+      "category": "cocktail",
+      "options": [
+        {
+          "optionLabel": "잔",
+          "pourMl": null,
+          "priceKrw": 16000
+        }
+      ],
+      "nameLines": [
+        "L051"
+      ],
+      "priceLines": [
+        "L054"
+      ],
+      "box": [
+        48,
+        759,
+        378,
+        785
+      ]
+    },
+    {
+      "itemOrder": 21,
+      "rawText": "롭로이",
+      "category": "cocktail",
+      "options": [
+        {
+          "optionLabel": "잔",
+          "pourMl": null,
+          "priceKrw": 18000
+        }
+      ],
+      "nameLines": [
+        "L052"
+      ],
+      "priceLines": [
+        "L053"
+      ],
+      "box": [
+        41,
+        802,
+        375,
+        829
+      ]
+    },
+    {
+      "itemOrder": 22,
+      "rawText": "프랭크시나트라",
+      "category": "cocktail",
+      "options": [
+        {
+          "optionLabel": "잔",
+          "pourMl": null,
+          "priceKrw": 18000
+        }
+      ],
+      "nameLines": [
+        "L059"
+      ],
+      "priceLines": [
+        "L002"
+      ],
+      "box": [
+        564,
+        87,
+        845,
+        129
+      ]
+    },
+    {
+      "itemOrder": 23,
+      "rawText": "슬로진피즈",
+      "category": "cocktail",
+      "options": [
+        {
+          "optionLabel": "잔",
+          "pourMl": null,
+          "priceKrw": 16000
+        }
+      ],
+      "nameLines": [
+        "L060"
+      ],
+      "priceLines": [
+        "L003"
+      ],
+      "box": [
+        566,
+        115,
+        852,
+        156
+      ]
+    },
+    {
+      "itemOrder": 24,
+      "rawText": "찰리채플린",
+      "category": "cocktail",
+      "options": [
+        {
+          "optionLabel": "잔",
+          "pourMl": null,
+          "priceKrw": 16000
+        }
+      ],
+      "nameLines": [
+        "L061"
+      ],
+      "priceLines": [
+        "L004"
+      ],
+      "box": [
+        565,
+        146,
+        854,
+        186
+      ]
+    },
+    {
+      "itemOrder": 25,
+      "rawText": "앤하탄",
+      "category": "cocktail",
+      "options": [
+        {
+          "optionLabel": "잔",
+          "pourMl": null,
+          "priceKrw": 18000
+        }
+      ],
+      "nameLines": [
+        "L062"
+      ],
+      "priceLines": [
+        "L005"
+      ],
+      "box": [
+        567,
+        176,
+        859,
+        215
+      ]
+    },
+    {
+      "itemOrder": 26,
+      "rawText": "카카오피즈",
+      "category": "cocktail",
+      "options": [
+        {
+          "optionLabel": "잔",
+          "pourMl": null,
+          "priceKrw": 16000
+        }
+      ],
+      "nameLines": [
+        "L063"
+      ],
+      "priceLines": [
+        "L006"
+      ],
+      "box": [
+        566,
+        207,
+        863,
+        245
+      ]
+    },
+    {
+      "itemOrder": 27,
+      "rawText": "엘더플라워 사워",
+      "category": "cocktail",
+      "options": [
+        {
+          "optionLabel": "잔",
+          "pourMl": null,
+          "priceKrw": 16000
+        }
+      ],
+      "nameLines": [
+        "L064"
+      ],
+      "priceLines": [
+        "L007"
+      ],
+      "box": [
+        566,
+        238,
+        868,
+        275
+      ]
+    },
+    {
+      "itemOrder": 28,
+      "rawText": "롱아일랜드티",
+      "category": "cocktail",
+      "options": [
+        {
+          "optionLabel": "잔",
+          "pourMl": null,
+          "priceKrw": 18000
+        }
+      ],
+      "nameLines": [
+        "L065"
+      ],
+      "priceLines": [
+        "L008"
+      ],
+      "box": [
+        568,
+        270,
+        873,
+        307
+      ]
+    },
+    {
+      "itemOrder": 29,
+      "rawText": "프렌치커넥션",
+      "category": "cocktail",
+      "options": [
+        {
+          "optionLabel": "잔",
+          "pourMl": null,
+          "priceKrw": 18000
+        }
+      ],
+      "nameLines": [
+        "L066"
+      ],
+      "priceLines": [
+        "L009"
+      ],
+      "box": [
+        568,
+        305,
+        877,
+        339
+      ]
+    },
+    {
+      "itemOrder": 30,
+      "rawText": "카타르시스",
+      "category": "cocktail",
+      "options": [
+        {
+          "optionLabel": "잔",
+          "pourMl": null,
+          "priceKrw": 16000
+        }
+      ],
+      "nameLines": [
+        "L067"
+      ],
+      "priceLines": [
+        "L010"
+      ],
+      "box": [
+        568,
+        339,
+        882,
+        372
+      ]
+    },
+    {
+      "itemOrder": 31,
+      "rawText": "올드파",
+      "category": "cocktail",
+      "options": [
+        {
+          "optionLabel": "잔",
+          "pourMl": null,
+          "priceKrw": 18000
+        }
+      ],
+      "nameLines": [
+        "L068"
+      ],
+      "priceLines": [
+        "L011"
+      ],
+      "box": [
+        569,
+        374,
+        887,
+        406
+      ]
+    },
+    {
+      "itemOrder": 32,
+      "rawText": "복춘",
+      "category": "cocktail",
+      "options": [
+        {
+          "optionLabel": "잔",
+          "pourMl": null,
+          "priceKrw": 15000
+        }
+      ],
+      "nameLines": [
+        "L057"
+      ],
+      "priceLines": [
+        "L012"
+      ],
+      "box": [
+        571,
+        530,
+        911,
+        549
+      ]
+    },
+    {
+      "itemOrder": 33,
+      "rawText": "입춘",
+      "category": "cocktail",
+      "options": [
+        {
+          "optionLabel": "잔",
+          "pourMl": null,
+          "priceKrw": 18000
+        }
+      ],
+      "nameLines": [
+        "L056"
+      ],
+      "priceLines": [
+        "L013"
+      ],
+      "box": [
+        573,
+        569,
+        917,
+        590
+      ]
+    }
+  ],
+  "other_items_dropped": 0,
+  "raw_text": "{\"items\": [{\"raw_name\": \"진토닉\", \"price_krw\": 12000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L032\"], \"price\": [\"L030\"]}, \"category\": \"cocktail\"}, {\"raw_name\": \"김렛\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L033\"], \"price\": [\"L029\"]}, \"category\": \"cocktail\"}, {\"raw_name\": \"다이퀴리\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L034\"], \"price\": [\"L028\"]}, \"category\": \"cocktail\"}, {\"raw_name\": \"드라이 마티니\", \"price_krw\": 17000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L035\"], \"price\": [\"L027\"]}, \"category\": \"cocktail\"}, {\"raw_name\": \"보스턴쿨러\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L036\"], \"price\": [\"L026\"]}, \"category\": \"cocktail\"}, {\"raw_name\": \"하이랜드쿨러\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L037\"], \"price\": [\"L025\"]}, \"category\": \"cocktail\"}, {\"raw_name\": \"코스모폴리탄\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L038\"], \"price\": [\"L024\"]}, \"category\": \"cocktail\"}, {\"raw_name\": \"올드패션\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L039\"], \"price\": [\"L023\"]}, \"category\": \"cocktail\"}, {\"raw_name\": \"파우스트\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L040\"], \"price\": [\"L022\"]}, \"category\": \"cocktail\"}, {\"raw_name\": \"위스키사워\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L041\"], \"price\": [\"L021\"]}, \"category\": \"cocktail\"}, {\"raw_name\": \"갓파더\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L042\"], \"price\": [\"L020\"]}, \"category\": \"cocktail\"}, {\"raw_name\": \"사이드카\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L043\"], \"price\": [\"L019\"]}, \"category\": \"cocktail\"}, {\"raw_name\": \"잭로즈\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L044\"], \"price\": [\"L018\"]}, \"category\": \"cocktail\"}, {\"raw_name\": \"진피즈\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L045\"], \"price\": [\"L017\"]}, \"category\": \"cocktail\"}, {\"raw_name\": \"에메랄드쿨러\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L046\"], \"price\": [\"L016\"]}, \"category\": \"cocktail\"}, {\"raw_name\": \"그래스호퍼\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L047\"], \"price\": [\"L015\"]}, \"category\": \"cocktail\"}, {\"raw_name\": \"네그로니\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L048\"], \"price\": [\"L014\"]}, \"category\": \"cocktail\"}, {\"raw_name\": \"불바디에\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L049\"], \"price\": [\"L031\"]}, \"category\": \"cocktail\"}, {\"raw_name\": \"라스트워드\", \"price_krw\": 20000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L050\"], \"price\": [\"L055\"]}, \"category\": \"cocktail\"}, {\"raw_name\": \"헤밍웨이 스페셜\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L051\"], \"price\": [\"L054\"]}, \"category\": \"cocktail\"}, {\"raw_name\": \"롭로이\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L052\"], \"price\": [\"L053\"]}, \"category\": \"cocktail\"}, {\"raw_name\": \"프랭크시나트라\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L059\"], \"price\": [\"L002\"]}, \"category\": \"cocktail\"}, {\"raw_name\": \"슬로진피즈\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L060\"], \"price\": [\"L003\"]}, \"category\": \"cocktail\"}, {\"raw_name\": \"찰리채플린\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L061\"], \"price\": [\"L004\"]}, \"category\": \"cocktail\"}, {\"raw_name\": \"앤하탄\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L062\"], \"price\": [\"L005\"]}, \"category\": \"cocktail\"}, {\"raw_name\": \"카카오피즈\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L063\"], \"price\": [\"L006\"]}, \"category\": \"cocktail\"}, {\"raw_name\": \"엘더플라워 사워\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L064\"], \"price\": [\"L007\"]}, \"category\": \"cocktail\"}, {\"raw_name\": \"롱아일랜드티\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L065\"], \"price\": [\"L008\"]}, \"category\": \"cocktail\"}, {\"raw_name\": \"프렌치커넥션\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L066\"], \"price\": [\"L009\"]}, \"category\": \"cocktail\"}, {\"raw_name\": \"카타르시스\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L067\"], \"price\": [\"L010\"]}, \"category\": \"cocktail\"}, {\"raw_name\": \"올드파\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L068\"], \"price\": [\"L011\"]}, \"category\": \"cocktail\"}, {\"raw_name\": \"복춘\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L057\"], \"price\": [\"L012\"]}, \"category\": \"cocktail\"}, {\"raw_name\": \"입춘\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L056\"], \"price\": [\"L013\"]}, \"category\": \"cocktail\"}]}",
+  "ocr_lines": [
+    {
+      "id": "L001",
+      "box": [
+        375,
+        41,
+        627,
+        83
+      ],
+      "text": "Cocktail"
+    },
+    {
+      "id": "L002",
+      "box": [
+        817,
+        87,
+        845,
+        101
+      ],
+      "text": "1.8"
+    },
+    {
+      "id": "L003",
+      "box": [
+        819,
+        115,
+        852,
+        131
+      ],
+      "text": "1.6"
+    },
+    {
+      "id": "L004",
+      "box": [
+        826,
+        146,
+        854,
+        159
+      ],
+      "text": "1.6"
+    },
+    {
+      "id": "L005",
+      "box": [
+        830,
+        176,
+        859,
+        189
+      ],
+      "text": "1.8"
+    },
+    {
+      "id": "L006",
+      "box": [
+        833,
+        207,
+        863,
+        220
+      ],
+      "text": "1.6"
+    },
+    {
+      "id": "L007",
+      "box": [
+        838,
+        238,
+        868,
+        251
+      ],
+      "text": "1.6"
+    },
+    {
+      "id": "L008",
+      "box": [
+        841,
+        270,
+        873,
+        286
+      ],
+      "text": "1.8"
+    },
+    {
+      "id": "L009",
+      "box": [
+        847,
+        305,
+        877,
+        318
+      ],
+      "text": "1,8"
+    },
+    {
+      "id": "L010",
+      "box": [
+        851,
+        339,
+        882,
+        353
+      ],
+      "text": "1.6"
+    },
+    {
+      "id": "L011",
+      "box": [
+        856,
+        374,
+        887,
+        388
+      ],
+      "text": "1.8"
+    },
+    {
+      "id": "L012",
+      "box": [
+        877,
+        531,
+        911,
+        548
+      ],
+      "text": "1.5"
+    },
+    {
+      "id": "L013",
+      "box": [
+        882,
+        573,
+        917,
+        590
+      ],
+      "text": "1.8"
+    },
+    {
+      "id": "L014",
+      "box": [
+        356,
+        641,
+        385,
+        656
+      ],
+      "text": "1.6"
+    },
+    {
+      "id": "L015",
+      "box": [
+        359,
+        601,
+        387,
+        617
+      ],
+      "text": "1.6"
+    },
+    {
+      "id": "L016",
+      "box": [
+        361,
+        564,
+        389,
+        577
+      ],
+      "text": "1.6"
+    },
+    {
+      "id": "L017",
+      "box": [
+        363,
+        525,
+        391,
+        539
+      ],
+      "text": "1.6"
+    },
+    {
+      "id": "L018",
+      "box": [
+        366,
+        488,
+        394,
+        502
+      ],
+      "text": "1.8"
+    },
+    {
+      "id": "L019",
+      "box": [
+        368,
+        453,
+        396,
+        467
+      ],
+      "text": "1.8"
+    },
+    {
+      "id": "L020",
+      "box": [
+        370,
+        419,
+        397,
+        432
+      ],
+      "text": "1.8"
+    },
+    {
+      "id": "L021",
+      "box": [
+        373,
+        385,
+        399,
+        398
+      ],
+      "text": "1.8"
+    },
+    {
+      "id": "L022",
+      "box": [
+        375,
+        353,
+        401,
+        366
+      ],
+      "text": "1.6"
+    },
+    {
+      "id": "L023",
+      "box": [
+        377,
+        320,
+        403,
+        333
+      ],
+      "text": "1.8"
+    },
+    {
+      "id": "L024",
+      "box": [
+        378,
+        290,
+        404,
+        302
+      ],
+      "text": "1.6"
+    },
+    {
+      "id": "L025",
+      "box": [
+        382,
+        259,
+        406,
+        272
+      ],
+      "text": "1.8"
+    },
+    {
+      "id": "L026",
+      "box": [
+        384,
+        229,
+        408,
+        242
+      ],
+      "text": "1.6"
+    },
+    {
+      "id": "L027",
+      "box": [
+        385,
+        200,
+        410,
+        214
+      ],
+      "text": "1.7"
+    },
+    {
+      "id": "L028",
+      "box": [
+        387,
+        172,
+        411,
+        185
+      ],
+      "text": "1.5"
+    },
+    {
+      "id": "L029",
+      "box": [
+        389,
+        144,
+        413,
+        157
+      ],
+      "text": "1.5"
+    },
+    {
+      "id": "L030",
+      "box": [
+        391,
+        118,
+        415,
+        130
+      ],
+      "text": "1.2"
+    },
+    {
+      "id": "L031",
+      "box": [
+        352,
+        682,
+        384,
+        698
+      ],
+      "text": "1.8"
+    },
+    {
+      "id": "L032",
+      "box": [
+        161,
+        121,
+        208,
+        134
+      ],
+      "text": "진토닉"
+    },
+    {
+      "id": "L033",
+      "box": [
+        156,
+        147,
+        191,
+        163
+      ],
+      "text": "김렛"
+    },
+    {
+      "id": "L034",
+      "box": [
+        151,
+        174,
+        219,
+        190
+      ],
+      "text": "다이퀴리"
+    },
+    {
+      "id": "L035",
+      "box": [
+        147,
+        201,
+        250,
+        219
+      ],
+      "text": "드라이 마티니"
+    },
+    {
+      "id": "L036",
+      "box": [
+        140,
+        230,
+        226,
+        248
+      ],
+      "text": "보스턴쿨러"
+    },
+    {
+      "id": "L037",
+      "box": [
+        137,
+        260,
+        238,
+        278
+      ],
+      "text": "하이랜드쿨러"
+    },
+    {
+      "id": "L038",
+      "box": [
+        132,
+        289,
+        234,
+        308
+      ],
+      "text": "코스모폴리탄"
+    },
+    {
+      "id": "L039",
+      "box": [
+        126,
+        320,
+        198,
+        339
+      ],
+      "text": "올드패션"
+    },
+    {
+      "id": "L040",
+      "box": [
+        121,
+        352,
+        193,
+        370
+      ],
+      "text": "파우스트"
+    },
+    {
+      "id": "L041",
+      "box": [
+        116,
+        383,
+        205,
+        403
+      ],
+      "text": "위스키사워"
+    },
+    {
+      "id": "L042",
+      "box": [
+        109,
+        417,
+        165,
+        437
+      ],
+      "text": "갓파더"
+    },
+    {
+      "id": "L043",
+      "box": [
+        104,
+        451,
+        177,
+        470
+      ],
+      "text": "사이드카"
+    },
+    {
+      "id": "L044",
+      "box": [
+        97,
+        486,
+        154,
+        504
+      ],
+      "text": "잭로즈"
+    },
+    {
+      "id": "L045",
+      "box": [
+        92,
+        523,
+        149,
+        542
+      ],
+      "text": "진피즈"
+    },
+    {
+      "id": "L046",
+      "box": [
+        85,
+        559,
+        198,
+        580
+      ],
+      "text": "에메랄드쿨러"
+    },
+    {
+      "id": "L047",
+      "box": [
+        77,
+        597,
+        176,
+        618
+      ],
+      "text": "그래스호퍼"
+    },
+    {
+      "id": "L048",
+      "box": [
+        72,
+        636,
+        151,
+        657
+      ],
+      "text": "네그로니"
+    },
+    {
+      "id": "L049",
+      "box": [
+        65,
+        677,
+        145,
+        698
+      ],
+      "text": "불바디에"
+    },
+    {
+      "id": "L050",
+      "box": [
+        58,
+        718,
+        158,
+        740
+      ],
+      "text": "라스트워드"
+    },
+    {
+      "id": "L051",
+      "box": [
+        48,
+        759,
+        196,
+        785
+      ],
+      "text": "헤밍웨이 스페셜"
+    },
+    {
+      "id": "L052",
+      "box": [
+        41,
+        802,
+        108,
+        826
+      ],
+      "text": "롭로이"
+    },
+    {
+      "id": "L053",
+      "box": [
+        344,
+        812,
+        375,
+        829
+      ],
+      "text": "1.8"
+    },
+    {
+      "id": "L054",
+      "box": [
+        347,
+        767,
+        378,
+        785
+      ],
+      "text": "1.6"
+    },
+    {
+      "id": "L055",
+      "box": [
+        347,
+        724,
+        384,
+        741
+      ],
+      "text": "2.0"
+    },
+    {
+      "id": "L056",
+      "box": [
+        573,
+        569,
+        614,
+        589
+      ],
+      "text": "입춘"
+    },
+    {
+      "id": "L057",
+      "box": [
+        571,
+        530,
+        614,
+        549
+      ],
+      "text": "복춘"
+    },
+    {
+      "id": "L058",
+      "box": [
+        562,
+        490,
+        691,
+        513
+      ],
+      "text": "Signature"
+    },
+    {
+      "id": "L059",
+      "box": [
+        564,
+        107,
+        687,
+        129
+      ],
+      "text": "프랭크시나트라"
+    },
+    {
+      "id": "L060",
+      "box": [
+        566,
+        137,
+        654,
+        156
+      ],
+      "text": "슬로진피즈"
+    },
+    {
+      "id": "L061",
+      "box": [
+        565,
+        164,
+        657,
+        186
+      ],
+      "text": "찰리채플린"
+    },
+    {
+      "id": "L062",
+      "box": [
+        567,
+        195,
+        622,
+        215
+      ],
+      "text": "앤하탄"
+    },
+    {
+      "id": "L063",
+      "box": [
+        566,
+        223,
+        660,
+        245
+      ],
+      "text": "카카오피즈"
+    },
+    {
+      "id": "L064",
+      "box": [
+        566,
+        250,
+        702,
+        275
+      ],
+      "text": "엘더플라워 사워"
+    },
+    {
+      "id": "L065",
+      "box": [
+        568,
+        284,
+        681,
+        307
+      ],
+      "text": "롱아일랜드티"
+    },
+    {
+      "id": "L066",
+      "box": [
+        568,
+        315,
+        683,
+        339
+      ],
+      "text": "프렌치커넥션"
+    },
+    {
+      "id": "L067",
+      "box": [
+        568,
+        349,
+        666,
+        372
+      ],
+      "text": "카타르시스"
+    },
+    {
+      "id": "L068",
+      "box": [
+        569,
+        385,
+        629,
+        406
+      ],
+      "text": "올드파"
+    }
+  ],
+  "ocr_cache_same_bytes": true,
+  "run": 2
+}

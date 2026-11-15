@@ -1,0 +1,1710 @@
+{
+  "condition": "hybrid",
+  "model": "gemini-3.5-flash-lite",
+  "thinking_level": "medium",
+  "source_image": "007_bokchun_01.jpg",
+  "photo_id": "007_위스키복춘_01",
+  "prompt_version": "hybrid-v1",
+  "prompt_sha256": "b73f15d2b20460fc9e51dc12926e57d09fe3548a47ef8cfc6771c6a3ebe1ac50",
+  "started_at": "2026-11-13T05:21:27.600026+00:00",
+  "latency_ms": 58124,
+  "attempts": 1,
+  "status": "completed",
+  "input_tokens": 7370,
+  "output_tokens": 5089,
+  "thought_tokens": 0,
+  "total_tokens": 12459,
+  "output": {
+    "items": [
+      {
+        "raw_name": "글렌그란트 15Y",
+        "price_krw": 360000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "글렌그란트 15Y",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌드로낙 12Y",
+        "price_krw": 260000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "글렌드로낙 12Y",
+        "price_krw": 13000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌드로낙 15Y",
+        "price_krw": 500000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "글렌드로낙 15Y",
+        "price_krw": 26000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌리벳 12Y",
+        "price_krw": 260000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "글렌리벳 12Y",
+        "price_krw": 13000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌모렌지 오리지널",
+        "price_krw": 220000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "글렌모렌지 오리지널",
+        "price_krw": 11000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌모렌지 넥타도르",
+        "price_krw": 380000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "글렌모렌지 넥타도르",
+        "price_krw": 19000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌모렌지 라산타",
+        "price_krw": 340000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "글렌모렌지 라산타",
+        "price_krw": 17000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌모렌지 퀀타루반",
+        "price_krw": 310000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "글렌모렌지 퀀타루반",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌모렌지 시그넷",
+        "price_krw": 830000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "글렌모렌지 시그넷",
+        "price_krw": 41000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌모렌지 18Y",
+        "price_krw": 690000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "글렌모렌지 18Y",
+        "price_krw": 35000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌알라키 12Y",
+        "price_krw": 320000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "글렌알라키 12Y",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌알라키 15Y",
+        "price_krw": 520000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "글렌알라키 15Y",
+        "price_krw": 26000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌파클라스 105",
+        "price_krw": 300000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "글렌파클라스 105",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌피딕 12Y",
+        "price_krw": 260000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "글렌피딕 12Y",
+        "price_krw": 13000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "글렌피딕 15Y",
+        "price_krw": 330000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "글렌피딕 15Y",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "달모어 12Y",
+        "price_krw": 300000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "달모어 12Y",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "달모어 12Y쉐리",
+        "price_krw": 480000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "달모어 12Y쉐리",
+        "price_krw": 24000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "달모어 15Y",
+        "price_krw": 600000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "달모어 15Y",
+        "price_krw": 30000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "달모어 포트우드 리저브",
+        "price_krw": 480000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "달모어 포트우드 리저브",
+        "price_krw": 24000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "달모어 시가몰트 리저브",
+        "price_krw": 720000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "달모어 시가몰트 리저브",
+        "price_krw": 36000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "로얄브라클라 12Y",
+        "price_krw": 280000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "로얄브라클라 12Y",
+        "price_krw": 14000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "로얄브라클라 18Y",
+        "price_krw": 680000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "로얄브라클라 18Y",
+        "price_krw": 34000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "맥캘란 더블캐스크 12Y",
+        "price_krw": 270000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "맥캘란 더블캐스크 12Y",
+        "price_krw": 13000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "맥캘란 더블캐스크 15Y",
+        "price_krw": 550000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "맥캘란 더블캐스크 15Y",
+        "price_krw": 27000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "부나하벤 12Y",
+        "price_krw": 270000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "부나하벤 12Y",
+        "price_krw": 13000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "아란 10Y",
+        "price_krw": 270000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "아란 10Y",
+        "price_krw": 13000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "아란 보데가 셰리 캐스크",
+        "price_krw": 440000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "아란 보데가 셰리 캐스크",
+        "price_krw": 22000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "아벨라워 아부나흐",
+        "price_krw": 600000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "아벨라워 아부나흐",
+        "price_krw": 30000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "오반 14Y",
+        "price_krw": 360000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "오반 14Y",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "카발란 솔리스트 셰리 오크",
+        "price_krw": 330000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "카발란 솔리스트 셰리 오크",
+        "price_krw": 660000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "카발란 솔리스트 비노 바리끄",
+        "price_krw": 920000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "카발란 솔리스트 비노 바리끄",
+        "price_krw": 46000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "카발란 트리플 셰리",
+        "price_krw": 500000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "카발란 트리플 셰리",
+        "price_krw": 25000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "클라이넬리쉬14Y",
+        "price_krw": 240000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "클라이넬리쉬14Y",
+        "price_krw": 12000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "발베니 12Y",
+        "price_krw": 14000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "발베니 12Y",
+        "price_krw": 280000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "발베니 14Y",
+        "price_krw": 22000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "발베니 14Y",
+        "price_krw": 450000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "츠누키 에디션 2025",
+        "price_krw": 24000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "츠누키 에디션 2025",
+        "price_krw": 490000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "요이치 싱글몰트",
+        "price_krw": 330000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "요이치 싱글몰트",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "에드라두어 10Y",
+        "price_krw": 17000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "노마드",
+        "price_krw": 200000,
+        "pour_ml": null,
+        "unit": "bottle"
+      },
+      {
+        "raw_name": "노마드",
+        "price_krw": 10000,
+        "pour_ml": null,
+        "unit": "glass"
+      }
+    ]
+  },
+  "other_items": null,
+  "other_items_dropped": null,
+  "raw_text": "{\"items\": [{\"raw_name\": \"글렌그란트 15Y\", \"price_krw\": 360000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L008\"], \"price\": [\"L032\"]}}, {\"raw_name\": \"글렌그란트 15Y\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L008\"], \"price\": [\"L033\"]}}, {\"raw_name\": \"글렌드로낙 12Y\", \"price_krw\": 260000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L009\"], \"price\": [\"L034\"]}}, {\"raw_name\": \"글렌드로낙 12Y\", \"price_krw\": 13000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L009\"], \"price\": [\"L035\"]}}, {\"raw_name\": \"글렌드로낙 15Y\", \"price_krw\": 500000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L010\"], \"price\": [\"L036\"]}}, {\"raw_name\": \"글렌드로낙 15Y\", \"price_krw\": 26000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L010\"], \"price\": [\"L037\"]}}, {\"raw_name\": \"글렌리벳 12Y\", \"price_krw\": 260000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L011\"], \"price\": [\"L038\"]}}, {\"raw_name\": \"글렌리벳 12Y\", \"price_krw\": 13000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L011\"], \"price\": [\"L039\"]}}, {\"raw_name\": \"글렌모렌지 오리지널\", \"price_krw\": 220000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L012\"], \"price\": [\"L040\"]}}, {\"raw_name\": \"글렌모렌지 오리지널\", \"price_krw\": 11000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L012\"], \"price\": [\"L041\"]}}, {\"raw_name\": \"글렌모렌지 넥타도르\", \"price_krw\": 380000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L013\"], \"price\": [\"L042\"]}}, {\"raw_name\": \"글렌모렌지 넥타도르\", \"price_krw\": 19000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L013\"], \"price\": [\"L043\"]}}, {\"raw_name\": \"글렌모렌지 라산타\", \"price_krw\": 340000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L014\"], \"price\": [\"L044\"]}}, {\"raw_name\": \"글렌모렌지 라산타\", \"price_krw\": 17000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L014\"], \"price\": [\"L045\"]}}, {\"raw_name\": \"글렌모렌지 퀀타루반\", \"price_krw\": 310000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L015\"], \"price\": [\"L046\"]}}, {\"raw_name\": \"글렌모렌지 퀀타루반\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L015\"], \"price\": [\"L047\"]}}, {\"raw_name\": \"글렌모렌지 시그넷\", \"price_krw\": 830000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L016\"], \"price\": [\"L048\"]}}, {\"raw_name\": \"글렌모렌지 시그넷\", \"price_krw\": 41000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L016\"], \"price\": [\"L049\"]}}, {\"raw_name\": \"글렌모렌지 18Y\", \"price_krw\": 690000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L017\"], \"price\": [\"L050\"]}}, {\"raw_name\": \"글렌모렌지 18Y\", \"price_krw\": 35000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L017\"], \"price\": [\"L051\"]}}, {\"raw_name\": \"글렌알라키 12Y\", \"price_krw\": 320000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L018\"], \"price\": [\"L052\"]}}, {\"raw_name\": \"글렌알라키 12Y\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L018\"], \"price\": [\"L053\"]}}, {\"raw_name\": \"글렌알라키 15Y\", \"price_krw\": 520000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L019\"], \"price\": [\"L054\"]}}, {\"raw_name\": \"글렌알라키 15Y\", \"price_krw\": 26000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L019\"], \"price\": [\"L055\"]}}, {\"raw_name\": \"글렌파클라스 105\", \"price_krw\": 300000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L020\"], \"price\": [\"L056\"]}}, {\"raw_name\": \"글렌파클라스 105\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L020\"], \"price\": [\"L057\"]}}, {\"raw_name\": \"글렌피딕 12Y\", \"price_krw\": 260000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L021\"], \"price\": [\"L058\"]}}, {\"raw_name\": \"글렌피딕 12Y\", \"price_krw\": 13000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L021\"], \"price\": [\"L059\"]}}, {\"raw_name\": \"글렌피딕 15Y\", \"price_krw\": 330000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L022\"], \"price\": [\"L061\"]}}, {\"raw_name\": \"글렌피딕 15Y\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L022\"], \"price\": [\"L060\"]}}, {\"raw_name\": \"달모어 12Y\", \"price_krw\": 300000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L023\"], \"price\": [\"L063\"]}}, {\"raw_name\": \"달모어 12Y\", \"price_krw\": 15000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L023\"], \"price\": [\"L062\"]}}, {\"raw_name\": \"달모어 12Y쉐리\", \"price_krw\": 480000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L024\"], \"price\": [\"L064\"]}}, {\"raw_name\": \"달모어 12Y쉐리\", \"price_krw\": 24000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L024\"], \"price\": [\"L065\"]}}, {\"raw_name\": \"달모어 15Y\", \"price_krw\": 600000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L025\"], \"price\": [\"L121\"]}}, {\"raw_name\": \"달모어 15Y\", \"price_krw\": 30000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L025\"], \"price\": [\"L119\"]}}, {\"raw_name\": \"달모어 포트우드 리저브\", \"price_krw\": 480000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L026\"], \"price\": [\"L066\"]}}, {\"raw_name\": \"달모어 포트우드 리저브\", \"price_krw\": 24000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L026\"], \"price\": [\"L067\"]}}, {\"raw_name\": \"달모어 시가몰트 리저브\", \"price_krw\": 720000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L027\"], \"price\": [\"L068\"]}}, {\"raw_name\": \"달모어 시가몰트 리저브\", \"price_krw\": 36000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L027\"], \"price\": [\"L069\"]}}, {\"raw_name\": \"로얄브라클라 12Y\", \"price_krw\": 280000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L028\"], \"price\": [\"L031\"]}}, {\"raw_name\": \"로얄브라클라 12Y\", \"price_krw\": 14000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L028\"], \"price\": [\"L070\"]}}, {\"raw_name\": \"로얄브라클라 18Y\", \"price_krw\": 680000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L029\"], \"price\": [\"L030\"]}}, {\"raw_name\": \"로얄브라클라 18Y\", \"price_krw\": 34000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L029\"], \"price\": [\"L071\"]}}, {\"raw_name\": \"맥캘란 더블캐스크 12Y\", \"price_krw\": 270000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L072\"], \"price\": [\"L112\"]}}, {\"raw_name\": \"맥캘란 더블캐스크 12Y\", \"price_krw\": 13000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L072\"], \"price\": [\"L115\"]}}, {\"raw_name\": \"맥캘란 더블캐스크 15Y\", \"price_krw\": 550000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L073\"], \"price\": [\"L113\"]}}, {\"raw_name\": \"맥캘란 더블캐스크 15Y\", \"price_krw\": 27000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L073\"], \"price\": [\"L116\"]}}, {\"raw_name\": \"부나하벤 12Y\", \"price_krw\": 270000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L074\"], \"price\": [\"L114\"]}}, {\"raw_name\": \"부나하벤 12Y\", \"price_krw\": 13000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L074\"], \"price\": [\"L117\"]}}, {\"raw_name\": \"아란 10Y\", \"price_krw\": 270000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L075\"], \"price\": [\"L007\"]}}, {\"raw_name\": \"아란 10Y\", \"price_krw\": 13000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L075\"], \"price\": [\"L118\"]}}, {\"raw_name\": \"아란 보데가 셰리 캐스크\", \"price_krw\": 440000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L076\"], \"price\": [\"L077\"]}}, {\"raw_name\": \"아란 보데가 셰리 캐스크\", \"price_krw\": 22000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L076\"], \"price\": [\"L006\"]}}, {\"raw_name\": \"아벨라워 아부나흐\", \"price_krw\": 600000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L078\"], \"price\": [\"L079\"]}}, {\"raw_name\": \"아벨라워 아부나흐\", \"price_krw\": 30000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L078\"], \"price\": [\"L080\"]}}, {\"raw_name\": \"오반 14Y\", \"price_krw\": 360000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L081\"], \"price\": [\"L082\"]}}, {\"raw_name\": \"오반 14Y\", \"price_krw\": 18000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L081\"], \"price\": [\"L083\"]}}, {\"raw_name\": \"카발란 솔리스트 셰리 오크\", \"price_krw\": 330000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L084\"], \"price\": [\"L085\"]}}, {\"raw_name\": \"카발란 솔리스트 셰리 오크\", \"price_krw\": 660000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L084\"], \"price\": [\"L086\"]}}, {\"raw_name\": \"카발란 솔리스트 비노 바리끄\", \"price_krw\": 920000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L087\"], \"price\": [\"L088\"]}}, {\"raw_name\": \"카발란 솔리스트 비노 바리끄\", \"price_krw\": 46000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L087\"], \"price\": [\"L089\"]}}, {\"raw_name\": \"카발란 트리플 셰리\", \"price_krw\": 500000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L090\"], \"price\": [\"L091\"]}}, {\"raw_name\": \"카발란 트리플 셰리\", \"price_krw\": 25000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L090\"], \"price\": [\"L092\"]}}, {\"raw_name\": \"클라이넬리쉬14Y\", \"price_krw\": 240000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L093\"], \"price\": [\"L094\"]}}, {\"raw_name\": \"클라이넬리쉬14Y\", \"price_krw\": 12000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L093\"], \"price\": [\"L095\"]}}, {\"raw_name\": \"발베니 12Y\", \"price_krw\": 14000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L096\"], \"price\": [\"L097\"]}}, {\"raw_name\": \"발베니 12Y\", \"price_krw\": 280000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L096\"], \"price\": [\"L098\"]}}, {\"raw_name\": \"발베니 14Y\", \"price_krw\": 22000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L099\"], \"price\": [\"L100\"]}}, {\"raw_name\": \"발베니 14Y\", \"price_krw\": 450000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L099\"], \"price\": [\"L101\"]}}, {\"raw_name\": \"츠누키 에디션 2025\", \"price_krw\": 24000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L102\"], \"price\": [\"L103\"]}}, {\"raw_name\": \"츠누키 에디션 2025\", \"price_krw\": 490000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L102\"], \"price\": [\"L104\"]}}, {\"raw_name\": \"요이치 싱글몰트\", \"price_krw\": 330000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L105\"], \"price\": [\"L106\"]}}, {\"raw_name\": \"요이치 싱글몰트\", \"price_krw\": 16000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L105\"], \"price\": [\"L107\"]}}, {\"raw_name\": \"에드라두어 10Y\", \"price_krw\": 17000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L108\"], \"price\": [\"L109\"]}}, {\"raw_name\": \"노마드\", \"price_krw\": 200000, \"pour_ml\": null, \"unit\": \"bottle\", \"source_lines\": {\"name\": [\"L110\"], \"price\": [\"L120\"]}}, {\"raw_name\": \"노마드\", \"price_krw\": 10000, \"pour_ml\": null, \"unit\": \"glass\", \"source_lines\": {\"name\": [\"L110\"], \"price\": [\"L111\"]}}]}",
+  "ocr_lines": [
+    {
+      "id": "L001",
+      "box": [
+        396,
+        27,
+        592,
+        66
+      ],
+      "text": "Whisky"
+    },
+    {
+      "id": "L002",
+      "box": [
+        146,
+        95,
+        284,
+        117
+      ],
+      "text": "Single Malt"
+    },
+    {
+      "id": "L003",
+      "box": [
+        368,
+        103,
+        411,
+        117
+      ],
+      "text": "Bottle"
+    },
+    {
+      "id": "L004",
+      "box": [
+        425,
+        104,
+        463,
+        118
+      ],
+      "text": "Glass"
+    },
+    {
+      "id": "L005",
+      "box": [
+        758,
+        106,
+        853,
+        122
+      ],
+      "text": "Bottle Glass"
+    },
+    {
+      "id": "L006",
+      "box": [
+        835,
+        203,
+        859,
+        215
+      ],
+      "text": "1.3"
+    },
+    {
+      "id": "L007",
+      "box": [
+        785,
+        229,
+        807,
+        241
+      ],
+      "text": "27"
+    },
+    {
+      "id": "L008",
+      "box": [
+        147,
+        139,
+        266,
+        156
+      ],
+      "text": "글렌그란트 15Y"
+    },
+    {
+      "id": "L009",
+      "box": [
+        144,
+        165,
+        264,
+        181
+      ],
+      "text": "글렌드로낙 12Y"
+    },
+    {
+      "id": "L010",
+      "box": [
+        140,
+        192,
+        262,
+        208
+      ],
+      "text": "글렌드로낙 15Y"
+    },
+    {
+      "id": "L011",
+      "box": [
+        137,
+        219,
+        243,
+        234
+      ],
+      "text": "글렌리벳 12Y"
+    },
+    {
+      "id": "L012",
+      "box": [
+        133,
+        247,
+        297,
+        266
+      ],
+      "text": "글렌모렌지 오리지널"
+    },
+    {
+      "id": "L013",
+      "box": [
+        130,
+        275,
+        297,
+        293
+      ],
+      "text": "글렌모렌지 넥타도르"
+    },
+    {
+      "id": "L014",
+      "box": [
+        128,
+        304,
+        278,
+        323
+      ],
+      "text": "글렌모렌지 라산타"
+    },
+    {
+      "id": "L015",
+      "box": [
+        123,
+        333,
+        293,
+        353
+      ],
+      "text": "글렌모렌지 퀀타루반"
+    },
+    {
+      "id": "L016",
+      "box": [
+        119,
+        364,
+        272,
+        383
+      ],
+      "text": "글렌모렌지 시그넷"
+    },
+    {
+      "id": "L017",
+      "box": [
+        116,
+        395,
+        250,
+        414
+      ],
+      "text": "글렌모렌지 18Y"
+    },
+    {
+      "id": "L018",
+      "box": [
+        112,
+        427,
+        246,
+        445
+      ],
+      "text": "글렌알라키 12Y"
+    },
+    {
+      "id": "L019",
+      "box": [
+        109,
+        459,
+        245,
+        478
+      ],
+      "text": "글렌알라키 15Y"
+    },
+    {
+      "id": "L020",
+      "box": [
+        104,
+        493,
+        262,
+        512
+      ],
+      "text": "글렌파클라스 105"
+    },
+    {
+      "id": "L021",
+      "box": [
+        100,
+        527,
+        222,
+        547
+      ],
+      "text": "글렌피딕 12Y"
+    },
+    {
+      "id": "L022",
+      "box": [
+        95,
+        563,
+        219,
+        582
+      ],
+      "text": "글렌피딕 15Y"
+    },
+    {
+      "id": "L023",
+      "box": [
+        92,
+        599,
+        196,
+        618
+      ],
+      "text": "달모어 12Y"
+    },
+    {
+      "id": "L024",
+      "box": [
+        87,
+        636,
+        238,
+        656
+      ],
+      "text": "달모어 12Y쉐리"
+    },
+    {
+      "id": "L025",
+      "box": [
+        81,
+        673,
+        191,
+        695
+      ],
+      "text": "달모어 15Y"
+    },
+    {
+      "id": "L026",
+      "box": [
+        76,
+        712,
+        299,
+        736
+      ],
+      "text": "달모어 포트우드 리저브"
+    },
+    {
+      "id": "L027",
+      "box": [
+        71,
+        752,
+        297,
+        776
+      ],
+      "text": "달모어 시가몰트 리저브"
+    },
+    {
+      "id": "L028",
+      "box": [
+        64,
+        795,
+        243,
+        818
+      ],
+      "text": "로얄브라클라 12Y"
+    },
+    {
+      "id": "L029",
+      "box": [
+        59,
+        837,
+        241,
+        862
+      ],
+      "text": "로얄브라클라 18Y"
+    },
+    {
+      "id": "L030",
+      "box": [
+        364,
+        839,
+        396,
+        857
+      ],
+      "text": "68"
+    },
+    {
+      "id": "L031",
+      "box": [
+        364,
+        797,
+        396,
+        814
+      ],
+      "text": "28"
+    },
+    {
+      "id": "L032",
+      "box": [
+        377,
+        147,
+        399,
+        159
+      ],
+      "text": "36"
+    },
+    {
+      "id": "L033",
+      "box": [
+        432,
+        148,
+        456,
+        160
+      ],
+      "text": "1.8"
+    },
+    {
+      "id": "L034",
+      "box": [
+        377,
+        173,
+        399,
+        184
+      ],
+      "text": "26"
+    },
+    {
+      "id": "L035",
+      "box": [
+        432,
+        173,
+        456,
+        185
+      ],
+      "text": "1.3"
+    },
+    {
+      "id": "L036",
+      "box": [
+        375,
+        199,
+        399,
+        211
+      ],
+      "text": "50"
+    },
+    {
+      "id": "L037",
+      "box": [
+        431,
+        199,
+        458,
+        211
+      ],
+      "text": "2.6"
+    },
+    {
+      "id": "L038",
+      "box": [
+        375,
+        225,
+        399,
+        237
+      ],
+      "text": "26"
+    },
+    {
+      "id": "L039",
+      "box": [
+        432,
+        226,
+        458,
+        238
+      ],
+      "text": "1.3"
+    },
+    {
+      "id": "L040",
+      "box": [
+        375,
+        252,
+        399,
+        264
+      ],
+      "text": "22"
+    },
+    {
+      "id": "L041",
+      "box": [
+        434,
+        254,
+        456,
+        266
+      ],
+      "text": "1.1"
+    },
+    {
+      "id": "L042",
+      "box": [
+        375,
+        280,
+        399,
+        293
+      ],
+      "text": "38"
+    },
+    {
+      "id": "L043",
+      "box": [
+        432,
+        281,
+        458,
+        294
+      ],
+      "text": "1.9"
+    },
+    {
+      "id": "L044",
+      "box": [
+        373,
+        309,
+        399,
+        321
+      ],
+      "text": "34"
+    },
+    {
+      "id": "L045",
+      "box": [
+        434,
+        310,
+        458,
+        323
+      ],
+      "text": "1.7"
+    },
+    {
+      "id": "L046",
+      "box": [
+        375,
+        339,
+        397,
+        350
+      ],
+      "text": "31"
+    },
+    {
+      "id": "L047",
+      "box": [
+        432,
+        339,
+        460,
+        351
+      ],
+      "text": "1.5"
+    },
+    {
+      "id": "L048",
+      "box": [
+        373,
+        368,
+        399,
+        381
+      ],
+      "text": "83"
+    },
+    {
+      "id": "L049",
+      "box": [
+        434,
+        368,
+        460,
+        383
+      ],
+      "text": "4.1"
+    },
+    {
+      "id": "L050",
+      "box": [
+        371,
+        400,
+        399,
+        413
+      ],
+      "text": "69"
+    },
+    {
+      "id": "L051",
+      "box": [
+        432,
+        400,
+        462,
+        413
+      ],
+      "text": "3.5"
+    },
+    {
+      "id": "L052",
+      "box": [
+        371,
+        431,
+        397,
+        444
+      ],
+      "text": "32"
+    },
+    {
+      "id": "L053",
+      "box": [
+        434,
+        431,
+        462,
+        445
+      ],
+      "text": "1.6"
+    },
+    {
+      "id": "L054",
+      "box": [
+        371,
+        464,
+        397,
+        476
+      ],
+      "text": "52"
+    },
+    {
+      "id": "L055",
+      "box": [
+        432,
+        464,
+        463,
+        476
+      ],
+      "text": "2.6"
+    },
+    {
+      "id": "L056",
+      "box": [
+        370,
+        496,
+        397,
+        510
+      ],
+      "text": "30"
+    },
+    {
+      "id": "L057",
+      "box": [
+        434,
+        496,
+        462,
+        510
+      ],
+      "text": "1.5"
+    },
+    {
+      "id": "L058",
+      "box": [
+        370,
+        530,
+        397,
+        545
+      ],
+      "text": "26"
+    },
+    {
+      "id": "L059",
+      "box": [
+        434,
+        530,
+        463,
+        544
+      ],
+      "text": "1.3"
+    },
+    {
+      "id": "L060",
+      "box": [
+        434,
+        565,
+        465,
+        581
+      ],
+      "text": "1.6"
+    },
+    {
+      "id": "L061",
+      "box": [
+        370,
+        565,
+        397,
+        581
+      ],
+      "text": "33"
+    },
+    {
+      "id": "L062",
+      "box": [
+        434,
+        601,
+        465,
+        617
+      ],
+      "text": "1.5"
+    },
+    {
+      "id": "L063",
+      "box": [
+        368,
+        601,
+        397,
+        617
+      ],
+      "text": "30"
+    },
+    {
+      "id": "L064",
+      "box": [
+        368,
+        638,
+        397,
+        654
+      ],
+      "text": "48"
+    },
+    {
+      "id": "L065",
+      "box": [
+        434,
+        676,
+        469,
+        693
+      ],
+      "text": "3.0"
+    },
+    {
+      "id": "L066",
+      "box": [
+        366,
+        715,
+        397,
+        732
+      ],
+      "text": "48"
+    },
+    {
+      "id": "L067",
+      "box": [
+        434,
+        714,
+        469,
+        732
+      ],
+      "text": "2.4"
+    },
+    {
+      "id": "L068",
+      "box": [
+        366,
+        755,
+        396,
+        772
+      ],
+      "text": "72"
+    },
+    {
+      "id": "L069",
+      "box": [
+        434,
+        754,
+        470,
+        771
+      ],
+      "text": "3.6"
+    },
+    {
+      "id": "L070",
+      "box": [
+        436,
+        795,
+        469,
+        812
+      ],
+      "text": "1.4"
+    },
+    {
+      "id": "L071",
+      "box": [
+        434,
+        837,
+        472,
+        857
+      ],
+      "text": "3.4"
+    },
+    {
+      "id": "L072",
+      "box": [
+        550,
+        150,
+        715,
+        164
+      ],
+      "text": "맥캘란 더블캐스크 12Y"
+    },
+    {
+      "id": "L073",
+      "box": [
+        550,
+        174,
+        719,
+        190
+      ],
+      "text": "맥캘란 더블캐스크 15Y"
+    },
+    {
+      "id": "L074",
+      "box": [
+        552,
+        200,
+        653,
+        215
+      ],
+      "text": "부나하벤 12Y"
+    },
+    {
+      "id": "L075",
+      "box": [
+        553,
+        227,
+        623,
+        243
+      ],
+      "text": "아란 10Y"
+    },
+    {
+      "id": "L076",
+      "box": [
+        555,
+        253,
+        738,
+        271
+      ],
+      "text": "아란 보데가 셰리 캐스크"
+    },
+    {
+      "id": "L077",
+      "box": [
+        788,
+        256,
+        814,
+        268
+      ],
+      "text": "44"
+    },
+    {
+      "id": "L078",
+      "box": [
+        557,
+        281,
+        699,
+        299
+      ],
+      "text": "아벨라워 아부나흐"
+    },
+    {
+      "id": "L079",
+      "box": [
+        791,
+        284,
+        817,
+        297
+      ],
+      "text": "60"
+    },
+    {
+      "id": "L080",
+      "box": [
+        847,
+        285,
+        877,
+        297
+      ],
+      "text": "3.0"
+    },
+    {
+      "id": "L081",
+      "box": [
+        559,
+        310,
+        632,
+        327
+      ],
+      "text": "오반 14Y"
+    },
+    {
+      "id": "L082",
+      "box": [
+        797,
+        312,
+        823,
+        325
+      ],
+      "text": "36"
+    },
+    {
+      "id": "L083",
+      "box": [
+        854,
+        312,
+        880,
+        325
+      ],
+      "text": "1.8"
+    },
+    {
+      "id": "L084",
+      "box": [
+        561,
+        340,
+        766,
+        358
+      ],
+      "text": "카발란 솔리스트 셰리 오크"
+    },
+    {
+      "id": "L085",
+      "box": [
+        800,
+        341,
+        826,
+        354
+      ],
+      "text": "3.3"
+    },
+    {
+      "id": "L086",
+      "box": [
+        857,
+        342,
+        887,
+        355
+      ],
+      "text": "66"
+    },
+    {
+      "id": "L087",
+      "box": [
+        562,
+        370,
+        790,
+        387
+      ],
+      "text": "카발란 솔리스트 비노 바리끄"
+    },
+    {
+      "id": "L088",
+      "box": [
+        805,
+        371,
+        831,
+        384
+      ],
+      "text": "92"
+    },
+    {
+      "id": "L089",
+      "box": [
+        862,
+        371,
+        892,
+        384
+      ],
+      "text": "4.6"
+    },
+    {
+      "id": "L090",
+      "box": [
+        564,
+        400,
+        717,
+        418
+      ],
+      "text": "카발란 트리플 셰리"
+    },
+    {
+      "id": "L091",
+      "box": [
+        810,
+        402,
+        837,
+        415
+      ],
+      "text": "50"
+    },
+    {
+      "id": "L092",
+      "box": [
+        868,
+        402,
+        899,
+        415
+      ],
+      "text": "2.5"
+    },
+    {
+      "id": "L093",
+      "box": [
+        566,
+        431,
+        713,
+        449
+      ],
+      "text": "클라이넬리쉬14Y"
+    },
+    {
+      "id": "L094",
+      "box": [
+        815,
+        433,
+        842,
+        446
+      ],
+      "text": "24"
+    },
+    {
+      "id": "L095",
+      "box": [
+        875,
+        433,
+        903,
+        446
+      ],
+      "text": "1.2"
+    },
+    {
+      "id": "L096",
+      "box": [
+        569,
+        463,
+        661,
+        480
+      ],
+      "text": "발베니 12Y"
+    },
+    {
+      "id": "L097",
+      "box": [
+        821,
+        465,
+        847,
+        478
+      ],
+      "text": "1.4"
+    },
+    {
+      "id": "L098",
+      "box": [
+        880,
+        465,
+        908,
+        479
+      ],
+      "text": "28"
+    },
+    {
+      "id": "L099",
+      "box": [
+        571,
+        496,
+        668,
+        513
+      ],
+      "text": "발베니 14Y"
+    },
+    {
+      "id": "L100",
+      "box": [
+        826,
+        497,
+        852,
+        512
+      ],
+      "text": "2.2"
+    },
+    {
+      "id": "L101",
+      "box": [
+        885,
+        497,
+        917,
+        512
+      ],
+      "text": "45"
+    },
+    {
+      "id": "L102",
+      "box": [
+        573,
+        529,
+        746,
+        548
+      ],
+      "text": "츠누키 에디션 2025"
+    },
+    {
+      "id": "L103",
+      "box": [
+        831,
+        531,
+        857,
+        545
+      ],
+      "text": "2.4"
+    },
+    {
+      "id": "L104",
+      "box": [
+        890,
+        531,
+        922,
+        545
+      ],
+      "text": "49"
+    },
+    {
+      "id": "L105",
+      "box": [
+        574,
+        564,
+        715,
+        582
+      ],
+      "text": "요이치 싱글몰트"
+    },
+    {
+      "id": "L106",
+      "box": [
+        837,
+        565,
+        864,
+        581
+      ],
+      "text": "33"
+    },
+    {
+      "id": "L107",
+      "box": [
+        899,
+        565,
+        929,
+        581
+      ],
+      "text": "1.6"
+    },
+    {
+      "id": "L108",
+      "box": [
+        576,
+        599,
+        715,
+        618
+      ],
+      "text": "에드라두어 10Y"
+    },
+    {
+      "id": "L109",
+      "box": [
+        906,
+        600,
+        934,
+        617
+      ],
+      "text": "1.7"
+    },
+    {
+      "id": "L110",
+      "box": [
+        578,
+        635,
+        641,
+        655
+      ],
+      "text": "노마드"
+    },
+    {
+      "id": "L111",
+      "box": [
+        911,
+        637,
+        942,
+        652
+      ],
+      "text": "1.0"
+    },
+    {
+      "id": "L112",
+      "box": [
+        772,
+        151,
+        795,
+        163
+      ],
+      "text": "27"
+    },
+    {
+      "id": "L113",
+      "box": [
+        776,
+        177,
+        800,
+        188
+      ],
+      "text": "55"
+    },
+    {
+      "id": "L114",
+      "box": [
+        781,
+        202,
+        804,
+        215
+      ],
+      "text": "27"
+    },
+    {
+      "id": "L115",
+      "box": [
+        824,
+        152,
+        851,
+        163
+      ],
+      "text": "1.3"
+    },
+    {
+      "id": "L116",
+      "box": [
+        830,
+        177,
+        854,
+        189
+      ],
+      "text": "2.7"
+    },
+    {
+      "id": "L117",
+      "box": [
+        838,
+        229,
+        864,
+        242
+      ],
+      "text": "1.3"
+    },
+    {
+      "id": "L118",
+      "box": [
+        842,
+        256,
+        871,
+        269
+      ],
+      "text": "2.2"
+    },
+    {
+      "id": "L119",
+      "box": [
+        432,
+        637,
+        469,
+        654
+      ],
+      "text": "2.4"
+    },
+    {
+      "id": "L120",
+      "box": [
+        847,
+        637,
+        877,
+        652
+      ],
+      "text": "20"
+    },
+    {
+      "id": "L121",
+      "box": [
+        366,
+        676,
+        397,
+        691
+      ],
+      "text": "60"
+    },
+    {
+      "id": "L122",
+      "box": [
+        448,
+        971,
+        611,
+        999
+      ],
+      "text": "韓"
+    }
+  ],
+  "ocr_cache_same_bytes": true,
+  "run": 3
+}
