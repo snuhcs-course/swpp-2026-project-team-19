@@ -574,6 +574,66 @@ OCR LLM과 Vision LLM은 메뉴에서 인식한 모든 상품 또는 비상품 �
   - OCR이 실패해 Gemini 단독으로 되돌아간 사진은 v1과 같이 위스키 줄만 나온다.
 - 4.3 형식 전체를 채우는 prompt v2는 후속 과제다. v1과 결과가 달라지므로 새 평가 실행으로 정확도를 확인한 뒤 v1을 대체한다.
 
+### 4.5 PDF 메뉴판 (I4-P13)
+
+업주가 사진 대신 메뉴판 PDF 파일을 올리는 경우를 위한 AI 층이다. PDF의 각 쪽을 사진 한 장처럼 다루어, 추출 이후의 저장·매칭·검수는 사진과 같은 경로를 탄다. 업로드 API와 워커에 연결하는 일은 I4-P35(백엔드)의 범위이며, 이 절은 그때 쓸 수 있도록 AI 층이 제공하는 것만 적는다.
+
+**쪽 읽기** (`backend/app/extraction/pdf.py`, `read_pdf(data, max_pages=15)`)
+
+- 각 쪽을 긴 변 2000px JPEG로 그린다. 반환하는 `PdfPage`는 쪽 번호, 이미지, 크기, 쪽 종류(`kind`), 글자 층 상태(`text_layer`), 글자 층의 줄을 가진다.
+- 쪽 종류는 두 가지다. `text`는 PDF 안에 글자가 들어 있는 쪽(워드·디자인 도구에서 내보낸 파일)이고, `scanned`는 그림만 있는 쪽(스캔본, 사진을 PDF로 묶은 파일)이다.
+- 글자 층이 있어도 다음 경우에는 쓰지 않고 `scanned`로 다룬다: 글자가 10자 미만인 쪽(`none`), 읽을 수 없는 글자가 5%를 넘는 쪽(`unreadable`, 글꼴의 유니코드 대응이 깨진 파일), 회전된 쪽(`rotated`), 쪽 영역이 원점에서 시작하지 않는 쪽(`offset`, 여백을 잘라낸 PDF 등. 글자 위치가 이미지 모서리 기준이 아니고 PDFium이 글자마다 줄을 나눈다), 그림 하나가 쪽의 절반 이상을 덮고 글자 줄이 5줄 미만인 쪽(`partial`, 스캔본 위에 머리글이나 쪽 번호만 글자로 얹은 파일).
+- 쪽 수는 한 번의 등록에서 받을 수 있는 사진 수(15)와 같은 상한을 쓴다.
+
+**업로드 때 검사** (`check_pdf(data, max_pages=15)`)
+
+- 쪽을 그리지 않고 파일만 열어 쪽 수를 돌려준다. 아래 표의 네 경우에 `read_pdf`와 같은 오류를 낸다. `read_pdf`도 같은 검사를 먼저 하므로, 이 검사를 통과한 파일이 나중에 같은 이유로 거절되지 않는다.
+- 문서는 열리지만 특정 쪽만 그릴 수 없는 파일은 이 검사로 알 수 없다. 그 경우는 `read_pdf`가 `PdfCorruptError`를 낸다.
+- 파일 크기 한도는 여기서 보지 않는다(업로드 쪽에서 정한다).
+
+**쪽 추출** (`backend/app/extraction/pdf_hybrid.py`, `backend/app/adapters/pdf_extraction.py`)
+
+- `text` 쪽: 글자 층의 낱말과 좌표를 CLOVA OCR 응답과 같은 모양으로 바꾸어 기존 하이브리드 추출(4.1)에 넣는다. 따라서 프롬프트, 출력 형식, 줄 번호와 영역 정보(`itemSources`)가 사진과 같고, CLOVA OCR은 호출하지 않는다. 추출 메타의 `ocr.provider`는 `pdf-text-layer`다.
+- `scanned` 쪽: 쪽 이미지를 사진과 똑같이 하이브리드 추출기에 넘긴다. CLOVA OCR 실패 시 Gemini 단독으로 되돌아가는 동작도 같다.
+- 두 경우 모두 추출 메타에 `pdf = { page, kind, textLayer }`를 남긴다.
+- 글자 층의 글은 파일에 든 그대로 쓴다. 숫자와 한글 사이에 조판 간격이 공백으로 읽히는 파일이 있으나(`10 년`), 7장 정규화가 공백을 없애므로 매칭 키는 같다.
+
+**읽을 수 없는 파일**
+
+| 경우 | 오류 | `code` |
+| --- | --- | --- |
+| 암호가 걸린 PDF | `PdfEncryptedError` | `pdf_encrypted` |
+| PDF가 아니거나 손상된 파일, 그릴 수 없는 쪽 | `PdfCorruptError` | `pdf_corrupt` |
+| 쪽이 없는 PDF | `PdfEmptyError` | `pdf_empty` |
+| 쪽 수가 상한을 넘는 PDF (쪽을 그리기 전에 거절) | `PdfTooManyPagesError` | `pdf_too_many_pages` |
+
+이 `code`를 API 오류 코드로 어떻게 내보낼지는 I4-P35에서 API 명세와 함께 정한다.
+
+**PDF 한 개의 한도 (I4-P37)** (`backend/app/adapters/pdf_guards.py`, `extract_pdf_pages(extractor, pages, guards)`)
+
+사진은 모델 호출 한 번이지만 PDF는 최대 15번이 이어진다. 호출 한 번의 한도(6회 시도, 시도당 최대 330초)를 그대로 쓰면 멈춘 파일 하나가 백그라운드 작업을 몇 시간 붙잡을 수 있어, PDF에는 아래 한도(`PdfGuards`)를 건다.
+
+| 한도 | 기본값 | 뜻 |
+| --- | --- | --- |
+| `attempt_timeout_s` | 120초 | 모델 호출 한 번의 시도가 이 시간 안에 오지 않으면 끊는다 |
+| `page_attempts` | 3 | 한 쪽이 쓸 수 있는 모델 시도 수 |
+| `document_retries` | 6 | 모든 쪽을 합친 재시도 수. 다 쓰면 이후 쪽은 한 번만 시도한다 |
+| `ocr_deadline_s` | 60초 | 스캔 쪽의 CLOVA 호출 전체(재시도 포함). 넘으면 사진처럼 OCR 줄 없이 모델로 간다. CLOVA 호출은 자기 시간 한도를 소켓 제한 시간만큼 넘길 수 있어, 한도와 소켓 제한 시간에 절반씩(30초) 준다 |
+| `page_budget_s` | 쪽당 90초 | PDF 전체 시간 한도는 쪽 수 × 90초이고, 한 쪽의 최악 시간(435초)보다 짧지 않다(15쪽이면 1,350초). 이 시간이 지나면 새 쪽을 시작하지 않는다. 남은 시간이 시도 한 번보다 짧으면 그 쪽은 한 번만, 남은 시간까지만 시도한다 |
+| `failed_pages` | 3 | 실패한 쪽이 이만큼 되면 이후 쪽은 시도하지 않는다 |
+
+- 따라서 모델 호출은 최대 `쪽 수 + document_retries`번이고, 전체 시간은 위 시간 한도에 한 쪽의 최악 시간(`PdfGuards.page_seconds`, 기본값 435초)을 더한 것 이하다(15쪽이면 1,785초).
+- 기본값의 근거: I4 사진 실측(15장 × 3회)에서 호출 한 번의 중앙값이 18~22초, p95가 58~83초였다. 쪽당 90초는 모든 쪽이 p95만큼 느려도 들어가는 값이다(15쪽 1,245초). PDF로 잰 값은 아니다.
+- 실패한 쪽은 예외가 아니라 결과로 돌려준다. 쪽마다 `failure`가 붙는다: `model_timeout`(시도가 시간 안에 오지 않음), `model_call_failed`(그 밖의 호출 실패), `invalid_output`(모델 출력이 형식에 맞지 않음), `page_failed`(호출 전 실패), `not_attempted`(한도 때문에 시도하지 않음). 시도하지 않은 이유는 결과의 `stopped`(`document_deadline`, `too_many_failed_pages`)에 있다.
+- 실패한 쪽이 있을 때 등록 전체를 실패시킬지, 나머지 쪽만 살릴지는 이 층이 정하지 않는다. 호출하는 쪽(I4-P35)이 정한다. 사진은 지금 첫 실패에서 등록 전체가 실패한다(3.7).
+
+**알려진 한계**
+
+- 스캐너가 자체 OCR 글자를 쪽 전체에 숨겨 넣은 스캔 PDF는 `text` 쪽으로 읽히며, 그 OCR 품질을 그대로 따른다.
+- 쪽을 그리고 글자 층을 읽는 시간(`read_pdf`)은 위 한도에 들어가지 않고, 시작하면 중간에 끊을 수 없다. `check_pdf`는 쪽 수만 센다. 이 시간까지 제한하려면 호출하는 쪽(I4-P35의 워커)이 `read_pdf`를 버릴 수 있는 곳(예: 시간 제한을 둔 별도 프로세스)에서 돌려야 한다. 테스트 파일로는 쪽당 약 50ms다.
+- 실제 매장의 PDF로는 아직 평가하지 않았다. 테스트는 가상 메뉴로 만든 PDF(`backend/tests/fixtures/pdf`)로 한다.
+- 실제 호출로 확인하는 방법(I4-P30): `backend/scripts/run_uat_inputs.py`가 사진 3개와 PDF 3개(`backend/scripts/uat_inputs.json`)를 서버의 추출 코드로 돌려 입력마다 읽은 이름·가격, 지연, 시도 수, 실패 사유를 보고한다. CLOVA와 Gemini를 실제로 호출하므로 CI에서는 돌리지 않는다.
+
 ## 5 extracted_items와 extracted_options 저장
 
 백엔드는 4.3 응답의 `items`를 각각 하나의 `extracted_items` 행으로 저장한다. `extracted_line_type`에는 AI의 1차 분류를 넣고 `corrected_line_type = null`, `review_status = pending`으로 저장한다. `section_header`, `description`, `unknown`도 원문과 함께 보존하지만 `extracted_line_type = product`이고 `extracted_kind = whisky`인 항목만 최초 상품 매칭 단계로 보낸다. AI가 위스키가 아닌 메뉴로 판단한 줄(`extracted_kind = other`)은 매칭하지 않고 `initial_resolution_status = null`로 두며, 검수에서 상품 없는 메뉴 항목으로 게시된다(API 명세 8.10). 검수자가 다른 종류로 게시하면 `corrected_kind`에 남겨, AI의 종류 분류를 `corrected_line_type`처럼 평가할 수 있게 한다.
