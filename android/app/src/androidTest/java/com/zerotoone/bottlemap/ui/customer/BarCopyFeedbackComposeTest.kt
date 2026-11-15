@@ -36,7 +36,7 @@ class BarCopyFeedbackComposeTest {
         items = emptyList(),
     )
 
-    @Test fun addressCopyShowsPopupAndPhoneUsesOnlySystemClipboard() {
+    @Test fun addressCopyShowsTopToastAndPhoneUsesOnlySystemClipboard() {
         compose.setContent {
             MaterialTheme {
                 CustomerP18BarDetail(
@@ -49,21 +49,23 @@ class BarCopyFeedbackComposeTest {
         }
         compose.onNodeWithText("지도").performScrollTo().performClick()
         compose.onNodeWithText("복사").performScrollTo().performClick()
-        compose.onNodeWithTag("customer-bar-address-copied-dialog").assertIsDisplayed()
+        compose.onNodeWithTag("customer-bar-address-copied-toast").assertIsDisplayed()
         compose.onNodeWithText("주소를 복사했어요.").assertIsDisplayed()
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         assertEquals("서울특별시 관악구 테스트길 1",
             clipboard.primaryClip?.getItemAt(0)?.coerceToText(context)?.toString())
-        compose.onNodeWithText("확인").performClick()
-        compose.onNodeWithTag("customer-bar-address-copied-dialog").assertDoesNotExist()
+        // The notice is transient: there is no blocking confirmation button.
+        compose.mainClock.advanceTimeBy(3000)
+        compose.waitForIdle()
+        compose.onNodeWithTag("customer-bar-address-copied-toast").assertDoesNotExist()
 
         compose.onNodeWithText("전화").performScrollTo().performClick()
         compose.onNodeWithText("복사").performScrollTo().performClick()
         assertEquals("02-1234-5678",
             clipboard.primaryClip?.getItemAt(0)?.coerceToText(context)?.toString())
         compose.onNodeWithTag("ux-toast").assertDoesNotExist()
-        compose.onNodeWithTag("customer-bar-address-copied-dialog").assertDoesNotExist()
+        compose.onNodeWithTag("customer-bar-address-copied-toast").assertDoesNotExist()
     }
 
     @Test fun missingPhoneNeverClaimsCopySucceeded() {
