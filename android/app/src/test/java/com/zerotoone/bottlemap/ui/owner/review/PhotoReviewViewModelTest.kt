@@ -635,6 +635,7 @@ class PhotoReviewViewModelTest {
                 }
                 assertEquals("No stale draft may commit after reloading new version", 1, loads)
             }
+            override suspend fun flushBeforePublish(state: PhotoReviewState) = saveDraft(state)
             override suspend fun publish(state: PhotoReviewState) {
                 throw ReviewVersionConflictException()
             }
