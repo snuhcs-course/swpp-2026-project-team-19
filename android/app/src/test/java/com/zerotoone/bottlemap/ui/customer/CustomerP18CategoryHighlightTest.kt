@@ -38,4 +38,23 @@ class CustomerP18CategoryHighlightTest {
         assertEquals(p18InitiallyCollapsedCategories(null) + "whiskey",
             p18InitiallyCollapsedCategories("whisky"))
     }
+
+    @Test fun normalBarVisitDoesNotSelectProductlessCategoryAsSearchHighlight() {
+        val rows = listOf(
+            BarMenuItemUiModel(menuBoardEntryId = "other-first", productId = null,
+                menuDisplayName = "칵테일", options = emptyList(), category = "cocktail"),
+            BarMenuItemUiModel(menuBoardEntryId = "whisky", productId = "whisky-a",
+                menuDisplayName = "위스키", options = emptyList(), category = "whisky"),
+        )
+        val ordinary = p18HighlightedCategory(rows, null)
+        assertNull(ordinary)
+        assertEquals(p18InitiallyCollapsedCategories(null),
+            p18InitiallyCollapsedCategories(ordinary))
+        assertFalse("whisky" in p18InitiallyCollapsedCategories(ordinary))
+        assertTrue("cocktail" in p18InitiallyCollapsedCategories(ordinary))
+
+        assertNull(p18HighlightedCategory(rows, "missing-id"))
+        assertEquals("whisky", p18HighlightedCategory(rows, "whisky-a"))
+        assertNull(p18HighlightedCategory(rows, ""))
+    }
 }
