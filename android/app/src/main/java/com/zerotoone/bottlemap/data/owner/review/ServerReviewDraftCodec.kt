@@ -315,6 +315,10 @@ internal object ServerReviewDraftCodec {
             // Android has only an excluded/reject state. Converting an
             // operator's confirmed header/description to reject destroys intent.
             if (action == "confirm_non_product") return null
+            // §5.9 also allows a productId before action has been chosen.
+            // Android cannot represent that incomplete selection: do not
+            // replace it with the fresh OCR-linked product on autosave.
+            if ("productId" in decision && action != "select_existing_product") return null
             // An operator may approve catalog aliases. Android has no field
             // to edit or round-trip them, so never replace the remote decision.
             val aliases = decision["aliasesToAdd"]
@@ -340,6 +344,10 @@ internal object ServerReviewDraftCodec {
                     // An incomplete operator choice must remain incomplete.
                     else -> return null
                 }
+            } else if (action == "select_existing_product") {
+                // A catalog-linked choice must follow the approved Whisky
+                // review rules even if OCR originally categorized it OTHER.
+                ReviewItemType.WHISKY
             } else original.type
             val rawOptions = when (val raw = decision["options"]) {
                 null -> if ("options" in decision) return null else null
@@ -410,15 +418,21 @@ internal object ServerReviewDraftCodec {
                         original.volumeChoices + original.preMergeOptions
                     ).distinctBy { it.sourceOptionId ?:
                         "manual:${PhotoReviewRules.servingKey(it)}" }
-                val currentIds = currentOptions.mapNotNull { it.sourceOptionId }.toSet()
-                val retainedIds = options.orEmpty().mapNotNull { it.sourceOptionId }.toSet()
-                if (currentIds != retainedIds) {
+                // Grouped child-line servings intentionally have no source
+                // option ID in their master card. Compare those by serving
+                // identity too, or a newly merged 60ml child would be lost.
+                fun inventoryKey(option: ReviewOption): String =
+                    option.sourceOptionId?.let { "ocr:$it" } ?:
+                        "serving:${PhotoReviewRules.servingKey(option)}"
+                val currentKeys = currentOptions.map(::inventoryKey).toSet()
+                val retainedKeys = options.orEmpty().map(::inventoryKey).toSet()
+                if (currentKeys != retainedKeys) {
                     // The OTHER review screen does not implement the 3-size
                     // whisky selection. Preserve the operator draft instead
                     // of replacing it with unconfirmed options.
                     if (changed.type != ReviewItemType.WHISKY) return null
                     val newCandidates = currentOptions.filter {
-                        it.sourceOptionId != null && it.sourceOptionId !in retainedIds
+                        inventoryKey(it) !in retainedKeys
                     }
                     val candidates = options.orEmpty() + newCandidates
                     // The picker keys by serving identity; two prices for one
