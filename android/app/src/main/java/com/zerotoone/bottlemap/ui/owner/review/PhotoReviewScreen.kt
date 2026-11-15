@@ -432,7 +432,7 @@ private fun PublishFooter(stats: ReviewStats, vm: PhotoReviewViewModel) {
                 style = uxText(15f, 750, if (canSubmit) UxColor.goldOn else UxColor.text))
         }
         when {
-            draftProblem != null -> Text(draftProblem, style = uxText(12f, 450, UxColor.error),
+            draftProblem != null -> Text(draftProblem.orEmpty(), style = uxText(12f, 450, UxColor.error),
                 modifier = Modifier.testTag("review-draft-error"))
             savingPour -> Text("기본 잔 용량을 저장하는 중이에요.", style = uxText(12f, 450, UxColor.muted))
             stats.noDefault -> Text("매장 기본 잔 용량을 입력해주세요.", style = uxText(12f, 400, UxColor.error, lineHeight = 1.65f),
