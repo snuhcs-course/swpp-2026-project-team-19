@@ -24,7 +24,9 @@ class PhotoReviewPublicationUatTest {
             nameSaved = true, linkedProductId = null, price = 18000.0,
         )
         val excluded = unlinked.copy(id = "excluded", excluded = true)
-        val state = PhotoReviewState(items = listOf(existing, unlinked, excluded))
+        val other = ReviewItem(id = "cocktail", name = "칵테일",
+            type = ReviewItemType.OTHER, price = 9000.0)
+        val state = PhotoReviewState(items = listOf(existing, unlinked, other, excluded))
 
         assertTrue(PhotoReviewRules.stats(state).canPublish)
         val preview = PhotoReviewRules.publicationPreview(state)
