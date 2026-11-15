@@ -25,8 +25,10 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -405,6 +407,28 @@ private fun PublishFooter(stats: ReviewStats, vm: PhotoReviewViewModel) {
     val savingPour by vm.savingDefaultPour.collectAsStateWithLifecycle()
     val draftProblem by vm.draftProblem.collectAsStateWithLifecycle()
     val draftRetryable by vm.draftRetryable.collectAsStateWithLifecycle()
+    val draftConflictChoice by vm.draftConflictChoice.collectAsStateWithLifecycle()
+    val draftResolving by vm.draftResolving.collectAsStateWithLifecycle()
+    var pendingChoice by remember { mutableStateOf<Boolean?>(null) }
+    if (pendingChoice != null) {
+        val useLocal = pendingChoice == true
+        AlertDialog(
+            onDismissRequest = { pendingChoice = null },
+            title = { Text(if (useLocal) "이 기기 초안으로 덮어쓸까요?" else "서버 초안을 사용할까요?") },
+            text = { Text(if (useLocal)
+                "다른 기기나 운영자가 서버에 저장한 수정사항이 덮어써질 수 있어요. 이 기기의 보관 초안을 사용합니다."
+                else "이 기기에만 보관된 미저장 수정사항을 삭제하고 서버의 최신 초안으로 이어서 작업합니다.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    vm.resolveDraftConflict(useLocal)
+                    pendingChoice = null
+                }) { Text("선택") }
+            },
+            dismissButton = {
+                TextButton(onClick = { pendingChoice = null }) { Text("취소") }
+            },
+        )
+    }
     val canSubmit = stats.canPublish && !savingPour && draftProblem == null
     Column(
         Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(bottom = 43.dp)
@@ -443,6 +467,18 @@ private fun PublishFooter(stats: ReviewStats, vm: PhotoReviewViewModel) {
                 if (draftRetryable) {
                     UxSecondaryButton("서버 저장 다시 시도", vm::retryDraftSave,
                         Modifier.testTag("review-draft-retry"))
+                }
+                if (draftConflictChoice) {
+                    Text("선택 전까지 두 초안을 자동으로 합치거나 덮어쓰지 않아요.",
+                        style = uxText(11f, 400, UxColor.muted))
+                    if (!draftResolving) {
+                        UxSecondaryButton("서버 초안 사용 (기기 수정 삭제)",
+                            { pendingChoice = false },
+                            Modifier.testTag("review-draft-use-server"))
+                        UxSecondaryButton("이 기기 초안으로 서버 덮어쓰기",
+                            { pendingChoice = true },
+                            Modifier.testTag("review-draft-use-local"))
+                    }
                 }
                 UxSecondaryButton("최신 검수 불러오기", vm::reload,
                     Modifier.testTag("review-draft-reload"))
