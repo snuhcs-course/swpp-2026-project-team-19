@@ -265,12 +265,17 @@ class LivePhotoReviewRepository(
             draftNotice = "서버 초안의 일부 내용을 복원할 수 없어요. 담당자에게 확인해 주세요."
         }
         if (pending != null) {
+            val working = workingStore.read(id)
             val serverAlreadySaved = saved != null &&
                 saved.draftVersion > pending.expectedDraftVersion &&
-                ServerReviewDraftCodec.sameAndroidSnapshot(pending.content, saved.content)
+                (ServerReviewDraftCodec.sameAndroidSnapshot(pending.content, saved.content) ||
+                    (working != null && ServerReviewDraftCodec.sameAndroidSnapshot(
+                        working.content, saved.content)))
             if (serverAlreadySaved) {
-                // Response was lost after a successful PUT. The server copy wins.
+                // A lost successful CAS response may have saved the explicit
+                // working copy. Clear both only on exact content match.
                 runCatching { pendingStore.clear(id) }
+                runCatching { workingStore.clear(id) }
             } else if (!draftConflict && pending.canReplay(saved, reviewVersion) &&
                 pending.itemIds == state.items.map { it.id }) {
                 val local = ServerReviewDraftCodec.decode(ReviewDraftDto(
@@ -423,6 +428,40 @@ class LivePhotoReviewRepository(
     /** §5.9 explicit conflict choices. Keep the pending file until the
      * owner deliberately selects one of these two paths.
      */
+    override suspend fun startEditingLocalDraft(): PhotoReviewState {
+        val id = activeImportId ?: error("검수 작업을 먼저 불러와 주세요.")
+        return draftMutex.withLock {
+            check(pendingDraftConflict) { "편집할 충돌 초안이 없어요." }
+            val current = remote.getMenuImport(id)
+            val displayed = loaded ?: error("최신 서버 초안을 먼저 불러와 주세요.")
+            if (current.menuImportId != id || current.status != "ready_for_review" ||
+                current.reviewVersion != displayed.reviewVersion ||
+                (current.reviewDraft?.draftVersion ?: 0) != draftVersion) {
+                throw ReviewDraftConflictException()
+            }
+            val original = pendingStore.read(id)
+                ?: error("이 기기의 보호된 초안을 찾지 못했어요.")
+            val selected = workingStore.read(id) ?: original
+            val local = ServerReviewDraftCodec.decode(ReviewDraftDto(
+                selected.expectedDraftVersion, selected.reviewVersion,
+                "1970-01-01T00:00:00Z", selected.content,
+            )) ?: error("기기 초안을 안전하게 읽을 수 없어요.")
+            val fresh = freshReview ?: error("최신 OCR 항목을 불러와 주세요.")
+            require(original.reviewVersion == displayed.reviewVersion &&
+                selected.reviewVersion == displayed.reviewVersion &&
+                selected.itemIds == fresh.items.map { it.id } &&
+                compatibleOwnerReviewDraft(local, fresh)) {
+                "기기 초안의 OCR 항목이 최신 서버 검수와 달라요. 원본을 유지했어요."
+            }
+            // This explicit action only changes the displayed editor. Until
+            // the owner confirms CAS overwrite, server data is unchanged.
+            editingLocalConflict = true
+            pendingLocally = true
+            pendingOversized = ServerReviewDraftCodec.exceedsServerLimit(selected.content)
+            rebindDraftData(local, fresh)
+        }
+    }
+
     override suspend fun chooseServerDraft() {
         val id = activeImportId ?: error("검수 작업을 먼저 불러와 주세요.")
         draftMutex.withLock {
