@@ -44,10 +44,11 @@ import com.zerotoone.bottlemap.data.CustomerDiscoverySource
 import com.zerotoone.bottlemap.data.Repositories
 import com.zerotoone.bottlemap.network.PopularProductDto
 import com.zerotoone.bottlemap.ui.common.BmIcon
-import com.zerotoone.bottlemap.ui.common.BottleMapNoticeDialog
+import com.zerotoone.bottlemap.ui.common.UxToast
 import com.zerotoone.bottlemap.ui.theme.BottleMapPalette
 import com.zerotoone.bottlemap.ui.common.BmIconId
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -138,14 +139,22 @@ internal fun CustomerP18Home(
 ) {
     val context = LocalContext.current
     var search by rememberSaveable { mutableStateOf("") }
-    var searchError by rememberSaveable { mutableStateOf<String?>(null) }
+    // Same non-blocking, auto-dismissing top toast as login/confirmation notices.
+    // The nonce allows the exact same validation to display again on a second tap.
+    var searchNotice by remember { mutableStateOf<Pair<Long, String>?>(null) }
+    LaunchedEffect(searchNotice) {
+        if (searchNotice != null) {
+            delay(2500)
+            searchNotice = null
+        }
+    }
     // Home must always show an empty query after returning from any other route.
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
                 search = ""
-                searchError = null
+                searchNotice = null
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -164,20 +173,16 @@ internal fun CustomerP18Home(
     }
     fun launch(term: String, source: String) {
         val trimmed = term.trim()
-        customerHomeSearchError(trimmed)?.let { searchError = it; return }
-        searchError = null
+        customerHomeSearchError(trimmed)?.let {
+            searchNotice = System.nanoTime() to it
+            return
+        }
+        searchNotice = null
         recent = rememberP18Search(context,trimmed)
         onSearch(trimmed,source)
     }
-    searchError?.let { message ->
-        BottleMapNoticeDialog(
-            message = message,
-            onDismiss = { searchError = null },
-            tag = "customer-home-search-validation-dialog",
-            title = "검색 안내",
-        )
-    }
-    Column(Modifier.fillMaxSize().background(P18Bg).testTag("customer-home")) {
+    Box(Modifier.fillMaxSize().background(P18Bg)) {
+    Column(Modifier.fillMaxSize().testTag("customer-home")) {
         Row(Modifier.fillMaxWidth().height(56.dp).padding(start = 20.dp,end=8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween) {
@@ -206,7 +211,7 @@ internal fun CustomerP18Home(
                 Text("어떤 위스키를\n마실까요?",
                     style=MaterialTheme.typography.headlineSmall,
                     fontSize=24.sp,lineHeight=32.sp,color=P18Text)
-                P18SearchField(search, { search = it; searchError = null },
+                P18SearchField(search, { search = it; searchNotice = null },
                     { launch(search, "input") }, modifier = Modifier.fillMaxWidth())
             }
             Column(Modifier.fillMaxWidth().padding(horizontal=20.dp),
@@ -309,5 +314,10 @@ internal fun CustomerP18Home(
                 Text("›",fontSize=22.sp,color=P18Muted)
             }
         }
+    }
+    searchNotice?.let { (_, message) ->
+        UxToast(message, Modifier.align(Alignment.TopCenter)
+            .testTag("customer-home-search-validation-toast"))
+    }
     }
 }
