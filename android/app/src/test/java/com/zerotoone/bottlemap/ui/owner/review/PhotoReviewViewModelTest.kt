@@ -495,6 +495,41 @@ class PhotoReviewViewModelTest {
                 appliedCopy!!.items.first { it.id == "glen12" }.draftPriceText)
         }
 
+    @Test fun leavingDuringLocalDraftCasCannotOverwriteChosenDeviceSnapshot() =
+        runTest(dispatcher) {
+            val base = MockPhotoReviewRepository(MockPhotoReviewScenario.READY)
+            val casStarted = CompletableDeferred<Unit>()
+            val releaseCas = CompletableDeferred<Unit>()
+            var conflict = true
+            var writes = 0
+            val repo = object : PhotoReviewRepository by base {
+                override fun hasPendingDraftConflict() = conflict
+                override suspend fun chooseLocalDraft() {
+                    casStarted.complete(Unit)
+                    releaseCas.await()
+                    conflict = false
+                }
+                override suspend fun saveDraft(state: PhotoReviewState) {
+                    writes++
+                }
+            }
+            val vm = PhotoReviewViewModel(repo)
+            val events = vm.collectEvents(backgroundScope)
+            assertTrue(vm.draftConflictChoice.value)
+            vm.resolveDraftConflict(useLocal = true)
+            casStarted.await()
+            assertTrue(vm.draftResolving.value)
+            vm.leave()
+            // The stale remote-preview screen must not be saved or exited
+            // while explicit "use device draft" is committing its CAS.
+            assertEquals(0, writes)
+            assertFalse(PhotoReviewEvent.Leave in events)
+            releaseCas.complete(Unit)
+            assertFalse(vm.draftResolving.value)
+            assertFalse(vm.draftConflictChoice.value)
+            assertFalse(PhotoReviewEvent.Leave in events)
+        }
+
     @Test fun failedWorkingCopyFlushNeverReachesExplicitCas() = runTest(dispatcher) {
         val base = MockPhotoReviewRepository(MockPhotoReviewScenario.READY)
         var writes = 0
