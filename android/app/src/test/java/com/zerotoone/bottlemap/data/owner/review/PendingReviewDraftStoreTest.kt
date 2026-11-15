@@ -65,6 +65,26 @@ class PendingReviewDraftStoreTest {
         assertNull(recreated.read("import-1"))
     }
 
+    @Test fun interruptedAtomicRewriteKeepsLastCompletedLocalDraft() = runBlocking {
+        val store = PendingReviewDraftStore(context) { jwt("owner-recovery") }
+        val draft = PendingReviewDraftStore.Envelope(
+            2, 1, listOf("ocr-1"), ServerReviewDraftCodec.encode(
+                PhotoReviewState(items = listOf(ReviewItem(id = "ocr-1", name = "보관한 수정"))),
+            ),
+        )
+        store.write("import-recovery", draft)
+        val file = requireNotNull(folder.listFiles()?.singleOrNull { it.name.endsWith(".json") })
+        // Simulate a process dying after the next atomic write begins but
+        // before finishWrite can commit it.
+        android.util.AtomicFile(file).startWrite().use {
+            it.write("{corrupt partial".toByteArray())
+        }
+        val recovered = requireNotNull(store.read("import-recovery"))
+        assertEquals("보관한 수정", requireNotNull(ServerReviewDraftCodec.decode(
+            ReviewDraftDto(1, 2, "2026-11-15T00:00:00Z", recovered.content)
+        )).items.single().name)
+    }
+
     @Test fun cannotWriteUnscopedDraftWithoutCurrentAuthSubject() = runBlocking {
         val unauthenticated = PendingReviewDraftStore(context) { null }
         try {
