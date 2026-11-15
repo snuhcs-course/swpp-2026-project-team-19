@@ -59,6 +59,7 @@ import com.zerotoone.bottlemap.ui.common.UxSecondaryButton
 import com.zerotoone.bottlemap.ui.common.UxToast
 import com.zerotoone.bottlemap.ui.common.quietClick
 import com.zerotoone.bottlemap.ui.common.uxText
+import com.zerotoone.bottlemap.ui.owner.MenuPhotoProcessingIllustration
 import com.zerotoone.bottlemap.ui.owner.MenuPhotoSteps
 import com.zerotoone.bottlemap.ui.owner.V4Toolbar
 import kotlinx.coroutines.delay
@@ -680,13 +681,18 @@ private fun PublicationResultScreen(
             Column(Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState())
                 .padding(top = 35.dp), verticalArrangement = Arrangement.spacedBy(13.dp),
                 horizontalAlignment = Alignment.CenterHorizontally) {
-                Box(Modifier.size(72.dp).background(iconBg, RoundedCornerShape(22.dp))
-                    .border(1.dp, iconBorder, RoundedCornerShape(22.dp)),
-                    contentAlignment = Alignment.Center) {
-                    if (busy) CircularProgressIndicator(color = UxColor.gold,
-                        modifier = Modifier.size(37.dp), strokeWidth = 3.dp)
-                    else BmLineIcon(if (success) BmLineIconId.CHECK_CIRCLE else BmLineIconId.ALERT,
-                        38.dp, iconColor)
+                if (busy) {
+                    // Reuse the existing moving whisky-glass illustration from
+                    // the photo-processing flow; no spinner or progress bar.
+                    MenuPhotoProcessingIllustration(
+                        diameter = 96.dp, tag = "review-publish-loading-glass")
+                } else {
+                    Box(Modifier.size(72.dp).background(iconBg, RoundedCornerShape(22.dp))
+                        .border(1.dp, iconBorder, RoundedCornerShape(22.dp)),
+                        contentAlignment = Alignment.Center) {
+                        BmLineIcon(if (success) BmLineIconId.CHECK_CIRCLE else BmLineIconId.ALERT,
+                            38.dp, iconColor)
+                    }
                 }
                 Spacer(Modifier.height(10.dp))
                 Text(title, style = uxText(25f, 760, lineHeight = 1.4f),
@@ -716,9 +722,6 @@ private fun PublicationResultScreen(
                     if (newWhisky) PublicationNote("새로운 위스키 안내",
                         "새로 등록한 위스키는 운영자가 확인한 뒤부터 검색에 나와요.", critical = false)
                 }
-                if (busy) androidx.compose.material3.LinearProgressIndicator(
-                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                    color = UxColor.gold, trackColor = UxColor.line)
                 if (failure == PublishFailure.UNKNOWN || failure == PublishFailure.SERVER)
                     PublicationNote(null,
                         "중복 등록을 막기 위해 지금은 다시 게시할 수 없어요. 먼저 게시 상태를 확인해 주세요.",
