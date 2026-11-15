@@ -39,6 +39,9 @@ internal class PendingReviewDraftStore(
                 expectedDraftVersion == (remote?.draftVersion ?: 0)
     }
 
+    // Larger than §5.9's 256 KiB server limit, so oversized reviews can
+    // still survive process death. Keep a bounded private device file.
+    private val maxDeviceBytes = 2 * 1024 * 1024
     private val directory = File(context.applicationContext.noBackupFilesDir,
         "pending-owner-review-drafts")
     private val adapter = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
@@ -63,7 +66,7 @@ internal class PendingReviewDraftStore(
         val file = fileFor(importId)
             ?: error("계정 확인이 안 되어 이 기기에 검수 초안을 저장할 수 없어요.")
         val json = adapter.toJson(envelope).toByteArray(Charsets.UTF_8)
-        check(json.size <= 350_000) { "기기 검수 초안이 너무 커서 저장할 수 없어요." }
+        check(json.size <= maxDeviceBytes) { "기기 검수 초안이 너무 커서 저장할 수 없어요." }
         withContext(Dispatchers.IO) {
             check(directory.isDirectory || directory.mkdirs()) {
                 "검수 초안 저장 공간을 만들 수 없어요."
@@ -89,7 +92,7 @@ internal class PendingReviewDraftStore(
             runCatching {
                 AtomicFile(file).openRead().use { stream ->
                     val bytes = stream.readBytes() // supported on all project Android API levels
-                    if (bytes.size > 350_000) null
+                    if (bytes.size > maxDeviceBytes) null
                     else adapter.fromJson(String(bytes, Charsets.UTF_8))
                 }
             }.getOrNull()
