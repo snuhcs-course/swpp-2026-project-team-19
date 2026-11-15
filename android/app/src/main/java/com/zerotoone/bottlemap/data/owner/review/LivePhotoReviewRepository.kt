@@ -67,6 +67,18 @@ internal object DraftSaveSafety {
         if (conflicted) throw ReviewDraftConflictException()
     }
 
+    /** Only the most recent working copy may be considered acknowledged. */
+    fun latestCopyAcknowledged(
+        remote: ReviewDraftDto?,
+        original: PendingReviewDraftStore.Envelope,
+        working: PendingReviewDraftStore.Envelope?,
+    ): Boolean = remote != null &&
+        remote.reviewVersion == original.reviewVersion &&
+        remote.draftVersion > original.expectedDraftVersion &&
+        (working == null || working.reviewVersion == original.reviewVersion) &&
+        ServerReviewDraftCodec.sameAndroidSnapshot(
+            (working ?: original).content, remote.content)
+
     fun canSkip(
         forced: Boolean,
         pendingLocally: Boolean,
@@ -268,12 +280,8 @@ class LivePhotoReviewRepository(
             val working = workingStore.read(id)
             pendingOversized = ServerReviewDraftCodec.exceedsServerLimit(
                 (working ?: pending).content)
-            // A working copy is more recent than the protected original.
-            // Never clear it merely because the server ACKed old content.
-            val serverAlreadySaved = saved != null &&
-                saved.draftVersion > pending.expectedDraftVersion &&
-                ServerReviewDraftCodec.sameAndroidSnapshot(
-                    (working ?: pending).content, saved.content)
+            val serverAlreadySaved =
+                DraftSaveSafety.latestCopyAcknowledged(saved, pending, working)
             if (serverAlreadySaved) {
                 // A lost successful CAS response may have saved the explicit
                 // working copy. Clear both only on exact content match.
