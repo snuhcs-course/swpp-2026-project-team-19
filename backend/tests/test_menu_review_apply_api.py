@@ -28,10 +28,12 @@ from app.models import (
     ReviewStatus,
     UserType,
 )
+from app.matching.db_catalog import DbCatalog
+from app.matching.rematch import attribute_conflict
 from app.schemas.menu_review import ReviewAndApplyRequest
 from app.services import menu_review_apply, serializable
 from app.services.menu_review_apply import review_and_apply
-from tests.factories import make_bar, make_owner, make_user
+from tests.factories import make_bar, make_owner, make_product, make_user
 from tests.sql_support import recorded_statements
 from tests.review_support import JPEG, make_glenfiddich, options_of, upload_sample_review, valid_body
 
@@ -615,18 +617,77 @@ def test_an_automatic_match_kept_opens_no_check(client, db_session, sample, oper
     }
 
 
-def test_an_edition_read_only_from_the_line_is_a_conflict(client, db_session, sample, operator, glenfiddich):
+def _fourteens(db_session, glenfiddich):
+    """Two 14-year-olds of the brand that differ only in the edition."""
+    brand = db_session.get(Brand, glenfiddich[12].brand_id)
+    bourbon = make_product(db_session, brand, "Glenfiddich 14 Bourbon Barrel Reserve", age_years=14,
+                           edition_name="Bourbon Barrel Reserve")
+    oak = make_product(db_session, brand, "Glenfiddich 14 Rich Oak", age_years=14, edition_name="Rich Oak")
+    return bourbon, oak
+
+
+def _read_as(db_session, item, name, **values):
     db_session.execute(
         ExtractedItem.__table__.update()
-        .where(ExtractedItem.id == sample.items[2].id)
-        .values(extracted_age_years=None, extracted_edition_name="Sherry Cask")
+        .where(ExtractedItem.id == item.id)
+        .values(raw_text=name, extracted_product_name=name, **values)
     )
     db_session.commit()
 
-    applied(client, sample, _choose_for_the_15yo_line(sample, glenfiddich, glenfiddich[15]), operator)
+
+def test_the_edition_is_compared_by_how_close_the_products_of_the_brand_are_to_the_line(
+    client, db_session, sample, operator, glenfiddich
+):
+    """The menu writes the edition its own way ("Bourbon Cask", the catalog has "Bourbon Barrel Reserve").
+    The product closest to the line among the brand's 14-year-olds opens no check, though comparing the
+    edition as text (rematch.attribute_conflict, what 8.7 first used) calls it a conflict."""
+    bourbon, _ = _fourteens(db_session, glenfiddich)
+    _read_as(db_session, sample.items[2], "Glenfiddich 14 Bourbon Cask", extracted_age_years=14,
+             extracted_edition_name="Bourbon Cask")
+    assert attribute_conflict(bourbon.id, 14, "Bourbon Cask", DbCatalog(db_session))
+
+    applied(client, sample, _choose_for_the_15yo_line(sample, glenfiddich, bourbon), operator)
+
+    assert _checks(db_session, sample.bar.id) == []
+
+
+def test_a_chosen_product_of_another_edition_is_published_and_checked(
+    client, db_session, sample, operator, glenfiddich
+):
+    """The same line linked to the other 14-year-old: another product of the brand is closer to the line."""
+    _, oak = _fourteens(db_session, glenfiddich)
+    _read_as(db_session, sample.items[2], "Glenfiddich 14 Bourbon Cask", extracted_age_years=14,
+             extracted_edition_name="Bourbon Cask")
+
+    applied(client, sample, _choose_for_the_15yo_line(sample, glenfiddich, oak), operator)
 
     assert [reasons for _, reasons in _checks(db_session, sample.bar.id)] == [
         [(CheckReason.ATTRIBUTE_CONFLICT, sample.items[2].id)]
+    ]
+
+
+def test_an_edition_in_the_extracted_field_alone_is_not_compared(client, db_session, sample, operator, glenfiddich):
+    """Only the line's name and age are compared (pick_check): an edition value the name does not have
+    opens no check when the chosen product is the one closest to the name."""
+    _read_as(db_session, sample.items[2], "Glenfiddich 15", extracted_age_years=15,
+             extracted_edition_name="Sherry Cask")
+
+    applied(client, sample, _choose_for_the_15yo_line(sample, glenfiddich, glenfiddich[15]), operator)
+
+    assert _checks(db_session, sample.bar.id) == []
+
+
+def test_a_line_without_a_name_is_compared_by_its_text(client, db_session, sample, operator, glenfiddich):
+    _, oak = _fourteens(db_session, glenfiddich)
+    _read_as(db_session, sample.items[2], "Glenfiddich 14 Bourbon Cask", extracted_age_years=14)
+    db_session.execute(ExtractedItem.__table__.update().where(ExtractedItem.id == sample.items[2].id)
+                       .values(extracted_product_name=None))
+    db_session.commit()
+
+    applied(client, sample, _choose_for_the_15yo_line(sample, glenfiddich, oak), operator)
+
+    assert [reason for _, reasons in _checks(db_session, sample.bar.id) for reason, _ in reasons] == [
+        CheckReason.ATTRIBUTE_CONFLICT
     ]
 
 

@@ -63,7 +63,8 @@ from app.services.bar_menu import bar_not_found
 from app.services.menu_checks import dismiss_open_checks, move_open_check, raise_check, settle_linked
 from app.services.menu_draft import build_draft, draft_compared_items, replace_draft
 from app.matching.db_catalog import DbCatalog
-from app.matching.rematch import attribute_conflict, name_corrected
+from app.matching.pick_check import check_pick, db_similarities
+from app.matching.rematch import name_corrected
 from app.services.menu_publish import AppliedChange, BoardEntry, PublishPlan, review_plan, write_board
 from app.services.menu_review_catalog import CatalogResult, create_catalog_entries
 from app.services.menu_review_draft import clear_review_draft
@@ -356,12 +357,14 @@ def _raise_attribute_conflicts(
     item: BarMenuItem,
     catalog: DbCatalog,
 ) -> None:
-    """A chosen product whose age or edition conflicts with what the AI read from the line (spec 8.7):
-    published as chosen, and shown to an operator with the line as source. Only lines published with an
-    existing product the reviewer chose without correcting the name; a corrected name is matched again
-    (8.11), and a new product or a line without one is not compared. Whoever submitted it."""
+    """A chosen product that does not fit the line (spec 8.7, app.matching.pick_check): its age differs
+    from the line's, or another product of its brand is closer to the line's name. Published as chosen,
+    and shown to an operator with the line as source. Only lines published with an existing product the
+    reviewer chose without correcting the name; a corrected name is matched again (8.11), and a new
+    product or a line without one is not compared. Whoever submitted it."""
     if item.product_id is None or entry.extracted_item_id is None:
         return
+    similarities = None
     for line in plan.entry_lines.get(entry.extracted_item_id, ()):
         reviewed = reviewed_by_id[line]
         decision = reviewed.decision
@@ -370,7 +373,10 @@ def _raise_attribute_conflicts(
         if name_corrected(decision.correctedProductName, reviewed.item.extracted_product_name):
             continue
         source = reviewed.item
-        if attribute_conflict(item.product_id, source.extracted_age_years, source.extracted_edition_name, catalog):
+        # the catalog index is built once per catalog version and only when a line needs it
+        similarities = similarities or db_similarities(session)
+        name = source.extracted_product_name or source.raw_text
+        if not check_pick(name, source.extracted_age_years, item.product_id, catalog, similarities).fits:
             raise_check(
                 session,
                 item,
