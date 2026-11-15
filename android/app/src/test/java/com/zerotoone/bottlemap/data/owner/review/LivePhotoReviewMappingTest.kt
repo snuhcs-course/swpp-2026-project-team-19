@@ -467,6 +467,69 @@ class LivePhotoReviewMappingTest {
         assertEquals("ocr-bottle",option.optionId)
     }
 
+    @Test fun restoredSelectedProductUsesItsOwnCurrentPricesNotOcrProposalPrices() {
+        val a = com.zerotoone.bottlemap.ui.owner.review.ReviewPriceCandidate(
+            servingKey = "ml:30", volumeMl = 30, priceKrw = 10000, existing = true,
+        )
+        val oldB = a.copy(priceKrw = 15000)
+        val newB = a.copy(priceKrw = 18000)
+        val restored = com.zerotoone.bottlemap.ui.owner.review.ReviewItem(
+            id = "review-A", name = "수정한 위스키 B",
+            linkedProductId = "product-B",
+            price = 16000.0, volume = 30.0,
+            priceCandidates = listOf(oldB),
+            chosenServingPrices = mapOf("ml:30" to 16000),
+        )
+        // Fresh AI mapping still proposes A, but the Owner selected B.
+        val fresh = restored.copy(
+            linkedProductId = "product-A",
+            priceCandidates = listOf(a),
+            existingServingPricesByProductId = mapOf(
+                "product-A" to listOf(a), "product-B" to listOf(newB),
+            ),
+        )
+        var unlinkedLookups = 0
+        val selected = currentExistingPricesForRestoredChoice(restored, fresh) {
+            unlinkedLookups++
+            emptyList()
+        }
+        assertEquals(listOf(newB), selected)
+        assertEquals(0, unlinkedLookups)
+        assertTrue(retainedOwnerServingPriceDecisions(restored, selected).isEmpty())
+        // If B was unchanged, the Owner's explicit confirmation stays valid.
+        val unchanged = fresh.copy(existingServingPricesByProductId =
+            fresh.existingServingPricesByProductId + ("product-B" to listOf(oldB)))
+        assertEquals(mapOf("ml:30" to 16000), retainedOwnerServingPriceDecisions(
+            restored, currentExistingPricesForRestoredChoice(restored, unchanged) { emptyList() },
+        ))
+    }
+
+    @Test fun editedOtherPourOrClearedPourIsSentWithOcrIdentity() {
+        val dto = item(
+            options = listOf(
+                ReviewOptionDto("other-30", 1, "잔", 30, 8000),
+                ReviewOptionDto("other-60", 2, "샷", 60, 12000),
+            ),
+            status = "unmatched", proposedId = null,
+        ).copy(extractedKind = "other", candidates = emptyList(), newProductDraft = null)
+        val card = mapServerPhotoReview(response(dto), fixture()).items.single()
+        val corrected = PhotoReviewRules.editOption(
+            PhotoReviewRules.editOption(
+                card, PhotoReviewRules.OptionField.VOLUME, null, "",
+            ),
+            PhotoReviewRules.OptionField.VOLUME, 0, "45",
+        )
+        assertTrue(corrected.volume.isNaN())
+        assertEquals(45.0, corrected.options.single().volume, 0.0)
+        assertTrue(PhotoReviewRules.problems(corrected).isEmpty())
+        val wire = requireNotNull(mapConfirmedReviewDecision(
+            corrected, dto, 30.0, emptyMap(),
+        ).correctedOptions)
+        assertEquals(listOf("other-30", "other-60"), wire.map { it.optionId })
+        assertEquals(listOf(null, 45), wire.map { it.pourMl })
+        assertEquals(listOf(8000, 12000), wire.map { it.priceKrw })
+    }
+
     @Test fun unknownOtherLabelCanSavePriceWithoutInventingPour() {
         val dto=item(options=listOf(ReviewOptionDto("ocr-other",1,null,null,1500)),
             status="unmatched",proposedId=null)
