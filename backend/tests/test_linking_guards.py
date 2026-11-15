@@ -8,6 +8,7 @@ import pytest
 from app.matching import ProductInfo
 from app.matching.linking_guards import apply_linking_guards, incomplete_name
 from app.matching.memory_catalog import InMemoryCatalog
+from app.matching import product_draft
 from app.matching.product_draft import ProductDraft, draft_from_name, whole_spellings
 from app.matching.review_state import ReviewState, review_state, stored_status
 from app.matching.staged import resolve_product_staged
@@ -154,6 +155,19 @@ def test_product_info_is_verified_unless_said_otherwise():
     ("발베니 16년 / Balvenie 16 French Oak", ProductDraft(
         "발베니 16년 / Balvenie 16 French Oak", ("발베니 16년", "Balvenie 16 French Oak"), BALVENIE, "Balvenie", 16,
         "French Oak")),
+    # brackets in the other script that hold the age or the edition are part of the name, not the
+    # name again: the brand and the edition are kept
+    ("발베니 (12Y DoubleWood)", ProductDraft("발베니 (12Y DoubleWood)", (), BALVENIE, "발베니", 12, "DoubleWood")),
+    ("발베니 (Caribbean Cask) 14년", ProductDraft(
+        "발베니 (Caribbean Cask) 14년", (), BALVENIE, "발베니", 14, "Caribbean Cask")),
+    ("Balvenie 14y (럼 캐스크)", ProductDraft("Balvenie 14y (럼 캐스크)", (), BALVENIE, "Balvenie", 14, "럼 캐스크")),
+    # brackets that say more but start with the title's brand are the name again: each side is
+    # read on its own, so "Balvenie" is not taken for the edition
+    ("발베니 (Balvenie 12) 더블우드", ProductDraft(
+        "발베니 (Balvenie 12) 더블우드", (), BALVENIE, "Balvenie", 12, "더블우드", "double wood")),
+    # brackets that only repeat the title's edition in the other script add nothing
+    ("Balvenie 16y French Oak (프렌치 오크)", ProductDraft(
+        "Balvenie 16y French Oak (프렌치 오크)", (), BALVENIE, "Balvenie", 16, "French Oak")),
     # OCR text with double spaces: the brand is the brand, not "Balvenie  2"
     ("Balvenie  21  Portwood", ProductDraft("Balvenie 21 Portwood", (), BALVENIE, "Balvenie", 21, "Portwood")),
 ])
@@ -177,9 +191,27 @@ def test_draft_needs_a_name(catalog):
     ("맥캘란 (12년) 셰리 오크", ()),
     ("Macallan (Sherry Oak) 12 Years", ()),
     ("맥캘란 Macallan (12년) 셰리 오크", ()),          # the text before the brackets mixes scripts
+    # brackets in the other script with a number or a whisky word the title lacks are not the
+    # name again: "12Y Sherry Oak 나머지" must never become an alias
+    ("맥캘란 (12Y Sherry Oak)", ()),
+    ("맥캘란 (12Y) 셰리 오크", ()),
+    ("맥캘란 (SherryOak) 12년", ()),                    # written together
+    ("Macallan (셰리 오크) 12 Years", ()),
+    # a whisky word the title has too, in its own script, is the name again
+    ("포트샬롯(Port Charlotte) 10년", ("포트샬롯 10년", "Port Charlotte 10년")),
+    ("맥캘란 셰리오크(Macallan Sherry Oak) 12년", ("맥캘란 셰리오크 12년", "Macallan Sherry Oak 12년")),
+    ("Macallan Sherry Oak (맥캘란 셰리 오크) 12", ("Macallan Sherry Oak 12", "맥캘란 셰리 오크 12")),
+    ("더 위스키 에이전시(TWA) 카발란 7년", ("더 위스키 에이전시 카발란 7년", "TWA 카발란 7년")),
+    ("글렌그란트(Glen Grant) 18년", ("글렌그란트 18년", "Glen Grant 18년")),
 ])
 def test_whole_spellings(name, spellings):
     assert whole_spellings(name) == spellings
+
+
+def test_brackets_are_read_by_script_alone_without_a_vocabulary(monkeypatch):
+    monkeypatch.setattr(product_draft, "_VOCABULARY", None)
+    assert whole_spellings("맥캘란 (Sherry Oak) 12년") == ("맥캘란 12년", "Sherry Oak 12년")
+    assert whole_spellings("맥캘란 (12Y) 셰리 오크") == ()  # the number is still seen
 
 
 def test_a_draft_never_confirms_a_line(catalog):

@@ -46,6 +46,11 @@ from app.matching.vocabulary import to_english
 _SPACES = re.compile(r"\s+")
 _PARENTHESES = re.compile(r"[()]")
 _NUMBERS = re.compile(r"\d+")
+_LATIN_WORD = re.compile(r"[a-z']+")
+_CAMEL = re.compile(r"(?<=[a-z])(?=[A-Z])")  # "DoubleWood" is read as "Double Wood"
+_KOREAN_SPELLINGS: dict[str, list[str]] = {}
+for _korean, _english in (_VOCABULARY.english.items() if _VOCABULARY is not None else ()):
+    _KOREAN_SPELLINGS.setdefault(_english, []).append(_korean)
 _MIN_BARE_AGE = 8
 
 
@@ -75,13 +80,26 @@ def _age_and_edition(rest: str) -> tuple[int | None, str | None]:
     return age, _SPACES.sub(" ", _PARENTHESES.sub(" ", rest)).strip() or None
 
 
-def _second_spelling(source: str) -> re.Match | None:
-    """The match of "제목(Title) 나머지" when the brackets hold the same words in the other script.
+def _says_more(title: str, inner: str) -> bool:
+    """Whether brackets in the other script say something the title does not: a number, or a
+    whisky word of the vocabulary. "발베니 (12Y DoubleWood)" and "Balvenie 14y (럼 캐스크)" do;
+    "포트샬롯(Port Charlotte)" and "Balvenie 16y French Oak (프렌치 오크)" only repeat the title."""
+    if not set(_NUMBERS.findall(inner)) <= set(_NUMBERS.findall(title)):
+        return True
+    if _VOCABULARY is None:
+        return False
+    if _HANGUL.search(title):  # Latin brackets: an English term none of whose Korean spellings is in the title
+        latin = f" {' '.join(_LATIN_WORD.findall(_CAMEL.sub(' ', inner).lower()))} "
+        return any(f" {english} " in latin and not any(korean in title for korean in spellings)
+                   for english, spellings in _KOREAN_SPELLINGS.items())
+    plain = "".join(_LATIN_WORD.findall(title.lower()))  # Hangul brackets: a Korean spelling whose English is not
+    return any(korean in inner and english.replace(" ", "") not in plain
+               for korean, english in _VOCABULARY.english.items())
 
-    The text before the brackets must be in one script and the brackets must have the other one:
-    "글렌알라키(Glenallachie) 15년", "Yamazaki Dr (야마자키 Dr)". Brackets in the same script are part
-    of the name ("Macallan 12 (Sherry Oak)", "맥캘란 (12년) 셰리 오크") and give no second spelling.
-    """
+
+def _other_script_brackets(source: str) -> re.Match | None:
+    """The match of "제목(Title) 나머지" when the text before the brackets is in one script and the
+    brackets have the other one."""
     match = _PARENTHESIZED.match(source)
     if match is None:
         return None
@@ -89,10 +107,33 @@ def _second_spelling(source: str) -> re.Match | None:
     return match if other is not None and other.search(match["inner"]) else None
 
 
-def _bracket_readings(source: str) -> list[str]:
+def _second_spelling(source: str) -> re.Match | None:
+    """The match of "제목(Title) 나머지" when the brackets hold the same words in the other script.
+
+    The text before the brackets must be in one script and the brackets must have the other one:
+    "글렌알라키(Glenallachie) 15년", "Yamazaki Dr (야마자키 Dr)". Brackets in the same script are part
+    of the name ("Macallan 12 (Sherry Oak)", "맥캘란 (12년) 셰리 오크") and give no second spelling.
+
+    The other script alone is not enough: "발베니 (12Y DoubleWood)" and "발베니 (Caribbean Cask) 14년"
+    put the age and the edition in the brackets, not the name again. Brackets with a number or a
+    whisky word the title does not have are part of the name too (_says_more).
+    """
+    match = _other_script_brackets(source)
+    return match if match is not None and not _says_more(match["title"], match["inner"]) else None
+
+
+def _bracket_readings(source: str, catalog: CatalogLookup) -> list[str]:
     match = _second_spelling(source)
     if match is None:
-        return []
+        # brackets that say more than the title are still the name again when they start with the
+        # title's brand: "맥캘란 (Macallan 12) 셰리 오크". Each side is read on its own then, so the
+        # other spelling of the brand is not taken for the edition.
+        match = _other_script_brackets(source)
+        if match is None:
+            return []
+        title, inner = (_find_brand(match[part].strip(), catalog) for part in ("title", "inner"))
+        if title is None or inner is None or not set(title[0]) & set(inner[0]):
+            return []
     rest = match["rest"].strip()
     return list(dict.fromkeys(f"{match[part].strip()} {rest}".strip() for part in ("title", "inner")))
 
@@ -118,7 +159,7 @@ def draft_from_name(name: str | None, catalog: CatalogLookup) -> ProductDraft | 
     spellings = whole_spellings(source)
     # the line as a whole is read only when it has no second spelling: with one, the other
     # spelling would be taken for the edition ("발베니 17년 / Balvenie 17Y")
-    readings = list(dict.fromkeys([*_bracket_readings(source), *spellings])) or [source]
+    readings = list(dict.fromkeys([*_bracket_readings(source, catalog), *spellings])) or [source]
     best: ProductDraft | None = None
     for variant in readings:
         found = _find_brand(variant, catalog)
