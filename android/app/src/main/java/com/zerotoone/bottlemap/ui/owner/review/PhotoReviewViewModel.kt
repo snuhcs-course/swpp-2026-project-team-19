@@ -82,6 +82,8 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
     val draftProblem: StateFlow<String?> = _draftProblem.asStateFlow()
     private val _draftRetryable = MutableStateFlow(false)
     val draftRetryable: StateFlow<Boolean> = _draftRetryable.asStateFlow()
+    private val _draftOversized = MutableStateFlow(false)
+    val draftOversized: StateFlow<Boolean> = _draftOversized.asStateFlow()
     private val _draftConflictChoice = MutableStateFlow(false)
     val draftConflictChoice: StateFlow<Boolean> = _draftConflictChoice.asStateFlow()
     private val _draftResolving = MutableStateFlow(false)
@@ -117,6 +119,7 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                 _load.value = try {
                     repository.loadReview().let { fresh ->
                         _draftConflictChoice.value = repository.hasPendingDraftConflict()
+                        _draftOversized.value = repository.hasOversizedPendingDraft()
                         _draftRetryable.value = repository.hasPendingLocalDraft() &&
                             !_draftConflictChoice.value &&
                             !repository.hasOversizedPendingDraft()
@@ -202,6 +205,7 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                         repository.saveDraft(state)
                         _draftProblem.value = null
                         _draftRetryable.value = false
+                        _draftOversized.value = false
                         _draftConflictChoice.value = false
                     } catch (cancelled: CancellationException) {
                         throw cancelled
@@ -216,6 +220,7 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                     } catch (error: ReviewDraftTooLargeLocalException) {
                         _draftProblem.value = oversizedNotice
                         _draftRetryable.value = false
+                        _draftOversized.value = true
                         toast(oversizedNotice)
                     } catch (error: BottleMapApiException) {
                         // Transient disconnects are retried on Leave; permanent
@@ -270,6 +275,7 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                 _draftConflictChoice.value = false
                 _draftProblem.value = null
                 _draftRetryable.value = false
+                _draftOversized.value = false
                 // Rebind all current OCR and reviewed fields from the server,
                 // never keep a stale ViewModel copy after a successful choice.
                 reload()
@@ -316,6 +322,7 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                     // §5.9 allows device-only storage above the server limit.
                     // Leave is safe ONLY after the local AtomicFile was written.
                     _draftRetryable.value = false
+                    _draftOversized.value = true
                     _draftProblem.value = oversizedNotice
                     repository.hasPendingLocalDraft() &&
                         repository.hasOversizedPendingDraft()
