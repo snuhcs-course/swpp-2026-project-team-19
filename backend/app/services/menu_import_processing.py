@@ -42,6 +42,7 @@ from app.matching import ExtractedProduct, ResolutionResult
 from app.matching.db_catalog import CatalogSnapshot, DbCatalog
 from app.matching.embedding import EmbeddingStep, get_embedding_step, summarize
 from app.matching.llm_layer import CONFIRMED, M3Engine
+from app.matching.review_state import stored_status
 from app.matching.staged import resolve_product_staged
 from app.matching.tool_config import CappedToolLLM, MatchingLayerConfig, ToolLayerConfig
 from app.matching.tool_layer import ToolEngine
@@ -312,10 +313,10 @@ def _resolve_and_draft(session: Session, menu_import: MenuImport, llm_layer: Mat
         results = _apply_embedding(session, menu_import.id, items, results, embedding)
     for item in items:
         result = results[item.id]
+        # exact_match only for a line that needs no review (I4-P24, app.matching.review_state).
         # "multi" (one line naming two products) has no stored status: the line stays ambiguous
         # with both products as candidates (evidence "multiProduct"), and the reviewer decides.
-        status = ResolutionStatus.AMBIGUOUS if result.status == "multi" else ResolutionStatus(result.status)
-        item.initial_resolution_status = status
+        item.initial_resolution_status = ResolutionStatus(stored_status(result))
         for candidate in result.candidates:
             session.add(
                 ResolutionCandidate(

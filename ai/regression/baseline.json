@@ -709,6 +709,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glen-grant-15"
         },
         {
@@ -717,6 +718,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glendronach-12"
         },
         {
@@ -725,6 +727,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glendronach-15"
         },
         {
@@ -733,6 +736,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenlivet-12"
         },
         {
@@ -741,6 +745,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenmorangie-original"
         },
         {
@@ -749,6 +754,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenmorangie-nectar-dor"
         },
         {
@@ -757,6 +763,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenmorangie-lasanta"
         },
         {
@@ -765,6 +772,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenmorangie-quinta-ruban"
         },
         {
@@ -773,6 +781,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenmorangie-signet"
         },
         {
@@ -781,6 +790,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenmorangie-18"
         },
         {
@@ -789,6 +799,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenallachie-12"
         },
         {
@@ -797,6 +808,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenallachie-15"
         },
         {
@@ -805,6 +817,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenfarclas-105"
         },
         {
@@ -813,6 +826,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenfiddich-12"
         },
         {
@@ -821,6 +835,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenfiddich-15"
         },
         {
@@ -829,6 +844,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "dalmore-12"
         },
         {
@@ -837,6 +853,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "dalmore-12-sherry-cask-select"
         },
         {
@@ -845,6 +862,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "dalmore-15"
         },
         {
@@ -853,6 +871,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "dalmore-port-wood"
         },
         {
@@ -861,6 +880,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "dalmore-cigar-malt"
         },
         {
@@ -869,6 +889,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "royal-brackla-12"
         },
         {
@@ -877,6 +898,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "royal-brackla-18"
         },
         {
@@ -885,6 +907,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "macallan-12-double-cask"
         },
         {
@@ -893,6 +916,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "macallan-15-double-cask"
         },
         {
@@ -901,6 +925,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "bunnahabhain-12"
         },
         {
@@ -909,6 +934,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "arran-10"
         },
         {
@@ -917,6 +943,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "arran-sherry-cask"
         },
         {
@@ -925,6 +952,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "aberlour-abunadh"
         },
         {
@@ -933,6 +961,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "oban-14"
         },
         {
@@ -941,6 +970,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "kavalan-solist-sherry"
         },
         {
@@ -949,6 +979,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "kavalan-solist-vinho-barrique"
         },
         {
@@ -957,6 +988,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "kavalan-triple-sherry"
         },
         {
@@ -965,6 +997,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "clynelish-14"
         },
         {
@@ -973,6 +1006,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "balvenie-12-doublewood"
         },
         {
@@ -981,6 +1015,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "balvenie-14-caribbean"
         },
         {
@@ -989,6 +1024,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "tsunuki-the-edition-2025"
         },
         {
@@ -997,6 +1033,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "yoichi-single-malt"
         },
         {
@@ -1005,6 +1042,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "edradour-10"
         },
         {
@@ -1013,6 +1051,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "nomad-outland"
         }
       ],
@@ -1023,6 +1062,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "royal-salute-21"
         },
         {
@@ -1031,6 +1071,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "monkey-shoulder"
         },
         {
@@ -1039,6 +1080,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "johnnie-walker-black"
         },
         {
@@ -1047,6 +1089,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "johnnie-walker-blue"
         },
         {
@@ -1055,6 +1098,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "paul-john-oloroso"
         },
         {
@@ -1063,6 +1107,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "paul-john-peated"
         },
         {
@@ -1071,6 +1116,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "signatory-benriach-12"
         },
         {
@@ -1079,6 +1125,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "signatory-macduff-13"
         },
         {
@@ -1087,6 +1134,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "aultmore-12"
         },
         {
@@ -1095,6 +1143,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "signatory-speyside-gl"
         }
       ],
@@ -1106,6 +1155,7 @@
           "kind": "non_whisky",
           "outcome": "unmatched",
           "status": "unmatched",
+          "state": "no_candidate",
           "rank1": null
         },
         {
@@ -1114,6 +1164,7 @@
           "kind": "non_whisky",
           "outcome": "unmatched",
           "status": "unmatched",
+          "state": "no_candidate",
           "rank1": null
         },
         {
@@ -1122,6 +1173,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "johnnie-walker-black"
         },
         {
@@ -1130,6 +1182,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "johnnie-walker-blue"
         },
         {
@@ -1138,6 +1191,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "monkey-shoulder"
         },
         {
@@ -1146,6 +1200,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "jameson"
         },
         {
@@ -1154,6 +1209,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "jack-daniels-old-no7"
         },
         {
@@ -1162,6 +1218,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "1792-small-batch"
         },
         {
@@ -1170,6 +1227,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "woodford-reserve"
         },
         {
@@ -1178,6 +1236,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "noahs-mill"
         }
       ],
@@ -1188,6 +1247,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "highland-park-12"
         },
         {
@@ -1196,6 +1256,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "highland-park-cs-batch-4"
         },
         {
@@ -1204,6 +1265,7 @@
           "kind": "unknown",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "highland-park-cs-batch-4"
         },
         {
@@ -1212,6 +1274,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "highland-park-15"
         },
         {
@@ -1220,6 +1283,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "highland-park-18"
         },
         {
@@ -1228,6 +1292,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "highland-park-16"
         },
         {
@@ -1236,6 +1301,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenkinchie-12"
         },
         {
@@ -1244,6 +1310,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "auchentoshan-american-oak"
         },
         {
@@ -1252,6 +1319,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "auchentoshan-12"
         },
         {
@@ -1260,6 +1328,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "auchentoshan-sauvignon-blanc"
         },
         {
@@ -1268,6 +1337,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "auchentoshan-three-wood"
         },
         {
@@ -1276,6 +1346,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "auchentoshan-18"
         },
         {
@@ -1284,6 +1355,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "longrow-peated"
         },
         {
@@ -1292,6 +1364,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "springbank-10"
         },
         {
@@ -1300,6 +1373,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "springbank-12-cs"
         },
         {
@@ -1308,6 +1382,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "springbank-15"
         },
         {
@@ -1316,6 +1391,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "kilkerran-12"
         },
         {
@@ -1324,6 +1400,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "kilkerran-heavily-peated"
         },
         {
@@ -1332,6 +1409,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "kilkerran-16"
         },
         {
@@ -1340,6 +1418,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glen-scotia-double-cask"
         },
         {
@@ -1348,6 +1427,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glen-scotia-15"
         },
         {
@@ -1356,6 +1436,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glen-scotia-18"
         },
         {
@@ -1364,6 +1445,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glen-scotia-12-mermaid"
         },
         {
@@ -1372,6 +1454,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "gm-miltonduff-10"
         },
         {
@@ -1380,6 +1463,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "gm-bunnahabhain-10"
         },
         {
@@ -1388,6 +1472,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "gm-bunnahabhain-heavily-peated-11"
         },
         {
@@ -1396,6 +1481,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "gm-glenrothes-11"
         },
         {
@@ -1404,6 +1490,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "scarabus"
         },
         {
@@ -1412,6 +1499,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "hunter-laing-royal-brackla-14"
         },
         {
@@ -1420,6 +1508,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "hunter-laing-cragganmore-26"
         },
         {
@@ -1428,6 +1517,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "rock-island"
         },
         {
@@ -1436,6 +1526,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "epicurean"
         },
         {
@@ -1444,6 +1535,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "timorous-beastie"
         },
         {
@@ -1452,6 +1544,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "gauldrons"
         },
         {
@@ -1460,6 +1553,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "gauldrons-cs"
         },
         {
@@ -1468,6 +1562,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "gauldrons-sherry"
         },
         {
@@ -1476,6 +1571,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "scallywag-winter-2025"
         },
         {
@@ -1484,6 +1580,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "big-peat-winter-2025"
         },
         {
@@ -1492,6 +1589,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "blackadder-sherry-snake"
         },
         {
@@ -1500,6 +1598,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "compass-box-orchard-house"
         },
         {
@@ -1508,6 +1607,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "port-askaig-8"
         },
         {
@@ -1516,6 +1616,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "port-askaig-17"
         },
         {
@@ -1524,6 +1625,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "elements-of-islay-bourbon"
         },
         {
@@ -1532,6 +1634,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "elements-of-islay-sherry"
         }
       ],
@@ -1542,6 +1645,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "lagavulin-8"
         },
         {
@@ -1550,6 +1654,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "lagavulin-11-sweet-peat"
         },
         {
@@ -1558,6 +1663,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "lagavulin-de-2023"
         },
         {
@@ -1566,6 +1672,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "lagavulin-16"
         },
         {
@@ -1574,6 +1681,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "kilchoman-machir-bay"
         },
         {
@@ -1582,6 +1690,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "kilchoman-sanaig"
         },
         {
@@ -1590,6 +1699,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "kilchoman-machir-bay-cs"
         },
         {
@@ -1598,6 +1708,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "kilchoman-korea-small-batch"
         },
         {
@@ -1606,6 +1717,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "kilchoman-batch-strength"
         },
         {
@@ -1614,6 +1726,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "kilchoman-sanaig-cs"
         },
         {
@@ -1622,6 +1735,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "kilchoman-fino-sherry"
         },
         {
@@ -1630,6 +1744,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "kilchoman-cognac-cask"
         },
         {
@@ -1638,6 +1753,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "kilchoman-px-sherry"
         },
         {
@@ -1646,6 +1762,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "kilchoman-loch-gorm"
         },
         {
@@ -1654,6 +1771,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "kilchoman-100-islay"
         },
         {
@@ -1662,6 +1780,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "kilchoman-port-single-cask"
         },
         {
@@ -1670,6 +1789,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "kilchoman-sauternes-cask"
         },
         {
@@ -1678,6 +1798,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "kilchoman-port-cask"
         },
         {
@@ -1686,6 +1807,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "kilchoman-16"
         },
         {
@@ -1694,6 +1816,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "bruichladdich-classic-laddie"
         },
         {
@@ -1702,6 +1825,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "bruichladdich-islay-barley"
         },
         {
@@ -1710,6 +1834,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "bruichladdich-18"
         },
         {
@@ -1718,6 +1843,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "bruichladdich-black-art-11"
         },
         {
@@ -1726,6 +1852,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "port-charlotte-10"
         },
         {
@@ -1734,6 +1861,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "port-charlotte-islay-barley-2014"
         },
         {
@@ -1742,6 +1870,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "port-charlotte-pmc-01"
         },
         {
@@ -1750,6 +1879,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "octomore-14-1"
         },
         {
@@ -1758,6 +1888,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "octomore-14-2"
         },
         {
@@ -1766,6 +1897,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "octomore-15-1"
         },
         {
@@ -1774,6 +1906,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "octomore-15-2"
         },
         {
@@ -1782,6 +1915,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "octomore-15-3"
         },
         {
@@ -1790,6 +1924,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "caol-ila-12"
         },
         {
@@ -1798,6 +1933,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "caol-ila-18"
         },
         {
@@ -1806,6 +1942,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "bunnahabhain-12"
         },
         {
@@ -1814,6 +1951,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "bunnahabhain-cruach-mhona"
         },
         {
@@ -1822,6 +1960,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "bunnahabhain-an-cladach"
         },
         {
@@ -1830,6 +1969,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "bunnahabhain-toiteach-a-dha"
         },
         {
@@ -1838,6 +1978,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "bunnahabhain-eirigh-na-greine"
         },
         {
@@ -1846,6 +1987,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "bunnahabhain-12-cs"
         },
         {
@@ -1854,6 +1996,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "bunnahabhain-14-ruby-port"
         },
         {
@@ -1862,6 +2005,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "bunnahabhain-18"
         },
         {
@@ -1870,6 +2014,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "arran-10"
         },
         {
@@ -1878,6 +2023,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "arran-quarter-cask"
         },
         {
@@ -1886,6 +2032,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "arran-port-cask"
         },
         {
@@ -1894,6 +2041,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "arran-amarone-cask"
         },
         {
@@ -1902,6 +2050,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "arran-sauternes-cask"
         },
         {
@@ -1910,6 +2059,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "arran-sherry-cask"
         },
         {
@@ -1918,6 +2068,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "arran-machrie-moor-cs"
         },
         {
@@ -1926,6 +2077,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "arran-machrie-moor-10"
         },
         {
@@ -1934,6 +2086,7 @@
           "kind": "unknown",
           "outcome": "unmatched",
           "status": "unmatched",
+          "state": "no_candidate",
           "rank1": null
         },
         {
@@ -1942,6 +2095,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "arran-private-cask-2"
         },
         {
@@ -1950,6 +2104,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "arran-18"
         },
         {
@@ -1958,6 +2113,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "arran-21"
         },
         {
@@ -1966,6 +2122,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "arran-25"
         },
         {
@@ -1974,6 +2131,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "talisker-skye"
         },
         {
@@ -1982,6 +2140,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "talisker-10"
         },
         {
@@ -1990,6 +2149,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "talisker-wild-blue"
         },
         {
@@ -1998,6 +2158,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "talisker-storm"
         },
         {
@@ -2006,6 +2167,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "talisker-18"
         },
         {
@@ -2014,6 +2176,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "talisker-25"
         }
       ],
@@ -2024,6 +2187,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "cragganmore-12"
         },
         {
@@ -2032,6 +2196,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "benromach-10"
         },
         {
@@ -2040,6 +2205,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "benromach-12-cs"
         },
         {
@@ -2048,6 +2214,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "benromach-peat-smoke"
         },
         {
@@ -2056,6 +2223,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "benromach-2013-vintage"
         },
         {
@@ -2064,6 +2232,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "benromach-15"
         },
         {
@@ -2072,6 +2241,7 @@
           "kind": "unknown",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "benromach-12-cs"
         },
         {
@@ -2080,6 +2250,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "benromach-21"
         },
         {
@@ -2088,6 +2259,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "benriach-10"
         },
         {
@@ -2096,6 +2268,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "benriach-12"
         },
         {
@@ -2104,6 +2277,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "benriach-smoky-12"
         },
         {
@@ -2112,6 +2286,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "oban-little-bay"
         },
         {
@@ -2120,6 +2295,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "oban-14"
         },
         {
@@ -2128,6 +2304,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenfarclas-10"
         },
         {
@@ -2136,6 +2313,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenfarclas-12"
         },
         {
@@ -2144,6 +2322,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenfarclas-105"
         },
         {
@@ -2152,6 +2331,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenfarclas-15"
         },
         {
@@ -2160,6 +2340,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenfarclas-25"
         },
         {
@@ -2168,6 +2349,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glengoyne-12"
         },
         {
@@ -2176,6 +2358,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glengoyne-15"
         },
         {
@@ -2184,6 +2367,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glengoyne-cs-batch-10"
         },
         {
@@ -2192,6 +2376,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glengoyne-18"
         },
         {
@@ -2200,6 +2385,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "clynelish-14"
         },
         {
@@ -2208,6 +2394,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "clynelish-de"
         },
         {
@@ -2216,6 +2403,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "dalmore-12"
         },
         {
@@ -2224,6 +2412,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "dalmore-12-sherry-cask-select"
         },
         {
@@ -2232,6 +2421,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "dalmore-port-wood"
         },
         {
@@ -2240,6 +2430,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "dalmore-15"
         },
         {
@@ -2248,6 +2439,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "dalmore-cigar-malt"
         },
         {
@@ -2256,6 +2448,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "dalmore-king-alexander-iii"
         },
         {
@@ -2264,6 +2457,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "dalmore-18"
         },
         {
@@ -2272,6 +2466,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "aberlour-12"
         },
         {
@@ -2280,6 +2475,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "aberlour-14"
         },
         {
@@ -2288,6 +2484,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "aberlour-abunadh-alba"
         },
         {
@@ -2296,6 +2493,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "aberlour-abunadh"
         },
         {
@@ -2304,6 +2502,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "aberlour-16"
         },
         {
@@ -2312,6 +2511,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "edradour-10"
         },
         {
@@ -2320,6 +2520,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "ballechin-10"
         },
         {
@@ -2328,6 +2529,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "edradour-caledonia-12"
         },
         {
@@ -2336,6 +2538,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "edradour-12-bordeaux"
         },
         {
@@ -2344,6 +2547,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "edradour-12-cs"
         },
         {
@@ -2352,6 +2556,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "edradour-12-sauternes"
         },
         {
@@ -2360,6 +2565,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "edradour-10-single-cask-cs"
         },
         {
@@ -2368,6 +2574,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "edradour-21-cs"
         },
         {
@@ -2376,6 +2583,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "dalwhinnie-15"
         },
         {
@@ -2384,6 +2592,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "royal-brackla-12"
         },
         {
@@ -2392,6 +2601,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "royal-brackla-18"
         },
         {
@@ -2400,6 +2610,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "royal-brackla-21"
         },
         {
@@ -2408,6 +2619,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "ancnoc-12"
         },
         {
@@ -2416,6 +2628,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "ancnoc-peated-sherry"
         },
         {
@@ -2424,6 +2637,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "ancnoc-peatheart"
         },
         {
@@ -2432,6 +2646,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "ancnoc-18"
         }
       ],
@@ -2442,6 +2657,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "balvenie-12-doublewood"
         },
         {
@@ -2450,6 +2666,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "balvenie-12-american-oak"
         },
         {
@@ -2458,6 +2675,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "balvenie-12-single-barrel"
         },
         {
@@ -2466,6 +2684,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "balvenie-14-caribbean"
         },
         {
@@ -2474,6 +2693,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "balvenie-14-week-of-peat"
         },
         {
@@ -2482,6 +2702,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "balvenie-15-madeira"
         },
         {
@@ -2490,6 +2711,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "balvenie-16-french-oak"
         },
         {
@@ -2498,6 +2720,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "balvenie-18-px"
         },
         {
@@ -2506,6 +2729,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "balvenie-21-portwood"
         },
         {
@@ -2514,6 +2738,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenlivet-12"
         },
         {
@@ -2522,6 +2747,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenlivet-15"
         },
         {
@@ -2530,6 +2756,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenlivet-18"
         },
         {
@@ -2538,6 +2765,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glen-grant-12"
         },
         {
@@ -2546,6 +2774,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glen-grant-15"
         },
         {
@@ -2554,6 +2783,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glen-grant-18"
         },
         {
@@ -2562,6 +2792,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "mortlach-16"
         },
         {
@@ -2570,6 +2801,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "aultmore-12"
         },
         {
@@ -2578,6 +2810,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "aultmore-18"
         },
         {
@@ -2586,6 +2819,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "aultmore-21"
         },
         {
@@ -2594,6 +2828,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "aberfeldy-12"
         },
         {
@@ -2602,6 +2837,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "aberfeldy-16"
         },
         {
@@ -2610,6 +2846,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenrothes-12"
         },
         {
@@ -2618,6 +2855,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenrothes-whisky-makers-cut"
         },
         {
@@ -2626,6 +2864,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenrothes-18"
         },
         {
@@ -2634,6 +2873,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "macallan-12-double-cask"
         },
         {
@@ -2642,6 +2882,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "macallan-12-sherry-oak"
         },
         {
@@ -2650,6 +2891,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "macallan-15-double-cask"
         },
         {
@@ -2658,6 +2900,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "macallan-classic-cut-2025"
         },
         {
@@ -2666,6 +2909,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "macallan-18-double-cask"
         },
         {
@@ -2674,6 +2918,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "macallan-18-sherry-oak"
         },
         {
@@ -2682,6 +2927,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenfiddich-12"
         },
         {
@@ -2690,6 +2936,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenfiddich-12-sherry-cask-finish"
         },
         {
@@ -2698,6 +2945,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenfiddich-14"
         },
         {
@@ -2706,6 +2954,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenfiddich-15"
         },
         {
@@ -2714,6 +2963,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenfiddich-18"
         },
         {
@@ -2722,6 +2972,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenfiddich-21"
         },
         {
@@ -2730,6 +2981,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenfiddich-23-grand-cru"
         },
         {
@@ -2738,6 +2990,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenallachie-8"
         },
         {
@@ -2746,6 +2999,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenallachie-12"
         },
         {
@@ -2754,6 +3008,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenallachie-10-cask-strength"
         },
         {
@@ -2762,6 +3017,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenallachie-9-cuvee"
         },
         {
@@ -2770,6 +3026,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenallachie-8-scottish-oak"
         },
         {
@@ -2778,6 +3035,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenallachie-10-ruby-port"
         },
         {
@@ -2786,6 +3044,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenallachie-12-moscatel"
         },
         {
@@ -2794,6 +3053,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenallachie-10-spanish-oak"
         },
         {
@@ -2802,6 +3062,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenallachie-15"
         },
         {
@@ -2810,6 +3071,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenallachie-18"
         },
         {
@@ -2818,6 +3080,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenallachie-18-px-puncheon"
         },
         {
@@ -2826,6 +3089,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenburgie-12"
         },
         {
@@ -2834,6 +3098,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenburgie-15"
         },
         {
@@ -2842,6 +3107,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "tamdhu-12"
         },
         {
@@ -2850,6 +3116,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "tamdhu-batch-strength-8"
         },
         {
@@ -2858,6 +3125,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "tamdhu-15"
         },
         {
@@ -2866,6 +3134,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "tamdhu-18"
         }
       ],
@@ -2876,6 +3145,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "makers-mark"
         },
         {
@@ -2884,6 +3154,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "makers-mark-46"
         },
         {
@@ -2892,6 +3163,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "makers-mark-cask-strength"
         },
         {
@@ -2900,6 +3172,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "redemption-rye"
         },
         {
@@ -2908,6 +3181,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "knob-creek"
         },
         {
@@ -2916,6 +3190,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "knob-creek-rye"
         },
         {
@@ -2924,6 +3199,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "eagle-rare-10"
         },
         {
@@ -2932,6 +3208,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "four-roses-single-barrel"
         },
         {
@@ -2940,6 +3217,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "russells-reserve-10"
         },
         {
@@ -2948,6 +3226,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "russells-reserve-single-barrel"
         },
         {
@@ -2956,6 +3235,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "russells-reserve-rye-single-barrel"
         },
         {
@@ -2964,6 +3244,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "james-e-pepper-1776-bourbon"
         },
         {
@@ -2972,6 +3253,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "james-e-pepper-1776-rye"
         },
         {
@@ -2980,6 +3262,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "michters-us1-bourbon"
         },
         {
@@ -2988,6 +3271,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "michters-us1-rye"
         },
         {
@@ -2996,6 +3280,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "sazerac-rye"
         },
         {
@@ -3004,6 +3289,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "broken-barrel-port-cask"
         },
         {
@@ -3012,6 +3298,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "bakers-7"
         },
         {
@@ -3020,6 +3307,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "1792-full-proof"
         },
         {
@@ -3028,6 +3316,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "woodford-reserve"
         },
         {
@@ -3036,6 +3325,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "woodford-reserve-double-oaked"
         },
         {
@@ -3044,6 +3334,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "woodford-reserve-double-xo-blend"
         },
         {
@@ -3052,6 +3343,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "rowans-creek"
         },
         {
@@ -3060,6 +3352,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "willett-pot-still-reserve"
         },
         {
@@ -3068,6 +3361,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "noahs-mill"
         },
         {
@@ -3076,6 +3370,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "willett-family-estate-bourbon-8"
         },
         {
@@ -3084,6 +3379,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "barrell-seagrass"
         },
         {
@@ -3092,6 +3388,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "blantons-original"
         },
         {
@@ -3100,6 +3397,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "blantons-sftb"
         },
         {
@@ -3108,6 +3406,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "bookers"
         },
         {
@@ -3116,6 +3415,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "elijah-craig-barrel-proof"
         }
       ],
@@ -3127,6 +3427,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "wild-turkey-81"
         },
         {
@@ -3135,6 +3436,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "wild-turkey-rye"
         },
         {
@@ -3143,6 +3445,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "wild-turkey-101-8"
         },
         {
@@ -3151,6 +3454,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "wild-turkey-rare-breed"
         },
         {
@@ -3159,6 +3463,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "basil-haydens"
         },
         {
@@ -3167,6 +3472,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "makers-mark"
         },
         {
@@ -3175,6 +3481,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "bulleit-bourbon"
         },
         {
@@ -3183,6 +3490,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "bulleit-rye"
         },
         {
@@ -3191,6 +3499,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "woodford-reserve"
         },
         {
@@ -3199,6 +3508,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "woodford-reserve-double-oaked"
         },
         {
@@ -3207,6 +3517,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "four-roses-bourbon"
         },
         {
@@ -3215,6 +3526,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "four-roses-single-barrel"
         },
         {
@@ -3223,6 +3535,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "russells-reserve-single-barrel"
         },
         {
@@ -3231,6 +3544,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "russells-reserve-rye-single-barrel"
         },
         {
@@ -3239,6 +3553,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "bookers"
         },
         {
@@ -3247,6 +3562,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "knob-creek"
         },
         {
@@ -3255,6 +3571,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "evan-williams"
         },
         {
@@ -3263,6 +3580,7 @@
           "kind": "unknown",
           "outcome": "unmatched",
           "status": "unmatched",
+          "state": "no_candidate",
           "rank1": null
         },
         {
@@ -3271,6 +3589,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "jack-daniels-old-no7"
         },
         {
@@ -3279,6 +3598,7 @@
           "kind": "non_whisky",
           "outcome": "unmatched",
           "status": "unmatched",
+          "state": "no_candidate",
           "rank1": null
         }
       ],
@@ -3289,6 +3609,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "maltman-fettercairn-37"
         },
         {
@@ -3297,6 +3618,7 @@
           "kind": "unknown",
           "outcome": "unmatched",
           "status": "unmatched",
+          "state": "no_candidate",
           "rank1": null
         },
         {
@@ -3305,6 +3627,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenallachie-19-ex-solera"
         },
         {
@@ -3313,6 +3636,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "signatory-north-british-34"
         },
         {
@@ -3321,6 +3645,7 @@
           "kind": "unknown",
           "outcome": "unmatched",
           "status": "unmatched",
+          "state": "no_candidate",
           "rank1": null
         },
         {
@@ -3329,6 +3654,7 @@
           "kind": "unknown",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "michters-us1-rye"
         },
         {
@@ -3337,6 +3663,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "north-star-ardmore-26"
         },
         {
@@ -3345,6 +3672,7 @@
           "kind": "unknown",
           "outcome": "unmatched",
           "status": "unmatched",
+          "state": "no_candidate",
           "rank1": null
         },
         {
@@ -3353,6 +3681,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "highland-park-cs-batch-4"
         },
         {
@@ -3361,6 +3690,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "balvenie-12-golden-cask"
         },
         {
@@ -3369,6 +3699,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "benriach-quarter-cask"
         },
         {
@@ -3377,6 +3708,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "loch-lomond-12"
         },
         {
@@ -3385,6 +3717,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "loch-lomond-18"
         },
         {
@@ -3393,6 +3726,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "shindo-the-blended"
         },
         {
@@ -3401,6 +3735,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "laphroaig-15"
         },
         {
@@ -3409,6 +3744,7 @@
           "kind": "non_whisky",
           "outcome": "unmatched",
           "status": "unmatched",
+          "state": "no_candidate",
           "rank1": null
         },
         {
@@ -3417,6 +3753,7 @@
           "kind": "non_whisky",
           "outcome": "unmatched",
           "status": "unmatched",
+          "state": "no_candidate",
           "rank1": null
         },
         {
@@ -3425,6 +3762,7 @@
           "kind": "non_whisky",
           "outcome": "unmatched",
           "status": "unmatched",
+          "state": "no_candidate",
           "rank1": null
         },
         {
@@ -3433,6 +3771,7 @@
           "kind": "non_whisky",
           "outcome": "unmatched",
           "status": "unmatched",
+          "state": "no_candidate",
           "rank1": null
         }
       ],
@@ -3443,6 +3782,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "balvenie-12-doublewood"
         },
         {
@@ -3451,6 +3791,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "balvenie-12-american-oak"
         },
         {
@@ -3459,6 +3800,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "balvenie-14-caribbean"
         },
         {
@@ -3467,6 +3809,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "balvenie-12-single-barrel"
         },
         {
@@ -3475,6 +3818,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "balvenie-16-french-oak"
         },
         {
@@ -3483,6 +3827,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenfiddich-12"
         },
         {
@@ -3491,6 +3836,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenfiddich-12-sherry-cask-finish"
         },
         {
@@ -3499,6 +3845,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenfiddich-15"
         },
         {
@@ -3507,6 +3854,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenfiddich-18"
         },
         {
@@ -3515,6 +3863,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenlivet-12"
         },
         {
@@ -3523,6 +3872,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenlivet-15"
         },
         {
@@ -3531,6 +3881,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenlivet-18"
         },
         {
@@ -3539,6 +3890,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "macallan-12-double-cask"
         },
         {
@@ -3547,6 +3899,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "macallan-12-sherry-oak"
         },
         {
@@ -3555,6 +3908,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "macallan-15-double-cask"
         },
         {
@@ -3563,6 +3917,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "macallan-18-double-cask"
         },
         {
@@ -3571,6 +3926,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "macallan-18-sherry-oak"
         },
         {
@@ -3579,6 +3935,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "cragganmore-12"
         },
         {
@@ -3587,6 +3944,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "dl-tormore-13-tempranillo"
         },
         {
@@ -3595,6 +3953,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenrothes-12"
         },
         {
@@ -3603,6 +3962,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenallachie-8"
         },
         {
@@ -3611,6 +3971,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenallachie-12"
         },
         {
@@ -3619,6 +3980,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenallachie-15"
         },
         {
@@ -3627,6 +3989,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenallachie-2014-sinteis"
         },
         {
@@ -3635,6 +3998,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenfarclas-105"
         },
         {
@@ -3643,6 +4007,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenfarclas-10"
         },
         {
@@ -3651,6 +4016,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenfarclas-15"
         },
         {
@@ -3659,6 +4025,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "tamdhu-12"
         },
         {
@@ -3667,6 +4034,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "tamdhu-15"
         },
         {
@@ -3675,6 +4043,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "benriach-12"
         },
         {
@@ -3683,6 +4052,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "aberlour-12"
         },
         {
@@ -3691,6 +4061,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "aberlour-14"
         },
         {
@@ -3699,6 +4070,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "aberlour-abunadh"
         },
         {
@@ -3707,6 +4079,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "royal-brackla-12"
         }
       ],
@@ -3717,6 +4090,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "yamazaki-12"
         },
         {
@@ -3725,6 +4099,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "yamazaki-distillers-reserve"
         },
         {
@@ -3733,6 +4108,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "hakushu-distillers-reserve"
         },
         {
@@ -3741,6 +4117,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "hibiki-japanese-harmony"
         },
         {
@@ -3749,6 +4126,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "kavalan-classic"
         },
         {
@@ -3757,6 +4135,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "kavalan-triple-sherry"
         },
         {
@@ -3765,6 +4144,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "kavalan-solist-vinho-barrique"
         },
         {
@@ -3773,6 +4153,7 @@
           "kind": "unknown",
           "outcome": "unmatched",
           "status": "unmatched",
+          "state": "no_candidate",
           "rank1": null
         },
         {
@@ -3781,6 +4162,7 @@
           "kind": "unknown",
           "outcome": "unmatched",
           "status": "unmatched",
+          "state": "no_candidate",
           "rank1": null
         },
         {
@@ -3789,6 +4171,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "high-coast-sherry"
         },
         {
@@ -3797,6 +4180,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "high-coast-maria"
         },
         {
@@ -3805,6 +4189,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "high-coast-eva"
         },
         {
@@ -3813,6 +4198,7 @@
           "kind": "unknown",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "eld-vatten-ben-nevis-14"
         },
         {
@@ -3821,6 +4207,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "eld-vatten-bruichladdich-11"
         },
         {
@@ -3829,6 +4216,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "eld-vatten-ben-nevis-14"
         },
         {
@@ -3837,6 +4225,7 @@
           "kind": "non_whisky",
           "outcome": "unmatched",
           "status": "unmatched",
+          "state": "no_candidate",
           "rank1": null
         },
         {
@@ -3845,6 +4234,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "kimgwajang-3-highland-park"
         },
         {
@@ -3853,6 +4243,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "kimgwajang-4-clynelish"
         },
         {
@@ -3861,6 +4252,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "hakushu-12"
         },
         {
@@ -3869,6 +4261,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "nectar-glen-ord-11"
         },
         {
@@ -3877,6 +4270,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "nectar-miltonduff-12"
         },
         {
@@ -3885,6 +4279,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "maltman-dailuaine-14"
         },
         {
@@ -3893,6 +4288,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "maltman-deanston-14"
         },
         {
@@ -3901,6 +4297,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "maltman-campbeltown-10"
         },
         {
@@ -3909,6 +4306,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "maltman-masters-blend-34"
         },
         {
@@ -3917,6 +4315,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "twa-bruichladdich-12"
         },
         {
@@ -3925,6 +4324,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "twa-secret-islay-6"
         },
         {
@@ -3933,6 +4333,7 @@
           "kind": "unknown",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "signatory-speyside-14"
         }
       ],
@@ -3943,6 +4344,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "makers-mark"
         },
         {
@@ -3951,6 +4353,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "dewars-12"
         },
         {
@@ -3959,6 +4362,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "monkey-shoulder"
         },
         {
@@ -3967,6 +4371,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "laphroaig-10"
         },
         {
@@ -3975,6 +4380,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "talisker-10"
         },
         {
@@ -3983,6 +4389,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenmorangie-original"
         },
         {
@@ -3991,6 +4398,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glendronach-12"
         },
         {
@@ -3999,6 +4407,7 @@
           "kind": "non_whisky",
           "outcome": "unmatched",
           "status": "unmatched",
+          "state": "no_candidate",
           "rank1": null
         },
         {
@@ -4007,6 +4416,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenfiddich-12"
         },
         {
@@ -4015,6 +4425,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "tamdhu-12"
         },
         {
@@ -4023,6 +4434,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "dalmore-12"
         },
         {
@@ -4031,6 +4443,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "macallan-12-double-cask"
         },
         {
@@ -4039,6 +4452,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "macallan-12-sherry-oak"
         },
         {
@@ -4047,6 +4461,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "balvenie-12-doublewood"
         },
         {
@@ -4055,6 +4470,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenallachie-12"
         },
         {
@@ -4063,6 +4479,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "johnnie-walker-blue"
         },
         {
@@ -4071,6 +4488,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenmorangie-signet"
         }
       ]
@@ -4083,6 +4501,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glen-grant-15"
         },
         {
@@ -4091,6 +4510,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glendronach-12"
         },
         {
@@ -4099,6 +4519,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glendronach-15"
         },
         {
@@ -4107,6 +4528,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenlivet-12"
         },
         {
@@ -4115,6 +4537,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenmorangie-original"
         },
         {
@@ -4123,6 +4546,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenmorangie-nectar-dor"
         },
         {
@@ -4131,6 +4555,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenmorangie-lasanta"
         },
         {
@@ -4139,6 +4564,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "confirm_recommended",
           "rank1": "glenmorangie-quinta-ruban"
         },
         {
@@ -4147,6 +4573,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenmorangie-signet"
         },
         {
@@ -4155,6 +4582,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenmorangie-18"
         },
         {
@@ -4163,6 +4591,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenallachie-12"
         },
         {
@@ -4171,6 +4600,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenallachie-15"
         },
         {
@@ -4179,6 +4609,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenfarclas-105"
         },
         {
@@ -4187,6 +4618,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenfiddich-12"
         },
         {
@@ -4195,6 +4627,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenfiddich-15"
         },
         {
@@ -4203,6 +4636,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "dalmore-12"
         },
         {
@@ -4211,6 +4645,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "confirm_recommended",
           "rank1": "dalmore-12-sherry-cask-select"
         },
         {
@@ -4219,6 +4654,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "dalmore-15"
         },
         {
@@ -4227,6 +4663,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "dalmore-port-wood"
         },
         {
@@ -4235,6 +4672,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "dalmore-cigar-malt"
         },
         {
@@ -4243,6 +4681,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "royal-brackla-12"
         },
         {
@@ -4251,6 +4690,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "royal-brackla-18"
         },
         {
@@ -4259,6 +4699,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "macallan-12-double-cask"
         },
         {
@@ -4267,6 +4708,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "macallan-15-double-cask"
         },
         {
@@ -4275,6 +4717,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "bunnahabhain-12"
         },
         {
@@ -4283,6 +4726,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "arran-10"
         },
         {
@@ -4291,6 +4735,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "arran-sherry-cask"
         },
         {
@@ -4299,6 +4744,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "aberlour-abunadh"
         },
         {
@@ -4307,6 +4753,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "oban-14"
         },
         {
@@ -4315,6 +4762,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "kavalan-oloroso-sherry-oak"
         },
         {
@@ -4323,6 +4771,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "kavalan-solist-vinho-barrique"
         },
         {
@@ -4331,6 +4780,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "kavalan-triple-sherry"
         },
         {
@@ -4339,6 +4789,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "clynelish-14"
         },
         {
@@ -4347,6 +4798,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "balvenie-12-doublewood"
         },
         {
@@ -4355,6 +4807,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "balvenie-14-caribbean"
         },
         {
@@ -4363,6 +4816,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "tsunuki-the-edition-2025"
         },
         {
@@ -4371,6 +4825,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "yoichi-single-malt"
         },
         {
@@ -4379,6 +4834,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "edradour-10"
         },
         {
@@ -4387,6 +4843,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "nomad-outland"
         }
       ],
@@ -4397,6 +4854,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "royal-salute-21"
         },
         {
@@ -4405,6 +4863,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "monkey-shoulder"
         },
         {
@@ -4413,6 +4872,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "johnnie-walker-black"
         },
         {
@@ -4421,6 +4881,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "johnnie-walker-blue"
         },
         {
@@ -4429,6 +4890,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "paul-john-oloroso"
         },
         {
@@ -4437,6 +4899,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "paul-john-peated"
         },
         {
@@ -4445,6 +4908,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "signatory-benriach-12"
         },
         {
@@ -4453,6 +4917,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "signatory-macduff-13"
         },
         {
@@ -4461,6 +4926,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "aultmore-12"
         },
         {
@@ -4469,6 +4935,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "signatory-speyside-gl"
         }
       ],
@@ -4480,6 +4947,7 @@
           "kind": "non_whisky",
           "outcome": "unmatched",
           "status": "unmatched",
+          "state": "no_candidate",
           "rank1": null
         },
         {
@@ -4488,6 +4956,7 @@
           "kind": "non_whisky",
           "outcome": "unmatched",
           "status": "unmatched",
+          "state": "no_candidate",
           "rank1": null
         },
         {
@@ -4496,6 +4965,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "johnnie-walker-black"
         },
         {
@@ -4504,6 +4974,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "johnnie-walker-blue"
         },
         {
@@ -4512,6 +4983,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "monkey-shoulder"
         },
         {
@@ -4520,6 +4992,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "jameson"
         },
         {
@@ -4528,6 +5001,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "jack-daniels-old-no7"
         },
         {
@@ -4536,6 +5010,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "1792-small-batch"
         },
         {
@@ -4544,6 +5019,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "woodford-reserve"
         },
         {
@@ -4552,6 +5028,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "noahs-mill"
         }
       ],
@@ -4562,6 +5039,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "highland-park-12"
         },
         {
@@ -4570,6 +5048,7 @@
           "kind": "known",
           "outcome": "unmatched",
           "status": "unmatched",
+          "state": "no_candidate",
           "rank1": null
         },
         {
@@ -4578,6 +5057,7 @@
           "kind": "unknown",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "highland-park-cs-batch-4"
         },
         {
@@ -4586,6 +5066,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "highland-park-15"
         },
         {
@@ -4594,6 +5075,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "highland-park-18"
         },
         {
@@ -4602,6 +5084,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "highland-park-16"
         },
         {
@@ -4610,6 +5093,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenkinchie-12"
         },
         {
@@ -4618,6 +5102,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "auchentoshan-american-oak"
         },
         {
@@ -4626,6 +5111,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "auchentoshan-12"
         },
         {
@@ -4634,6 +5120,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "auchentoshan-sauvignon-blanc"
         },
         {
@@ -4642,6 +5129,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "auchentoshan-three-wood"
         },
         {
@@ -4650,6 +5138,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "auchentoshan-18"
         },
         {
@@ -4658,6 +5147,7 @@
           "kind": "known",
           "outcome": "unmatched",
           "status": "unmatched",
+          "state": "no_candidate",
           "rank1": null
         },
         {
@@ -4666,6 +5156,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "springbank-10"
         },
         {
@@ -4674,6 +5165,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "springbank-12-cs"
         },
         {
@@ -4682,6 +5174,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "springbank-15"
         },
         {
@@ -4690,6 +5183,7 @@
           "kind": "known",
           "outcome": "ambiguous_bad",
           "status": "ambiguous",
+          "state": "confirm_recommended",
           "rank1": "glengoyne-12"
         },
         {
@@ -4698,6 +5192,7 @@
           "kind": "known",
           "outcome": "unmatched",
           "status": "unmatched",
+          "state": "no_candidate",
           "rank1": null
         },
         {
@@ -4706,6 +5201,7 @@
           "kind": "known",
           "outcome": "unmatched",
           "status": "unmatched",
+          "state": "no_candidate",
           "rank1": null
         },
         {
@@ -4714,6 +5210,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glen-scotia-double-cask"
         },
         {
@@ -4722,6 +5219,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glen-scotia-15"
         },
         {
@@ -4730,6 +5228,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glen-scotia-18"
         },
         {
@@ -4738,6 +5237,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glen-scotia-12-mermaid"
         },
         {
@@ -4746,6 +5246,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "gm-miltonduff-10"
         },
         {
@@ -4754,6 +5255,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "gm-bunnahabhain-10"
         },
         {
@@ -4762,6 +5264,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "gm-bunnahabhain-heavily-peated-11"
         },
         {
@@ -4770,6 +5273,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "gm-glenrothes-11"
         },
         {
@@ -4778,6 +5282,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "scarabus"
         },
         {
@@ -4786,6 +5291,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "hunter-laing-royal-brackla-14"
         },
         {
@@ -4794,6 +5300,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "hunter-laing-cragganmore-26"
         },
         {
@@ -4802,6 +5309,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "rock-island"
         },
         {
@@ -4810,6 +5318,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "epicurean"
         },
         {
@@ -4818,6 +5327,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "timorous-beastie"
         },
         {
@@ -4826,6 +5336,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "gauldrons"
         },
         {
@@ -4834,6 +5345,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "confirm_recommended",
           "rank1": "gauldrons-cs"
         },
         {
@@ -4842,6 +5354,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "confirm_recommended",
           "rank1": "gauldrons-sherry"
         },
         {
@@ -4850,6 +5363,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "big-peat-winter-2025"
         },
         {
@@ -4858,6 +5372,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "big-peat-winter-2025"
         },
         {
@@ -4866,6 +5381,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "blackadder-sherry-snake"
         },
         {
@@ -4874,6 +5390,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "compass-box-orchard-house"
         },
         {
@@ -4882,6 +5399,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "port-askaig-8"
         },
         {
@@ -4890,6 +5408,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "port-askaig-17"
         },
         {
@@ -4898,6 +5417,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "elements-of-islay-bourbon"
         },
         {
@@ -4906,6 +5426,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "elements-of-islay-sherry"
         }
       ],
@@ -4916,6 +5437,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "lagavulin-8"
         },
         {
@@ -4924,6 +5446,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "lagavulin-11-sweet-peat"
         },
         {
@@ -4932,6 +5455,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "lagavulin-de-2023"
         },
         {
@@ -4940,6 +5464,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "lagavulin-16"
         },
         {
@@ -4948,6 +5473,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "kilchoman-machir-bay"
         },
         {
@@ -4956,6 +5482,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "kilchoman-sanaig"
         },
         {
@@ -4964,6 +5491,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "kilchoman-machir-bay-cs"
         },
         {
@@ -4972,6 +5500,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "kilchoman-korea-small-batch"
         },
         {
@@ -4980,6 +5509,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "kilchoman-batch-strength"
         },
         {
@@ -4988,6 +5518,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "confirm_recommended",
           "rank1": "kilchoman-sanaig-cs"
         },
         {
@@ -4996,6 +5527,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "kilchoman-fino-sherry"
         },
         {
@@ -5004,6 +5536,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "kilchoman-cognac-cask"
         },
         {
@@ -5012,6 +5545,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "kilchoman-fino-sherry"
         },
         {
@@ -5020,6 +5554,7 @@
           "kind": "known",
           "outcome": "unmatched",
           "status": "unmatched",
+          "state": "no_candidate",
           "rank1": null
         },
         {
@@ -5028,6 +5563,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "kilchoman-100-islay"
         },
         {
@@ -5036,6 +5572,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "kilchoman-port-single-cask"
         },
         {
@@ -5044,6 +5581,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "kilchoman-sauternes-cask"
         },
         {
@@ -5052,6 +5590,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "kilchoman-port-cask"
         },
         {
@@ -5060,6 +5599,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "kilchoman-16"
         },
         {
@@ -5068,6 +5608,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "bruichladdich-islay-barley"
         },
         {
@@ -5076,6 +5617,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "bruichladdich-islay-barley"
         },
         {
@@ -5084,6 +5626,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "bruichladdich-18"
         },
         {
@@ -5092,6 +5635,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "bruichladdich-black-art-11"
         },
         {
@@ -5100,6 +5644,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "port-charlotte-10"
         },
         {
@@ -5108,6 +5653,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "port-charlotte-islay-barley-2014"
         },
         {
@@ -5116,6 +5662,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "port-charlotte-pmc-01"
         },
         {
@@ -5124,6 +5671,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "octomore-14-1"
         },
         {
@@ -5132,6 +5680,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "octomore-14-2"
         },
         {
@@ -5140,6 +5689,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "octomore-15-1"
         },
         {
@@ -5148,6 +5698,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "octomore-15-2"
         },
         {
@@ -5156,6 +5707,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "octomore-15-3"
         },
         {
@@ -5164,6 +5716,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "caol-ila-12"
         },
         {
@@ -5172,6 +5725,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "caol-ila-18"
         },
         {
@@ -5180,6 +5734,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "bunnahabhain-12"
         },
         {
@@ -5188,6 +5743,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "bunnahabhain-cruach-mhona"
         },
         {
@@ -5196,6 +5752,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "bunnahabhain-an-cladach"
         },
         {
@@ -5204,6 +5761,7 @@
           "kind": "known",
           "outcome": "unmatched",
           "status": "unmatched",
+          "state": "no_candidate",
           "rank1": null
         },
         {
@@ -5212,6 +5770,7 @@
           "kind": "known",
           "outcome": "unmatched",
           "status": "unmatched",
+          "state": "no_candidate",
           "rank1": null
         },
         {
@@ -5220,6 +5779,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "bunnahabhain-12-cs"
         },
         {
@@ -5228,6 +5788,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "bunnahabhain-14-ruby-port"
         },
         {
@@ -5236,6 +5797,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "bunnahabhain-18"
         },
         {
@@ -5244,6 +5806,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "arran-10"
         },
         {
@@ -5252,6 +5815,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "arran-quarter-cask"
         },
         {
@@ -5260,6 +5824,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "arran-port-cask"
         },
         {
@@ -5268,6 +5833,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "arran-amarone-cask"
         },
         {
@@ -5276,6 +5842,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "arran-sauternes-cask"
         },
         {
@@ -5284,6 +5851,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "arran-sherry-cask"
         },
         {
@@ -5292,6 +5860,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "arran-machrie-moor-cs"
         },
         {
@@ -5300,6 +5869,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "arran-machrie-moor-10"
         },
         {
@@ -5308,6 +5878,7 @@
           "kind": "unknown",
           "outcome": "unmatched",
           "status": "unmatched",
+          "state": "no_candidate",
           "rank1": null
         },
         {
@@ -5316,6 +5887,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "arran-private-cask-2"
         },
         {
@@ -5324,6 +5896,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "arran-18"
         },
         {
@@ -5332,6 +5905,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "arran-21"
         },
         {
@@ -5340,6 +5914,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "arran-25"
         },
         {
@@ -5348,6 +5923,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "talisker-skye"
         },
         {
@@ -5356,6 +5932,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "talisker-10"
         },
         {
@@ -5364,6 +5941,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "talisker-wild-blue"
         },
         {
@@ -5372,6 +5950,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "talisker-storm"
         },
         {
@@ -5380,6 +5959,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "talisker-18"
         },
         {
@@ -5388,6 +5968,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "talisker-25"
         }
       ],
@@ -5398,6 +5979,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "cragganmore-12"
         },
         {
@@ -5406,6 +5988,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "benromach-10"
         },
         {
@@ -5414,6 +5997,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "benromach-12-cs"
         },
         {
@@ -5422,6 +6006,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "benromach-peat-smoke"
         },
         {
@@ -5430,6 +6015,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "benromach-2013-vintage"
         },
         {
@@ -5438,6 +6024,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "benromach-15"
         },
         {
@@ -5446,6 +6033,7 @@
           "kind": "unknown",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "benromach-12-cs"
         },
         {
@@ -5454,6 +6042,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "benromach-21"
         },
         {
@@ -5462,6 +6051,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "confirm_recommended",
           "rank1": "benriach-10"
         },
         {
@@ -5470,6 +6060,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "benriach-12"
         },
         {
@@ -5478,6 +6069,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "benriach-smoky-12"
         },
         {
@@ -5486,6 +6078,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "oban-little-bay"
         },
         {
@@ -5494,6 +6087,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "oban-14"
         },
         {
@@ -5502,6 +6096,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenfarclas-10"
         },
         {
@@ -5510,6 +6105,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenfarclas-12"
         },
         {
@@ -5518,6 +6114,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "glenfarclas-105"
         },
         {
@@ -5526,6 +6123,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenfarclas-15"
         },
         {
@@ -5534,6 +6132,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenfarclas-25"
         },
         {
@@ -5542,6 +6141,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glengoyne-12"
         },
         {
@@ -5550,6 +6150,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glengoyne-15"
         },
         {
@@ -5558,6 +6159,7 @@
           "kind": "known",
           "outcome": "unmatched",
           "status": "unmatched",
+          "state": "no_candidate",
           "rank1": null
         },
         {
@@ -5566,6 +6168,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glengoyne-18"
         },
         {
@@ -5574,6 +6177,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "clynelish-14"
         },
         {
@@ -5582,6 +6186,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "clynelish-de"
         },
         {
@@ -5590,6 +6195,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "dalmore-12"
         },
         {
@@ -5598,6 +6204,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "dalmore-12-sherry-cask-select"
         },
         {
@@ -5606,6 +6213,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "confirm_recommended",
           "rank1": "dalmore-port-wood"
         },
         {
@@ -5614,6 +6222,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "dalmore-15"
         },
         {
@@ -5622,6 +6231,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "confirm_recommended",
           "rank1": "dalmore-cigar-malt"
         },
         {
@@ -5630,6 +6240,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "dalmore-king-alexander-iii"
         },
         {
@@ -5638,6 +6249,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "dalmore-18"
         },
         {
@@ -5646,6 +6258,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "aberlour-12"
         },
         {
@@ -5654,6 +6267,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "aberlour-14"
         },
         {
@@ -5662,6 +6276,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "aberlour-abunadh-alba"
         },
         {
@@ -5670,6 +6285,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "aberlour-abunadh"
         },
         {
@@ -5678,6 +6294,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "aberlour-16"
         },
         {
@@ -5686,6 +6303,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "edradour-10"
         },
         {
@@ -5694,6 +6312,7 @@
           "kind": "known",
           "outcome": "ambiguous_bad",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "edradour-10"
         },
         {
@@ -5702,6 +6321,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "edradour-caledonia-12"
         },
         {
@@ -5710,6 +6330,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "edradour-12-bordeaux"
         },
         {
@@ -5718,6 +6339,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "edradour-12-cs"
         },
         {
@@ -5726,6 +6348,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "edradour-12-sauternes"
         },
         {
@@ -5734,6 +6357,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "edradour-10-single-cask-cs"
         },
         {
@@ -5742,6 +6366,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "edradour-21-cs"
         },
         {
@@ -5750,6 +6375,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "dalwhinnie-15"
         },
         {
@@ -5758,6 +6384,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "royal-brackla-12"
         },
         {
@@ -5766,6 +6393,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "royal-brackla-18"
         },
         {
@@ -5774,6 +6402,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "royal-brackla-21"
         },
         {
@@ -5782,6 +6411,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "ancnoc-12"
         },
         {
@@ -5790,6 +6420,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "ancnoc-peated-sherry"
         },
         {
@@ -5798,6 +6429,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "ancnoc-peatheart"
         },
         {
@@ -5806,6 +6438,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "ancnoc-18"
         }
       ],
@@ -5816,6 +6449,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "balvenie-12-doublewood"
         },
         {
@@ -5824,6 +6458,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "balvenie-12-american-oak"
         },
         {
@@ -5832,6 +6467,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "balvenie-12-single-barrel"
         },
         {
@@ -5840,6 +6476,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "balvenie-14-caribbean"
         },
         {
@@ -5848,6 +6485,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "balvenie-14-week-of-peat"
         },
         {
@@ -5856,6 +6494,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "balvenie-15-madeira"
         },
         {
@@ -5864,6 +6503,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "balvenie-16-french-oak"
         },
         {
@@ -5872,6 +6512,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "balvenie-18-px"
         },
         {
@@ -5880,6 +6521,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "balvenie-21-portwood"
         },
         {
@@ -5888,6 +6530,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "glenlivet-12"
         },
         {
@@ -5896,6 +6539,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenlivet-15"
         },
         {
@@ -5904,6 +6548,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenlivet-18"
         },
         {
@@ -5912,6 +6557,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glen-grant-12"
         },
         {
@@ -5920,6 +6566,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glen-grant-15"
         },
         {
@@ -5928,6 +6575,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glen-grant-18"
         },
         {
@@ -5936,6 +6584,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "mortlach-16"
         },
         {
@@ -5944,6 +6593,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "aultmore-12"
         },
         {
@@ -5952,6 +6602,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "aultmore-18"
         },
         {
@@ -5960,6 +6611,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "aultmore-21"
         },
         {
@@ -5968,6 +6620,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "aberfeldy-12"
         },
         {
@@ -5976,6 +6629,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "aberfeldy-16"
         },
         {
@@ -5984,6 +6638,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenrothes-12"
         },
         {
@@ -5992,6 +6647,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenrothes-whisky-makers-cut"
         },
         {
@@ -6000,6 +6656,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenrothes-18"
         },
         {
@@ -6008,6 +6665,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "macallan-12-double-cask"
         },
         {
@@ -6016,6 +6674,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "macallan-12-sherry-oak"
         },
         {
@@ -6024,6 +6683,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "macallan-15-double-cask"
         },
         {
@@ -6032,6 +6692,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "macallan-classic-cut-2025"
         },
         {
@@ -6040,6 +6701,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "macallan-18-double-cask"
         },
         {
@@ -6048,6 +6710,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "macallan-18-sherry-oak"
         },
         {
@@ -6056,6 +6719,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenfiddich-12"
         },
         {
@@ -6064,6 +6728,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "glenfiddich-12-sherry-cask-finish"
         },
         {
@@ -6072,6 +6737,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "confirm_recommended",
           "rank1": "glenfiddich-14"
         },
         {
@@ -6080,6 +6746,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenfiddich-15"
         },
         {
@@ -6088,6 +6755,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenfiddich-18"
         },
         {
@@ -6096,6 +6764,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "glenfiddich-21"
         },
         {
@@ -6104,6 +6773,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenfiddich-23-grand-cru"
         },
         {
@@ -6112,6 +6782,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenallachie-8"
         },
         {
@@ -6120,6 +6791,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenallachie-12"
         },
         {
@@ -6128,6 +6800,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenallachie-10-cask-strength"
         },
         {
@@ -6136,6 +6809,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenallachie-9-cuvee"
         },
         {
@@ -6144,6 +6818,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenallachie-8-scottish-oak"
         },
         {
@@ -6152,6 +6827,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "glenallachie-10-ruby-port"
         },
         {
@@ -6160,6 +6836,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "glenallachie-12-moscatel"
         },
         {
@@ -6168,6 +6845,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenallachie-10-spanish-oak"
         },
         {
@@ -6176,6 +6854,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenallachie-15"
         },
         {
@@ -6184,6 +6863,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenallachie-18"
         },
         {
@@ -6192,6 +6872,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "glenallachie-18-px-puncheon"
         },
         {
@@ -6200,6 +6881,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenburgie-12"
         },
         {
@@ -6208,6 +6890,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenburgie-15"
         },
         {
@@ -6216,6 +6899,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "tamdhu-12"
         },
         {
@@ -6224,6 +6908,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "confirm_recommended",
           "rank1": "tamdhu-batch-strength-8"
         },
         {
@@ -6232,6 +6917,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "tamdhu-15"
         },
         {
@@ -6240,6 +6926,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "tamdhu-18"
         }
       ],
@@ -6250,6 +6937,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "makers-mark"
         },
         {
@@ -6258,6 +6946,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "makers-mark-46"
         },
         {
@@ -6266,6 +6955,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "makers-mark-cask-strength"
         },
         {
@@ -6274,6 +6964,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "redemption-rye"
         },
         {
@@ -6282,6 +6973,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "knob-creek"
         },
         {
@@ -6290,6 +6982,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "knob-creek-rye"
         },
         {
@@ -6298,6 +6991,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "eagle-rare-10"
         },
         {
@@ -6306,6 +7000,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "four-roses-single-barrel"
         },
         {
@@ -6314,6 +7009,7 @@
           "kind": "known",
           "outcome": "unmatched",
           "status": "unmatched",
+          "state": "no_candidate",
           "rank1": null
         },
         {
@@ -6322,6 +7018,7 @@
           "kind": "known",
           "outcome": "unmatched",
           "status": "unmatched",
+          "state": "no_candidate",
           "rank1": null
         },
         {
@@ -6330,6 +7027,7 @@
           "kind": "known",
           "outcome": "unmatched",
           "status": "unmatched",
+          "state": "no_candidate",
           "rank1": null
         },
         {
@@ -6338,6 +7036,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "james-e-pepper-1776-bourbon"
         },
         {
@@ -6346,6 +7045,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "james-e-pepper-1776-rye"
         },
         {
@@ -6354,6 +7054,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "confirm_recommended",
           "rank1": "michters-us1-bourbon"
         },
         {
@@ -6362,6 +7063,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "confirm_recommended",
           "rank1": "michters-us1-rye"
         },
         {
@@ -6370,6 +7072,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "sazerac-rye"
         },
         {
@@ -6378,6 +7081,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "broken-barrel-port-cask"
         },
         {
@@ -6386,6 +7090,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "bakers-7"
         },
         {
@@ -6394,6 +7099,7 @@
           "kind": "known",
           "outcome": "unmatched",
           "status": "unmatched",
+          "state": "no_candidate",
           "rank1": null
         },
         {
@@ -6402,6 +7108,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "woodford-reserve"
         },
         {
@@ -6410,6 +7117,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "woodford-reserve-double-oaked"
         },
         {
@@ -6418,6 +7126,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "woodford-reserve-double-oaked"
         },
         {
@@ -6426,6 +7135,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "confirm_recommended",
           "rank1": "rowans-creek"
         },
         {
@@ -6434,6 +7144,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "willett-pot-still-reserve"
         },
         {
@@ -6442,6 +7153,7 @@
           "kind": "known",
           "outcome": "unmatched",
           "status": "unmatched",
+          "state": "no_candidate",
           "rank1": null
         },
         {
@@ -6450,6 +7162,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "willett-family-estate-bourbon-8"
         },
         {
@@ -6458,6 +7171,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "confirm_recommended",
           "rank1": "barrell-seagrass"
         },
         {
@@ -6466,6 +7180,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "blantons-original"
         },
         {
@@ -6474,6 +7189,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "blantons-sftb"
         },
         {
@@ -6482,6 +7198,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "confirm_recommended",
           "rank1": "bookers"
         },
         {
@@ -6490,6 +7207,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "elijah-craig-barrel-proof"
         }
       ],
@@ -6501,6 +7219,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "wild-turkey-81"
         },
         {
@@ -6509,6 +7228,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "wild-turkey-rye"
         },
         {
@@ -6517,6 +7237,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "wild-turkey-101-8"
         },
         {
@@ -6525,6 +7246,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "wild-turkey-rare-breed"
         },
         {
@@ -6533,6 +7255,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "basil-haydens"
         },
         {
@@ -6541,6 +7264,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "makers-mark"
         },
         {
@@ -6549,6 +7273,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "bulleit-bourbon"
         },
         {
@@ -6557,6 +7282,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "bulleit-rye"
         },
         {
@@ -6565,6 +7291,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "woodford-reserve"
         },
         {
@@ -6573,6 +7300,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "woodford-reserve-double-oaked"
         },
         {
@@ -6581,6 +7309,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "four-roses-bourbon"
         },
         {
@@ -6589,6 +7318,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "four-roses-single-barrel"
         },
         {
@@ -6597,6 +7327,7 @@
           "kind": "known",
           "outcome": "unmatched",
           "status": "unmatched",
+          "state": "no_candidate",
           "rank1": null
         },
         {
@@ -6605,6 +7336,7 @@
           "kind": "known",
           "outcome": "unmatched",
           "status": "unmatched",
+          "state": "no_candidate",
           "rank1": null
         },
         {
@@ -6613,6 +7345,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "bookers"
         },
         {
@@ -6621,6 +7354,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "knob-creek"
         },
         {
@@ -6629,6 +7363,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "confirm_recommended",
           "rank1": "evan-williams"
         },
         {
@@ -6637,6 +7372,7 @@
           "kind": "unknown",
           "outcome": "unmatched",
           "status": "unmatched",
+          "state": "no_candidate",
           "rank1": null
         },
         {
@@ -6645,6 +7381,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "jack-daniels-old-no7"
         },
         {
@@ -6653,6 +7390,7 @@
           "kind": "non_whisky",
           "outcome": "unmatched",
           "status": "unmatched",
+          "state": "no_candidate",
           "rank1": null
         }
       ],
@@ -6663,6 +7401,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "maltman-fettercairn-37"
         },
         {
@@ -6671,6 +7410,7 @@
           "kind": "unknown",
           "outcome": "unmatched",
           "status": "unmatched",
+          "state": "no_candidate",
           "rank1": null
         },
         {
@@ -6679,6 +7419,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "glenallachie-19-ex-solera"
         },
         {
@@ -6687,6 +7428,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "signatory-north-british-15"
         },
         {
@@ -6695,6 +7437,7 @@
           "kind": "unknown",
           "outcome": "unmatched",
           "status": "unmatched",
+          "state": "no_candidate",
           "rank1": null
         },
         {
@@ -6703,6 +7446,7 @@
           "kind": "unknown",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "michters-us1-rye"
         },
         {
@@ -6711,6 +7455,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "confirm_recommended",
           "rank1": "north-star-ardmore-26"
         },
         {
@@ -6719,6 +7464,7 @@
           "kind": "unknown",
           "outcome": "unmatched",
           "status": "unmatched",
+          "state": "no_candidate",
           "rank1": null
         },
         {
@@ -6727,6 +7473,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "confirm_recommended",
           "rank1": "highland-park-cs-batch-4"
         },
         {
@@ -6735,6 +7482,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "balvenie-12-american-oak"
         },
         {
@@ -6743,6 +7491,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "benriach-quarter-cask"
         },
         {
@@ -6751,6 +7500,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "loch-lomond-12"
         },
         {
@@ -6759,6 +7509,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "loch-lomond-18"
         },
         {
@@ -6767,6 +7518,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "shindo-the-blended"
         },
         {
@@ -6775,6 +7527,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "laphroaig-15"
         },
         {
@@ -6783,6 +7536,7 @@
           "kind": "non_whisky",
           "outcome": "unmatched",
           "status": "unmatched",
+          "state": "no_candidate",
           "rank1": null
         },
         {
@@ -6791,6 +7545,7 @@
           "kind": "non_whisky",
           "outcome": "unmatched",
           "status": "unmatched",
+          "state": "no_candidate",
           "rank1": null
         },
         {
@@ -6799,6 +7554,7 @@
           "kind": "non_whisky",
           "outcome": "unmatched",
           "status": "unmatched",
+          "state": "no_candidate",
           "rank1": null
         },
         {
@@ -6807,6 +7563,7 @@
           "kind": "non_whisky",
           "outcome": "unmatched",
           "status": "unmatched",
+          "state": "no_candidate",
           "rank1": null
         }
       ],
@@ -6817,6 +7574,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "balvenie-12-doublewood"
         },
         {
@@ -6825,6 +7583,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "balvenie-12-american-oak"
         },
         {
@@ -6833,6 +7592,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "balvenie-14-caribbean"
         },
         {
@@ -6841,6 +7601,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "balvenie-12-single-barrel"
         },
         {
@@ -6849,6 +7610,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "balvenie-16-french-oak"
         },
         {
@@ -6857,6 +7619,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenfiddich-12"
         },
         {
@@ -6865,6 +7628,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenfiddich-12-sherry-cask-finish"
         },
         {
@@ -6873,6 +7637,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenfiddich-15"
         },
         {
@@ -6881,6 +7646,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenfiddich-18"
         },
         {
@@ -6889,6 +7655,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenlivet-12"
         },
         {
@@ -6897,6 +7664,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenlivet-15"
         },
         {
@@ -6905,6 +7673,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenlivet-18"
         },
         {
@@ -6913,6 +7682,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "macallan-12-double-cask"
         },
         {
@@ -6921,6 +7691,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "macallan-12-sherry-oak"
         },
         {
@@ -6929,6 +7700,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "macallan-15-double-cask"
         },
         {
@@ -6937,6 +7709,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "macallan-18-double-cask"
         },
         {
@@ -6945,6 +7718,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "macallan-18-double-cask"
         },
         {
@@ -6953,6 +7727,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "cragganmore-12"
         },
         {
@@ -6961,6 +7736,7 @@
           "kind": "known",
           "outcome": "ambiguous_bad",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "bowmore-10"
         },
         {
@@ -6969,6 +7745,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenrothes-12"
         },
         {
@@ -6977,6 +7754,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenallachie-8"
         },
         {
@@ -6985,6 +7763,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenallachie-12"
         },
         {
@@ -6993,6 +7772,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenallachie-15"
         },
         {
@@ -7001,6 +7781,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenallachie-2014-sinteis"
         },
         {
@@ -7009,6 +7790,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenfarclas-105"
         },
         {
@@ -7017,6 +7799,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenfarclas-10"
         },
         {
@@ -7025,6 +7808,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenfarclas-15"
         },
         {
@@ -7033,6 +7817,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "tamdhu-12"
         },
         {
@@ -7041,6 +7826,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "tamdhu-15"
         },
         {
@@ -7049,6 +7835,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "benriach-12"
         },
         {
@@ -7057,6 +7844,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "aberlour-12"
         },
         {
@@ -7065,6 +7853,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "aberlour-14"
         },
         {
@@ -7073,6 +7862,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "aberlour-abunadh"
         },
         {
@@ -7081,6 +7871,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "royal-brackla-12"
         }
       ],
@@ -7091,6 +7882,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "yamazaki-12"
         },
         {
@@ -7099,6 +7891,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "yamazaki-12"
         },
         {
@@ -7107,6 +7900,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "hakushu-distillers-reserve"
         },
         {
@@ -7115,6 +7909,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "hibiki-21"
         },
         {
@@ -7123,6 +7918,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "kavalan-classic"
         },
         {
@@ -7131,6 +7927,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "kavalan-triple-sherry"
         },
         {
@@ -7139,6 +7936,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "confirm_recommended",
           "rank1": "kavalan-solist-vinho-barrique"
         },
         {
@@ -7147,6 +7945,7 @@
           "kind": "unknown",
           "outcome": "unmatched",
           "status": "unmatched",
+          "state": "no_candidate",
           "rank1": null
         },
         {
@@ -7155,6 +7954,7 @@
           "kind": "unknown",
           "outcome": "unmatched",
           "status": "unmatched",
+          "state": "no_candidate",
           "rank1": null
         },
         {
@@ -7163,6 +7963,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "high-coast-maria"
         },
         {
@@ -7171,6 +7972,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "high-coast-maria"
         },
         {
@@ -7179,6 +7981,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "high-coast-eva"
         },
         {
@@ -7187,6 +7990,7 @@
           "kind": "unknown",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "eld-vatten-ben-nevis-14"
         },
         {
@@ -7195,6 +7999,7 @@
           "kind": "known",
           "outcome": "ambiguous_bad",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "bruichladdich-18"
         },
         {
@@ -7203,6 +8008,7 @@
           "kind": "known",
           "outcome": "unmatched",
           "status": "unmatched",
+          "state": "no_candidate",
           "rank1": null
         },
         {
@@ -7211,6 +8017,7 @@
           "kind": "non_whisky",
           "outcome": "unmatched",
           "status": "unmatched",
+          "state": "no_candidate",
           "rank1": null
         },
         {
@@ -7219,6 +8026,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "kimgwajang-3-highland-park"
         },
         {
@@ -7227,6 +8035,7 @@
           "kind": "known",
           "outcome": "ambiguous_bad",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "clynelish-14"
         },
         {
@@ -7235,6 +8044,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "hakushu-12"
         },
         {
@@ -7243,6 +8053,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "nectar-glen-ord-11"
         },
         {
@@ -7251,6 +8062,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "nectar-miltonduff-12"
         },
         {
@@ -7259,6 +8071,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "maltman-dailuaine-14"
         },
         {
@@ -7267,6 +8080,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "maltman-deanston-14"
         },
         {
@@ -7275,6 +8089,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "maltman-campbeltown-10"
         },
         {
@@ -7283,6 +8098,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "maltman-masters-blend-34"
         },
         {
@@ -7291,6 +8107,7 @@
           "kind": "known",
           "outcome": "unmatched",
           "status": "unmatched",
+          "state": "no_candidate",
           "rank1": null
         },
         {
@@ -7299,6 +8116,7 @@
           "kind": "known",
           "outcome": "unmatched",
           "status": "unmatched",
+          "state": "no_candidate",
           "rank1": null
         },
         {
@@ -7307,6 +8125,7 @@
           "kind": "unknown",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
+          "state": "choose_candidate",
           "rank1": "signatory-speyside-14"
         }
       ],
@@ -7317,6 +8136,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "makers-mark"
         },
         {
@@ -7325,6 +8145,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "dewars-12"
         },
         {
@@ -7333,6 +8154,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "monkey-shoulder"
         },
         {
@@ -7341,6 +8163,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "laphroaig-10"
         },
         {
@@ -7349,6 +8172,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "talisker-10"
         },
         {
@@ -7357,6 +8181,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenmorangie-original"
         },
         {
@@ -7365,6 +8190,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glendronach-12"
         },
         {
@@ -7373,6 +8199,7 @@
           "kind": "non_whisky",
           "outcome": "unmatched",
           "status": "unmatched",
+          "state": "no_candidate",
           "rank1": null
         },
         {
@@ -7381,6 +8208,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenfiddich-12"
         },
         {
@@ -7389,6 +8217,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "tamdhu-12"
         },
         {
@@ -7397,6 +8226,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "dalmore-12"
         },
         {
@@ -7405,6 +8235,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "macallan-12-double-cask"
         },
         {
@@ -7413,6 +8244,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "macallan-12-sherry-oak"
         },
         {
@@ -7421,6 +8253,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "balvenie-12-doublewood"
         },
         {
@@ -7429,6 +8262,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenallachie-12"
         },
         {
@@ -7437,6 +8271,7 @@
           "kind": "known",
           "outcome": "unmatched",
           "status": "unmatched",
+          "state": "no_candidate",
           "rank1": null
         },
         {
@@ -7445,6 +8280,7 @@
           "kind": "known",
           "outcome": "correct",
           "status": "exact_match",
+          "state": "confirmed",
           "rank1": "glenmorangie-signet"
         }
       ]
