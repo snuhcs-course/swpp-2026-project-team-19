@@ -180,6 +180,7 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                 if (revision == latestDraftRevision) {
                     try {
                         repository.saveDraft(state)
+                        _draftProblem.value = null
                     } catch (cancelled: CancellationException) {
                         throw cancelled
                     } catch (error: ReviewDraftConflictException) {
@@ -187,8 +188,18 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                         // cannot be published until the owner reloads the draft.
                         if (_draftProblem.value == null) toast(error.message.orEmpty())
                         _draftProblem.value = error.message
+                    } catch (error: BottleMapApiException) {
+                        // Transient disconnects are retried on Leave; permanent
+                        // permission/size/state errors block publication.
+                        if (error.httpStatus in setOf(401, 403, 409, 413)) {
+                            _draftProblem.value = error.message
+                            toast(error.message)
+                        }
+                    } catch (error: IllegalStateException) {
+                        _draftProblem.value = error.message ?: "검수 초안 저장에 실패했어요."
+                        toast(_draftProblem.value.orEmpty())
                     } catch (_: Exception) {
-                        // The final save on Leave will retry and surface errors.
+                        // Transient failure: the final save on Leave will retry.
                     }
                 }
             }
@@ -212,6 +223,7 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
             val saved = draftSaveMutex.withLock {
                 try {
                     repository.saveDraft(final)
+                    _draftProblem.value = null
                     true
                 } catch (cancelled: CancellationException) {
                     throw cancelled
