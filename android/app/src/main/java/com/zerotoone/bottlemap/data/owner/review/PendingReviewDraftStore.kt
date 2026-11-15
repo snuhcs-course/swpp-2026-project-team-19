@@ -25,8 +25,8 @@ import kotlinx.coroutines.withContext
  */
 internal class PendingReviewDraftStore(
     context: Context,
-    private val token: suspend () -> String? = { AppAuth.gateway.currentAccessTokenOrNull() },
     private val slot: String = "pending",
+    private val token: suspend () -> String? = { AppAuth.gateway.currentAccessTokenOrNull() },
 ) {
     internal data class Envelope(
         val reviewVersion: Int,
