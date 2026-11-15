@@ -402,6 +402,39 @@ internal object ServerReviewDraftCodec {
                     )
                 }
             }
+            if (allowStaleIds && rawOptions != null) {
+                // In a rebuilt review, the operator's old option list may
+                // omit newly extracted servings. Forcing a fresh owner choice
+                // prevents silently publishing A while dropping new option B.
+                val currentOptions = (
+                    PhotoReviewRules.optionSummary(original) +
+                        original.volumeChoices + original.preMergeOptions
+                    ).distinctBy { it.sourceOptionId ?:
+                        "manual:${PhotoReviewRules.servingKey(it)}" }
+                val currentIds = currentOptions.mapNotNull { it.sourceOptionId }.toSet()
+                val retainedIds = options.orEmpty().mapNotNull { it.sourceOptionId }.toSet()
+                if (currentIds != retainedIds) {
+                    // The OTHER review screen does not implement the 3-size
+                    // whisky selection. Preserve the operator draft instead
+                    // of replacing it with unconfirmed options.
+                    if (changed.type != ReviewItemType.WHISKY) return null
+                    val newCandidates = currentOptions.filter {
+                        it.sourceOptionId != null && it.sourceOptionId !in retainedIds
+                    }
+                    val candidates = options.orEmpty() + newCandidates
+                    // The picker keys by serving identity; two prices for one
+                    // ml cannot be chosen independently without losing data.
+                    val keys = candidates.map(PhotoReviewRules::servingKey)
+                    if (keys.distinct().size != keys.size) return null
+                    changed = changed.copy(
+                        volumeChoices = candidates,
+                        chosenVolumeKeys = options.orEmpty()
+                            .map(PhotoReviewRules::servingKey).toSet(),
+                        volumeChoicesConfirmed = false,
+                        expanded = true,
+                    )
+                }
+            }
             changed
         }
         return fresh.copy(items = restored)
