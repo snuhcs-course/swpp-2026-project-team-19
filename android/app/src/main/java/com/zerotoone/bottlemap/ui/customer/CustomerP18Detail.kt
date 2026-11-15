@@ -58,7 +58,7 @@ import com.zerotoone.bottlemap.network.BarOperatingExceptionDto
 import com.zerotoone.bottlemap.network.BarWeeklyHoursDto
 import com.zerotoone.bottlemap.ui.common.BmIcon
 import com.zerotoone.bottlemap.ui.common.BmIconId
-import com.zerotoone.bottlemap.ui.common.BottleMapNoticeDialog
+import com.zerotoone.bottlemap.ui.common.UxToast
 import com.zerotoone.bottlemap.ui.theme.BottleMapPalette
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -172,7 +172,13 @@ internal fun CustomerP18BarDetail(
 ) {
     val context=LocalContext.current
     val clipboard=LocalClipboardManager.current
-    var addressCopyNotice by remember(bar.barId) { mutableStateOf(false) }
+    var addressCopyNotice by remember(bar.barId) { mutableStateOf<Long?>(null) }
+    LaunchedEffect(addressCopyNotice) {
+        if (addressCopyNotice != null) {
+            delay(2500)
+            addressCopyNotice = null
+        }
+    }
     val scroll=rememberScrollState()
     val anchorPx=with(LocalDensity.current){160.dp.roundToPx()}
     var highlightTarget by remember(bar.barId,highlightProductId) {
@@ -200,14 +206,6 @@ internal fun CustomerP18BarDetail(
     val open=p18BusinessStatus(bar.weeklyHours,bar.operatingException,at)
     val photos=bar.photos
     val selectedPhoto=photos.getOrNull(if(photos.isEmpty())0 else photoIndex.mod(photos.size))
-    if (addressCopyNotice) {
-        BottleMapNoticeDialog(
-            message = "주소를 복사했어요.",
-            onDismiss = { addressCopyNotice = false },
-            tag = "customer-bar-address-copied-dialog",
-            title = "복사 완료",
-        )
-    }
     if(photoFull && selectedPhoto!=null) Dialog(onDismissRequest={photoFull=false},
         properties=DialogProperties(usePlatformDefaultWidth=false)) {
         Column(Modifier.fillMaxWidth().fillMaxHeight(.82f)
@@ -352,7 +350,7 @@ internal fun CustomerP18BarDetail(
                         P18PreviewCopy({
                             if (bar.address.isNotBlank()) {
                                 clipboard.setText(AnnotatedString(bar.address))
-                                addressCopyNotice = true
+                                addressCopyNotice = System.nanoTime()
                             }
                         },enabled=bar.address.isNotBlank())
                     }
@@ -459,6 +457,10 @@ internal fun CustomerP18BarDetail(
       }
       P18ScrollTopButton(scroll,Modifier.align(Alignment.BottomEnd)
           .padding(end=16.dp,bottom=18.dp))
+      addressCopyNotice?.let {
+          UxToast("주소를 복사했어요.", Modifier.align(Alignment.TopCenter)
+              .testTag("customer-bar-address-copied-toast"))
+      }
     }
 }
 
