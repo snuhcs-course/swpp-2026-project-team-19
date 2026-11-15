@@ -212,6 +212,11 @@ internal object ServerReviewDraftCodec {
 
     /** Null means the server draft came from another client / unknown schema. */
     fun decode(saved: ReviewDraftDto): PhotoReviewState? {
+        if (saved.content.keys.any { it !in setOf(
+                "clientState", "itemDecisions", "changeDecisions") }) return null
+        val changes = saved.content["changeDecisions"]
+        if (changes != null && (changes !is List<*> || changes.isNotEmpty()))
+            return null // a web operator's diff must never be erased
         val client = saved.content["clientState"] as? Map<*, *> ?: return null
         if ((client["androidSchemaVersion"] as? Number)?.toInt() != 1) return null
         val json = client["androidStateJson"] as? String ?: return null
@@ -238,6 +243,10 @@ internal object ServerReviewDraftCodec {
     fun restoreStandard(
         saved: ReviewDraftDto, fresh: PhotoReviewState, allowStaleIds: Boolean = false,
     ): PhotoReviewState? {
+        // Unknown extension fields are legal JSON but Android cannot
+        // round-trip them; block rather than silently overwrite those values.
+        if (saved.content.keys.any { it !in setOf(
+                "clientState", "itemDecisions", "changeDecisions") }) return null
         val changes = when (val raw = saved.content["changeDecisions"]) {
             null -> emptyList<Any>()
             is List<*> -> raw
