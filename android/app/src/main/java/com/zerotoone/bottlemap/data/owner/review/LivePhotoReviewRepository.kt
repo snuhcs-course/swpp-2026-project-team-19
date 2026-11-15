@@ -52,6 +52,11 @@ class ReviewDraftTooLargeLocalException : IllegalStateException(
     "검수 초안이 서버 256KB 제한을 넘었어요. 이 기기에만 저장했어요. 입력 내용을 줄여 주세요."
 )
 
+/** Edits were saved only to the explicit conflict working copy, never PUT. */
+class ReviewDraftLocalEditingException : IllegalStateException(
+    "이 기기 초안 편집 중이에요. 서버에 반영하려면 명시적으로 덮어쓰기를 선택해 주세요."
+)
+
 /**
  * Shared save gate for server CAS and the unique device pending copy.
  * Test this gate independently: a conflict must never reach AtomicFile.write;
@@ -118,6 +123,11 @@ class LivePhotoReviewRepository(
 ) : PhotoReviewRepository {
     private val appContext = context.applicationContext
     private val pendingStore = PendingReviewDraftStore(appContext)
+    // An explicitly chosen local conflict edit never mutates the original
+    // pending file. It lives in its own auth/import-scoped AtomicFile.
+    private val workingStore = PendingReviewDraftStore(appContext, slot = "working")
+    private var editingLocalConflict = false
+    private var freshReview: PhotoReviewState? = null
     private var pendingLocally = false
     private var pendingOversized = false
     private var loaded: MenuImportStatusDto? = null
@@ -177,6 +187,8 @@ class LivePhotoReviewRepository(
             it.menuImportId == id && it.reviewVersion == response.reviewVersion
         }) { "검수 버전이 변경됐어요. 다시 불러와 주세요." }
         val state = mapServerPhotoReview(response, current)
+        freshReview = state
+        editingLocalConflict = false
         // One source identity/group compatibility policy for restores and
         // the explicit device-over-server conflict choice.
         fun compatible(candidate: PhotoReviewState?): Boolean =
@@ -297,11 +309,18 @@ class LivePhotoReviewRepository(
         }
         // Signed URLs expire, and source observations belong to the server.
         // Restore only owner edits; rebind fresh data to the current response.
-        val currentItems = state.items.associateBy { it.id }
         // Restoring a corrected name must use *that* name's saved row.
         // The fresh OCR name could refer to a different menu item and would
         // otherwise erase the owner's unresolved saved-versus-photo conflict.
         loaded = response
+        return rebindDraftData(chosen, state)
+    }
+
+    /** Rebind live OCR provenance and catalog observations to an edited draft. */
+    private fun rebindDraftData(
+        chosen: PhotoReviewState, state: PhotoReviewState,
+    ): PhotoReviewState {
+        val currentItems = state.items.associateBy { it.id }
         val restored = chosen.copy(items = chosen.items.map { old ->
             val fresh = currentItems.getValue(old.id)
             val savedPrices = if (old.linkedProductId == null && old.name.isNotBlank())
@@ -327,7 +346,6 @@ class LivePhotoReviewRepository(
                 // when an owner later adds a manual replacement with null ID.
                 primarySourceOptionId = old.primarySourceOptionId)
         }, modal = null, typingSnapshots = emptyMap())
-        loaded = response
         return restored
     }
 
@@ -420,6 +438,7 @@ class LivePhotoReviewRepository(
                 throw ReviewDraftConflictException()
             }
             pendingStore.clear(id)
+            workingStore.clear(id)
             pendingDraftConflict = false
             pendingLocally = false
             pendingOversized = false
@@ -432,7 +451,7 @@ class LivePhotoReviewRepository(
         val version = loaded?.reviewVersion ?: error("검수 데이터를 먼저 불러와 주세요.")
         draftMutex.withLock {
             check(pendingDraftConflict) { "선택할 기기 초안 충돌이 없어요." }
-            val pending = pendingStore.read(id)
+            val pending = workingStore.read(id) ?: pendingStore.read(id)
                 ?: error("이 기기의 보관 초안을 찾지 못했어요.")
             val current = remote.getMenuImport(id)
             require(current.menuImportId == id && current.status == "ready_for_review" &&
@@ -473,6 +492,8 @@ class LivePhotoReviewRepository(
             // Clear only after an acknowledged CAS save. On connection loss,
             // the local backup survives and can be reconciled on reload.
             pendingStore.clear(id)
+            workingStore.clear(id)
+            editingLocalConflict = false
             pendingLocally = false
             pendingOversized = false
             pendingDraftConflict = false
@@ -495,6 +516,18 @@ class LivePhotoReviewRepository(
             // The pending file is the ONLY copy of the offline edits when
             // an operator/device has advanced the server CAS. Do not touch it
             // until the owner explicitly resolves the conflict.
+            if (editingLocalConflict && draftConflict) {
+                // No server PUT is allowed during conflict editing, even
+                // after the working copy is reduced under the server limit.
+                // Explicit confirmation in chooseLocalDraft is required.
+                val original = pendingStore.read(id)
+                    ?: error("보호된 기기 원본 초안을 찾지 못했어요.")
+                workingStore.write(id, original.copy(content = content,
+                    itemIds = state.items.map { it.id }))
+                pendingLocally = true
+                pendingOversized = ServerReviewDraftCodec.exceedsServerLimit(content)
+                throw ReviewDraftLocalEditingException()
+            }
             DraftSaveSafety.assertWritable(draftConflict)
             // An unacknowledged forced prepublish PUT may have identical
             // content to the last ACK, but still needs server CAS + cleanup.
@@ -570,6 +603,7 @@ class LivePhotoReviewRepository(
             pendingLocally = false
             pendingOversized = false
             runCatching { pendingStore.clear(id) }
+            runCatching { workingStore.clear(id) }
         }
     }
 
