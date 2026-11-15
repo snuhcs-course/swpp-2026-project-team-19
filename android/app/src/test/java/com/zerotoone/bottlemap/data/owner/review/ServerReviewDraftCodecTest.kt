@@ -287,4 +287,124 @@ class ServerReviewDraftCodecTest {
         assertEquals(15000.0,restored.items.single().price,0.0)
         assertEquals("option-live",restored.items.single().primarySourceOptionId)
     }
+
+    @Test fun operatorAliasChangesCannotBeDiscardedByAndroidAutosave() {
+        val fresh = PhotoReviewState(items = listOf(ReviewItem(
+            id = "ocr-1", name = "위스키", primarySourceOptionId = "opt-1",
+        )))
+        fun draft(aliases: Any?) = ReviewDraftDto(5, 3, "2026-11-15T00:00:00Z",
+            mapOf("itemDecisions" to listOf(mapOf(
+                "extractedItemId" to "ocr-1",
+                "action" to "select_existing_product",
+                "productId" to "catalog-a",
+                "aliasesToAdd" to aliases,
+            ))))
+        assertNull(ServerReviewDraftCodec.restoreStandard(
+            draft(listOf("운영자 확정 별칭")), fresh))
+        assertNotNull(ServerReviewDraftCodec.restoreStandard(
+            draft(emptyList<String>()), fresh))
+        assertNull(ServerReviewDraftCodec.restoreStandard(
+            draft("잘못된 별칭 형식"), fresh))
+    }
+
+    @Test fun regeneratedClassificationSnapshotNeverRestoresDeletedOcrId() {
+        val hidden = ClassificationSnapshot(
+            type = ReviewItemType.OTHER,
+            volume = 30.0,
+            volumeSource = VolumeSource.PHOTO,
+            bottle = false,
+            primaryHasOption = true,
+            options = listOf(ReviewOption(
+                volume = 60.0, price = 20000.0, sourceOptionId = "surviving",
+            )),
+            match = ReviewMatch.NEW,
+            matchConfirmed = false,
+            nameSaved = true,
+            newConfirmed = true,
+            linkedProductId = null,
+            linkedProductName = null,
+            newProductName = null,
+            candidates = emptyList(),
+            rawOptionEdits = emptyMap(),
+            primarySourceOptionId = "removed",
+            primaryPrice = 15000.0,
+        )
+        val previous = PhotoReviewState(items = listOf(ReviewItem(
+            id = "line", name = "교정한 위스키", volume = 30.0, price = 12000.0,
+            primarySourceOptionId = "visible",
+            classificationSnapshot = hidden,
+        )))
+        val updated = PhotoReviewState(items = listOf(ReviewItem(
+            id = "line", name = "OCR 결과", volume = 30.0, price = 12000.0,
+            primarySourceOptionId = "visible",
+            options = listOf(ReviewOption(
+                volume = 60.0, price = 18000.0, sourceOptionId = "surviving",
+            )),
+        )))
+        val recovered = requireNotNull(
+            ServerReviewDraftCodec.reconcileRegenerated(previous, updated)
+        ).items.single()
+        val safeSnapshot = requireNotNull(recovered.classificationSnapshot)
+        assertEquals("surviving", safeSnapshot.primarySourceOptionId)
+        assertTrue(safeSnapshot.options.isEmpty())
+        assertFalse(recovered.volumeChoicesConfirmed)
+        val returnedToOther = PhotoReviewRules.reclassify(recovered, 30.0)
+        assertEquals("surviving", returnedToOther.primarySourceOptionId)
+        assertFalse(PhotoReviewRules.optionSummary(returnedToOther)
+            .any { it.sourceOptionId == "removed" })
+    }
+
+    @Test fun regeneratedOperatorDraftRequiresExplicitNewOcrOptionSelection() {
+        val fresh = PhotoReviewState(items = listOf(ReviewItem(
+            id = "line", name = "위스키",
+            price = 12000.0, volume = 30.0, primarySourceOptionId = "option-a",
+            options = listOf(ReviewOption(
+                price = 22000.0, volume = 60.0, sourceOptionId = "option-b",
+            )),
+        )))
+        val content = mapOf("itemDecisions" to listOf(mapOf(
+            "extractedItemId" to "line",
+            "options" to listOf(mapOf(
+                "extractedOptionId" to "option-a",
+                "priceKrw" to 15000,
+                "pourMl" to 30,
+            )),
+        )))
+        val saved = ReviewDraftDto(4, 2, "2026-11-15T00:00:00Z", content)
+        val restored = requireNotNull(ServerReviewDraftCodec.restoreStandard(
+            saved, fresh, allowStaleIds = true))
+        val line = restored.items.single()
+        assertFalse(line.volumeChoicesConfirmed)
+        assertEquals(setOf("option-a", "option-b"),
+            line.volumeChoices.mapNotNull { it.sourceOptionId }.toSet())
+        assertEquals(setOf("ml:30"), line.chosenVolumeKeys)
+        assertFalse(PhotoReviewRules.stats(restored).canPublish)
+        // The non-whisky screen cannot express the whisky-only volume picker.
+        assertNull(ServerReviewDraftCodec.restoreStandard(saved,
+            fresh.copy(items = fresh.items.map { it.copy(type = ReviewItemType.OTHER) }),
+            allowStaleIds = true))
+    }
+
+    @Test fun operatorBottleCapacityLabelsRestoreWithBottleIdentity() {
+        val original = PhotoReviewState(items = listOf(ReviewItem(
+            id = "line", name = "위스키", primarySourceOptionId = "opt-1",
+        )))
+        for (label in listOf("병 700ml", "Bottle 700ml")) {
+            val server = ReviewDraftDto(4, 3, "2026-11-15T00:00:00Z",
+                mapOf("itemDecisions" to listOf(mapOf(
+                    "extractedItemId" to "line",
+                    "options" to listOf(mapOf(
+                        "extractedOptionId" to "opt-1",
+                        "optionLabel" to label,
+                        "priceKrw" to 90000,
+                    )),
+                ))))
+            val restored = requireNotNull(ServerReviewDraftCodec.restoreStandard(
+                server, original)).items.single()
+            val option = PhotoReviewRules.optionSummary(restored).single()
+            assertTrue(label, option.bottle)
+            assertEquals(0.0, option.volume, 0.0)
+            assertEquals("bottle", PhotoReviewRules.servingKey(option))
+        }
+    }
 }
