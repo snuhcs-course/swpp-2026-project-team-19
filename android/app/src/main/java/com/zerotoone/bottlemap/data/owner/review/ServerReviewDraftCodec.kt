@@ -319,6 +319,20 @@ internal object ServerReviewDraftCodec {
             // Android cannot represent that incomplete selection: do not
             // replace it with the fresh OCR-linked product on autosave.
             if ("productId" in decision && action != "select_existing_product") return null
+            // An operator may choose kind before action. Android has no
+            // separate pending-kind field: never autosave over that choice.
+            if ("kind" in decision && action != "publish_without_product") return null
+            // A freshly grouped OCR child is hidden and must be rejected.
+            // Its earlier operator publish decision cannot be replayed on the
+            // child without creating a hidden duplicate. Block the draft.
+            if (original.mergedInto != null) {
+                if (action == "reject" &&
+                    decision.keys.all { it == "extractedItemId" || it == "action" }
+                ) return@map original.copy(excluded = true)
+                if (decision.keys == setOf("extractedItemId"))
+                    return@map original.copy(excluded = true)
+                return null
+            }
             // An operator may approve catalog aliases. Android has no field
             // to edit or round-trip them, so never replace the remote decision.
             val aliases = decision["aliasesToAdd"]
