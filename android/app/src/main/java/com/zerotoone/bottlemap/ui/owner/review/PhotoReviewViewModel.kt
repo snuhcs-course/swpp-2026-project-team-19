@@ -133,20 +133,19 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                             val resumable = repository.hasPendingLocalDraft() &&
                                 !_draftConflictChoice.value &&
                                 !repository.hasOversizedPendingDraft()
-                            _draftRetryable.value = false
+                            // An unsynced device draft must not appear fully
+                            // persisted or publishable before a server CAS ACK.
+                            // Keep the existing retry behavior; do not start
+                            // a competing save while the reload holds locks.
+                            _draftRetryable.value = resumable
                             _draftProblem.value = when {
                                 _draftConflictChoice.value ->
                                     "최신 서버 초안을 불러왔어요. 화면에 표시된 서버 초안과 이 기기의 미저장 초안 중 선택해 주세요."
                                 repository.hasOversizedPendingDraft() -> oversizedNotice
+                                resumable -> localOnlyNotice
                                 else -> null
                             }
                             repository.consumeDraftNotice()?.let(::toast)
-                            if (resumable) {
-                                // Restore is immediately editable. Retry the
-                                // regular version-checked save without asking
-                                // the owner where the data was loaded from.
-                                saveDraft(fresh)
-                            }
                             PhotoReviewLoad.Ready(fresh)
                         }
                     } catch (applied: ReviewAlreadyAppliedException) {
