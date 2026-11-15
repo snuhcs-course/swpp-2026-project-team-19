@@ -243,7 +243,9 @@ internal object ServerReviewDraftCodec {
             is List<*> -> raw
             else -> return null
         }
-        if (changes.isNotEmpty()) return null // Android cannot edit ignored diffs.
+        // A rebuilt review has new diffs (§5.4/9.4). Old changeDecisions
+        // cannot be replayed, but surviving itemDecisions still can.
+        if (changes.isNotEmpty() && !allowStaleIds) return null
         // The spec permits a draft with no itemDecisions at all; it is empty,
         // not malformed. A present non-array value still must be rejected.
         val input = when (val raw = saved.content["itemDecisions"]) {
