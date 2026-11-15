@@ -85,6 +85,54 @@ class PendingReviewDraftStoreTest {
         )).items.single().name)
     }
 
+
+    @Test fun conflictedOfflineSnapshotStaysImmutableUntilExplicitDecision() = runBlocking {
+        val store = PendingReviewDraftStore(context) { jwt("owner-conflicted") }
+        fun snapshot(name: String) = PendingReviewDraftStore.Envelope(
+            reviewVersion = 2, expectedDraftVersion = 3, itemIds = listOf("ocr-1"),
+            content = ServerReviewDraftCodec.encode(PhotoReviewState(
+                items = listOf(ReviewItem(id = "ocr-1", name = name)),
+            )),
+        )
+        val protected = snapshot("오프라인에서 고친 원본")
+        store.write("import-conflicted", protected)
+        try {
+            // The actual Live repository uses this gate before AtomicFile.write.
+            DraftSaveSafety.assertWritable(true)
+            store.write("import-conflicted", snapshot("새 서버 화면의 편집"))
+            fail("Conflict must not enter the local backup writer")
+        } catch (_: ReviewDraftConflictException) {
+            val stillSaved = requireNotNull(store.read("import-conflicted"))
+            val restored = requireNotNull(ServerReviewDraftCodec.decode(ReviewDraftDto(
+                3, 2, "2026-11-15T00:00:00Z", stillSaved.content,
+            )))
+            assertEquals("오프라인에서 고친 원본", restored.items.single().name)
+            assertEquals(3, stillSaved.expectedDraftVersion)
+        }
+    }
+
+    @Test fun pendingEqualSnapshotMustNotSkipRequiredServerCas() {
+        val content = ServerReviewDraftCodec.encode(PhotoReviewState(
+            items = listOf(ReviewItem(id = "ocr-1", name = "동일한 초안")),
+        ))
+        assertTrue(DraftSaveSafety.canSkip(
+            forced = false, pendingLocally = false, attempted = content,
+            acknowledged = content,
+        ))
+        assertFalse(DraftSaveSafety.canSkip(
+            forced = false, pendingLocally = true, attempted = content,
+            acknowledged = content,
+        ))
+        assertFalse(DraftSaveSafety.canSkip(
+            forced = true, pendingLocally = false, attempted = content,
+            acknowledged = content,
+        ))
+        assertFalse(DraftSaveSafety.canSkip(
+            forced = false, pendingLocally = false, attempted = content,
+            acknowledged = null,
+        ))
+    }
+
     @Test fun cannotWriteUnscopedDraftWithoutCurrentAuthSubject() = runBlocking {
         val unauthenticated = PendingReviewDraftStore(context) { null }
         try {
