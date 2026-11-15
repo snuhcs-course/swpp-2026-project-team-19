@@ -565,7 +565,7 @@ OCR LLM과 Vision LLM은 메뉴에서 인식한 모든 상품 또는 비상품 �
 - 섹션 제목, 열 제목, 설명, 세트 메뉴, 비위스키 섹션(칵테일·와인·맥주·음식 등)은 프롬프트가 반환하지 않게 한다.
 - 한 줄에 잔·병 가격이 모두 있으면 두 항목으로 나눠 반환한다. 어댑터(`backend/app/extraction/convert.py`)는 이름이 같은 인접한 잔·병 항목을 옵션 두 개(`잔`, `병`)를 가진 한 항목으로 묶어 4.3 형식으로 바꾼다.
 - 따라서 현재 모든 항목의 `lineType`은 `product`이고, `brandText`, `ageYears`, `editionName`, `abv`, `confidence`는 항상 `null`이다. 이름에 적힌 연수(예: `12년`)는 7장 정규화로 별칭 조회 키에 반영되지만, 10장의 연수·에디션 비교는 추출값이 없어 동작하지 않는다.
-- prompt v1은 위스키 줄만 반환하므로 어댑터는 모든 항목을 `kind = whisky`로 둔다. 위스키가 아닌 메뉴 줄도 `kind = other`로 반환하게 하는 것은 추출 프롬프트의 후속 작업이다(AI 담당). 백엔드의 저장, 매칭 생략, 검수 응답과 게시는 그 전에도 4.3 형식의 `kind`를 받으면 동작한다.
+- prompt v1은 위스키 줄만 반환하므로 어댑터는 모든 항목을 `kind = whisky`로 둔다. 위스키가 아닌 메뉴 줄도 `kind = other`로 반환하게 하는 것은 추출 프롬프트의 후속 작업이다(AI 담당). 백엔드의 저장, 매칭 생략, 검수 응답과 게시는 그 전에도 4.3 형식의 `kind`를 받으면 동작한다. 다만 Gemini와 하이브리드 어댑터가 자기 출력을 검증하는 모델(`backend/app/extraction/schema.py`의 `ExtractedItem`)에는 아직 `kind`가 없다. 이 파일은 AI 평가(P30, `ai/eval/p30_extract.py`의 `FROZEN_CODE`)가 SHA-256으로 고정한 파일이므로, 비위스키 줄을 내는 프롬프트의 어댑터를 연결할 때 AI 담당이 그 고정값과 함께 바꾼다.
 - 4.3 형식 전체를 채우는 prompt v2는 후속 과제다. v1과 결과가 달라지므로 새 평가 실행으로 정확도를 확인한 뒤 v1을 대체한다.
 
 ## 5 extracted_items와 extracted_options 저장
@@ -888,7 +888,7 @@ AI가 바로 상품을 확정하거나 신규 브랜드·상품을 생성하지 
 
 따라서 AI는 상품명, 브랜드명, 연수, 에디션 같은 의미 있는 정보를 이미지에서 추출하는 역할을 맡고, 백엔드는 그 결과의 표기 형식만 고정 규칙으로 정규화한다. 규칙 정규화와 정확한 별칭 조회로 후보를 결정하기 어려울 때만 임베딩 또는 LLM을 후속 매칭 단계에서 사용한다.
 
-정규화 함수를 변경하는 배포에서는 새 함수로 `brand_aliases.normalized_alias`와 `product_aliases.normalized_alias`를 모두 재계산하고 unique 제약 충돌 여부를 검사한다. 재계산은 `backend/scripts/renormalize_aliases.py`로 수행한다(인자 없이 실행하면 변경 예정 내역만 출력하고, `--apply`로 반영한 뒤 `seed_catalog.py`를 다시 실행). 이 재계산이 성공한 뒤에만 새 함수를 사용하는 백엔드를 활성화한다. 일부 별칭만 새 규칙으로 바꾸거나 구규칙·신규칙 검색을 동시에 운영하지 않는다.
+정규화 함수를 변경하는 배포에서는 새 함수로 `brand_aliases.normalized_alias`와 `product_aliases.normalized_alias`를 모두 재계산하고 unique 제약 충돌 여부를 검사한다. 재계산은 `backend/scripts/renormalize_aliases.py`로 수행한다(인자 없이 실행하면 변경 예정 내역만 출력하고, `--apply`로 반영한 뒤 `seed_catalog.py`를 다시 실행). 같은 스크립트가 현재 메뉴판의 미연결 항목 `bar_menu_items.name_key`도 다시 계산하고, 한 메뉴판 안에서 이름 키가 겹치는 줄이 있으면 반영을 멈춘다. 검수 중인 작업의 임시 diff도 다시 만든다(스키마 가이드 7.1). 이 재계산이 성공한 뒤에만 새 함수를 사용하는 백엔드를 활성화한다. 일부 별칭만 새 규칙으로 바꾸거나 구규칙·신규칙 검색을 동시에 운영하지 않는다.
 
 정규화는 번역이 아니다. `Deanston`과 `딘스톤`은 각각 별칭으로 저장되고 같은 브랜드 또는 상품 ID를 가리킨다.
 

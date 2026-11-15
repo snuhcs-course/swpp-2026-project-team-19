@@ -110,6 +110,13 @@ BAR_MANAGER = [
         (409, "INVALID_IMPORT_STATE"),
     ),
     ManagerRoute("post", "/api/menu-imports/{menuImportId}/cancel", {}, (404, "MENU_IMPORT_NOT_FOUND"), (200, None)),
+    ManagerRoute(
+        "put",
+        "/api/menu-imports/{menuImportId}/review-draft",
+        {"json": {"draftVersion": 0, "reviewVersion": 1, "content": {}}},
+        (404, "MENU_IMPORT_NOT_FOUND"),
+        (409, "INVALID_IMPORT_STATE"),
+    ),
     # Manual menu edits: the target bar has an unfinished import, so a manager's edit stops there.
     ManagerRoute(
         "post",

@@ -43,6 +43,7 @@ from app.schemas.menu_import import (
     ReviewItem,
     ReviewOption,
 )
+from app.services.menu_review_draft import review_draft_of
 from app.services.menu_review_validation import change_lines
 
 POLL_AFTER_MS = 3000
@@ -186,7 +187,8 @@ def _review_item(item: ExtractedItem, products: dict[UUID, Product], boxes: dict
                 editionName=item.extracted_edition_name,
                 abv=_float(item.extracted_abv),
             )
-            if effective == LineType.PRODUCT
+            # A line the AI read as another menu is not a whisky to create (spec 5.4).
+            if effective == LineType.PRODUCT and item.extracted_kind != MenuItemKind.OTHER
             else None
         ),
     )
@@ -330,6 +332,7 @@ def _review(session: Session, menu_import: MenuImport, storage: ImageStorage, ba
         status="ready_for_review",
         reviewVersion=menu_import.review_version,
         images=images,
+        reviewDraft=review_draft_of(menu_import),
         proposedChanges=[change for _, change in proposed],
     )
 

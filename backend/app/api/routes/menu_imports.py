@@ -1,14 +1,14 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, Header, Request, Response, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Body, Depends, File, Form, Header, Request, Response, UploadFile
 from pydantic import WithJsonSchema
 from sqlalchemy.orm import Session
 
 from app.adapters.extraction import MenuExtractor
 from app.adapters.storage import ImageStorage
 from app.api.deps import get_image_storage, get_matching_llm_layer, get_menu_extractor
-from app.api.permissions import require_active_bar_manager, require_import_manager
+from app.api.permissions import MenuImportId, require_active_bar_manager, require_import_manager
 from app.core.security import Principal, get_current_user
 from app.db.session import get_serializable_session_factory, get_session, get_session_factory
 from app.matching.tool_config import MatchingLayerConfig
@@ -17,7 +17,9 @@ from app.schemas.errors import AUTH_UNAVAILABLE, AUTH_UNAVAILABLE_DESCRIPTION, e
 from app.schemas.menu_import import ImportCanceledResponse, MenuImportAcceptedResponse, MenuImportStatusResponse
 from app.schemas.menu_review import ReviewAndApplyRequest, ReviewAppliedResponse
 from app.services import menu_import_upload as upload
+from app.schemas.review_draft import ReviewDraftRequest, ReviewDraftSavedResponse
 from app.services.menu_import_cancel import cancel_menu_import
+from app.services.menu_review_draft import check_draft_size, save_review_draft
 from app.services.menu_import_processing import SessionFactory, start_processing
 from app.services.menu_import_review import POLL_AFTER_MS, get_menu_import_status
 from app.services.menu_import_upload import ImageUpload, create_menu_import
@@ -125,8 +127,10 @@ def upload_menu_import(
         "- `failed`: `progress` and `failure` (`IMAGE_EXTRACTION_FAILED` or `PROCESSING_FAILED`). "
         "Stop polling; a failed import is not resumed, so start a new upload.\n"
         "- `ready_for_review`: everything the review screen needs in one response: images with URLs, "
-        "every extracted item (non-products too) with options, candidates and `proposedProductId`, "
-        "and the draft `proposedChanges` against the current menu. Stop polling.\n"
+        "every extracted item (non-products too) with options, candidates, `proposedProductId` and the "
+        "AI's `extractedKind`, "
+        "the draft `proposedChanges` against the current menu, and the saved `reviewDraft` (or null). "
+        "Stop polling.\n"
         "- `applied`: when it was applied and the resulting menu board.\n"
         "- `canceled`: when it was canceled. Stop polling.\n\n"
         "Proposed products and changes are suggestions; nothing is published until the review is submitted."
@@ -160,18 +164,29 @@ def read_menu_import(
         "Options without a price are not published; a published product needs at least one.\n\n"
         "**What gets published.** The reviewer's decisions are final:\n"
         "- Each product line is published with its chosen product and options, unless its proposed "
-        "change is `ignore`d. The first line of a product wins.\n"
+        "change is `ignore`d and the line is still what that change was about.\n"
+        "- Lines of one product, or without a product under one name key, are one item: the first "
+        "line's name and position, every line's options with an equal one kept once (spec 8.12). Lines "
+        "sent with the same `productId` (or `kind = other` lines of one name key) that disagree on a "
+        "price for the same label and pour are `OPTION_PRICE_CONFLICT`; send a line left with no "
+        "options as `reject`.\n"
+        "- A whisky line whose name was corrected is matched again by that name alone (spec 8.11): "
+        "another product links it (`relinked_by_name`), none publishes it without a product "
+        "(`unlinked_by_name`), and it takes the place of the item the draft compared it with. A product "
+        "chosen whose age or edition conflicts with the line is published and shown to an operator "
+        "(`attribute_conflict`, spec 8.7).\n"
         "- Against the current board that is an add, an update or nothing. Changes the draft did not "
         "show (an update from a price correction, an add after choosing another product) are applied "
         "too, as the reviewer's own decisions.\n"
         "- A board entry leaves the board only through an applied `remove`, and stays if a line "
-        "publishes its product again.\n"
+        "publishes its product again; the exception is an item a rematched line takes the place of.\n"
         "- `full_replace`: photo order, then kept entries in their old order. `partial_update`: old "
         "order with updates in place, adds at the end.\n\n"
         "**New brands and products** are checked again for duplicates first: a submitted name equal "
         "(after normalization) to an existing alias, or for products the same brand, category, age and "
         "edition, inactive products included. Similar-name search (flow doc 16.1) is not done. Two lines "
         "creating the same new brand or product in one submission share one row.\n\n"
+        "Applying clears the saved review draft (spec 5.9); a `REVIEW_OUTDATED` keeps it.\n\n"
         "**Retries.** Repeating the request after it was applied returns the stored result. "
         "A serialization conflict is retried up to three attempts, then `503`."
     ),
@@ -196,7 +211,7 @@ def read_menu_import(
             "`DUPLICATE_ITEM`, `MISSING_ITEM`, `UNKNOWN_CHANGE`, `DUPLICATE_CHANGE`, `MISSING_CHANGE`, "
             "`UNKNOWN_OPTION`, `DUPLICATE_OPTION`, `DUPLICATE_OPTION_VALUES`, `OPERATOR_ONLY`, "
             "`PRODUCT_NOT_FOUND`, `PRODUCT_INACTIVE`, `BRAND_NOT_FOUND`, `NOT_NORMALIZABLE`, "
-            "`CHANGE_WITHOUT_PRODUCT`.",
+            "`CHANGE_WITHOUT_PRODUCT`, `OPTION_PRICE_CONFLICT`.",
         ),
         (
             503,
@@ -221,8 +236,8 @@ def submit_menu_review(
     description=(
         "Operator or the bar's owner. Ends an `uploaded`, `processing` or `ready_for_review` import without applying it, "
         "so the bar can take a new upload. The menu board and the catalog do not change, and the photos "
-        "and AI records are kept. Processing still running stores nothing more, and the import stays "
-        "`canceled`. No request body.\n\n"
+        "and AI records are kept; a saved review draft is cleared (spec 5.9). Processing still running "
+        "stores nothing more, and the import stays `canceled`. No request body.\n\n"
         "Canceling a canceled import returns the same response, so a retry is safe. If it races with "
         "`review-and-apply`, the first to lock the import wins and the other gets `409`."
     ),
@@ -239,3 +254,43 @@ def cancel_import(
     import_id: UUID = Depends(require_import_manager),
 ) -> ImportCanceledResponse:
     return cancel_menu_import(session, import_id)
+
+
+@router.put(
+    "/menu-imports/{menuImportId}/review-draft",
+    response_model=ReviewDraftSavedResponse,
+    summary="Save the review draft",
+    description=(
+        "Operator or the bar's owner (spec 5.9). Saves the unfinished review input, so the review can go on "
+        "later or from another device or the operator web; the review data returns it as `reviewDraft` "
+        "(5.4). The menu board and the catalog do not change.\n\n"
+        "The content is not checked beyond being an object of at most 256 KB as JSON; the submission checks "
+        "the decisions (8.7). `draftVersion` is the version last read (0 before the first save); another "
+        "version is `REVIEW_DRAFT_OUTDATED`, so two editors do not overwrite each other. A saved draft is "
+        "cleared when the import is applied or canceled, and kept when the review data is rebuilt."
+    ),
+    responses=error_responses(
+        (401, "`UNAUTHENTICATED`: missing, invalid or expired token."),
+        (403, "`FORBIDDEN`: the caller is neither an operator nor the bar's current owner."),
+        AUTH_UNAVAILABLE,
+        (404, "`MENU_IMPORT_NOT_FOUND`: no such import or a malformed id."),
+        (
+            409,
+            "`INVALID_IMPORT_STATE` (not `ready_for_review`; `details.status`); `REVIEW_DRAFT_OUTDATED` "
+            "(saved elsewhere first: `details.currentDraftVersion`, `savedAt`, `reviewUrl`).",
+        ),
+        (413, "`REVIEW_DRAFT_TOO_LARGE`: the content is over 256 KB as JSON; `details.maxBytes`."),
+        (422, "`VALIDATION_FAILED`: `draftVersion` below 0, `reviewVersion` below 1, or `content` not an object."),
+    ),
+)
+def save_draft(
+    menu_import_id: MenuImportId,
+    body: Annotated[ReviewDraftRequest, Body()],
+    session: Session = Depends(get_session),
+    principal: Principal = Depends(get_current_user),
+) -> ReviewDraftSavedResponse:
+    # The request's own rules first (422, then 413), then the import (404) and the caller (403), as spec
+    # 5.9 orders them; a dependency would run before the body is checked.
+    check_draft_size(body)
+    import_id = require_import_manager(menu_import_id, principal, session)
+    return save_review_draft(session, principal, import_id, body)

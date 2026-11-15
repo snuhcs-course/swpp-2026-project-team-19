@@ -432,16 +432,30 @@ def add_bar_menu_item(
     summary="Edit a menu item",
     description=(
         _EDIT_RULES
-        + "\n\nReplaces the item's menu name and all of its options; the product and the position stay. "
+        + "\n\nReplaces the item's menu name and all of its options; the position stays. "
         "To keep a discount, send the `discount` from the menu back; leaving it out removes it. On "
-        "`DISCOUNT_ENDED`, drop that discount and send again. To link another product, delete the item and "
-        "add the product.\n\n" + _OPTION_RULES
+        "`DISCOUNT_ENDED`, drop that discount and send again. The request does not choose a product: to link "
+        "another one, delete the item and add the product.\n\n"
+        "**A new name of a whisky is matched again** by that name alone (spec 3.14.4): when it names another "
+        "product, the line moves to that product's item, or merges into its line already on the menu (that "
+        "line's prices win); when it names none, the line becomes a whisky without a product. Its "
+        "`barMenuItemId` and `productId` may then change, so redraw from the response; an operator is shown "
+        "the change. Spacing or symbols alone are not a new name. An item without a product is known by its "
+        "name, so its new name must not be another unlinked item's (`MENU_ITEM_EXISTS`).\n\n" + _OPTION_RULES
     ),
     responses=error_responses(
         *_EDIT_COMMON_ERRORS,
         (404, "`BAR_NOT_FOUND`: no such bar, a malformed id, or an inactive bar; " + _ITEM_NOT_FOUND + "."),
-        (409, _EDIT_CONFLICTS + "."),
-        (422, "`VALIDATION_FAILED`: field rules, " + _OPTION_CODES + "."),
+        (
+            409,
+            _EDIT_CONFLICTS + "; `MENU_ITEM_EXISTS` (`details.barMenuItemId`): another item without a product "
+            "on the menu has the new name.",
+        ),
+        (
+            422,
+            "`VALIDATION_FAILED`: field rules, " + _OPTION_CODES + ", `NOT_NORMALIZABLE` (`displayName` of an item "
+            "left without a product has nothing to normalize).",
+        ),
     ),
 )
 def edit_bar_menu_item(
