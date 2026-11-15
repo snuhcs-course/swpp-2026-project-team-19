@@ -151,6 +151,10 @@ def _edition_reading(source: str, catalog: CatalogLookup) -> str | None:
     brand = _find_brand(title, catalog)
     if brand is None or len(brand[0]) != 1:
         return None
+    if _age_and_edition(brand[2])[1] is not None:
+        # the title has an edition of its own ("아드벡 우가달 (Uigeadail)"): the brackets repeat it in
+        # the other script, and adding them would write the edition twice
+        return None
     wanted = normalize(inner)  # never empty: the brackets have a letter of the other script
     for product_id in catalog.get_brand_product_ids(brand[0][0]):
         product = catalog.get_product(product_id)
@@ -201,7 +205,7 @@ def draft_from_name(name: str | None, catalog: CatalogLookup) -> ProductDraft | 
     readings = list(dict.fromkeys([*bracketed, *spellings])) or [source]
     best: ProductDraft | None = None
     drafts: list[ProductDraft] = []
-    brand_alone: tuple[UUID | None, str] | None = None
+    brands_alone: list[tuple[UUID | None, str]] = []
     for variant in readings:
         found = _find_brand(variant, catalog)
         if found is None:
@@ -209,7 +213,7 @@ def draft_from_name(name: str | None, catalog: CatalogLookup) -> ProductDraft | 
         brand_ids, alias, rest = found
         if not rest and variant != source:
             # this reading is only the brand ("아벨라워" of "Aberlour 12 (아벨라워)")
-            brand_alone = brand_alone or (brand_ids[0] if len(brand_ids) == 1 else None, variant)
+            brands_alone.append((brand_ids[0] if len(brand_ids) == 1 else None, variant))
             continue
         age, edition = _age_and_edition(rest)
         english = to_english(edition, _VOCABULARY) if edition and _VOCABULARY is not None else edition
@@ -233,11 +237,13 @@ def draft_from_name(name: str | None, catalog: CatalogLookup) -> ProductDraft | 
         return _with_parts_of_the_other_readings(best, drafts)
     match = _AGE_WITH_UNIT.search(source)
     age = int(match[1]) if match else None
-    if brand_alone is not None:
+    if brands_alone and len({brand_id for brand_id, _ in brands_alone}) == 1:
         # "아드벡 (Corryvreckan)": the other reading has no brand the catalog knows (an edition it
-        # does not have, or the brand in another spelling). The brand is still the brand.
-        return ProductDraft(source_text=source, spellings=spellings, brand_id=brand_alone[0],
-                            brand_text=brand_alone[1], age_years=age)
+        # does not have, or the brand in another spelling). The brand is still the brand. Two
+        # readings that are each a different brand ("맥캘란 (Balvenie)") say nothing sure.
+        brand_id, brand_text = brands_alone[0]
+        return ProductDraft(source_text=source, spellings=spellings, brand_id=brand_id, brand_text=brand_text,
+                            age_years=age)
     return ProductDraft(source_text=source, spellings=spellings, age_years=age)
 
 

@@ -249,6 +249,9 @@ def ardbeg():
     ("아드벡 (Corryvreckan) 10년", "아드벡", 10, None, ("아드벡 10년", "Corryvreckan 10년")),
     # the edition after the age
     ("아드벡 10년 (Uigeadail)", "아드벡", 10, "Uigeadail", ()),
+    # the title already has an edition: the brackets repeat it and are not added to it
+    ("아드벡 우가달 (Uigeadail)", "아드벡", None, "우가달", ()),
+    ("아드벡 우가달 10년 (Uigeadail)", "아드벡", 10, "우가달", ()),
     # the title is not a brand the catalog knows: the brackets stay a second spelling
     ("라프로익 (Uigeadail) 10년", None, 10, None, ("라프로익 10년", "Uigeadail 10년")),
 ])
@@ -257,6 +260,13 @@ def test_an_edition_of_the_brand_in_brackets_is_part_of_the_name(ardbeg, name, b
 
     assert (draft.brand_id, draft.brand_text, draft.age_years, draft.edition_text, draft.spellings) == (
         ARDBEG if brand_text else None, brand_text, age, edition, spellings)
+
+
+def test_two_readings_that_are_different_brands_give_no_brand(catalog):
+    draft = draft_from_name("발베니 (Jameson)", catalog)
+    assert (draft.brand_id, draft.brand_text, draft.edition_text) == (None, None, None)
+    same = draft_from_name("발베니 (Balvenie)", catalog)
+    assert (same.brand_id, same.brand_text) == (BALVENIE, "발베니")
 
 
 def test_parts_are_taken_only_from_a_reading_of_the_same_known_brand():
