@@ -311,6 +311,35 @@ def test_a_kept_result_of_another_file_is_run_again_and_settings_are_read_only_w
     assert model.calls == 2
 
 
+@pytest.mark.parametrize("left_behind", [
+    '{"id": "pdf-text-design", "items": [{"name": "글렌',   # a run stopped while writing
+    "",
+    "[1, 2]",                                               # not a record
+    '{"id": "pdf-text-design", "failure": null}',           # a record without its items
+])
+def test_a_record_a_stopped_run_left_unusable_is_run_again(tmp_path, model, left_behind):
+    entry = INPUTS["pdf-text-design"]
+    (tmp_path / "pdf-text-design.json").write_text(left_behind, encoding="utf-8")
+
+    [record], log = run([entry], tmp_path, tmp_path)
+
+    assert record["failure"] is None and model.calls == 1 and "kept" not in log[0]
+    assert json.loads((tmp_path / "pdf-text-design.json").read_text(encoding="utf-8")) == record
+    assert sorted(path.name for path in tmp_path.iterdir()) == ["pdf-text-design.json"]  # no part file left
+
+
+def test_a_record_is_written_whole_or_not_at_all(tmp_path, monkeypatch):
+    target = tmp_path / "x.json"
+    uat.write_record(target, {"items": [], "failure": None})
+    monkeypatch.setattr(uat.os, "replace", lambda source, destination: (_ for _ in ()).throw(OSError("stopped")))
+
+    with pytest.raises(OSError):
+        uat.write_record(target, {"items": [1], "failure": None})
+
+    assert uat.read_record(target) == {"items": [], "failure": None}  # the earlier record is intact
+    assert uat.read_record(tmp_path / "none.json") is None
+
+
 # ---- the report and the command ----
 
 

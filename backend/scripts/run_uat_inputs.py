@@ -211,7 +211,7 @@ def run_all(
     records = []
     for entry in inputs:
         target = out / f"{entry['id']}.json"
-        kept = json.loads(target.read_text(encoding="utf-8")) if target.is_file() and not force else None
+        kept = None if force else read_record(target)
         if kept is not None and kept.get("failure") is None and kept.get("sha256") == entry["sha256"]:
             log(f"{entry['id']}: kept ({len(kept['items'])} items)")
             records.append(kept)
@@ -219,12 +219,30 @@ def run_all(
         hybrid = hybrid or hybrid_factory()  # the settings are needed only when something is run
         record = {**run_input(entry, data_dir, hybrid, guards), "sha256": entry["sha256"],
                   "model": hybrid.model_name, "pipeline": hybrid.pipeline_version}
-        target.write_text(json.dumps(record, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        write_record(target, record)
         failure = record["failure"]
         log(f"{entry['id']}: " + (f"FAILED {failure['code']}: {failure['message']}" if failure
                                   else f"{len(record['items'])} items in {record['wallMs']} ms"))
         records.append(record)
     return records
+
+
+def read_record(path: Path) -> dict[str, Any] | None:
+    """A kept record, or None when there is none or it cannot be used: a file a stopped run left
+    half written, or one that is not a record of this script. Such an input is run again."""
+    try:
+        record = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    usable = isinstance(record, dict) and isinstance(record.get("items"), list) and "failure" in record
+    return record if usable else None
+
+
+def write_record(path: Path, record: dict[str, Any]) -> None:
+    """Write the record whole or not at all: to a file beside it, then moved into place."""
+    partial = path.with_name(path.name + ".part")
+    partial.write_text(json.dumps(record, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    os.replace(partial, path)
 
 
 def _price(price: dict[str, Any]) -> str:

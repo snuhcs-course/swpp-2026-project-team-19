@@ -12,6 +12,8 @@ scanned_menu_2.pdf     two pages: the office menu's pages as pictures
 rotated_text.pdf       text_menu_design.pdf with a 90 degree page rotation
 encrypted.pdf          text_menu_design.pdf with a password
 corrupt.pdf            the first 2000 bytes of text_menu_design.pdf
+cropped_text.pdf       text_menu_design.pdf with its margins cropped, so the page box does not start at 0
+scan_with_header.pdf   scanned_menu_1.pdf with a typed header and page number over the picture
 """
 
 import io
@@ -22,6 +24,7 @@ import numpy as np
 import pypdfium2 as pdfium
 from PIL import Image
 from pypdf import PdfReader, PdfWriter
+from pypdf.generic import DecodedStreamObject, DictionaryObject, NameObject
 
 HERE = Path(__file__).resolve().parent
 
@@ -68,6 +71,35 @@ def main() -> None:
     encrypted.encrypt("menu-password")
     encrypted.write(HERE / "encrypted.pdf")
     (HERE / "corrupt.pdf").write_bytes(design.read_bytes()[:2000])
+    derived()
+
+
+def derived() -> None:
+    """The fixtures made from other fixtures; they need neither Chrome nor LibreOffice."""
+    cropped = pdfium.PdfDocument((HERE / "text_menu_design.pdf").read_bytes())
+    left, bottom, right, top = cropped[0].get_mediabox()
+    box = (left + 60, bottom + 90, right - 40, top - 50)
+    cropped[0].set_mediabox(*box)
+    cropped[0].set_cropbox(*box)
+    cropped.save(HERE / "cropped_text.pdf")
+
+    scan = PdfReader(HERE / "scanned_menu_1.pdf").pages[0]
+    width, height = float(scan.mediabox.width), float(scan.mediabox.height)
+    words = (f"BT /F1 11 Tf 36 {height - 28:.0f} Td (BAR OAK AND MALT - SAMPLE MENU) Tj ET "
+             f"BT /F1 9 Tf {width / 2 - 12:.0f} 18 Td (- 1 -) Tj ET")
+    overlay = PdfWriter()
+    page = overlay.add_blank_page(width, height)
+    stream = DecodedStreamObject()
+    stream.set_data(words.encode("ascii"))
+    page[NameObject("/Contents")] = overlay._add_object(stream)
+    page[NameObject("/Resources")] = DictionaryObject({NameObject("/Font"): DictionaryObject({
+        NameObject("/F1"): DictionaryObject({NameObject("/Type"): NameObject("/Font"),
+                                             NameObject("/Subtype"): NameObject("/Type1"),
+                                             NameObject("/BaseFont"): NameObject("/Helvetica")})})})
+    scan.merge_page(page)
+    with_header = PdfWriter()
+    with_header.add_page(scan)
+    with_header.write(HERE / "scan_with_header.pdf")
 
 
 if __name__ == "__main__":

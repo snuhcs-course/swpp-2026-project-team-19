@@ -17,15 +17,25 @@ Two kinds of page:
 - "scanned": the page is a picture (a scan or a photo saved as PDF), or its text cannot be
   trusted. The page image goes through OCR like a photo. `text_layer` says why the text was not
   used: "none" (fewer than MIN_TEXT_CHARS characters), "unreadable" (too many characters without
-  a Unicode value, which a font with a broken mapping gives) or "rotated" (the page has a
-  rotation, and its text positions are not mapped onto the rotated image here).
+  a Unicode value, which a font with a broken mapping gives), "rotated" (the page has a
+  rotation, and its text positions are not mapped onto the rotated image here), "offset" (the
+  page's visible box does not start at the origin, as on a cropped page: its text positions are
+  not measured from the corner of the image, and PDFium gives its text a line per character) or
+  "partial" (one picture covers at least half the page and the text has fewer than
+  MIN_LINES_OVER_PICTURE lines: a scan with a header, a page number or a watermark typed on it).
 
 The words are kept as the file has them. A layout that sets digits and Hangul in different fonts
 can leave a gap the text layer reads as a space ("10 년"); matching compares names without spaces
 (app.core.normalize), so the product found is the same.
 
-Not handled: a scan that carries hidden text from the scanner's own OCR is read as a "text" page,
-with whatever quality that OCR had.
+Not handled:
+- A scan that carries hidden text from the scanner's own OCR over the whole page is read as a
+  "text" page, with whatever quality that OCR had.
+- Drawing a page and reading its text take as long as the file makes them take, and cannot be
+  stopped once started. `check_pdf` only counts the pages, and the limits of
+  app.adapters.pdf_guards start after the pages are read. A caller that must bound this (the
+  upload worker) has to run `read_pdf` where it can be abandoned, for example in a process of
+  its own with a time limit.
 """
 
 import io
@@ -34,6 +44,7 @@ from dataclasses import dataclass
 from typing import Any, Literal
 
 import pypdfium2 as pdfium
+import pypdfium2.raw as pdfium_raw
 
 # The same limit as menu photos in one import (app.services.menu_import_upload.MAX_IMAGES).
 MAX_PDF_PAGES = 15
@@ -45,6 +56,9 @@ PAGE_MIME_TYPE = "image/jpeg"
 MIN_TEXT_CHARS = 10
 # Above this share of characters without a usable Unicode value, the text layer is not trusted.
 MAX_UNREADABLE_SHARE = 0.05
+# A page mostly covered by one picture, with fewer text lines than this, is read as a picture.
+PICTURE_PAGE_SHARE = 0.5
+MIN_LINES_OVER_PICTURE = 5
 
 
 class PdfError(Exception):
@@ -96,7 +110,7 @@ class PdfPage:
     height: int
     kind: Literal["text", "scanned"]
     # Why the text layer was not used; "used" on a text page.
-    text_layer: Literal["used", "none", "unreadable", "rotated"]
+    text_layer: Literal["used", "none", "unreadable", "rotated", "offset", "partial"]
     # Text lines top to bottom as the file orders them; empty on a scanned page.
     lines: tuple[tuple[PdfWord, ...], ...] = ()
     mime_type: str = PAGE_MIME_TYPE
@@ -119,7 +133,8 @@ def _unreadable(char: str) -> bool:
 
 
 def _text_lines(textpage: pdfium.PdfTextPage, scale: float, page_height: float) -> tuple[list[list[PdfWord]], int, int]:
-    """(lines of words, characters read, unreadable characters). Boxes are in image pixels."""
+    """(lines of words, characters read, unreadable characters). Boxes are in image pixels, for a
+    page whose visible box starts at the origin of the PDF's coordinates (see "offset" in _page)."""
     lines: list[list[PdfWord]] = [[]]
     word: list[tuple[str, tuple[float, float, float, float]]] = []
     count = unreadable = 0
@@ -137,6 +152,7 @@ def _text_lines(textpage: pdfium.PdfTextPage, scale: float, page_height: float) 
             word.clear()
 
     for index in range(textpage.count_chars()):
+        # one character of the file can be several code points (a ligature read as "fi"), or none
         char = textpage.get_text_range(index, 1)
         if char in ("\r", "\n"):
             end_word()
@@ -147,20 +163,32 @@ def _text_lines(textpage: pdfium.PdfTextPage, scale: float, page_height: float) 
             end_word()
             continue
         count += 1
-        if _unreadable(char):
+        if any(_unreadable(point) for point in char):
             unreadable += 1
         word.append((char, textpage.get_charbox(index)))
     end_word()
     return [line for line in lines if line], count, unreadable
 
 
+def _picture_share(page: pdfium.PdfPage, area: float) -> float:
+    """The share of the page its largest picture covers (0 without a picture)."""
+    largest = 0.0
+    for picture in page.get_objects(filter=(pdfium_raw.FPDF_PAGEOBJ_IMAGE,), max_depth=3):
+        left, bottom, right, top = picture.get_bounds()
+        largest = max(largest, (right - left) * (top - bottom))
+    return min(1.0, largest / area)
+
+
 def _page(page: pdfium.PdfPage, number: int) -> PdfPage:
     width_pt, height_pt = page.get_size()
+    if width_pt <= 0 or height_pt <= 0:
+        raise PdfCorruptError(f"page {number} of the PDF has no size")
     scale = RENDER_LONG_SIDE / max(width_pt, height_pt)
     image = page.render(scale=scale).to_pil().convert("RGB")
     out = io.BytesIO()
     image.save(out, format="JPEG", quality=JPEG_QUALITY)
 
+    left, bottom, _, _ = page.get_bbox()
     textpage = page.get_textpage()
     try:
         lines, count, unreadable = _text_lines(textpage, scale, height_pt)
@@ -172,6 +200,15 @@ def _page(page: pdfium.PdfPage, number: int) -> PdfPage:
         text_layer = "unreadable"
     elif page.get_rotation():
         text_layer = "rotated"
+    elif abs(left) > 0.5 or abs(bottom) > 0.5:
+        # a cropped page, or a MediaBox that does not start at 0: the character boxes are not
+        # measured from the corner of the image, and PDFium breaks the text of such a page into a
+        # line per character
+        text_layer = "offset"
+    elif len(lines) < MIN_LINES_OVER_PICTURE and _picture_share(page, width_pt * height_pt) >= PICTURE_PAGE_SHARE:
+        # a scan with a few typed words on it (a header, a page number, a watermark): the menu is
+        # in the picture, and the text layer alone would give those words and nothing else
+        text_layer = "partial"
     else:
         text_layer = "used"
     used = text_layer == "used"

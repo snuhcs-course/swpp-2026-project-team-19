@@ -325,10 +325,29 @@ def test_the_ocr_call_of_a_scanned_page_has_a_deadline_and_its_failure_is_not_a_
 
     outcome = extract_pdf_pages(extractor, [page], PdfGuards(ocr_deadline_s=20))
 
-    assert seen[0].deadline_s == 20 and (seen[0].invoke_url, seen[0].secret) == (CLOVA.invoke_url, CLOVA.secret)
-    assert CLOVA.deadline_s is None  # the extractor's own settings are kept
+    # a CLOVA call can run past its deadline by one socket timeout: half and half stay within 20 s
+    assert (seen[0].deadline_s, seen[0].timeout_s) == (10, 10)
+    assert (seen[0].invoke_url, seen[0].secret) == (CLOVA.invoke_url, CLOVA.secret)
+    assert (CLOVA.deadline_s, CLOVA.timeout_s) == (None, 60)  # the extractor's own settings are kept
     assert outcome.ok and outcome.pages[0].raw_output["hybridFallback"]["reason"].startswith("CLOVA OCR gave up")
     assert outcome.pages[0].attempts == 1
+
+
+def test_a_short_socket_timeout_of_the_extractor_is_kept(model, monkeypatch):
+    seen = []
+
+    def call_ocr(settings, image, mime_type, client=None):
+        seen.append(settings)
+        raise clova.ClovaOCRError("down")
+
+    monkeypatch.setattr(hybrid, "call_ocr", call_ocr)
+    quick = PdfMenuExtractor(HybridMenuExtractor(SETTINGS, clova.ClovaSettings(
+        invoke_url=CLOVA.invoke_url, secret=CLOVA.secret, timeout_s=5), prompt="v1"))
+    [page] = pdf.read_pdf((PDFS / "scanned_menu_1.pdf").read_bytes())
+
+    extract_pdf_pages(quick, [page])
+
+    assert (seen[0].deadline_s, seen[0].timeout_s) == (30, 5)
 
 
 # ---- the guards themselves ----

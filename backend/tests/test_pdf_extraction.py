@@ -135,6 +135,83 @@ def test_a_rotated_page_is_read_as_a_picture():
     assert page.width > page.height  # drawn as the reader sees it
 
 
+def test_a_cropped_page_is_read_as_a_picture():
+    """The page box does not start at 0: the text positions are not measured from the corner of the
+    image, and PDFium gives the text of such a page a line per character."""
+    [page] = pages("cropped_text.pdf")
+
+    assert (page.kind, page.text_layer, page.lines) == ("scanned", "offset", ())
+    image = Image.open(io.BytesIO(page.image))
+    assert image.size == (page.width, page.height) and image.convert("L").getextrema()[0] < 110
+    [whole] = pages("text_menu_design.pdf")
+    assert page.width / page.height < whole.width / whole.height + 0.01  # the cropped area, not the whole page
+
+
+def test_a_scan_with_a_typed_header_is_read_as_a_picture():
+    """One picture covers the page and the text layer has two lines (a header and a page number):
+    the menu is in the picture."""
+    [page] = pages("scan_with_header.pdf")
+
+    assert (page.kind, page.text_layer, page.lines) == ("scanned", "partial", ())
+
+
+def test_a_page_with_a_large_picture_and_enough_text_lines_is_a_text_page(monkeypatch):
+    # a designed menu on a background picture: the text is the menu
+    monkeypatch.setattr(pdf, "MIN_LINES_OVER_PICTURE", 2)
+    [page] = pages("scan_with_header.pdf")
+
+    assert (page.kind, page.text_layer) == ("text", "used")
+    assert [" ".join(word.text for word in line) for line in page.lines] == [
+        "BAR OAK AND MALT - SAMPLE MENU", "- 1 -"]
+
+
+def test_a_small_picture_does_not_make_a_text_page_a_picture(monkeypatch):
+    monkeypatch.setattr(pdf, "PICTURE_PAGE_SHARE", 1.01)  # as if the picture were a logo
+    monkeypatch.setattr(pdf, "MIN_TEXT_CHARS", 5)
+    [page] = pages("scan_with_header.pdf")
+
+    assert (page.kind, page.text_layer) == ("text", "used")
+
+
+class FakeTextPage:
+    """A text page that gives the listed characters, each 10 pt wide on one row."""
+
+    def __init__(self, *chars: str):
+        self.chars = chars
+
+    def count_chars(self) -> int:
+        return len(self.chars)
+
+    def get_text_range(self, index: int, count: int) -> str:
+        return self.chars[index]
+
+    def get_charbox(self, index: int) -> tuple[float, float, float, float]:
+        return (10.0 * index, 100.0, 10.0 * index + 9, 112.0)
+
+
+def test_one_character_of_the_file_can_be_several_code_points_or_none():
+    """A ligature the file maps to "fi", and a character it maps to nothing: PDFium says the text of
+    one character need not be one code point."""
+    chars = FakeTextPage("O", "f", "fi", "c", "", "e", " ", "\ufffd\ufffd", "A")
+
+    lines, count, unreadable = pdf._text_lines(chars, 2.0, 200.0)
+
+    assert [[word.text for word in line] for line in lines] == [["Offic", "e", "\ufffd\ufffdA"]]
+    assert (count, unreadable) == (7, 1)
+    office = lines[0][0]
+    assert (office.x0, office.x1, office.y0, office.y1) == (0.0, 78.0, 176.0, 200.0)
+
+
+def test_a_page_without_a_size_is_a_corrupt_pdf():
+    class Flat:
+        def get_size(self):
+            return (0.0, 842.0)
+
+    with pytest.raises(pdf.PdfCorruptError, match="page 3 of the PDF has no size") as error:
+        pdf._page(Flat(), 3)
+    assert error.value.code == "pdf_corrupt"
+
+
 def test_a_text_layer_of_unreadable_characters_is_not_used(monkeypatch):
     # what a font with a broken Unicode mapping gives: here every Hangul syllable
     monkeypatch.setattr(pdf, "_unreadable", lambda char: "가" <= char <= "힣")

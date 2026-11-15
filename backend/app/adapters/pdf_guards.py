@@ -14,8 +14,10 @@ A photo is one model call. A PDF is up to 15 of them in a row, and the limits of
   `page_attempts` attempts;
 - all pages together get at most `document_retries` retries; once they are used every later
   page gets one attempt;
-- the CLOVA call of a scanned page ends after `ocr_deadline_s`, retries included (the page then
-  goes to the model without OCR lines, as a photo does);
+- the CLOVA call of a scanned page ends within `ocr_deadline_s`, retries included (the page then
+  goes to the model without OCR lines, as a photo does). A CLOVA call can run past its own
+  deadline by one socket timeout (app.extraction.clova), so the page's call gets half of
+  `ocr_deadline_s` as its deadline and at most the other half as its socket timeout;
 - no page starts after the PDF's deadline, `page_budget_s` for every page of the file and never
   less than one page's own worst case (`deadline_s`), and a page that starts with less than
   one attempt's time left gets one attempt, cut at the deadline;
@@ -154,7 +156,8 @@ def _for_page(extractor: PdfMenuExtractor, guards: PdfGuards, attempts: int, tim
     """The extractor with this page's limits. Nothing is read from the environment or opened here."""
     hybrid = extractor.hybrid
     settings = replace(hybrid.settings, max_attempts=attempts, request_timeout_s=timeout_s, wall_timeout_s=timeout_s)
-    clova = replace(hybrid.clova, deadline_s=guards.ocr_deadline_s)
+    half = guards.ocr_deadline_s / 2
+    clova = replace(hybrid.clova, deadline_s=half, timeout_s=min(hybrid.clova.timeout_s, half))
     return PdfMenuExtractor(HybridMenuExtractor(settings, clova, prompt=hybrid.prompt))
 
 
