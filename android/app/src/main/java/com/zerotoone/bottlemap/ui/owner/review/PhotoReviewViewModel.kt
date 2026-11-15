@@ -394,7 +394,10 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
     }
 
     fun leave() {
-        if (_publishing.value || leaving) return
+        // A device-vs-server CAS choice remains in flight through its reload.
+        // Leaving now could enqueue a stale server-preview snapshot after
+        // the chosen device draft and silently overwrite that explicit choice.
+        if (_publishing.value || leaving || _draftResolving.value) return
         leaving = true
         val final = review?.takeIf { _publishOutcome.value == null }?.copy(modal = null)
         if (final == null) {
