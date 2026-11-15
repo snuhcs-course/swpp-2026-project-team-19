@@ -44,6 +44,7 @@ import com.zerotoone.bottlemap.data.CustomerDiscoverySource
 import com.zerotoone.bottlemap.data.Repositories
 import com.zerotoone.bottlemap.network.PopularProductDto
 import com.zerotoone.bottlemap.ui.common.BmIcon
+import com.zerotoone.bottlemap.ui.common.BottleMapNoticeDialog
 import com.zerotoone.bottlemap.ui.theme.BottleMapPalette
 import com.zerotoone.bottlemap.ui.common.BmIconId
 import kotlinx.coroutines.CancellationException
@@ -168,6 +169,14 @@ internal fun CustomerP18Home(
         recent = rememberP18Search(context,trimmed)
         onSearch(trimmed,source)
     }
+    searchError?.let { message ->
+        BottleMapNoticeDialog(
+            message = message,
+            onDismiss = { searchError = null },
+            tag = "customer-home-search-validation-dialog",
+            title = "검색 안내",
+        )
+    }
     Column(Modifier.fillMaxSize().background(P18Bg).testTag("customer-home")) {
         Row(Modifier.fillMaxWidth().height(56.dp).padding(start = 20.dp,end=8.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -199,10 +208,6 @@ internal fun CustomerP18Home(
                     fontSize=24.sp,lineHeight=32.sp,color=P18Text)
                 P18SearchField(search, { search = it; searchError = null },
                     { launch(search, "input") }, modifier = Modifier.fillMaxWidth())
-                searchError?.let { message ->
-                    Text(message, color = androidx.compose.ui.graphics.Color(0xFFFFB4AB),
-                        fontSize = 12.sp, modifier = Modifier.testTag("customer-home-search-validation"))
-                }
             }
             Column(Modifier.fillMaxWidth().padding(horizontal=20.dp),
                 verticalArrangement=Arrangement.spacedBy(8.dp)) {
