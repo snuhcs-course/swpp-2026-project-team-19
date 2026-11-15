@@ -40,7 +40,7 @@ def test_the_three_review_states_all_occur_and_their_counts_are_pinned():
     counts = {c: dict(collections.Counter(r["state"] for _, r in rows(c))) for c in reg.CONDITIONS}
     assert counts == {
         "deployed": {"confirmed": 397, "choose_candidate": 5, "no_candidate": 16},
-        "heldout": {"confirmed": 310, "confirm_recommended": 20, "choose_candidate": 53, "no_candidate": 35},
+        "heldout": {"confirmed": 313, "confirm_recommended": 26, "choose_candidate": 44, "no_candidate": 35},
     }
     pinned = {c: dict(collections.Counter(r["state"] for photo in BASELINE["matching"][c].values() for r in photo))
               for c in reg.CONDITIONS}

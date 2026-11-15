@@ -370,7 +370,7 @@ def menu_lines(use_extractor):
     [
         # Each line is unmatched by the Iteration 1 alias lookup alone.
         ("글렌피딕(Glenfiddich) 12년", ResolutionStatus.EXACT_MATCH, 12, "parenExpanded", "S1"),  # name variant
-        ("글렌피딕 12년 싱글몰트", ResolutionStatus.AMBIGUOUS, 12, "ageMatch", "S2"),  # brand + age
+        ("글렌피딕 12년 한정판", ResolutionStatus.AMBIGUOUS, 12, "ageMatch", "S2"),  # brand + age
         ("글렌피닥 15년", ResolutionStatus.EXACT_MATCH, 15, "editDistance", "S3"),  # one-letter typo
     ],
 )
@@ -403,6 +403,37 @@ def test_line_naming_two_products_is_stored_as_ambiguous(client, db_session, ima
         (1, buffalo.id, "Buffalo Trace", "S1"),
         (2, makers.id, "Maker's Mark", "S1"),
     ]
+    # I4-P18: no brand, age or edition is read from a line of two products ("Buffalo Trace" with the
+    # edition "/ Maker's Mark" would be a draft that fuses them)
+    assert (item.extracted_brand_name, item.extracted_age_years, item.extracted_edition_name) == (None, None, None)
+
+
+# ---- I4-P18: product parts read from an unconfirmed line fill the new-product form ----
+
+
+def test_unconfirmed_lines_get_brand_age_and_edition_and_confirmed_lines_do_not(
+    client, db_session, image_storage, operator, glenfiddich, menu_lines
+):
+    menu_lines("글렌피딕(Glenfiddich) 12년", "글렌피딕(Glenfiddich) 21년 그란 레제르바", "모르는 술 10년 셰리", "하우스 위스키")
+
+    import_id = upload(client, make_bar(db_session), operator)
+    confirmed, no_such_age, no_brand, nothing = items_of(load_import(db_session, import_id))
+
+    assert confirmed.initial_resolution_status == ResolutionStatus.EXACT_MATCH
+    assert (confirmed.extracted_brand_name, confirmed.extracted_age_years, confirmed.extracted_edition_name) == (None, None, None)
+    assert no_such_age.initial_resolution_status != ResolutionStatus.EXACT_MATCH
+    assert (no_such_age.extracted_brand_name, no_such_age.extracted_age_years, no_such_age.extracted_edition_name) == (
+        "글렌피딕", 21, "그란 레제르바")
+    assert (no_brand.extracted_brand_name, no_brand.extracted_age_years, no_brand.extracted_edition_name) == (None, 10, None)
+    assert (nothing.extracted_brand_name, nothing.extracted_age_years, nothing.extracted_edition_name) == (None, None, None)
+
+    # the review response builds the new-product form from these fields
+    items = client.get(f"/api/menu-imports/{import_id}", headers=operator).json()["images"][0]["items"]
+    assert items[1]["newProductDraft"] == {
+        "brandText": "글렌피딕", "category": "whisky", "displayName": "글렌피딕(Glenfiddich) 21년 그란 레제르바",
+        "ageYears": 21, "editionName": "그란 레제르바", "abv": None,
+    }
+    assert items[0]["newProductDraft"]["brandText"] is None and items[0]["initialResolutionStatus"] == "exact_match"
 
 
 # ---- I3: the LLM matching layer (M3) after S1–S3; the LLM is always a fake ----
@@ -531,8 +562,8 @@ def test_llm_candidates_come_before_the_rule_candidates(
 ):
     sherry = make_product(db_session, glenfiddich[12].brand, "Glenfiddich 12 Sherry Cask", age_years=12,
                           edition_name="Sherry Cask")
-    menu_lines("글렌피딕 12년 싱글몰트")  # S2: brand + age, two products of that age
-    use_llm_layer(FakeMatchingLLM({"글렌피딕 12년 싱글몰트": translation(brand_en="Glenfiddich", age=12)}))
+    menu_lines("글렌피딕 12년 한정판")  # S2: brand + age, two products of that age
+    use_llm_layer(FakeMatchingLLM({"글렌피딕 12년 한정판": translation(brand_en="Glenfiddich", age=12)}))
 
     [item] = items_of(load_import(db_session, upload(client, make_bar(db_session), operator)))
 
@@ -565,7 +596,7 @@ def test_call_cap_leaves_the_remaining_lines_with_their_rule_result(
 def test_llm_failure_keeps_the_rule_results(
     client, db_session, image_storage, operator, glenfiddich, menu_lines, use_llm_layer, answer
 ):
-    menu_lines("글렌피딕 12년 싱글몰트", "글렌피딕 18년")
+    menu_lines("글렌피딕 12년 한정판", "글렌피딕 18년")
     llm = use_llm_layer(FakeMatchingLLM(answer=answer))
 
     menu_import = load_import(db_session, upload(client, make_bar(db_session), operator))
@@ -751,8 +782,8 @@ def test_tool_candidates_come_before_the_rule_candidates(
 ):
     sherry = make_product(db_session, glenfiddich[12].brand, "Glenfiddich 12 Sherry Cask", age_years=12,
                           edition_name="Sherry Cask")
-    menu_lines("글렌피딕 12년 싱글몰트")  # S2: brand + age, two products of that age
-    use_tool_layer(FakeToolLLM({"글렌피딕 12년 싱글몰트": {"query": "Glenfiddich 12", "brand_en": "Glenfiddich",
+    menu_lines("글렌피딕 12년 한정판")  # S2: brand + age, two products of that age
+    use_tool_layer(FakeToolLLM({"글렌피딕 12년 한정판": {"query": "Glenfiddich 12", "brand_en": "Glenfiddich",
                                                          "age": 12}}))
 
     [item] = items_of(load_import(db_session, upload(client, make_bar(db_session), operator)))
@@ -788,7 +819,7 @@ def test_call_cap_bounds_the_conversation_turns(
 def test_tool_failure_keeps_the_rule_results(
     client, db_session, image_storage, operator, glenfiddich, menu_lines, use_tool_layer, answer, turns
 ):
-    menu_lines("글렌피딕 12년 싱글몰트", "글렌피딕 18년")
+    menu_lines("글렌피딕 12년 한정판", "글렌피딕 18년")
     llm = use_tool_layer(FakeToolLLM(answer=answer))
 
     menu_import = load_import(db_session, upload(client, make_bar(db_session), operator))

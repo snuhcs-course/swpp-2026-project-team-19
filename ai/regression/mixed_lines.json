@@ -1,0 +1,515 @@
+{
+  "_about": [
+    "Non-whisky lines of the 15 regression photos that the whisky labels (eval/labels_*.json) do not have. Read by ai/regression/mixed_report.py (I4-P25).",
+    "Source: the non-whisky lines of prompt v2 run 1 (ai/runs/2026-11-13_p12/hybrid_v2/*_r1.json), which Jinwoo Park checked against the photos on 2026-11-13. His one finding was three set lines on 오드비_09 that the output lacked; they are added here from the OCR text (added_in_review).",
+    "Lines the labels already have are not repeated: a label row whose match gold is non_whisky (cognac, rum, liqueur, beer) counts as a non-whisky line of category other.",
+    "category: cocktail, food or other (other spirits, wine, beer, sets). unit: glass, bottle or null, as in the labels."
+  ],
+  "photos": {
+    "007_위스키복춘_03": [
+      {
+        "raw_name": "헤네시 VSOP",
+        "category": "other",
+        "price_krw": 13000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "다니엘 부쥬 로얄",
+        "category": "other",
+        "price_krw": 27000,
+        "pour_ml": null,
+        "unit": "glass"
+      }
+    ],
+    "007_위스키복춘_04": [
+      {
+        "raw_name": "진토닉",
+        "category": "cocktail",
+        "price_krw": 12000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "김렛",
+        "category": "cocktail",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "다이퀴리",
+        "category": "cocktail",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "드라이 마티니",
+        "category": "cocktail",
+        "price_krw": 17000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "보스턴쿨러",
+        "category": "cocktail",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "하이랜드쿨러",
+        "category": "cocktail",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "코스모폴리탄",
+        "category": "cocktail",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "올드패션",
+        "category": "cocktail",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "파우스트",
+        "category": "cocktail",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "위스키사워",
+        "category": "cocktail",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "갓파더",
+        "category": "cocktail",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "사이드카",
+        "category": "cocktail",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "잭로즈",
+        "category": "cocktail",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "진피즈",
+        "category": "cocktail",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "에메랄드쿨러",
+        "category": "cocktail",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "그래스호퍼",
+        "category": "cocktail",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "네그로니",
+        "category": "cocktail",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "불바디에",
+        "category": "cocktail",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "라스트워드",
+        "category": "cocktail",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "헤밍웨이 스페셜",
+        "category": "cocktail",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "롭로이",
+        "category": "cocktail",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "프랭크시나트라",
+        "category": "cocktail",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "슬로진피즈",
+        "category": "cocktail",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "찰리채플린",
+        "category": "cocktail",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "앤하탄",
+        "category": "cocktail",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "카카오피즈",
+        "category": "cocktail",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "엘더플라워 사워",
+        "category": "cocktail",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "롱아일랜드티",
+        "category": "cocktail",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "프렌치커넥션",
+        "category": "cocktail",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "카타르시스",
+        "category": "cocktail",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "올드파",
+        "category": "cocktail",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "복춘",
+        "category": "cocktail",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "입춘",
+        "category": "cocktail",
+        "price_krw": 18000,
+        "pour_ml": null,
+        "unit": "glass"
+      }
+    ],
+    "009_오드비_02": [
+      {
+        "raw_name": "헤네시 VSOP",
+        "category": "other",
+        "price_krw": 14000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "레미마틴 VSOP",
+        "category": "other",
+        "price_krw": 14000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "까뮤 VSOP",
+        "category": "other",
+        "price_krw": 14000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "다니엘부쥬 XO",
+        "category": "other",
+        "price_krw": 34000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "다니엘부쥬 로얄 CS",
+        "category": "other",
+        "price_krw": 30000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "불라 VSOP",
+        "category": "other",
+        "price_krw": 14000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "탱커레이NO.10",
+        "category": "other",
+        "price_krw": 8000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "봄베이사파이어",
+        "category": "other",
+        "price_krw": 8000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "헨드릭스",
+        "category": "other",
+        "price_krw": 9000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "호세쿠엘보 에스페샬",
+        "category": "other",
+        "price_krw": 8000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "호세쿠엘보 1800 레포사도",
+        "category": "other",
+        "price_krw": 14000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "호세쿠엘보 1800 아네호",
+        "category": "other",
+        "price_krw": 16000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "호세쿠엘보 크리스탈리노",
+        "category": "other",
+        "price_krw": 21000,
+        "pour_ml": 30,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "플렌테이션 파인애플",
+        "category": "other",
+        "price_krw": 9000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "플렌테이션 XO",
+        "category": "other",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass"
+      }
+    ],
+    "009_오드비_09": [
+      {
+        "raw_name": "올드풀티니 3종 세트 / 행사",
+        "category": "other",
+        "price_krw": 60000,
+        "pour_ml": null,
+        "unit": null,
+        "added_in_review": "set line"
+      },
+      {
+        "raw_name": "사부로마루 피트 위스키 5종 세트 / 행사",
+        "category": "other",
+        "price_krw": 160000,
+        "pour_ml": null,
+        "unit": null,
+        "added_in_review": "set line"
+      },
+      {
+        "raw_name": "아르마냑 가호 5종 세트 / 행사",
+        "category": "other",
+        "price_krw": 140000,
+        "pour_ml": null,
+        "unit": null,
+        "added_in_review": "set line"
+      }
+    ],
+    "010_수이_04": [
+      {
+        "raw_name": "1800 Anejo (아네호 데킬라)",
+        "category": "other",
+        "price_krw": 13000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Petron Silver (페트론)",
+        "category": "other",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Clase - Azul (클라세아줄)",
+        "category": "other",
+        "price_krw": 39000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Hennesy V.S.O.A (헤네시 VSOP)",
+        "category": "other",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Hennesy X.O",
+        "category": "other",
+        "price_krw": 42000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Remy Martin V.S.O.P (레미 마틴)",
+        "category": "other",
+        "price_krw": 16000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Remy Martin 1738",
+        "category": "other",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Remy Martin X.O",
+        "category": "other",
+        "price_krw": 45000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Camus V.S.O.P (까뮤)",
+        "category": "other",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Daniel Royal",
+        "category": "other",
+        "price_krw": 25000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Jean Luc Pasquet (장 뤽 파스케)",
+        "category": "other",
+        "price_krw": 30000,
+        "pour_ml": null,
+        "unit": "glass"
+      },
+      {
+        "raw_name": "Boulard X.O (불라)",
+        "category": "other",
+        "price_krw": 20000,
+        "pour_ml": null,
+        "unit": "glass"
+      }
+    ],
+    "010_수이_05": [
+      {
+        "raw_name": "하몽을 곁들인 감자튀김.",
+        "category": "food",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": null
+      },
+      {
+        "raw_name": "과일·치즈 플레이트",
+        "category": "food",
+        "price_krw": 33000,
+        "pour_ml": null,
+        "unit": null
+      },
+      {
+        "raw_name": "교자",
+        "category": "food",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": null
+      },
+      {
+        "raw_name": "훈제굴 플레이트",
+        "category": "food",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": null
+      },
+      {
+        "raw_name": "안키모와 바게트",
+        "category": "food",
+        "price_krw": 15000,
+        "pour_ml": null,
+        "unit": null
+      }
+    ]
+  }
+}

@@ -126,6 +126,8 @@ python ai/eval/score.py --set i3 ai/runs/2026-10-30_p30/hybrid_i3
 
 ## 4. 종단 매칭: 추출 r*k* ↔ LLM r*k* (M3a)
 
+> **I4 이후 (2026-11-13): 이 절은 이 체크아웃에서 그대로 돌리지 않는다.** I3 평가가 끝나 `backend/app/matching/staged.py`가 동결에서 풀렸다(`p30_extract.py`의 `RELEASED_MATCHING`). `--check`는 이 파일을 건너뛰고 통과하지만, `i3_match_eval.py`는 지금 체크아웃의 `staged.py`를 불러오므로 아래 명령은 I4 매칭 결과를 낸다. I3 동결 숫자를 다시 내려면 `staged.py`가 동결 값(`dddfb200…`)인 커밋을 따로 꺼내 거기서 돌린다. 예: `git worktree add ../i3-frozen 2de7dd9` 후 그 폴더에서 이 절을 따른다(`2de7dd9`의 `staged.py` SHA-256이 동결 값과 같다). 이 체크아웃에서 돌린 결과는 I3 결과로 적지 않는다.
+
 동결 4.2 "종단 입력", 4.3 "반복"(추출 r*i*에 LLM 회차 r*i*를 짝지음, 3쌍). C2 rules+LLM(서버 M3a, M3b 끔), 카탈로그 `full`·`asis` 둘 다. 결과 JSON의 `rules`가 같은 입력의 rules 결과이므로 rules만 따로 돌리지 않는다.
 
 - 시작 전에 동결 4.3 "실행 전 점검"(dev 5곳 E8 숫자 재현, Gemini 호출 0)을 병합된 `main`에서 다시 통과해야 한다. 라벨 입력 P10 실행(동결 4.3 명령 예)은 이 문서 범위가 아니다.

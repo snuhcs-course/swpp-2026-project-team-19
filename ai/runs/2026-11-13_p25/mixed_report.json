@@ -1,0 +1,3139 @@
+{
+  "report": "mixed-menu extraction metrics (I4-P25)",
+  "fixtures": {
+    "photos": 15,
+    "expected_rows": 542,
+    "by_category": {
+      "whisky": 461,
+      "cocktail": 33,
+      "food": 5,
+      "other": 43
+    },
+    "whisky_labels": [
+      "eval/labels_final_v1.json",
+      "eval/labels_heldout_v1_1.json",
+      "eval/labels_v1_1.json"
+    ],
+    "non_whisky_lines": "ai/regression/mixed_lines.json"
+  },
+  "runs": {
+    "ai/runs/2026-11-13_p12/hybrid_v1": {
+      "counts": {
+        "records": 45,
+        "rejected": 0,
+        "expected": 1626,
+        "expected_whisky": 1383,
+        "expected_non_whisky": 243,
+        "output": 1444,
+        "paired": 1436,
+        "paired_whisky": 1375,
+        "paired_non_whisky": 61,
+        "extra": 8,
+        "priced": 1436,
+        "price_correct": 1433,
+        "duplicates": 0,
+        "whisky_as_non_whisky": 0,
+        "non_whisky_as_whisky": 61,
+        "wrong_kind": 0
+      },
+      "rates": {
+        "line_recall": 0.8831,
+        "whisky_line_recall": 0.9942,
+        "non_whisky_line_recall": 0.251,
+        "extra_line_rate": 0.0055,
+        "price_accuracy": 0.9979,
+        "duplicate_line_rate": 0.0,
+        "classification_error_rate": 0.0425
+      },
+      "confusion": {
+        "other->whisky": 61,
+        "whisky->whisky": 1375
+      },
+      "per_run": {
+        "1": {
+          "counts": {
+            "records": 15,
+            "rejected": 0,
+            "expected": 542,
+            "expected_whisky": 461,
+            "expected_non_whisky": 81,
+            "output": 480,
+            "paired": 479,
+            "paired_whisky": 460,
+            "paired_non_whisky": 19,
+            "extra": 1,
+            "priced": 479,
+            "price_correct": 478,
+            "duplicates": 0,
+            "whisky_as_non_whisky": 0,
+            "non_whisky_as_whisky": 19,
+            "wrong_kind": 0
+          },
+          "rates": {
+            "line_recall": 0.8838,
+            "whisky_line_recall": 0.9978,
+            "non_whisky_line_recall": 0.2346,
+            "extra_line_rate": 0.0021,
+            "price_accuracy": 0.9979,
+            "duplicate_line_rate": 0.0,
+            "classification_error_rate": 0.0397
+          },
+          "confusion": {
+            "other->whisky": 19,
+            "whisky->whisky": 460
+          }
+        },
+        "2": {
+          "counts": {
+            "records": 15,
+            "rejected": 0,
+            "expected": 542,
+            "expected_whisky": 461,
+            "expected_non_whisky": 81,
+            "output": 482,
+            "paired": 476,
+            "paired_whisky": 455,
+            "paired_non_whisky": 21,
+            "extra": 6,
+            "priced": 476,
+            "price_correct": 476,
+            "duplicates": 0,
+            "whisky_as_non_whisky": 0,
+            "non_whisky_as_whisky": 21,
+            "wrong_kind": 0
+          },
+          "rates": {
+            "line_recall": 0.8782,
+            "whisky_line_recall": 0.987,
+            "non_whisky_line_recall": 0.2593,
+            "extra_line_rate": 0.0124,
+            "price_accuracy": 1.0,
+            "duplicate_line_rate": 0.0,
+            "classification_error_rate": 0.0441
+          },
+          "confusion": {
+            "other->whisky": 21,
+            "whisky->whisky": 455
+          }
+        },
+        "3": {
+          "counts": {
+            "records": 15,
+            "rejected": 0,
+            "expected": 542,
+            "expected_whisky": 461,
+            "expected_non_whisky": 81,
+            "output": 482,
+            "paired": 481,
+            "paired_whisky": 460,
+            "paired_non_whisky": 21,
+            "extra": 1,
+            "priced": 481,
+            "price_correct": 479,
+            "duplicates": 0,
+            "whisky_as_non_whisky": 0,
+            "non_whisky_as_whisky": 21,
+            "wrong_kind": 0
+          },
+          "rates": {
+            "line_recall": 0.8875,
+            "whisky_line_recall": 0.9978,
+            "non_whisky_line_recall": 0.2593,
+            "extra_line_rate": 0.0021,
+            "price_accuracy": 0.9958,
+            "duplicate_line_rate": 0.0,
+            "classification_error_rate": 0.0437
+          },
+          "confusion": {
+            "other->whisky": 21,
+            "whisky->whisky": 460
+          }
+        }
+      },
+      "per_photo": {
+        "007_위스키복춘_01": {
+          "counts": {
+            "records": 3,
+            "rejected": 0,
+            "expected": 231,
+            "expected_whisky": 231,
+            "expected_non_whisky": 0,
+            "output": 231,
+            "paired": 225,
+            "paired_whisky": 225,
+            "paired_non_whisky": 0,
+            "extra": 6,
+            "priced": 225,
+            "price_correct": 223,
+            "duplicates": 0,
+            "whisky_as_non_whisky": 0,
+            "non_whisky_as_whisky": 0,
+            "wrong_kind": 0
+          },
+          "rates": {
+            "line_recall": 0.974,
+            "whisky_line_recall": 0.974,
+            "non_whisky_line_recall": null,
+            "extra_line_rate": 0.026,
+            "price_accuracy": 0.9911,
+            "duplicate_line_rate": 0.0,
+            "classification_error_rate": 0.0
+          },
+          "confusion": {
+            "whisky->whisky": 225
+          }
+        },
+        "007_위스키복춘_03": {
+          "counts": {
+            "records": 3,
+            "rejected": 0,
+            "expected": 54,
+            "expected_whisky": 48,
+            "expected_non_whisky": 6,
+            "output": 52,
+            "paired": 52,
+            "paired_whisky": 48,
+            "paired_non_whisky": 4,
+            "extra": 0,
+            "priced": 52,
+            "price_correct": 52,
+            "duplicates": 0,
+            "whisky_as_non_whisky": 0,
+            "non_whisky_as_whisky": 4,
+            "wrong_kind": 0
+          },
+          "rates": {
+            "line_recall": 0.963,
+            "whisky_line_recall": 1.0,
+            "non_whisky_line_recall": 0.6667,
+            "extra_line_rate": 0.0,
+            "price_accuracy": 1.0,
+            "duplicate_line_rate": 0.0,
+            "classification_error_rate": 0.0769
+          },
+          "confusion": {
+            "other->whisky": 4,
+            "whisky->whisky": 48
+          }
+        },
+        "007_위스키복춘_04": {
+          "counts": {
+            "records": 3,
+            "rejected": 0,
+            "expected": 99,
+            "expected_whisky": 0,
+            "expected_non_whisky": 99,
+            "output": 0,
+            "paired": 0,
+            "paired_whisky": 0,
+            "paired_non_whisky": 0,
+            "extra": 0,
+            "priced": 0,
+            "price_correct": 0,
+            "duplicates": 0,
+            "whisky_as_non_whisky": 0,
+            "non_whisky_as_whisky": 0,
+            "wrong_kind": 0
+          },
+          "rates": {
+            "line_recall": 0.0,
+            "whisky_line_recall": null,
+            "non_whisky_line_recall": 0.0,
+            "extra_line_rate": null,
+            "price_accuracy": null,
+            "duplicate_line_rate": null,
+            "classification_error_rate": null
+          },
+          "confusion": {}
+        },
+        "008_서로상_01": {
+          "counts": {
+            "records": 3,
+            "rejected": 0,
+            "expected": 60,
+            "expected_whisky": 48,
+            "expected_non_whisky": 12,
+            "output": 60,
+            "paired": 60,
+            "paired_whisky": 48,
+            "paired_non_whisky": 12,
+            "extra": 0,
+            "priced": 60,
+            "price_correct": 60,
+            "duplicates": 0,
+            "whisky_as_non_whisky": 0,
+            "non_whisky_as_whisky": 12,
+            "wrong_kind": 0
+          },
+          "rates": {
+            "line_recall": 1.0,
+            "whisky_line_recall": 1.0,
+            "non_whisky_line_recall": 1.0,
+            "extra_line_rate": 0.0,
+            "price_accuracy": 1.0,
+            "duplicate_line_rate": 0.0,
+            "classification_error_rate": 0.2
+          },
+          "confusion": {
+            "other->whisky": 12,
+            "whisky->whisky": 48
+          }
+        },
+        "011_미라보_02": {
+          "counts": {
+            "records": 3,
+            "rejected": 0,
+            "expected": 132,
+            "expected_whisky": 132,
+            "expected_non_whisky": 0,
+            "output": 132,
+            "paired": 132,
+            "paired_whisky": 132,
+            "paired_non_whisky": 0,
+            "extra": 0,
+            "priced": 132,
+            "price_correct": 132,
+            "duplicates": 0,
+            "whisky_as_non_whisky": 0,
+            "non_whisky_as_whisky": 0,
+            "wrong_kind": 0
+          },
+          "rates": {
+            "line_recall": 1.0,
+            "whisky_line_recall": 1.0,
+            "non_whisky_line_recall": null,
+            "extra_line_rate": 0.0,
+            "price_accuracy": 1.0,
+            "duplicate_line_rate": 0.0,
+            "classification_error_rate": 0.0
+          },
+          "confusion": {
+            "whisky->whisky": 132
+          }
+        },
+        "011_미라보_03": {
+          "counts": {
+            "records": 3,
+            "rejected": 0,
+            "expected": 180,
+            "expected_whisky": 180,
+            "expected_non_whisky": 0,
+            "output": 180,
+            "paired": 180,
+            "paired_whisky": 180,
+            "paired_non_whisky": 0,
+            "extra": 0,
+            "priced": 180,
+            "price_correct": 179,
+            "duplicates": 0,
+            "whisky_as_non_whisky": 0,
+            "non_whisky_as_whisky": 0,
+            "wrong_kind": 0
+          },
+          "rates": {
+            "line_recall": 1.0,
+            "whisky_line_recall": 1.0,
+            "non_whisky_line_recall": null,
+            "extra_line_rate": 0.0,
+            "price_accuracy": 0.9944,
+            "duplicate_line_rate": 0.0,
+            "classification_error_rate": 0.0
+          },
+          "confusion": {
+            "whisky->whisky": 180
+          }
+        },
+        "011_미라보_05": {
+          "counts": {
+            "records": 3,
+            "rejected": 0,
+            "expected": 156,
+            "expected_whisky": 156,
+            "expected_non_whisky": 0,
+            "output": 156,
+            "paired": 156,
+            "paired_whisky": 156,
+            "paired_non_whisky": 0,
+            "extra": 0,
+            "priced": 156,
+            "price_correct": 156,
+            "duplicates": 0,
+            "whisky_as_non_whisky": 0,
+            "non_whisky_as_whisky": 0,
+            "wrong_kind": 0
+          },
+          "rates": {
+            "line_recall": 1.0,
+            "whisky_line_recall": 1.0,
+            "non_whisky_line_recall": null,
+            "extra_line_rate": 0.0,
+            "price_accuracy": 1.0,
+            "duplicate_line_rate": 0.0,
+            "classification_error_rate": 0.0
+          },
+          "confusion": {
+            "whisky->whisky": 156
+          }
+        },
+        "011_미라보_06": {
+          "counts": {
+            "records": 3,
+            "rejected": 0,
+            "expected": 162,
+            "expected_whisky": 162,
+            "expected_non_whisky": 0,
+            "output": 162,
+            "paired": 162,
+            "paired_whisky": 162,
+            "paired_non_whisky": 0,
+            "extra": 0,
+            "priced": 162,
+            "price_correct": 162,
+            "duplicates": 0,
+            "whisky_as_non_whisky": 0,
+            "non_whisky_as_whisky": 0,
+            "wrong_kind": 0
+          },
+          "rates": {
+            "line_recall": 1.0,
+            "whisky_line_recall": 1.0,
+            "non_whisky_line_recall": null,
+            "extra_line_rate": 0.0,
+            "price_accuracy": 1.0,
+            "duplicate_line_rate": 0.0,
+            "classification_error_rate": 0.0
+          },
+          "confusion": {
+            "whisky->whisky": 162
+          }
+        },
+        "011_미라보_07": {
+          "counts": {
+            "records": 3,
+            "rejected": 0,
+            "expected": 93,
+            "expected_whisky": 93,
+            "expected_non_whisky": 0,
+            "output": 93,
+            "paired": 92,
+            "paired_whisky": 92,
+            "paired_non_whisky": 0,
+            "extra": 1,
+            "priced": 92,
+            "price_correct": 92,
+            "duplicates": 0,
+            "whisky_as_non_whisky": 0,
+            "non_whisky_as_whisky": 0,
+            "wrong_kind": 0
+          },
+          "rates": {
+            "line_recall": 0.9892,
+            "whisky_line_recall": 0.9892,
+            "non_whisky_line_recall": null,
+            "extra_line_rate": 0.0108,
+            "price_accuracy": 1.0,
+            "duplicate_line_rate": 0.0,
+            "classification_error_rate": 0.0
+          },
+          "confusion": {
+            "whisky->whisky": 92
+          }
+        },
+        "009_오드비_02": {
+          "counts": {
+            "records": 3,
+            "rejected": 0,
+            "expected": 45,
+            "expected_whisky": 0,
+            "expected_non_whisky": 45,
+            "output": 0,
+            "paired": 0,
+            "paired_whisky": 0,
+            "paired_non_whisky": 0,
+            "extra": 0,
+            "priced": 0,
+            "price_correct": 0,
+            "duplicates": 0,
+            "whisky_as_non_whisky": 0,
+            "non_whisky_as_whisky": 0,
+            "wrong_kind": 0
+          },
+          "rates": {
+            "line_recall": 0.0,
+            "whisky_line_recall": null,
+            "non_whisky_line_recall": 0.0,
+            "extra_line_rate": null,
+            "price_accuracy": null,
+            "duplicate_line_rate": null,
+            "classification_error_rate": null
+          },
+          "confusion": {}
+        },
+        "009_오드비_04": {
+          "counts": {
+            "records": 3,
+            "rejected": 0,
+            "expected": 60,
+            "expected_whisky": 57,
+            "expected_non_whisky": 3,
+            "output": 60,
+            "paired": 60,
+            "paired_whisky": 57,
+            "paired_non_whisky": 3,
+            "extra": 0,
+            "priced": 60,
+            "price_correct": 60,
+            "duplicates": 0,
+            "whisky_as_non_whisky": 0,
+            "non_whisky_as_whisky": 3,
+            "wrong_kind": 0
+          },
+          "rates": {
+            "line_recall": 1.0,
+            "whisky_line_recall": 1.0,
+            "non_whisky_line_recall": 1.0,
+            "extra_line_rate": 0.0,
+            "price_accuracy": 1.0,
+            "duplicate_line_rate": 0.0,
+            "classification_error_rate": 0.05
+          },
+          "confusion": {
+            "other->whisky": 3,
+            "whisky->whisky": 57
+          }
+        },
+        "009_오드비_09": {
+          "counts": {
+            "records": 3,
+            "rejected": 0,
+            "expected": 66,
+            "expected_whisky": 45,
+            "expected_non_whisky": 21,
+            "output": 45,
+            "paired": 45,
+            "paired_whisky": 45,
+            "paired_non_whisky": 0,
+            "extra": 0,
+            "priced": 45,
+            "price_correct": 45,
+            "duplicates": 0,
+            "whisky_as_non_whisky": 0,
+            "non_whisky_as_whisky": 0,
+            "wrong_kind": 0
+          },
+          "rates": {
+            "line_recall": 0.6818,
+            "whisky_line_recall": 1.0,
+            "non_whisky_line_recall": 0.0,
+            "extra_line_rate": 0.0,
+            "price_accuracy": 1.0,
+            "duplicate_line_rate": 0.0,
+            "classification_error_rate": 0.0
+          },
+          "confusion": {
+            "whisky->whisky": 45
+          }
+        },
+        "010_수이_02": {
+          "counts": {
+            "records": 3,
+            "rejected": 0,
+            "expected": 102,
+            "expected_whisky": 102,
+            "expected_non_whisky": 0,
+            "output": 102,
+            "paired": 101,
+            "paired_whisky": 101,
+            "paired_non_whisky": 0,
+            "extra": 1,
+            "priced": 101,
+            "price_correct": 101,
+            "duplicates": 0,
+            "whisky_as_non_whisky": 0,
+            "non_whisky_as_whisky": 0,
+            "wrong_kind": 0
+          },
+          "rates": {
+            "line_recall": 0.9902,
+            "whisky_line_recall": 0.9902,
+            "non_whisky_line_recall": null,
+            "extra_line_rate": 0.0098,
+            "price_accuracy": 1.0,
+            "duplicate_line_rate": 0.0,
+            "classification_error_rate": 0.0
+          },
+          "confusion": {
+            "whisky->whisky": 101
+          }
+        },
+        "010_수이_04": {
+          "counts": {
+            "records": 3,
+            "rejected": 0,
+            "expected": 120,
+            "expected_whisky": 81,
+            "expected_non_whisky": 39,
+            "output": 120,
+            "paired": 120,
+            "paired_whisky": 81,
+            "paired_non_whisky": 39,
+            "extra": 0,
+            "priced": 120,
+            "price_correct": 120,
+            "duplicates": 0,
+            "whisky_as_non_whisky": 0,
+            "non_whisky_as_whisky": 39,
+            "wrong_kind": 0
+          },
+          "rates": {
+            "line_recall": 1.0,
+            "whisky_line_recall": 1.0,
+            "non_whisky_line_recall": 1.0,
+            "extra_line_rate": 0.0,
+            "price_accuracy": 1.0,
+            "duplicate_line_rate": 0.0,
+            "classification_error_rate": 0.325
+          },
+          "confusion": {
+            "other->whisky": 39,
+            "whisky->whisky": 81
+          }
+        },
+        "010_수이_05": {
+          "counts": {
+            "records": 3,
+            "rejected": 0,
+            "expected": 66,
+            "expected_whisky": 48,
+            "expected_non_whisky": 18,
+            "output": 51,
+            "paired": 51,
+            "paired_whisky": 48,
+            "paired_non_whisky": 3,
+            "extra": 0,
+            "priced": 51,
+            "price_correct": 51,
+            "duplicates": 0,
+            "whisky_as_non_whisky": 0,
+            "non_whisky_as_whisky": 3,
+            "wrong_kind": 0
+          },
+          "rates": {
+            "line_recall": 0.7727,
+            "whisky_line_recall": 1.0,
+            "non_whisky_line_recall": 0.1667,
+            "extra_line_rate": 0.0,
+            "price_accuracy": 1.0,
+            "duplicate_line_rate": 0.0,
+            "classification_error_rate": 0.0588
+          },
+          "confusion": {
+            "other->whisky": 3,
+            "whisky->whisky": 48
+          }
+        }
+      },
+      "misclassified": [
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "헤네시 VSOP",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "007_위스키복춘_03",
+          "record": "007_bokchun_03_r2.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "다니엘 부쥬 로얄",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "007_위스키복춘_03",
+          "record": "007_bokchun_03_r2.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "헤네시 VSOP",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "007_위스키복춘_03",
+          "record": "007_bokchun_03_r3.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "다니엘 부쥬 로얄",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "007_위스키복춘_03",
+          "record": "007_bokchun_03_r3.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "헤네시vsop / Hennessy vsop",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "008_서로상_01",
+          "record": "008_seorosang_01_r1.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "헤네시vsop / Hennessy vsop",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "008_서로상_01",
+          "record": "008_seorosang_01_r1.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "레미마틴vsop / Remy Martin vsop",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "008_서로상_01",
+          "record": "008_seorosang_01_r1.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "레미마틴vsop / Remy Martin vsop",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "008_서로상_01",
+          "record": "008_seorosang_01_r1.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "헤네시vsop / Hennessy vsop",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "008_서로상_01",
+          "record": "008_seorosang_01_r2.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "헤네시vsop / Hennessy vsop",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "008_서로상_01",
+          "record": "008_seorosang_01_r2.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "레미마틴vsop / Remy Martin vsop",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "008_서로상_01",
+          "record": "008_seorosang_01_r2.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "레미마틴vsop / Remy Martin vsop",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "008_서로상_01",
+          "record": "008_seorosang_01_r2.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "헤네시vsop / Hennessy vsop",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "008_서로상_01",
+          "record": "008_seorosang_01_r3.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "헤네시vsop / Hennessy vsop",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "008_서로상_01",
+          "record": "008_seorosang_01_r3.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "레미마틴vsop / Remy Martin vsop",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "008_서로상_01",
+          "record": "008_seorosang_01_r3.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "레미마틴vsop / Remy Martin vsop",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "008_서로상_01",
+          "record": "008_seorosang_01_r3.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "잭다니엘 애플",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "009_오드비_04",
+          "record": "009_odbi_04_r1.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "잭다니엘 애플",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "009_오드비_04",
+          "record": "009_odbi_04_r2.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "잭다니엘 애플",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "009_오드비_04",
+          "record": "009_odbi_04_r3.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "김과장 #2 (바베이도스 럼)",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "010_수이_04",
+          "record": "010_sui_04_r1.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "1800 Anejo (아네호 데킬라)",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "010_수이_04",
+          "record": "010_sui_04_r1.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "Petron Silver (페트론)",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "010_수이_04",
+          "record": "010_sui_04_r1.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "Clase - Azul (클라세아줄)",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "010_수이_04",
+          "record": "010_sui_04_r1.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "Hennesy V.S.O.A (헤네시 VSOP)",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "010_수이_04",
+          "record": "010_sui_04_r1.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "Hennesy X.O",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "010_수이_04",
+          "record": "010_sui_04_r1.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "Remy Martin V.S.O.P (레미 마틴)",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "010_수이_04",
+          "record": "010_sui_04_r1.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "Remy Martin 1738",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "010_수이_04",
+          "record": "010_sui_04_r1.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "Remy Martin X.O",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "010_수이_04",
+          "record": "010_sui_04_r1.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "Camus V.S.O.P (까뮤)",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "010_수이_04",
+          "record": "010_sui_04_r1.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "Daniel Royal",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "010_수이_04",
+          "record": "010_sui_04_r1.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "Jean Luc Pasquet (장 뤽 파스케)",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "010_수이_04",
+          "record": "010_sui_04_r1.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "Boulard X.O (불라)",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "010_수이_04",
+          "record": "010_sui_04_r1.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "김과장 #2 (바베이도스 럼)",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "010_수이_04",
+          "record": "010_sui_04_r2.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "1800 Anejo (아네호 데킬라)",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "010_수이_04",
+          "record": "010_sui_04_r2.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "Petron Silver (페트론)",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "010_수이_04",
+          "record": "010_sui_04_r2.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "Clase - Azul (클라세아줄)",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "010_수이_04",
+          "record": "010_sui_04_r2.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "Hennesy V.S.O.A (헤네시 VSOP)",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "010_수이_04",
+          "record": "010_sui_04_r2.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "Hennesy X.O",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "010_수이_04",
+          "record": "010_sui_04_r2.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "Remy Martin V.S.O.P (레미 마틴)",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "010_수이_04",
+          "record": "010_sui_04_r2.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "Remy Martin 1738",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "010_수이_04",
+          "record": "010_sui_04_r2.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "Remy Martin X.O",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "010_수이_04",
+          "record": "010_sui_04_r2.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "Camus V.S.O.P (까뮤)",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "010_수이_04",
+          "record": "010_sui_04_r2.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "Daniel Royal",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "010_수이_04",
+          "record": "010_sui_04_r2.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "Jean Luc Pasquet (장 뤽 파스케)",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "010_수이_04",
+          "record": "010_sui_04_r2.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "Boulard X.O (불라)",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "010_수이_04",
+          "record": "010_sui_04_r2.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "김과장 #2 (바베이도스 럼)",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "010_수이_04",
+          "record": "010_sui_04_r3.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "1800 Anejo (아네호 데킬라)",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "010_수이_04",
+          "record": "010_sui_04_r3.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "Petron Silver (페트론)",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "010_수이_04",
+          "record": "010_sui_04_r3.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "Clase - Azul (클라세아줄)",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "010_수이_04",
+          "record": "010_sui_04_r3.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "Hennesy V.S.O.A (헤네시 VSOP)",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "010_수이_04",
+          "record": "010_sui_04_r3.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "Hennesy X.O",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "010_수이_04",
+          "record": "010_sui_04_r3.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "Remy Martin V.S.O.P (레미 마틴)",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "010_수이_04",
+          "record": "010_sui_04_r3.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "Remy Martin 1738",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "010_수이_04",
+          "record": "010_sui_04_r3.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "Remy Martin X.O",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "010_수이_04",
+          "record": "010_sui_04_r3.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "Camus V.S.O.P (까뮤)",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "010_수이_04",
+          "record": "010_sui_04_r3.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "Daniel Royal",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "010_수이_04",
+          "record": "010_sui_04_r3.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "Jean Luc Pasquet (장 뤽 파스케)",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "010_수이_04",
+          "record": "010_sui_04_r3.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "Boulard X.O (불라)",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "010_수이_04",
+          "record": "010_sui_04_r3.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "헤네시 VSOP",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "010_수이_05",
+          "record": "010_sui_05_r1.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "헤네시 VSOP",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "010_수이_05",
+          "record": "010_sui_05_r2.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "헤네시 VSOP",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "010_수이_05",
+          "record": "010_sui_05_r3.json"
+        }
+      ],
+      "missed": [
+        {
+          "line": "카발란 솔리스트 셰리 오크",
+          "expected": "whisky",
+          "photo_id": "007_위스키복춘_01",
+          "record": "007_bokchun_01_r2.json"
+        },
+        {
+          "line": "카발란 솔리스트 비노 바리끄",
+          "expected": "whisky",
+          "photo_id": "007_위스키복춘_01",
+          "record": "007_bokchun_01_r2.json"
+        },
+        {
+          "line": "카발란 트리플 셰리",
+          "expected": "whisky",
+          "photo_id": "007_위스키복춘_01",
+          "record": "007_bokchun_01_r2.json"
+        },
+        {
+          "line": "발베니 12Y",
+          "expected": "whisky",
+          "photo_id": "007_위스키복춘_01",
+          "record": "007_bokchun_01_r2.json"
+        },
+        {
+          "line": "발베니 14Y",
+          "expected": "whisky",
+          "photo_id": "007_위스키복춘_01",
+          "record": "007_bokchun_01_r2.json"
+        },
+        {
+          "line": "츠누키 에디션 2025",
+          "expected": "whisky",
+          "photo_id": "007_위스키복춘_01",
+          "record": "007_bokchun_01_r2.json"
+        },
+        {
+          "line": "헤네시 VSOP",
+          "expected": "other",
+          "photo_id": "007_위스키복춘_03",
+          "record": "007_bokchun_03_r1.json"
+        },
+        {
+          "line": "다니엘 부쥬 로얄",
+          "expected": "other",
+          "photo_id": "007_위스키복춘_03",
+          "record": "007_bokchun_03_r1.json"
+        },
+        {
+          "line": "진토닉",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r1.json"
+        },
+        {
+          "line": "김렛",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r1.json"
+        },
+        {
+          "line": "다이퀴리",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r1.json"
+        },
+        {
+          "line": "드라이 마티니",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r1.json"
+        },
+        {
+          "line": "보스턴쿨러",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r1.json"
+        },
+        {
+          "line": "하이랜드쿨러",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r1.json"
+        },
+        {
+          "line": "코스모폴리탄",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r1.json"
+        },
+        {
+          "line": "올드패션",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r1.json"
+        },
+        {
+          "line": "파우스트",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r1.json"
+        },
+        {
+          "line": "위스키사워",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r1.json"
+        },
+        {
+          "line": "갓파더",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r1.json"
+        },
+        {
+          "line": "사이드카",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r1.json"
+        },
+        {
+          "line": "잭로즈",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r1.json"
+        },
+        {
+          "line": "진피즈",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r1.json"
+        },
+        {
+          "line": "에메랄드쿨러",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r1.json"
+        },
+        {
+          "line": "그래스호퍼",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r1.json"
+        },
+        {
+          "line": "네그로니",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r1.json"
+        },
+        {
+          "line": "불바디에",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r1.json"
+        },
+        {
+          "line": "라스트워드",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r1.json"
+        },
+        {
+          "line": "헤밍웨이 스페셜",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r1.json"
+        },
+        {
+          "line": "롭로이",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r1.json"
+        },
+        {
+          "line": "프랭크시나트라",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r1.json"
+        },
+        {
+          "line": "슬로진피즈",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r1.json"
+        },
+        {
+          "line": "찰리채플린",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r1.json"
+        },
+        {
+          "line": "앤하탄",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r1.json"
+        },
+        {
+          "line": "카카오피즈",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r1.json"
+        },
+        {
+          "line": "엘더플라워 사워",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r1.json"
+        },
+        {
+          "line": "롱아일랜드티",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r1.json"
+        },
+        {
+          "line": "프렌치커넥션",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r1.json"
+        },
+        {
+          "line": "카타르시스",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r1.json"
+        },
+        {
+          "line": "올드파",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r1.json"
+        },
+        {
+          "line": "복춘",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r1.json"
+        },
+        {
+          "line": "입춘",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r1.json"
+        },
+        {
+          "line": "진토닉",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r2.json"
+        },
+        {
+          "line": "김렛",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r2.json"
+        },
+        {
+          "line": "다이퀴리",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r2.json"
+        },
+        {
+          "line": "드라이 마티니",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r2.json"
+        },
+        {
+          "line": "보스턴쿨러",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r2.json"
+        },
+        {
+          "line": "하이랜드쿨러",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r2.json"
+        },
+        {
+          "line": "코스모폴리탄",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r2.json"
+        },
+        {
+          "line": "올드패션",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r2.json"
+        },
+        {
+          "line": "파우스트",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r2.json"
+        },
+        {
+          "line": "위스키사워",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r2.json"
+        },
+        {
+          "line": "갓파더",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r2.json"
+        },
+        {
+          "line": "사이드카",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r2.json"
+        },
+        {
+          "line": "잭로즈",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r2.json"
+        },
+        {
+          "line": "진피즈",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r2.json"
+        },
+        {
+          "line": "에메랄드쿨러",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r2.json"
+        },
+        {
+          "line": "그래스호퍼",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r2.json"
+        },
+        {
+          "line": "네그로니",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r2.json"
+        },
+        {
+          "line": "불바디에",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r2.json"
+        },
+        {
+          "line": "라스트워드",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r2.json"
+        },
+        {
+          "line": "헤밍웨이 스페셜",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r2.json"
+        },
+        {
+          "line": "롭로이",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r2.json"
+        },
+        {
+          "line": "프랭크시나트라",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r2.json"
+        },
+        {
+          "line": "슬로진피즈",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r2.json"
+        },
+        {
+          "line": "찰리채플린",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r2.json"
+        },
+        {
+          "line": "앤하탄",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r2.json"
+        },
+        {
+          "line": "카카오피즈",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r2.json"
+        },
+        {
+          "line": "엘더플라워 사워",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r2.json"
+        },
+        {
+          "line": "롱아일랜드티",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r2.json"
+        },
+        {
+          "line": "프렌치커넥션",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r2.json"
+        },
+        {
+          "line": "카타르시스",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r2.json"
+        },
+        {
+          "line": "올드파",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r2.json"
+        },
+        {
+          "line": "복춘",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r2.json"
+        },
+        {
+          "line": "입춘",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r2.json"
+        },
+        {
+          "line": "진토닉",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r3.json"
+        },
+        {
+          "line": "김렛",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r3.json"
+        },
+        {
+          "line": "다이퀴리",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r3.json"
+        },
+        {
+          "line": "드라이 마티니",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r3.json"
+        },
+        {
+          "line": "보스턴쿨러",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r3.json"
+        },
+        {
+          "line": "하이랜드쿨러",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r3.json"
+        },
+        {
+          "line": "코스모폴리탄",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r3.json"
+        },
+        {
+          "line": "올드패션",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r3.json"
+        },
+        {
+          "line": "파우스트",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r3.json"
+        },
+        {
+          "line": "위스키사워",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r3.json"
+        },
+        {
+          "line": "갓파더",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r3.json"
+        },
+        {
+          "line": "사이드카",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r3.json"
+        },
+        {
+          "line": "잭로즈",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r3.json"
+        },
+        {
+          "line": "진피즈",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r3.json"
+        },
+        {
+          "line": "에메랄드쿨러",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r3.json"
+        },
+        {
+          "line": "그래스호퍼",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r3.json"
+        },
+        {
+          "line": "네그로니",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r3.json"
+        },
+        {
+          "line": "불바디에",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r3.json"
+        },
+        {
+          "line": "라스트워드",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r3.json"
+        },
+        {
+          "line": "헤밍웨이 스페셜",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r3.json"
+        },
+        {
+          "line": "롭로이",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r3.json"
+        },
+        {
+          "line": "프랭크시나트라",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r3.json"
+        },
+        {
+          "line": "슬로진피즈",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r3.json"
+        },
+        {
+          "line": "찰리채플린",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r3.json"
+        },
+        {
+          "line": "앤하탄",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r3.json"
+        },
+        {
+          "line": "카카오피즈",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r3.json"
+        },
+        {
+          "line": "엘더플라워 사워",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r3.json"
+        },
+        {
+          "line": "롱아일랜드티",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r3.json"
+        },
+        {
+          "line": "프렌치커넥션",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r3.json"
+        },
+        {
+          "line": "카타르시스",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r3.json"
+        },
+        {
+          "line": "올드파",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r3.json"
+        },
+        {
+          "line": "복춘",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r3.json"
+        },
+        {
+          "line": "입춘",
+          "expected": "cocktail",
+          "photo_id": "007_위스키복춘_04",
+          "record": "007_bokchun_04_r3.json"
+        },
+        {
+          "line": "우드포드 리저브(Woodford Reserve) 더블 X.O",
+          "expected": "whisky",
+          "photo_id": "011_미라보_07",
+          "record": "011_mirabeau_07_r1.json"
+        },
+        {
+          "line": "헤네시 VSOP",
+          "expected": "other",
+          "photo_id": "009_오드비_02",
+          "record": "009_odbi_02_r1.json"
+        },
+        {
+          "line": "레미마틴 VSOP",
+          "expected": "other",
+          "photo_id": "009_오드비_02",
+          "record": "009_odbi_02_r1.json"
+        },
+        {
+          "line": "까뮤 VSOP",
+          "expected": "other",
+          "photo_id": "009_오드비_02",
+          "record": "009_odbi_02_r1.json"
+        },
+        {
+          "line": "다니엘부쥬 XO",
+          "expected": "other",
+          "photo_id": "009_오드비_02",
+          "record": "009_odbi_02_r1.json"
+        },
+        {
+          "line": "다니엘부쥬 로얄 CS",
+          "expected": "other",
+          "photo_id": "009_오드비_02",
+          "record": "009_odbi_02_r1.json"
+        },
+        {
+          "line": "불라 VSOP",
+          "expected": "other",
+          "photo_id": "009_오드비_02",
+          "record": "009_odbi_02_r1.json"
+        },
+        {
+          "line": "탱커레이NO.10",
+          "expected": "other",
+          "photo_id": "009_오드비_02",
+          "record": "009_odbi_02_r1.json"
+        },
+        {
+          "line": "봄베이사파이어",
+          "expected": "other",
+          "photo_id": "009_오드비_02",
+          "record": "009_odbi_02_r1.json"
+        },
+        {
+          "line": "헨드릭스",
+          "expected": "other",
+          "photo_id": "009_오드비_02",
+          "record": "009_odbi_02_r1.json"
+        },
+        {
+          "line": "호세쿠엘보 에스페샬",
+          "expected": "other",
+          "photo_id": "009_오드비_02",
+          "record": "009_odbi_02_r1.json"
+        },
+        {
+          "line": "호세쿠엘보 1800 레포사도",
+          "expected": "other",
+          "photo_id": "009_오드비_02",
+          "record": "009_odbi_02_r1.json"
+        },
+        {
+          "line": "호세쿠엘보 1800 아네호",
+          "expected": "other",
+          "photo_id": "009_오드비_02",
+          "record": "009_odbi_02_r1.json"
+        },
+        {
+          "line": "호세쿠엘보 크리스탈리노",
+          "expected": "other",
+          "photo_id": "009_오드비_02",
+          "record": "009_odbi_02_r1.json"
+        },
+        {
+          "line": "플렌테이션 파인애플",
+          "expected": "other",
+          "photo_id": "009_오드비_02",
+          "record": "009_odbi_02_r1.json"
+        },
+        {
+          "line": "플렌테이션 XO",
+          "expected": "other",
+          "photo_id": "009_오드비_02",
+          "record": "009_odbi_02_r1.json"
+        },
+        {
+          "line": "헤네시 VSOP",
+          "expected": "other",
+          "photo_id": "009_오드비_02",
+          "record": "009_odbi_02_r2.json"
+        },
+        {
+          "line": "레미마틴 VSOP",
+          "expected": "other",
+          "photo_id": "009_오드비_02",
+          "record": "009_odbi_02_r2.json"
+        },
+        {
+          "line": "까뮤 VSOP",
+          "expected": "other",
+          "photo_id": "009_오드비_02",
+          "record": "009_odbi_02_r2.json"
+        },
+        {
+          "line": "다니엘부쥬 XO",
+          "expected": "other",
+          "photo_id": "009_오드비_02",
+          "record": "009_odbi_02_r2.json"
+        },
+        {
+          "line": "다니엘부쥬 로얄 CS",
+          "expected": "other",
+          "photo_id": "009_오드비_02",
+          "record": "009_odbi_02_r2.json"
+        },
+        {
+          "line": "불라 VSOP",
+          "expected": "other",
+          "photo_id": "009_오드비_02",
+          "record": "009_odbi_02_r2.json"
+        },
+        {
+          "line": "탱커레이NO.10",
+          "expected": "other",
+          "photo_id": "009_오드비_02",
+          "record": "009_odbi_02_r2.json"
+        },
+        {
+          "line": "봄베이사파이어",
+          "expected": "other",
+          "photo_id": "009_오드비_02",
+          "record": "009_odbi_02_r2.json"
+        },
+        {
+          "line": "헨드릭스",
+          "expected": "other",
+          "photo_id": "009_오드비_02",
+          "record": "009_odbi_02_r2.json"
+        },
+        {
+          "line": "호세쿠엘보 에스페샬",
+          "expected": "other",
+          "photo_id": "009_오드비_02",
+          "record": "009_odbi_02_r2.json"
+        },
+        {
+          "line": "호세쿠엘보 1800 레포사도",
+          "expected": "other",
+          "photo_id": "009_오드비_02",
+          "record": "009_odbi_02_r2.json"
+        },
+        {
+          "line": "호세쿠엘보 1800 아네호",
+          "expected": "other",
+          "photo_id": "009_오드비_02",
+          "record": "009_odbi_02_r2.json"
+        },
+        {
+          "line": "호세쿠엘보 크리스탈리노",
+          "expected": "other",
+          "photo_id": "009_오드비_02",
+          "record": "009_odbi_02_r2.json"
+        },
+        {
+          "line": "플렌테이션 파인애플",
+          "expected": "other",
+          "photo_id": "009_오드비_02",
+          "record": "009_odbi_02_r2.json"
+        },
+        {
+          "line": "플렌테이션 XO",
+          "expected": "other",
+          "photo_id": "009_오드비_02",
+          "record": "009_odbi_02_r2.json"
+        },
+        {
+          "line": "헤네시 VSOP",
+          "expected": "other",
+          "photo_id": "009_오드비_02",
+          "record": "009_odbi_02_r3.json"
+        },
+        {
+          "line": "레미마틴 VSOP",
+          "expected": "other",
+          "photo_id": "009_오드비_02",
+          "record": "009_odbi_02_r3.json"
+        },
+        {
+          "line": "까뮤 VSOP",
+          "expected": "other",
+          "photo_id": "009_오드비_02",
+          "record": "009_odbi_02_r3.json"
+        },
+        {
+          "line": "다니엘부쥬 XO",
+          "expected": "other",
+          "photo_id": "009_오드비_02",
+          "record": "009_odbi_02_r3.json"
+        },
+        {
+          "line": "다니엘부쥬 로얄 CS",
+          "expected": "other",
+          "photo_id": "009_오드비_02",
+          "record": "009_odbi_02_r3.json"
+        },
+        {
+          "line": "불라 VSOP",
+          "expected": "other",
+          "photo_id": "009_오드비_02",
+          "record": "009_odbi_02_r3.json"
+        },
+        {
+          "line": "탱커레이NO.10",
+          "expected": "other",
+          "photo_id": "009_오드비_02",
+          "record": "009_odbi_02_r3.json"
+        },
+        {
+          "line": "봄베이사파이어",
+          "expected": "other",
+          "photo_id": "009_오드비_02",
+          "record": "009_odbi_02_r3.json"
+        },
+        {
+          "line": "헨드릭스",
+          "expected": "other",
+          "photo_id": "009_오드비_02",
+          "record": "009_odbi_02_r3.json"
+        },
+        {
+          "line": "호세쿠엘보 에스페샬",
+          "expected": "other",
+          "photo_id": "009_오드비_02",
+          "record": "009_odbi_02_r3.json"
+        },
+        {
+          "line": "호세쿠엘보 1800 레포사도",
+          "expected": "other",
+          "photo_id": "009_오드비_02",
+          "record": "009_odbi_02_r3.json"
+        },
+        {
+          "line": "호세쿠엘보 1800 아네호",
+          "expected": "other",
+          "photo_id": "009_오드비_02",
+          "record": "009_odbi_02_r3.json"
+        },
+        {
+          "line": "호세쿠엘보 크리스탈리노",
+          "expected": "other",
+          "photo_id": "009_오드비_02",
+          "record": "009_odbi_02_r3.json"
+        },
+        {
+          "line": "플렌테이션 파인애플",
+          "expected": "other",
+          "photo_id": "009_오드비_02",
+          "record": "009_odbi_02_r3.json"
+        },
+        {
+          "line": "플렌테이션 XO",
+          "expected": "other",
+          "photo_id": "009_오드비_02",
+          "record": "009_odbi_02_r3.json"
+        },
+        {
+          "line": "기네스 병",
+          "expected": "other",
+          "photo_id": "009_오드비_09",
+          "record": "009_odbi_09_r1.json"
+        },
+        {
+          "line": "산미구엘 병",
+          "expected": "other",
+          "photo_id": "009_오드비_09",
+          "record": "009_odbi_09_r1.json"
+        },
+        {
+          "line": "아사히 병",
+          "expected": "other",
+          "photo_id": "009_오드비_09",
+          "record": "009_odbi_09_r1.json"
+        },
+        {
+          "line": "코로나 병 + 라임(선택)",
+          "expected": "other",
+          "photo_id": "009_오드비_09",
+          "record": "009_odbi_09_r1.json"
+        },
+        {
+          "line": "올드풀티니 3종 세트 / 행사",
+          "expected": "other",
+          "photo_id": "009_오드비_09",
+          "record": "009_odbi_09_r1.json"
+        },
+        {
+          "line": "사부로마루 피트 위스키 5종 세트 / 행사",
+          "expected": "other",
+          "photo_id": "009_오드비_09",
+          "record": "009_odbi_09_r1.json"
+        },
+        {
+          "line": "아르마냑 가호 5종 세트 / 행사",
+          "expected": "other",
+          "photo_id": "009_오드비_09",
+          "record": "009_odbi_09_r1.json"
+        },
+        {
+          "line": "기네스 병",
+          "expected": "other",
+          "photo_id": "009_오드비_09",
+          "record": "009_odbi_09_r2.json"
+        },
+        {
+          "line": "산미구엘 병",
+          "expected": "other",
+          "photo_id": "009_오드비_09",
+          "record": "009_odbi_09_r2.json"
+        },
+        {
+          "line": "아사히 병",
+          "expected": "other",
+          "photo_id": "009_오드비_09",
+          "record": "009_odbi_09_r2.json"
+        },
+        {
+          "line": "코로나 병 + 라임(선택)",
+          "expected": "other",
+          "photo_id": "009_오드비_09",
+          "record": "009_odbi_09_r2.json"
+        },
+        {
+          "line": "올드풀티니 3종 세트 / 행사",
+          "expected": "other",
+          "photo_id": "009_오드비_09",
+          "record": "009_odbi_09_r2.json"
+        },
+        {
+          "line": "사부로마루 피트 위스키 5종 세트 / 행사",
+          "expected": "other",
+          "photo_id": "009_오드비_09",
+          "record": "009_odbi_09_r2.json"
+        },
+        {
+          "line": "아르마냑 가호 5종 세트 / 행사",
+          "expected": "other",
+          "photo_id": "009_오드비_09",
+          "record": "009_odbi_09_r2.json"
+        },
+        {
+          "line": "기네스 병",
+          "expected": "other",
+          "photo_id": "009_오드비_09",
+          "record": "009_odbi_09_r3.json"
+        },
+        {
+          "line": "산미구엘 병",
+          "expected": "other",
+          "photo_id": "009_오드비_09",
+          "record": "009_odbi_09_r3.json"
+        },
+        {
+          "line": "아사히 병",
+          "expected": "other",
+          "photo_id": "009_오드비_09",
+          "record": "009_odbi_09_r3.json"
+        },
+        {
+          "line": "코로나 병 + 라임(선택)",
+          "expected": "other",
+          "photo_id": "009_오드비_09",
+          "record": "009_odbi_09_r3.json"
+        },
+        {
+          "line": "올드풀티니 3종 세트 / 행사",
+          "expected": "other",
+          "photo_id": "009_오드비_09",
+          "record": "009_odbi_09_r3.json"
+        },
+        {
+          "line": "사부로마루 피트 위스키 5종 세트 / 행사",
+          "expected": "other",
+          "photo_id": "009_오드비_09",
+          "record": "009_odbi_09_r3.json"
+        },
+        {
+          "line": "아르마냑 가호 5종 세트 / 행사",
+          "expected": "other",
+          "photo_id": "009_오드비_09",
+          "record": "009_odbi_09_r3.json"
+        },
+        {
+          "line": "Balvenie 16y French Oak (프렌치 오크)",
+          "expected": "whisky",
+          "photo_id": "010_수이_02",
+          "record": "010_sui_02_r3.json"
+        },
+        {
+          "line": "하몽을 곁들인 감자튀김.",
+          "expected": "food",
+          "photo_id": "010_수이_05",
+          "record": "010_sui_05_r1.json"
+        },
+        {
+          "line": "과일·치즈 플레이트",
+          "expected": "food",
+          "photo_id": "010_수이_05",
+          "record": "010_sui_05_r1.json"
+        },
+        {
+          "line": "교자",
+          "expected": "food",
+          "photo_id": "010_수이_05",
+          "record": "010_sui_05_r1.json"
+        },
+        {
+          "line": "훈제굴 플레이트",
+          "expected": "food",
+          "photo_id": "010_수이_05",
+          "record": "010_sui_05_r1.json"
+        },
+        {
+          "line": "안키모와 바게트",
+          "expected": "food",
+          "photo_id": "010_수이_05",
+          "record": "010_sui_05_r1.json"
+        },
+        {
+          "line": "하몽을 곁들인 감자튀김.",
+          "expected": "food",
+          "photo_id": "010_수이_05",
+          "record": "010_sui_05_r2.json"
+        },
+        {
+          "line": "과일·치즈 플레이트",
+          "expected": "food",
+          "photo_id": "010_수이_05",
+          "record": "010_sui_05_r2.json"
+        },
+        {
+          "line": "교자",
+          "expected": "food",
+          "photo_id": "010_수이_05",
+          "record": "010_sui_05_r2.json"
+        },
+        {
+          "line": "훈제굴 플레이트",
+          "expected": "food",
+          "photo_id": "010_수이_05",
+          "record": "010_sui_05_r2.json"
+        },
+        {
+          "line": "안키모와 바게트",
+          "expected": "food",
+          "photo_id": "010_수이_05",
+          "record": "010_sui_05_r2.json"
+        },
+        {
+          "line": "하몽을 곁들인 감자튀김.",
+          "expected": "food",
+          "photo_id": "010_수이_05",
+          "record": "010_sui_05_r3.json"
+        },
+        {
+          "line": "과일·치즈 플레이트",
+          "expected": "food",
+          "photo_id": "010_수이_05",
+          "record": "010_sui_05_r3.json"
+        },
+        {
+          "line": "교자",
+          "expected": "food",
+          "photo_id": "010_수이_05",
+          "record": "010_sui_05_r3.json"
+        },
+        {
+          "line": "훈제굴 플레이트",
+          "expected": "food",
+          "photo_id": "010_수이_05",
+          "record": "010_sui_05_r3.json"
+        },
+        {
+          "line": "안키모와 바게트",
+          "expected": "food",
+          "photo_id": "010_수이_05",
+          "record": "010_sui_05_r3.json"
+        }
+      ],
+      "photos_without_record": []
+    },
+    "ai/runs/2026-11-13_p12/hybrid_v2": {
+      "counts": {
+        "records": 45,
+        "rejected": 0,
+        "expected": 1626,
+        "expected_whisky": 1383,
+        "expected_non_whisky": 243,
+        "output": 1617,
+        "paired": 1615,
+        "paired_whisky": 1381,
+        "paired_non_whisky": 234,
+        "extra": 2,
+        "priced": 1615,
+        "price_correct": 1608,
+        "duplicates": 0,
+        "whisky_as_non_whisky": 0,
+        "non_whisky_as_whisky": 20,
+        "wrong_kind": 0
+      },
+      "rates": {
+        "line_recall": 0.9932,
+        "whisky_line_recall": 0.9986,
+        "non_whisky_line_recall": 0.963,
+        "extra_line_rate": 0.0012,
+        "price_accuracy": 0.9957,
+        "duplicate_line_rate": 0.0,
+        "classification_error_rate": 0.0124
+      },
+      "confusion": {
+        "cocktail->cocktail": 99,
+        "food->food": 15,
+        "other->other": 100,
+        "other->whisky": 20,
+        "whisky->whisky": 1381
+      },
+      "per_run": {
+        "1": {
+          "counts": {
+            "records": 15,
+            "rejected": 0,
+            "expected": 542,
+            "expected_whisky": 461,
+            "expected_non_whisky": 81,
+            "output": 539,
+            "paired": 538,
+            "paired_whisky": 460,
+            "paired_non_whisky": 78,
+            "extra": 1,
+            "priced": 538,
+            "price_correct": 538,
+            "duplicates": 0,
+            "whisky_as_non_whisky": 0,
+            "non_whisky_as_whisky": 6,
+            "wrong_kind": 0
+          },
+          "rates": {
+            "line_recall": 0.9926,
+            "whisky_line_recall": 0.9978,
+            "non_whisky_line_recall": 0.963,
+            "extra_line_rate": 0.0019,
+            "price_accuracy": 1.0,
+            "duplicate_line_rate": 0.0,
+            "classification_error_rate": 0.0112
+          },
+          "confusion": {
+            "cocktail->cocktail": 33,
+            "food->food": 5,
+            "other->other": 34,
+            "other->whisky": 6,
+            "whisky->whisky": 460
+          }
+        },
+        "2": {
+          "counts": {
+            "records": 15,
+            "rejected": 0,
+            "expected": 542,
+            "expected_whisky": 461,
+            "expected_non_whisky": 81,
+            "output": 539,
+            "paired": 538,
+            "paired_whisky": 460,
+            "paired_non_whisky": 78,
+            "extra": 1,
+            "priced": 538,
+            "price_correct": 531,
+            "duplicates": 0,
+            "whisky_as_non_whisky": 0,
+            "non_whisky_as_whisky": 7,
+            "wrong_kind": 0
+          },
+          "rates": {
+            "line_recall": 0.9926,
+            "whisky_line_recall": 0.9978,
+            "non_whisky_line_recall": 0.963,
+            "extra_line_rate": 0.0019,
+            "price_accuracy": 0.987,
+            "duplicate_line_rate": 0.0,
+            "classification_error_rate": 0.013
+          },
+          "confusion": {
+            "cocktail->cocktail": 33,
+            "food->food": 5,
+            "other->other": 33,
+            "other->whisky": 7,
+            "whisky->whisky": 460
+          }
+        },
+        "3": {
+          "counts": {
+            "records": 15,
+            "rejected": 0,
+            "expected": 542,
+            "expected_whisky": 461,
+            "expected_non_whisky": 81,
+            "output": 539,
+            "paired": 539,
+            "paired_whisky": 461,
+            "paired_non_whisky": 78,
+            "extra": 0,
+            "priced": 539,
+            "price_correct": 539,
+            "duplicates": 0,
+            "whisky_as_non_whisky": 0,
+            "non_whisky_as_whisky": 7,
+            "wrong_kind": 0
+          },
+          "rates": {
+            "line_recall": 0.9945,
+            "whisky_line_recall": 1.0,
+            "non_whisky_line_recall": 0.963,
+            "extra_line_rate": 0.0,
+            "price_accuracy": 1.0,
+            "duplicate_line_rate": 0.0,
+            "classification_error_rate": 0.013
+          },
+          "confusion": {
+            "cocktail->cocktail": 33,
+            "food->food": 5,
+            "other->other": 33,
+            "other->whisky": 7,
+            "whisky->whisky": 461
+          }
+        }
+      },
+      "per_photo": {
+        "007_위스키복춘_01": {
+          "counts": {
+            "records": 3,
+            "rejected": 0,
+            "expected": 231,
+            "expected_whisky": 231,
+            "expected_non_whisky": 0,
+            "output": 231,
+            "paired": 231,
+            "paired_whisky": 231,
+            "paired_non_whisky": 0,
+            "extra": 0,
+            "priced": 231,
+            "price_correct": 224,
+            "duplicates": 0,
+            "whisky_as_non_whisky": 0,
+            "non_whisky_as_whisky": 0,
+            "wrong_kind": 0
+          },
+          "rates": {
+            "line_recall": 1.0,
+            "whisky_line_recall": 1.0,
+            "non_whisky_line_recall": null,
+            "extra_line_rate": 0.0,
+            "price_accuracy": 0.9697,
+            "duplicate_line_rate": 0.0,
+            "classification_error_rate": 0.0
+          },
+          "confusion": {
+            "whisky->whisky": 231
+          }
+        },
+        "007_위스키복춘_03": {
+          "counts": {
+            "records": 3,
+            "rejected": 0,
+            "expected": 54,
+            "expected_whisky": 48,
+            "expected_non_whisky": 6,
+            "output": 54,
+            "paired": 54,
+            "paired_whisky": 48,
+            "paired_non_whisky": 6,
+            "extra": 0,
+            "priced": 54,
+            "price_correct": 54,
+            "duplicates": 0,
+            "whisky_as_non_whisky": 0,
+            "non_whisky_as_whisky": 0,
+            "wrong_kind": 0
+          },
+          "rates": {
+            "line_recall": 1.0,
+            "whisky_line_recall": 1.0,
+            "non_whisky_line_recall": 1.0,
+            "extra_line_rate": 0.0,
+            "price_accuracy": 1.0,
+            "duplicate_line_rate": 0.0,
+            "classification_error_rate": 0.0
+          },
+          "confusion": {
+            "other->other": 6,
+            "whisky->whisky": 48
+          }
+        },
+        "007_위스키복춘_04": {
+          "counts": {
+            "records": 3,
+            "rejected": 0,
+            "expected": 99,
+            "expected_whisky": 0,
+            "expected_non_whisky": 99,
+            "output": 99,
+            "paired": 99,
+            "paired_whisky": 0,
+            "paired_non_whisky": 99,
+            "extra": 0,
+            "priced": 99,
+            "price_correct": 99,
+            "duplicates": 0,
+            "whisky_as_non_whisky": 0,
+            "non_whisky_as_whisky": 0,
+            "wrong_kind": 0
+          },
+          "rates": {
+            "line_recall": 1.0,
+            "whisky_line_recall": null,
+            "non_whisky_line_recall": 1.0,
+            "extra_line_rate": 0.0,
+            "price_accuracy": 1.0,
+            "duplicate_line_rate": 0.0,
+            "classification_error_rate": 0.0
+          },
+          "confusion": {
+            "cocktail->cocktail": 99
+          }
+        },
+        "008_서로상_01": {
+          "counts": {
+            "records": 3,
+            "rejected": 0,
+            "expected": 60,
+            "expected_whisky": 48,
+            "expected_non_whisky": 12,
+            "output": 60,
+            "paired": 60,
+            "paired_whisky": 48,
+            "paired_non_whisky": 12,
+            "extra": 0,
+            "priced": 60,
+            "price_correct": 60,
+            "duplicates": 0,
+            "whisky_as_non_whisky": 0,
+            "non_whisky_as_whisky": 12,
+            "wrong_kind": 0
+          },
+          "rates": {
+            "line_recall": 1.0,
+            "whisky_line_recall": 1.0,
+            "non_whisky_line_recall": 1.0,
+            "extra_line_rate": 0.0,
+            "price_accuracy": 1.0,
+            "duplicate_line_rate": 0.0,
+            "classification_error_rate": 0.2
+          },
+          "confusion": {
+            "other->whisky": 12,
+            "whisky->whisky": 48
+          }
+        },
+        "011_미라보_02": {
+          "counts": {
+            "records": 3,
+            "rejected": 0,
+            "expected": 132,
+            "expected_whisky": 132,
+            "expected_non_whisky": 0,
+            "output": 132,
+            "paired": 132,
+            "paired_whisky": 132,
+            "paired_non_whisky": 0,
+            "extra": 0,
+            "priced": 132,
+            "price_correct": 132,
+            "duplicates": 0,
+            "whisky_as_non_whisky": 0,
+            "non_whisky_as_whisky": 0,
+            "wrong_kind": 0
+          },
+          "rates": {
+            "line_recall": 1.0,
+            "whisky_line_recall": 1.0,
+            "non_whisky_line_recall": null,
+            "extra_line_rate": 0.0,
+            "price_accuracy": 1.0,
+            "duplicate_line_rate": 0.0,
+            "classification_error_rate": 0.0
+          },
+          "confusion": {
+            "whisky->whisky": 132
+          }
+        },
+        "011_미라보_03": {
+          "counts": {
+            "records": 3,
+            "rejected": 0,
+            "expected": 180,
+            "expected_whisky": 180,
+            "expected_non_whisky": 0,
+            "output": 180,
+            "paired": 180,
+            "paired_whisky": 180,
+            "paired_non_whisky": 0,
+            "extra": 0,
+            "priced": 180,
+            "price_correct": 180,
+            "duplicates": 0,
+            "whisky_as_non_whisky": 0,
+            "non_whisky_as_whisky": 0,
+            "wrong_kind": 0
+          },
+          "rates": {
+            "line_recall": 1.0,
+            "whisky_line_recall": 1.0,
+            "non_whisky_line_recall": null,
+            "extra_line_rate": 0.0,
+            "price_accuracy": 1.0,
+            "duplicate_line_rate": 0.0,
+            "classification_error_rate": 0.0
+          },
+          "confusion": {
+            "whisky->whisky": 180
+          }
+        },
+        "011_미라보_05": {
+          "counts": {
+            "records": 3,
+            "rejected": 0,
+            "expected": 156,
+            "expected_whisky": 156,
+            "expected_non_whisky": 0,
+            "output": 156,
+            "paired": 156,
+            "paired_whisky": 156,
+            "paired_non_whisky": 0,
+            "extra": 0,
+            "priced": 156,
+            "price_correct": 156,
+            "duplicates": 0,
+            "whisky_as_non_whisky": 0,
+            "non_whisky_as_whisky": 0,
+            "wrong_kind": 0
+          },
+          "rates": {
+            "line_recall": 1.0,
+            "whisky_line_recall": 1.0,
+            "non_whisky_line_recall": null,
+            "extra_line_rate": 0.0,
+            "price_accuracy": 1.0,
+            "duplicate_line_rate": 0.0,
+            "classification_error_rate": 0.0
+          },
+          "confusion": {
+            "whisky->whisky": 156
+          }
+        },
+        "011_미라보_06": {
+          "counts": {
+            "records": 3,
+            "rejected": 0,
+            "expected": 162,
+            "expected_whisky": 162,
+            "expected_non_whisky": 0,
+            "output": 162,
+            "paired": 162,
+            "paired_whisky": 162,
+            "paired_non_whisky": 0,
+            "extra": 0,
+            "priced": 162,
+            "price_correct": 162,
+            "duplicates": 0,
+            "whisky_as_non_whisky": 0,
+            "non_whisky_as_whisky": 0,
+            "wrong_kind": 0
+          },
+          "rates": {
+            "line_recall": 1.0,
+            "whisky_line_recall": 1.0,
+            "non_whisky_line_recall": null,
+            "extra_line_rate": 0.0,
+            "price_accuracy": 1.0,
+            "duplicate_line_rate": 0.0,
+            "classification_error_rate": 0.0
+          },
+          "confusion": {
+            "whisky->whisky": 162
+          }
+        },
+        "011_미라보_07": {
+          "counts": {
+            "records": 3,
+            "rejected": 0,
+            "expected": 93,
+            "expected_whisky": 93,
+            "expected_non_whisky": 0,
+            "output": 93,
+            "paired": 92,
+            "paired_whisky": 92,
+            "paired_non_whisky": 0,
+            "extra": 1,
+            "priced": 92,
+            "price_correct": 92,
+            "duplicates": 0,
+            "whisky_as_non_whisky": 0,
+            "non_whisky_as_whisky": 0,
+            "wrong_kind": 0
+          },
+          "rates": {
+            "line_recall": 0.9892,
+            "whisky_line_recall": 0.9892,
+            "non_whisky_line_recall": null,
+            "extra_line_rate": 0.0108,
+            "price_accuracy": 1.0,
+            "duplicate_line_rate": 0.0,
+            "classification_error_rate": 0.0
+          },
+          "confusion": {
+            "whisky->whisky": 92
+          }
+        },
+        "009_오드비_02": {
+          "counts": {
+            "records": 3,
+            "rejected": 0,
+            "expected": 45,
+            "expected_whisky": 0,
+            "expected_non_whisky": 45,
+            "output": 45,
+            "paired": 45,
+            "paired_whisky": 0,
+            "paired_non_whisky": 45,
+            "extra": 0,
+            "priced": 45,
+            "price_correct": 45,
+            "duplicates": 0,
+            "whisky_as_non_whisky": 0,
+            "non_whisky_as_whisky": 0,
+            "wrong_kind": 0
+          },
+          "rates": {
+            "line_recall": 1.0,
+            "whisky_line_recall": null,
+            "non_whisky_line_recall": 1.0,
+            "extra_line_rate": 0.0,
+            "price_accuracy": 1.0,
+            "duplicate_line_rate": 0.0,
+            "classification_error_rate": 0.0
+          },
+          "confusion": {
+            "other->other": 45
+          }
+        },
+        "009_오드비_04": {
+          "counts": {
+            "records": 3,
+            "rejected": 0,
+            "expected": 60,
+            "expected_whisky": 57,
+            "expected_non_whisky": 3,
+            "output": 60,
+            "paired": 60,
+            "paired_whisky": 57,
+            "paired_non_whisky": 3,
+            "extra": 0,
+            "priced": 60,
+            "price_correct": 60,
+            "duplicates": 0,
+            "whisky_as_non_whisky": 0,
+            "non_whisky_as_whisky": 3,
+            "wrong_kind": 0
+          },
+          "rates": {
+            "line_recall": 1.0,
+            "whisky_line_recall": 1.0,
+            "non_whisky_line_recall": 1.0,
+            "extra_line_rate": 0.0,
+            "price_accuracy": 1.0,
+            "duplicate_line_rate": 0.0,
+            "classification_error_rate": 0.05
+          },
+          "confusion": {
+            "other->whisky": 3,
+            "whisky->whisky": 57
+          }
+        },
+        "009_오드비_09": {
+          "counts": {
+            "records": 3,
+            "rejected": 0,
+            "expected": 66,
+            "expected_whisky": 45,
+            "expected_non_whisky": 21,
+            "output": 57,
+            "paired": 57,
+            "paired_whisky": 45,
+            "paired_non_whisky": 12,
+            "extra": 0,
+            "priced": 57,
+            "price_correct": 57,
+            "duplicates": 0,
+            "whisky_as_non_whisky": 0,
+            "non_whisky_as_whisky": 0,
+            "wrong_kind": 0
+          },
+          "rates": {
+            "line_recall": 0.8636,
+            "whisky_line_recall": 1.0,
+            "non_whisky_line_recall": 0.5714,
+            "extra_line_rate": 0.0,
+            "price_accuracy": 1.0,
+            "duplicate_line_rate": 0.0,
+            "classification_error_rate": 0.0
+          },
+          "confusion": {
+            "other->other": 12,
+            "whisky->whisky": 45
+          }
+        },
+        "010_수이_02": {
+          "counts": {
+            "records": 3,
+            "rejected": 0,
+            "expected": 102,
+            "expected_whisky": 102,
+            "expected_non_whisky": 0,
+            "output": 102,
+            "paired": 101,
+            "paired_whisky": 101,
+            "paired_non_whisky": 0,
+            "extra": 1,
+            "priced": 101,
+            "price_correct": 101,
+            "duplicates": 0,
+            "whisky_as_non_whisky": 0,
+            "non_whisky_as_whisky": 0,
+            "wrong_kind": 0
+          },
+          "rates": {
+            "line_recall": 0.9902,
+            "whisky_line_recall": 0.9902,
+            "non_whisky_line_recall": null,
+            "extra_line_rate": 0.0098,
+            "price_accuracy": 1.0,
+            "duplicate_line_rate": 0.0,
+            "classification_error_rate": 0.0
+          },
+          "confusion": {
+            "whisky->whisky": 101
+          }
+        },
+        "010_수이_04": {
+          "counts": {
+            "records": 3,
+            "rejected": 0,
+            "expected": 120,
+            "expected_whisky": 81,
+            "expected_non_whisky": 39,
+            "output": 120,
+            "paired": 120,
+            "paired_whisky": 81,
+            "paired_non_whisky": 39,
+            "extra": 0,
+            "priced": 120,
+            "price_correct": 120,
+            "duplicates": 0,
+            "whisky_as_non_whisky": 0,
+            "non_whisky_as_whisky": 3,
+            "wrong_kind": 0
+          },
+          "rates": {
+            "line_recall": 1.0,
+            "whisky_line_recall": 1.0,
+            "non_whisky_line_recall": 1.0,
+            "extra_line_rate": 0.0,
+            "price_accuracy": 1.0,
+            "duplicate_line_rate": 0.0,
+            "classification_error_rate": 0.025
+          },
+          "confusion": {
+            "other->other": 36,
+            "other->whisky": 3,
+            "whisky->whisky": 81
+          }
+        },
+        "010_수이_05": {
+          "counts": {
+            "records": 3,
+            "rejected": 0,
+            "expected": 66,
+            "expected_whisky": 48,
+            "expected_non_whisky": 18,
+            "output": 66,
+            "paired": 66,
+            "paired_whisky": 48,
+            "paired_non_whisky": 18,
+            "extra": 0,
+            "priced": 66,
+            "price_correct": 66,
+            "duplicates": 0,
+            "whisky_as_non_whisky": 0,
+            "non_whisky_as_whisky": 2,
+            "wrong_kind": 0
+          },
+          "rates": {
+            "line_recall": 1.0,
+            "whisky_line_recall": 1.0,
+            "non_whisky_line_recall": 1.0,
+            "extra_line_rate": 0.0,
+            "price_accuracy": 1.0,
+            "duplicate_line_rate": 0.0,
+            "classification_error_rate": 0.0303
+          },
+          "confusion": {
+            "food->food": 15,
+            "other->other": 1,
+            "other->whisky": 2,
+            "whisky->whisky": 48
+          }
+        }
+      },
+      "misclassified": [
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "헤네시vsop / Hennessy vsop",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "008_서로상_01",
+          "record": "008_seorosang_01_r1.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "헤네시vsop / Hennessy vsop",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "008_서로상_01",
+          "record": "008_seorosang_01_r1.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "레미마틴vsop / Remy Martin vsop",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "008_서로상_01",
+          "record": "008_seorosang_01_r1.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "레미마틴vsop / Remy Martin vsop",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "008_서로상_01",
+          "record": "008_seorosang_01_r1.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "헤네시vsop / Hennessy vsop",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "008_서로상_01",
+          "record": "008_seorosang_01_r2.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "헤네시vsop / Hennessy vsop",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "008_서로상_01",
+          "record": "008_seorosang_01_r2.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "레미마틴vsop / Remy Martin vsop",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "008_서로상_01",
+          "record": "008_seorosang_01_r2.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "레미마틴vsop / Remy Martin vsop",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "008_서로상_01",
+          "record": "008_seorosang_01_r2.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "헤네시vsop / Hennessy vsop",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "008_서로상_01",
+          "record": "008_seorosang_01_r3.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "헤네시vsop / Hennessy vsop",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "008_서로상_01",
+          "record": "008_seorosang_01_r3.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "레미마틴vsop / Remy Martin vsop",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "008_서로상_01",
+          "record": "008_seorosang_01_r3.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "레미마틴vsop / Remy Martin vsop",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "008_서로상_01",
+          "record": "008_seorosang_01_r3.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "잭다니엘 애플",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "009_오드비_04",
+          "record": "009_odbi_04_r1.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "잭다니엘 애플",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "009_오드비_04",
+          "record": "009_odbi_04_r2.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "잭다니엘 애플",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "009_오드비_04",
+          "record": "009_odbi_04_r3.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "김과장 #2 (바베이도스 럼)",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "010_수이_04",
+          "record": "010_sui_04_r1.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "김과장 #2 (바베이도스 럼)",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "010_수이_04",
+          "record": "010_sui_04_r2.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "김과장 #2 (바베이도스 럼)",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "010_수이_04",
+          "record": "010_sui_04_r3.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "헤네시 VSOP",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "010_수이_05",
+          "record": "010_sui_05_r2.json"
+        },
+        {
+          "type": "non_whisky_as_whisky",
+          "line": "헤네시 VSOP",
+          "expected": "other",
+          "got": "whisky",
+          "photo_id": "010_수이_05",
+          "record": "010_sui_05_r3.json"
+        }
+      ],
+      "missed": [
+        {
+          "line": "우드포드 리저브(Woodford Reserve) 더블 X.O",
+          "expected": "whisky",
+          "photo_id": "011_미라보_07",
+          "record": "011_mirabeau_07_r2.json"
+        },
+        {
+          "line": "올드풀티니 3종 세트 / 행사",
+          "expected": "other",
+          "photo_id": "009_오드비_09",
+          "record": "009_odbi_09_r1.json"
+        },
+        {
+          "line": "사부로마루 피트 위스키 5종 세트 / 행사",
+          "expected": "other",
+          "photo_id": "009_오드비_09",
+          "record": "009_odbi_09_r1.json"
+        },
+        {
+          "line": "아르마냑 가호 5종 세트 / 행사",
+          "expected": "other",
+          "photo_id": "009_오드비_09",
+          "record": "009_odbi_09_r1.json"
+        },
+        {
+          "line": "올드풀티니 3종 세트 / 행사",
+          "expected": "other",
+          "photo_id": "009_오드비_09",
+          "record": "009_odbi_09_r2.json"
+        },
+        {
+          "line": "사부로마루 피트 위스키 5종 세트 / 행사",
+          "expected": "other",
+          "photo_id": "009_오드비_09",
+          "record": "009_odbi_09_r2.json"
+        },
+        {
+          "line": "아르마냑 가호 5종 세트 / 행사",
+          "expected": "other",
+          "photo_id": "009_오드비_09",
+          "record": "009_odbi_09_r2.json"
+        },
+        {
+          "line": "올드풀티니 3종 세트 / 행사",
+          "expected": "other",
+          "photo_id": "009_오드비_09",
+          "record": "009_odbi_09_r3.json"
+        },
+        {
+          "line": "사부로마루 피트 위스키 5종 세트 / 행사",
+          "expected": "other",
+          "photo_id": "009_오드비_09",
+          "record": "009_odbi_09_r3.json"
+        },
+        {
+          "line": "아르마냑 가호 5종 세트 / 행사",
+          "expected": "other",
+          "photo_id": "009_오드비_09",
+          "record": "009_odbi_09_r3.json"
+        },
+        {
+          "line": "Balvenie 16y French Oak (프렌치 오크)",
+          "expected": "whisky",
+          "photo_id": "010_수이_02",
+          "record": "010_sui_02_r1.json"
+        }
+      ],
+      "photos_without_record": []
+    }
+  }
+}
