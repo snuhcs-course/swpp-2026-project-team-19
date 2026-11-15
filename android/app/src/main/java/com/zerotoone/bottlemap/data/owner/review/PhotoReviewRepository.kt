@@ -59,6 +59,9 @@ interface PhotoReviewRepository {
         error("이 검수 저장소에서는 이 기기 초안 선택을 지원하지 않아요.")
     }
 
+    /** True if the device-only copy exceeds §5.9's server 256 KiB limit. */
+    fun hasOversizedPendingDraft(): Boolean = false
+
     /** True if an account-scoped device copy is loaded but not yet server-acknowledged. */
     fun hasPendingLocalDraft(): Boolean = false
 
