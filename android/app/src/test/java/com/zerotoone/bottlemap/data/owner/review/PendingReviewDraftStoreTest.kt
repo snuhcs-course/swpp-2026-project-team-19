@@ -119,7 +119,8 @@ class PendingReviewDraftStoreTest {
         val fresh = PhotoReviewState(items = listOf(
             ReviewItem(id = "master", name = "위스키"),
             ReviewItem(id = "child", name = "위스키", mergedInto = "master",
-                primarySourceOptionId = "ocr-option", excluded = true),
+                primaryHasOption = true, primarySourceOptionId = "ocr-option",
+                price = 15000.0, volume = 30.0, excluded = true),
         ))
         val split = fresh.copy(items = listOf(
             fresh.items.first(),
