@@ -10,6 +10,7 @@ import com.zerotoone.bottlemap.ui.owner.review.ReviewItemType
 import com.zerotoone.bottlemap.ui.owner.review.ReviewIssue
 import com.zerotoone.bottlemap.ui.owner.review.ReviewMatch
 import com.zerotoone.bottlemap.ui.owner.review.ReviewOption
+import com.zerotoone.bottlemap.ui.owner.review.ReviewPriceCandidate
 import com.zerotoone.bottlemap.ui.owner.review.VolumeSource
 import org.junit.Assert.*
 import org.junit.Test
@@ -72,6 +73,66 @@ class ServerReviewDraftCodecTest {
         assertTrue(copy.manuallySplitGroup)
         assertTrue(copy.expanded)
         assertEquals("6", copy.draftVolumeText)
+    }
+
+    @Test fun restoredConfirmedPricesSurviveStrippedPreviousServerPriceMap() {
+        val saved30 = ReviewPriceCandidate(
+            servingKey = "ml:30", volumeMl = 30, priceKrw = 11000, existing = true,
+        )
+        val saved60 = ReviewPriceCandidate(
+            servingKey = "ml:60", volumeMl = 60, priceKrw = 20000, existing = true,
+        )
+        val original = PhotoReviewState(items = listOf(
+            ReviewItem(
+                id = "ocr-1", name = "검수한 위스키",
+                linkedProductId = "product-1",
+                volume = 30.0, price = 12000.0,
+                options = listOf(ReviewOption(volume = 60.0, price = 22000.0)),
+                chosenServingPrices = mapOf("ml:30" to 12000, "ml:60" to 22000),
+                priceCandidates = listOf(saved30, saved60),
+                existingServingPricesByProductId =
+                    mapOf("product-1" to listOf(saved30, saved60)),
+            ),
+        ))
+        val encoded = ServerReviewDraftCodec.encode(original)
+        val recovered = requireNotNull(ServerReviewDraftCodec.decode(
+            ReviewDraftDto(4, 3, "2026-11-16T00:00:00Z", encoded),
+        )).items.single()
+        // The decoder omits the old server-derived map by design.
+        assertTrue(recovered.existingServingPricesByProductId.isEmpty())
+        // Rebinding must preserve BOTH previously reviewed serving choices.
+        assertEquals(mapOf("ml:30" to 12000, "ml:60" to 22000),
+            retainedOwnerServingPriceDecisions(recovered, listOf(saved30, saved60)))
+        // If the server changes one existing serving, require review only
+        // for that serving, not for an unrelated correctly reviewed option.
+        val changed30 = saved30.copy(priceKrw = 13000)
+        assertEquals(mapOf("ml:60" to 22000),
+            retainedOwnerServingPriceDecisions(recovered, listOf(changed30, saved60)))
+        // A stale confirmation not matching the owner-edited final option
+        // must never be restored as if the price was reviewed.
+        assertEquals(emptyMap<String, Int>(), retainedOwnerServingPriceDecisions(
+            recovered.copy(chosenServingPrices = mapOf("ml:30" to 9999)),
+            listOf(saved30, saved60),
+        ))
+    }
+
+    @Test fun serverDraftRoundTripPreservesSeveralDifferentReviewedItemDecisions() {
+        val state = PhotoReviewState(items = listOf(
+            ReviewItem(id = "linked", name = "수정한 상품", linkedProductId = "p1",
+                price = 13000.0, volume = 30.0, matchConfirmed = true),
+            ReviewItem(id = "excluded", name = "잡음", excluded = true),
+            ReviewItem(id = "manual", name = "직접 입력", priceChoice = PriceChoice.MANUAL,
+                price = 14000.0, volume = 60.0, draftPriceText = "15000"),
+        ))
+        val restored = requireNotNull(ServerReviewDraftCodec.decode(ReviewDraftDto(
+            3, 7, "2026-11-16T00:00:00Z", ServerReviewDraftCodec.encode(state),
+        )))
+        assertEquals(listOf("linked", "excluded", "manual"),
+            restored.items.map { it.id })
+        assertEquals("수정한 상품", restored.items[0].name)
+        assertTrue(restored.items[1].excluded)
+        assertEquals(PriceChoice.MANUAL, restored.items[2].priceChoice)
+        assertEquals("15000", restored.items[2].draftPriceText)
     }
 
     @Test fun foreignClientDraftCannotBeMistakenForEmptyAndroidDraft() {
