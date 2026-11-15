@@ -870,6 +870,8 @@ class PhotoReviewViewModelTest {
                 writes++
                 if (writes >= 2) throw ReviewDraftConflictException()
             }
+            override suspend fun flushBeforePublish(state: PhotoReviewState) =
+                saveDraft(state) // Test double must intercept the final CAS path.
             override suspend fun publish(state: PhotoReviewState) { publishes++ }
         }
         val vm = PhotoReviewViewModel(repo)
