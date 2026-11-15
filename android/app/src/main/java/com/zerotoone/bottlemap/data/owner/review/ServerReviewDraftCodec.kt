@@ -108,11 +108,15 @@ internal object ServerReviewDraftCodec {
                 "expandedItemIds" to state.items.filter { it.expanded }.map { it.id },
             ),
         )
-        check(mapAdapter.toJson(content).toByteArray(Charsets.UTF_8).size <= MAX_BYTES) {
-            "검수 초안이 256KB를 넘었어요. 입력 내용을 줄여 주세요."
-        }
+        // Do not enforce the server-only 256 KiB limit here. The complete
+        // snapshot must be encoded and safely saved on device FIRST, even
+        // when it cannot be sent to §5.9's draft endpoint.
         return content
     }
+
+    /** Size of the exact §5.9 JSON content transmitted to the server. */
+    fun exceedsServerLimit(content: Map<String, Any?>): Boolean =
+        mapAdapter.toJson(content).toByteArray(Charsets.UTF_8).size > MAX_BYTES
 
     /** Compare the COMPLETE draft, not just Android UI state: an operator may
      * change standard decisions while leaving clientState untouched.
