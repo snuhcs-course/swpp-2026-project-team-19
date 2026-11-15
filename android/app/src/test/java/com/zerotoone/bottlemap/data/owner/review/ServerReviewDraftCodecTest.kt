@@ -7,6 +7,7 @@ import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewRules
 import com.zerotoone.bottlemap.ui.owner.review.PriceChoice
 import com.zerotoone.bottlemap.ui.owner.review.ReviewItem
 import com.zerotoone.bottlemap.ui.owner.review.ReviewItemType
+import com.zerotoone.bottlemap.ui.owner.review.ReviewIssue
 import com.zerotoone.bottlemap.ui.owner.review.ReviewMatch
 import com.zerotoone.bottlemap.ui.owner.review.ReviewOption
 import com.zerotoone.bottlemap.ui.owner.review.VolumeSource
@@ -497,5 +498,76 @@ class ServerReviewDraftCodecTest {
         assertEquals(2, PhotoReviewRules.optionSummary(confirmed).size)
         assertEquals(15000.0, confirmed.price, 0.0)
         assertEquals(22000.0, confirmed.options.single().price, 0.0)
+    }
+
+    @Test fun regeneratedGroupedChildWithFormerPublishDecisionIsNotSilentlyRepublished() {
+        val master = ReviewItem(id = "master", name = "위스키",
+            price = 14000.0, volume = 30.0, primarySourceOptionId = "master-opt")
+        val freshChild = ReviewItem(id = "child", name = "위스키",
+            mergedInto = "master", excluded = true, required = false,
+            price = 22000.0, volume = 60.0, primarySourceOptionId = "child-opt")
+        val current = PhotoReviewState(items = listOf(master, freshChild))
+        fun draft(action: String) = ReviewDraftDto(6, 2, "2026-11-15T00:00:00Z",
+            mapOf("itemDecisions" to listOf(mapOf(
+                "extractedItemId" to "child", "action" to action,
+                "kind" to "whisky",
+            ))))
+        // A previously independent child publish choice cannot become a
+        // hidden second publish after new OCR grouping.
+        assertNull(ServerReviewDraftCodec.restoreStandard(
+            draft("publish_without_product"), current, allowStaleIds = true))
+        val reject = ReviewDraftDto(6, 2, "2026-11-15T00:00:00Z",
+            mapOf("itemDecisions" to listOf(mapOf(
+                "extractedItemId" to "child", "action" to "reject",
+            ))))
+        val safelyRestored = requireNotNull(ServerReviewDraftCodec.restoreStandard(
+            reject, current, allowStaleIds = true))
+        assertEquals("master", safelyRestored.items.last().mergedInto)
+        assertTrue(safelyRestored.items.last().excluded)
+        assertEquals(1, PhotoReviewRules.stats(safelyRestored).ready.size)
+    }
+
+    @Test fun partialOperatorKindDecisionIsNotOverwrittenByFreshOcrKind() {
+        val fresh = PhotoReviewState(items = listOf(ReviewItem(
+            id = "line", name = "위스키", type = ReviewItemType.WHISKY,
+        )))
+        fun dto(fields: Map<String, Any?>) = ReviewDraftDto(
+            3, 2, "2026-11-15T00:00:00Z",
+            mapOf("itemDecisions" to listOf(
+                mapOf("extractedItemId" to "line") + fields,
+            )),
+        )
+        assertNull(ServerReviewDraftCodec.restoreStandard(dto(
+            mapOf("kind" to "other")), fresh))
+        assertNull(ServerReviewDraftCodec.restoreStandard(dto(
+            mapOf("kind" to null)), fresh))
+        assertNull(ServerReviewDraftCodec.restoreStandard(dto(
+            mapOf("action" to "select_existing_product", "productId" to "catalog-a",
+                "kind" to "other")), fresh))
+        val complete = requireNotNull(ServerReviewDraftCodec.restoreStandard(dto(
+            mapOf("action" to "publish_without_product", "kind" to "other")),
+            fresh,
+        )).items.single()
+        assertEquals(ReviewItemType.OTHER, complete.type)
+    }
+
+    @Test fun operatorDraftSupportsFullServingPourRangeNotBarDefaultRange() {
+        val fresh = PhotoReviewState(items = listOf(ReviewItem(
+            id = "line", name = "위스키", price = 15000.0,
+            primarySourceOptionId = "opt-1",
+        )))
+        fun draft(pour: Int) = ReviewDraftDto(4, 3, "2026-11-15T00:00:00Z",
+            mapOf("itemDecisions" to listOf(mapOf(
+                "extractedItemId" to "line",
+                "options" to listOf(mapOf(
+                    "extractedOptionId" to "opt-1", "priceKrw" to 15000,
+                    "optionLabel" to "잔", "pourMl" to pour,
+                )),
+            ))))
+        val restored = requireNotNull(ServerReviewDraftCodec.restoreStandard(
+            draft(32767), fresh)).items.single()
+        assertEquals(32767.0, restored.volume, 0.0)
+        assertFalse(ReviewIssue.VOLUME in PhotoReviewRules.problems(restored))
+        assertNull(ServerReviewDraftCodec.restoreStandard(draft(32768), fresh))
     }
 }
