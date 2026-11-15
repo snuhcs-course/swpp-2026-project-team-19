@@ -80,14 +80,23 @@ class ServerReviewDraftCodecTest {
         assertNull(ServerReviewDraftCodec.decode(foreign))
     }
 
-    @Test fun oversizedDraftRejectedBeforeNetworkWrite() {
+    @Test fun oversizedDraftIsEncodedForDeviceButMarkedUnsafeForServerPut() {
         val huge = PhotoReviewState(items = listOf(ReviewItem(
             id = "line-1", name = "A",
             draftPriceText = "9".repeat(270_000),
         )))
-        val ex = runCatching { ServerReviewDraftCodec.encode(huge) }.exceptionOrNull()
-        assertNotNull(ex)
-        assertTrue(ex!!.message.orEmpty().contains("256KB"))
+        // Do not throw before PendingReviewDraftStore.write(), even when
+        // the server's JSON content limit is exceeded.
+        val content = ServerReviewDraftCodec.encode(huge)
+        assertTrue(ServerReviewDraftCodec.exceedsServerLimit(content))
+        val restored = requireNotNull(ServerReviewDraftCodec.decode(ReviewDraftDto(
+            0, 3, "2026-11-15T00:00:00Z", content,
+        )))
+        assertEquals("9".repeat(270_000), restored.items.single().draftPriceText)
+        val normal = ServerReviewDraftCodec.encode(PhotoReviewState(items = listOf(
+            ReviewItem(id = "line-1", name = "A", draftPriceText = "9000"),
+        )))
+        assertFalse(ServerReviewDraftCodec.exceedsServerLimit(normal))
     }
     @Test fun operatorStandardDraftRestoresSimpleNamePriceAndLinkedProduct() {
         val state = PhotoReviewState(items = listOf(
