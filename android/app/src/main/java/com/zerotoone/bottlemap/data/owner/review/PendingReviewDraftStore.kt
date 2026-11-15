@@ -33,11 +33,25 @@ internal class PendingReviewDraftStore(
         val expectedDraftVersion: Int,
         val itemIds: List<String>,
         val content: Map<String, Any?>,
+        // The last server request may commit even if the process dies before
+        // its 200 response. Track that request separately from later edits.
+        val inFlightContent: Map<String, Any?>? = null,
+        val inFlightDraftVersion: Int? = null,
     ) {
         fun canReplay(remote: ReviewDraftDto?, activeReviewVersion: Int): Boolean =
             reviewVersion == activeReviewVersion &&
                 (remote == null || remote.reviewVersion == activeReviewVersion) &&
                 expectedDraftVersion == (remote?.draftVersion ?: 0)
+
+        fun canRebaseAfterLostResponse(
+            remote: ReviewDraftDto?, activeReviewVersion: Int,
+        ): Boolean = remote != null &&
+            reviewVersion == activeReviewVersion &&
+            remote.reviewVersion == activeReviewVersion &&
+            inFlightDraftVersion != null &&
+            remote.draftVersion == inFlightDraftVersion + 1 &&
+            inFlightContent != null &&
+            ServerReviewDraftCodec.sameAndroidSnapshot(inFlightContent, remote.content)
     }
 
     // Larger than §5.9's 256 KiB server limit, so oversized reviews can
