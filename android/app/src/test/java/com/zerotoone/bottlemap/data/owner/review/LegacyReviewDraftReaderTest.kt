@@ -2,7 +2,7 @@ package com.zerotoone.bottlemap.data.owner.review
 
 import android.content.Context
 import android.util.Base64
-import androidx.test.core.app.ApplicationProvider
+import org.robolectric.RuntimeEnvironment
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewState
@@ -18,7 +18,7 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class LegacyReviewDraftReaderTest {
-    private val context = ApplicationProvider.getApplicationContext<Context>()
+    private val context: Context = RuntimeEnvironment.getApplication()
     private val folder = File(context.noBackupFilesDir, "owner-review-drafts")
 
     private fun jwt(subject: String) = "header." + Base64.encodeToString(

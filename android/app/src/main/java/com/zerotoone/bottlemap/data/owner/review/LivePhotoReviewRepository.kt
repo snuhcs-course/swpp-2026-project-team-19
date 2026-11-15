@@ -127,7 +127,8 @@ class LivePhotoReviewRepository(
                     if (old.manuallySplitGroup)
                         fresh.mergedInto != null || fresh.mergeSources.isNotEmpty()
                     else old.mergedInto == fresh.mergedInto &&
-                        old.volumeChoices == fresh.volumeChoices
+                        old.volumeChoices.map { it.sourceOptionId } ==
+                            fresh.volumeChoices.map { it.sourceOptionId }
                 }
         val legacy = LegacyReviewDraftReader(appContext)
         val reviewVersion = requireNotNull(response.reviewVersion)
