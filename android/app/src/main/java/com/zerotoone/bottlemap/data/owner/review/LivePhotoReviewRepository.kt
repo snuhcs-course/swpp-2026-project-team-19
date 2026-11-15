@@ -89,6 +89,35 @@ internal object DraftSaveSafety {
 }
 
 /**
+ * The device checkpoint is never sufficient authorization to overwrite a
+ * newer server draft. A prior in-flight PUT may, however, explain one exact
+ * server version advance when its content matches byte-for-byte semantically.
+ */
+internal object DraftRecoveryPolicy {
+    enum class Outcome { NONE, ACKNOWLEDGED, RESTORE, REBASE, CONFLICT }
+
+    fun decide(
+        server: ReviewDraftDto?,
+        device: PendingReviewDraftStore.Envelope?,
+        priorAttempt: PendingReviewDraftStore.Envelope?,
+        reviewVersion: Int,
+    ): Outcome {
+        val local = device ?: return Outcome.NONE
+        if (local.reviewVersion != reviewVersion ||
+            (server != null && server.reviewVersion != reviewVersion)) return Outcome.CONFLICT
+        if (ServerReviewDraftCodec.sameAndroidSnapshot(local.content, server?.content))
+            return Outcome.ACKNOWLEDGED
+        val serverVersion = server?.draftVersion ?: 0
+        if (local.expectedDraftVersion == serverVersion) return Outcome.RESTORE
+        if (priorAttempt != null && priorAttempt.reviewVersion == reviewVersion &&
+            priorAttempt.expectedDraftVersion + 1 == serverVersion &&
+            ServerReviewDraftCodec.sameAndroidSnapshot(priorAttempt.content, server?.content))
+            return Outcome.REBASE
+        return Outcome.CONFLICT
+    }
+}
+
+/**
  * Treat a deliberate split of a previously merged OCR child as compatible.
  * Fresh OCR source identities must still be present. Used for both normal
  * draft restore and explicit conflict overwrite; keep their gates identical.
@@ -138,6 +167,10 @@ class LivePhotoReviewRepository(
     // An explicitly chosen local conflict edit never mutates the original
     // pending file. It lives in its own auth/import-scoped AtomicFile.
     private val workingStore = PendingReviewDraftStore(appContext, slot = "working")
+    // Separate AtomicFile and mutex: slow server PUT must never delay a newer
+    // keystroke's durable on-device checkpoint.
+    private val checkpointStore = PendingReviewDraftStore(appContext, slot = "checkpoint")
+    private val checkpointMutex = Mutex()
     private var editingLocalConflict = false
     private var freshReview: PhotoReviewState? = null
     private var pendingLocally = false
@@ -145,7 +178,7 @@ class LivePhotoReviewRepository(
     private var loaded: MenuImportStatusDto? = null
     private var activeImportId: String? = null
     private val draftMutex = Mutex()
-    private var draftVersion = 0
+    @Volatile private var draftVersion = 0
     private var published = false
     private var draftConflict = false
     private var pendingDraftConflict = false
@@ -201,19 +234,12 @@ class LivePhotoReviewRepository(
         val state = mapServerPhotoReview(response, current)
         freshReview = state
         editingLocalConflict = false
-        // One source identity/group compatibility policy for restores and
-        // the explicit device-over-server conflict choice.
+        // Server content remains authoritative for other devices. Device
+        // checkpoints are candidates only after draftVersion, reviewVersion,
+        // OCR identity and the full serialized decisions are checked.
         fun compatible(candidate: PhotoReviewState?): Boolean =
             compatibleOwnerReviewDraft(candidate, state)
-        // The server Draft is the only recovery source. Old device-only
-        // backups (including prior checkpoint experiments) must not restore
-        // stale decisions or trap the Owner in local-conflict editing.
-        // A failed server save still prevents leaving via the existing UI.
-        runCatching { pendingStore.clear(id) }
-        runCatching { workingStore.clear(id) }
         runCatching { LegacyReviewDraftReader(appContext).clear(id) }
-        pendingLocally = false
-        pendingOversized = false
         val reviewVersion = requireNotNull(response.reviewVersion)
         val saved = response.reviewDraft
         val parsedAndroid = saved?.let(ServerReviewDraftCodec::decode)
@@ -228,28 +254,80 @@ class LivePhotoReviewRepository(
         draftConflict = false
         pendingDraftConflict = false
         published = false
+        pendingLocally = false
+        pendingOversized = false
         lastSavedContent = saved?.content
         draftNotice = when {
             saved == null -> null
             parsed == null -> "다른 클라이언트에서 저장한 초안을 확인해 주세요."
-            // A compatible web draft needs no informational popup.
             saved.reviewVersion != reviewVersion ->
                 "검수 버전이 변경됐어요. 남아 있는 항목만 다시 확인해 주세요."
             else -> null
         }
-        val canRestore = if (regenerated) parsed != null else compatible(parsed)
-        val chosen = parsed.takeIf { canRestore } ?: state
+        val canRestore = saved == null ||
+            (if (regenerated) parsed != null else compatible(parsed))
+        var chosen = parsed.takeIf { canRestore } ?: state
         if (saved != null && !canRestore) {
-            // Preserve remote edits: do not silently overwrite an operator's
-            // different-schema draft or an incompatible saved OCR grouping.
             draftConflict = true
             draftNotice = "서버 초안의 일부 내용을 복원할 수 없어요. 담당자에게 확인해 주세요."
         }
-        // Signed URLs expire, and source observations belong to the server.
-        // Restore only owner edits; rebind fresh data to the current response.
-        // Restoring a corrected name must use *that* name's saved row.
-        // The fresh OCR name could refer to a different menu item and would
-        // otherwise erase the owner's unresolved saved-versus-photo conflict.
+
+        val pending = pendingStore.read(id)
+        val checkpoint = checkpointStore.read(id)
+        val working = workingStore.read(id)
+        val device = working ?: checkpoint ?: pending
+        val recovery = DraftRecoveryPolicy.decide(saved, device, pending, reviewVersion)
+        if (device != null) {
+            val local = ServerReviewDraftCodec.decode(ReviewDraftDto(
+                device.expectedDraftVersion, device.reviewVersion,
+                "1970-01-01T00:00:00Z", device.content,
+            ))
+            val safeLocal = device.itemIds == state.items.map { it.id } &&
+                compatible(local)
+            when {
+                recovery == DraftRecoveryPolicy.Outcome.ACKNOWLEDGED && working == null -> {
+                    // This exact edit reached the server (including a lost
+                    // 200 response). Only now can its device copies be removed.
+                    checkpointStore.clear(id)
+                    pendingStore.clear(id)
+                }
+                working == null && canRestore && safeLocal &&
+                    recovery in setOf(DraftRecoveryPolicy.Outcome.RESTORE,
+                        DraftRecoveryPolicy.Outcome.REBASE) -> {
+                    // Compatible unsent changes are editable immediately;
+                    // normal CAS will synchronize them after the screen loads.
+                    chosen = requireNotNull(local)
+                    pendingLocally = true
+                    pendingOversized =
+                        ServerReviewDraftCodec.exceedsServerLimit(device.content)
+                    if (recovery == DraftRecoveryPolicy.Outcome.REBASE) {
+                        // An older in-flight request is the exact server
+                        // version advance. Rebase the *newer* checkpoint
+                        // durably before discarding evidence of that request.
+                        checkpointStore.write(id,
+                            device.copy(expectedDraftVersion = draftVersion))
+                        pendingStore.clear(id)
+                    }
+                }
+                else -> {
+                    // Never silently overwrite another device or an unknown
+                    // operator schema. Preserve the freshest local copy and
+                    // expose only the already-existing explicit conflict flow.
+                    if (working == null && checkpoint != null && safeLocal)
+                        pendingStore.write(id, checkpoint)
+                    draftConflict = true
+                    pendingDraftConflict = safeLocal
+                    pendingLocally = safeLocal
+                    pendingOversized = safeLocal &&
+                        ServerReviewDraftCodec.exceedsServerLimit(device.content)
+                    draftNotice = if (safeLocal)
+                        "서버와 기기에 서로 다른 검수 초안이 있어요. 먼저 확인해 주세요."
+                    else "기기 초안의 OCR 항목이 변경되어 자동 복원을 중단했어요."
+                }
+            }
+        }
+        // OCR evidence and signed image URLs always come from this GET, not
+        // from old local files. Draft-only fields are rebound to fresh data.
         loaded = response
         return rebindDraftData(chosen, state)
     }
@@ -409,8 +487,11 @@ class LivePhotoReviewRepository(
                 (current.reviewDraft?.draftVersion ?: 0) != draftVersion) {
                 throw ReviewDraftConflictException()
             }
-            pendingStore.clear(id)
-            workingStore.clear(id)
+            checkpointMutex.withLock {
+                checkpointStore.clear(id)
+                pendingStore.clear(id)
+                workingStore.clear(id)
+            }
             pendingDraftConflict = false
             pendingLocally = false
             pendingOversized = false
@@ -463,13 +544,70 @@ class LivePhotoReviewRepository(
             lastSavedContent = pending.content
             // Clear only after an acknowledged CAS save. On connection loss,
             // the local backup survives and can be reconciled on reload.
-            pendingStore.clear(id)
-            workingStore.clear(id)
+            checkpointMutex.withLock {
+                checkpointStore.clear(id)
+                pendingStore.clear(id)
+                workingStore.clear(id)
+            }
             editingLocalConflict = false
             pendingLocally = false
             pendingOversized = false
             pendingDraftConflict = false
             draftConflict = false
+        }
+    }
+
+    /** Atomic, account/import-scoped local write independent of network IO. */
+    override suspend fun checkpointDraft(state: PhotoReviewState) {
+        val id = activeImportId ?: error("검수 작업을 먼저 불러와 주세요.")
+        val version = loaded?.reviewVersion ?: error("검수 데이터를 먼저 불러와 주세요.")
+        val content = ServerReviewDraftCodec.encode(state)
+        checkpointMutex.withLock {
+            if (published) return@withLock
+            if (editingLocalConflict && draftConflict) {
+                val original = pendingStore.read(id)
+                    ?: error("보호된 기기 원본 초안을 찾지 못했어요.")
+                workingStore.write(id, original.copy(
+                    content = content, itemIds = state.items.map { it.id },
+                ))
+                pendingLocally = true
+                pendingOversized = ServerReviewDraftCodec.exceedsServerLimit(content)
+            } else if (!draftConflict) {
+                checkpointStore.write(id, PendingReviewDraftStore.Envelope(
+                    reviewVersion = version,
+                    expectedDraftVersion = draftVersion,
+                    itemIds = state.items.map { it.id },
+                    content = content,
+                ))
+                pendingLocally = !ServerReviewDraftCodec.sameAndroidSnapshot(
+                    content, lastSavedContent)
+                pendingOversized = ServerReviewDraftCodec.exceedsServerLimit(content)
+            }
+        }
+    }
+
+    /** The ACK applies only to the submitted snapshot, not later edits. */
+    private suspend fun acknowledgeDeviceDraft(
+        id: String, content: Map<String, Any?>,
+    ) {
+        checkpointMutex.withLock {
+            val latest = checkpointStore.read(id)
+            if (latest != null &&
+                !ServerReviewDraftCodec.sameAndroidSnapshot(latest.content, content)) {
+                // A newer edit was made while PUT was in flight. The server
+                // version is now the base for that edit; keep it recoverable.
+                checkpointStore.write(id, latest.copy(expectedDraftVersion = draftVersion))
+                pendingLocally = true
+                pendingOversized =
+                    ServerReviewDraftCodec.exceedsServerLimit(latest.content)
+            } else {
+                checkpointStore.clear(id)
+                pendingLocally = false
+                pendingOversized = false
+            }
+            // Clearing last is important for crashes during version rebase:
+            // this attempted snapshot proves a lost server ACK was ours.
+            pendingStore.clear(id)
         }
     }
 
@@ -504,7 +642,14 @@ class LivePhotoReviewRepository(
             // An unacknowledged forced prepublish PUT may have identical
             // content to the last ACK, but still needs server CAS + cleanup.
             if (DraftSaveSafety.canSkip(forceCas, pendingLocally,
-                    content, lastSavedContent)) return@withLock
+                    content, lastSavedContent)) {
+                checkpointMutex.withLock {
+                    val cache = checkpointStore.read(id)
+                    if (ServerReviewDraftCodec.sameAndroidSnapshot(cache?.content, content))
+                        checkpointStore.clear(id)
+                }
+                return@withLock
+            }
             // Atomic no-backup storage is completed BEFORE network IO so a
             // process kill after a failed PUT cannot silently lose edits.
             pendingStore.write(id, PendingReviewDraftStore.Envelope(
@@ -543,9 +688,7 @@ class LivePhotoReviewRepository(
                     currentDraft.draftVersion > draftVersion) {
                     draftVersion = currentDraft.draftVersion
                     lastSavedContent = content
-                    pendingLocally = false
-                    pendingOversized = false
-                    runCatching { pendingStore.clear(id) }
+                    acknowledgeDeviceDraft(id, content)
                     return@withLock
                 }
                 if (currentDraft != null && currentDraft.draftVersion > draftVersion) {
@@ -560,10 +703,8 @@ class LivePhotoReviewRepository(
             }
             draftVersion = saved.draftVersion
             lastSavedContent = content
-            pendingLocally = false
-            pendingOversized = false
             pendingDraftConflict = false
-            runCatching { pendingStore.clear(id) }
+            acknowledgeDeviceDraft(id, content)
         }
     }
 
@@ -574,8 +715,11 @@ class LivePhotoReviewRepository(
             lastSavedContent = null
             pendingLocally = false
             pendingOversized = false
-            runCatching { pendingStore.clear(id) }
-            runCatching { workingStore.clear(id) }
+            checkpointMutex.withLock {
+                runCatching { checkpointStore.clear(id) }
+                runCatching { pendingStore.clear(id) }
+                runCatching { workingStore.clear(id) }
+            }
         }
     }
 
