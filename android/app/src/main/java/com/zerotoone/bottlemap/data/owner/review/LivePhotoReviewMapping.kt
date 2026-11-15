@@ -291,7 +291,11 @@ internal fun mapConfirmedReviewDecision(
             pourMl = when {
                 bottle -> null
                 card.type == ReviewItemType.WHISKY -> chosen.volume.toInt()
-                source?.extractedPourMl != null -> source.extractedPourMl
+                // On OTHER rows an Owner/operator can correct or clear an
+                // OCR pour. The reviewed value, not the original OCR value,
+                // is authoritative when that source originally had a size.
+                source?.extractedPourMl != null ->
+                    chosen.volume.takeIf(::validVolume)?.toInt()
                 isGlass(label) -> chosen.volume.takeIf(::validVolume)?.toInt()
                 else -> null
             },
