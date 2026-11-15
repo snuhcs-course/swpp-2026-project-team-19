@@ -178,8 +178,9 @@ class AuthViewModel(
         signingIn = false
         awaitingGoogleCredential = false
         signInJob?.cancel()
-        _state.value = if (blockFreshLogin)
-            AuthUiState.SigningOut else AuthUiState.Guest
+        // The account row must not allow a fresh Google picker while ANY
+        // logout, including ordinary Guest/logout, is still in flight.
+        _state.value = AuthUiState.SigningOut
 
         viewModelScope.launch {
             try {

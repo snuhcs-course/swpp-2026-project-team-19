@@ -168,13 +168,13 @@ class AuthViewModelTest {
         assertEquals(1, fake.meRequests)
 
         vm.logout()
-        // Must not wait for the suspended GET /api/me to finish.
-        assertEquals(AuthUiState.Guest, vm.state.value)
+        // Old identity disappears immediately; login remains gated.
+        assertEquals(AuthUiState.SigningOut, vm.state.value)
         heldProfile.complete(fake.user)
         advanceUntilIdle()
         // Even before remote sign-out completes or the SDK emits Guest,
         // the stale profile response must not resurrect SignedIn.
-        assertEquals(AuthUiState.Guest, vm.state.value)
+        assertEquals(AuthUiState.SigningOut, vm.state.value)
         assertEquals(1, fake.logouts)
         heldLogout.complete(Unit)
         advanceUntilIdle()
@@ -357,7 +357,7 @@ class AuthViewModelTest {
         advanceUntilIdle()
 
         vm.continueAsGuest()
-        assertEquals(AuthUiState.Guest, vm.state.value)
+        assertEquals(AuthUiState.SigningOut, vm.state.value)
         advanceUntilIdle()
         vm.prepareOwnerReauthentication()
         assertEquals(AuthUiState.SigningOut, vm.state.value)
