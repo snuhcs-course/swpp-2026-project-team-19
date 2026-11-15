@@ -90,4 +90,9 @@ interface PhotoReviewRepository {
 
     /** Publishes reviewed decisions through the backend's single 8.1 submit. */
     suspend fun publish(state: PhotoReviewState)
+
+    /** Server-confirmed added count, or null if the response was lost.
+     * Null must NEVER be replaced by an optimistic local estimate.
+     */
+    fun publishedAddedCount(): Int? = null
 }
