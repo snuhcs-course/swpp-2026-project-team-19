@@ -112,6 +112,20 @@ internal object ServerReviewDraftCodec {
         return content
     }
 
+    /** JSON strings survive the server's parse/serialize roundtrip exactly,
+     * unlike Map values, where JSON integers may return as Doubles.
+     */
+    fun sameAndroidSnapshot(
+        attempted: Map<String, Any?>?,
+        observed: Map<String, Any?>?,
+    ): Boolean {
+        fun snapshot(content: Map<String, Any?>?): String? =
+            ((content?.get("clientState") as? Map<*, *>)
+                ?.get("androidStateJson")) as? String
+        val source = snapshot(attempted) ?: return false
+        return source == snapshot(observed)
+    }
+
     /** Null means the server draft came from another client / unknown schema. */
     fun decode(saved: ReviewDraftDto): PhotoReviewState? {
         val client = saved.content["clientState"] as? Map<*, *> ?: return null

@@ -307,7 +307,8 @@ class LivePhotoReviewRepository(
         draftMutex.withLock {
             if (published) return@withLock
             if (draftConflict) throw ReviewDraftConflictException()
-            if (content == lastSavedContent) return@withLock
+            if (ServerReviewDraftCodec.sameAndroidSnapshot(content, lastSavedContent))
+                return@withLock
             val request = ReviewDraftSaveRequestDto(
                 draftVersion = draftVersion, reviewVersion = version, content = content,
             )
@@ -324,7 +325,8 @@ class LivePhotoReviewRepository(
                 // exact content before retrying with an obsolete draftVersion.
                 val observed = runCatching { remote.getMenuImport(id) }.getOrNull()
                 val currentDraft = observed?.reviewDraft
-                if (currentDraft?.content == content &&
+                if (currentDraft != null &&
+                    ServerReviewDraftCodec.sameAndroidSnapshot(content, currentDraft.content) &&
                     currentDraft.reviewVersion == version &&
                     currentDraft.draftVersion > draftVersion) {
                     draftVersion = currentDraft.draftVersion
