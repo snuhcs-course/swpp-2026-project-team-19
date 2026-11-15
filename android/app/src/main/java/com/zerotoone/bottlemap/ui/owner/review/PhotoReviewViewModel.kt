@@ -229,11 +229,17 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                 if (revision == latestDraftRevision) {
                     try {
                         repository.saveDraft(state)
-                        _draftProblem.value = null
-                        _draftRetryable.value = false
-                        _draftOversized.value = false
-                        _draftConflictChoice.value = false
-                        _draftEditingLocal.value = false
+                        // An older PUT may finish after a newer edit was
+                        // checkpointed. Do not clear the newer unsynced status.
+                        if (revision == latestDraftRevision) {
+                            val pending = repository.hasPendingLocalDraft()
+                            _draftRetryable.value = pending &&
+                                !repository.hasOversizedPendingDraft()
+                            _draftOversized.value = repository.hasOversizedPendingDraft()
+                            _draftProblem.value = if (pending) localOnlyNotice else null
+                            _draftConflictChoice.value = false
+                            _draftEditingLocal.value = false
+                        }
                     } catch (cancelled: CancellationException) {
                         throw cancelled
                     } catch (error: ReviewDraftConflictException) {
@@ -441,8 +447,9 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
             } }
             // An offline/network timeout is safe to leave after the AtomicFile
             // commit. The next visit will retry the pending server Draft.
-            val localOnly = saved == null && repository.hasPendingLocalDraft() &&
-                !repository.hasPendingDraftConflict()
+            val localOnly = saved != true && repository.hasPendingLocalDraft() &&
+                !repository.hasPendingDraftConflict() &&
+                (saved == null || _draftRetryable.value)
             if (saved == true || localOnly) {
                 if (localOnly) _draftProblem.value = localOnlyNotice
                 if (repository.hasOversizedPendingDraft()) toast(oversizedNotice)
