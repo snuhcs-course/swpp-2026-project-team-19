@@ -2,6 +2,9 @@ package com.zerotoone.bottlemap.ui.owner.review
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.util.LruCache
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -29,6 +32,35 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.withContext
 import java.net.HttpURLConnection
 import java.net.URL
+
+/**
+ * Shared decoded source per signed URL. Crops are derived from one 1600px
+ * bitmap; grouped lines never each download/decode the same signed photo.
+ * Memory is bounded and purged on account switch/logout.
+ */
+internal object ReviewSourceBitmapCache {
+    private val cache = object : LruCache<String, Bitmap>(24 * 1024) {
+        override fun sizeOf(key: String, value: Bitmap): Int =
+            (value.byteCount / 1024).coerceAtLeast(1)
+    }
+    private val mutex = Mutex()
+    @Volatile private var generation = 0L
+
+    suspend fun getOrLoad(url: String, loader: suspend () -> Bitmap?): Bitmap? =
+        mutex.withLock {
+            cache.get(url)?.let { return@withLock it }
+            val before = generation
+            val image = loader()
+            if (before == generation && image != null && !image.isRecycled)
+                cache.put(url, image)
+            image
+        }
+
+    fun clearForAccountChange() {
+        generation++
+        cache.evictAll()
+    }
+}
 
 /**
  * Actual server-signed photo in the same visual bounds as the v20 SourceVisual.
@@ -89,10 +121,26 @@ internal fun RealReviewSourceVisual(
 }
 
 /** HTTP(S) URLs only; server returns short-lived signed links (API §5.4). */
-private fun retrieveSignedReviewBitmap(
+private suspend fun retrieveSignedReviewBitmap(
     sourceUrl: String, normalizedBox: List<Int>?,
 ): Bitmap? {
     if (!sourceUrl.startsWith("https://") && !sourceUrl.startsWith("http://")) return null
+    val decoded = ReviewSourceBitmapCache.getOrLoad(sourceUrl) {
+        withContext(Dispatchers.IO) { downloadSignedReviewBitmap(sourceUrl) }
+    } ?: return null
+    if (normalizedBox == null || normalizedBox.size != 4) return decoded
+    val left = (normalizedBox[0].coerceIn(0, 1000) * decoded.width / 1000)
+        .coerceIn(0, decoded.width - 1)
+    val top = (normalizedBox[1].coerceIn(0, 1000) * decoded.height / 1000)
+        .coerceIn(0, decoded.height - 1)
+    val right = (normalizedBox[2].coerceIn(0, 1000) * decoded.width / 1000)
+        .coerceIn(left + 1, decoded.width)
+    val bottom = (normalizedBox[3].coerceIn(0, 1000) * decoded.height / 1000)
+        .coerceIn(top + 1, decoded.height)
+    return Bitmap.createBitmap(decoded, left, top, right - left, bottom - top)
+}
+
+private fun downloadSignedReviewBitmap(sourceUrl: String): Bitmap? {
     val connection = URL(sourceUrl).openConnection() as HttpURLConnection
     connection.connectTimeout = 10_000
     connection.readTimeout = 20_000
@@ -116,20 +164,10 @@ private fun retrieveSignedReviewBitmap(
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
         BitmapFactory.decodeByteArray(data, 0, data.size, bounds)
         if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return null
-        val decoded = BitmapFactory.decodeByteArray(data, 0, data.size,
+        return BitmapFactory.decodeByteArray(data, 0, data.size,
             BitmapFactory.Options().apply {
                 inSampleSize = sampledBitmapSize(bounds.outWidth, bounds.outHeight, 1600)
-            }) ?: return null
-        if (normalizedBox == null || normalizedBox.size != 4) return decoded
-        val left = (normalizedBox[0].coerceIn(0, 1000) * decoded.width / 1000)
-            .coerceIn(0, decoded.width - 1)
-        val top = (normalizedBox[1].coerceIn(0, 1000) * decoded.height / 1000)
-            .coerceIn(0, decoded.height - 1)
-        val right = (normalizedBox[2].coerceIn(0, 1000) * decoded.width / 1000)
-            .coerceIn(left + 1, decoded.width)
-        val bottom = (normalizedBox[3].coerceIn(0, 1000) * decoded.height / 1000)
-            .coerceIn(top + 1, decoded.height)
-        return Bitmap.createBitmap(decoded, left, top, right - left, bottom - top)
+            })
     } finally {
         connection.disconnect()
     }

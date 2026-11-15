@@ -1,5 +1,7 @@
 package com.zerotoone.bottlemap.data.owner
 
+import com.zerotoone.bottlemap.ui.owner.review.ReviewSourceBitmapCache
+
 import android.content.Context
 
 /**
@@ -15,5 +17,8 @@ object OwnerRuntime {
     }
 
     /** Never reuse cached owner bars or imports after an account change. */
-    fun invalidateForAccountChange() = synchronized(this) { instance = null }
+    fun invalidateForAccountChange() = synchronized(this) {
+        instance = null
+        ReviewSourceBitmapCache.clearForAccountChange()
+    }
 }
