@@ -789,7 +789,7 @@ private fun OptionCard(x: ReviewItem, index: Int?, seq: Int, vm: PhotoReviewView
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             if (!bottle) {
-                OptionInput("용량 (ml)", volumeText, "30", volumeInvalid, "1 ~ 999 사이의 숫자를 입력해주세요.",
+                OptionInput("용량 (ml)", volumeText, "30", volumeInvalid, "1 ~ 32767 사이의 숫자를 입력해주세요.",
                     Modifier.weight(1f), "review-volume-${x.id}-${index ?: "main"}", vm::commitOptionField) {
                     vm.typeOptionField(x.id, OptionField.VOLUME, index, it)
                 }
