@@ -8,6 +8,9 @@ import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewState
 import com.zerotoone.bottlemap.ui.owner.review.ReviewItem
 import com.zerotoone.bottlemap.ui.owner.review.ReviewItemType
 import com.zerotoone.bottlemap.ui.owner.review.ReviewOption
+import com.zerotoone.bottlemap.ui.owner.review.ReviewMatch
+import com.zerotoone.bottlemap.ui.owner.review.PriceChoice
+import com.zerotoone.bottlemap.ui.owner.review.VolumeSource
 import com.zerotoone.bottlemap.ui.owner.review.validPrice
 import com.zerotoone.bottlemap.ui.owner.review.validVolume
 
@@ -116,4 +119,86 @@ internal object ServerReviewDraftCodec {
         val json = client["androidStateJson"] as? String ?: return null
         return runCatching { stateAdapter.fromJson(json) }.getOrNull()
     }
+    /**
+     * Drafts written by the operator web may not contain Android's UI
+     * snapshot. Reconcile their standard, partial §8.1 decisions when the
+     * operation is representable without dropping an explicit changeDecision.
+     * Unknown actions/options block restoration instead of being overwritten.
+     */
+    fun restoreStandard(saved: ReviewDraftDto, fresh: PhotoReviewState): PhotoReviewState? {
+        val changes = saved.content["changeDecisions"] as? List<*> ?: emptyList<Any>()
+        if (changes.isNotEmpty()) return null // Android cannot edit ignored diffs.
+        val input = saved.content["itemDecisions"] as? List<*> ?: return null
+        val rows = mutableMapOf<String, Map<*, *>>()
+        for (candidate in input) {
+            val decision = candidate as? Map<*, *> ?: return null
+            val id = decision["extractedItemId"] as? String ?: return null
+            if (id in rows || fresh.items.none { it.id == id }) return null
+            rows[id] = decision
+        }
+        val restored = fresh.items.map { original ->
+            val decision = rows[original.id] ?: return@map original
+            val action = decision["action"] as? String
+            if (action != null && action !in setOf(
+                    "reject", "confirm_non_product",
+                    "select_existing_product", "publish_without_product"
+                )) return null
+            val name = (decision["correctedProductName"] as? String)
+                ?.takeIf { it.isNotBlank() } ?: original.name
+            val linked = if (action == "select_existing_product")
+                decision["productId"] as? String ?: return null
+                else if (action == "publish_without_product") null
+                else original.linkedProductId
+            val category = if (action == "publish_without_product")
+                if (decision["kind"] == "other") ReviewItemType.OTHER
+                else ReviewItemType.WHISKY
+                else original.type
+            val rawOptions = decision["options"] as? List<*>
+            val options = rawOptions?.map { raw ->
+                val obj = raw as? Map<*, *> ?: return null
+                val price = (obj["priceKrw"] as? Number)?.toDouble() ?: return null
+                if (!validPrice(price)) return null
+                val originalId = obj["extractedOptionId"] as? String
+                val validIds = (
+                    PhotoReviewRules.optionSummary(original) + original.volumeChoices +
+                    original.preMergeOptions
+                ).mapNotNull { it.sourceOptionId }.toSet()
+                if (originalId != null && originalId !in validIds) return null
+                val label = obj["optionLabel"] as? String
+                val bottle = label.equals("Bottle", ignoreCase = true) || label == "병"
+                val ml = (obj["pourMl"] as? Number)?.toDouble()
+                if (ml != null && !validVolume(ml)) return null
+                ReviewOption(
+                    volume = if (bottle) 0.0 else ml ?: 0.0,
+                    price = price, bottle = bottle,
+                    sourceOptionId = originalId, label = label,
+                )
+            }
+            var changed = original.copy(
+                name = name,
+                nameSaved = action != null || name != original.name || original.nameSaved,
+                excluded = action == "reject" || action == "confirm_non_product",
+                linkedProductId = linked,
+                linkedProductName = if (linked == original.linkedProductId)
+                    original.linkedProductName else null,
+                match = if (linked != null) ReviewMatch.EXACT else ReviewMatch.NEW,
+                matchConfirmed = action != null || original.matchConfirmed,
+                newConfirmed = action != null || original.newConfirmed,
+                type = category,
+            )
+            if (!options.isNullOrEmpty()) {
+                val first = options.first()
+                changed = changed.copy(
+                    price = first.price, volume = first.volume,
+                    bottle = first.bottle, volumeSource = VolumeSource.MANUAL,
+                    primaryOptionLabel = first.label,
+                    primarySourceOptionId = first.sourceOptionId,
+                    options = options.drop(1), priceChoice = PriceChoice.MANUAL,
+                )
+            }
+            changed
+        }
+        return fresh.copy(items = restored)
+    }
+
 }

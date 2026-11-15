@@ -167,7 +167,10 @@ class LivePhotoReviewRepository(
             // values on top of a concurrent owner's/operator's edits.
             runCatching { legacy.clear(id) }
         }
-        val parsed = saved?.let(ServerReviewDraftCodec::decode)
+        val parsedAndroid = saved?.let(ServerReviewDraftCodec::decode)
+        val parsed = parsedAndroid ?: saved?.let {
+            ServerReviewDraftCodec.restoreStandard(it, state)
+        }
         draftVersion = saved?.draftVersion ?: 0
         draftConflict = false
         published = false
@@ -176,6 +179,7 @@ class LivePhotoReviewRepository(
             migrated -> "기존 검수 임시 기록을 서버에 옮겼어요."
             saved == null -> null
             parsed == null -> "다른 클라이언트에서 저장한 초안을 확인해 주세요."
+            parsedAndroid == null -> "운영자 웹에서 저장한 검수 선택을 확인해 주세요."
             saved.reviewVersion != reviewVersion ->
                 "검수 버전이 변경됐어요. 남아 있는 항목만 다시 확인해 주세요."
             else -> null
