@@ -205,4 +205,86 @@ class ServerReviewDraftCodecTest {
         )), fresh)).items.single()
         assertEquals(ReviewItemType.OTHER, other.type)
     }
+
+    @Test fun operatorStandardDecisionsOverrideStaleClientState() {
+        val fresh = PhotoReviewState(items = listOf(ReviewItem(
+            id = "ocr-1", name = "원래 메뉴", price = 10000.0,
+        )))
+        val original = ServerReviewDraftCodec.encode(fresh)
+        val updated = original + mapOf("itemDecisions" to listOf(mapOf(
+            "extractedItemId" to "ocr-1",
+            "correctedProductName" to "운영자가 수정한 이름",
+        )))
+        val dto = ReviewDraftDto(4, 3, "2026-11-15T00:00:00Z", updated)
+        // The embedded Android snapshot is no longer authoritative.
+        assertNull(ServerReviewDraftCodec.decode(dto))
+        val restored = requireNotNull(ServerReviewDraftCodec.restoreStandard(dto, fresh))
+        assertEquals("운영자가 수정한 이름", restored.items.single().name)
+        val noOptions = ReviewItem(id = "empty", name = "미완료",
+            primaryHasOption = false)
+        val emptyWire = ServerReviewDraftCodec.encode(
+            PhotoReviewState(items = listOf(noOptions)))
+        val firstDecision = (emptyWire["itemDecisions"] as List<*>).first() as Map<*, *>
+        assertEquals(emptyList<Any>(), firstDecision["options"])
+    }
+
+    @Test fun regeneratedReviewKeepsSurvivingEditsByIdAndRechecksChangedOptions() {
+        val edited = ReviewItem(
+            id = "retained", name = "사장님이 고친 이름",
+            volume = 30.0, price = 16000.0,
+            primarySourceOptionId = "removed-opt",
+            options = listOf(ReviewOption(
+                volume = 60.0, price = 24000.0, sourceOptionId = "still-opt",
+            )),
+        )
+        val previous = PhotoReviewState(items = listOf(
+            ReviewItem(id = "deleted", name = "과거 줄"),
+            edited,
+        ))
+        val now = PhotoReviewState(items = listOf(
+            ReviewItem(id = "new", name = "새 줄"),
+            ReviewItem(id = "retained", name = "OCR 새 이름",
+                primarySourceOptionId = "still-opt",
+                volume = 60.0, price = 20000.0,
+                options = listOf(ReviewOption(
+                    volume = 90.0, price = 28000.0,
+                    sourceOptionId = "new-opt",
+                )),
+            ),
+        ))
+        val fixed = requireNotNull(ServerReviewDraftCodec.reconcileRegenerated(previous,now))
+        assertEquals(listOf("new","retained"), fixed.items.map { it.id })
+        val line = fixed.items.last()
+        assertEquals("사장님이 고친 이름", line.name)
+        assertEquals("still-opt", line.primarySourceOptionId)
+        assertEquals(24000.0,line.price,0.0)
+        assertFalse(line.volumeChoicesConfirmed)
+        assertEquals(setOf("still-opt","new-opt"),
+            line.volumeChoices.mapNotNull { it.sourceOptionId }.toSet())
+        assertFalse(PhotoReviewRules.stats(fixed).canPublish)
+    }
+
+    @Test fun regeneratedOperatorDraftIgnoresRemovedItemsAndStaleOptions() {
+        val fresh = PhotoReviewState(items = listOf(ReviewItem(
+            id = "live", name = "메뉴",
+            primarySourceOptionId = "option-live",
+        )))
+        val dto = ReviewDraftDto(5, 2, "2026-11-15T00:00:00Z", mapOf(
+            "itemDecisions" to listOf(
+                mapOf("extractedItemId" to "removed", "action" to "reject"),
+                mapOf("extractedItemId" to "live", "options" to listOf(
+                    mapOf("extractedOptionId" to "option-deleted",
+                        "priceKrw" to 11000),
+                    mapOf("extractedOptionId" to "option-live",
+                        "priceKrw" to 15000, "pourMl" to 30),
+                )),
+            ),
+        ))
+        val restored = requireNotNull(ServerReviewDraftCodec.restoreStandard(
+            dto, fresh, allowStaleIds = true,
+        ))
+        assertEquals(listOf("live"),restored.items.map { it.id })
+        assertEquals(15000.0,restored.items.single().price,0.0)
+        assertEquals("option-live",restored.items.single().primarySourceOptionId)
+    }
 }
