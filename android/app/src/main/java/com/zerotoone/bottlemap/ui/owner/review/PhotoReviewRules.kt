@@ -644,6 +644,7 @@ object PhotoReviewRules {
         val bottle = !op.bottle
         val updated = if (bottle) op.copy(bottle = true, volume = 0.0,
             volumeFromDefault = false) else op.copy(bottle = false,
+            label = op.label?.takeUnless(::isBottleServingLabel),
             volume = if (op.volume > 0) op.volume else defaultPour,
             volumeFromDefault = op.volume <= 0)
         val raw = if (bottle) x.rawOptionEdits - "option-volume:$index" else x.rawOptionEdits
