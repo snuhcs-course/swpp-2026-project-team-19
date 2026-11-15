@@ -311,7 +311,7 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                 // queued writes are invalidated, and no 409 can be missed.
                 ++latestDraftRevision
                 draftSaveMutex.withLock {
-                    repository.saveDraft(state.copy(modal = null))
+                    repository.flushBeforePublish(state.copy(modal = null))
                 }
                 _draftProblem.value = null
                 repository.publish(state)
