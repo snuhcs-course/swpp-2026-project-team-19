@@ -46,6 +46,8 @@ class PhotoReviewRulesTest {
         val stats = PhotoReviewRules.stats(ready.copy(defaultPour = 0.0))
         assertTrue(stats.noDefault)
         assertFalse(stats.canPublish)
+        assertTrue(PhotoReviewRules.stats(ready.copy(defaultPour = 1000.0)).noDefault)
+        assertFalse(PhotoReviewRules.stats(ready.copy(defaultPour = 1000.0)).canPublish)
         assertTrue(MockPhotoReviewScenario.NO_DEFAULT.initialState().items.first { it.id == "glen12" }
             .let { ReviewIssue.VOLUME in PhotoReviewRules.problems(it) })
     }
@@ -56,8 +58,13 @@ class PhotoReviewRulesTest {
         assertTrue(priceValue("12.5").isNaN())
         assertEquals(22.5, readNumeric("22.5"), 0.0)
         assertFalse(validVolume(22.5))
-        assertFalse(validVolume(1000.0))
         assertTrue(validVolume(999.0))
+        assertTrue(validVolume(1000.0))
+        assertTrue(validVolume(32_767.0))
+        assertFalse(validVolume(32_768.0))
+        assertTrue(validDefaultPour(999.0))
+        assertFalse(validDefaultPour(1000.0))
+        assertFalse(validDefaultPour(Double.POSITIVE_INFINITY))
         assertFalse(validPrice(100_000_000.0))
         assertEquals("15,000원", won(15000.0))
         assertEquals("—", won(0.0))
