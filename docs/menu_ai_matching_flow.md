@@ -625,6 +625,7 @@ OCR LLM과 Vision LLM은 메뉴에서 인식한 모든 상품 또는 비상품 �
 
 - 스캐너가 자체 OCR 글자를 숨겨 넣은 스캔 PDF는 `text` 쪽으로 읽히며, 그 OCR 품질을 그대로 따른다.
 - 실제 매장의 PDF로는 아직 평가하지 않았다. 테스트는 가상 메뉴로 만든 PDF(`backend/tests/fixtures/pdf`)로 한다.
+- 실제 호출로 확인하는 방법(I4-P30): `backend/scripts/run_uat_inputs.py`가 사진 3개와 PDF 3개(`backend/scripts/uat_inputs.json`)를 서버의 추출 코드로 돌려 입력마다 읽은 이름·가격, 지연, 시도 수, 실패 사유를 보고한다. CLOVA와 Gemini를 실제로 호출하므로 CI에서는 돌리지 않는다.
 
 ## 5 extracted_items와 extracted_options 저장
 

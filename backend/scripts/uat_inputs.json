@@ -1,0 +1,196 @@
+{
+  "_about": [
+    "The six inputs of the UAT input run (I4-P30): three menu photos and three menu PDFs. Read by backend/scripts/run_uat_inputs.py.",
+    "source repo: a file in this repository, path from the repository root. Made-up menus, so the expected lines are listed here.",
+    "source data: a real bar's menu photo. It is not in the repository; the path is under the data directory (--data-dir or BOTTLEMAP_DATA_DIR, default ../bottlemap-p14/data). Its expected lines are the expected_items of the regression fixture named in expect_fixture.",
+    "expect lists whisky lines only, one row per price: prompt v1 returns whisky lines only. A row is found when an extracted item has the same name (compared with app.core.normalize) and that price. price_krw null is a line printed without a price."
+  ],
+  "inputs": [
+    {
+      "id": "photo-review-menu",
+      "kind": "photo",
+      "uat": "4.5 review and publish (made-up menu for the review cards)",
+      "source": "repo",
+      "path": "backend/tests/fixtures/uat/review_menu.jpg",
+      "sha256": "e412c65631ac23f83d40e7cba70a2c6a0ad23cceb264343dad7b98400773f0a1",
+      "expect": [
+        {
+          "name": "글렌피딕 12년",
+          "price_krw": 15000
+        },
+        {
+          "name": "탈리스커 10년 싱글몰트",
+          "price_krw": 16000
+        },
+        {
+          "name": "맥캘란 18년",
+          "price_krw": 45000
+        },
+        {
+          "name": "하우스 위스키",
+          "price_krw": 9000
+        },
+        {
+          "name": "라가불린 16년",
+          "price_krw": null
+        },
+        {
+          "name": "라프로익 10년",
+          "price_krw": 16000
+        },
+        {
+          "name": "글렌드로낙 12년",
+          "price_krw": 18000
+        },
+        {
+          "name": "조니워커 블랙 라벨",
+          "price_krw": 11000
+        }
+      ]
+    },
+    {
+      "id": "photo-seorosang",
+      "kind": "photo",
+      "uat": "4.4 register a menu from a photo (screen capture, glass and bottle prices)",
+      "source": "data",
+      "path": "eval_photos/008_seorosang_01.png",
+      "sha256": "c1c304b23f92853ef046d2e3862410110533806fedb1a8dce3685b106f0bfffa",
+      "expect_fixture": "ai/regression/fixtures/008_서로상_01.json"
+    },
+    {
+      "id": "photo-bokchun",
+      "kind": "photo",
+      "uat": "4.9 apply to manage a bar (menu photo sent with the application)",
+      "source": "data",
+      "path": "eval_photos/007_bokchun_01.jpg",
+      "sha256": "1e5e195f4fad857bfae474b05067aaa996752854e5022614fc898f6a859befec",
+      "expect_fixture": "ai/regression/fixtures/007_위스키복춘_01.json"
+    },
+    {
+      "id": "pdf-text-design",
+      "kind": "pdf",
+      "uat": "PDF import: text PDF exported from a design tool, one page, glass and bottle columns",
+      "source": "repo",
+      "path": "backend/tests/fixtures/pdf/text_menu_design.pdf",
+      "sha256": "3fb62c0cbd48eca400c0383abe7a6967d188045e638e7ccbe06963d5afbb03dd",
+      "expect": [
+        {
+          "name": "글렌피딕 12년",
+          "price_krw": 15000
+        },
+        {
+          "name": "글렌피딕 12년",
+          "price_krw": 190000
+        },
+        {
+          "name": "발베니 12년 더블우드",
+          "price_krw": 22000
+        },
+        {
+          "name": "발베니 12년 더블우드",
+          "price_krw": 280000
+        },
+        {
+          "name": "탈리스커 10년",
+          "price_krw": 16000
+        },
+        {
+          "name": "라가불린 16년",
+          "price_krw": 26000
+        },
+        {
+          "name": "라가불린 16년",
+          "price_krw": 340000
+        },
+        {
+          "name": "메이커스 마크",
+          "price_krw": 11000
+        },
+        {
+          "name": "메이커스 마크",
+          "price_krw": 130000
+        },
+        {
+          "name": "와일드터키 101",
+          "price_krw": 12000
+        }
+      ]
+    },
+    {
+      "id": "pdf-text-office",
+      "kind": "pdf",
+      "uat": "PDF import: text PDF exported from an office document, two pages",
+      "source": "repo",
+      "path": "backend/tests/fixtures/pdf/text_menu_office.pdf",
+      "sha256": "c8cdcdd9cb5f4fa250015a127fc2159c0a803f181a2ac6833d8b2706de0460c2",
+      "expect": [
+        {
+          "name": "아드벡 10년",
+          "price_krw": 17000
+        },
+        {
+          "name": "라프로익 10년",
+          "price_krw": 16000
+        },
+        {
+          "name": "맥캘란 12년 셰리 오크",
+          "price_krw": 25000
+        },
+        {
+          "name": "글렌드로낙 12년",
+          "price_krw": 18000
+        },
+        {
+          "name": "조니워커 블랙 라벨",
+          "price_krw": 11000
+        },
+        {
+          "name": "버팔로 트레이스",
+          "price_krw": 12000
+        },
+        {
+          "name": "우드포드 리저브",
+          "price_krw": 15000
+        }
+      ]
+    },
+    {
+      "id": "pdf-scanned",
+      "kind": "pdf",
+      "uat": "PDF import: scanned PDF (pictures only), two pages",
+      "source": "repo",
+      "path": "backend/tests/fixtures/pdf/scanned_menu_2.pdf",
+      "sha256": "19db9e1e1ae773537ff99740cae2a6e4ef02a6359d6984804dbab2610f241c8f",
+      "expect": [
+        {
+          "name": "아드벡 10년",
+          "price_krw": 17000
+        },
+        {
+          "name": "라프로익 10년",
+          "price_krw": 16000
+        },
+        {
+          "name": "맥캘란 12년 셰리 오크",
+          "price_krw": 25000
+        },
+        {
+          "name": "글렌드로낙 12년",
+          "price_krw": 18000
+        },
+        {
+          "name": "조니워커 블랙 라벨",
+          "price_krw": 11000
+        },
+        {
+          "name": "버팔로 트레이스",
+          "price_krw": 12000
+        },
+        {
+          "name": "우드포드 리저브",
+          "price_krw": 15000
+        }
+      ]
+    }
+  ]
+}
