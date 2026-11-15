@@ -84,10 +84,13 @@ internal class PendingReviewDraftStore(
     suspend fun read(importId: String): Envelope? {
         val file = fileFor(importId) ?: return null
         return withContext(Dispatchers.IO) {
-            if (!file.exists() || file.length() > 350_000L) return@withContext null
+            // openRead repairs an interrupted AtomicFile write (including its
+            // backup file). Checking file.exists first would skip recovery.
             runCatching {
-                AtomicFile(file).openRead().bufferedReader().use {
-                    adapter.fromJson(it.readText())
+                AtomicFile(file).openRead().use { stream ->
+                    val bytes = stream.readNBytes(350_001)
+                    if (bytes.size > 350_000) null
+                    else adapter.fromJson(String(bytes, Charsets.UTF_8))
                 }
             }.getOrNull()
         }
