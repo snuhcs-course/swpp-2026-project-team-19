@@ -320,6 +320,69 @@ class LivePhotoReviewMappingTest {
         assertEquals(8000,decision.correctedOptions!!.single().priceKrw)
     }
 
+    @Test fun littleGalleryPhotoKeepsAllEightNonWhiskyLinesInOtherGroup() {
+        // Reported 017 Little Gallery page 4: seven bourbon whiskies, plus
+        // three brandies, one tequila, two highballs and two beers.
+        // This is the Android contract test for a COMPLETE v2 server response,
+        // not an AI OCR accuracy test. Missing server lines cannot be inferred.
+        val whiskyNames = listOf(
+            "Angel's Envy Port Cask Finish", "Wild Turkey Bourbon",
+            "Wild Turkey 101 proof", "Wild Turkey Rare Breed",
+            "Maker's Mark", "Jack Daniel's Old No. 7", "Jim Beam",
+        )
+        val otherNames = listOf(
+            "Hennessy V.S.O.P.", "Rémy Martin V.S.O.P.",
+            "Camus Borderies X.O", "Jose Cuervo",
+            "Suntory Highball", "Jim Beam Highball", "Asahi", "Guinness",
+        )
+        val whisky = whiskyNames.mapIndexed { index, name ->
+            item(status = "unmatched", proposedId = null).copy(
+                extractedItemId = "w-${index + 1}",
+                itemOrder = index + 1,
+                extractedProductName = name,
+                extractedKind = "whisky",
+                candidates = emptyList(),
+                newProductDraft = null,
+                options = listOf(option("w-price-${index + 1}", 30, 12000)),
+            )
+        }
+        val other = otherNames.mapIndexed { index, name ->
+            item(status = "unmatched", proposedId = null).copy(
+                extractedItemId = "o-${index + 1}",
+                itemOrder = index + 8,
+                extractedProductName = name,
+                extractedKind = "other",
+                candidates = emptyList(),
+                newProductDraft = null,
+                options = listOf(option("o-price-${index + 1}", null, 10000)),
+            )
+        }
+        val inputs = whisky + other
+        // OCR responses do not have to be ordered by itemOrder.
+        val review = mapServerPhotoReview(response(*inputs.reversed().toTypedArray()), fixture())
+        assertEquals(15, review.items.size)
+        assertEquals((1..15).toList(), review.items.map { it.sourceLine })
+        assertEquals(8, PhotoReviewRules.stats(review).other.size)
+        val reviewedOthers = review.items.filter {
+            it.type == com.zerotoone.bottlemap.ui.owner.review.ReviewItemType.OTHER
+        }
+        assertEquals(otherNames, reviewedOthers.map { it.name })
+        val inputsById = inputs.associateBy { it.extractedItemId }
+        reviewedOthers.forEach { card ->
+            assertFalse(card.excluded)
+            assertNull(card.linkedProductId)
+            val decision = mapConfirmedReviewDecision(
+                card, inputsById.getValue(card.id), review.defaultPour, emptyMap(),
+            )
+            assertEquals(MockDecisionKind.CREATE_PRODUCT, decision.kind)
+            assertEquals("other", decision.newProduct?.category)
+            assertNull(decision.productId)
+            assertEquals(card.name, decision.newProduct?.name)
+            assertEquals(10000, decision.correctedOptions?.single()?.priceKrw)
+            assertNull(decision.correctedOptions?.single()?.pourMl)
+        }
+    }
+
     @Test fun aiV2MixedWhiskyCocktailAndFoodPublishInTheirOriginalKinds() {
         // PR #176's 5.4 response: other lines are real product rows with
         // extractedKind=other, no catalog candidates and no newProductDraft.
