@@ -316,11 +316,13 @@ internal fun mapConfirmedReviewDecision(
         "${card.name}: 신규 위스키 이름을 확인해 주세요."
     }
     val sourceDraft = extracted.newProductDraft
-    val brandText = (extracted.extractedBrandName
-        ?: sourceDraft?.brandText)?.trim().orEmpty()
-    // PR #164 publishes new lines on the bar without any catalog product.
-    // Brand metadata is optional and never sent to the server for owner adds.
+    // The AI may return stale whisky brand metadata even when its final
+    // extractedKind is other. Never carry that metadata into an Other draft;
+    // §8.10 publishes only a bar-local name, price and serving options.
     val category = if (card.type == ReviewItemType.WHISKY) "whisky" else "other"
+    val brandText = if (card.type == ReviewItemType.WHISKY)
+        (extracted.extractedBrandName ?: sourceDraft?.brandText)?.trim().orEmpty()
+        else ""
     val brandId = existingBrands[brandText.lowercase()]
     // The owner-confirmed on-screen name is authoritative. newProductName
     // can be a stale OCR draft after editing the detail name.
@@ -336,9 +338,9 @@ internal fun mapConfirmedReviewDecision(
             brandId = brandId,
             brandName = brandText.takeIf { brandId == null && it.isNotBlank() },
             category = category,
-            ageYears = sourceDraft?.ageYears,
-            editionName = sourceDraft?.editionName,
-            abvPercent = sourceDraft?.abv,
+            ageYears = sourceDraft?.ageYears.takeIf { category == "whisky" },
+            editionName = sourceDraft?.editionName.takeIf { category == "whisky" },
+            abvPercent = sourceDraft?.abv.takeIf { category == "whisky" },
         ),
     )
 }
