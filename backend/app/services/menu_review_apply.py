@@ -311,6 +311,7 @@ def _settle_checks(
     - an item that became other, or left the board, has no open check.
     """
     catalog = DbCatalog(session)
+    similarities = _LazySimilarities(session)
     reviewed_by_id = review.by_id
     displaced_into: dict[UUID, list[UUID]] = {}
     for displaced, first_line in plan.replaced.items():
@@ -342,7 +343,7 @@ def _settle_checks(
             )
         if entry.extracted_item_id in plan.discarded:
             _raise_price_conflict(session, menu_import, item, entry.display_name, plan.discarded[entry.extracted_item_id])
-        _raise_attribute_conflicts(session, menu_import, reviewed_by_id, plan, entry, item, catalog)
+        _raise_attribute_conflicts(session, menu_import, reviewed_by_id, plan, entry, item, catalog, similarities)
     dismiss_open_checks(
         session, old_item_ids - {item.id for item in items} - plan.linked_items - set(plan.replaced)
     )
@@ -356,6 +357,7 @@ def _raise_attribute_conflicts(
     entry: BoardEntry,
     item: BarMenuItem,
     catalog: DbCatalog,
+    similarities: "_LazySimilarities",
 ) -> None:
     """A chosen product that does not fit the line (spec 8.7, app.matching.pick_check): its age differs
     from the line's, or another product of its brand is closer to the line's name. Published as chosen,
@@ -364,7 +366,6 @@ def _raise_attribute_conflicts(
     product or a line without one is not compared. Whoever submitted it."""
     if item.product_id is None or entry.extracted_item_id is None:
         return
-    similarities = None
     for line in plan.entry_lines.get(entry.extracted_item_id, ()):
         reviewed = reviewed_by_id[line]
         decision = reviewed.decision
@@ -373,8 +374,6 @@ def _raise_attribute_conflicts(
         if name_corrected(decision.correctedProductName, reviewed.item.extracted_product_name):
             continue
         source = reviewed.item
-        # the catalog index is built once per catalog version and only when a line needs it
-        similarities = similarities or db_similarities(session)
         name = source.extracted_product_name or source.raw_text
         if not check_pick(name, source.extracted_age_years, item.product_id, catalog, similarities).fits:
             raise_check(
@@ -385,6 +384,21 @@ def _raise_attribute_conflicts(
                 source_menu_import_id=menu_import.id,
                 source_extracted_item_id=line,
             )
+
+
+class _LazySimilarities:
+    """The catalog similarities for one submission (pick_check.db_similarities): looked up when the
+    first line needs the comparison and reused for every other entry, so the catalog version is read
+    at most once while the bar is locked, and not at all when no line is compared."""
+
+    def __init__(self, session: Session) -> None:
+        self._session = session
+        self._similarities = None
+
+    def __call__(self, query: str):
+        if self._similarities is None:
+            self._similarities = db_similarities(self._session)
+        return self._similarities(query)
 
 
 def _raise_price_conflict(

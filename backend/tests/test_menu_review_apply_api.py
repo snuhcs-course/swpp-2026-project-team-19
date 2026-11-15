@@ -666,6 +666,35 @@ def test_a_chosen_product_of_another_edition_is_published_and_checked(
     ]
 
 
+def test_the_catalog_similarities_are_looked_up_once_for_a_submission_and_only_when_needed(
+    client, db_session, sample, operator, glenfiddich, monkeypatch
+):
+    calls = []
+    real = menu_review_apply.db_similarities
+    monkeypatch.setattr(menu_review_apply, "db_similarities", lambda session: calls.append(1) or real(session))
+    bourbon, oak = _fourteens(db_session, glenfiddich)
+    _read_as(db_session, sample.items[2], "Glenfiddich 14 Bourbon Cask", extracted_age_years=14)
+    _read_as(db_session, sample.items[3], "Glenfiddich 14 Rich Oak", extracted_age_years=14)
+    body = _choose_for_the_15yo_line(sample, glenfiddich, bourbon)
+    body["itemDecisions"][3] = {
+        "action": "select_existing_product", "extractedItemId": str(sample.items[3].id), "finalLineType": "product",
+        "productId": str(oak.id), "options": [{"pourMl": 30, "priceKrw": 23000}],
+    }
+
+    applied(client, sample, body, operator)
+
+    assert calls == [1]  # two lines on two board entries compared, one lookup
+    assert _checks(db_session, sample.bar.id) == []
+
+
+def test_a_submission_without_a_chosen_product_does_not_look_the_similarities_up(
+    client, db_session, sample, operator, glenfiddich, monkeypatch
+):
+    monkeypatch.setattr(menu_review_apply, "db_similarities", lambda session: pytest.fail("looked up"))
+
+    applied(client, sample, valid_body(sample, glenfiddich), operator)
+
+
 def test_an_edition_in_the_extracted_field_alone_is_not_compared(client, db_session, sample, operator, glenfiddich):
     """Only the line's name and age are compared (pick_check): an edition value the name does not have
     opens no check when the chosen product is the one closest to the name."""
