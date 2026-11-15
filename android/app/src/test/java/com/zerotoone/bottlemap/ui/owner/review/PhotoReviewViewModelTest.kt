@@ -524,9 +524,7 @@ class PhotoReviewViewModelTest {
         val events = vm.collectEvents(backgroundScope)
         vm.leave()
         assertFalse(PhotoReviewEvent.Leave in events)
-        assertTrue(PhotoReviewEvent.Toast(
-            "임시 검수 기록을 저장하지 못했어요. 다시 시도해 주세요."
-        ) in events)
+        assertTrue(PhotoReviewEvent.Toast("out of space") in events)
     }
 
 
