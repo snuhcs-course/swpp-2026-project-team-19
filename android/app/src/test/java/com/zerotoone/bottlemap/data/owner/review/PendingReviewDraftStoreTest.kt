@@ -88,7 +88,7 @@ class PendingReviewDraftStoreTest {
 
     @Test fun conflictWorkingCopyCanShrinkWhileOriginalOversizedBackupStaysImmutable() = runBlocking {
         val original = PendingReviewDraftStore(context) { jwt("owner-working") }
-        val working = PendingReviewDraftStore(context, { jwt("owner-working") }, slot = "working")
+        val working = PendingReviewDraftStore(context, slot = "working") { jwt("owner-working") }
         val oversized = ServerReviewDraftCodec.encode(PhotoReviewState(items = listOf(
             ReviewItem(id = "ocr-1", name = "편집할 내용",
                 draftPriceText = "8".repeat(400_000)),
@@ -104,14 +104,14 @@ class PendingReviewDraftStoreTest {
         // Reopening the app preserves both: the immutable original and the
         // separately trimmed version available for an explicit CAS choice.
         val origAgain = PendingReviewDraftStore(context) { jwt("owner-working") }
-        val workAgain = PendingReviewDraftStore(context, { jwt("owner-working") }, "working")
+        val workAgain = PendingReviewDraftStore(context, slot = "working") { jwt("owner-working") }
         assertTrue(ServerReviewDraftCodec.sameAndroidSnapshot(
             oversized, requireNotNull(origAgain.read("import-working")).content))
         assertTrue(ServerReviewDraftCodec.sameAndroidSnapshot(
             reduced, requireNotNull(workAgain.read("import-working")).content))
         assertFalse(ServerReviewDraftCodec.exceedsServerLimit(
             requireNotNull(workAgain.read("import-working")).content))
-        assertNull(PendingReviewDraftStore(context, { jwt("another-owner") }, "working")
+        assertNull(PendingReviewDraftStore(context, slot = "working") { jwt("another-owner") }
             .read("import-working"))
         workAgain.clear("import-working")
         assertNotNull(origAgain.read("import-working"))
