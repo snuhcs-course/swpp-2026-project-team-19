@@ -635,6 +635,9 @@ object PhotoReviewRules {
                 volumeSource = VolumeSource.MANUAL,
                 rawOptionEdits = x.rawOptionEdits - "volume:main")
             else x.copy(bottle = false, volume = if (x.volume > 0) x.volume else defaultPour,
+                // This was an OCR Bottle label; do not retain a contradictory
+                // Bottle label after the Owner explicitly turned Bottle off.
+                primaryOptionLabel = x.primaryOptionLabel?.takeUnless(::isBottleServingLabel),
                 volumeSource = if (x.volume > 0) x.volumeSource else VolumeSource.DEFAULT)
         }
         val op = x.options.getOrNull(index) ?: return x
