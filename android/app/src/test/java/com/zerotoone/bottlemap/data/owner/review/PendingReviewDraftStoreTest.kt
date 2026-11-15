@@ -65,6 +65,60 @@ class PendingReviewDraftStoreTest {
         assertNull(recreated.read("import-1"))
     }
 
+    @Test fun recoveryPolicyRestoresOnlyMatchingReviewAndServerCas() {
+        fun content(name: String) = ServerReviewDraftCodec.encode(
+            PhotoReviewState(items = listOf(ReviewItem(id = "ocr-1", name = name)))
+        )
+        fun envelope(name: String, expected: Int) =
+            PendingReviewDraftStore.Envelope(
+                reviewVersion = 7, expectedDraftVersion = expected,
+                itemIds = listOf("ocr-1"), content = content(name),
+            )
+        fun remote(name: String, version: Int) =
+            ReviewDraftDto(version, 7, "2026-11-16T00:00:00Z", content(name))
+
+        val local = envelope("latest edit", 3)
+        assertEquals(DraftRecoveryPolicy.Outcome.RESTORE,
+            DraftRecoveryPolicy.decide(remote("older edit", 3), local, null, 7))
+        assertEquals(DraftRecoveryPolicy.Outcome.ACKNOWLEDGED,
+            DraftRecoveryPolicy.decide(remote("latest edit", 4), local, null, 7))
+        assertEquals(DraftRecoveryPolicy.Outcome.REBASE,
+            DraftRecoveryPolicy.decide(
+                remote("in flight", 4), local, envelope("in flight", 3), 7))
+        assertEquals(DraftRecoveryPolicy.Outcome.CONFLICT,
+            DraftRecoveryPolicy.decide(remote("other device", 4), local, null, 7))
+        assertEquals(DraftRecoveryPolicy.Outcome.CONFLICT,
+            DraftRecoveryPolicy.decide(remote("other device", 5), local,
+                envelope("in flight", 3), 7))
+        assertEquals(DraftRecoveryPolicy.Outcome.CONFLICT,
+            DraftRecoveryPolicy.decide(remote("older edit", 3),
+                local.copy(reviewVersion = 6), null, 7))
+        assertEquals(DraftRecoveryPolicy.Outcome.NONE,
+            DraftRecoveryPolicy.decide(remote("older edit", 3), null, null, 7))
+    }
+
+    @Test fun checkpointStoreRetainsLatestEditSeparateFromPreviousInFlightAttempt() =
+        runBlocking {
+            fun envelope(name: String) = PendingReviewDraftStore.Envelope(
+                reviewVersion = 7, expectedDraftVersion = 3,
+                itemIds = listOf("ocr-1"),
+                content = ServerReviewDraftCodec.encode(PhotoReviewState(
+                    items = listOf(ReviewItem(id = "ocr-1", name = name)))),
+            )
+            val attempt = PendingReviewDraftStore(context) { jwt("same-owner") }
+            val checkpoint = PendingReviewDraftStore(context, slot = "checkpoint") {
+                jwt("same-owner")
+            }
+            attempt.write("import-1", envelope("first request"))
+            checkpoint.write("import-1", envelope("newest local edit"))
+            attempt.clear("import-1")
+            assertNull(attempt.read("import-1"))
+            val recovered = requireNotNull(checkpoint.read("import-1"))
+            val decoded = ServerReviewDraftCodec.decode(ReviewDraftDto(
+                3, 7, "2026-11-16T00:00:00Z", recovered.content))
+            assertEquals("newest local edit", decoded?.items?.single()?.name)
+        }
+
     @Test fun oversizedServerDraftSurvivesInPrivateDeviceFileAfterRecreation() = runBlocking {
         val content = ServerReviewDraftCodec.encode(PhotoReviewState(items = listOf(
             ReviewItem(id = "ocr-large", name = "큰 메뉴", draftPriceText = "9".repeat(400_000)),
