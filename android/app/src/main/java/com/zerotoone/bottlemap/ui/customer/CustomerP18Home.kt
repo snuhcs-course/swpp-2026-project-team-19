@@ -107,6 +107,18 @@ internal fun rememberP18Search(context: Context, input: String): List<String> {
     return next
 }
 
+/** UAT 4.1: validation happens before navigation and never records an invalid search. */
+internal fun customerHomeSearchError(query: String): String? {
+    val normalized = query.trim()
+    return when {
+        normalized.isEmpty() -> "검색어를 입력해 주세요."
+        normalized.length > 100 -> "검색어는 100자까지 입력할 수 있어요."
+        normalized.none(Char::isLetterOrDigit) ->
+            "검색할 수 있는 문자가 없습니다. 제품명을 입력해 주세요."
+        else -> null
+    }
+}
+
 internal fun clearP18Recents(context: Context) {
     context.getSharedPreferences("bottlemap-search-history", Context.MODE_PRIVATE)
         .edit().remove(RECENT_KEY).apply()
@@ -125,11 +137,15 @@ internal fun CustomerP18Home(
 ) {
     val context = LocalContext.current
     var search by rememberSaveable { mutableStateOf("") }
+    var searchError by rememberSaveable { mutableStateOf<String?>(null) }
     // Home must always show an empty query after returning from any other route.
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) search = ""
+            if (event == Lifecycle.Event.ON_RESUME) {
+                search = ""
+                searchError = null
+            }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
@@ -147,7 +163,8 @@ internal fun CustomerP18Home(
     }
     fun launch(term: String, source: String) {
         val trimmed = term.trim()
-        if (trimmed.isBlank() || trimmed.length > 100) return
+        customerHomeSearchError(trimmed)?.let { searchError = it; return }
+        searchError = null
         recent = rememberP18Search(context,trimmed)
         onSearch(trimmed,source)
     }
@@ -180,8 +197,12 @@ internal fun CustomerP18Home(
                 Text("어떤 위스키를\n마실까요?",
                     style=MaterialTheme.typography.headlineSmall,
                     fontSize=24.sp,lineHeight=32.sp,color=P18Text)
-                P18SearchField(search, {search=it}, {launch(search,"input")},
-                    modifier=Modifier.fillMaxWidth())
+                P18SearchField(search, { search = it; searchError = null },
+                    { launch(search, "input") }, modifier = Modifier.fillMaxWidth())
+                searchError?.let { message ->
+                    Text(message, color = androidx.compose.ui.graphics.Color(0xFFFFB4AB),
+                        fontSize = 12.sp, modifier = Modifier.testTag("customer-home-search-validation"))
+                }
             }
             Column(Modifier.fillMaxWidth().padding(horizontal=20.dp),
                 verticalArrangement=Arrangement.spacedBy(8.dp)) {
