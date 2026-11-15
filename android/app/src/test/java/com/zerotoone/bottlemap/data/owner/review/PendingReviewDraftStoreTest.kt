@@ -50,6 +50,10 @@ class PendingReviewDraftStoreTest {
             4, 7, "2026-11-15T00:00:00Z", emptyMap()), 7))
         assertFalse(restored.canReplay(ReviewDraftDto(
             3, 8, "2026-11-15T00:00:00Z", emptyMap()), 8))
+        // Even when the CAS number happens to match, never replay across
+        // a server draft created for another OCR review version.
+        assertFalse(restored.canReplay(ReviewDraftDto(
+            3, 8, "2026-11-15T00:00:00Z", emptyMap()), 7))
         val decoded = requireNotNull(ServerReviewDraftCodec.decode(ReviewDraftDto(
             3, 7, "2026-11-15T00:00:00Z", restored.content,
         )))
