@@ -291,7 +291,7 @@ object PhotoReviewRules {
         val required = all.filter { it.required || problems(it, state).isNotEmpty() }
         val done = required.count { it.excluded || problems(it, state).isEmpty() }
         val total = required.size
-        val noDefault = !validVolume(state.defaultPour)
+        val noDefault = !validDefaultPour(state.defaultPour)
         val pending = byGroup[ReviewGroup.PENDING].orEmpty()
         val ready = byGroup[ReviewGroup.READY].orEmpty()
         val other = byGroup[ReviewGroup.OTHER].orEmpty()
@@ -355,7 +355,7 @@ object PhotoReviewRules {
     fun offerVolumeLabel(o: RecognizedOffer, defaultPourMl: Double? = null): String = when {
         o.bottle -> "Bottle"
         (o.volumeMl ?: 0) > 0 -> "${o.volumeMl}ml"
-        defaultPourMl != null && validVolume(defaultPourMl) ->
+        defaultPourMl != null && validDefaultPour(defaultPourMl) ->
             "${defaultPourMl.toInt()}ml"
         else -> ""
     }
