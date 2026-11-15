@@ -29,8 +29,9 @@ import java.text.Normalizer
  *
  * Draft edits use server §5.9 (PR #171) with compare-and-swap draftVersion.
  * Only final publishing uses the separate atomic review-and-apply (§8).
- * Only an upgrade-only, auth-subject-scoped reader can import pre-#171
- * local drafts. There are no new device-local writes.
+ * Pre-#171 local drafts are imported only once. New device-local writes
+ * are exclusively a failure-safe pending copy under §5.9, never the source
+ * of truth and never replayed over a newer server draftVersion.
  *
  * Real OCR, reviewed product IDs and version are always loaded from the
  * owner-authenticated server; never substitute the BASIC demo scenario.
@@ -66,6 +67,8 @@ class LivePhotoReviewRepository(
     private val remote: OwnerRepository = OwnerRepository(),
 ) : PhotoReviewRepository {
     private val appContext = context.applicationContext
+    private val pendingStore = PendingReviewDraftStore(appContext)
+    private var pendingLocally = false
     private var loaded: MenuImportStatusDto? = null
     private var activeImportId: String? = null
     private val draftMutex = Mutex()
@@ -76,6 +79,7 @@ class LivePhotoReviewRepository(
     private var draftNotice: String? = null
 
     override fun consumeDraftNotice(): String? = draftNotice.also { draftNotice = null }
+    override fun hasPendingLocalDraft(): Boolean = pendingLocally
 
     private fun snapshot(): MockOwnerSnapshot = when (val current = owner.state.value) {
         is MockOwnerLoadState.Ready -> current.snapshot
@@ -142,8 +146,10 @@ class LivePhotoReviewRepository(
         val legacy = LegacyReviewDraftReader(appContext)
         val reviewVersion = requireNotNull(response.reviewVersion)
         var saved = response.reviewDraft
+        val pending = pendingStore.read(id)
+        pendingLocally = false
         var migrated = false
-        if (saved == null) {
+        if (saved == null && pending == null) {
             // One-time upgrade: server is empty, so move compatible, scoped
             // pre-#171 edits to the server BEFORE deleting their old file.
             val local = legacy.read(id, reviewVersion, state.items.map { it.id })
@@ -198,12 +204,40 @@ class LivePhotoReviewRepository(
             else -> null
         }
         val canRestore = if (regenerated) parsed != null else compatible(parsed)
-        val chosen = parsed.takeIf { canRestore } ?: state
+        var chosen = parsed.takeIf { canRestore } ?: state
         if (saved != null && !canRestore) {
             // Preserve remote edits: do not silently overwrite an operator's
             // different-schema draft or an incompatible saved OCR grouping.
             draftConflict = true
             draftNotice = "서버 초안의 일부 내용을 복원할 수 없어요. 담당자에게 확인해 주세요."
+        }
+        if (pending != null) {
+            val serverAlreadySaved = saved != null &&
+                saved.draftVersion > pending.expectedDraftVersion &&
+                ServerReviewDraftCodec.sameAndroidSnapshot(pending.content, saved.content)
+            if (serverAlreadySaved) {
+                // Response was lost after a successful PUT. The server copy wins.
+                runCatching { pendingStore.clear(id) }
+            } else if (!draftConflict && pending.canReplay(saved, reviewVersion) &&
+                pending.itemIds == state.items.map { it.id }) {
+                val local = ServerReviewDraftCodec.decode(ReviewDraftDto(
+                    pending.expectedDraftVersion, pending.reviewVersion,
+                    "1970-01-01T00:00:00Z", pending.content,
+                ))
+                if (compatible(local)) {
+                    chosen = requireNotNull(local)
+                    pendingLocally = true
+                    draftNotice = "이 기기에 저장된 변경사항을 복원했어요. 서버에 다시 저장해 주세요."
+                } else {
+                    draftConflict = true
+                    draftNotice = "이 기기의 보관 초안이 현재 검수와 달라요. 자동 덮어쓰기를 막았어요."
+                }
+            } else {
+                // Never replay stale local data across review regeneration,
+                // operator edits, or another device's newer CAS version.
+                draftConflict = true
+                draftNotice = "이 기기에 저장된 초안과 서버 버전이 달라요. 담당자에게 확인해 주세요."
+            }
         }
         // Signed URLs expire, and source observations belong to the server.
         // Restore only owner edits; rebind fresh data to the current response.
@@ -327,6 +361,13 @@ class LivePhotoReviewRepository(
             if (draftConflict) throw ReviewDraftConflictException()
             if (!forceCas && ServerReviewDraftCodec.sameAndroidSnapshot(content, lastSavedContent))
                 return@withLock
+            // Atomic no-backup storage is completed BEFORE network IO so a
+            // process kill after a failed PUT cannot silently lose edits.
+            pendingStore.write(id, PendingReviewDraftStore.Envelope(
+                reviewVersion = version, expectedDraftVersion = draftVersion,
+                itemIds = state.items.map { it.id }, content = content,
+            ))
+            pendingLocally = true
             val request = ReviewDraftSaveRequestDto(
                 draftVersion = draftVersion, reviewVersion = version, content = content,
             )
@@ -349,6 +390,8 @@ class LivePhotoReviewRepository(
                     currentDraft.draftVersion > draftVersion) {
                     draftVersion = currentDraft.draftVersion
                     lastSavedContent = content
+                    pendingLocally = false
+                    runCatching { pendingStore.clear(id) }
                     return@withLock
                 }
                 if (currentDraft != null && currentDraft.draftVersion > draftVersion) {
@@ -362,6 +405,8 @@ class LivePhotoReviewRepository(
             }
             draftVersion = saved.draftVersion
             lastSavedContent = content
+            pendingLocally = false
+            runCatching { pendingStore.clear(id) }
         }
     }
 
@@ -370,6 +415,8 @@ class LivePhotoReviewRepository(
         draftMutex.withLock {
             published = true
             lastSavedContent = null
+            pendingLocally = false
+            runCatching { pendingStore.clear(id) }
         }
     }
 
