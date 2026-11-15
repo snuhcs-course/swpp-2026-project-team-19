@@ -25,6 +25,11 @@ in review, in the order every menu request locks them (API spec 3.14.1), and rea
 after that: a name edit, a publish or a cancel waits until the run commits instead of being overwritten.
 A dry run takes no lock.
 
+An import still processing is not rebuilt: processing builds its draft before it locks its import, and
+the old backend keeps processing with the old rules until the new one starts, so locking it here would not
+help. Such a draft heals on its own: a submission rebuilds the draft and compares it with the stored one,
+and a difference answers REVIEW_OUTDATED with the draft rebuilt on the new rules (spec 8.7).
+
     cd backend
     uv run --env-file .env python scripts/renormalize_aliases.py           # dry run
     uv run --env-file .env python scripts/renormalize_aliases.py --apply

@@ -29,9 +29,14 @@ def draft_too_large() -> ApiError:
 
 
 def check_draft_size(request: ReviewDraftRequest) -> None:
-    """413 when the content written as JSON is over 256 KB; checked with the request's shape."""
-    size = len(json.dumps(request.content, ensure_ascii=False, separators=(",", ":")).encode())
-    if size > MAX_DRAFT_BYTES:
+    """Checked with the request's shape. 400 INVALID_REQUEST when the content has NaN or Infinity: the JSON
+    parser takes them, but they are not JSON and the database's json type refuses them, so the body is not
+    readable JSON (spec 9.2). 413 when the content written as JSON is over 256 KB."""
+    try:
+        text = json.dumps(request.content, ensure_ascii=False, separators=(",", ":"), allow_nan=False)
+    except ValueError:
+        raise ApiError(400, "INVALID_REQUEST", "요청 형식이 올바르지 않습니다.") from None
+    if len(text.encode()) > MAX_DRAFT_BYTES:
         raise draft_too_large()
 
 

@@ -257,3 +257,18 @@ def test_the_response_has_this_saves_version_even_if_another_save_follows(db_ses
     )
 
     assert response.draftVersion == 1
+
+
+@pytest.mark.parametrize("token", ["NaN", "Infinity", "-Infinity"])
+def test_a_draft_with_a_non_json_number_is_an_unreadable_request(client, db_session, sample, operator, token):
+    """Python reads these tokens, but they are not JSON and the database refuses them (spec 9.2)."""
+    body = '{"draftVersion": 0, "reviewVersion": 1, "content": {"clientState": {"zoom": %s}}}' % token
+
+    response = client.put(
+        f"/api/menu-imports/{sample.menu_import.id}/review-draft",
+        content=body,
+        headers={**operator, "Content-Type": "application/json"},
+    )
+
+    assert (response.status_code, response.json()["error"]["code"]) == (400, "INVALID_REQUEST")
+    assert stored(db_session, sample).review_draft is None

@@ -4417,7 +4417,7 @@ operator와 작업 대상 업장의 현재 업주가 호출할 수 있다. 요�
             }
           ],
           "candidates": [],
-          "newProductDraft": { "brandText": null, "category": "whisky", "displayName": "글렌피딕 하이볼", "ageYears": null, "editionName": null, "abv": null }
+          "newProductDraft": null
         }
       ]
     }
@@ -4574,7 +4574,7 @@ operator와 작업 대상 업장의 현재 업주가 호출할 수 있다(검수
 - **동시 수정**: 요청의 `draftVersion`이 서버의 현재 초안 버전과 다르면 아무것도 저장하지 않고 `409 REVIEW_DRAFT_OUTDATED`다. 같은 검수를 두 기기에서, 또는 업주와 operator가 함께 고칠 때 서로의 입력을 덮어쓰지 않게 하기 위해서다. 같으면 초안을 바꾸고 버전을 1 올린다.
 - **잠금**: 메뉴판을 바꾸지 않으므로 업장 행은 잠그지 않는다. 작업 행만 잠그고 상태와 버전을 확인한다. 그래서 검수 제출, 취소와 동시에 와도 차례로 처리되고, 제출이나 취소가 먼저 끝나면 저장은 `409 INVALID_IMPORT_STATE`다.
 - **지우기**: 검수 제출(8)이나 취소(5.7)가 성공하면 같은 트랜잭션에서 초안을 지운다. 초안 버전은 그대로 둔다. 검수 데이터가 다시 만들어져도(`REVIEW_OUTDATED`, 9.4) 초안은 지우지 않는다. 사용자가 그 입력을 다시 적용해야 하기 때문이다.
-- **검사 순서**: 인증(`401`) → 요청 형식(`422`), 크기(`413`) → 작업(`404 MENU_IMPORT_NOT_FOUND`) → 권한(`403`) → 작업 행 잠금 → 상태(`409 INVALID_IMPORT_STATE`) → 초안 버전(`409 REVIEW_DRAFT_OUTDATED`).
+- **검사 순서**: 인증(`401`) → 요청 형식(`400`, `422`), 크기(`413`) → 작업(`404 MENU_IMPORT_NOT_FOUND`) → 권한(`403`) → 작업 행 잠금 → 상태(`409 INVALID_IMPORT_STATE`) → 초안 버전(`409 REVIEW_DRAFT_OUTDATED`).
 
 `200 OK`
 
@@ -4588,6 +4588,7 @@ operator와 작업 대상 업장의 현재 업주가 호출할 수 있다(검수
 
 | HTTP | code | 발생 조건 | 프론트엔드 처리 |
 |---|---|---|---|
+| `400` | `INVALID_REQUEST` | 본문이 JSON이 아님. `content`에 JSON에 없는 수(`NaN`, `Infinity`)가 있는 경우도 같다(9.2) | 앱 버그로 보고 기록 |
 | `401` | `UNAUTHENTICATED` | 3.1.5 | 3.1.5 |
 | `403` | `FORBIDDEN` | operator도 작업 대상 업장의 업주도 아님 | 3.1.5 |
 | `404` | `MENU_IMPORT_NOT_FOUND` | 작업이 없거나 `menuImportId`가 UUID 형식이 아님 | 작업 목록으로 이동 |
@@ -5365,7 +5366,7 @@ API가 보내는 오류는 예상하지 못한 서버 오류(`500 INTERNAL_ERROR
 | `500` | `INTERNAL_ERROR` | 예상하지 못한 서버 오류(DB 연결 실패, 코드 오류 등). 모든 API에서 생길 수 있다. 원인은 응답에 담지 않고 서버 로그에만 남긴다 | 잠시 후 재시도 안내 |
 | `503` | `SERVICE_UNAVAILABLE` | 서버의 인증 설정 누락 또는 오류, Supabase JWKS 조회 실패 (3.1.5) | 잠시 후 재시도 안내. 로그인 화면으로 보내지 않음 |
 
-- `400 INVALID_REQUEST`는 JSON 본문을 읽을 수 없거나 multipart 본문의 구조(경계 문자열 등)가 깨졌을 때이며 `fieldErrors`는 비어 있다. JSON으로 읽었지만 필드 값이 규칙에 맞지 않으면 `422 VALIDATION_FAILED`다. 끝이 잘린 multipart 본문은 읽을 수 있는 부분까지만 읽히므로, 빠진 필드가 `422`의 `MISSING`으로 나올 수 있다. 서버는 요청 본문을 다른 검사보다 먼저 읽으므로, 이 오류는 인증(`401`)과 각 API의 확인 순서보다 먼저 나온다. 앱이 만든 요청에서는 생기지 않으므로 앱 버그로 본다.
+- `400 INVALID_REQUEST`는 JSON 본문을 읽을 수 없거나 multipart 본문의 구조(경계 문자열 등)가 깨졌을 때이며 `fieldErrors`는 비어 있다. JSON으로 읽었지만 필드 값이 규칙에 맞지 않으면 `422 VALIDATION_FAILED`다. 끝이 잘린 multipart 본문은 읽을 수 있는 부분까지만 읽히므로, 빠진 필드가 `422`의 `MISSING`으로 나올 수 있다. 서버는 요청 본문을 다른 검사보다 먼저 읽으므로, 이 오류는 인증(`401`)과 각 API의 확인 순서보다 먼저 나온다. 예외는 검수 초안(5.9)의 `content`에 있는 `NaN`과 `Infinity`다. JSON에 없는 수이지만 서버의 JSON 파서가 읽어 들이므로 인증 뒤 요청 형식 단계에서 이 오류로 바꾼다. 앱이 만든 요청에서는 생기지 않으므로 앱 버그로 본다.
 - 라우팅이나 인증 단계에서 생긴 HTTP 오류 중 위 표에 없는 상태 코드도 같은 공통 형식으로 반환한다. 없는 경로는 `404 NOT_FOUND`, 경로는 있지만 메서드가 다르면 `405 METHOD_NOT_ALLOWED`, 그 밖은 `code = HTTP_ERROR`다. 프론트엔드는 HTTP 상태 코드 기준의 일반 오류 메시지를 보여 준다.
 
 ### 9.3 필드 검증 오류 예시

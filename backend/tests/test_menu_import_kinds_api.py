@@ -65,6 +65,9 @@ def test_the_review_proposes_other_lines_as_non_whisky_menus(client, operator, i
     lines = {line["extractedItemId"]: line for image in review["images"] for line in image["items"]}
     assert lines[str(items[3].id)]["extractedKind"] == "other"
     assert lines[str(items[3].id)]["proposedProductId"] is None
+    # Not a whisky to create (spec 5.4); the whisky line keeps its draft.
+    assert lines[str(items[3].id)]["newProductDraft"] is None
+    assert lines[str(items[1].id)]["newProductDraft"]["displayName"] == "글렌피딕 12년"
     adds = {c["extractedItemId"]: c["after"] for c in review["proposedChanges"] if c["changeType"] == "add"}
     assert (adds[str(items[3].id)]["productId"], adds[str(items[3].id)]["kind"]) == (None, "other")
     assert adds[str(items[1].id)]["kind"] == "whisky"

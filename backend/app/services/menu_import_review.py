@@ -187,7 +187,8 @@ def _review_item(item: ExtractedItem, products: dict[UUID, Product], boxes: dict
                 editionName=item.extracted_edition_name,
                 abv=_float(item.extracted_abv),
             )
-            if effective == LineType.PRODUCT
+            # A line the AI read as another menu is not a whisky to create (spec 5.4).
+            if effective == LineType.PRODUCT and item.extracted_kind != MenuItemKind.OTHER
             else None
         ),
     )
