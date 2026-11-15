@@ -87,4 +87,55 @@ class ServerReviewDraftCodecTest {
         assertNotNull(ex)
         assertTrue(ex!!.message.orEmpty().contains("256KB"))
     }
+    @Test fun operatorStandardDraftRestoresSimpleNamePriceAndLinkedProduct() {
+        val state = PhotoReviewState(items = listOf(
+            ReviewItem(id = "ocr-1", name = "인식된 이름",
+                price = 12000.0, volume = 30.0,
+                primarySourceOptionId = "opt-1"),
+        ))
+        val server = ReviewDraftDto(2, 3, "2026-11-15T00:00:00Z", mapOf(
+            "itemDecisions" to listOf(mapOf(
+                "extractedItemId" to "ocr-1",
+                "action" to "select_existing_product",
+                "productId" to "catalog-a",
+                "correctedProductName" to "수정된 상품",
+                "options" to listOf(mapOf(
+                    "extractedOptionId" to "opt-1",
+                    "optionLabel" to "잔",
+                    "pourMl" to 30,
+                    "priceKrw" to 15000,
+                )),
+            )),
+            "changeDecisions" to emptyList<Any>(),
+        ))
+        val restored = requireNotNull(ServerReviewDraftCodec.restoreStandard(server,state))
+            .items.single()
+        assertEquals("catalog-a", restored.linkedProductId)
+        assertEquals("수정된 상품", restored.name)
+        assertEquals(15000.0, restored.price, 0.0)
+        assertEquals("opt-1",restored.primarySourceOptionId)
+        assertTrue(restored.matchConfirmed)
+    }
+
+    @Test fun operatorChangeDecisionOrUnknownOptionCannotBeSilentlyDiscarded() {
+        val state=PhotoReviewState(items=listOf(ReviewItem(
+            id="ocr-1",name="위스키",primarySourceOptionId="opt-1",
+        )))
+        val decisions=listOf(mapOf(
+            "extractedItemId" to "ocr-1",
+            "options" to listOf(mapOf(
+                "extractedOptionId" to "wrong-id", "pourMl" to 30,
+                "priceKrw" to 12000,
+            )),
+        ))
+        val saved=ReviewDraftDto(2,3,"2026-11-15T00:00:00Z",mapOf(
+            "itemDecisions" to decisions, "changeDecisions" to emptyList<Any>(),
+        ))
+        assertNull(ServerReviewDraftCodec.restoreStandard(saved,state))
+        val withIgnore=saved.copy(content=saved.content + mapOf(
+            "changeDecisions" to listOf(mapOf("changeId" to "change-a", "decision" to "ignore")),
+        ))
+        assertNull(ServerReviewDraftCodec.restoreStandard(withIgnore,state))
+    }
+
 }
