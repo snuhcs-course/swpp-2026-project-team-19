@@ -145,8 +145,6 @@ class LivePhotoReviewRepository(
     private var loaded: MenuImportStatusDto? = null
     private var activeImportId: String? = null
     private val draftMutex = Mutex()
-    // Device checkpoint writes must never wait for an older remote PUT.
-    private val checkpointMutex = Mutex()
     private var draftVersion = 0
     private var published = false
     private var draftConflict = false
@@ -207,47 +205,17 @@ class LivePhotoReviewRepository(
         // the explicit device-over-server conflict choice.
         fun compatible(candidate: PhotoReviewState?): Boolean =
             compatibleOwnerReviewDraft(candidate, state)
-        val legacy = LegacyReviewDraftReader(appContext)
-        val reviewVersion = requireNotNull(response.reviewVersion)
-        var saved = response.reviewDraft
-        val pending = pendingStore.read(id)
+        // The server Draft is the only recovery source. Old device-only
+        // backups (including prior checkpoint experiments) must not restore
+        // stale decisions or trap the Owner in local-conflict editing.
+        // A failed server save still prevents leaving via the existing UI.
+        runCatching { pendingStore.clear(id) }
+        runCatching { workingStore.clear(id) }
+        runCatching { LegacyReviewDraftReader(appContext).clear(id) }
         pendingLocally = false
         pendingOversized = false
-        var migrated = false
-        if (saved == null && pending == null) {
-            // One-time upgrade: server is empty, so move compatible, scoped
-            // pre-#171 edits to the server BEFORE deleting their old file.
-            val local = legacy.read(id, reviewVersion, state.items.map { it.id })
-            if (compatible(local)) {
-                val content = ServerReviewDraftCodec.encode(requireNotNull(local))
-                val acknowledgement = try {
-                    remote.saveMenuReviewDraft(id, ReviewDraftSaveRequestDto(
-                        draftVersion = 0, reviewVersion = reviewVersion, content = content,
-                    ))
-                } catch (error: BottleMapApiException) {
-                    if (error.code != "REVIEW_DRAFT_OUTDATED") throw error
-                    // Another editor won the first save. Its server draft wins,
-                    // never overwrite it with the legacy file.
-                    val newer = remote.getMenuImport(id)
-                    newer.reviewDraft
-                        ?: throw ReviewDraftConflictException()
-                    null
-                }
-                if (acknowledgement != null) {
-                    saved = ReviewDraftDto(acknowledgement.draftVersion,
-                        reviewVersion, acknowledgement.savedAt, content)
-                    migrated = true
-                    runCatching { legacy.clear(id) }
-                } else {
-                    saved = remote.getMenuImport(id).reviewDraft
-                }
-            }
-        } else if (saved != null) {
-            // The server already has a canonical draft. Never import legacy
-            // values on top of another editor's changes. Pending backups are
-            // separate and can only replay after exact version checks.
-            runCatching { legacy.clear(id) }
-        }
+        val reviewVersion = requireNotNull(response.reviewVersion)
+        val saved = response.reviewDraft
         val parsedAndroid = saved?.let(ServerReviewDraftCodec::decode)
         val regenerated = saved != null && saved.reviewVersion != reviewVersion
         val parsed = if (parsedAndroid != null) {
@@ -262,96 +230,20 @@ class LivePhotoReviewRepository(
         published = false
         lastSavedContent = saved?.content
         draftNotice = when {
-            migrated -> "기존 검수 임시 기록을 서버에 옮겼어요."
             saved == null -> null
             parsed == null -> "다른 클라이언트에서 저장한 초안을 확인해 주세요."
-            // A compatible web/operator draft is restored without an
-            // informational popup. Incompatible drafts still show an error.
-            parsedAndroid == null -> null
+            // A compatible web draft needs no informational popup.
             saved.reviewVersion != reviewVersion ->
                 "검수 버전이 변경됐어요. 남아 있는 항목만 다시 확인해 주세요."
             else -> null
         }
         val canRestore = if (regenerated) parsed != null else compatible(parsed)
-        var chosen = parsed.takeIf { canRestore } ?: state
+        val chosen = parsed.takeIf { canRestore } ?: state
         if (saved != null && !canRestore) {
             // Preserve remote edits: do not silently overwrite an operator's
             // different-schema draft or an incompatible saved OCR grouping.
             draftConflict = true
             draftNotice = "서버 초안의 일부 내용을 복원할 수 없어요. 담당자에게 확인해 주세요."
-        }
-        if (pending != null) {
-            val working = workingStore.read(id)
-            pendingOversized = ServerReviewDraftCodec.exceedsServerLimit(
-                (working ?: pending).content)
-            val serverAlreadySaved =
-                DraftSaveSafety.latestCopyAcknowledged(saved, pending, working)
-            if (serverAlreadySaved) {
-                // A lost successful CAS response may have saved the explicit
-                // working copy. Clear both only on exact content match.
-                runCatching { pendingStore.clear(id) }
-                runCatching { workingStore.clear(id) }
-            } else if (!draftConflict &&
-                pending.canRebaseAfterLostResponse(saved, reviewVersion) &&
-                pending.itemIds == state.items.map { it.id }) {
-                // Our previous PUT was committed, but its response was lost
-                // after a later edit was checkpointed. This is NOT a foreign
-                // CAS conflict: replay the newer device state against the
-                // proven server version, never silently discard it.
-                val latest = working ?: pending
-                val recovered = ServerReviewDraftCodec.decode(ReviewDraftDto(
-                    latest.expectedDraftVersion, latest.reviewVersion,
-                    "1970-01-01T00:00:00Z", latest.content,
-                ))
-                if (compatible(recovered)) {
-                    pendingStore.write(id, pending.copy(
-                        expectedDraftVersion = requireNotNull(saved).draftVersion,
-                        inFlightContent = null, inFlightDraftVersion = null,
-                    ))
-                    chosen = requireNotNull(recovered)
-                    pendingLocally = true
-                    pendingOversized = ServerReviewDraftCodec.exceedsServerLimit(latest.content)
-                    draftNotice = "이 기기에 저장된 변경사항을 복원했어요. 서버에 다시 저장해 주세요."
-                } else {
-                    draftConflict = true
-                    pendingDraftConflict = true
-                    draftNotice = "기기 초안이 최신 검수 항목과 달라요. 원본을 보관했어요."
-                }
-            } else if (!draftConflict && pending.canReplay(saved, reviewVersion) &&
-                pending.itemIds == state.items.map { it.id }) {
-                val local = ServerReviewDraftCodec.decode(ReviewDraftDto(
-                    pending.expectedDraftVersion, pending.reviewVersion,
-                    "1970-01-01T00:00:00Z", pending.content,
-                ))
-                if (compatible(local)) {
-                    chosen = requireNotNull(local)
-                    pendingLocally = true
-                    pendingOversized = ServerReviewDraftCodec.exceedsServerLimit(pending.content)
-                    draftNotice = if (pendingOversized)
-                        "이 기기의 큰 초안을 복원했어요. 서버 256KB 제한에 맞게 입력 내용을 줄여 주세요."
-                    else "이 기기에 저장된 변경사항을 복원했어요. 서버에 다시 저장해 주세요."
-                } else {
-                    draftConflict = true
-                    pendingDraftConflict = true
-                    draftNotice = "이 기기의 보관 초안이 현재 검수와 달라요. 자동 덮어쓰기를 막았어요."
-                }
-            } else {
-                // Never replay stale local data across review regeneration,
-                // operator edits, or another device's newer CAS version.
-                draftConflict = true
-                pendingDraftConflict = true
-                draftNotice = "이 기기에 저장된 초안과 서버 버전이 달라요. 서버와 이 기기의 초안 중 선택해 주세요."
-            }
-        }
-        // Do not offer a destructive draft choice when a foreign/operator
-        // server draft cannot actually be represented on the Android screen.
-        // Preserve the local backup for human reconciliation instead.
-        if (pending != null && saved != null && !canRestore) {
-            pendingDraftConflict = false
-            throw IllegalStateException(
-                "최신 서버 초안을 이 화면에서 안전하게 표시할 수 없어요. " +
-                    "기기에 보관된 변경 내용은 유지했어요. 담당자에게 확인해 주세요."
-            )
         }
         // Signed URLs expire, and source observations belong to the server.
         // Restore only owner edits; rebind fresh data to the current response.
@@ -581,66 +473,6 @@ class LivePhotoReviewRepository(
         }
     }
 
-    /**
-     * Checkpoint only the latest UI edit. The separate mutex lets this write
-     * finish even if an earlier remote CAS is still waiting on the network.
-     */
-    override suspend fun checkpointDraft(state: PhotoReviewState) {
-        val id = activeImportId ?: error("검수 작업을 먼저 불러와 주세요.")
-        val version = loaded?.reviewVersion ?: error("검수 정보를 먼저 불러와 주세요.")
-        val content = ServerReviewDraftCodec.encode(state)
-        checkpointMutex.withLock {
-            if (published) return@withLock
-            if (editingLocalConflict && draftConflict) {
-                val original = pendingStore.read(id)
-                    ?: error("보호된 기기 원본 초안을 찾지 못했어요.")
-                workingStore.write(id, original.copy(content = content,
-                    itemIds = state.items.map { it.id }))
-            } else {
-                DraftSaveSafety.assertWritable(draftConflict)
-                val previous = pendingStore.read(id)
-                pendingStore.write(id, PendingReviewDraftStore.Envelope(
-                    reviewVersion = version, expectedDraftVersion = draftVersion,
-                    itemIds = state.items.map { it.id }, content = content,
-                    inFlightContent = previous?.inFlightContent,
-                    inFlightDraftVersion = previous?.inFlightDraftVersion,
-                ))
-            }
-            pendingLocally = true
-            pendingOversized = ServerReviewDraftCodec.exceedsServerLimit(content)
-        }
-    }
-
-    /** Keep a newer on-device checkpoint after an older remote PUT succeeds. */
-    private suspend fun acknowledgeDraft(
-        id: String, acknowledged: Map<String, Any?>, version: Int,
-    ) {
-        checkpointMutex.withLock {
-            val pending = pendingStore.read(id)
-            when {
-                pending == null -> {
-                    pendingLocally = false
-                    pendingOversized = false
-                }
-                ServerReviewDraftCodec.sameAndroidSnapshot(pending.content, acknowledged) -> {
-                    pendingStore.clear(id)
-                    pendingLocally = false
-                    pendingOversized = false
-                }
-                else -> {
-                    // A later edit may have been checkpointed while this PUT
-                    // was in flight. Rebase it onto the acknowledged CAS.
-                    pendingStore.write(id, pending.copy(
-                        expectedDraftVersion = version,
-                        inFlightContent = null, inFlightDraftVersion = null,
-                    ))
-                    pendingLocally = true
-                    pendingOversized = ServerReviewDraftCodec.exceedsServerLimit(pending.content)
-                }
-            }
-        }
-    }
-
     /** §5.9 optimistic concurrency: never silently replace another editor. */
     override suspend fun saveDraft(state: PhotoReviewState) = saveDraftInternal(state, forceCas = false)
 
@@ -657,9 +489,15 @@ class LivePhotoReviewRepository(
             // an operator/device has advanced the server CAS. Do not touch it
             // until the owner explicitly resolves the conflict.
             if (editingLocalConflict && draftConflict) {
-                // Checkpoint separately from network IO; never submit while
-                // editing a protected local conflict working copy.
-                checkpointDraft(state)
+                // No server PUT is allowed during conflict editing, even
+                // after the working copy is reduced under the server limit.
+                // Explicit confirmation in chooseLocalDraft is required.
+                val original = pendingStore.read(id)
+                    ?: error("보호된 기기 원본 초안을 찾지 못했어요.")
+                workingStore.write(id, original.copy(content = content,
+                    itemIds = state.items.map { it.id }))
+                pendingLocally = true
+                pendingOversized = ServerReviewDraftCodec.exceedsServerLimit(content)
                 throw ReviewDraftLocalEditingException()
             }
             DraftSaveSafety.assertWritable(draftConflict)
@@ -669,34 +507,18 @@ class LivePhotoReviewRepository(
                     content, lastSavedContent)) return@withLock
             // Atomic no-backup storage is completed BEFORE network IO so a
             // process kill after a failed PUT cannot silently lose edits.
-            checkpointMutex.withLock {
-                // An older PUT may reach this point after the next keystroke
-                // has already been checkpointed. Never overwrite that copy.
-                if (pendingStore.read(id) == null) {
-                    pendingStore.write(id, PendingReviewDraftStore.Envelope(
-                        reviewVersion = version, expectedDraftVersion = draftVersion,
-                        itemIds = state.items.map { it.id }, content = content,
-                    ))
-                    pendingLocally = true
-                }
-            }
-            // Check size of this request, not a newer local checkpoint.
-            val requestOversized = ServerReviewDraftCodec.exceedsServerLimit(content)
-            if (requestOversized) pendingOversized = true
-            if (requestOversized) throw ReviewDraftTooLargeLocalException()
+            pendingStore.write(id, PendingReviewDraftStore.Envelope(
+                reviewVersion = version, expectedDraftVersion = draftVersion,
+                itemIds = state.items.map { it.id }, content = content,
+            ))
+            pendingLocally = true
+            // A server-rejected large snapshot still survives on device.
+            // Never make a PUT that §5.9 must reject above 256 KiB.
+            pendingOversized = ServerReviewDraftCodec.exceedsServerLimit(content)
+            if (pendingOversized) throw ReviewDraftTooLargeLocalException()
             val request = ReviewDraftSaveRequestDto(
                 draftVersion = draftVersion, reviewVersion = version, content = content,
             )
-            // Mark the exact in-flight request in the device backup BEFORE
-            // network IO. It lets a later process detect a lost 200 response
-            // without mistaking this device's last edit for a foreign conflict.
-            checkpointMutex.withLock {
-                val onDisk = pendingStore.read(id)
-                    ?: error("서버 전송 전 기기 초안을 확인할 수 없어요.")
-                pendingStore.write(id, onDisk.copy(
-                    inFlightContent = content, inFlightDraftVersion = draftVersion,
-                ))
-            }
             val saved = try {
                 remote.saveMenuReviewDraft(id, request)
             } catch (cancelled: CancellationException) {
@@ -721,7 +543,9 @@ class LivePhotoReviewRepository(
                     currentDraft.draftVersion > draftVersion) {
                     draftVersion = currentDraft.draftVersion
                     lastSavedContent = content
-                    acknowledgeDraft(id, content, draftVersion)
+                    pendingLocally = false
+                    pendingOversized = false
+                    runCatching { pendingStore.clear(id) }
                     return@withLock
                 }
                 if (currentDraft != null && currentDraft.draftVersion > draftVersion) {
@@ -736,8 +560,10 @@ class LivePhotoReviewRepository(
             }
             draftVersion = saved.draftVersion
             lastSavedContent = content
+            pendingLocally = false
+            pendingOversized = false
             pendingDraftConflict = false
-            acknowledgeDraft(id, content, draftVersion)
+            runCatching { pendingStore.clear(id) }
         }
     }
 
