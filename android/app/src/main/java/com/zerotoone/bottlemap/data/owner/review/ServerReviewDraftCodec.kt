@@ -76,7 +76,8 @@ internal object ServerReviewDraftCodec {
                 "priceKrw" to option.price.toInt(),
             )
         }
-        if (validOptions.isNotEmpty()) decision["options"] = validOptions
+        if (validOptions.isNotEmpty() || !item.primaryHasOption && item.options.isEmpty())
+            decision["options"] = validOptions
         if (validOptions.isNotEmpty() && item.name.isNotBlank()) {
             if (item.linkedProductId != null && item.matchConfirmed) {
                 decision["action"] = "select_existing_product"
@@ -138,7 +139,19 @@ internal object ServerReviewDraftCodec {
         val client = saved.content["clientState"] as? Map<*, *> ?: return null
         if ((client["androidSchemaVersion"] as? Number)?.toInt() != 1) return null
         val json = client["androidStateJson"] as? String ?: return null
-        return runCatching { stateAdapter.fromJson(json) }.getOrNull()
+        val restored = runCatching { stateAdapter.fromJson(json) }.getOrNull() ?: return null
+        // clientState is advisory. Operator web may have changed standard
+        // decisions without removing an older Android UI snapshot.
+        val serverDecisions = saved.content["itemDecisions"] ?: return null
+        val locallyDerived = runCatching { encode(restored)["itemDecisions"] }.getOrNull()
+            ?: return null
+        fun normalize(value: Any?): Any? = when (value) {
+            is Number -> value.toDouble()
+            is List<*> -> value.map(::normalize)
+            is Map<*, *> -> value.entries.associate { (k, v) -> k to normalize(v) }
+            else -> value
+        }
+        return restored.takeIf { normalize(serverDecisions) == normalize(locallyDerived) }
     }
     /**
      * Drafts written by the operator web may not contain Android's UI
