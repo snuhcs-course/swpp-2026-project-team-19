@@ -7,6 +7,8 @@ is moved to the right item instead:
   moves to that old item.
 - A line of product P linked to Q moves to Q's item (the old one, or a new one); P's item stays off the
   board for a later add.
+- Unlinking a line of product P (a corrected name that names no product, spec 3.14.4) moves it to a new
+  unlinked whisky item named by the line; P's item stays off the board.
 - When Q is already another line on the board, the two lines merge. The line that was Q's stays, with its
   name, position and sold-out mark; the moving line's options are added after its own, and an option with
   the same label and pour size but another price keeps the staying line's price and discount. The prices
@@ -56,6 +58,19 @@ def link_entry(session: Session, board: MenuBoard, entry: MenuBoardEntry, produc
         target = BarMenuItem(bar_id=board.bar_id, product_id=product_id)
         session.add(target)
         session.flush()
+    target.sold_out_at, item.sold_out_at = item.sold_out_at, None
+    entry.bar_menu_item = target
+    session.flush()
+    return LinkResult(entry, left_item_id=item.id)
+
+
+def unlink_entry(session: Session, entry: MenuBoardEntry, key: str) -> LinkResult:
+    """Move a line linked to a product to a new unlinked whisky item with name key `key`. The caller has
+    checked that no other unlinked line on the board has that key (spec 3.14.4)."""
+    item = entry.bar_menu_item
+    target = BarMenuItem(bar_id=item.bar_id, kind=MenuItemKind.WHISKY, name_key=key)
+    session.add(target)
+    session.flush()
     target.sold_out_at, item.sold_out_at = item.sold_out_at, None
     entry.bar_menu_item = target
     session.flush()

@@ -1,7 +1,14 @@
 from uuid import UUID
 
 from app.models import ImportMode, MenuChangeType
-from app.services.menu_diff import CurrentEntry, DraftChange, ProposedEntry, compute_draft_changes
+from app.services.menu_diff import (
+    CurrentEntry,
+    DraftChange,
+    ProposedEntry,
+    compute_draft_changes,
+    group_lines,
+    merge_options,
+)
 
 ITEM = [UUID(int=100 + n) for n in range(6)]
 PRODUCT = [UUID(int=200 + n) for n in range(4)]
@@ -59,15 +66,83 @@ def test_partial_update_never_removes():
     assert compute_draft_changes([], board, ImportMode.PARTIAL_UPDATE) == []
 
 
-def test_first_occurrence_of_a_product_wins():
+def test_lines_of_the_same_product_make_one_change_with_merged_options():
+    """A glass line and a bottle-corner line of one whisky (spec 8.12)."""
     board = [current(BAR_ITEM[0], PRODUCT[0])]
-    later_price = (("잔", None, 99000),)
+    glass, bottle = (("잔", None, 11000),), (("병", None, 150000),)
 
-    changes = compute_draft_changes(
-        [proposed(ITEM[0], PRODUCT[0]), proposed(ITEM[1], PRODUCT[0], later_price)], board, ImportMode.FULL_REPLACE
+    same = compute_draft_changes(
+        [proposed(ITEM[0], PRODUCT[0], glass), proposed(ITEM[1], PRODUCT[0], bottle)], board, ImportMode.FULL_REPLACE
+    )
+    changed = compute_draft_changes(
+        [proposed(ITEM[0], PRODUCT[0], glass), proposed(ITEM[1], PRODUCT[0], (("병", None, 99000),))],
+        board,
+        ImportMode.FULL_REPLACE,
     )
 
-    assert changes == []
+    assert same == []
+    assert changed == [DraftChange(MenuChangeType.UPDATE, bar_menu_item_id=BAR_ITEM[0], extracted_item_id=ITEM[0])]
+    assert changed[0].extracted_item_ids == (ITEM[0], ITEM[1])
+
+
+def test_an_option_equal_to_an_earlier_one_is_kept_once():
+    """The same board photographed twice."""
+    changes = compute_draft_changes(
+        [proposed(ITEM[0], PRODUCT[0]), proposed(ITEM[1], PRODUCT[1]), proposed(ITEM[2], PRODUCT[0])],
+        [current(BAR_ITEM[0], PRODUCT[0])],
+        ImportMode.PARTIAL_UPDATE,
+    )
+
+    assert changes == [DraftChange(MenuChangeType.ADD, extracted_item_id=ITEM[1])]
+    assert merge_options([GLASS_BOTTLE, GLASS_BOTTLE[1:], (("잔", 30, 1),)]) == (*GLASS_BOTTLE, ("잔", 30, 1))
+
+
+def test_group_lines_keeps_menu_order_and_leaves_lines_without_a_key_alone():
+    groups = group_lines(
+        [
+            (ITEM[0], ("product", PRODUCT[0])),
+            (ITEM[1], ("name", "하이볼")),
+            (ITEM[2], ("name", "")),
+            (ITEM[3], ("product", PRODUCT[0])),
+            (ITEM[4], None),
+            (ITEM[5], ("name", "하이볼")),
+        ]
+    )
+
+    assert groups == {
+        ITEM[0]: (ITEM[0], ITEM[3]),
+        ITEM[1]: (ITEM[1], ITEM[5]),
+        ITEM[2]: (ITEM[2],),
+        ITEM[4]: (ITEM[4],),
+    }
+
+
+def test_any_line_of_a_group_can_take_over_the_unlinked_entry_of_its_name_key():
+    board = [unlinked(BAR_ITEM[0], "unknowndistillery25")]
+    lines = [
+        ProposedEntry(ITEM[0], PRODUCT[0], GLASS_BOTTLE, name_key="ud25"),
+        ProposedEntry(ITEM[1], PRODUCT[0], GLASS_BOTTLE, name_key="unknowndistillery25"),
+    ]
+
+    changes = compute_draft_changes(lines, board, ImportMode.PARTIAL_UPDATE)
+
+    assert changes == [DraftChange(MenuChangeType.UPDATE, bar_menu_item_id=BAR_ITEM[0], extracted_item_id=ITEM[0])]
+    assert changes[0].extracted_item_ids == (ITEM[0], ITEM[1])
+
+
+def test_a_group_meeting_an_entry_already_taken_over_is_added():
+    board = [unlinked(BAR_ITEM[0], "unknowndistillery25")]
+    lines = [
+        ProposedEntry(ITEM[0], PRODUCT[0], GLASS_BOTTLE, name_key="unknowndistillery25"),
+        unmatched(ITEM[1], "unknowndistillery25"),
+    ]
+
+    changes = compute_draft_changes(lines, board, ImportMode.PARTIAL_UPDATE)
+
+    assert changes == [
+        DraftChange(MenuChangeType.UPDATE, bar_menu_item_id=BAR_ITEM[0], extracted_item_id=ITEM[0]),
+        DraftChange(MenuChangeType.ADD, extracted_item_id=ITEM[1]),
+    ]
 
 
 def test_every_unmatched_item_is_an_add():
@@ -155,7 +230,7 @@ def test_a_matched_line_whose_product_is_on_the_board_keeps_to_that_entry():
     assert changes == [DraftChange(MenuChangeType.REMOVE, bar_menu_item_id=BAR_ITEM[1])]
 
 
-def test_lines_without_a_name_key_are_added_and_repeated_keys_take_the_first():
+def test_lines_without_a_name_key_are_added_and_lines_of_one_name_key_are_one_change():
     board = [unlinked(BAR_ITEM[0], "하이볼", (("잔", None, 1),))]
 
     changes = compute_draft_changes(
@@ -169,3 +244,4 @@ def test_lines_without_a_name_key_are_added_and_repeated_keys_take_the_first():
         DraftChange(MenuChangeType.UPDATE, bar_menu_item_id=BAR_ITEM[0], extracted_item_id=ITEM[1]),
         DraftChange(MenuChangeType.ADD, extracted_item_id=ITEM[3]),
     ]
+    assert changes[1].extracted_item_ids == (ITEM[1], ITEM[2])

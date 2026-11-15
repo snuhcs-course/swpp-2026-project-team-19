@@ -155,7 +155,7 @@ class ChangeBefore(BaseModel):
 
 class ChangeAfter(BaseModel):
     productId: UUID | None = Field(description="Proposed product; null when the item matched no product")
-    kind: MenuItemKind = Field(description="The line's extractedKind")
+    kind: MenuItemKind = Field(description="The lines' extractedKind; whisky when any merged line is whisky")
     displayName: str | None = Field(description="Canonical product name, or the extracted name when unmatched")
     options: list[ChangeAfterOption]
 
@@ -164,7 +164,13 @@ class ProposedChange(BaseModel):
     changeId: UUID
     changeType: MenuChangeType
     barMenuItemId: UUID | None
-    extractedItemId: UUID | None
+    extractedItemId: UUID | None = Field(description="The first of `extractedItemIds`; null for remove")
+    extractedItemIds: list[UUID] = Field(
+        description=(
+            "Every line merged into this change, in menu order: lines proposed as the same product, or "
+            "without one under the same name key (spec 8.12); empty for remove"
+        )
+    )
     before: ChangeBefore | None = Field(description="Published values; null for add")
     after: ChangeAfter | None = Field(description="Proposed values; null for remove")
     summary: str = Field(description="Display text only; never used for validation")

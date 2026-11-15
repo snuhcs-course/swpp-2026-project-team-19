@@ -80,7 +80,7 @@ def adding(product, menu_version) -> dict:
     return {"menuVersion": menu_version, "productId": str(product.id), "options": [option()]}
 
 
-def editing(menu_version, options=None, *, name="12") -> dict:
+def editing(menu_version, options=None, *, name="글렌피딕 12년") -> dict:
     return {"menuVersion": menu_version, "displayName": name, "options": [option()] if options is None else options}
 
 

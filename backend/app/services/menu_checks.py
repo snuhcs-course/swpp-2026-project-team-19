@@ -78,6 +78,34 @@ def _dismiss(check: MenuItemCheck) -> None:
     check.resolved_at = func.clock_timestamp()
 
 
+def move_open_check(session: Session, item_id: UUID, now_on: BarMenuItem, display_name: str) -> None:
+    """The board line of `item_id` moved to `now_on` (spec 3.18.1, check cleanup): its open check moves
+    with it, merging into `now_on`'s open check if it has one (a reason with the same source once)."""
+    check = open_check(session, item_id)
+    if check is None or now_on.id == item_id:
+        return
+    check.display_name = display_name
+    target = open_check(session, now_on.id)
+    if target is None:
+        check.bar_menu_item_id = now_on.id
+        session.flush()
+        return
+    known = {(r.reason, r.source_extracted_item_id) for r in target.reasons}
+    for reason in check.reasons:
+        if (reason.reason, reason.source_extracted_item_id) not in known:
+            target.reasons.append(
+                MenuItemCheckReason(
+                    reason=reason.reason,
+                    source_menu_import_id=reason.source_menu_import_id,
+                    source_extracted_item_id=reason.source_extracted_item_id,
+                    added_at=reason.added_at,
+                )
+            )
+    target.discarded_options = [*target.discarded_options, *check.discarded_options]
+    _dismiss(check)
+    session.flush()
+
+
 def settle_linked(session: Session, item_id: UUID, now_on: BarMenuItem, display_name: str) -> None:
     """An unlinked item was linked to a product without an operator (spec 3.18.1, check cleanup): its
     unlinked reasons no longer hold. With other reasons left, only those two go and the check stays open;
@@ -92,22 +120,4 @@ def settle_linked(session: Session, item_id: UUID, now_on: BarMenuItem, display_
         return
     check.reasons[:] = others
     check.display_name = display_name
-    if now_on.id == item_id:
-        return
-    target = open_check(session, now_on.id)
-    if target is None:
-        check.bar_menu_item_id = now_on.id
-        return
-    known = {(r.reason, r.source_extracted_item_id) for r in target.reasons}
-    for reason in others:
-        if (reason.reason, reason.source_extracted_item_id) not in known:
-            target.reasons.append(
-                MenuItemCheckReason(
-                    reason=reason.reason,
-                    source_menu_import_id=reason.source_menu_import_id,
-                    source_extracted_item_id=reason.source_extracted_item_id,
-                    added_at=reason.added_at,
-                )
-            )
-    target.discarded_options = [*target.discarded_options, *check.discarded_options]
-    _dismiss(check)
+    move_open_check(session, item_id, now_on, display_name)

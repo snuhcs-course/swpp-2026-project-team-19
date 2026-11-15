@@ -13,6 +13,7 @@ from app.models import (
     BarMenuItem,
     BarStatus,
     Brand,
+    CheckReason,
     ExtractedItem,
     ImportStatus,
     MatchMethod,
@@ -22,6 +23,7 @@ from app.models import (
     MenuEntryOption,
     MenuImport,
     MenuImportChange,
+    MenuItemCheck,
     Product,
     ReviewStatus,
     UserType,
@@ -131,7 +133,18 @@ def test_review_to_customer_search(client, db_session, sample, operator, glenfid
     assert prices_found(client, "글렌피딕 15년") == [[21000]]
     assert customer_search(client, "Unknown Distillery 25")["matchType"] == "none"
 
-    body = applied(client, sample, body_from_review(review), operator)
+    accepted = body_from_review(review)
+    # Both 12 lines are the same product with 30 ml at 17,000 and 21,000; accepted as they are, they are
+    # refused (spec 8.12), so the client has the owner keep one price. Here the first line's, and the
+    # second line has no other option, so it is left out.
+    conflicting = submit(client, sample.menu_import.id, accepted, operator)
+    assert conflicting.status_code == 422
+    assert [(e["path"], e["code"]) for e in conflicting.json()["error"]["fieldErrors"]] == [
+        ("itemDecisions[2].options[0]", "OPTION_PRICE_CONFLICT")
+    ]
+    accepted["itemDecisions"][2] = {**accepted["itemDecisions"][2], "action": "reject"}
+    del accepted["itemDecisions"][2]["options"], accepted["itemDecisions"][2]["productId"]
+    body = applied(client, sample, accepted, operator)
 
     assert body["status"] == "applied"
     assert body["reviewVersion"] == 1
@@ -228,11 +241,19 @@ def test_choosing_another_candidate_is_manual_with_its_score(client, db_session,
 
 def test_changes_left_are_the_applied_and_ignored_ones(client, db_session, sample, operator, glenfiddich):
     """Picking Glenfiddich 15 for the 12 line turns the draft's update of 12 into an update of
-    15; the approved removal of 15 changes nothing, so its row goes; 12 stays on the board."""
+    15; the approved removal of 15 changes nothing, so its row goes; 12 stays on the board. The unknown
+    line is kept as proposed (without a product, same name), so its ignored add skips it."""
     _, exact, _, unknown, _ = sample.items
     entry_12, entry_15 = sample.board.entries
     body = valid_body(sample, glenfiddich)
     body["itemDecisions"][1]["productId"] = str(glenfiddich[15].id)
+    body["itemDecisions"][3] = {
+        "action": "publish_without_product",
+        "extractedItemId": str(unknown.id),
+        "finalLineType": "product",
+        "kind": "whisky",
+        "options": body["itemDecisions"][3]["options"],
+    }
     set_decision(body, sample.changes[MenuChangeType.ADD], "ignore")
 
     result = applied(client, sample, body, operator)
@@ -248,8 +269,8 @@ def test_changes_left_are_the_applied_and_ignored_ones(client, db_session, sampl
         "updated": 1,
         "removed": 0,
         "ignored": 1,
-        "createdBrands": 1,
-        "createdProducts": 1,
+        "createdBrands": 0,
+        "createdProducts": 0,
         "unlinkedWhisky": 0,
     }
     menu = client.get(f"/api/bars/{sample.bar.id}/menu").json()
@@ -287,13 +308,15 @@ def test_an_old_review_version_is_outdated(client, sample, operator, glenfiddich
 
 
 def test_a_board_change_rebuilds_the_draft(client, db_session, sample, operator, glenfiddich):
-    # The board now has the menu's price for 12, so the proposed update is stale.
+    # The board now has the menu's options for 12 (both 12 lines merged, spec 8.12), so the proposed
+    # update is stale.
     entry_12 = sample.board.entries[0]
     db_session.execute(
         MenuEntryOption.__table__.update()
         .where(MenuEntryOption.menu_board_entry_id == entry_12.id, MenuEntryOption.pour_ml == 15)
         .values(price_krw=9000)
     )
+    db_session.add(MenuEntryOption(menu_board_entry_id=entry_12.id, pour_ml=30, price_krw=21000, sort_order=3))
     db_session.commit()
 
     response = submit(client, sample.menu_import.id, valid_body(sample, glenfiddich), operator)
@@ -307,7 +330,9 @@ def test_a_board_change_rebuilds_the_draft(client, db_session, sample, operator,
     body = valid_body(sample, glenfiddich)
     body["reviewVersion"] = 2
     body["changeDecisions"] = [{"changeId": c["changeId"], "decision": "apply"} for c in review["proposedChanges"]]
-    assert applied(client, sample, body, operator)["result"]["updated"] == 0
+    # The reviewer rejected the second 12 line, so its 30 ml at 21,000 leaves the board: a change the
+    # draft did not have, recorded as applied.
+    assert applied(client, sample, body, operator)["result"]["updated"] == 1
 
 
 def test_errors_roll_back_everything(client, db_session, sample, operator, glenfiddich):
@@ -520,3 +545,97 @@ def test_operators_only(client, sample, token_for, glenfiddich):
 
     assert submit(client, sample.menu_import.id, body, customer).status_code == 403
     assert submit(client, sample.menu_import.id, body, {}).status_code == 401
+
+
+# ---- a chosen product the line's age or edition conflicts with (spec 8.7) ----
+
+
+def _checks(db_session, bar_id):
+    db_session.expire_all()
+    checks = db_session.scalars(select(MenuItemCheck).where(MenuItemCheck.bar_id == bar_id))
+    return [(c.bar_menu_item_id, [(r.reason, r.source_extracted_item_id) for r in c.reasons]) for c in checks]
+
+
+def _choose_for_the_15yo_line(sample, glenfiddich, product, **fields):
+    """The exact 12 line and the unknown line left out (an owner may not create a product), and the line
+    read as "Glenfiddich 12 (15yo)" published as `product`."""
+    _, exact, conflict, unknown, _ = sample.items
+    body = valid_body(sample, glenfiddich)
+    body["itemDecisions"][1] = {"action": "reject", "extractedItemId": str(exact.id), "finalLineType": "product"}
+    body["itemDecisions"][3] = {"action": "reject", "extractedItemId": str(unknown.id), "finalLineType": "product"}
+    for decision in body["changeDecisions"]:
+        if decision["changeId"] == str(sample.changes[MenuChangeType.ADD].id):
+            decision["decision"] = "ignore"
+    body["itemDecisions"][2] = {
+        "action": "select_existing_product",
+        "extractedItemId": str(conflict.id),
+        "finalLineType": "product",
+        "productId": str(product.id),
+        "options": [{"pourMl": 30, "priceKrw": 21000}],
+        **fields,
+    }
+    return body
+
+
+@pytest.mark.parametrize("submitter", ["operator", "owner"])
+def test_a_chosen_product_of_another_age_is_published_and_checked(
+    client, db_session, sample, operator, glenfiddich, supabase, submitter
+):
+    """The age read (15) differs from the product's (12): published as chosen, and an operator looks at it,
+    whoever chose it."""
+    headers = operator
+    if submitter == "owner":
+        reviewer = make_user(db_session, "reviewer-subject", user_type=UserType.OPERATOR)
+        make_owner(db_session, make_user(db_session, "owner-subject"), sample.bar, reviewer)
+        db_session.commit()
+        headers = {"Authorization": f"Bearer {supabase.token(sub='owner-subject')}"}
+    conflict = sample.items[2]
+
+    applied(client, sample, _choose_for_the_15yo_line(sample, glenfiddich, glenfiddich[12]), headers)
+
+    entry_12 = sample.board.entries[0]
+    assert _checks(db_session, sample.bar.id) == [
+        (entry_12.bar_menu_item_id, [(CheckReason.ATTRIBUTE_CONFLICT, conflict.id)])
+    ]
+
+
+def test_products_that_fit_the_line_or_were_matched_automatically_open_no_check(
+    client, db_session, sample, operator, glenfiddich
+):
+    # The 15yo line published as the 15.
+    applied(client, sample, _choose_for_the_15yo_line(sample, glenfiddich, glenfiddich[15]), operator)
+    assert _checks(db_session, sample.bar.id) == []
+
+
+def test_an_automatic_match_kept_opens_no_check(client, db_session, sample, operator, glenfiddich):
+    # The exact 12 line keeps its automatic match; the 15yo line is left out.
+    applied(client, sample, valid_body(sample, glenfiddich), operator)
+    assert CheckReason.ATTRIBUTE_CONFLICT not in {
+        reason for _, reasons in _checks(db_session, sample.bar.id) for reason, _ in reasons
+    }
+
+
+def test_an_edition_read_only_from_the_line_is_a_conflict(client, db_session, sample, operator, glenfiddich):
+    db_session.execute(
+        ExtractedItem.__table__.update()
+        .where(ExtractedItem.id == sample.items[2].id)
+        .values(extracted_age_years=None, extracted_edition_name="Sherry Cask")
+    )
+    db_session.commit()
+
+    applied(client, sample, _choose_for_the_15yo_line(sample, glenfiddich, glenfiddich[15]), operator)
+
+    assert [reasons for _, reasons in _checks(db_session, sample.bar.id)] == [
+        [(CheckReason.ATTRIBUTE_CONFLICT, sample.items[2].id)]
+    ]
+
+
+def test_a_corrected_name_is_not_compared(client, db_session, sample, operator, glenfiddich):
+    """The values read came from the old name; a corrected name is matched again instead (spec 8.11)."""
+    body = _choose_for_the_15yo_line(sample, glenfiddich, glenfiddich[12], correctedProductName="글렌피딕 12년")
+
+    applied(client, sample, body, operator)
+
+    assert CheckReason.ATTRIBUTE_CONFLICT not in {
+        reason for _, reasons in _checks(db_session, sample.bar.id) for reason, _ in reasons
+    }

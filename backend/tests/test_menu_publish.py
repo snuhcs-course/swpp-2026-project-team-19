@@ -103,13 +103,35 @@ def test_ignored_items_are_not_published():
     assert change_types(result) == [MenuChangeType.ADD]
 
 
-def test_first_line_of_a_product_wins():
-    first, second = proposal(A, 1), proposal(A, 2)
+def test_lines_of_one_product_are_one_entry_with_every_lines_options():
+    """A glass line and a bottle-corner line (spec 8.12): the first line's name and position, the options one
+    after another, an equal option kept once."""
+    first = Proposal(uuid4(), A, "글렌피딕 12년", (opt(15000, label="잔"), opt(9000, pour=15)))
+    other = proposal(B, 5)
+    second = Proposal(uuid4(), A, "Glenfiddich 12", (opt(180000, pour=None, label="병"), opt(9000, pour=15)))
 
-    result = plan([first, second], [])
+    result = plan([first, other, second], [])
 
-    assert [e.options[0].price_krw for e in result.entries] == [1]
-    assert result.changes[0].extracted_item_id == first.extracted_item_id
+    assert products(result) == [A, B]
+    merged = result.entries[0]
+    assert (merged.display_name, merged.extracted_item_id) == ("글렌피딕 12년", first.extracted_item_id)
+    assert [(o.label, o.pour_ml, o.price_krw) for o in merged.options] == [
+        ("잔", 30, 15000),
+        (None, 15, 9000),
+        ("병", None, 180000),
+    ]
+    assert result.changes[0].extracted_item_ids == (first.extracted_item_id, second.extracted_item_id)
+    assert result.discarded == {}
+
+
+def test_an_ignored_line_is_left_out_of_the_merge():
+    first, second = proposal(A, 1), Proposal(uuid4(), A, "menu", (opt(2, pour=60),))
+
+    result = plan([first, second], [], ignored=[first.extracted_item_id])
+
+    assert [(e.extracted_item_id, [o.price_krw for o in e.options]) for e in result.entries] == [
+        (second.extracted_item_id, [2])
+    ]
 
 
 def test_partial_update_keeps_board_order_and_appends_adds():
@@ -356,3 +378,93 @@ def test_a_corrected_name_replaces_the_boards_name_even_with_the_same_options():
     assert change_types(plan([corrected], [a])) == [MenuChangeType.UPDATE]
     assert plan([corrected], [a]).entries[0].display_name == "menu read differently"
     assert plan([same_name], [a]).changes == []
+
+
+def test_unlinked_whisky_lines_of_one_name_key_keep_the_earlier_price():
+    """The server's name key can join lines the reviewer saw apart (spec 8.12): no refusal, the earlier
+    price stays and the other is kept for the operator."""
+    first = unlinked_proposal("glenallachie10cs", 26000)
+    second = replace(unlinked_proposal("glenallachie10cs", 28000, kind=MenuItemKind.OTHER), display_name="글렌알라키10CS")
+
+    result = plan([first, second], [])
+
+    [entry] = result.entries
+    assert ([o.price_krw for o in entry.options], entry.kind) == ([26000], MenuItemKind.WHISKY)
+    assert result.discarded == {
+        first.extracted_item_id: [
+            {
+                "optionLabel": None,
+                "pourMl": 30,
+                "priceKrw": 28000,
+                "displayName": "글렌알라키10CS",
+                "extractedItemId": str(second.extracted_item_id),
+            }
+        ]
+    }
+
+
+def test_other_lines_of_one_name_key_are_other():
+    result = plan([unlinked_proposal("하이볼", 1, MenuItemKind.OTHER), unlinked_proposal("하이볼", 1, MenuItemKind.OTHER)], [])
+
+    assert [(e.kind, len(e.options)) for e in result.entries] == [(MenuItemKind.OTHER, 1)]
+
+
+def test_a_line_not_matched_again_keeps_its_price_over_an_earlier_rematched_one():
+    """Rematching joined two lines (spec 8.12): the line whose name was not corrected sets the price."""
+    renamed_first = replace(proposal(A, 21000), rematched=True)
+    kept = proposal(A, 17000)
+
+    result = plan([renamed_first, kept], [])
+
+    [entry] = result.entries
+    assert [o.price_krw for o in entry.options] == [17000]
+    assert [(o["priceKrw"], o["extractedItemId"]) for o in result.discarded[renamed_first.extracted_item_id]] == [
+        (21000, str(renamed_first.extracted_item_id))
+    ]
+
+
+def test_unlinked_lines_keep_the_earlier_price_even_when_it_was_matched_again():
+    """Lines without a product under one name key keep the menu-order earlier price (spec 8.12); the
+    preference for a line not matched again is only for lines rematching joined to one product."""
+    first = replace(unlinked_proposal("glenallachie10cs", 26000), rematched=True)
+    later = unlinked_proposal("glenallachie10cs", 28000)
+
+    result = plan([first, later], [])
+
+    assert [o.price_krw for o in result.entries[0].options] == [26000]
+    assert [o["priceKrw"] for o in result.discarded[first.extracted_item_id]] == [28000]
+
+
+def test_merged_lines_replace_every_item_they_were_compared_with():
+    """Two lines compared with the 12 and the 15, both renamed to the 18 (spec 8.11): the 18 takes the 12's
+    slot and the 15 leaves the board, recorded as an applied remove."""
+    twelve, fifteen = on_board(A, 1), on_board(B, 2)
+    first = replace(proposal(C, 3), rematched=True, replaces=(twelve.bar_menu_item_id,))
+    second = replace(proposal(C, 4, item=uuid4()), rematched=True, replaces=(fifteen.bar_menu_item_id,))
+    second = replace(second, options=(opt(4, pour=60),))
+
+    result = plan([first, second], [twelve, fifteen], mode=PARTIAL)
+
+    assert [(e.product_id, e.bar_menu_item_id) for e in result.entries] == [(C, twelve.bar_menu_item_id)]
+    assert result.replaced == {
+        twelve.bar_menu_item_id: first.extracted_item_id,
+        fifteen.bar_menu_item_id: first.extracted_item_id,
+    }
+    assert [(c.change_type, c.bar_menu_item_id) for c in result.changes] == [
+        (MenuChangeType.REMOVE, fifteen.bar_menu_item_id),
+        (MenuChangeType.UPDATE, twelve.bar_menu_item_id),
+    ]
+
+
+def test_an_item_left_for_an_unchanged_entry_is_recorded_as_removed():
+    """The renamed line joins the 15 already on the board with the same options: the 15 is unchanged, and
+    the 12 it replaced still leaves the board with a record of it."""
+    twelve, fifteen = on_board(A, 1), on_board(B, 2)
+    line = replace(proposal(B, 2), rematched=True, replaces=(twelve.bar_menu_item_id,))
+
+    result = plan([line], [twelve, fifteen], mode=PARTIAL)
+
+    assert [e.product_id for e in result.entries] == [B]
+    assert [(c.change_type, c.bar_menu_item_id) for c in result.changes] == [
+        (MenuChangeType.REMOVE, twelve.bar_menu_item_id)
+    ]
