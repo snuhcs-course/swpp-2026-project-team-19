@@ -46,6 +46,9 @@ interface PhotoReviewRepository {
     /** Always check the server's latest draftVersion before the atomic publication. */
     suspend fun flushBeforePublish(state: PhotoReviewState) = saveDraft(state)
 
+    /** True if an account-scoped device copy is loaded but not yet server-acknowledged. */
+    fun hasPendingLocalDraft(): Boolean = false
+
     /** Optional message when a server draft needs operator review/reconciliation. */
     fun consumeDraftNotice(): String? = null
 
