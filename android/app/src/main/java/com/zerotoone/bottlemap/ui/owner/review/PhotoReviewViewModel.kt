@@ -81,6 +81,10 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
     val draftProblem: StateFlow<String?> = _draftProblem.asStateFlow()
     private val _draftRetryable = MutableStateFlow(false)
     val draftRetryable: StateFlow<Boolean> = _draftRetryable.asStateFlow()
+    private val _draftConflictChoice = MutableStateFlow(false)
+    val draftConflictChoice: StateFlow<Boolean> = _draftConflictChoice.asStateFlow()
+    private val _draftResolving = MutableStateFlow(false)
+    val draftResolving: StateFlow<Boolean> = _draftResolving.asStateFlow()
     private val localOnlyNotice = "이 기기에는 저장됐어요. 서버 저장을 다시 시도해 주세요."
     private val _publishOutcome = MutableStateFlow<PublishOutcome?>(null)
     val publishOutcome: StateFlow<PublishOutcome?> = _publishOutcome.asStateFlow()
@@ -109,8 +113,15 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
             draftSaveMutex.withLock {
                 _load.value = try {
                     repository.loadReview().let { fresh ->
-                        _draftRetryable.value = repository.hasPendingLocalDraft()
-                        _draftProblem.value = if (_draftRetryable.value) localOnlyNotice else null
+                        _draftConflictChoice.value = repository.hasPendingDraftConflict()
+                        _draftRetryable.value = repository.hasPendingLocalDraft() &&
+                            !_draftConflictChoice.value
+                        _draftProblem.value = when {
+                            _draftConflictChoice.value ->
+                                "서버 초안과 이 기기의 미저장 초안이 충돌해요. 어느 쪽을 사용할지 선택해 주세요."
+                            _draftRetryable.value -> localOnlyNotice
+                            else -> null
+                        }
                         repository.consumeDraftNotice()?.let(::toast)
                         PhotoReviewLoad.Ready(fresh)
                     }
@@ -186,6 +197,7 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                         repository.saveDraft(state)
                         _draftProblem.value = null
                         _draftRetryable.value = false
+                        _draftConflictChoice.value = false
                     } catch (cancelled: CancellationException) {
                         throw cancelled
                     } catch (error: ReviewDraftConflictException) {
@@ -194,6 +206,7 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                         if (_draftProblem.value == null) toast(error.message.orEmpty())
                         _draftProblem.value = error.message
                         _draftRetryable.value = false
+                        _draftConflictChoice.value = repository.hasPendingDraftConflict()
                     } catch (error: BottleMapApiException) {
                         // Transient disconnects are retried on Leave; permanent
                         // permission/size/state errors block publication.
@@ -228,8 +241,38 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
     // ---- Screen-level actions ----
 
     fun retryDraftSave() {
-        if (_publishing.value || !_draftRetryable.value) return
+        if (_publishing.value || !_draftRetryable.value ||
+            _draftConflictChoice.value || _draftResolving.value) return
         review?.let(::saveDraft)
+    }
+
+    /** §5.9: never resolve a local/remote collision without an explicit tap. */
+    fun resolveDraftConflict(useLocal: Boolean) {
+        if (_publishing.value || !_draftConflictChoice.value || _draftResolving.value) return
+        _draftResolving.value = true
+        ++latestDraftRevision // discard any queued autosaves from before the choice
+        viewModelScope.launch {
+            try {
+                draftSaveMutex.withLock {
+                    if (useLocal) repository.chooseLocalDraft()
+                    else repository.chooseServerDraft()
+                }
+                _draftConflictChoice.value = false
+                _draftProblem.value = null
+                _draftRetryable.value = false
+                // Rebind all current OCR and reviewed fields from the server,
+                // never keep a stale ViewModel copy after a successful choice.
+                reload()
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: Exception) {
+                _draftProblem.value = error.message
+                    ?: "초안 선택에 실패했어요. 최신 서버 검수를 확인해 주세요."
+                toast(_draftProblem.value.orEmpty())
+            } finally {
+                _draftResolving.value = false
+            }
+        }
     }
 
     fun leave() {
