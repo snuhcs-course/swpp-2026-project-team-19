@@ -128,6 +128,26 @@ data class ProposedChangeDto(
     val extractedItemIds: List<String> = emptyList(),
 )
 
+/** PR #171 / API §5.9: versioned server-owned, cross-device review draft. */
+data class ReviewDraftDto(
+    val draftVersion: Int,
+    val reviewVersion: Int,
+    val savedAt: String,
+    val content: Map<String, Any?> = emptyMap(),
+)
+
+data class ReviewDraftSaveRequestDto(
+    val draftVersion: Int,
+    val reviewVersion: Int,
+    val content: Map<String, Any?>,
+)
+
+data class ReviewDraftSavedResponseDto(
+    val menuImportId: String,
+    val draftVersion: Int,
+    val savedAt: String,
+)
+
 data class MenuImportStatusDto(
     val menuImportId: String,
     val barId: String? = null,
@@ -139,6 +159,7 @@ data class MenuImportStatusDto(
     val failure: ImportFailureDto? = null,
     val images: List<ReviewImageDto> = emptyList(),
     val proposedChanges: List<ProposedChangeDto> = emptyList(),
+    val reviewDraft: ReviewDraftDto? = null,
     val appliedAt: String? = null,
     val menuBoardId: String? = null,
 )
