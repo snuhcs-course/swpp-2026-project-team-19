@@ -1,5 +1,7 @@
 package com.zerotoone.bottlemap.ui.customer
 
+import android.content.ClipboardManager
+import android.content.Context
 import androidx.activity.ComponentActivity
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.assertIsDisplayed
@@ -10,6 +12,8 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
+import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -32,7 +36,7 @@ class BarCopyFeedbackComposeTest {
         items = emptyList(),
     )
 
-    @Test fun addressAndPhoneCopyShowAppToast() {
+    @Test fun addressUsesSystemClipboardAndPhoneShowsAppToast() {
         compose.setContent {
             MaterialTheme {
                 CustomerP18BarDetail(
@@ -45,8 +49,13 @@ class BarCopyFeedbackComposeTest {
         }
         compose.onNodeWithText("지도").performScrollTo().performClick()
         compose.onNodeWithText("복사").performScrollTo().performClick()
-        compose.onNodeWithTag("ux-toast").assertIsDisplayed()
-        compose.onNodeWithText("주소를 복사했어요.").assertIsDisplayed()
+        // UAT 4.3: Android 13+ shows its own clipboard preview.
+        // The app must not display a second 'address copied' toast.
+        compose.onNodeWithTag("ux-toast").assertDoesNotExist()
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        assertEquals("서울특별시 관악구 테스트길 1",
+            clipboard.primaryClip?.getItemAt(0)?.coerceToText(context)?.toString())
 
         compose.onNodeWithText("전화").performScrollTo().performClick()
         compose.onNodeWithText("복사").performScrollTo().performClick()
