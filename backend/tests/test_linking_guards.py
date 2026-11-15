@@ -1,13 +1,14 @@
 """Guards on a confirmed match (I4-P18 unverified product, I4-P38 incomplete name) and the
 product draft read from a menu line (I4-P18)."""
 
-from uuid import UUID
+from uuid import UUID, uuid4
 
 import pytest
 
 from app.matching import ProductInfo
 from app.matching.linking_guards import apply_linking_guards, incomplete_name
 from app.matching.memory_catalog import InMemoryCatalog
+from app.matching import product_draft
 from app.matching.product_draft import ProductDraft, draft_from_name, whole_spellings
 from app.matching.review_state import ReviewState, review_state, stored_status
 from app.matching.staged import resolve_product_staged
@@ -154,6 +155,27 @@ def test_product_info_is_verified_unless_said_otherwise():
     ("발베니 16년 / Balvenie 16 French Oak", ProductDraft(
         "발베니 16년 / Balvenie 16 French Oak", ("발베니 16년", "Balvenie 16 French Oak"), BALVENIE, "Balvenie", 16,
         "French Oak")),
+    # brackets in the other script that hold the age or the edition are part of the name, not the
+    # name again: the brand and the edition are kept
+    ("발베니 (12Y DoubleWood)", ProductDraft("발베니 (12Y DoubleWood)", (), BALVENIE, "발베니", 12, "DoubleWood")),
+    ("발베니 (Caribbean Cask) 14년", ProductDraft(
+        "발베니 (Caribbean Cask) 14년", (), BALVENIE, "발베니", 14, "Caribbean Cask")),
+    ("Balvenie 14y (럼 캐스크)", ProductDraft("Balvenie 14y (럼 캐스크)", (), BALVENIE, "Balvenie", 14, "럼 캐스크")),
+    # brackets that say more but start with the title's brand are the name again: each side is
+    # read on its own, so "Balvenie" is not taken for the edition
+    ("발베니 (Balvenie 12) 더블우드", ProductDraft(
+        "발베니 (Balvenie 12) 더블우드", (), BALVENIE, "Balvenie", 12, "더블우드", "double wood")),
+    # the age on one side of the brackets and the edition on the other: both are kept
+    ("발베니 14년 (Balvenie Caribbean Cask)", ProductDraft(
+        "발베니 14년 (Balvenie Caribbean Cask)", (), BALVENIE, "발베니", 14, "Caribbean Cask")),
+    ("Balvenie Caribbean Cask (발베니 14년)", ProductDraft(
+        "Balvenie Caribbean Cask (발베니 14년)", (), BALVENIE, "Balvenie", 14, "Caribbean Cask")),
+    # a part the chosen reading has is not replaced by the other reading's
+    ("발베니 12년 (Balvenie 14 DoubleWood)", ProductDraft(
+        "발베니 12년 (Balvenie 14 DoubleWood)", (), BALVENIE, "Balvenie", 14, "DoubleWood")),
+    # brackets that only repeat the title's edition in the other script add nothing
+    ("Balvenie 16y French Oak (프렌치 오크)", ProductDraft(
+        "Balvenie 16y French Oak (프렌치 오크)", (), BALVENIE, "Balvenie", 16, "French Oak")),
     # OCR text with double spaces: the brand is the brand, not "Balvenie  2"
     ("Balvenie  21  Portwood", ProductDraft("Balvenie 21 Portwood", (), BALVENIE, "Balvenie", 21, "Portwood")),
 ])
@@ -177,9 +199,92 @@ def test_draft_needs_a_name(catalog):
     ("맥캘란 (12년) 셰리 오크", ()),
     ("Macallan (Sherry Oak) 12 Years", ()),
     ("맥캘란 Macallan (12년) 셰리 오크", ()),          # the text before the brackets mixes scripts
+    # brackets in the other script with a number or a whisky word the title lacks are not the
+    # name again: "12Y Sherry Oak 나머지" must never become an alias
+    ("맥캘란 (12Y Sherry Oak)", ()),
+    ("맥캘란 (12Y) 셰리 오크", ()),
+    ("맥캘란 (SherryOak) 12년", ()),                    # written together
+    ("Macallan (셰리 오크) 12 Years", ()),
+    # a whisky word the title has too, in its own script, is the name again
+    ("포트샬롯(Port Charlotte) 10년", ("포트샬롯 10년", "Port Charlotte 10년")),
+    ("맥캘란 셰리오크(Macallan Sherry Oak) 12년", ("맥캘란 셰리오크 12년", "Macallan Sherry Oak 12년")),
+    ("Macallan Sherry Oak (맥캘란 셰리 오크) 12", ("Macallan Sherry Oak 12", "맥캘란 셰리 오크 12")),
+    ("더 위스키 에이전시(TWA) 카발란 7년", ("더 위스키 에이전시 카발란 7년", "TWA 카발란 7년")),
+    ("글렌그란트(Glen Grant) 18년", ("글렌그란트 18년", "Glen Grant 18년")),
+    # a Korean whisky word inside a longer word is not that word: "라이" (rye) in 클라이넬리쉬,
+    # "몰트" (malt) in 몰트락
+    ("Clynelish (클라이넬리쉬) 14년", ("Clynelish 14년", "클라이넬리쉬 14년")),
+    ("Mortlach (몰트락) 16", ("Mortlach 16", "몰트락 16")),
+    ("Macallan (피트 몰트) 12", ()),                     # as a word of its own it is
+    ("Macallan (12년 몰트)", ()),
 ])
 def test_whole_spellings(name, spellings):
     assert whole_spellings(name) == spellings
+
+
+ARDBEG, UIGEADAIL, TEN = uuid4(), uuid4(), uuid4()
+
+
+@pytest.fixture
+def ardbeg():
+    products = [ProductInfo(UIGEADAIL, "Ardbeg Uigeadail", None, "Uigeadail", brand_id=ARDBEG),
+                ProductInfo(TEN, "Ardbeg 10", 10, None, brand_id=ARDBEG)]
+    return InMemoryCatalog(products, [(p.product_id, p.display_name) for p in products],
+                           [(ARDBEG, "아드벡"), (ARDBEG, "Ardbeg")])
+
+
+@pytest.mark.parametrize("name, brand_text, age, edition, spellings", [
+    # an edition the catalog has for the brand, in brackets after the brand alone: part of the name,
+    # though it is no vocabulary word and has no number
+    ("아드벡 (Uigeadail)", "아드벡", None, "Uigeadail", ()),
+    ("아드벡(Uigeadail) 10년", "아드벡", 10, "Uigeadail", ()),
+    ("아드벡 (UIGEADAIL)", "아드벡", None, "UIGEADAIL", ()),
+    # the brand again in a spelling the catalog does not have stays a second spelling: menus write
+    # "맥캘란(Maccallan)", "산토리(Santory)"
+    ("아드벡(Ardbegg) 10년", "아드벡", 10, None, ("아드벡 10년", "Ardbegg 10년")),
+    ("아드벡 (Ardbeg) 10년", "아드벡", 10, None, ("아드벡 10년", "Ardbeg 10년")),
+    # an edition the catalog does not have cannot be told from the brand in another spelling: the
+    # brand is kept, the edition is left for the reviewer
+    ("아드벡 (Corryvreckan)", "아드벡", None, None, ()),
+    ("아드벡 (Corryvreckan) 10년", "아드벡", 10, None, ("아드벡 10년", "Corryvreckan 10년")),
+    # the edition after the age
+    ("아드벡 10년 (Uigeadail)", "아드벡", 10, "Uigeadail", ()),
+    # the title already has an edition: the brackets repeat it and are not added to it
+    ("아드벡 우가달 (Uigeadail)", "아드벡", None, "우가달", ()),
+    ("아드벡 우가달 10년 (Uigeadail)", "아드벡", 10, "우가달", ()),
+    # the title is not a brand the catalog knows: the brackets stay a second spelling
+    ("라프로익 (Uigeadail) 10년", None, 10, None, ("라프로익 10년", "Uigeadail 10년")),
+])
+def test_an_edition_of_the_brand_in_brackets_is_part_of_the_name(ardbeg, name, brand_text, age, edition, spellings):
+    draft = draft_from_name(name, ardbeg)
+
+    assert (draft.brand_id, draft.brand_text, draft.age_years, draft.edition_text, draft.spellings) == (
+        ARDBEG if brand_text else None, brand_text, age, edition, spellings)
+
+
+def test_two_readings_that_are_different_brands_give_no_brand(catalog):
+    draft = draft_from_name("발베니 (Jameson)", catalog)
+    assert (draft.brand_id, draft.brand_text, draft.edition_text) == (None, None, None)
+    same = draft_from_name("발베니 (Balvenie)", catalog)
+    assert (same.brand_id, same.brand_text) == (BALVENIE, "발베니")
+
+
+def test_parts_are_taken_only_from_a_reading_of_the_same_known_brand():
+    fill = product_draft._with_parts_of_the_other_readings
+    best = ProductDraft("x", (), BALVENIE, "발베니", 14, None)
+    assert fill(best, [best, ProductDraft("x", (), JACK, "Jack", None, "Old No.7")]) == best
+    unknown = ProductDraft("x", (), None, "?", 14, None)
+    assert fill(unknown, [unknown, ProductDraft("x", (), None, "?", None, "Cask")]) == unknown
+    filled = fill(best, [best, ProductDraft("x", (), BALVENIE, "Balvenie", 12, "더블우드", "double wood")])
+    assert (filled.age_years, filled.edition_text, filled.edition_english) == (14, "더블우드", "double wood")
+    without_age = ProductDraft("x", (), BALVENIE, "발베니", None, "DoubleWood")
+    assert fill(without_age, [ProductDraft("x", (), BALVENIE, "Balvenie", 12, None), without_age]).age_years == 12
+
+
+def test_brackets_are_read_by_script_alone_without_a_vocabulary(monkeypatch):
+    monkeypatch.setattr(product_draft, "_VOCABULARY", None)
+    assert whole_spellings("맥캘란 (Sherry Oak) 12년") == ("맥캘란 12년", "Sherry Oak 12년")
+    assert whole_spellings("맥캘란 (12Y) 셰리 오크") == ()  # the number is still seen
 
 
 def test_a_draft_never_confirms_a_line(catalog):
