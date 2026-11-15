@@ -257,7 +257,7 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
     fun saveDefaultPour(text: String) {
         if (_savingDefaultPour.value || _publishing.value) return
         val n = readNumeric(text)
-        if (!validVolume(n)) {
+        if (!validDefaultPour(n)) {
             toast("1 ~ 999 사이의 숫자를 입력해주세요.")
             return
         }
@@ -757,7 +757,7 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
         val x = item(id) ?: return
         val n = readNumeric(x.draftVolumeText)
         if (!validVolume(n)) {
-            toast("1 ~ 999 사이의 숫자를 입력해주세요.")
+            toast("1 ~ 32767 사이의 숫자를 입력해주세요.")
             return
         }
         mutateItem(id) {
