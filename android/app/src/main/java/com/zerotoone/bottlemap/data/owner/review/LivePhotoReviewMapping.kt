@@ -275,18 +275,12 @@ internal fun mapConfirmedReviewDecision(
     val mapped = choices.mapIndexed { index, chosen ->
         // An owner-added option must never borrow a different OCR option ID.
         val source = chosen.sourceOptionId?.let(byId::get)
-        // Display and publish all bottle variants as "Bottle", retaining the
-        // original extractedOptionId for traceability and server validation.
-        val originalLabel = source?.extractedOptionLabel
-        val bottle = chosen.bottle ||
-            (card.type == ReviewItemType.OTHER && isBottle(originalLabel))
-        val label = when {
-            bottle -> "Bottle"
-            isBottle(originalLabel) -> null
-            // A null reviewed label is an intentional removal. Do not
-            // resurrect the OCR label during final publication.
-            else -> canonicalServingLabel(chosen.label)
-        }
+        // The reviewed option, not the original OCR label, determines
+        // Bottle identity. A cleared "병"/"Bottle" label with a new pour
+        // must remain a non-bottle option with its reviewed pour/label.
+        // Keep the original extractedOptionId for server traceability.
+        val bottle = chosen.bottle || isBottle(chosen.label)
+        val label = if (bottle) "Bottle" else canonicalServingLabel(chosen.label)
         MockMenuOption(
             optionId = source?.extractedOptionId ?: "manual-${card.id}-$index",
             label = label,
