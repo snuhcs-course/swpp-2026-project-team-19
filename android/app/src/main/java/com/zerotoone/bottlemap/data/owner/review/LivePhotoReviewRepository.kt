@@ -352,6 +352,84 @@ class LivePhotoReviewRepository(
             current.reviewVersion == loaded?.reviewVersion) false else null
     }
 
+    /** §5.9 explicit conflict choices. Keep the pending file until the
+     * owner deliberately selects one of these two paths.
+     */
+    override suspend fun chooseServerDraft() {
+        val id = activeImportId ?: error("검수 작업을 먼저 불러와 주세요.")
+        draftMutex.withLock {
+            check(pendingDraftConflict) { "선택할 기기 초안 충돌이 없어요." }
+            pendingStore.clear(id)
+            pendingDraftConflict = false
+            pendingLocally = false
+            // A fresh load below re-checks that the server draft can be
+            // represented safely by this Android review screen.
+            draftConflict = false
+        }
+    }
+
+    override suspend fun chooseLocalDraft() {
+        val id = activeImportId ?: error("검수 작업을 먼저 불러와 주세요.")
+        val version = loaded?.reviewVersion ?: error("검수 데이터를 먼저 불러와 주세요.")
+        draftMutex.withLock {
+            check(pendingDraftConflict) { "선택할 기기 초안 충돌이 없어요." }
+            val pending = pendingStore.read(id)
+                ?: error("이 기기의 보관 초안을 찾지 못했어요.")
+            val current = remote.getMenuImport(id)
+            require(current.menuImportId == id && current.status == "ready_for_review" &&
+                current.reviewVersion == version &&
+                pending.reviewVersion == version) {
+                "검수 데이터가 변경됐어요. 서버 검수를 다시 확인해 주세요."
+            }
+            val currentDraftVersion = current.reviewDraft?.draftVersion ?: 0
+            // The user made a choice about the exact version displayed.
+            // If someone saved again, require another explicit review.
+            if (currentDraftVersion != draftVersion) throw ReviewDraftConflictException()
+            val fresh = mapServerPhotoReview(current, snapshot())
+            val local = ServerReviewDraftCodec.decode(ReviewDraftDto(
+                pending.expectedDraftVersion, version, "1970-01-01T00:00:00Z",
+                pending.content,
+            )) ?: error("기기 보관 초안을 안전하게 읽을 수 없어요.")
+            require(pending.itemIds == fresh.items.map { it.id } &&
+                local.items.map { it.id } == pending.itemIds &&
+                local.items.zip(fresh.items).all { (old, new) ->
+                    old.mergedInto == new.mergedInto &&
+                        (PhotoReviewRules.optionSummary(old) + old.volumeChoices +
+                            old.preMergeOptions +
+                            old.classificationSnapshot?.options.orEmpty())
+                            .mapNotNull { it.sourceOptionId }
+                            .all { sourceId ->
+                                sourceId in (PhotoReviewRules.optionSummary(new) +
+                                    new.volumeChoices + new.preMergeOptions)
+                                    .mapNotNull { it.sourceOptionId }
+                            }
+                }) {
+                "OCR 항목이나 옵션이 변경됐어요. 자동 덮어쓰기를 중단했어요."
+            }
+            val result = try {
+                remote.saveMenuReviewDraft(id, ReviewDraftSaveRequestDto(
+                    draftVersion = currentDraftVersion,
+                    reviewVersion = version, content = pending.content,
+                ))
+            } catch (error: BottleMapApiException) {
+                if (error.code == "REVIEW_DRAFT_OUTDATED") throw ReviewDraftConflictException()
+                throw error
+            }
+            check(result.menuImportId == id &&
+                result.draftVersion == currentDraftVersion + 1) {
+                "검수 초안 저장 버전이 올바르지 않아요."
+            }
+            draftVersion = result.draftVersion
+            lastSavedContent = pending.content
+            // Clear only after an acknowledged CAS save. On connection loss,
+            // the local backup survives and can be reconciled on reload.
+            pendingStore.clear(id)
+            pendingLocally = false
+            pendingDraftConflict = false
+            draftConflict = false
+        }
+    }
+
     /** §5.9 optimistic concurrency: never silently replace another editor. */
     override suspend fun saveDraft(state: PhotoReviewState) = saveDraftInternal(state, forceCas = false)
 
