@@ -75,11 +75,13 @@ class LivePhotoReviewRepository(
     private var draftVersion = 0
     private var published = false
     private var draftConflict = false
+    private var pendingDraftConflict = false
     private var lastSavedContent: Map<String, Any?>? = null
     private var draftNotice: String? = null
 
     override fun consumeDraftNotice(): String? = draftNotice.also { draftNotice = null }
     override fun hasPendingLocalDraft(): Boolean = pendingLocally
+    override fun hasPendingDraftConflict(): Boolean = pendingDraftConflict
 
     private fun snapshot(): MockOwnerSnapshot = when (val current = owner.state.value) {
         is MockOwnerLoadState.Ready -> current.snapshot
@@ -193,6 +195,7 @@ class LivePhotoReviewRepository(
         }
         draftVersion = saved?.draftVersion ?: 0
         draftConflict = false
+        pendingDraftConflict = false
         published = false
         lastSavedContent = saved?.content
         draftNotice = when {
@@ -231,13 +234,15 @@ class LivePhotoReviewRepository(
                     draftNotice = "이 기기에 저장된 변경사항을 복원했어요. 서버에 다시 저장해 주세요."
                 } else {
                     draftConflict = true
+                    pendingDraftConflict = true
                     draftNotice = "이 기기의 보관 초안이 현재 검수와 달라요. 자동 덮어쓰기를 막았어요."
                 }
             } else {
                 // Never replay stale local data across review regeneration,
                 // operator edits, or another device's newer CAS version.
                 draftConflict = true
-                draftNotice = "이 기기에 저장된 초안과 서버 버전이 달라요. 담당자에게 확인해 주세요."
+                pendingDraftConflict = true
+                draftNotice = "이 기기에 저장된 초안과 서버 버전이 달라요. 서버와 이 기기의 초안 중 선택해 주세요."
             }
         }
         // Signed URLs expire, and source observations belong to the server.
@@ -385,6 +390,7 @@ class LivePhotoReviewRepository(
             } catch (error: BottleMapApiException) {
                 if (error.code == "REVIEW_DRAFT_OUTDATED") {
                     draftConflict = true
+                    pendingDraftConflict = true
                     throw ReviewDraftConflictException()
                 }
                 // A lost 200 response can mean the server committed. Check the
@@ -403,6 +409,7 @@ class LivePhotoReviewRepository(
                 }
                 if (currentDraft != null && currentDraft.draftVersion > draftVersion) {
                     draftConflict = true
+                    pendingDraftConflict = true
                     throw ReviewDraftConflictException()
                 }
                 throw error
@@ -413,6 +420,7 @@ class LivePhotoReviewRepository(
             draftVersion = saved.draftVersion
             lastSavedContent = content
             pendingLocally = false
+            pendingDraftConflict = false
             runCatching { pendingStore.clear(id) }
         }
     }
