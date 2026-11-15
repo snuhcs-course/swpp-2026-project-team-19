@@ -14,6 +14,7 @@ import com.zerotoone.bottlemap.data.owner.review.ReviewDraftTooLargeLocalExcepti
 import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewRules.OptionField
 import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewRules.RematchOutcome
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -98,6 +99,8 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
     val publishOutcome: StateFlow<PublishOutcome?> = _publishOutcome.asStateFlow()
 
     private val draftSaveMutex = Mutex()
+    // Device file IO must never queue behind a slow remote PUT.
+    private val draftCheckpointMutex = Mutex()
     private var latestDraftRevision = 0L
     private var leaving = false
     private val latestRematchRequest = mutableMapOf<String, Int>()
@@ -119,30 +122,40 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
         _load.value = PhotoReviewLoad.Loading
         viewModelScope.launch {
             draftSaveMutex.withLock {
-                _load.value = try {
-                    repository.loadReview().let { fresh ->
-                        _draftConflictChoice.value = repository.hasPendingDraftConflict()
-                        _draftEditingLocal.value = false
-                        _draftOversized.value = repository.hasOversizedPendingDraft()
-                        _draftRetryable.value = repository.hasPendingLocalDraft() &&
-                            !_draftConflictChoice.value &&
-                            !repository.hasOversizedPendingDraft()
-                        _draftProblem.value = when {
-                            _draftConflictChoice.value ->
-                                "최신 서버 초안을 불러왔어요. 화면에 표시된 서버 초안과 이 기기의 미저장 초안 중 선택해 주세요."
-                            repository.hasOversizedPendingDraft() -> oversizedNotice
-                            _draftRetryable.value -> localOnlyNotice
-                            else -> null
+                // No checkpoint from the old screen may land after a reload
+                // has read the server and recovered the latest device edit.
+                draftCheckpointMutex.withLock {
+                    _load.value = try {
+                        repository.loadReview().let { fresh ->
+                            _draftConflictChoice.value = repository.hasPendingDraftConflict()
+                            _draftEditingLocal.value = false
+                            _draftOversized.value = repository.hasOversizedPendingDraft()
+                            val resumable = repository.hasPendingLocalDraft() &&
+                                !_draftConflictChoice.value &&
+                                !repository.hasOversizedPendingDraft()
+                            _draftRetryable.value = false
+                            _draftProblem.value = when {
+                                _draftConflictChoice.value ->
+                                    "최신 서버 초안을 불러왔어요. 화면에 표시된 서버 초안과 이 기기의 미저장 초안 중 선택해 주세요."
+                                repository.hasOversizedPendingDraft() -> oversizedNotice
+                                else -> null
+                            }
+                            repository.consumeDraftNotice()?.let(::toast)
+                            if (resumable) {
+                                // Restore is immediately editable. Retry the
+                                // regular version-checked save without asking
+                                // the owner where the data was loaded from.
+                                saveDraft(fresh)
+                            }
+                            PhotoReviewLoad.Ready(fresh)
                         }
-                        repository.consumeDraftNotice()?.let(::toast)
-                        PhotoReviewLoad.Ready(fresh)
+                    } catch (applied: ReviewAlreadyAppliedException) {
+                        PhotoReviewLoad.Applied
+                    } catch (cancelled: CancellationException) {
+                        throw cancelled
+                    } catch (error: Exception) {
+                        PhotoReviewLoad.Error(error.message ?: "검수 정보를 불러오지 못했어요.")
                     }
-                } catch (applied: ReviewAlreadyAppliedException) {
-                    PhotoReviewLoad.Applied
-                } catch (cancelled: CancellationException) {
-                    throw cancelled
-                } catch (error: Exception) {
-                    PhotoReviewLoad.Error(error.message ?: "검수 정보를 불러오지 못했어요.")
                 }
             }
         }
@@ -206,7 +219,22 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
      */
     private fun saveDraft(state: PhotoReviewState) {
         val revision = ++latestDraftRevision
-        viewModelScope.launch {
+        viewModelScope.launch(start = CoroutineStart.UNDISPATCHED) {
+            // The local AtomicFile write runs in its own lane. Older network
+            // saves may continue, but cannot delay this latest edit.
+            try {
+                draftCheckpointMutex.withLock {
+                    if (revision != latestDraftRevision) return@launch
+                    repository.checkpointDraft(state)
+                }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: Exception) {
+                _draftProblem.value = error.message ?: "기기 검수 초안 저장에 실패했어요."
+                _draftRetryable.value = false
+                toast(_draftProblem.value.orEmpty())
+                return@launch
+            }
             draftSaveMutex.withLock {
                 if (revision == latestDraftRevision) {
                     try {
@@ -378,6 +406,20 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
         _load.value = PhotoReviewLoad.Ready(final)
         ++latestDraftRevision // invalidate any queued older save
         viewModelScope.launch {
+            // Guarantee the last visible edit is safely on device before
+            // waiting for any older in-flight server request.
+            val localSaved = try {
+                draftCheckpointMutex.withLock { repository.checkpointDraft(final) }
+                true
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: Exception) {
+                leaving = false
+                _draftProblem.value = error.message ?: "기기 검수 초안 저장에 실패했어요."
+                toast(_draftProblem.value.orEmpty())
+                false
+            }
+            if (!localSaved) return@launch
             val saved = draftSaveMutex.withLock {
                 try {
                     repository.saveDraft(final)
@@ -490,8 +532,10 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                 // Verify the server draft CAS BEFORE the final publish. Older
                 // queued writes are invalidated, and no 409 can be missed.
                 ++latestDraftRevision
+                val final = state.copy(modal = null)
+                draftCheckpointMutex.withLock { repository.checkpointDraft(final) }
                 draftSaveMutex.withLock {
-                    repository.flushBeforePublish(state.copy(modal = null))
+                    repository.flushBeforePublish(final)
                 }
                 _draftProblem.value = null
                 repository.publish(state)
