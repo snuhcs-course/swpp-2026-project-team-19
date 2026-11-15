@@ -40,6 +40,13 @@ interface PhotoReviewRepository {
     /** Saves the bar's default glass size (spec 3.7 `defaultPourMl`, 1..999). */
     suspend fun saveDefaultPour(ml: Int)
 
+    /**
+     * Persist the latest edit on the device independently of any in-flight
+     * server request. Live implementations must finish the atomic write before
+     * returning; mocks without persistence may use the no-op default.
+     */
+    suspend fun checkpointDraft(state: PhotoReviewState) = Unit
+
     /** Version-checked remote draft; errors must be visible before leaving. */
     suspend fun saveDraft(state: PhotoReviewState)
 
