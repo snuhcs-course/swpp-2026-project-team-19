@@ -1,7 +1,5 @@
 package com.zerotoone.bottlemap.data.owner.review
 
-import android.content.Context
-
 import com.zerotoone.bottlemap.data.OwnerRepository
 import com.zerotoone.bottlemap.data.owner.MockImportStatus
 import com.zerotoone.bottlemap.data.owner.MockOwnerLoadState
@@ -10,6 +8,8 @@ import com.zerotoone.bottlemap.data.owner.ownerExistingUnlinkedOptions
 import com.zerotoone.bottlemap.data.owner.isBottleServingLabel
 import com.zerotoone.bottlemap.data.owner.servingIdentityKey
 import com.zerotoone.bottlemap.network.MenuImportStatusDto
+import com.zerotoone.bottlemap.network.ReviewDraftSaveRequestDto
+import com.zerotoone.bottlemap.network.BottleMapApiException
 import com.zerotoone.bottlemap.ui.owner.OwnerMockViewModel
 import com.zerotoone.bottlemap.ui.owner.review.CatalogProduct
 import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewRules
@@ -25,10 +25,9 @@ import java.text.Normalizer
 /**
  * Production data adapter for the existing one-page v20 photo-review UI.
  *
- * The backend contract uses one atomic review-and-apply request (section 8);
- * it has NO intermediate draft endpoint. Until that is agreed, edits remain
- * in this navigation ViewModel's memory and the existing Owner repository
- * stages validated decisions locally just before the one final submit.
+ * Draft edits use server §5.9 (PR #171) with compare-and-swap draftVersion.
+ * Only final publishing uses the separate atomic review-and-apply (§8).
+ * No device-local Draft is read or written: another account never inherits it.
  *
  * Real OCR, reviewed product IDs and version are always loaded from the
  * owner-authenticated server; never substitute the BASIC demo scenario.
@@ -38,6 +37,11 @@ class ReviewAlreadyAppliedException : IllegalStateException("이미 게시된 �
 
 /** Typed error for preflight reviewVersion mismatches (distinct from field validation). */
 class ReviewVersionConflictException : IllegalStateException("검수 버전이 달라졌어요. 다시 불러와 확인해 주세요.")
+
+/** A different device/operator saved this same import; no automatic overwrite. */
+class ReviewDraftConflictException : IllegalStateException(
+    "다른 기기에서 검수 초안을 변경했어요. 최신 내용을 다시 불러와 확인해 주세요."
+)
 
 internal fun reviewerCandidateConflicts(
     extractedAge: Int?, extractedEdition: String?,
@@ -55,15 +59,18 @@ internal fun reviewerCandidateConflicts(
 class LivePhotoReviewRepository(
     private val owner: OwnerMockViewModel,
     private val importId: String?,
-    context: Context,
     private val remote: OwnerRepository = OwnerRepository(),
 ) : PhotoReviewRepository {
     private var loaded: MenuImportStatusDto? = null
     private var activeImportId: String? = null
-    private var inMemoryDraft: PhotoReviewState? = null
-    private val draftStore = OwnerPhotoReviewDraftStore(context)
     private val draftMutex = Mutex()
+    private var draftVersion = 0
     private var published = false
+    private var draftConflict = false
+    private var lastSavedContent: Map<String, Any?>? = null
+    private var draftNotice: String? = null
+
+    override fun consumeDraftNotice(): String? = draftNotice.also { draftNotice = null }
 
     private fun snapshot(): MockOwnerSnapshot = when (val current = owner.state.value) {
         is MockOwnerLoadState.Ready -> current.snapshot
@@ -107,24 +114,35 @@ class LivePhotoReviewRepository(
             it.menuImportId == id && it.reviewVersion == response.reviewVersion
         }) { "검수 버전이 변경됐어요. 다시 불러와 주세요." }
         val state = mapServerPhotoReview(response, current)
-        val local = draftStore.load(id, requireNotNull(response.reviewVersion),
-            state.items.map { it.id })
-        // A draft created before the per-product grouping migration has the
-        // same raw OCR IDs but incompatible card semantics. Never restore that
-        // obsolete ungrouped state over a newly grouped, price-conflicted card.
-        // Compatible drafts retain all owner edits after process recreation.
+        // GET /api/menu-imports/{id} is the only source of truth for the draft.
+        // The server authorizes this import against the CURRENT account.
+        val saved = response.reviewDraft
+        val parsed = saved?.let(ServerReviewDraftCodec::decode)
+        draftVersion = saved?.draftVersion ?: 0
+        draftConflict = false
+        published = false
+        lastSavedContent = saved?.content
+        draftNotice = when {
+            saved == null -> null
+            parsed == null -> "다른 클라이언트에서 저장한 초안을 확인해 주세요."
+            saved.reviewVersion != response.reviewVersion ->
+                "검수 버전이 변경됐어요. 남아 있는 항목만 다시 확인해 주세요."
+            else -> null
+        }
+        // Grouped-line and OCR identities must be compatible before an old
+        // state can be restored. We never restore stale signed photo URLs.
         fun compatible(candidate: PhotoReviewState?): Boolean =
             candidate != null &&
                 candidate.items.map { it.id } == state.items.map { it.id } &&
-                candidate.items.zip(state.items).all { (saved, fresh) ->
-                    if (saved.manuallySplitGroup)
-                        (fresh.mergedInto != null || fresh.mergeSources.isNotEmpty())
-                    else saved.mergedInto == fresh.mergedInto &&
-                        saved.volumeChoices == fresh.volumeChoices
+                candidate.items.zip(state.items).all { (old, fresh) ->
+                    if (old.manuallySplitGroup)
+                        fresh.mergedInto != null || fresh.mergeSources.isNotEmpty()
+                    else old.mergedInto == fresh.mergedInto &&
+                        old.volumeChoices == fresh.volumeChoices
                 }
-        val chosen = inMemoryDraft.takeIf {
-            loaded?.reviewVersion == response.reviewVersion && compatible(it)
-        } ?: local.takeIf(::compatible) ?: state
+        val chosen = parsed.takeIf(::compatible) ?: state
+        if (parsed != null && !compatible(parsed))
+            draftNotice = "검수 항목 구성이 변경돼 저장된 초안을 자동 적용하지 않았어요."
         // Signed URLs expire, and source observations belong to the server.
         // Restore only owner edits; rebind fresh data to the current response.
         val currentItems = state.items.associateBy { it.id }
@@ -232,27 +250,57 @@ class LivePhotoReviewRepository(
             current.reviewVersion == loaded?.reviewVersion) false else null
     }
 
-    /** Durable device-local draft; never claims a server-side write. */
+    /** §5.9 optimistic concurrency: never silently replace another editor. */
     override suspend fun saveDraft(state: PhotoReviewState) {
-        val id = activeImportId ?: return
-        val version = loaded?.reviewVersion ?: return
+        val id = activeImportId ?: error("검수 작업을 먼저 불러와 주세요.")
+        val version = loaded?.reviewVersion ?: error("검수 정보를 먼저 불러와 주세요.")
+        val content = ServerReviewDraftCodec.encode(state)
         draftMutex.withLock {
-            if (!published) {
-                draftStore.save(id, version, state)
-                inMemoryDraft = state
+            if (published) return@withLock
+            if (draftConflict) throw ReviewDraftConflictException()
+            if (content == lastSavedContent) return@withLock
+            val request = ReviewDraftSaveRequestDto(
+                draftVersion = draftVersion, reviewVersion = version, content = content,
+            )
+            val saved = try {
+                remote.saveMenuReviewDraft(id, request)
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: BottleMapApiException) {
+                if (error.code == "REVIEW_DRAFT_OUTDATED") {
+                    draftConflict = true
+                    throw ReviewDraftConflictException()
+                }
+                // A lost 200 response can mean the server committed. Check the
+                // exact content before retrying with an obsolete draftVersion.
+                val observed = runCatching { remote.getMenuImport(id) }.getOrNull()
+                val currentDraft = observed?.reviewDraft
+                if (currentDraft?.content == content &&
+                    currentDraft.reviewVersion == version &&
+                    currentDraft.draftVersion > draftVersion) {
+                    draftVersion = currentDraft.draftVersion
+                    lastSavedContent = content
+                    return@withLock
+                }
+                if (currentDraft != null && currentDraft.draftVersion > draftVersion) {
+                    draftConflict = true
+                    throw ReviewDraftConflictException()
+                }
+                throw error
             }
+            check(saved.menuImportId == id && saved.draftVersion == draftVersion + 1) {
+                "검수 초안 저장 버전이 올바르지 않아요."
+            }
+            draftVersion = saved.draftVersion
+            lastSavedContent = content
         }
     }
 
-    /** A committed server review must never be reported as a failed publish
-     * just because the HTTP response or local draft deletion was interrupted.
-     */
+    /** A committed server review atomically clears its draft (PR #171). */
     private suspend fun finishPublishedDraft(id: String) {
         draftMutex.withLock {
             published = true
-            // Local persistence is best effort once the server has committed.
-            runCatching { draftStore.clear(id) }
-            inMemoryDraft = null
+            lastSavedContent = null
         }
     }
 
