@@ -266,6 +266,8 @@ class LivePhotoReviewRepository(
         }
         if (pending != null) {
             val working = workingStore.read(id)
+            pendingOversized = ServerReviewDraftCodec.exceedsServerLimit(
+                (working ?: pending).content)
             val serverAlreadySaved = saved != null &&
                 saved.draftVersion > pending.expectedDraftVersion &&
                 (ServerReviewDraftCodec.sameAndroidSnapshot(pending.content, saved.content) ||
