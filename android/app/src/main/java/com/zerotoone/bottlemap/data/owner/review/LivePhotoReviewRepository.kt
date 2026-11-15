@@ -177,9 +177,10 @@ class LivePhotoReviewRepository(
                     saved = remote.getMenuImport(id).reviewDraft
                 }
             }
-        } else {
-            // The server already has a canonical draft. Never import local
-            // values on top of a concurrent owner's/operator's edits.
+        } else if (saved != null) {
+            // The server already has a canonical draft. Never import legacy
+            // values on top of another editor's changes. Pending backups are
+            // separate and can only replay after exact version checks.
             runCatching { legacy.clear(id) }
         }
         val parsedAndroid = saved?.let(ServerReviewDraftCodec::decode)
@@ -358,8 +359,8 @@ class LivePhotoReviewRepository(
         val content = ServerReviewDraftCodec.encode(state)
         draftMutex.withLock {
             if (published) return@withLock
-            if (draftConflict) throw ReviewDraftConflictException()
-            if (!forceCas && ServerReviewDraftCodec.sameAndroidSnapshot(content, lastSavedContent))
+            if (!forceCas && !draftConflict &&
+                ServerReviewDraftCodec.sameAndroidSnapshot(content, lastSavedContent))
                 return@withLock
             // Atomic no-backup storage is completed BEFORE network IO so a
             // process kill after a failed PUT cannot silently lose edits.
@@ -368,6 +369,9 @@ class LivePhotoReviewRepository(
                 itemIds = state.items.map { it.id }, content = content,
             ))
             pendingLocally = true
+            // Even a blocked conflict save stays on device, but no old draft
+            // is allowed to pass a newer server CAS version automatically.
+            if (draftConflict) throw ReviewDraftConflictException()
             val request = ReviewDraftSaveRequestDto(
                 draftVersion = draftVersion, reviewVersion = version, content = content,
             )
