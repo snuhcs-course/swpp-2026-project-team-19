@@ -583,4 +583,97 @@ class LivePhotoReviewMappingTest {
             toReview.volumeChoices.map(PhotoReviewRules::servingKey).toSet())
         assertFalse(PhotoReviewRules.stats(restored).canPublish)
     }
+
+    @Test fun explicitNullOperatorLabelDoesNotResurrectOldOcrLabel() {
+        val dto = item(
+            options = listOf(ReviewOptionDto("ocr-glass", 1, "잔", 30, 9000)),
+            status = "unmatched", proposedId = null,
+        ).copy(extractedKind = "other", candidates = emptyList(),
+            newProductDraft = null, extractedProductName = "하이볼")
+        val fresh = mapServerPhotoReview(response(dto), fixture())
+        val draft = com.zerotoone.bottlemap.network.ReviewDraftDto(
+            3, 3, "2026-11-15T00:00:00Z",
+            mapOf("itemDecisions" to listOf(mapOf(
+                "extractedItemId" to "line-1",
+                "action" to "publish_without_product", "kind" to "other",
+                "options" to listOf(mapOf(
+                    "extractedOptionId" to "ocr-glass",
+                    "optionLabel" to null,
+                    "pourMl" to 30, "priceKrw" to 9000,
+                )),
+            ))),
+        )
+        val restored = requireNotNull(ServerReviewDraftCodec.restoreStandard(
+            draft, fresh)).items.single()
+        assertNull(PhotoReviewRules.optionSummary(restored).single().label)
+        val final = requireNotNull(mapConfirmedReviewDecision(
+            restored, dto, 30.0, emptyMap()).correctedOptions).single()
+        assertNull(final.label)
+        assertEquals(30, final.pourMl)
+        assertEquals("ocr-glass", final.optionId)
+    }
+
+    @Test fun otherUnknownLabelCanReceiveNewOperatorPourAfterUnsizedOcr() {
+        val dto = item(
+            options = listOf(ReviewOptionDto("ocr-rocks", 1, "온더락", null, 9000)),
+            status = "unmatched", proposedId = null,
+        ).copy(extractedKind = "other", candidates = emptyList(),
+            newProductDraft = null, extractedProductName = "하이볼")
+        val fresh = mapServerPhotoReview(response(dto), fixture())
+        assertTrue(fresh.items.single().volume.isNaN())
+        fun restored(pour: Int?): com.zerotoone.bottlemap.ui.owner.review.ReviewItem {
+            val saved = com.zerotoone.bottlemap.network.ReviewDraftDto(
+                3, 3, "2026-11-15T00:00:00Z",
+                mapOf("itemDecisions" to listOf(mapOf(
+                    "extractedItemId" to "line-1",
+                    "action" to "publish_without_product", "kind" to "other",
+                    "options" to listOf(mapOf(
+                        "extractedOptionId" to "ocr-rocks",
+                        "optionLabel" to "온더락",
+                        "pourMl" to pour,
+                        "priceKrw" to 9000,
+                    )),
+                ))),
+            )
+            return requireNotNull(ServerReviewDraftCodec.restoreStandard(
+                saved, fresh)).items.single()
+        }
+        val assigned = requireNotNull(mapConfirmedReviewDecision(
+            restored(60), dto, 30.0, emptyMap()).correctedOptions).single()
+        assertEquals("온더락", assigned.label)
+        assertEquals(60, assigned.pourMl)
+        assertEquals("ocr-rocks", assigned.optionId)
+        val unsized = requireNotNull(mapConfirmedReviewDecision(
+            restored(null), dto, 30.0, emptyMap()).correctedOptions).single()
+        assertNull(unsized.pourMl)
+    }
+
+    @Test fun finalWhiskyDecisionCanCarry32767MlButBarDefaultRemains999Max() {
+        val dto = item(options = listOf(ReviewOptionDto(
+            "large-glass", 1, "잔", 1000, 18000,
+        )))
+        val initial = mapServerPhotoReview(response(dto), fixture())
+        assertEquals(1000.0, initial.items.single().volume, 0.0)
+        assertFalse(com.zerotoone.bottlemap.ui.owner.review.ReviewIssue.VOLUME in
+            PhotoReviewRules.problems(initial.items.single()))
+        val saved = com.zerotoone.bottlemap.network.ReviewDraftDto(
+            4, 3, "2026-11-15T00:00:00Z",
+            mapOf("itemDecisions" to listOf(mapOf(
+                "extractedItemId" to "line-1",
+                "action" to "select_existing_product",
+                "productId" to "product-1",
+                "options" to listOf(mapOf(
+                    "extractedOptionId" to "large-glass",
+                    "optionLabel" to "잔",
+                    "pourMl" to 32767, "priceKrw" to 18000,
+                )),
+            ))),
+        )
+        val corrected = requireNotNull(ServerReviewDraftCodec.restoreStandard(
+            saved, initial)).items.single()
+        val submitted = requireNotNull(mapConfirmedReviewDecision(
+            corrected, dto, 30.0, emptyMap()).correctedOptions).single()
+        assertEquals(32767, submitted.pourMl)
+        assertEquals("large-glass", submitted.optionId)
+    }
 }
