@@ -79,6 +79,9 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
     val savingDefaultPour: StateFlow<Boolean> = _savingDefaultPour.asStateFlow()
     private val _draftProblem = MutableStateFlow<String?>(null)
     val draftProblem: StateFlow<String?> = _draftProblem.asStateFlow()
+    private val _draftRetryable = MutableStateFlow(false)
+    val draftRetryable: StateFlow<Boolean> = _draftRetryable.asStateFlow()
+    private val localOnlyNotice = "이 기기에는 저장됐어요. 서버 저장을 다시 시도해 주세요."
     private val _publishOutcome = MutableStateFlow<PublishOutcome?>(null)
     val publishOutcome: StateFlow<PublishOutcome?> = _publishOutcome.asStateFlow()
 
@@ -106,7 +109,8 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
             draftSaveMutex.withLock {
                 _load.value = try {
                     repository.loadReview().let { fresh ->
-                        _draftProblem.value = null
+                        _draftRetryable.value = repository.hasPendingLocalDraft()
+                        _draftProblem.value = if (_draftRetryable.value) localOnlyNotice else null
                         repository.consumeDraftNotice()?.let(::toast)
                         PhotoReviewLoad.Ready(fresh)
                     }
@@ -181,6 +185,7 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                     try {
                         repository.saveDraft(state)
                         _draftProblem.value = null
+                        _draftRetryable.value = false
                     } catch (cancelled: CancellationException) {
                         throw cancelled
                     } catch (error: ReviewDraftConflictException) {
@@ -188,18 +193,32 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                         // cannot be published until the owner reloads the draft.
                         if (_draftProblem.value == null) toast(error.message.orEmpty())
                         _draftProblem.value = error.message
+                        _draftRetryable.value = false
                     } catch (error: BottleMapApiException) {
                         // Transient disconnects are retried on Leave; permanent
                         // permission/size/state errors block publication.
-                        if (error.httpStatus in setOf(401, 403, 409, 413)) {
+                        if (error.httpStatus in setOf(401, 403, 409)) {
                             _draftProblem.value = error.message
+                            _draftRetryable.value = false
                             toast(error.message)
+                        } else {
+                            // §5.9: failed server save must remain durable on
+                            // device and be retried explicitly, not silently.
+                            val recoverable = repository.hasPendingLocalDraft()
+                            _draftRetryable.value = recoverable
+                            _draftProblem.value = if (recoverable) localOnlyNotice
+                                else error.message
+                            toast(_draftProblem.value.orEmpty())
                         }
                     } catch (error: IllegalStateException) {
                         _draftProblem.value = error.message ?: "검수 초안 저장에 실패했어요."
+                        _draftRetryable.value = false
                         toast(_draftProblem.value.orEmpty())
-                    } catch (_: Exception) {
-                        // Transient failure: the final save on Leave will retry.
+                    } catch (error: Exception) {
+                        _draftRetryable.value = repository.hasPendingLocalDraft()
+                        _draftProblem.value = if (_draftRetryable.value) localOnlyNotice
+                            else error.message ?: "검수 초안 저장에 실패했어요."
+                        toast(_draftProblem.value.orEmpty())
                     }
                 }
             }
@@ -207,6 +226,11 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
     }
 
     // ---- Screen-level actions ----
+
+    fun retryDraftSave() {
+        if (_publishing.value || !_draftRetryable.value) return
+        review?.let(::saveDraft)
+    }
 
     fun leave() {
         if (_publishing.value || leaving) return
@@ -224,11 +248,15 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                 try {
                     repository.saveDraft(final)
                     _draftProblem.value = null
+                    _draftRetryable.value = false
                     true
                 } catch (cancelled: CancellationException) {
                     throw cancelled
                 } catch (error: Exception) {
-                    _draftProblem.value = error.message ?: "검수 초안 저장에 실패했어요."
+                    _draftRetryable.value = repository.hasPendingLocalDraft() &&
+                        error !is ReviewDraftConflictException
+                    _draftProblem.value = if (_draftRetryable.value) localOnlyNotice
+                        else error.message ?: "검수 초안 저장에 실패했어요."
                     false
                 }
             }
