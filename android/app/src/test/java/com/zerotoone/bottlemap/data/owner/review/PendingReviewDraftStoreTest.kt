@@ -86,6 +86,57 @@ class PendingReviewDraftStoreTest {
         assertNull(PendingReviewDraftStore(context) { jwt("other-account") }.read("import-large"))
     }
 
+    @Test fun conflictWorkingCopyCanShrinkWhileOriginalOversizedBackupStaysImmutable() = runBlocking {
+        val original = PendingReviewDraftStore(context) { jwt("owner-working") }
+        val working = PendingReviewDraftStore(context, { jwt("owner-working") }, slot = "working")
+        val oversized = ServerReviewDraftCodec.encode(PhotoReviewState(items = listOf(
+            ReviewItem(id = "ocr-1", name = "편집할 내용",
+                draftPriceText = "8".repeat(400_000)),
+        )))
+        val initial = PendingReviewDraftStore.Envelope(3, 2, listOf("ocr-1"), oversized)
+        original.write("import-working", initial)
+        assertTrue(ServerReviewDraftCodec.exceedsServerLimit(
+            requireNotNull(original.read("import-working")).content))
+        val reduced = ServerReviewDraftCodec.encode(PhotoReviewState(items = listOf(
+            ReviewItem(id = "ocr-1", name = "편집할 내용", draftPriceText = "8000"),
+        )))
+        working.write("import-working", initial.copy(content = reduced))
+        // Reopening the app preserves both: the immutable original and the
+        // separately trimmed version available for an explicit CAS choice.
+        val origAgain = PendingReviewDraftStore(context) { jwt("owner-working") }
+        val workAgain = PendingReviewDraftStore(context, { jwt("owner-working") }, "working")
+        assertEquals(oversized, requireNotNull(origAgain.read("import-working")).content)
+        assertEquals(reduced, requireNotNull(workAgain.read("import-working")).content)
+        assertFalse(ServerReviewDraftCodec.exceedsServerLimit(
+            requireNotNull(workAgain.read("import-working")).content))
+        assertNull(PendingReviewDraftStore(context, { jwt("another-owner") }, "working")
+            .read("import-working"))
+        workAgain.clear("import-working")
+        assertNotNull(origAgain.read("import-working"))
+    }
+
+    @Test fun manuallySplitChildIsCompatibleForBothRestoreAndExplicitOverwrite() {
+        val fresh = PhotoReviewState(items = listOf(
+            ReviewItem(id = "master", name = "위스키"),
+            ReviewItem(id = "child", name = "위스키", mergedInto = "master",
+                primarySourceOptionId = "ocr-option", excluded = true),
+        ))
+        val split = fresh.copy(items = listOf(
+            fresh.items.first(),
+            fresh.items.last().copy(manuallySplitGroup = true, mergedInto = null,
+                excluded = false),
+        ))
+        assertTrue(compatibleOwnerReviewDraft(split, fresh))
+        assertFalse(compatibleOwnerReviewDraft(
+            split.copy(items = split.items.reversed()), fresh))
+        assertFalse(compatibleOwnerReviewDraft(
+            split.copy(items = listOf(split.items.first(),
+                split.items.last().copy(manuallySplitGroup = false))), fresh))
+        assertFalse(compatibleOwnerReviewDraft(
+            split.copy(items = listOf(split.items.first(),
+                split.items.last().copy(primarySourceOptionId = "unknown-id"))), fresh))
+    }
+
     @Test fun interruptedAtomicRewriteKeepsLastCompletedLocalDraft() = runBlocking {
         val store = PendingReviewDraftStore(context) { jwt("owner-recovery") }
         val draft = PendingReviewDraftStore.Envelope(
