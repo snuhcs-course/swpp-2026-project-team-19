@@ -407,6 +407,7 @@ private fun PublishFooter(stats: ReviewStats, vm: PhotoReviewViewModel) {
     val savingPour by vm.savingDefaultPour.collectAsStateWithLifecycle()
     val draftProblem by vm.draftProblem.collectAsStateWithLifecycle()
     val draftRetryable by vm.draftRetryable.collectAsStateWithLifecycle()
+    val draftOversized by vm.draftOversized.collectAsStateWithLifecycle()
     val draftConflictChoice by vm.draftConflictChoice.collectAsStateWithLifecycle()
     val draftResolving by vm.draftResolving.collectAsStateWithLifecycle()
     var pendingChoice by remember { mutableStateOf<Boolean?>(null) }
@@ -460,10 +461,15 @@ private fun PublishFooter(stats: ReviewStats, vm: PhotoReviewViewModel) {
             draftProblem != null -> Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(draftProblem.orEmpty(), style = uxText(12f, 450, UxColor.error),
                     modifier = Modifier.testTag("review-draft-error"))
-                Text(if (draftRetryable)
-                    "현재 변경 내용은 이 기기에 보관했어요. 서버 저장을 재시도할 수 있어요."
-                    else "최신 서버 검수를 불러오면 이 화면의 미저장 수정은 사라질 수 있어요.",
-                    style = uxText(11f, 400, UxColor.muted))
+                Text(when {
+                    draftOversized ->
+                        "이 기기에는 보관했어요. 검수 입력을 줄여 서버 256KB 제한 이내로 만들면 다시 저장할 수 있어요."
+                    draftRetryable ->
+                        "현재 변경 내용은 이 기기에 보관했어요. 서버 저장을 재시도할 수 있어요."
+                    draftConflictChoice ->
+                        "현재 화면은 새로 불러온 서버 초안이에요. 기기 초안과 비교한 뒤 명시적으로 선택해 주세요."
+                    else -> "최신 서버 검수를 불러오면 이 화면의 미저장 수정은 사라질 수 있어요."
+                }, style = uxText(11f, 400, UxColor.muted))
                 if (draftRetryable) {
                     UxSecondaryButton("서버 저장 다시 시도", vm::retryDraftSave,
                         Modifier.testTag("review-draft-retry"))
