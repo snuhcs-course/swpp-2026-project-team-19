@@ -36,7 +36,7 @@ class BarCopyFeedbackComposeTest {
         items = emptyList(),
     )
 
-    @Test fun addressUsesSystemClipboardAndPhoneShowsAppToast() {
+    @Test fun addressCopyShowsPopupAndPhoneUsesOnlySystemClipboard() {
         compose.setContent {
             MaterialTheme {
                 CustomerP18BarDetail(
@@ -49,17 +49,21 @@ class BarCopyFeedbackComposeTest {
         }
         compose.onNodeWithText("지도").performScrollTo().performClick()
         compose.onNodeWithText("복사").performScrollTo().performClick()
-        // UAT 4.3: Android 13+ shows its own clipboard preview.
-        // The app must not display a second 'address copied' toast.
-        compose.onNodeWithTag("ux-toast").assertDoesNotExist()
+        compose.onNodeWithTag("customer-bar-address-copied-dialog").assertIsDisplayed()
+        compose.onNodeWithText("주소를 복사했어요.").assertIsDisplayed()
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         assertEquals("서울특별시 관악구 테스트길 1",
             clipboard.primaryClip?.getItemAt(0)?.coerceToText(context)?.toString())
+        compose.onNodeWithText("확인").performClick()
+        compose.onNodeWithTag("customer-bar-address-copied-dialog").assertDoesNotExist()
 
         compose.onNodeWithText("전화").performScrollTo().performClick()
         compose.onNodeWithText("복사").performScrollTo().performClick()
-        compose.onNodeWithText("전화번호를 복사했어요.").assertIsDisplayed()
+        assertEquals("02-1234-5678",
+            clipboard.primaryClip?.getItemAt(0)?.coerceToText(context)?.toString())
+        compose.onNodeWithTag("ux-toast").assertDoesNotExist()
+        compose.onNodeWithTag("customer-bar-address-copied-dialog").assertDoesNotExist()
     }
 
     @Test fun missingPhoneNeverClaimsCopySucceeded() {
