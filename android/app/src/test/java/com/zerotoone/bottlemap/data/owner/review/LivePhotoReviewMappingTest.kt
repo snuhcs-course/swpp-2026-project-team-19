@@ -550,4 +550,37 @@ class LivePhotoReviewMappingTest {
         assertEquals("other-ocr", publishedCleared.optionId)
         assertEquals(9000, publishedCleared.priceKrw)
     }
+
+    @Test fun regeneratedOperatorDraftMustReviewChildServingCreatedByRealGrouping() {
+        val master = item(
+            options = listOf(ReviewOptionDto("ocr-master", 1, "잔", 30, 15000)),
+        ).copy(extractedItemId = "line-master", itemOrder = 1)
+        val child = item(
+            options = listOf(ReviewOptionDto("ocr-child", 1, "샷", 60, 22000)),
+        ).copy(extractedItemId = "line-child", itemOrder = 2)
+        val fresh = mapServerPhotoReview(response(master, child), fixture())
+        val masterCard = fresh.items.first { it.id == "line-master" }
+        assertEquals(1, masterCard.options.size)
+        assertNull(masterCard.options.single().sourceOptionId)
+        val saved = com.zerotoone.bottlemap.network.ReviewDraftDto(
+            8, 2, "2026-11-15T00:00:00Z",
+            mapOf("itemDecisions" to listOf(mapOf(
+                "extractedItemId" to "line-master",
+                "action" to "select_existing_product",
+                "productId" to "product-1",
+                "options" to listOf(mapOf(
+                    "extractedOptionId" to "ocr-master",
+                    "optionLabel" to "잔", "pourMl" to 30,
+                    "priceKrw" to 15000,
+                )),
+            ))),
+        )
+        val restored = requireNotNull(ServerReviewDraftCodec.restoreStandard(
+            saved, fresh, allowStaleIds = true))
+        val toReview = restored.items.first { it.id == "line-master" }
+        assertFalse(toReview.volumeChoicesConfirmed)
+        assertEquals(setOf("ml:30", "ml:60"),
+            toReview.volumeChoices.map(PhotoReviewRules::servingKey).toSet())
+        assertFalse(PhotoReviewRules.stats(restored).canPublish)
+    }
 }
