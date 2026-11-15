@@ -275,6 +275,16 @@ class LivePhotoReviewRepository(
                 draftNotice = "이 기기에 저장된 초안과 서버 버전이 달라요. 서버와 이 기기의 초안 중 선택해 주세요."
             }
         }
+        // Do not offer a destructive draft choice when a foreign/operator
+        // server draft cannot actually be represented on the Android screen.
+        // Preserve the local backup for human reconciliation instead.
+        if (pending != null && saved != null && !canRestore) {
+            pendingDraftConflict = false
+            throw IllegalStateException(
+                "최신 서버 초안을 이 화면에서 안전하게 표시할 수 없어요. " +
+                    "기기에 보관된 변경 내용은 유지했어요. 담당자에게 확인해 주세요."
+            )
+        }
         // Signed URLs expire, and source observations belong to the server.
         // Restore only owner edits; rebind fresh data to the current response.
         val currentItems = state.items.associateBy { it.id }
