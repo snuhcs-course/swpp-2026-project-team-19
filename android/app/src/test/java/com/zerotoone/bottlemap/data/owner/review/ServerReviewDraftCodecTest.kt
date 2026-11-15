@@ -503,6 +503,59 @@ class ServerReviewDraftCodecTest {
         assertEquals(ReviewItemType.WHISKY, completed.type)
     }
 
+    @Test fun incompleteOperatorNameMustNotBeReplacedWithOcrName() {
+        val fresh = PhotoReviewState(items = listOf(
+            ReviewItem(id = "ocr-1", name = "AI가 읽은 이름", price = 12000.0, volume = 30.0),
+        ))
+        for (bad in listOf<Any?>("", "   ", null, 777)) {
+            val saved = ReviewDraftDto(4, 3, "2026-11-16T00:00:00Z", mapOf(
+                "itemDecisions" to listOf(mapOf(
+                    "extractedItemId" to "ocr-1",
+                    "correctedProductName" to bad,
+                )),
+            ))
+            assertNull("Incomplete name must not be silently reset: $bad",
+                ServerReviewDraftCodec.restoreStandard(saved, fresh))
+        }
+        val valid = ReviewDraftDto(4, 3, "2026-11-16T00:00:00Z", mapOf(
+            "itemDecisions" to listOf(mapOf(
+                "extractedItemId" to "ocr-1",
+                "correctedProductName" to "검수자가 수정한 이름",
+            )),
+        ))
+        assertEquals("검수자가 수정한 이름",
+            ServerReviewDraftCodec.restoreStandard(valid, fresh)?.items?.single()?.name)
+    }
+
+    @Test fun partialOperatorDecisionCannotUnexcludeAnOcrHeader() {
+        val fresh = PhotoReviewState(items = listOf(
+            ReviewItem(id = "header", name = "HIGHBALL", excluded = true,
+                required = false, price = 12000.0, volume = 30.0),
+        ))
+        val partial = ReviewDraftDto(4, 3, "2026-11-16T00:00:00Z", mapOf(
+            "itemDecisions" to listOf(mapOf(
+                "extractedItemId" to "header",
+                "correctedProductName" to "HIGHBALL SECTION",
+            )),
+        ))
+        val restored = requireNotNull(
+            ServerReviewDraftCodec.restoreStandard(partial, fresh))
+        assertTrue(restored.items.single().excluded)
+        assertEquals(1, PhotoReviewRules.stats(restored).excluded.size)
+        assertFalse(PhotoReviewRules.stats(restored).canPublish)
+        val explicitProduct = ReviewDraftDto(4, 3, "2026-11-16T00:00:00Z", mapOf(
+            "itemDecisions" to listOf(mapOf(
+                "extractedItemId" to "header",
+                "action" to "publish_without_product",
+                "kind" to "other",
+                "finalLineType" to "product",
+            )),
+        ))
+        assertFalse(requireNotNull(
+            ServerReviewDraftCodec.restoreStandard(explicitProduct, fresh)
+        ).items.single().excluded)
+    }
+
     @Test fun operatorCatalogSelectionConvertsOtherToWhiskyAndEnforcesThreeSizes() {
         val fresh = PhotoReviewState(items = listOf(ReviewItem(
             id = "other-line", name = "잘못 분류한 위스키",
