@@ -3,6 +3,7 @@ package com.zerotoone.bottlemap.data.owner.review
 import com.zerotoone.bottlemap.network.ReviewDraftDto
 import com.zerotoone.bottlemap.ui.owner.review.ClassificationSnapshot
 import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewState
+import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewRules
 import com.zerotoone.bottlemap.ui.owner.review.PriceChoice
 import com.zerotoone.bottlemap.ui.owner.review.ReviewItem
 import com.zerotoone.bottlemap.ui.owner.review.ReviewItemType
@@ -157,4 +158,51 @@ class ServerReviewDraftCodecTest {
         assertFalse(ServerReviewDraftCodec.sameAndroidSnapshot(attempted,foreign))
     }
 
+
+    @Test fun operatorEmptyDraftAndDeletedOptionsAreNotRejectedOrResurrected() {
+        val fresh = PhotoReviewState(items = listOf(ReviewItem(
+            id = "ocr-1", name = "위스키", price = 10000.0, volume = 30.0,
+            primarySourceOptionId = "opt-1",
+        )))
+        fun draft(content: Map<String, Any?>) =
+            ReviewDraftDto(2, 3, "2026-11-15T00:00:00Z", content)
+        assertEquals(fresh, ServerReviewDraftCodec.restoreStandard(draft(emptyMap()), fresh))
+        assertEquals(fresh, ServerReviewDraftCodec.restoreStandard(
+            draft(mapOf("changeDecisions" to emptyList<Any>())), fresh))
+        val cleared = requireNotNull(ServerReviewDraftCodec.restoreStandard(
+            draft(mapOf("itemDecisions" to listOf(mapOf(
+                "extractedItemId" to "ocr-1", "options" to emptyList<Any>()
+            )))), fresh,
+        )).items.single()
+        assertFalse(cleared.primaryHasOption)
+        assertTrue(PhotoReviewRules.optionSummary(cleared).isEmpty())
+    }
+
+    @Test fun operatorFirstOptionIsRetainedAndExplicitNonProductCannotBecomeReject() {
+        val fresh = PhotoReviewState(items = listOf(ReviewItem(
+            id = "ocr-1", name = "위스키", price = 0.0, primaryHasOption = false,
+        )))
+        fun draft(decision: Map<String, Any?>) =
+            ReviewDraftDto(2, 3, "2026-11-15T00:00:00Z",
+                mapOf("itemDecisions" to listOf(decision)))
+        val added = requireNotNull(ServerReviewDraftCodec.restoreStandard(draft(mapOf(
+            "extractedItemId" to "ocr-1",
+            "options" to listOf(mapOf("priceKrw" to 15000,
+                "optionLabel" to "잔", "pourMl" to 45)),
+        )), fresh)).items.single()
+        assertTrue(added.primaryHasOption)
+        assertEquals(15000.0, PhotoReviewRules.optionSummary(added).single().price, 0.0)
+        assertNull(ServerReviewDraftCodec.restoreStandard(draft(mapOf(
+            "extractedItemId" to "ocr-1", "action" to "confirm_non_product",
+            "finalLineType" to "header",
+        )), fresh))
+        assertNull(ServerReviewDraftCodec.restoreStandard(draft(mapOf(
+            "extractedItemId" to "ocr-1", "action" to "publish_without_product",
+        )), fresh))
+        val other = requireNotNull(ServerReviewDraftCodec.restoreStandard(draft(mapOf(
+            "extractedItemId" to "ocr-1", "action" to "publish_without_product",
+            "kind" to "other",
+        )), fresh)).items.single()
+        assertEquals(ReviewItemType.OTHER, other.type)
+    }
 }
