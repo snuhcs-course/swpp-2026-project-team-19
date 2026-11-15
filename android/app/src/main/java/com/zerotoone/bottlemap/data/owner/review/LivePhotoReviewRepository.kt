@@ -124,11 +124,20 @@ class LivePhotoReviewRepository(
             candidate != null &&
                 candidate.items.map { it.id } == state.items.map { it.id } &&
                 candidate.items.zip(state.items).all { (old, fresh) ->
-                    if (old.manuallySplitGroup)
+                    val freshIds = (
+                        PhotoReviewRules.optionSummary(fresh) + fresh.volumeChoices +
+                        fresh.preMergeOptions
+                    ).mapNotNull { it.sourceOptionId }.toSet()
+                    val savedIds = (
+                        PhotoReviewRules.optionSummary(old) + old.volumeChoices +
+                        old.preMergeOptions + old.classificationSnapshot?.options.orEmpty()
+                    ).mapNotNull { it.sourceOptionId } +
+                        listOfNotNull(old.classificationSnapshot?.primarySourceOptionId)
+                    savedIds.all { it in freshIds } && (if (old.manuallySplitGroup)
                         fresh.mergedInto != null || fresh.mergeSources.isNotEmpty()
                     else old.mergedInto == fresh.mergedInto &&
                         old.volumeChoices.map { it.sourceOptionId } ==
-                            fresh.volumeChoices.map { it.sourceOptionId }
+                            fresh.volumeChoices.map { it.sourceOptionId })
                 }
         val legacy = LegacyReviewDraftReader(appContext)
         val reviewVersion = requireNotNull(response.reviewVersion)
@@ -168,8 +177,12 @@ class LivePhotoReviewRepository(
             runCatching { legacy.clear(id) }
         }
         val parsedAndroid = saved?.let(ServerReviewDraftCodec::decode)
-        val parsed = parsedAndroid ?: saved?.let {
-            ServerReviewDraftCodec.restoreStandard(it, state)
+        val regenerated = saved != null && saved.reviewVersion != reviewVersion
+        val parsed = if (parsedAndroid != null) {
+            if (regenerated) ServerReviewDraftCodec.reconcileRegenerated(parsedAndroid, state)
+            else parsedAndroid
+        } else saved?.let {
+            ServerReviewDraftCodec.restoreStandard(it, state, allowStaleIds = regenerated)
         }
         draftVersion = saved?.draftVersion ?: 0
         draftConflict = false
@@ -184,8 +197,8 @@ class LivePhotoReviewRepository(
                 "검수 버전이 변경됐어요. 남아 있는 항목만 다시 확인해 주세요."
             else -> null
         }
-        val canRestore = compatible(parsed)
-        val chosen = parsed.takeIf(::compatible) ?: state
+        val canRestore = if (regenerated) parsed != null else compatible(parsed)
+        val chosen = parsed.takeIf { canRestore } ?: state
         if (saved != null && !canRestore) {
             // Preserve remote edits: do not silently overwrite an operator's
             // different-schema draft or an incompatible saved OCR grouping.
