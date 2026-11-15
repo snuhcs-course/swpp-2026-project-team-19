@@ -847,12 +847,14 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
             com.zerotoone.bottlemap.network.ApiClient.api.searchBarNames(trimmed, limit=20)
         }
         val before=snapshot()
-        publishSnapshot(before.copy(existingBarCandidates=matches.items
-            .filter { !it.hasOwner }
-            .map {
-                MockBar(it.barId,it.name,it.address,
-                    latitude=it.latitude, longitude=it.longitude)
-            }))
+        val toBar: (com.zerotoone.bottlemap.network.BarNameItemDto) -> MockBar = { item ->
+            MockBar(item.barId,item.name,item.address,
+                latitude=item.latitude,longitude=item.longitude)
+        }
+        publishSnapshot(before.copy(
+            existingBarCandidates = matches.items.filterNot { it.hasOwner }.map(toBar),
+            claimedBarCandidates = matches.items.filter { it.hasOwner }.map(toBar),
+        ))
     }
 
     suspend fun searchCatalogBrandsLive(query: String) {
