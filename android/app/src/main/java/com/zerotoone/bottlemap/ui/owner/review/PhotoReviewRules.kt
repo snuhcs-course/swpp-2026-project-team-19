@@ -591,13 +591,21 @@ object PhotoReviewRules {
         val raw = if (valid) x.rawOptionEdits - key else x.rawOptionEdits + (key to text)
         val edited = x.copy(rawOptionEdits = raw)
         if (x.type != ReviewItemType.WHISKY) {
-            if (field != OptionField.PRICE) return edited
-            return if (index == null) edited.copy(price = n, primaryHasOption = true)
-            else {
-                val previous = x.options.getOrNull(index) ?: return edited
-                edited.copy(options = x.options.toMutableList().also {
-                    it[index] = previous.copy(price = n)
-                })
+            // OTHER supports optional pours, including manually supplied sizes
+            // and a cleared (unspecified) pour. The former price-only branch
+            // left the displayed change out of the final publish options.
+            return when {
+                index == null && field == OptionField.PRICE ->
+                    edited.copy(price = n, primaryHasOption = true)
+                index == null ->
+                    edited.copy(volume = n, volumeSource = VolumeSource.MANUAL)
+                else -> {
+                    val previous = x.options.getOrNull(index) ?: return edited
+                    edited.copy(options = x.options.toMutableList().also {
+                        it[index] = if (field == OptionField.PRICE) previous.copy(price = n)
+                            else previous.copy(volume = n, volumeFromDefault = false)
+                    })
+                }
             }
         }
         return when {
