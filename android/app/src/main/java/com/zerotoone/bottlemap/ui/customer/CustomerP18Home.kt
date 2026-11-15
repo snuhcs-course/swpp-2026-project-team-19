@@ -316,8 +316,7 @@ internal fun CustomerP18Home(
         }
     }
     searchNotice?.let { (_, message) ->
-        UxToast(message, Modifier.align(Alignment.TopCenter)
-            .testTag("customer-home-search-validation-toast"))
+        UxToast(message, Modifier.align(Alignment.TopCenter))
     }
     }
 }
