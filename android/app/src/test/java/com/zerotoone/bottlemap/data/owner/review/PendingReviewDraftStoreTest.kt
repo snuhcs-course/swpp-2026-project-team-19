@@ -65,6 +65,27 @@ class PendingReviewDraftStoreTest {
         assertNull(recreated.read("import-1"))
     }
 
+    @Test fun oversizedServerDraftSurvivesInPrivateDeviceFileAfterRecreation() = runBlocking {
+        val content = ServerReviewDraftCodec.encode(PhotoReviewState(items = listOf(
+            ReviewItem(id = "ocr-large", name = "큰 메뉴", draftPriceText = "9".repeat(400_000)),
+        )))
+        assertTrue(ServerReviewDraftCodec.exceedsServerLimit(content))
+        val owner = PendingReviewDraftStore(context) { jwt("owner-large") }
+        owner.write("import-large", PendingReviewDraftStore.Envelope(
+            reviewVersion = 3, expectedDraftVersion = 4,
+            itemIds = listOf("ocr-large"), content = content,
+        ))
+        val recreated = PendingReviewDraftStore(context) { jwt("owner-large") }
+        val saved = requireNotNull(recreated.read("import-large"))
+        assertEquals(4, saved.expectedDraftVersion)
+        assertTrue(ServerReviewDraftCodec.exceedsServerLimit(saved.content))
+        val restored = requireNotNull(ServerReviewDraftCodec.decode(ReviewDraftDto(
+            4, 3, "2026-11-15T00:00:00Z", saved.content,
+        )))
+        assertEquals("9".repeat(400_000), restored.items.single().draftPriceText)
+        assertNull(PendingReviewDraftStore(context) { jwt("other-account") }.read("import-large"))
+    }
+
     @Test fun interruptedAtomicRewriteKeepsLastCompletedLocalDraft() = runBlocking {
         val store = PendingReviewDraftStore(context) { jwt("owner-recovery") }
         val draft = PendingReviewDraftStore.Envelope(
