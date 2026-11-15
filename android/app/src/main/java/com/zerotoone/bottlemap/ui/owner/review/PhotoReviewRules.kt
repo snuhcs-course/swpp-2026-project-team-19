@@ -304,7 +304,11 @@ object PhotoReviewRules {
         }
         return ReviewPublicationPreview(
             changedExistingPrices = updatedExisting,
-            publishWithoutProduct = approved.count { it.linkedProductId == null },
+            // Other menu rows are already counted separately in the confirmation sheet.
+            // The UAT "unlinked" number refers to new whiskies awaiting operator linking.
+            publishWithoutProduct = approved.count {
+                it.type == ReviewItemType.WHISKY && it.linkedProductId == null
+            },
         )
     }
 
