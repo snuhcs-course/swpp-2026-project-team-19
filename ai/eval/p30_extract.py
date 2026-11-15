@@ -156,6 +156,11 @@ FROZEN_MATCHING = {
     "ai/eval/i3_match_eval.py": "ae53dadd542691b921d5868f01ca5772ea82a968fbd81a7055663966208b8a0c",
     "ai/eval/match_eval.py": "6f4347d9451e1d0cd7aec689e16fd79be84bc9e9e57a9836de4859e1fcb7e892",
 }
+# Released from the freeze on 2026-11-13 (Jinwoo Park): the I3 evaluation is finished and I4 changes
+# the matching rules. The I3 hashes above stay as the record of what P30 ran with. The check skips
+# the released files and every command says so, since a run on this checkout no longer measures
+# the I3 configuration.
+RELEASED_MATCHING = ("backend/app/matching/staged.py",)
 RUNS = (1, 2, 3)  # freeze 3장: r1-r3
 PHOTO_HASHES = REPO_ROOT / "ai" / "eval" / "i3_photo_sha256.json"
 # SHA-256 (CRLF read as LF) of ai/eval/i3_photo_sha256.json as frozen in 15b1eff (#69). The photo
@@ -344,11 +349,24 @@ def check_frozen_code(repo: Path) -> dict[str, str]:
     if diff:
         raise Stop(f"frozen scoring files changed (no API call made): {', '.join(diff)}")
     check_raw_files(repo, FROZEN_RAW, "frozen label/gold/hash files")
-    check_raw_files(repo, FROZEN_MATCHING, "frozen matching files (i3_eval_freeze.md 4.5)")
+    check_raw_files(repo, {rel: pin for rel, pin in FROZEN_MATCHING.items() if rel not in RELEASED_MATCHING},
+                    "frozen matching files (i3_eval_freeze.md 4.5)")
+    if RELEASED_MATCHING:
+        print(f"NOTE: not the I3 configuration: released from the freeze: {', '.join(RELEASED_MATCHING)}")
     prompt_sha = sha256_bytes(server_hybrid.load_prompt().encode("utf-8"))
     if server_hybrid.PROMPT_VERSION != PROMPT_VERSION or prompt_sha != PROMPT_SHA256:
         raise Stop(f"prompt {server_hybrid.PROMPT_VERSION} {prompt_sha[:12]}... is not the frozen {PROMPT_VERSION}")
     return actual
+
+
+def released_matching(repo: Path) -> dict[str, dict[str, str | None]]:
+    """The released files with their I3 pin and the SHA-256 they have now (None when missing)."""
+    out = {}
+    for rel in RELEASED_MATCHING:
+        path = repo / rel
+        out[rel] = {"i3_sha256": FROZEN_MATCHING[rel],
+                    "sha256": sha256_bytes(path.read_bytes()) if path.is_file() else None}
+    return out
 
 
 def check_raw_files(repo: Path, pins: dict[str, str], what: str) -> None:
@@ -689,8 +707,11 @@ def load_manifest(out: Path, config: dict, frozen: dict, photos: list[Photo]) ->
                 "frozen_code_reference": "5d49c8a (clova.py: 1e149d4, deadline_s path only)",
                 "frozen_code_equivalent": FROZEN_CODE_EQUIVALENT,
                 "frozen_eval": FROZEN_EVAL, "frozen_eval_reference": "score.py: 15b1eff, e2e_match.py: 5d49c8a",
-                "frozen_raw": FROZEN_RAW, "frozen_matching": FROZEN_MATCHING,
+                "frozen_raw": FROZEN_RAW,
+                "frozen_matching": {rel: pin for rel, pin in FROZEN_MATCHING.items() if rel not in RELEASED_MATCHING},
                 "frozen_matching_reference": "ai/docs/i3_eval_freeze.md 4.5 (file SHA-256, raw bytes)",
+                # not checked: the I3 pin and what the file is in this checkout
+                "released_matching": released_matching(REPO_ROOT),
                 "photo_hashes_file": "ai/eval/i3_photo_sha256.json",
                 "photo_hashes_file_sha256": None, "photos": inputs, "ocr_caches": {}, "commands": []}
     manifest = json.loads(path.read_text(encoding="utf-8"))
@@ -762,7 +783,8 @@ def run_command(args: argparse.Namespace, secrets: Secrets, clients: Clients | N
 
     todo = plan(photos, args.runs, out, data_dir)
     print(f"photos verified: {len(photos)} (SHA-256 = {args.hashes.name}); frozen code and prompt {PROMPT_VERSION}, "
-          f"scoring code, label/gold/hash files (raw bytes) and matching files (4.5) OK")
+          f"scoring code, label/gold/hash files (raw bytes) and matching files (4.5) OK"
+          + (f", except {', '.join(RELEASED_MATCHING)}: released from the freeze, NOT checked" if RELEASED_MATCHING else ""))
     print(f"OCR caches: {len(photos) - len(todo['no_ocr_cache'])}/{len(photos)} present"
           + (f"; CLOVA calls needed: {todo['clova_calls']}" if todo["no_ocr_cache"] else ""))
     for k, files in todo["todo"].items():

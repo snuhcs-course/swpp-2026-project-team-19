@@ -29,6 +29,14 @@ S2  brand + attributes (needs S1), tried only when no alias matched
     - numbers on the line other than the age (a year, "#2", "16.2"; strength, volume,
       servings and prices such as "46%", "700 ml", "16,000원" left out) rule out a product
       whose name has numbers and none of them (Classic Cut 2020 for "클래식컷 2025") (I3-A4)
+    - a Latin token of one or two letters ("PX", "XO") fits a product that has it as a whole
+      word, and "CS" and "DR" fit Cask Strength and Distiller's Reserve; one that fits no
+      product still rules nothing out (I4)
+    - words that describe every whisky rather than one edition (the, and, 더, 버번, 싱글몰트,
+      캐스크, 오크, 피니시, ...) are left out when they fit none of the products, and if the
+      rest then picks one product, or the plain product of that age, it is the only candidate
+      with evidence ignoredWords and confirmRecommended. It is never exact: on another menu
+      "버번 캐스크" names an edition the catalog does not have (I4)
     - when edition tokens picked the product but its edition name has words the line
       does not have ("anCnoc Sherry" -> anCnoc Peated Sherry Cask), the line is
       ambiguous with that one candidate, evidence editionOnlyInProduct and
@@ -342,6 +350,28 @@ def _token_fits(token: str, targets: list[str]) -> bool:
     return len(token) >= min_length and any(token in target for target in targets)
 
 
+# What a one- or two-letter token stands for on a menu.
+_ABBREVIATIONS = {"cs": ("cask", "strength"), "dr": ("distillers", "reserve")}
+
+
+def _short_token_fits(token: str, product: ProductInfo) -> bool:
+    """A short Latin letter token ("px", "cs") against the whole words of the product's name."""
+    words = _words(product.display_name)
+    return token in words or all(word in words for word in _ABBREVIATIONS.get(token, ("",)))
+
+
+# Line words that say what every whisky has, not which edition it is. Left out only when they
+# fit none of the products (`_narrow_brand`): "Elements of Islay 버번" keeps its 버번.
+# 위스키/whisky/whiskey are not here: they are _NEUTRAL_TOKENS, dropped before any edition token is
+# made, and do not stop a confirmation ("Glenfiddich 12 Whisky" is exact, as in I3).
+_GENERIC_TOKENS = frozenset(normalize(word) for word in (
+    "the", "and", "of", "더", "앤", "오브",
+    "scotch", "single", "malt", "bourbon", "distillery",
+    "스카치", "싱글", "몰트", "싱글몰트", "버번", "버본", "디스틸러리",
+    "cask", "oak", "wood", "finish", "matured", "캐스크", "케스크", "오크", "우드", "피니시", "피니쉬",
+))
+
+
 def _short_letters(token: str) -> bool:
     """A Latin letter token too short to check ("dr", "px"); numbers are never this."""
     return token.isascii() and token.isalpha() and len(token) < _MIN_LATIN_TOKEN
@@ -400,12 +430,16 @@ def _edition_words_not_in_line(
         lines.append(to_english(lines[0], _VOCABULARY))
     texts = [_DIGITS.sub("", normalize(line)) for line in lines]
     line_words = {word for line in lines for word in _words(line)}
+    # "CS" on the line is the product's "Cask Strength".
+    spelled_out = {word for short in line_words for word in _ABBREVIATIONS.get(short, ())}
     missing = []
     for word in dict.fromkeys(_words(product.edition_name)):
         if word in _EDITION_NEUTRAL_WORDS:
             continue
         # Numbers and short words ("PX") as whole words, longer words anywhere ("doublewood").
         whole_word = word.isdigit() or len(word) < _MIN_LATIN_TOKEN
+        if word in spelled_out:
+            continue
         if not (word in line_words if whole_word else any(word in text for text in texts)):
             missing.append(word)
     if missing and _unexplained_hangul(lines[-1], brand_aliases):
@@ -463,6 +497,22 @@ def _resolve_by_brand(
     return _narrow_brand(brand_ids, {"brandMatch": brand_alias}, rest, item, catalog, default_product)
 
 
+def _fits_any(token: str, products: list[ProductInfo], catalog: CatalogLookup) -> bool:
+    """Whether the token, as written or in English (vocab_ko_en.json), fits any of the products."""
+    spellings = {token}
+    if _VOCABULARY is not None:
+        english = normalize(to_english(token, _VOCABULARY))
+        if english:
+            spellings.add(english)
+    for product in products:
+        targets = [*catalog.get_normalized_aliases(product.product_id)]
+        if product.edition_name:
+            targets.append(normalize(product.edition_name))
+        if any(_token_fits(spelling, targets) for spelling in spellings):
+            return True
+    return False
+
+
 def _narrow_brand(
     brand_ids: list[UUID],
     brand_evidence: dict[str, Any],
@@ -485,6 +535,7 @@ def _narrow_brand(
             product = catalog.get_product(product_id)
             if product is not None:
                 products.append(product)
+    brand_products = list(products)
     if age is not None:
         products = [product for product in products if product.age_years == age]
     # A number on the line other than the age (year, batch, "#2", "16.1") rules out a product
@@ -506,7 +557,11 @@ def _narrow_brand(
         targets = [*catalog.get_normalized_aliases(product.product_id)]
         if product.edition_name:
             targets.append(normalize(product.edition_name))
-        fits.append((product, [token for token in tokens if _token_fits(token, targets)]))
+        fits.append((product, [
+            token for token in tokens
+            if _token_fits(token, targets) or (_short_letters(token) and _short_token_fits(token, product))
+        ]))
+    fitted_somewhere = {token for _, fitted in fits for token in fitted}
 
     full = [product for product, fitted in fits if len(fitted) == len(tokens)]
     if age is not None and default_product and not tokens:
@@ -520,14 +575,35 @@ def _narrow_brand(
     else:
         # No age: only edition tokens can pick the product.
         exact = bool(tokens) and len(full) == 1
-        # Letter tokens too short to check ("DR") do not rule a product out.
-        deciding = [token for token in tokens if not _short_letters(token)]
+        # Letter tokens too short to check ("DR") rule a product out only when some product has them.
+        deciding = [token for token in tokens if not _short_letters(token) or token in fitted_somewhere]
         chosen = full if exact else [product for product, fitted in fits if fitted or not deciding]
     if not chosen:
         return UNMATCHED
     confirm = (
         default_product and not exact and not tokens and len(chosen) == 1 and chosen[0].edition_name is not None
     )
+    # Generic words that fit none of these products are left out; what the rest picks is
+    # recommended, never exact.
+    generic = [token for token in tokens if token in _GENERIC_TOKENS and token not in fitted_somewhere]
+    ignored: list[str] = []
+    if default_product and not exact and generic:
+        kept = [token for token in tokens if token not in generic]
+        if kept:
+            # A generic word that does fit ("캐스크" of Cask Strength) cannot pick a product by itself.
+            specific = any(token not in _GENERIC_TOKENS for token in kept)
+            picked = [product for product, fitted in fits if len(fitted) == len(kept)] if specific else []
+        elif age is not None and not any(_fits_any(token, brand_products, catalog) for token in generic):
+            picked = [product for product in products if product.edition_name is None]
+        else:
+            # Only generic words are left, and the brand uses one of them for an edition: at any
+            # age or number, as written or in English. "Glenfiddich 12 Bourbon" (the 14-year
+            # Bourbon Barrel Reserve) and "라프로익 10년 캐스크" (cask, of Cask Strength) do not
+            # recommend the plain product. A specific word that picks one product is enough by
+            # itself ("글렌알라키 12년 모스카텔 캐스크 피니시" -> Moscatel Wood Finish).
+            picked = []
+        if len(picked) == 1:
+            chosen, confirm, ignored = picked, True, generic
     # Edition tokens picked one product, but it has edition words the line does not have
     # ("anCnoc Sherry" -> anCnoc Peated Sherry Cask): the owner confirms it.
     only_in_product = _edition_words_not_in_line(chosen[0], item, brand_aliases, catalog) if exact and tokens else []
@@ -544,13 +620,15 @@ def _narrow_brand(
             evidence["ageMatch"] = age
         if fitted:
             evidence["editionMatch"] = fitted
-        unfitted = [token for token in tokens if token not in fitted]
+        unfitted = [token for token in tokens if token not in fitted and token not in ignored]
         if unfitted:
             evidence["editionUnmatched"] = unfitted
         if default_product and exact and not tokens:
             evidence["defaultProduct"] = True
         if confirm:
             evidence["confirmRecommended"] = True
+        if confirm and ignored:
+            evidence["ignoredWords"] = ignored
         if only_in_product:
             evidence["editionOnlyInProduct"] = only_in_product
             evidence["confirmRecommended"] = True
