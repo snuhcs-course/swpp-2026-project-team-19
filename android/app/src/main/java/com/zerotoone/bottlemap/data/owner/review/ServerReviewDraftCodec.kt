@@ -349,8 +349,13 @@ internal object ServerReviewDraftCodec {
                 ) }) return null
             if (decision["finalLineType"] != null &&
                 decision["finalLineType"] != "product") return null
-            val name = (decision["correctedProductName"] as? String)
-                ?.takeIf { it.isNotBlank() } ?: original.name
+            // A blank or non-string name is a valid *in-progress* operator
+            // edit but Android cannot represent it without reverting to OCR.
+            // Refuse the partial draft rather than silently overwrite it.
+            val name = if ("correctedProductName" in decision) {
+                val value = decision["correctedProductName"] as? String ?: return null
+                value.takeIf { it.isNotBlank() } ?: return null
+            } else original.name
             val linked = if (action == "select_existing_product")
                 decision["productId"] as? String ?: return null
                 else if (action == "publish_without_product") null
@@ -398,7 +403,15 @@ internal object ServerReviewDraftCodec {
             var changed = original.copy(
                 name = name,
                 nameSaved = action != null || name != original.name || original.nameSaved,
-                excluded = action == "reject" || action == "confirm_non_product",
+                // Keep OCR headers/descriptions excluded for incomplete
+                // operator drafts. Only an explicit product decision or
+                // classification can turn them into a publishable item.
+                excluded = when (action) {
+                    "reject", "confirm_non_product" -> true
+                    "select_existing_product", "publish_without_product" -> false
+                    else -> if (decision["finalLineType"] == "product") false
+                        else original.excluded
+                },
                 linkedProductId = linked,
                 linkedProductName = if (linked == original.linkedProductId)
                     original.linkedProductName else null,
