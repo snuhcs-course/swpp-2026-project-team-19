@@ -216,6 +216,14 @@ data class PhotoReviewState(
     val typingSnapshots: Map<String, ReviewItem> = emptyMap(),
 )
 
+/** Confirmation-page counts derived from the current, reviewed local selections.
+ * The server's review-and-apply response remains authoritative after submission.
+ */
+data class ReviewPublicationPreview(
+    val changedExistingPrices: Int,
+    val publishWithoutProduct: Int,
+)
+
 data class ReviewStats(
     val pending: List<ReviewItem>,
     val ready: List<ReviewItem>,
