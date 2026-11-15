@@ -1,10 +1,6 @@
 package com.zerotoone.bottlemap.data.owner.review
 
 import android.content.Context
-import java.io.File
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-
 import com.zerotoone.bottlemap.data.OwnerRepository
 import com.zerotoone.bottlemap.data.owner.MockImportStatus
 import com.zerotoone.bottlemap.data.owner.MockOwnerLoadState
@@ -14,6 +10,7 @@ import com.zerotoone.bottlemap.data.owner.isBottleServingLabel
 import com.zerotoone.bottlemap.data.owner.servingIdentityKey
 import com.zerotoone.bottlemap.network.MenuImportStatusDto
 import com.zerotoone.bottlemap.network.ReviewDraftSaveRequestDto
+import com.zerotoone.bottlemap.network.ReviewDraftDto
 import com.zerotoone.bottlemap.network.BottleMapApiException
 import com.zerotoone.bottlemap.ui.owner.OwnerMockViewModel
 import com.zerotoone.bottlemap.ui.owner.review.CatalogProduct
@@ -32,7 +29,8 @@ import java.text.Normalizer
  *
  * Draft edits use server §5.9 (PR #171) with compare-and-swap draftVersion.
  * Only final publishing uses the separate atomic review-and-apply (§8).
- * No device-local Draft is read or written: another account never inherits it.
+ * Only an upgrade-only, auth-subject-scoped reader can import pre-#171
+ * local drafts. There are no new device-local writes.
  *
  * Real OCR, reviewed product IDs and version are always loaded from the
  * owner-authenticated server; never substitute the BASIC demo scenario.
@@ -101,11 +99,6 @@ class LivePhotoReviewRepository(
     }
 
     override suspend fun loadReview(): PhotoReviewState {
-        // PR #171 replaced the private device draft. Delete legacy files so
-        // pre-upgrade drafts cannot remain on this phone after account switches.
-        withContext(Dispatchers.IO) {
-            File(appContext.noBackupFilesDir, "owner-review-drafts").deleteRecursively()
-        }
         val id = resolveImportId()
         activeImportId = id
         val status = owner.pollPhotoImportLive(id)
@@ -126,23 +119,7 @@ class LivePhotoReviewRepository(
             it.menuImportId == id && it.reviewVersion == response.reviewVersion
         }) { "검수 버전이 변경됐어요. 다시 불러와 주세요." }
         val state = mapServerPhotoReview(response, current)
-        // GET /api/menu-imports/{id} is the only source of truth for the draft.
-        // The server authorizes this import against the CURRENT account.
-        val saved = response.reviewDraft
-        val parsed = saved?.let(ServerReviewDraftCodec::decode)
-        draftVersion = saved?.draftVersion ?: 0
-        draftConflict = false
-        published = false
-        lastSavedContent = saved?.content
-        draftNotice = when {
-            saved == null -> null
-            parsed == null -> "다른 클라이언트에서 저장한 초안을 확인해 주세요."
-            saved.reviewVersion != response.reviewVersion ->
-                "검수 버전이 변경됐어요. 남아 있는 항목만 다시 확인해 주세요."
-            else -> null
-        }
-        // Grouped-line and OCR identities must be compatible before an old
-        // state can be restored. We never restore stale signed photo URLs.
+        // Grouping and OCR identities must match before adopting old edits.
         fun compatible(candidate: PhotoReviewState?): Boolean =
             candidate != null &&
                 candidate.items.map { it.id } == state.items.map { it.id } &&
@@ -152,6 +129,56 @@ class LivePhotoReviewRepository(
                     else old.mergedInto == fresh.mergedInto &&
                         old.volumeChoices == fresh.volumeChoices
                 }
+        val legacy = LegacyReviewDraftReader(appContext)
+        val reviewVersion = requireNotNull(response.reviewVersion)
+        var saved = response.reviewDraft
+        var migrated = false
+        if (saved == null) {
+            // One-time upgrade: server is empty, so move compatible, scoped
+            // pre-#171 edits to the server BEFORE deleting their old file.
+            val local = legacy.read(id, reviewVersion, state.items.map { it.id })
+            if (compatible(local)) {
+                val content = ServerReviewDraftCodec.encode(requireNotNull(local))
+                val acknowledgement = try {
+                    remote.saveMenuReviewDraft(id, ReviewDraftSaveRequestDto(
+                        draftVersion = 0, reviewVersion = reviewVersion, content = content,
+                    ))
+                } catch (error: BottleMapApiException) {
+                    if (error.code != "REVIEW_DRAFT_OUTDATED") throw error
+                    // Another editor won the first save. Its server draft wins,
+                    // never overwrite it with the legacy file.
+                    val newer = remote.getMenuImport(id)
+                    newer.reviewDraft
+                        ?: throw ReviewDraftConflictException()
+                    null
+                }
+                if (acknowledgement != null) {
+                    saved = ReviewDraftDto(acknowledgement.draftVersion,
+                        reviewVersion, acknowledgement.savedAt, content)
+                    migrated = true
+                    runCatching { legacy.clear(id) }
+                } else {
+                    saved = remote.getMenuImport(id).reviewDraft
+                }
+            }
+        } else {
+            // The server already has a canonical draft. Never import local
+            // values on top of a concurrent owner's/operator's edits.
+            runCatching { legacy.clear(id) }
+        }
+        val parsed = saved?.let(ServerReviewDraftCodec::decode)
+        draftVersion = saved?.draftVersion ?: 0
+        draftConflict = false
+        published = false
+        lastSavedContent = saved?.content
+        draftNotice = when {
+            migrated -> "기존 검수 임시 기록을 서버에 옮겼어요."
+            saved == null -> null
+            parsed == null -> "다른 클라이언트에서 저장한 초안을 확인해 주세요."
+            saved.reviewVersion != reviewVersion ->
+                "검수 버전이 변경됐어요. 남아 있는 항목만 다시 확인해 주세요."
+            else -> null
+        }
         val canRestore = compatible(parsed)
         val chosen = parsed.takeIf(::compatible) ?: state
         if (saved != null && !canRestore) {
