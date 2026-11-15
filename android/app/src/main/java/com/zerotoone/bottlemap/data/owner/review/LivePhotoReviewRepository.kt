@@ -143,6 +143,36 @@ internal fun compatibleOwnerReviewDraft(
                 fresh.volumeChoices.map { it.sourceOptionId })
     }
 
+/**
+ * The device draft deliberately omits existingServingPricesByProductId to
+ * avoid persisting stale bar/catalog observations. Rebinding must NOT compare
+ * that stripped map against fresh server data: doing so silently erases every
+ * owner-confirmed price conflict on restart.
+ *
+ * Preserve each confirmation independently when its edited option still has
+ * that price and the server's existing price candidates for that serving are
+ * unchanged. An unrelated serving update must not unconfirm this one.
+ */
+internal fun retainedOwnerServingPriceDecisions(
+    saved: ReviewItem,
+    currentExisting: List<ReviewPriceCandidate>,
+): Map<String, Int> {
+    val editedOptions = PhotoReviewRules.optionSummary(saved)
+    return saved.chosenServingPrices.filter { (key, confirmedPrice) ->
+        val editedOptionStillMatches = editedOptions.any { option ->
+            PhotoReviewRules.servingKey(option) == key &&
+                option.price.isFinite() && option.price.toInt() == confirmedPrice
+        }
+        val previousPrices = saved.priceCandidates.filter {
+            it.existing && it.servingKey == key
+        }.toSet()
+        val currentPrices = currentExisting.filter {
+            it.existing && it.servingKey == key
+        }.toSet()
+        editedOptionStillMatches && previousPrices == currentPrices
+    }
+}
+
 internal fun reviewerCandidateConflicts(
     extractedAge: Int?, extractedEdition: String?,
     candidateAge: Int?, candidateEdition: String?,
@@ -285,7 +315,8 @@ class LivePhotoReviewRepository(
             val safeLocal = device.itemIds == state.items.map { it.id } &&
                 compatible(local)
             when {
-                recovery == DraftRecoveryPolicy.Outcome.ACKNOWLEDGED && working == null -> {
+                recovery == DraftRecoveryPolicy.Outcome.ACKNOWLEDGED &&
+                    working == null && canRestore && safeLocal -> {
                     // This exact edit reached the server (including a lost
                     // 200 response). Only now can its device copies be removed.
                     checkpointStore.clear(id)
@@ -342,7 +373,6 @@ class LivePhotoReviewRepository(
             val savedPrices = if (old.linkedProductId == null && old.name.isNotBlank())
                 existingUnlinkedServingPrices(old.name)
             else fresh.priceCandidates.filter { it.existing }
-            val previousSaved = old.priceCandidates.filter { it.existing }
             old.copy(sourcePhotoUrl = fresh.sourcePhotoUrl, sourceBox = fresh.sourceBox,
                 raw = fresh.raw, recognizedOffers = fresh.recognizedOffers,
                 // Candidate prices and OCR identities always come from the current
@@ -354,10 +384,12 @@ class LivePhotoReviewRepository(
                 // Existing prices are refreshed from the server; the OCR
                 // candidates are retained even after a late product relink.
                 priceCandidates = old.priceCandidates.filterNot { it.existing } + savedPrices,
-                chosenServingPrices = if (previousSaved == savedPrices &&
-                    old.existingServingPricesByProductId ==
-                    fresh.existingServingPricesByProductId) old.chosenServingPrices
-                    else emptyMap(),
+                // The persisted client snapshot intentionally strips the
+                // old existingServingPricesByProductId map. Check real price
+                // candidates by serving instead of comparing with emptyMap.
+                chosenServingPrices = retainedOwnerServingPriceDecisions(
+                    old, savedPrices,
+                ),
                 // A removed OCR primary must not regain its extractedOptionId
                 // when an owner later adds a manual replacement with null ID.
                 primarySourceOptionId = old.primarySourceOptionId)
