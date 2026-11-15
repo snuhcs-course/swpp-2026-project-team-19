@@ -40,6 +40,13 @@ interface PhotoReviewRepository {
     /** Saves the bar's default glass size (spec 3.7 `defaultPourMl`, 1..999). */
     suspend fun saveDefaultPour(ml: Int)
 
+    /**
+     * Immediately checkpoint the latest UI state on the device without network IO.
+     * Live persists an account/import-scoped AtomicFile; Mock-only adapters
+     * intentionally have no device store. Called before any remote save.
+     */
+    suspend fun checkpointDraft(state: PhotoReviewState) = Unit
+
     /** Version-checked remote draft; errors must be visible before leaving. */
     suspend fun saveDraft(state: PhotoReviewState)
 
