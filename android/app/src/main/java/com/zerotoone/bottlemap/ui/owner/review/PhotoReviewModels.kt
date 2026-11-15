@@ -244,7 +244,12 @@ fun priceValue(raw: String?): Double {
 
 fun validPrice(n: Double): Boolean = !n.isNaN() && n == Math.floor(n) && n >= 1 && n <= 99_999_999
 
-fun validVolume(n: Double): Boolean = !n.isNaN() && n == Math.floor(n) && n >= 1 && n <= 999
+/** §8.1 / §3.14.2 menu-serving pourMl: 1..32767 (different from bar defaults). */
+fun validVolume(n: Double): Boolean = n.isFinite() &&
+    n == Math.floor(n) && n >= 1 && n <= 32_767
+
+/** §3.15.1 bar defaultPourMl must remain 1..999, even though servings may be larger. */
+fun validDefaultPour(n: Double): Boolean = validVolume(n) && n <= 999
 
 /** "15,000원", or "—" when there is no price. */
 fun won(n: Double?): String =
