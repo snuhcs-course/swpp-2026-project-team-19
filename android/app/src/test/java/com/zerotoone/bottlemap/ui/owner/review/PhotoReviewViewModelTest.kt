@@ -325,6 +325,43 @@ class PhotoReviewViewModelTest {
         assertTrue(PhotoReviewEvent.Leave in events)
     }
 
+    @Test fun transientDraftFailureShowsDeviceSavedNoticeAndRetryRecovers() = runTest(dispatcher) {
+        val base = MockPhotoReviewRepository(MockPhotoReviewScenario.READY)
+        var attempts = 0
+        var pending = false
+        val repo = object : PhotoReviewRepository by base {
+            override fun hasPendingLocalDraft(): Boolean = pending
+            override suspend fun saveDraft(state: PhotoReviewState) {
+                attempts++
+                pending = true // Live writes the local backup before network IO.
+                if (attempts == 1) throw BottleMapApiException(
+                    code = "NETWORK_ERROR", message = "offline")
+                pending = false
+            }
+        }
+        val vm = PhotoReviewViewModel(repo)
+        vm.typeInlinePrice("glen12", "21000")
+        assertEquals(1, attempts)
+        assertTrue(vm.draftRetryable.value)
+        assertTrue(vm.draftProblem.value.orEmpty().contains("이 기기에는 저장"))
+        vm.retryDraftSave()
+        assertEquals(2, attempts)
+        assertFalse(vm.draftRetryable.value)
+        assertNull(vm.draftProblem.value)
+    }
+
+    @Test fun locallyRestoredDraftRequiresRetryBeforePublication() = runTest(dispatcher) {
+        val base = MockPhotoReviewRepository(MockPhotoReviewScenario.READY)
+        val repo = object : PhotoReviewRepository by base {
+            override fun hasPendingLocalDraft() = true
+            override suspend fun saveDraft(state: PhotoReviewState) { }
+        }
+        val vm = PhotoReviewViewModel(repo)
+        assertTrue(vm.load.value is PhotoReviewLoad.Ready)
+        assertTrue(vm.draftRetryable.value)
+        assertTrue(vm.draftProblem.value.orEmpty().contains("이 기기에는 저장"))
+    }
+
     @Test fun laterLeavesWithoutPublishingAndKeepsTheDraft() = runTest(dispatcher) {
         val repo = MockPhotoReviewRepository()
         val vm = vm(repository = repo)
