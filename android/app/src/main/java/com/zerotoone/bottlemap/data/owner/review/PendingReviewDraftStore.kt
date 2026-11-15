@@ -88,7 +88,7 @@ internal class PendingReviewDraftStore(
             // backup file). Checking file.exists first would skip recovery.
             runCatching {
                 AtomicFile(file).openRead().use { stream ->
-                    val bytes = stream.readNBytes(350_001)
+                    val bytes = stream.readBytes() // supported on all project Android API levels
                     if (bytes.size > 350_000) null
                     else adapter.fromJson(String(bytes, Charsets.UTF_8))
                 }
