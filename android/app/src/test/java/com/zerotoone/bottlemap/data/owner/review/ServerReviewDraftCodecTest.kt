@@ -138,4 +138,19 @@ class ServerReviewDraftCodecTest {
         assertNull(ServerReviewDraftCodec.restoreStandard(withIgnore,state))
     }
 
+    @Test fun lostSaveResponseCanBeIdentifiedAfterServerJsonRoundTrip() {
+        val state=PhotoReviewState(items=listOf(ReviewItem(id="ocr-1",name="위스키")))
+        val attempted=ServerReviewDraftCodec.encode(state)
+        val client=attempted["clientState"] as Map<*, *>
+        // Real Moshi object/number roundtrip converts JSON integer 1 to 1.0.
+        val serverCopy=attempted + mapOf("clientState" to
+            client + mapOf("androidSchemaVersion" to 1.0))
+        assertTrue(ServerReviewDraftCodec.sameAndroidSnapshot(attempted,serverCopy))
+        assertFalse(ServerReviewDraftCodec.sameAndroidSnapshot(attempted,null))
+        val changed=ServerReviewDraftCodec.encode(state.copy(
+            items=state.items.map { it.copy(draftPriceText="changed") },
+        ))
+        assertFalse(ServerReviewDraftCodec.sameAndroidSnapshot(attempted,changed))
+    }
+
 }
