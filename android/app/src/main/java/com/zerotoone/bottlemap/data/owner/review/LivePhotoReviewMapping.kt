@@ -283,7 +283,9 @@ internal fun mapConfirmedReviewDecision(
         val label = when {
             bottle -> "Bottle"
             isBottle(originalLabel) -> null
-            else -> canonicalServingLabel(chosen.label ?: originalLabel)
+            // A null reviewed label is an intentional removal. Do not
+            // resurrect the OCR label during final publication.
+            else -> canonicalServingLabel(chosen.label)
         }
         MockMenuOption(
             optionId = source?.extractedOptionId ?: "manual-${card.id}-$index",
@@ -291,13 +293,10 @@ internal fun mapConfirmedReviewDecision(
             pourMl = when {
                 bottle -> null
                 card.type == ReviewItemType.WHISKY -> chosen.volume.toInt()
-                // On OTHER rows an Owner/operator can correct or clear an
-                // OCR pour. The reviewed value, not the original OCR value,
-                // is authoritative when that source originally had a size.
-                source?.extractedPourMl != null ->
-                    chosen.volume.takeIf(::validVolume)?.toInt()
-                isGlass(label) -> chosen.volume.takeIf(::validVolume)?.toInt()
-                else -> null
+                // OTHER may add, change or clear an OCR pour. Its reviewed
+                // volume is authoritative even if old OCR label was unsized.
+                // Unspecified source options keep NaN and publish null.
+                else -> chosen.volume.takeIf(::validVolume)?.toInt()
             },
             priceKrw = chosen.price.toInt(),
         )
