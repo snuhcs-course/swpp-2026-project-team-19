@@ -623,13 +623,15 @@ class PhotoReviewViewModelTest {
         vm.requestPublish()
         firstSaveStarted.await()
         vm.confirmPublish()
+        // The final CAS save is now serialized BEFORE publishing. A conflicting
+        // publish cannot run while a prior autosave is still suspended.
+        assertTrue(vm.publishOutcome.value is PublishOutcome.Submitting)
+        unblockFirstSave.complete(Unit)
         assertEquals(PublishFailure.CONFLICT,
             (vm.publishOutcome.value as PublishOutcome.Failed).reason)
         vm.returnToReview()
-        assertEquals(1,loads) // reload waits for the in-flight old-version save
-        unblockFirstSave.complete(Unit)
         assertEquals(2,loads)
-        assertEquals(1,writes) // queued stale modal-close save was invalidated
+        assertEquals(2,writes) // first autosave + final CAS; modal-close save skipped
         assertTrue(vm.load.value is PhotoReviewLoad.Ready)
     }
 
