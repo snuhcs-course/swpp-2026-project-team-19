@@ -9,6 +9,7 @@ import com.zerotoone.bottlemap.data.owner.review.PhotoReviewRepository
 import com.zerotoone.bottlemap.data.owner.review.ReviewAlreadyAppliedException
 import com.zerotoone.bottlemap.data.owner.review.ReviewVersionConflictException
 import com.zerotoone.bottlemap.data.owner.review.ReviewDraftConflictException
+import com.zerotoone.bottlemap.data.owner.review.ReviewDraftLocalEditingException
 import com.zerotoone.bottlemap.data.owner.review.ReviewDraftTooLargeLocalException
 import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewRules.OptionField
 import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewRules.RematchOutcome
@@ -86,6 +87,8 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
     val draftOversized: StateFlow<Boolean> = _draftOversized.asStateFlow()
     private val _draftConflictChoice = MutableStateFlow(false)
     val draftConflictChoice: StateFlow<Boolean> = _draftConflictChoice.asStateFlow()
+    private val _draftEditingLocal = MutableStateFlow(false)
+    val draftEditingLocal: StateFlow<Boolean> = _draftEditingLocal.asStateFlow()
     private val _draftResolving = MutableStateFlow(false)
     val draftResolving: StateFlow<Boolean> = _draftResolving.asStateFlow()
     private val localOnlyNotice = "이 기기에는 저장됐어요. 서버 저장을 다시 시도해 주세요."
@@ -119,6 +122,7 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                 _load.value = try {
                     repository.loadReview().let { fresh ->
                         _draftConflictChoice.value = repository.hasPendingDraftConflict()
+                        _draftEditingLocal.value = false
                         _draftOversized.value = repository.hasOversizedPendingDraft()
                         _draftRetryable.value = repository.hasPendingLocalDraft() &&
                             !_draftConflictChoice.value &&
@@ -207,6 +211,7 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                         _draftRetryable.value = false
                         _draftOversized.value = false
                         _draftConflictChoice.value = false
+                        _draftEditingLocal.value = false
                     } catch (cancelled: CancellationException) {
                         throw cancelled
                     } catch (error: ReviewDraftConflictException) {
@@ -217,6 +222,13 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                         // stale content. Refresh and DISPLAY the newer draft first.
                         if (repository.hasPendingDraftConflict()) reload()
                         else toast(error.message.orEmpty())
+                    } catch (error: ReviewDraftLocalEditingException) {
+                        _draftEditingLocal.value = true
+                        _draftConflictChoice.value = true
+                        _draftOversized.value = repository.hasOversizedPendingDraft()
+                        _draftRetryable.value = false
+                        _draftProblem.value =
+                            "이 기기 초안 편집 중이에요. 서버에 반영하려면 확인 후 덮어쓰기를 선택해 주세요."
                     } catch (error: ReviewDraftTooLargeLocalException) {
                         _draftProblem.value = oversizedNotice
                         _draftRetryable.value = false
@@ -261,6 +273,36 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
         review?.let(::saveDraft)
     }
 
+    /** Enter a device-only editing view; no automatic CAS or backup deletion. */
+    fun editConflictedLocalDraft() {
+        if (_publishing.value || !_draftConflictChoice.value || _draftResolving.value) return
+        _draftResolving.value = true
+        ++latestDraftRevision
+        viewModelScope.launch {
+            try {
+                val local = draftSaveMutex.withLock {
+                    repository.startEditingLocalDraft()
+                }
+                _load.value = PhotoReviewLoad.Ready(local)
+                _draftEditingLocal.value = true
+                _draftOversized.value = repository.hasOversizedPendingDraft()
+                _draftRetryable.value = false
+                _draftProblem.value =
+                    "이 기기 초안 편집 중이에요. 수정은 기기에만 보관돼요. 서버 반영은 별도 확인이 필요해요."
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: ReviewDraftConflictException) {
+                toast(error.message.orEmpty())
+                reload()
+            } catch (error: Exception) {
+                _draftProblem.value = error.message ?: "기기 초안을 열 수 없어요."
+                toast(_draftProblem.value.orEmpty())
+            } finally {
+                _draftResolving.value = false
+            }
+        }
+    }
+
     /** §5.9: never resolve a local/remote collision without an explicit tap. */
     fun resolveDraftConflict(useLocal: Boolean) {
         if (_publishing.value || !_draftConflictChoice.value || _draftResolving.value) return
@@ -276,6 +318,7 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                 _draftProblem.value = null
                 _draftRetryable.value = false
                 _draftOversized.value = false
+                _draftEditingLocal.value = false
                 // Rebind all current OCR and reviewed fields from the server,
                 // never keep a stale ViewModel copy after a successful choice.
                 reload()
@@ -318,6 +361,12 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                     true
                 } catch (cancelled: CancellationException) {
                     throw cancelled
+                } catch (error: ReviewDraftLocalEditingException) {
+                    // The working copy was committed to device storage. Leave
+                    // without submitting an unconfirmed conflicting server PUT.
+                    _draftProblem.value =
+                        "이 기기 초안만 저장됐어요. 서버 반영은 초안 선택에서 확인해 주세요."
+                    repository.hasPendingLocalDraft()
                 } catch (error: ReviewDraftTooLargeLocalException) {
                     // §5.9 allows device-only storage above the server limit.
                     // Leave is safe ONLY after the local AtomicFile was written.
