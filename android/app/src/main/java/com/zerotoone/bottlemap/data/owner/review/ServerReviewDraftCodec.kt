@@ -112,18 +112,25 @@ internal object ServerReviewDraftCodec {
         return content
     }
 
-    /** JSON strings survive the server's parse/serialize roundtrip exactly,
-     * unlike Map values, where JSON integers may return as Doubles.
+    /** Compare the COMPLETE draft, not just Android UI state: an operator may
+     * change standard decisions while leaving clientState untouched.
+     * Moshi may parse JSON integers as Doubles; normalize only numeric type.
      */
     fun sameAndroidSnapshot(
         attempted: Map<String, Any?>?,
         observed: Map<String, Any?>?,
     ): Boolean {
-        fun snapshot(content: Map<String, Any?>?): String? =
-            ((content?.get("clientState") as? Map<*, *>)
-                ?.get("androidStateJson")) as? String
-        val source = snapshot(attempted) ?: return false
-        return source == snapshot(observed)
+        fun normalize(value: Any?): Any? = when (value) {
+            is Number -> value.toDouble()
+            is List<*> -> value.map(::normalize)
+            is Map<*, *> -> value.entries.associate { (k, v) -> k to normalize(v) }
+            else -> value
+        }
+        val left = attempted ?: return false
+        val right = observed ?: return false
+        if (((left["clientState"] as? Map<*, *>)?.get("androidStateJson")) !is String)
+            return false
+        return normalize(left) == normalize(right)
     }
 
     /** Null means the server draft came from another client / unknown schema. */

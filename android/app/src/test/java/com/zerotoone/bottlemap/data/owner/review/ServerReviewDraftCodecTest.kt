@@ -151,6 +151,10 @@ class ServerReviewDraftCodecTest {
             items=state.items.map { it.copy(draftPriceText="changed") },
         ))
         assertFalse(ServerReviewDraftCodec.sameAndroidSnapshot(attempted,changed))
+        // Do not confuse a different operator's choices with our lost 200,
+        // even when they kept the original Android UI snapshot verbatim.
+        val foreign=serverCopy + mapOf("itemDecisions" to emptyList<Any>())
+        assertFalse(ServerReviewDraftCodec.sameAndroidSnapshot(attempted,foreign))
     }
 
 }
