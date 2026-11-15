@@ -26,6 +26,7 @@ import kotlinx.coroutines.withContext
 internal class PendingReviewDraftStore(
     context: Context,
     private val token: suspend () -> String? = { AppAuth.gateway.currentAccessTokenOrNull() },
+    private val slot: String = "pending",
 ) {
     internal data class Envelope(
         val reviewVersion: Int,
@@ -57,7 +58,7 @@ internal class PendingReviewDraftStore(
                 .takeIf { it.isNotBlank() }
         }.getOrNull() ?: return null
         val hash = MessageDigest.getInstance("SHA-256")
-            .digest("pending:$subject:$importId".toByteArray(Charsets.UTF_8))
+            .digest("$slot:$subject:$importId".toByteArray(Charsets.UTF_8))
             .joinToString("") { "%02x".format(it) }
         return File(directory, "$hash.json")
     }
