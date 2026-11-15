@@ -6836,7 +6836,7 @@
           "kind": "known",
           "outcome": "ambiguous_ok",
           "status": "ambiguous",
-          "state": "choose_candidate",
+          "state": "confirm_recommended",
           "rank1": "glenallachie-12-moscatel"
         },
         {

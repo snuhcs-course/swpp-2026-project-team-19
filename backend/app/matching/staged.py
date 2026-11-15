@@ -583,12 +583,9 @@ def _narrow_brand(
     confirm = (
         default_product and not exact and not tokens and len(chosen) == 1 and chosen[0].edition_name is not None
     )
-    # Generic words that fit no product of the brand are left out; what the rest picks is
-    # recommended, never exact. "No product" means any age and any number, and the word in
-    # English too: "Glenfiddich 12 Bourbon" keeps "bourbon" (the 14-year Bourbon Barrel Reserve
-    # has it) and "라프로익 10년 캐스크" keeps "캐스크" (cask, of Cask Strength).
-    generic = [token for token in tokens if token in _GENERIC_TOKENS and token not in fitted_somewhere
-               and not _fits_any(token, brand_products, catalog)]
+    # Generic words that fit none of these products are left out; what the rest picks is
+    # recommended, never exact.
+    generic = [token for token in tokens if token in _GENERIC_TOKENS and token not in fitted_somewhere]
     ignored: list[str] = []
     if default_product and not exact and generic:
         kept = [token for token in tokens if token not in generic]
@@ -596,8 +593,15 @@ def _narrow_brand(
             # A generic word that does fit ("캐스크" of Cask Strength) cannot pick a product by itself.
             specific = any(token not in _GENERIC_TOKENS for token in kept)
             picked = [product for product, fitted in fits if len(fitted) == len(kept)] if specific else []
+        elif age is not None and not any(_fits_any(token, brand_products, catalog) for token in generic):
+            picked = [product for product in products if product.edition_name is None]
         else:
-            picked = [product for product in products if product.edition_name is None] if age is not None else []
+            # Only generic words are left, and the brand uses one of them for an edition: at any
+            # age or number, as written or in English. "Glenfiddich 12 Bourbon" (the 14-year
+            # Bourbon Barrel Reserve) and "라프로익 10년 캐스크" (cask, of Cask Strength) do not
+            # recommend the plain product. A specific word that picks one product is enough by
+            # itself ("글렌알라키 12년 모스카텔 캐스크 피니시" -> Moscatel Wood Finish).
+            picked = []
         if len(picked) == 1:
             chosen, confirm, ignored = picked, True, generic
     # Edition tokens picked one product, but it has edition words the line does not have

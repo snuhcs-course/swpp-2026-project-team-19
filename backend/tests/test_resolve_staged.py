@@ -820,6 +820,12 @@ def test_a_generic_word_another_product_of_the_brand_has_is_kept(two_brands, gle
     assert all(c.evidence.get("editionUnmatched") == ["bourbon"] for c in result.candidates)
 
 
+def test_a_specific_word_still_recommends_when_the_brand_has_the_generic_word_elsewhere(two_brands):
+    # "finish" is a word of a Glenfiddich product and "cask" of other Laphroaig products, but PX
+    # already picked one product: it is recommended as before (글렌알라키 12년 모스카텔 캐스크 피니시)
+    _one_recommended(staged("Laphroaig PX Oak Finish", two_brands, "S2b"), LAPHROAIG_PX, ["oak", "finish"])
+
+
 def test_a_korean_generic_word_that_fits_in_english_is_kept(two_brands):
     # 캐스크 is cask in the vocabulary, and Laphroaig 10 Cask Strength has it: not ignored, so
     # the plain 10 is not recommended over the Cask Strength
