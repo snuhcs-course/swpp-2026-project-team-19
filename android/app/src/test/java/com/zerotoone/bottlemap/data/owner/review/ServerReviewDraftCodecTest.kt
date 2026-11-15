@@ -407,4 +407,95 @@ class ServerReviewDraftCodecTest {
             assertEquals("bottle", PhotoReviewRules.servingKey(option))
         }
     }
+
+    @Test fun partialOperatorProductIdWithoutActionCannotBeDiscarded() {
+        val fresh = PhotoReviewState(items = listOf(ReviewItem(
+            id = "ocr-1", name = "미확인 상품", match = ReviewMatch.NEW,
+            linkedProductId = null,
+        )))
+        fun draft(decision: Map<String, Any?>) = ReviewDraftDto(
+            4, 3, "2026-11-15T00:00:00Z",
+            mapOf("itemDecisions" to listOf(decision)),
+        )
+        assertNull(ServerReviewDraftCodec.restoreStandard(
+            draft(mapOf(
+                "extractedItemId" to "ocr-1",
+                "productId" to "operator-selected",
+            )), fresh))
+        val completed = requireNotNull(ServerReviewDraftCodec.restoreStandard(
+            draft(mapOf(
+                "extractedItemId" to "ocr-1",
+                "action" to "select_existing_product",
+                "productId" to "operator-selected",
+            )), fresh)).items.single()
+        assertEquals("operator-selected", completed.linkedProductId)
+        assertEquals(ReviewItemType.WHISKY, completed.type)
+    }
+
+    @Test fun operatorCatalogSelectionConvertsOtherToWhiskyAndEnforcesThreeSizes() {
+        val fresh = PhotoReviewState(items = listOf(ReviewItem(
+            id = "other-line", name = "잘못 분류한 위스키",
+            type = ReviewItemType.OTHER, primarySourceOptionId = "opt-1",
+            options = listOf(
+                ReviewOption(45.0, 14000.0, sourceOptionId = "opt-2"),
+                ReviewOption(60.0, 19000.0, sourceOptionId = "opt-3"),
+                ReviewOption(90.0, 25000.0, sourceOptionId = "opt-4"),
+            ),
+        )))
+        val saved = ReviewDraftDto(4, 3, "2026-11-15T00:00:00Z", mapOf(
+            "itemDecisions" to listOf(mapOf(
+                "extractedItemId" to "other-line",
+                "action" to "select_existing_product",
+                "productId" to "catalog-whisky",
+            )),
+        ))
+        val restored = requireNotNull(
+            ServerReviewDraftCodec.restoreStandard(saved, fresh))
+        assertEquals(ReviewItemType.WHISKY, restored.items.single().type)
+        assertEquals("catalog-whisky", restored.items.single().linkedProductId)
+        assertTrue(PhotoReviewRules.problems(restored.items.single()).isNotEmpty())
+        assertFalse(PhotoReviewRules.stats(restored).canPublish)
+    }
+
+    @Test fun regeneratedOperatorDraftRechecksNewlyGroupedSourceNullServings() {
+        // A second OCR child row was merged. Its 60ml serving is a manual
+        // master option and intentionally has no extractedOptionId.
+        val master = ReviewItem(
+            id = "master", name = "위스키", price = 14000.0,
+            volume = 30.0, primarySourceOptionId = "ocr-a",
+            options = listOf(ReviewOption(
+                volume = 60.0, price = 22000.0,
+                sourceOptionId = null, label = "잔",
+            )),
+            required = true,
+        )
+        val child = ReviewItem(
+            id = "child", name = "위스키", excluded = true,
+            required = false, mergedInto = "master",
+        )
+        val fresh = PhotoReviewState(items = listOf(master, child))
+        val saved = ReviewDraftDto(7, 2, "2026-11-15T00:00:00Z", mapOf(
+            "itemDecisions" to listOf(mapOf(
+                "extractedItemId" to "master",
+                "options" to listOf(mapOf(
+                    "extractedOptionId" to "ocr-a",
+                    "optionLabel" to "잔", "pourMl" to 30,
+                    "priceKrw" to 15000,
+                )),
+            )),
+        ))
+        val restored = requireNotNull(ServerReviewDraftCodec.restoreStandard(
+            saved, fresh, allowStaleIds = true))
+        val line = restored.items.first()
+        assertFalse(line.volumeChoicesConfirmed)
+        assertEquals(setOf("ml:30", "ml:60"),
+            line.volumeChoices.map(PhotoReviewRules::servingKey).toSet())
+        assertEquals(setOf("ml:30"), line.chosenVolumeKeys)
+        assertFalse(PhotoReviewRules.stats(restored).canPublish)
+        val confirmed = PhotoReviewRules.confirmVolumeChoices(
+            line.copy(chosenVolumeKeys = setOf("ml:30", "ml:60")))
+        assertEquals(2, PhotoReviewRules.optionSummary(confirmed).size)
+        assertEquals(15000.0, confirmed.price, 0.0)
+        assertEquals(22000.0, confirmed.options.single().price, 0.0)
+    }
 }
