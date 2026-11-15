@@ -596,6 +596,21 @@ internal fun OwnerMenuPhotoSelectionScreen(
                             fontWeight = FontWeight.Light, lineHeight = 28.sp)
                         Text("사진 추가", color = V4Color.sub, fontSize = 13.sp)
                     }
+                } else {
+                    // UAT 4.4: a 16th photo does not open the picker or alter the 15.
+                    Column(Modifier.width(112.dp).height(144.dp)
+                        .border(1.dp, V4Color.line, RoundedCornerShape(7.dp))
+                        .background(V4Color.surface, RoundedCornerShape(7.dp))
+                        .ownerQuietClick(enabled = !busy && active == null) {
+                            error = "사진은 최대 15장까지 선택할 수 있어요."
+                        }
+                        .testTag("stage7-photo-add-limit"),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("+", color = V4Color.sub, fontSize = 28.sp,
+                            fontWeight = FontWeight.Light, lineHeight = 28.sp)
+                        Text("사진 추가", color = V4Color.sub, fontSize = 13.sp)
+                    }
                 }
             }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween,
