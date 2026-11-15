@@ -175,8 +175,7 @@ internal object ServerReviewDraftCodec {
                 val keptSecondary = snapshot.options.filter {
                     it.sourceOptionId == null || it.sourceOptionId in liveIds
                 }
-                val primaryValid = !snapshot.primaryHasOption ||
-                    snapshot.primarySourceOptionId == null ||
+                val primaryValid = snapshot.primarySourceOptionId == null ||
                     snapshot.primarySourceOptionId in liveIds
                 if (primaryValid) snapshot.copy(options = keptSecondary)
                 else {
