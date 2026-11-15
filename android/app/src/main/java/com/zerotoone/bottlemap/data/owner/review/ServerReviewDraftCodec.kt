@@ -3,6 +3,7 @@ package com.zerotoone.bottlemap.data.owner.review
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.zerotoone.bottlemap.network.ReviewDraftDto
+import com.zerotoone.bottlemap.data.owner.isBottleServingLabel
 import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewRules
 import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewState
 import com.zerotoone.bottlemap.ui.owner.review.ReviewItem
@@ -283,6 +284,16 @@ internal object ServerReviewDraftCodec {
             // Android has only an excluded/reject state. Converting an
             // operator's confirmed header/description to reject destroys intent.
             if (action == "confirm_non_product") return null
+            // An operator may approve catalog aliases. Android has no field
+            // to edit or round-trip them, so never replace the remote decision.
+            val aliases = decision["aliasesToAdd"]
+            if (aliases != null && (aliases !is List<*> || aliases.isNotEmpty()))
+                return null
+            if (decision.keys.any { it !in setOf(
+                    "extractedItemId", "action", "finalLineType",
+                    "correctedProductName", "productId", "kind", "options",
+                    "aliasesToAdd"
+                ) }) return null
             if (decision["finalLineType"] != null &&
                 decision["finalLineType"] != "product") return null
             val name = (decision["correctedProductName"] as? String)
@@ -318,7 +329,7 @@ internal object ServerReviewDraftCodec {
                     return null
                 }
                 val label = obj["optionLabel"] as? String
-                val bottle = label.equals("Bottle", ignoreCase = true) || label == "병"
+                val bottle = isBottleServingLabel(label)
                 val ml = (obj["pourMl"] as? Number)?.toDouble()
                 if (ml != null && !validVolume(ml)) return null
                 ReviewOption(
