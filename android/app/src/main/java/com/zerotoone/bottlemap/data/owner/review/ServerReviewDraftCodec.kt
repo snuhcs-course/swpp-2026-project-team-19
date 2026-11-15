@@ -134,6 +134,82 @@ internal object ServerReviewDraftCodec {
         return normalize(left) == normalize(right)
     }
 
+    /** A regenerated §5.4 review may reorder, add or remove extracted lines.
+     * Keep edits on surviving item IDs, never keep an OCR option ID that no
+     * longer occurs in the new review. Changed option inventories require
+     * explicit Owner selection again rather than silently dropping/adding a
+     * serving. Re-grouped source lines are not safely representable here.
+     */
+    fun reconcileRegenerated(saved: PhotoReviewState, fresh: PhotoReviewState): PhotoReviewState? {
+        val oldById = saved.items.associateBy { it.id }
+        if (oldById.size != saved.items.size) return null
+        val result = mutableListOf<ReviewItem>()
+        for (current in fresh.items) {
+            val old = oldById[current.id]
+            if (old == null) {
+                result += current // newly extracted: never invent an old decision
+                continue
+            }
+            if (old.mergedInto != current.mergedInto &&
+                !(old.manuallySplitGroup && current.mergeSources.isNotEmpty())) return null
+            if (old.manuallySplitGroup && current.mergeSources.isEmpty() &&
+                current.mergedInto == null) return null
+            val liveOptions = PhotoReviewRules.optionSummary(current) +
+                current.volumeChoices + current.preMergeOptions
+            val liveIds = liveOptions.mapNotNull { it.sourceOptionId }.toSet()
+            val oldSeen = (PhotoReviewRules.optionSummary(old) + old.volumeChoices +
+                old.preMergeOptions).mapNotNull { it.sourceOptionId }.toSet()
+            val selected = PhotoReviewRules.optionSummary(old)
+            val kept = selected.filter { it.sourceOptionId == null || it.sourceOptionId in liveIds }
+            val validChoices = old.volumeChoices.filter {
+                it.sourceOptionId == null || it.sourceOptionId in liveIds
+            }
+            val newOptions = liveOptions.filter {
+                it.sourceOptionId != null && it.sourceOptionId !in oldSeen
+            }.distinctBy { it.sourceOptionId }
+            val inventoryChanged = kept.size != selected.size ||
+                validChoices.size != old.volumeChoices.size || newOptions.isNotEmpty()
+            var retained = PhotoReviewRules.applyDefaultPour(old, fresh.defaultPour)
+            if (inventoryChanged) {
+                val safeRetained = kept.map { option ->
+                    if (option.volumeFromDefault && !option.bottle)
+                        option.copy(volume = fresh.defaultPour) else option
+                }
+                val candidates = (if (old.volumeChoicesConfirmed) safeRetained
+                    else validChoices) + newOptions
+                val first = safeRetained.firstOrNull()
+                retained = retained.copy(
+                    primaryHasOption = first != null,
+                    price = first?.price ?: current.price,
+                    volume = first?.volume ?: current.volume,
+                    bottle = first?.bottle ?: current.bottle,
+                    primarySourceOptionId = first?.sourceOptionId,
+                    primaryOptionLabel = first?.label,
+                    volumeSource = if (first?.volumeFromDefault == true)
+                        VolumeSource.DEFAULT else VolumeSource.MANUAL,
+                    options = safeRetained.drop(1),
+                    volumeChoices = candidates.distinctBy {
+                        it.sourceOptionId ?: "manual:${PhotoReviewRules.servingKey(it)}"
+                    },
+                    chosenVolumeKeys = if (old.volumeChoicesConfirmed)
+                        safeRetained.map(PhotoReviewRules::servingKey).toSet()
+                    else old.chosenVolumeKeys.intersect(
+                        candidates.map(PhotoReviewRules::servingKey).toSet()),
+                    volumeChoicesConfirmed = false,
+                    expanded = true,
+                )
+            }
+            result += retained.copy(
+                photoIndex = current.photoIndex,
+                sourceLine = current.sourceLine,
+                mergedInto = current.mergedInto,
+                preMergeOptions = current.preMergeOptions,
+            )
+        }
+        return saved.copy(items = result, defaultPour = fresh.defaultPour,
+            modal = null, typingSnapshots = emptyMap())
+    }
+
     /** Null means the server draft came from another client / unknown schema. */
     fun decode(saved: ReviewDraftDto): PhotoReviewState? {
         val client = saved.content["clientState"] as? Map<*, *> ?: return null
