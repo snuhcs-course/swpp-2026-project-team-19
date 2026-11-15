@@ -43,6 +43,9 @@ interface PhotoReviewRepository {
     /** Version-checked remote draft; errors must be visible before leaving. */
     suspend fun saveDraft(state: PhotoReviewState)
 
+    /** Always check the server's latest draftVersion before the atomic publication. */
+    suspend fun flushBeforePublish(state: PhotoReviewState) = saveDraft(state)
+
     /** Optional message when a server draft needs operator review/reconciliation. */
     fun consumeDraftNotice(): String? = null
 
