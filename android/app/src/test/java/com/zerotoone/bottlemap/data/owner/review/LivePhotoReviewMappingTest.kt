@@ -746,4 +746,40 @@ class LivePhotoReviewMappingTest {
         assertNull(published.pourMl)
         assertEquals("ocr-bottle", published.optionId)
     }
+
+    @Test fun whiskyUncheckingOriginalOcrBottlePublishesReviewedGlassServing() {
+        for (oldLabel in listOf("병", "Bottle", "Bottle 700ml")) {
+            val dto = item(options = listOf(
+                ReviewOptionDto("ocr-bottle", 1, oldLabel, null, 90000),
+            ))
+            val initial = mapServerPhotoReview(response(dto), fixture()).items.single()
+            assertTrue(initial.bottle)
+            val unchecked = PhotoReviewRules.toggleBottle(initial, null, 30.0)
+            assertFalse(unchecked.bottle)
+            assertNull(unchecked.primaryOptionLabel)
+            val published = requireNotNull(mapConfirmedReviewDecision(
+                unchecked, dto, 30.0, emptyMap()).correctedOptions).single()
+            assertNull("unchecked Bottle should not reappear: $oldLabel", published.label)
+            assertEquals(30, published.pourMl)
+            assertEquals("ocr-bottle", published.optionId)
+            assertEquals(90000, published.priceKrw)
+        }
+    }
+
+    @Test fun whiskyUncheckingSecondaryBottleDoesNotRecreateBottleOnPublish() {
+        val dto = item(options = listOf(
+            ReviewOptionDto("ocr-glass", 1, "잔", 60, 18000),
+            ReviewOptionDto("ocr-bottle", 2, "병", null, 90000),
+        ))
+        val card = mapServerPhotoReview(response(dto), fixture()).items.single()
+        assertTrue(card.options.single().bottle)
+        val changed = PhotoReviewRules.toggleBottle(card, 0, 30.0)
+        assertFalse(changed.options.single().bottle)
+        assertNull(changed.options.single().label)
+        val mapped = requireNotNull(mapConfirmedReviewDecision(
+            changed, dto, 30.0, emptyMap()).correctedOptions)
+        assertEquals(listOf(60, 30), mapped.map { it.pourMl })
+        assertEquals(listOf("ocr-glass", "ocr-bottle"), mapped.map { it.optionId })
+        assertEquals(listOf("잔", null), mapped.map { it.label })
+    }
 }
