@@ -54,6 +54,11 @@ interface PhotoReviewRepository {
         error("이 검수 저장소에서는 서버 초안 선택을 지원하지 않아요.")
     }
 
+    /** Enter protected device-only conflict editing; no remote PUT is allowed. */
+    suspend fun startEditingLocalDraft(): PhotoReviewState {
+        error("이 검수 저장소에서는 충돌 초안 편집을 지원하지 않아요.")
+    }
+
     /** Explicit choice: overwrite the just-reviewed remote CAS with a compatible local copy. */
     suspend fun chooseLocalDraft() {
         error("이 검수 저장소에서는 이 기기 초안 선택을 지원하지 않아요.")
