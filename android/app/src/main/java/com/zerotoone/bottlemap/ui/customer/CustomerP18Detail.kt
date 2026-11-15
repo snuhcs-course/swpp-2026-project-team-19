@@ -188,9 +188,11 @@ internal fun CustomerP18BarDetail(
     var menuQuery by rememberSaveable(bar.barId) {mutableStateOf("")}
     // Product-search navigation opens only the matching category. Once opened,
     // the regular category accordion still closes and reopens on user taps.
-    val highlightedCategory = bar.items.firstOrNull {
-        it.productId == highlightProductId
-    }?.category
+    // A normal bar visit has no search target. Product-less rows also
+    // have null productId and must never be treated as a highlighted hit.
+    val highlightedCategory = highlightProductId?.let { productId ->
+        bar.items.firstOrNull { it.productId == productId }?.category
+    }
     var collapsed by rememberSaveable(bar.barId, highlightProductId) {
         mutableStateOf(p18InitiallyCollapsedCategories(highlightedCategory))
     }
