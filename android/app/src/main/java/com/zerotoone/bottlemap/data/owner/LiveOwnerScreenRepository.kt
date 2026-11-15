@@ -123,6 +123,20 @@ internal fun ownerRetainedOptionsForGroupedLine(
     }
 }
 
+/** Keep claimed bars visible but not selectable in the owner application flow.
+ * API §3.11.11 hasOwner is authoritative; never infer ownership from a name.
+ */
+internal fun partitionOwnerApplicationBarCandidates(
+    items: List<com.zerotoone.bottlemap.network.BarNameItemDto>,
+): Pair<List<MockBar>, List<MockBar>> {
+    val convert: (com.zerotoone.bottlemap.network.BarNameItemDto) -> MockBar = { item ->
+        MockBar(item.barId, item.name, item.address,
+            latitude = item.latitude, longitude = item.longitude)
+    }
+    return items.filterNot { it.hasOwner }.map(convert) to
+        items.filter { it.hasOwner }.map(convert)
+}
+
 class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
     private val app = context.applicationContext
     private val local = LocalOwnerMockRepository(InMemoryMockOwnerStateStore())
@@ -847,13 +861,11 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
             com.zerotoone.bottlemap.network.ApiClient.api.searchBarNames(trimmed, limit=20)
         }
         val before=snapshot()
-        val toBar: (com.zerotoone.bottlemap.network.BarNameItemDto) -> MockBar = { item ->
-            MockBar(item.barId,item.name,item.address,
-                latitude=item.latitude,longitude=item.longitude)
-        }
+        val (canClaim, alreadyManaged) =
+            partitionOwnerApplicationBarCandidates(matches.items)
         publishSnapshot(before.copy(
-            existingBarCandidates = matches.items.filterNot { it.hasOwner }.map(toBar),
-            claimedBarCandidates = matches.items.filter { it.hasOwner }.map(toBar),
+            existingBarCandidates = canClaim,
+            claimedBarCandidates = alreadyManaged,
         ))
     }
 
