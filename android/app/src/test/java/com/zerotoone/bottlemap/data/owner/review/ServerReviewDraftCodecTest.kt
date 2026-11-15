@@ -524,7 +524,10 @@ class ServerReviewDraftCodecTest {
             reject, current, allowStaleIds = true))
         assertEquals("master", safelyRestored.items.last().mergedInto)
         assertTrue(safelyRestored.items.last().excluded)
-        assertEquals(1, PhotoReviewRules.stats(safelyRestored).ready.size)
+        assertEquals(1, safelyRestored.items.count { it.mergedInto == null })
+        val visible = PhotoReviewRules.stats(safelyRestored)
+        assertTrue((visible.pending + visible.ready + visible.other + visible.excluded)
+            .none { it.id == "child" })
     }
 
     @Test fun partialOperatorKindDecisionIsNotOverwrittenByFreshOcrKind() {
