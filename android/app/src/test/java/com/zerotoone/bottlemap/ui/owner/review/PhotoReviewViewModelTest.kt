@@ -187,7 +187,7 @@ class PhotoReviewViewModelTest {
         val events = vm.collectEvents(backgroundScope)
         vm.typeInlineVolume("glen12", "22.5")
         vm.commitInlineVolume("glen12")
-        assertTrue(PhotoReviewEvent.Toast("1 ~ 999 사이의 숫자를 입력해주세요.") in events)
+        assertTrue(PhotoReviewEvent.Toast("1 ~ 32767 사이의 숫자를 입력해주세요.") in events)
         vm.typeInlineVolume("glen12", "30")
         vm.commitInlineVolume("glen12")
         assertEquals(ReviewGroup.READY, vm.group("glen12"))
