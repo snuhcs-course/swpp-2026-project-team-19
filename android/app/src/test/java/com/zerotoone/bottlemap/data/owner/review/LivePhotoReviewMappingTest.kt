@@ -320,6 +320,78 @@ class LivePhotoReviewMappingTest {
         assertEquals(8000,decision.correctedOptions!!.single().priceKrw)
     }
 
+    @Test fun aiV2MixedWhiskyCocktailAndFoodPublishInTheirOriginalKinds() {
+        // PR #176's 5.4 response: other lines are real product rows with
+        // extractedKind=other, no catalog candidates and no newProductDraft.
+        val whisky = item(
+            options = listOf(option("whisky-opt", 30, 12000)),
+        ).copy(
+            extractedItemId = "whisky-line",
+            itemOrder = 1,
+            extractedProductName = "위스키 12년",
+        )
+        val cocktail = item(
+            options = listOf(option("cocktail-opt", null, 10000)),
+            status = "unmatched",
+            proposedId = null,
+        ).copy(
+            extractedItemId = "cocktail-line",
+            itemOrder = 2,
+            extractedKind = "other",
+            extractedProductName = "진토닉",
+            candidates = emptyList(),
+            newProductDraft = null,
+            sourceBox = listOf(100, 200, 500, 300),
+        )
+        val food = item(
+            options = listOf(option("food-opt", null, 9000)),
+            status = "unmatched",
+            proposedId = null,
+        ).copy(
+            extractedItemId = "food-line",
+            itemOrder = 3,
+            extractedKind = "other",
+            extractedProductName = "감자튀김",
+            candidates = emptyList(),
+            newProductDraft = null,
+        )
+        val original = response(food, whisky, cocktail)
+        val mapped = mapServerPhotoReview(original, fixture())
+        assertEquals(listOf("whisky-line", "cocktail-line", "food-line"),
+            mapped.items.map { it.id })
+        assertEquals(1, PhotoReviewRules.stats(mapped).ready.size)
+        assertEquals(2, PhotoReviewRules.stats(mapped).other.size)
+        assertTrue(PhotoReviewRules.stats(mapped).canPublish)
+        assertEquals(listOf(1, 2, 3), mapped.items.map { it.sourceLine })
+        assertEquals(listOf(100, 200, 500, 300),
+            mapped.items.first { it.id == "cocktail-line" }.sourceBox)
+
+        val byId = listOf(whisky, cocktail, food).associateBy { it.extractedItemId }
+        val published = mapped.items.associate { card ->
+            card.id to mapConfirmedReviewDecision(
+                card, byId.getValue(card.id), mapped.defaultPour, emptyMap(),
+            )
+        }
+        val linked = requireNotNull(published["whisky-line"])
+        assertEquals(MockDecisionKind.SELECT_PRODUCT, linked.kind)
+        assertEquals("product-1", linked.productId)
+        for (id in listOf("cocktail-line", "food-line")) {
+            val decision = requireNotNull(published[id])
+            assertEquals(MockDecisionKind.CREATE_PRODUCT, decision.kind)
+            // CREATE_PRODUCT is only the legacy Android enum. The live
+            // adapter serializes it as publish_without_product, kind=other.
+            assertEquals("other", decision.newProduct?.category)
+            assertNull(decision.productId)
+            assertNull(decision.newProduct?.brandId)
+            assertNull(decision.newProduct?.brandName)
+            assertNull(decision.correctedOptions?.single()?.pourMl)
+        }
+        assertEquals("진토닉", published["cocktail-line"]?.newProduct?.name)
+        assertEquals(10000, published["cocktail-line"]?.correctedOptions?.single()?.priceKrw)
+        assertEquals("감자튀김", published["food-line"]?.newProduct?.name)
+        assertEquals(9000, published["food-line"]?.correctedOptions?.single()?.priceKrw)
+    }
+
     @Test fun koreanBottleIsPublishedAsBottleWithoutLosingOcrIdentity() {
         val dto=item(options=listOf(ReviewOptionDto("ocr-bottle",1,"병",null,88000)),
             status="unmatched",proposedId=null)
