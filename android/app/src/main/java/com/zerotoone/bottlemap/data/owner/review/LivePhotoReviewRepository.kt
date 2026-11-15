@@ -145,6 +145,8 @@ class LivePhotoReviewRepository(
     private var loaded: MenuImportStatusDto? = null
     private var activeImportId: String? = null
     private val draftMutex = Mutex()
+    // Device checkpoint writes must never wait for an older remote PUT.
+    private val checkpointMutex = Mutex()
     private var draftVersion = 0
     private var published = false
     private var draftConflict = false
@@ -263,7 +265,9 @@ class LivePhotoReviewRepository(
             migrated -> "기존 검수 임시 기록을 서버에 옮겼어요."
             saved == null -> null
             parsed == null -> "다른 클라이언트에서 저장한 초안을 확인해 주세요."
-            parsedAndroid == null -> "운영자 웹에서 저장한 검수 선택을 확인해 주세요."
+            // A compatible web/operator draft is restored without an
+            // informational popup. Incompatible drafts still show an error.
+            parsedAndroid == null -> null
             saved.reviewVersion != reviewVersion ->
                 "검수 버전이 변경됐어요. 남아 있는 항목만 다시 확인해 주세요."
             else -> null
@@ -551,6 +555,60 @@ class LivePhotoReviewRepository(
         }
     }
 
+    /**
+     * Checkpoint only the latest UI edit. The separate mutex lets this write
+     * finish even if an earlier remote CAS is still waiting on the network.
+     */
+    override suspend fun checkpointDraft(state: PhotoReviewState) {
+        val id = activeImportId ?: error("검수 작업을 먼저 불러와 주세요.")
+        val version = loaded?.reviewVersion ?: error("검수 정보를 먼저 불러와 주세요.")
+        val content = ServerReviewDraftCodec.encode(state)
+        checkpointMutex.withLock {
+            if (published) return@withLock
+            if (editingLocalConflict && draftConflict) {
+                val original = pendingStore.read(id)
+                    ?: error("보호된 기기 원본 초안을 찾지 못했어요.")
+                workingStore.write(id, original.copy(content = content,
+                    itemIds = state.items.map { it.id }))
+            } else {
+                DraftSaveSafety.assertWritable(draftConflict)
+                pendingStore.write(id, PendingReviewDraftStore.Envelope(
+                    reviewVersion = version, expectedDraftVersion = draftVersion,
+                    itemIds = state.items.map { it.id }, content = content,
+                ))
+            }
+            pendingLocally = true
+            pendingOversized = ServerReviewDraftCodec.exceedsServerLimit(content)
+        }
+    }
+
+    /** Keep a newer on-device checkpoint after an older remote PUT succeeds. */
+    private suspend fun acknowledgeDraft(
+        id: String, acknowledged: Map<String, Any?>, version: Int,
+    ) {
+        checkpointMutex.withLock {
+            val pending = pendingStore.read(id)
+            when {
+                pending == null -> {
+                    pendingLocally = false
+                    pendingOversized = false
+                }
+                ServerReviewDraftCodec.sameAndroidSnapshot(pending.content, acknowledged) -> {
+                    pendingStore.clear(id)
+                    pendingLocally = false
+                    pendingOversized = false
+                }
+                else -> {
+                    // A later edit may have been checkpointed while this PUT
+                    // was in flight. Rebase it onto the acknowledged CAS.
+                    pendingStore.write(id, pending.copy(expectedDraftVersion = version))
+                    pendingLocally = true
+                    pendingOversized = ServerReviewDraftCodec.exceedsServerLimit(pending.content)
+                }
+            }
+        }
+    }
+
     /** §5.9 optimistic concurrency: never silently replace another editor. */
     override suspend fun saveDraft(state: PhotoReviewState) = saveDraftInternal(state, forceCas = false)
 
@@ -567,15 +625,9 @@ class LivePhotoReviewRepository(
             // an operator/device has advanced the server CAS. Do not touch it
             // until the owner explicitly resolves the conflict.
             if (editingLocalConflict && draftConflict) {
-                // No server PUT is allowed during conflict editing, even
-                // after the working copy is reduced under the server limit.
-                // Explicit confirmation in chooseLocalDraft is required.
-                val original = pendingStore.read(id)
-                    ?: error("보호된 기기 원본 초안을 찾지 못했어요.")
-                workingStore.write(id, original.copy(content = content,
-                    itemIds = state.items.map { it.id }))
-                pendingLocally = true
-                pendingOversized = ServerReviewDraftCodec.exceedsServerLimit(content)
+                // Checkpoint separately from network IO; never submit while
+                // editing a protected local conflict working copy.
+                checkpointDraft(state)
                 throw ReviewDraftLocalEditingException()
             }
             DraftSaveSafety.assertWritable(draftConflict)
@@ -585,15 +637,21 @@ class LivePhotoReviewRepository(
                     content, lastSavedContent)) return@withLock
             // Atomic no-backup storage is completed BEFORE network IO so a
             // process kill after a failed PUT cannot silently lose edits.
-            pendingStore.write(id, PendingReviewDraftStore.Envelope(
-                reviewVersion = version, expectedDraftVersion = draftVersion,
-                itemIds = state.items.map { it.id }, content = content,
-            ))
-            pendingLocally = true
-            // A server-rejected large snapshot still survives on device.
-            // Never make a PUT that §5.9 must reject above 256 KiB.
-            pendingOversized = ServerReviewDraftCodec.exceedsServerLimit(content)
-            if (pendingOversized) throw ReviewDraftTooLargeLocalException()
+            checkpointMutex.withLock {
+                // An older PUT may reach this point after the next keystroke
+                // has already been checkpointed. Never overwrite that copy.
+                if (pendingStore.read(id) == null) {
+                    pendingStore.write(id, PendingReviewDraftStore.Envelope(
+                        reviewVersion = version, expectedDraftVersion = draftVersion,
+                        itemIds = state.items.map { it.id }, content = content,
+                    ))
+                    pendingLocally = true
+                }
+            }
+            // Check size of this request, not a newer local checkpoint.
+            val requestOversized = ServerReviewDraftCodec.exceedsServerLimit(content)
+            if (requestOversized) pendingOversized = true
+            if (requestOversized) throw ReviewDraftTooLargeLocalException()
             val request = ReviewDraftSaveRequestDto(
                 draftVersion = draftVersion, reviewVersion = version, content = content,
             )
@@ -621,9 +679,7 @@ class LivePhotoReviewRepository(
                     currentDraft.draftVersion > draftVersion) {
                     draftVersion = currentDraft.draftVersion
                     lastSavedContent = content
-                    pendingLocally = false
-                    pendingOversized = false
-                    runCatching { pendingStore.clear(id) }
+                    acknowledgeDraft(id, content, draftVersion)
                     return@withLock
                 }
                 if (currentDraft != null && currentDraft.draftVersion > draftVersion) {
@@ -638,10 +694,8 @@ class LivePhotoReviewRepository(
             }
             draftVersion = saved.draftVersion
             lastSavedContent = content
-            pendingLocally = false
-            pendingOversized = false
             pendingDraftConflict = false
-            runCatching { pendingStore.clear(id) }
+            acknowledgeDraft(id, content, draftVersion)
         }
     }
 
