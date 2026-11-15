@@ -49,7 +49,7 @@ class BarCopyFeedbackComposeTest {
         }
         compose.onNodeWithText("지도").performScrollTo().performClick()
         compose.onNodeWithText("복사").performScrollTo().performClick()
-        compose.onNodeWithTag("customer-bar-address-copied-toast").assertIsDisplayed()
+        compose.onNodeWithTag("ux-toast").assertIsDisplayed()
         compose.onNodeWithText("주소를 복사했어요.").assertIsDisplayed()
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
@@ -58,14 +58,14 @@ class BarCopyFeedbackComposeTest {
         // The notice is transient: there is no blocking confirmation button.
         compose.mainClock.advanceTimeBy(3000)
         compose.waitForIdle()
-        compose.onNodeWithTag("customer-bar-address-copied-toast").assertDoesNotExist()
+        compose.onNodeWithTag("ux-toast").assertDoesNotExist()
 
         compose.onNodeWithText("전화").performScrollTo().performClick()
         compose.onNodeWithText("복사").performScrollTo().performClick()
         assertEquals("02-1234-5678",
             clipboard.primaryClip?.getItemAt(0)?.coerceToText(context)?.toString())
         compose.onNodeWithTag("ux-toast").assertDoesNotExist()
-        compose.onNodeWithTag("customer-bar-address-copied-toast").assertDoesNotExist()
+        compose.onNodeWithTag("ux-toast").assertDoesNotExist()
     }
 
     @Test fun missingPhoneNeverClaimsCopySucceeded() {
