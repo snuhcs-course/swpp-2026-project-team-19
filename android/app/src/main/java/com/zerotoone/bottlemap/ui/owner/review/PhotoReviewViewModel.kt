@@ -8,6 +8,7 @@ import com.zerotoone.bottlemap.network.menuWriteErrorText
 import com.zerotoone.bottlemap.data.owner.review.PhotoReviewRepository
 import com.zerotoone.bottlemap.data.owner.review.ReviewAlreadyAppliedException
 import com.zerotoone.bottlemap.data.owner.review.ReviewVersionConflictException
+import com.zerotoone.bottlemap.data.owner.review.ReviewDraftConflictException
 import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewRules.OptionField
 import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewRules.RematchOutcome
 import kotlinx.coroutines.CancellationException
@@ -46,7 +47,7 @@ internal fun classifyPublishFailure(error: Throwable): PublishFailure {
     return when {
         api?.httpStatus == 401 || api?.code == "UNAUTHORIZED" -> PublishFailure.AUTH
         api?.httpStatus == 403 -> PublishFailure.FORBIDDEN
-        api?.httpStatus == 409 || error is ReviewVersionConflictException ||
+        api?.httpStatus == 409 || error is ReviewVersionConflictException || error is ReviewDraftConflictException ||
             error.message == "REVIEW_OUTDATED" -> PublishFailure.CONFLICT
         api?.httpStatus == 422 || error is IllegalArgumentException ->
             PublishFailure.VALIDATION
@@ -74,6 +75,10 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
     val load: StateFlow<PhotoReviewLoad> = _load.asStateFlow()
     private val _publishing = MutableStateFlow(false)
     val publishing: StateFlow<Boolean> = _publishing.asStateFlow()
+    private val _savingDefaultPour = MutableStateFlow(false)
+    val savingDefaultPour: StateFlow<Boolean> = _savingDefaultPour.asStateFlow()
+    private val _draftProblem = MutableStateFlow<String?>(null)
+    val draftProblem: StateFlow<String?> = _draftProblem.asStateFlow()
     private val _publishOutcome = MutableStateFlow<PublishOutcome?>(null)
     val publishOutcome: StateFlow<PublishOutcome?> = _publishOutcome.asStateFlow()
 
@@ -100,7 +105,11 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
         viewModelScope.launch {
             draftSaveMutex.withLock {
                 _load.value = try {
-                    PhotoReviewLoad.Ready(repository.loadReview())
+                    repository.loadReview().let { fresh ->
+                        _draftProblem.value = null
+                        repository.consumeDraftNotice()?.let(::toast)
+                        PhotoReviewLoad.Ready(fresh)
+                    }
                 } catch (applied: ReviewAlreadyAppliedException) {
                     PhotoReviewLoad.Applied
                 } catch (cancelled: CancellationException) {
@@ -173,6 +182,11 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                         repository.saveDraft(state)
                     } catch (cancelled: CancellationException) {
                         throw cancelled
+                    } catch (error: ReviewDraftConflictException) {
+                        // Never silently ignore a remote CAS failure. New edits
+                        // cannot be published until the owner reloads the draft.
+                        if (_draftProblem.value == null) toast(error.message.orEmpty())
+                        _draftProblem.value = error.message
                     } catch (_: Exception) {
                         // The final save on Leave will retry and surface errors.
                     }
@@ -201,14 +215,15 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                     true
                 } catch (cancelled: CancellationException) {
                     throw cancelled
-                } catch (_: Exception) {
+                } catch (error: Exception) {
+                    _draftProblem.value = error.message ?: "검수 초안 저장에 실패했어요."
                     false
                 }
             }
             if (saved) _events.send(PhotoReviewEvent.Leave)
             else {
                 leaving = false
-                toast("임시 검수 기록을 저장하지 못했어요. 다시 시도해 주세요.")
+                toast(_draftProblem.value ?: "검수 초안 저장에 실패했어요. 다시 시도해 주세요.")
             }
         }
     }
@@ -228,11 +243,13 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
     }
 
     fun saveDefaultPour(text: String) {
+        if (_savingDefaultPour.value || _publishing.value) return
         val n = readNumeric(text)
         if (!validVolume(n)) {
             toast("1 ~ 999 사이의 숫자를 입력해주세요.")
             return
         }
+        _savingDefaultPour.value = true
         viewModelScope.launch {
             // Claim a saved default only after the real bar API succeeds. A
             // failed request must not silently unlock the Publish button.
@@ -246,12 +263,22 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                 throw cancelled
             } catch (error: Exception) {
                 toast(error.message ?: "기본 잔 용량을 저장하지 못했어요. 다시 시도해 주세요.")
+            } finally {
+                _savingDefaultPour.value = false
             }
         }
     }
 
     fun requestPublish() {
         if (_publishing.value) return
+        if (_savingDefaultPour.value) {
+            toast("기본 잔 용량을 저장하는 중이에요.")
+            return
+        }
+        if (_draftProblem.value != null) {
+            toast("서버 검수 초안 상태를 확인해 주세요. 최신 내용을 다시 불러와 주세요.")
+            return
+        }
         val s = review ?: return
         if (PhotoReviewRules.stats(s).canPublish) set(s.copy(modal = ReviewModal(ReviewModalType.PUBLISH)))
     }
@@ -268,6 +295,13 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
         _publishOutcome.value = PublishOutcome.Submitting(summary, newWhisky)
         viewModelScope.launch {
             try {
+                // Verify the server draft CAS BEFORE the final publish. Older
+                // queued writes are invalidated, and no 409 can be missed.
+                ++latestDraftRevision
+                draftSaveMutex.withLock {
+                    repository.saveDraft(state.copy(modal = null))
+                }
+                _draftProblem.value = null
                 repository.publish(state)
                 _publishOutcome.value = PublishOutcome.Success(summary, newWhisky)
             } catch (cancelled: CancellationException) {
@@ -286,7 +320,8 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
     }
 
     fun confirmPublish() {
-        if (_publishing.value || _publishOutcome.value != null) return
+        if (_publishing.value || _savingDefaultPour.value ||
+            _draftProblem.value != null || _publishOutcome.value != null) return
         val state = review ?: return
         if (state.modal?.type != ReviewModalType.PUBLISH ||
             !PhotoReviewRules.stats(state).canPublish) return

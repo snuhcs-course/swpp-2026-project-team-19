@@ -333,6 +333,7 @@ private fun ReviewHead(s: PhotoReviewState, stats: ReviewStats, vm: PhotoReviewV
 
 @Composable
 private fun DefaultPourPanel(s: PhotoReviewState, vm: PhotoReviewViewModel) {
+    val saving by vm.savingDefaultPour.collectAsStateWithLifecycle()
     Row(
         Modifier.fillMaxWidth().padding(top = 9.dp, bottom = 11.dp)
             .background(ReviewColor.pourPanelBg, RoundedCornerShape(12.dp))
@@ -350,10 +351,11 @@ private fun DefaultPourPanel(s: PhotoReviewState, vm: PhotoReviewViewModel) {
                 keyboardType = KeyboardType.Number, onImeAction = { vm.saveDefaultPour(s.draftDefaultPourText) })
             Text("ml", style = uxText(12f, 400, UxColor.sub))
             Box(Modifier.heightIn(min = 44.dp).background(UxColor.gold, RoundedCornerShape(9.dp))
-                .quietClick { vm.saveDefaultPour(s.draftDefaultPourText) }
+                .quietClick(enabled = !saving) { vm.saveDefaultPour(s.draftDefaultPourText) }
                 .padding(horizontal = 14.dp, vertical = 8.dp).testTag("review-default-pour-save"),
                 contentAlignment = Alignment.Center) {
-                Text("저장", style = uxText(12f, 750, UxColor.goldOn))
+                Text(if (saving) "저장 중" else "저장",
+                    style = uxText(12f, 750, UxColor.goldOn))
             }
         }
     }
@@ -400,6 +402,9 @@ private fun AllDoneRow(onJump: () -> Unit) {
 
 @Composable
 private fun PublishFooter(stats: ReviewStats, vm: PhotoReviewViewModel) {
+    val savingPour by vm.savingDefaultPour.collectAsStateWithLifecycle()
+    val draftProblem by vm.draftProblem.collectAsStateWithLifecycle()
+    val canSubmit = stats.canPublish && !savingPour && draftProblem == null
     Column(
         Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(bottom = 43.dp)
             .drawBehind { drawLine(UxColor.line, Offset(0f, 0f), Offset(size.width, 0f), 1.dp.toPx()) }
@@ -413,20 +418,23 @@ private fun PublishFooter(stats: ReviewStats, vm: PhotoReviewViewModel) {
         val shape = RoundedCornerShape(12.dp)
         BoxWithConstraints(
             Modifier.fillMaxWidth().padding(top = 18.dp, bottom = 14.dp).height(56.dp).clip(shape)
-                .background(if (stats.canPublish) UxColor.gold else ReviewColor.publishBg, shape)
-                .border(1.dp, if (stats.canPublish) UxColor.gold else ReviewColor.publishBorder, shape)
-                .quietClick(enabled = stats.canPublish, onClick = vm::requestPublish)
-                .semantics { contentDescription = if (stats.canPublish) "게시하기" else "검수 ${stats.done}/${stats.total} 완료" }
+                .background(if (canSubmit) UxColor.gold else ReviewColor.publishBg, shape)
+                .border(1.dp, if (canSubmit) UxColor.gold else ReviewColor.publishBorder, shape)
+                .quietClick(enabled = canSubmit, onClick = vm::requestPublish)
+                .semantics { contentDescription = if (canSubmit) "게시하기" else "검수 ${stats.done}/${stats.total} 완료" }
                 .testTag("review-publish"),
             contentAlignment = Alignment.Center,
         ) {
             Box(Modifier.align(Alignment.CenterStart).fillMaxHeight()
                 .width(maxWidth * (stats.percent / 100f))
-                .background(if (stats.canPublish) UxColor.gold else ReviewColor.publishProgress))
-            Text(if (stats.canPublish) "게시하기" else "검수 ${stats.done}/${stats.total} 완료",
-                style = uxText(15f, 750, if (stats.canPublish) UxColor.goldOn else UxColor.text))
+                .background(if (canSubmit) UxColor.gold else ReviewColor.publishProgress))
+            Text(if (canSubmit) "게시하기" else if (savingPour) "용량 저장 중" else "검수 ${stats.done}/${stats.total} 완료",
+                style = uxText(15f, 750, if (canSubmit) UxColor.goldOn else UxColor.text))
         }
         when {
+            draftProblem != null -> Text(draftProblem, style = uxText(12f, 450, UxColor.error),
+                modifier = Modifier.testTag("review-draft-error"))
+            savingPour -> Text("기본 잔 용량을 저장하는 중이에요.", style = uxText(12f, 450, UxColor.muted))
             stats.noDefault -> Text("매장 기본 잔 용량을 입력해주세요.", style = uxText(12f, 400, UxColor.error, lineHeight = 1.65f),
                 modifier = Modifier.padding(horizontal = 1.dp, vertical = 4.dp).testTag("review-publish-blocker"))
             stats.pending.isNotEmpty() -> Text("확인이 필요한 메뉴 ${stats.pending.size}개를 먼저 검수해 주세요.",
