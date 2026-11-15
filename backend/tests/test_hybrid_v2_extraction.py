@@ -9,8 +9,9 @@ from pydantic import ValidationError
 
 from app import extraction
 from app.adapters.extraction import ExtractionError
-from app.adapters.hybrid_extraction import HybridMenuExtractor
+from app.adapters.hybrid_extraction import HybridMenuExtractor, in_menu_order
 from app.extraction import gemini, hybrid, hybrid_v2
+from app.models import LineType, MenuItemKind
 from tests.test_hybrid_extraction_adapter import CLOVA, OCR_RESPONSE, SETTINGS, FakeInteractions, jpeg
 
 TABLE = [{"id": "L001", "box": [100, 10, 260, 30], "text": "WHISKY"},
@@ -64,7 +65,7 @@ def convert(output, table=TABLE):
 def test_only_whisky_lines_become_items():
     result = convert(V2_OUTPUT)
     assert [(i["rawText"], i["lineType"], len(i["options"])) for i in result["items"]] == [("페른홀로우 12년", "product", 2)]
-    assert result["itemSources"] == [{"itemOrder": 1, "nameLines": ["L002"], "priceLines": ["L003"],
+    assert result["itemSources"] == [{"itemOrder": 1, "menuOrder": 1, "nameLines": ["L002"], "priceLines": ["L003"],
                                       "box": [100, 100, 880, 120]}]
     assert result["rawOutput"] == V2_OUTPUT and result["otherItemsDropped"] == 0
 
@@ -109,7 +110,7 @@ def test_glass_and_bottle_rows_of_one_printed_line_are_joined_when_apart():
     ]})
     assert [(i["itemOrder"], i["rawText"], [o["optionLabel"] for o in i["options"]]) for i in out["items"]] == [
         (1, "페른홀로우 12년", ["잔", "병"])]
-    assert out["itemSources"] == [{"itemOrder": 1, "nameLines": ["L002"], "priceLines": ["L003"],
+    assert out["itemSources"] == [{"itemOrder": 1, "menuOrder": 1, "nameLines": ["L002"], "priceLines": ["L003"],
                                    "box": [100, 100, 880, 120]}]
     assert [(o["rawText"], [x["optionLabel"] for x in o["options"]]) for o in out["otherItems"]] == [
         ("페른홀로우 하이볼", ["잔"]), ("하우스 와인", ["잔", "병"])]
@@ -231,14 +232,103 @@ def test_adapter_defaults_to_prompt_v1(monkeypatch):
     assert extractor.prompt == "v1" and "prompthybrid-v1-" in extractor.pipeline_version
 
 
-def test_adapter_with_prompt_v2_stores_only_whisky_items(monkeypatch, fake_ocr, fake_gemini):
+def test_every_line_has_its_place_in_the_menu():
+    out = convert({"items": [
+        item("치즈 플래터", "food", 25000, None),
+        item("페른홀로우 12년", "whisky", 15000, "glass", name_lines=["L002"], price_lines=["L003"]),
+        item("x" * 201, "cocktail", 9000, "glass"),                      # dropped: leaves a gap
+        item("페른홀로우 하이볼", "cocktail", 12000, "glass", name_lines=["L004"], price_lines=["L005"]),
+        item("스톤브리지 10년", "whisky", 16000, "glass"),
+    ]})
+
+    assert [(s["itemOrder"], s["menuOrder"]) for s in out["itemSources"]] == [(1, 2), (2, 5)]
+    assert [(o["itemOrder"], o["menuOrder"], o["rawText"]) for o in out["otherItems"]] == [
+        (1, 1, "치즈 플래터"), (2, 4, "페른홀로우 하이볼")]
+    assert out["otherItemsDropped"] == 1
+
+
+def test_adapter_with_prompt_v2_gives_every_line_in_menu_order(monkeypatch, fake_ocr, fake_gemini):
     monkeypatch.setenv("EXTRACTION_HYBRID_PROMPT", "v2")
     extractor = HybridMenuExtractor(SETTINGS, CLOVA)
     assert extractor.pipeline_version == "bottlemap-menu-hybrid-prompthybrid-v2-thinking-medium"
+
     result = extractor.extract(jpeg(), "image/jpeg", "menu.jpg")
-    # result.items is what the import stores as extracted_items and sends to matching
-    assert [i.raw_text for i in result.items] == ["페른홀로우 12년"]
-    assert [o["rawText"] for o in result.raw_output["otherItems"]] == ["페른홀로우 하이볼", "치즈 플래터", "하우스 와인"]
+
+    # result.items is what the import stores as extracted_items; only kind whisky is matched
+    assert [(i.item_order, i.raw_text, i.kind, i.line_type) for i in result.items] == [
+        (1, "페른홀로우 12년", MenuItemKind.WHISKY, LineType.PRODUCT),
+        (2, "페른홀로우 하이볼", MenuItemKind.OTHER, LineType.PRODUCT),
+        (3, "치즈 플래터", MenuItemKind.OTHER, LineType.PRODUCT),
+        (4, "하우스 와인", MenuItemKind.OTHER, LineType.PRODUCT),
+    ]
+    highball, cheese, wine = result.items[1:]
+    assert highball.product_name == "페른홀로우 하이볼" and (highball.brand_text, highball.age_years) == (None, None)
+    assert [(o.option_label, o.pour_ml, o.price_krw) for o in highball.options] == [("잔", None, 12000)]
+    assert cheese.options[0].price_krw == 25000
+    assert [(o.option_label, o.pour_ml, o.price_krw) for o in wine.options] == [("잔", 120, 9000), ("병", None, 45000)]
+    # every line has its source under its new number, for the review screen (this OCR response
+    # has the whisky line only, so the other lines have no box)
+    sources = result.raw_output["itemSources"]
+    assert [(s["itemOrder"], s["menuOrder"], s["nameLines"], s["box"]) for s in sources] == [
+        (1, 1, ["L002"], [100, 100, 880, 120]), (2, 2, [], None), (3, 3, [], None), (4, 4, [], None)]
+    # the lines as the extraction gave them, with their categories, stay in raw_output
+    assert [(o["rawText"], o["category"]) for o in result.raw_output["otherItems"]] == [
+        ("페른홀로우 하이볼", "cocktail"), ("치즈 플래터", "food"), ("하우스 와인", "other")]
+
+
+def test_whisky_lines_between_other_lines_keep_their_place_and_their_boxes(monkeypatch, fake_ocr):
+    output = {"items": [
+        item("치즈 플래터", "food", 25000, None),
+        item("페른홀로우 12년", "whisky", 15000, "glass", name_lines=["L002"], price_lines=["L003"]),
+        item("페른홀로우 하이볼", "cocktail", 12000, "glass", name_lines=["L001"]),
+        item("스톤브리지 10년", "whisky", 16000, "glass"),
+    ]}
+    fake = SimpleNamespace(interactions=FakeInteractions(json.dumps(output)))
+    monkeypatch.setattr(gemini, "make_client", lambda settings: fake)
+
+    result = HybridMenuExtractor(SETTINGS, CLOVA, prompt="v2").extract(jpeg(), "image/jpeg", None)
+
+    assert [(i.item_order, i.raw_text, i.kind.value) for i in result.items] == [
+        (1, "치즈 플래터", "other"), (2, "페른홀로우 12년", "whisky"), (3, "페른홀로우 하이볼", "other"),
+        (4, "스톤브리지 10년", "whisky")]
+    assert [(s["itemOrder"], s["box"]) for s in result.raw_output["itemSources"]] == [
+        (1, None), (2, [100, 100, 880, 120]), (3, [100, 10, 260, 30]), (4, None)]
+
+
+def test_in_menu_order_leaves_a_result_without_other_lines_as_it_is():
+    items, meta = [{"itemOrder": 1, "rawText": "a"}], {"itemSources": [{"itemOrder": 1, "box": None}]}
+    assert in_menu_order(items, meta) == (items, meta)                                   # prompt v1
+    assert in_menu_order(items, {**meta, "otherItems": []})[0] is items                  # v2, whisky only
+    assert in_menu_order(items, {**meta, "otherItems": None})[1]["itemSources"] is meta["itemSources"]
+
+
+def test_in_menu_order_puts_lines_without_a_place_after_the_others():
+    """A result recorded before menuOrder existed: whisky first, then the other lines, as given."""
+    items = [{"itemOrder": 1, "rawText": "위스키 A"}, {"itemOrder": 2, "rawText": "위스키 B"}]
+    meta = {"itemSources": [{"itemOrder": 2, "nameLines": ["L9"], "priceLines": [], "box": [1, 2, 3, 4]}],
+            "otherItems": [{"itemOrder": 1, "rawText": "안주", "options": [], "nameLines": [], "priceLines": [],
+                            "box": None}]}
+
+    payload, merged = in_menu_order(items, meta)
+
+    assert [(i["itemOrder"], i["rawText"], i.get("kind")) for i in payload] == [
+        (1, "위스키 A", None), (2, "위스키 B", None), (3, "안주", "other")]
+    # 위스키 A had no source and gets none; the others keep theirs under the new numbers
+    assert merged["itemSources"] == [
+        {"itemOrder": 2, "nameLines": ["L9"], "priceLines": [], "box": [1, 2, 3, 4], "menuOrder": None},
+        {"itemOrder": 3, "nameLines": [], "priceLines": [], "box": None, "menuOrder": None}]
+    assert meta["itemSources"][0]["itemOrder"] == 2 and "menuOrder" not in meta["itemSources"][0]  # not changed in place
+
+
+def test_adapter_with_prompt_v1_gives_whisky_items_only(monkeypatch, fake_ocr):
+    v1 = {"items": [{k: v for k, v in row.items() if k != "category"} for row in V2_OUTPUT["items"][:2]]}
+    fake = SimpleNamespace(interactions=FakeInteractions(json.dumps(v1)))
+    monkeypatch.setattr(gemini, "make_client", lambda settings: fake)
+
+    result = HybridMenuExtractor(SETTINGS, CLOVA, prompt="v1").extract(jpeg(), "image/jpeg", None)
+
+    assert [(i.raw_text, i.kind) for i in result.items] == [("페른홀로우 12년", MenuItemKind.WHISKY)]
+    assert "otherItems" not in result.raw_output and "menuOrder" not in result.raw_output["itemSources"][0]
 
 
 def test_adapter_rejects_an_unknown_prompt(monkeypatch):

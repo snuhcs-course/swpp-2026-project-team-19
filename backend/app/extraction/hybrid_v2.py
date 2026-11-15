@@ -129,11 +129,12 @@ def other_items(hybrid_items: list[dict[str, Any]], table: list[dict[str, Any]])
 
     Glass and bottle rows of one line are grouped as for whisky. An item whose name or options
     break the stored limits is dropped instead of failing the photo: these lines are extra, and
-    one bad cocktail must not cost the owner the whisky lines.
+    one bad cocktail must not cost the owner the whisky lines. `menuOrder` is the line's place
+    among all lines of the menu, whisky included (see convert_output).
     """
     out: list[dict[str, Any]] = []
     dropped = 0
-    for group in line_groups(hybrid_items):
+    for menu_order, group in enumerate(line_groups(hybrid_items), start=1):
         if group[0]["category"] == WHISKY:
             continue
         flow, source = _flow_item(1, _plain(group)), _group_source(group, table)
@@ -146,7 +147,8 @@ def other_items(hybrid_items: list[dict[str, Any]], table: list[dict[str, Any]])
         if not 1 <= len(name) <= MAX_TEXT:
             dropped += 1
             continue
-        out.append({"itemOrder": len(out) + 1, "rawText": name, "category": group[0]["category"], "options": options,
+        out.append({"itemOrder": len(out) + 1, "menuOrder": menu_order, "rawText": name,
+                    "category": group[0]["category"], "options": options,
                     "nameLines": source["nameLines"], "priceLines": source["priceLines"], "box": source["box"]})
     return out, dropped
 
@@ -156,11 +158,18 @@ def convert_output(text: str, table: list[dict[str, Any]]) -> dict[str, Any]:
 
     `items` are the flow v2 4.3 items of the whisky lines only. Raises pydantic.ValidationError
     when the answer is not prompt v2 output or a whisky line fails the flow validation.
+
+    `items` and `otherItems` are numbered apart (`itemOrder`), each from 1. `menuOrder`, on every
+    entry of `itemSources` and `otherItems`, is the line's place among all lines of the menu in
+    the order the model listed them, so the two lists can be put back into one (the adapter does,
+    app.adapters.hybrid_extraction.in_menu_order). A dropped line leaves a gap.
     """
     hybrid = HybridExtractionV2.model_validate_json(text).model_dump()
-    whisky = [group for group in line_groups(hybrid["items"]) if group[0]["category"] == WHISKY]
-    flow_items = [_flow_item(order, _plain(group)) for order, group in enumerate(whisky, start=1)]
-    sources = [{**_group_source(group, table), "itemOrder": order} for order, group in enumerate(whisky, start=1)]
+    whisky = [(menu_order, group) for menu_order, group in enumerate(line_groups(hybrid["items"]), start=1)
+              if group[0]["category"] == WHISKY]
+    flow_items = [_flow_item(order, _plain(group)) for order, (_, group) in enumerate(whisky, start=1)]
+    sources = [{**_group_source(group, table), "itemOrder": order, "menuOrder": menu_order}
+               for order, (menu_order, group) in enumerate(whisky, start=1)]
     items = ExtractionItems.model_validate({"items": flow_items})
     others, dropped = other_items(hybrid["items"], table)
     return {"items": items.model_dump(mode="json")["items"], "rawOutput": hybrid,
