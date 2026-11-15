@@ -105,8 +105,10 @@ class PendingReviewDraftStoreTest {
         // separately trimmed version available for an explicit CAS choice.
         val origAgain = PendingReviewDraftStore(context) { jwt("owner-working") }
         val workAgain = PendingReviewDraftStore(context, { jwt("owner-working") }, "working")
-        assertEquals(oversized, requireNotNull(origAgain.read("import-working")).content)
-        assertEquals(reduced, requireNotNull(workAgain.read("import-working")).content)
+        assertTrue(ServerReviewDraftCodec.sameAndroidSnapshot(
+            oversized, requireNotNull(origAgain.read("import-working")).content))
+        assertTrue(ServerReviewDraftCodec.sameAndroidSnapshot(
+            reduced, requireNotNull(workAgain.read("import-working")).content))
         assertFalse(ServerReviewDraftCodec.exceedsServerLimit(
             requireNotNull(workAgain.read("import-working")).content))
         assertNull(PendingReviewDraftStore(context, { jwt("another-owner") }, "working")
