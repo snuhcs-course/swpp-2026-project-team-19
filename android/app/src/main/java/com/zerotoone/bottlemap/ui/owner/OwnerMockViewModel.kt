@@ -163,7 +163,7 @@ class OwnerMockViewModel(private val repository: OwnerMockRepository) : ViewMode
         (repository as? com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
             ?.consumePhotoPublishWarning()
 
-    suspend fun publishPhotoImportLive(importId: String, version: Int): Int =
+    suspend fun publishPhotoImportLive(importId: String, version: Int): Int? =
         if(repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
             repository.publishPhotoImportLive(importId, version)
         else repository.publishAddOnly(importId, version)
