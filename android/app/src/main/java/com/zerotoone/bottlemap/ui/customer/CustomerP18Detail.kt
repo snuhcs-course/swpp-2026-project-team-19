@@ -146,6 +146,13 @@ internal fun P18RemoteBarPhoto(url:String?,modifier:Modifier=Modifier,
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
+/** Null route highlight must not match a product-less (null productId) row. */
+internal fun p18HighlightedCategory(
+    items: List<BarMenuItemUiModel>, highlightProductId: String?,
+): String? = highlightProductId?.let { id ->
+    items.firstOrNull { it.productId == id }?.category
+}
+
 internal fun p18InitiallyCollapsedCategories(highlightCategory: String?): Set<String> {
     val defaults = setOf("cocktail","food","snack","brandy","gin","rum","wine",
         "beer","otheralcohol","other")
@@ -190,9 +197,7 @@ internal fun CustomerP18BarDetail(
     // the regular category accordion still closes and reopens on user taps.
     // A normal bar visit has no search target. Product-less rows also
     // have null productId and must never be treated as a highlighted hit.
-    val highlightedCategory = highlightProductId?.let { productId ->
-        bar.items.firstOrNull { it.productId == productId }?.category
-    }
+    val highlightedCategory = p18HighlightedCategory(bar.items, highlightProductId)
     var collapsed by rememberSaveable(bar.barId, highlightProductId) {
         mutableStateOf(p18InitiallyCollapsedCategories(highlightedCategory))
     }
