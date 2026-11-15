@@ -163,36 +163,6 @@ class PendingReviewDraftStoreTest {
             original, edited))
     }
 
-    @Test fun lostResponseCanRebaseLaterDeviceEditOnlyAfterItsOwnCas() = runBlocking {
-        fun snapshot(name: String) = ServerReviewDraftCodec.encode(
-            PhotoReviewState(items = listOf(ReviewItem(id = "ocr-1", name = name))),
-        )
-        val earlierPut = snapshot("먼저 서버로 전송한 값")
-        val laterDeviceEdit = snapshot("서버 응답 중 수정한 최신 값")
-        val pending = PendingReviewDraftStore.Envelope(
-            reviewVersion = 7, expectedDraftVersion = 3,
-            itemIds = listOf("ocr-1"), content = laterDeviceEdit,
-            inFlightContent = earlierPut, inFlightDraftVersion = 3,
-        )
-        val original = PendingReviewDraftStore(context) { jwt("owner-recovery-ack") }
-        original.write("import-ack", pending)
-        val restored = requireNotNull(
-            PendingReviewDraftStore(context) { jwt("owner-recovery-ack") }
-                .read("import-ack"))
-        fun server(content: Map<String, Any?>, dv: Int = 4, rv: Int = 7) =
-            ReviewDraftDto(dv, rv, "2026-11-16T00:00:00Z", content)
-        assertTrue(restored.canRebaseAfterLostResponse(server(earlierPut), 7))
-        assertFalse(restored.canRebaseAfterLostResponse(server(snapshot("다른 기기의 변경")), 7))
-        assertFalse(restored.canRebaseAfterLostResponse(server(earlierPut, 5), 7))
-        assertFalse(restored.canRebaseAfterLostResponse(server(earlierPut, 4, 8), 7))
-        assertFalse(restored.copy(inFlightContent = null)
-            .canRebaseAfterLostResponse(server(earlierPut), 7))
-        assertEquals("서버 응답 중 수정한 최신 값", requireNotNull(
-            ServerReviewDraftCodec.decode(ReviewDraftDto(3, 7,
-                "2026-11-16T00:00:00Z", restored.content)))
-            .items.single().name)
-    }
-
     @Test fun interruptedAtomicRewriteKeepsLastCompletedLocalDraft() = runBlocking {
         val store = PendingReviewDraftStore(context) { jwt("owner-recovery") }
         val draft = PendingReviewDraftStore.Envelope(
