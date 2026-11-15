@@ -370,9 +370,15 @@ class LivePhotoReviewRepository(
         val currentItems = state.items.associateBy { it.id }
         val restored = chosen.copy(items = chosen.items.map { old ->
             val fresh = currentItems.getValue(old.id)
-            val savedPrices = if (old.linkedProductId == null && old.name.isNotBlank())
-                existingUnlinkedServingPrices(old.name)
-            else fresh.priceCandidates.filter { it.existing }
+            // A saved Owner decision may have linked a DIFFERENT product
+            // from the OCR proposal. Compare against that selected product's
+            // current bar prices, never the fresh OCR product candidates.
+            val savedPrices = when {
+                old.linkedProductId != null ->
+                    fresh.existingServingPricesByProductId[old.linkedProductId].orEmpty()
+                old.name.isNotBlank() -> existingUnlinkedServingPrices(old.name)
+                else -> emptyList()
+            }
             old.copy(sourcePhotoUrl = fresh.sourcePhotoUrl, sourceBox = fresh.sourceBox,
                 raw = fresh.raw, recognizedOffers = fresh.recognizedOffers,
                 // Candidate prices and OCR identities always come from the current
