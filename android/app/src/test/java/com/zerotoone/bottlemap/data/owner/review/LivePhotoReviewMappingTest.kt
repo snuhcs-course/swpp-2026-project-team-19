@@ -507,4 +507,47 @@ class LivePhotoReviewMappingTest {
     }
 
 
+
+    @Test fun restoredOtherPourCorrectionAndClearOverrideOriginalOcrPour() {
+        val dto = item(
+            options = listOf(ReviewOptionDto("other-ocr", 1, "잔", 30, 9000)),
+            status = "unmatched", proposedId = null,
+        ).copy(extractedKind = "other", candidates = emptyList(),
+            newProductDraft = null, extractedProductName = "하이볼")
+        val initial = mapServerPhotoReview(response(dto), fixture())
+        assertEquals(com.zerotoone.bottlemap.ui.owner.review.ReviewItemType.OTHER,
+            initial.items.single().type)
+        fun restored(pour: Int?): com.zerotoone.bottlemap.ui.owner.review.ReviewItem {
+            val server = com.zerotoone.bottlemap.network.ReviewDraftDto(
+                2, 3, "2026-11-15T00:00:00Z",
+                mapOf("itemDecisions" to listOf(mapOf(
+                    "extractedItemId" to "line-1",
+                    "action" to "publish_without_product",
+                    "kind" to "other",
+                    "options" to listOf(mapOf(
+                        "extractedOptionId" to "other-ocr",
+                        "optionLabel" to "잔",
+                        "pourMl" to pour,
+                        "priceKrw" to 9000,
+                    )),
+                ))),
+            )
+            return requireNotNull(ServerReviewDraftCodec.restoreStandard(
+                server, initial)).items.single()
+        }
+        val corrected = restored(60)
+        assertEquals(60.0, corrected.volume, 0.0)
+        val publishedCorrected = requireNotNull(mapConfirmedReviewDecision(
+            corrected, dto, 30.0, emptyMap()).correctedOptions).single()
+        assertEquals(60, publishedCorrected.pourMl)
+        assertEquals("other-ocr", publishedCorrected.optionId)
+
+        val cleared = restored(null)
+        assertEquals(0.0, cleared.volume, 0.0)
+        val publishedCleared = requireNotNull(mapConfirmedReviewDecision(
+            cleared, dto, 30.0, emptyMap()).correctedOptions).single()
+        assertNull(publishedCleared.pourMl)
+        assertEquals("other-ocr", publishedCleared.optionId)
+        assertEquals(9000, publishedCleared.priceKrw)
+    }
 }
