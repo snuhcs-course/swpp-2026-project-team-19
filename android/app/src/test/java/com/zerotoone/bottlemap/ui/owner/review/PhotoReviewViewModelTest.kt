@@ -669,15 +669,20 @@ class PhotoReviewViewModelTest {
         assertNull(vm.draftProblem.value)
     }
 
-    @Test fun transientDraftFailureShowsDeviceSavedNoticeAndRetryRecovers() = runTest(dispatcher) {
+    @Test fun transientDraftFailureShowsExistingRetryPageAndReloadRestoresDraft() = runTest(dispatcher) {
         val base = MockPhotoReviewRepository(MockPhotoReviewScenario.READY)
         var attempts = 0
         var pending = false
+        var deviceDraft: PhotoReviewState? = null
         val repo = object : PhotoReviewRepository by base {
             override fun hasPendingLocalDraft(): Boolean = pending
+            override suspend fun checkpointDraft(state: PhotoReviewState) {
+                deviceDraft = state
+            }
+            override suspend fun loadReview(): PhotoReviewState = deviceDraft ?: base.loadReview()
             override suspend fun saveDraft(state: PhotoReviewState) {
                 attempts++
-                pending = true // Live writes the local backup before network IO.
+                pending = true
                 if (attempts == 1) throw BottleMapApiException(
                     code = "NETWORK_ERROR", message = "offline")
                 pending = false
@@ -686,12 +691,15 @@ class PhotoReviewViewModelTest {
         val vm = PhotoReviewViewModel(repo)
         vm.typeInlinePrice("glen12", "21000")
         assertEquals(1, attempts)
+        assertTrue(vm.load.value is PhotoReviewLoad.Error)
         assertTrue(vm.draftRetryable.value)
         assertTrue(vm.draftProblem.value.orEmpty().contains("이 기기에는 저장"))
-        vm.retryDraftSave()
+        vm.reload() // Existing error-screen Retry button, not a hidden footer method.
         assertEquals(2, attempts)
+        assertTrue(vm.load.value is PhotoReviewLoad.Ready)
         assertFalse(vm.draftRetryable.value)
         assertNull(vm.draftProblem.value)
+        assertEquals(deviceDraft, vm.state)
     }
 
     @Test fun locallyRestoredDraftSynchronizesAutomaticallyOnEntry() = runTest(dispatcher) {
