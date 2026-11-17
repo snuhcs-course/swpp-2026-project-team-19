@@ -242,7 +242,7 @@ internal fun P18OwnerParityMenuRow(
             }
             Column(Modifier.width(priceWidth),
                 horizontalAlignment=Alignment.End,
-                verticalArrangement=Arrangement.spacedBy(3.dp)) {
+                verticalArrangement=Arrangement.spacedBy(0.dp)) {
                 item.options.forEach { option ->
                     val active=customerDiscountActive(option,timestamp)
                     Row(Modifier.fillMaxWidth(),
@@ -259,12 +259,12 @@ internal fun P18OwnerParityMenuRow(
                             }
                         }
                         Text(servingDisplayLabel(option.pourMl,option.label),
-                            Modifier.width(pourWidth),color=P18Text,fontSize=10.sp,
+                            Modifier.width(pourWidth),color=P18Text,fontSize=10.sp,lineHeight=11.sp,
                             maxLines=1,textAlign=TextAlign.End)
                         Text(option.priceKrw?.let{
                             p18Price(p18EffectivePrice(it,option.discount,timestamp))
                         } ?: option.text,
-                            modifier=Modifier.weight(1f),color=P18Muted,fontSize=10.sp,
+                            modifier=Modifier.weight(1f),color=P18Muted,fontSize=10.sp,lineHeight=11.sp,
                             maxLines=1,textAlign=TextAlign.End)
                     }
                 }
