@@ -66,6 +66,25 @@ class PendingReviewDraftStoreTest {
     }
 
 
+    @Test fun workingCopyAckAfterPendingWasClearedDoesNotCreateFalseConflict() {
+        fun content(name: String) = ServerReviewDraftCodec.encode(
+            PhotoReviewState(items = listOf(ReviewItem(id = "ocr-1", name = name))))
+        val value = content("latest owner edit")
+        val remote = ReviewDraftDto(8, 3, "2026-11-17T00:00:00Z", value)
+        val working = PendingReviewDraftStore.Envelope(
+            reviewVersion = 3, expectedDraftVersion = 7,
+            itemIds = listOf("ocr-1"), content = value)
+        assertEquals(DraftRecoveryPolicy.Outcome.ACKNOWLEDGED,
+            DraftRecoveryPolicy.decide(remote, working, null, 3))
+        assertTrue(acknowledgedWorkingReview(remote, working, null))
+        assertFalse(acknowledgedWorkingReview(
+            remote, working, working.copy(content = content("newer unsent edit"))))
+        assertFalse(acknowledgedWorkingReview(
+            remote.copy(content = content("foreign edit")), working, null))
+        assertFalse(acknowledgedWorkingReview(
+            remote.copy(reviewVersion = 4), working, null))
+    }
+
     @Test fun acknowledgedWorkingCopyRetainsOlderProtectedBackup() = runBlocking {
         fun content(name: String) = ServerReviewDraftCodec.encode(
             PhotoReviewState(items = listOf(ReviewItem(id = "ocr-1", name = name))),
