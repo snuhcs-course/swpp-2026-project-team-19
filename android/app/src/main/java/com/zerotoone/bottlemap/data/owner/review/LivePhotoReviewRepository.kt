@@ -262,6 +262,9 @@ class LivePhotoReviewRepository(
     private var draftConflict = false
     private var pendingDraftConflict = false
     private var lastSavedContent: Map<String, Any?>? = null
+    // Encode the exact review shown immediately after a load. Pressing Back
+    // without editing must not overwrite a newer protected working copy.
+    private var displayedAtLoadContent: Map<String, Any?>? = null
     private var draftNotice: String? = null
 
     override fun publishedAddedCount(): Int? = committedAddedCount
@@ -294,6 +297,7 @@ class LivePhotoReviewRepository(
     override suspend fun loadReview(): PhotoReviewState {
         val id = resolveImportId()
         activeImportId = id
+        displayedAtLoadContent = null
         // A newly loaded import must never inherit a count acknowledged for
         // a different import in this repository instance.
         committedAddedCount = null
@@ -454,9 +458,11 @@ class LivePhotoReviewRepository(
                         pending == null)
                         pendingStore.write(id, checkpoint)
                     draftConflict = true
-                    pendingDraftConflict = safeLocal
-                    pendingLocally = safeLocal
-                    pendingOversized = safeLocal &&
+                    // Even an incompatible same-account backup remains durable
+                    // evidence. Do not auto PUT, suppress Back, or erase it.
+                    pendingDraftConflict = true
+                    pendingLocally = true
+                    pendingOversized =
                         ServerReviewDraftCodec.exceedsServerLimit(device.content)
                     draftNotice = if (safeLocal)
                         "서버와 기기에 서로 다른 검수 초안이 있어요. 먼저 확인해 주세요."
@@ -467,7 +473,9 @@ class LivePhotoReviewRepository(
         // OCR evidence and signed image URLs always come from this GET, not
         // from old local files. Draft-only fields are rebound to fresh data.
         loaded = response
-        return rebindDraftData(chosen, state)
+        val displayed = rebindDraftData(chosen, state)
+        displayedAtLoadContent = ServerReviewDraftCodec.encode(displayed)
+        return displayed
     }
 
     /** Rebind live OCR provenance and catalog observations to an edited draft. */
@@ -708,10 +716,11 @@ class LivePhotoReviewRepository(
         checkpointMutex.withLock {
             if (published) return@withLock
             if (draftConflict) {
-                // Keep the prior pending snapshot immutable and checkpoint
-                // *every* new edit into the separate working AtomicFile.
-                // The old code skipped this write until a user tapped an
-                // explicit conflict button, silently losing edits on exit.
+                // A Back with NO edits after loading the server must not
+                // replace a protected local working copy. Only real owner
+                // edits become a new device-only working snapshot.
+                if (ServerReviewDraftCodec.sameAndroidSnapshot(
+                        content, displayedAtLoadContent)) return@withLock
                 workingStore.write(id, PendingReviewDraftStore.Envelope(
                     reviewVersion = version,
                     expectedDraftVersion = draftVersion,
@@ -779,6 +788,9 @@ class LivePhotoReviewRepository(
             // an operator/device has advanced the server CAS. Do not touch it
             // until the owner explicitly resolves the conflict.
             if (draftConflict) {
+                // No changes and no local draft: nothing to PUT or protect.
+                if (!pendingLocally && ServerReviewDraftCodec.sameAndroidSnapshot(
+                        content, displayedAtLoadContent)) return@withLock
                 // The current visible review was already saved by
                 // checkpointDraft. Never replace that newer working copy
                 // with an older in-flight network snapshot here.
