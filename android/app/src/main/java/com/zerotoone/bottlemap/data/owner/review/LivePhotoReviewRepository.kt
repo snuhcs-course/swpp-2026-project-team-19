@@ -485,9 +485,12 @@ class LivePhotoReviewRepository(
                     }
                 }
                 else -> {
-                    // Never silently overwrite another device or an unknown
-                    // operator schema. Preserve the freshest local copy and
-                    // expose only the already-existing explicit conflict flow.
+                    // A genuine CAS conflict cannot be auto-published, but
+                    // hiding the compatible device edit behind the server
+                    // preview looks exactly like data loss on re-entry.
+                    // Show the protected latest device decisions while keeping
+                    // the server immutable and publication blocked.
+                    if (safeLocal && canRestore) chosen = requireNotNull(local)
                     if (!selectedWorking && checkpoint != null && safeLocal &&
                         pending == null)
                         pendingStore.write(id, checkpoint)
