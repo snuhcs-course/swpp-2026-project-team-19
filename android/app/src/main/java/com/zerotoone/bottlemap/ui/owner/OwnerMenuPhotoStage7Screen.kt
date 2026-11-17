@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.core.content.FileProvider
 import java.io.File
 import com.zerotoone.bottlemap.ui.common.UxToast
+import com.zerotoone.bottlemap.network.BottleMapApiException
 import com.zerotoone.bottlemap.data.owner.MockExtractedLine
 import com.zerotoone.bottlemap.data.owner.MockLineKind
 import com.zerotoone.bottlemap.data.owner.MockMenuOption
@@ -370,6 +371,13 @@ internal fun OwnerMenuPhotoSelectionScreen(
     var busy by remember { mutableStateOf(false) }
     var error by rememberSaveable { mutableStateOf<String?>(null) }
     var photoLimitNotice by remember { mutableStateOf<Long?>(null) }
+    var networkNotice by remember { mutableStateOf<Long?>(null) }
+    LaunchedEffect(networkNotice) {
+        if (networkNotice != null) {
+            delay(2500)
+            networkNotice = null
+        }
+    }
     LaunchedEffect(photoLimitNotice) {
         if (photoLimitNotice != null) {
             delay(2500)
@@ -658,7 +666,14 @@ internal fun OwnerMenuPhotoSelectionScreen(
                             error = null
                             onJob()
                         } catch (e: Exception) {
-                            error = e.message ?: "사진을 제출하지 못했어요."
+                            if ((e as? BottleMapApiException)?.code == "NETWORK_ERROR") {
+                                // UAT 4.4-5: same transient top toast as sign-in,
+                                // never an inline or bottom-fixed network message.
+                                error = null
+                                networkNotice = System.nanoTime()
+                            } else {
+                                error = e.message ?: "사진을 제출하지 못했어요."
+                            }
                         } finally { busy = false }
                     }
                 }
@@ -667,6 +682,10 @@ internal fun OwnerMenuPhotoSelectionScreen(
     }
     photoLimitNotice?.let {
         UxToast("사진은 최대 15장까지 선택할 수 있어요.",
+            Modifier.align(Alignment.TopCenter))
+    }
+    networkNotice?.let {
+        UxToast("인터넷 연결을 확인해 주세요.",
             Modifier.align(Alignment.TopCenter))
     }
     }

@@ -48,6 +48,72 @@ class PhotoReviewViewModelTest {
         return events
     }
 
+    @Test fun offlineLoadExposesKoreanReviewErrorInsteadOfRawRetrofitText() =
+        runTest(dispatcher) {
+            val base = MockPhotoReviewRepository(MockPhotoReviewScenario.READY)
+            val repo = object : PhotoReviewRepository by base {
+                override suspend fun loadReview(): PhotoReviewState {
+                    throw BottleMapApiException(
+                        code = "NETWORK_ERROR",
+                        message = "Cannot reach the BottleMap backend. Check the server and network.")
+                }
+            }
+            val vm = PhotoReviewViewModel(repo)
+            val state = vm.load.value as PhotoReviewLoad.Error
+            assertEquals(ReviewLoadErrorKind.NETWORK, state.kind)
+            assertEquals("인터넷 연결을 확인한 뒤 다시 시도해 주세요.", state.message)
+            val events = vm.collectEvents(backgroundScope)
+            vm.leave()
+            assertTrue(PhotoReviewEvent.Leave in events)
+        }
+
+    @Test fun offlineInteractionIsIgnoredAndShowsExistingNetworkErrorPage() = runTest(dispatcher) {
+        val base = MockPhotoReviewRepository(MockPhotoReviewScenario.BASIC)
+        var connected = true
+        var checkpoint: PhotoReviewState? = null
+        val repo = object : PhotoReviewRepository by base {
+            override fun hasUsableNetwork(): Boolean = connected
+            override suspend fun checkpointDraft(state: PhotoReviewState) {
+                checkpoint = state
+            }
+        }
+        val vm = PhotoReviewViewModel(repo)
+        val before = vm.state
+        val events = vm.collectEvents(backgroundScope)
+        connected = false
+        vm.toggleExpanded("glen12")
+        val error = vm.load.value as PhotoReviewLoad.Error
+        assertEquals(ReviewLoadErrorKind.NETWORK, error.kind)
+        // Do not accept the attempted input; protect the previous review.
+        assertEquals(before, checkpoint)
+        assertTrue(events.none { it is PhotoReviewEvent.Toast })
+    }
+
+    @Test fun networkSaveFailureShowsRetryPageWithoutOfflineToast() = runTest(dispatcher) {
+        val base = MockPhotoReviewRepository(MockPhotoReviewScenario.BASIC)
+        val repo = object : PhotoReviewRepository by base {
+            override fun hasPendingLocalDraft() = true
+            override suspend fun saveDraft(state: PhotoReviewState) {
+                throw BottleMapApiException(code = "NETWORK_ERROR",
+                    message = "Cannot reach the BottleMap backend.")
+            }
+        }
+        val vm = PhotoReviewViewModel(repo)
+        val events = vm.collectEvents(backgroundScope)
+        vm.toggleExpanded("glen12")
+        val error = vm.load.value as PhotoReviewLoad.Error
+        assertEquals(ReviewLoadErrorKind.NETWORK, error.kind)
+        assertTrue(events.none { it is PhotoReviewEvent.Toast })
+    }
+
+    @Test fun reviewLoadHttpFailureDoesNotExposeServerExceptionDetails() {
+        val state = reviewLoadError(BottleMapApiException(
+            httpStatus = 500, code = "HTTP_500",
+            message = "Internal server stack trace with secrets"))
+        assertEquals(ReviewLoadErrorKind.OTHER, state.kind)
+        assertFalse(state.message.contains("stack trace"))
+    }
+
     @Test fun cardsStartFoldedAndExpandOnlyWhenAsked() = runTest(dispatcher) {
         val vm = vm()
         assertTrue(vm.state.items.none { it.expanded })
@@ -268,8 +334,8 @@ class PhotoReviewViewModelTest {
         vm.addOption("gin")
         assertTrue(PhotoReviewRules.countOptions(vm.item("gin")) >= 2)
         repeat(10) { vm.addOption("gin") }
-        assertEquals(10, PhotoReviewRules.countOptions(vm.item("gin")))
-        assertTrue(PhotoReviewEvent.Toast("검수 옵션은 최대 10개까지 등록할 수 있어요.") in events)
+        assertEquals(3, PhotoReviewRules.countOptions(vm.item("gin")))
+        assertTrue(PhotoReviewEvent.Toast("검수 옵션은 최대 3개까지 등록할 수 있어요.") in events)
     }
 
     @Test fun reclassifyMovesToOtherAndBackRestoringOptions() = runTest(dispatcher) {
@@ -327,12 +393,11 @@ class PhotoReviewViewModelTest {
         assertTrue(PhotoReviewEvent.Leave in events)
     }
 
-    @Test fun autosaveConflictLoadsAndShowsNewServerDraftBeforeAllowingChoice() =
+    @Test fun autosaveConflictAutomaticallyLoadsLatestServerDraftWithoutToast() =
         runTest(dispatcher) {
             val base = MockPhotoReviewRepository(MockPhotoReviewScenario.READY)
             var reads = 0
-            var conflicted = false
-            var explicitOverwrites = 0
+            var attemptedWrites = 0
             val repo = object : PhotoReviewRepository by base {
                 override suspend fun loadReview(): PhotoReviewState {
                     reads++
@@ -342,28 +407,22 @@ class PhotoReviewViewModelTest {
                             it.copy(name = "다른 기기에서 고친 최신 이름") else it },
                     )
                 }
-                override fun hasPendingDraftConflict() = conflicted
                 override suspend fun saveDraft(state: PhotoReviewState) {
-                    conflicted = true
-                    throw ReviewDraftConflictException()
-                }
-                override suspend fun chooseLocalDraft() {
-                    assertEquals("Must see the competing server draft before choosing", 2, reads)
-                    explicitOverwrites++
-                    conflicted = false
+                    attemptedWrites++
+                    if (attemptedWrites == 1) throw ReviewDraftConflictException()
                 }
             }
             val vm = PhotoReviewViewModel(repo)
             assertEquals(1, reads)
             vm.typeInlinePrice("glen12", "22000")
             assertEquals(2, reads)
-            assertTrue(vm.draftConflictChoice.value)
+            assertEquals(1, attemptedWrites)
+            assertFalse(vm.draftConflictChoice.value)
             assertEquals("다른 기기에서 고친 최신 이름",
                 vm.state.items.first { it.id == "glen12" }.name)
-            assertTrue(vm.draftProblem.value.orEmpty().contains("최신 서버 초안"))
-            vm.resolveDraftConflict(useLocal = true)
-            assertEquals(1, explicitOverwrites)
-            assertFalse(vm.draftConflictChoice.value)
+            assertNull(vm.draftProblem.value)
+            assertTrue(vm.load.value is PhotoReviewLoad.Ready)
+            assertFalse(vm.draftRetryable.value)
         }
 
     @Test fun oversizedDeviceOnlyDraftBlocksPublishButAllowsSafeLeave() =
@@ -610,15 +669,20 @@ class PhotoReviewViewModelTest {
         assertNull(vm.draftProblem.value)
     }
 
-    @Test fun transientDraftFailureShowsDeviceSavedNoticeAndRetryRecovers() = runTest(dispatcher) {
+    @Test fun transientDraftFailureShowsExistingRetryPageAndReloadRestoresDraft() = runTest(dispatcher) {
         val base = MockPhotoReviewRepository(MockPhotoReviewScenario.READY)
         var attempts = 0
         var pending = false
+        var deviceDraft: PhotoReviewState? = null
         val repo = object : PhotoReviewRepository by base {
             override fun hasPendingLocalDraft(): Boolean = pending
+            override suspend fun checkpointDraft(state: PhotoReviewState) {
+                deviceDraft = state
+            }
+            override suspend fun loadReview(): PhotoReviewState = deviceDraft ?: base.loadReview()
             override suspend fun saveDraft(state: PhotoReviewState) {
                 attempts++
-                pending = true // Live writes the local backup before network IO.
+                pending = true
                 if (attempts == 1) throw BottleMapApiException(
                     code = "NETWORK_ERROR", message = "offline")
                 pending = false
@@ -627,24 +691,53 @@ class PhotoReviewViewModelTest {
         val vm = PhotoReviewViewModel(repo)
         vm.typeInlinePrice("glen12", "21000")
         assertEquals(1, attempts)
+        assertTrue(vm.load.value is PhotoReviewLoad.Error)
         assertTrue(vm.draftRetryable.value)
         assertTrue(vm.draftProblem.value.orEmpty().contains("이 기기에는 저장"))
-        vm.retryDraftSave()
+        vm.reload() // Existing error-screen Retry button, not a hidden footer method.
         assertEquals(2, attempts)
+        assertTrue(vm.load.value is PhotoReviewLoad.Ready)
+        assertFalse(vm.draftRetryable.value)
+        assertNull(vm.draftProblem.value)
+        assertEquals(deviceDraft, vm.state)
+    }
+
+    @Test fun locallyRestoredDraftSynchronizesAutomaticallyOnEntry() = runTest(dispatcher) {
+        val base = MockPhotoReviewRepository(MockPhotoReviewScenario.READY)
+        var pending = true
+        var saveCalls = 0
+        val repo = object : PhotoReviewRepository by base {
+            override fun hasPendingLocalDraft() = pending
+            override suspend fun saveDraft(state: PhotoReviewState) {
+                saveCalls++
+                pending = false
+            }
+        }
+        val vm = PhotoReviewViewModel(repo)
+        assertTrue(vm.load.value is PhotoReviewLoad.Ready)
+        assertEquals(1, saveCalls)
         assertFalse(vm.draftRetryable.value)
         assertNull(vm.draftProblem.value)
     }
 
-    @Test fun locallyRestoredDraftRequiresRetryBeforePublication() = runTest(dispatcher) {
+    @Test fun networkFailureOnBackLeavesWithDurableLocalDraft() = runTest(dispatcher) {
         val base = MockPhotoReviewRepository(MockPhotoReviewScenario.READY)
+        var checkpointed = false
         val repo = object : PhotoReviewRepository by base {
-            override fun hasPendingLocalDraft() = true
-            override suspend fun saveDraft(state: PhotoReviewState) { }
+            override suspend fun checkpointDraft(state: PhotoReviewState) {
+                checkpointed = true
+            }
+            override fun hasPendingLocalDraft() = checkpointed
+            override suspend fun saveDraft(state: PhotoReviewState) {
+                throw BottleMapApiException(
+                    code = "NETWORK_ERROR", message = "offline")
+            }
         }
         val vm = PhotoReviewViewModel(repo)
-        assertTrue(vm.load.value is PhotoReviewLoad.Ready)
-        assertTrue(vm.draftRetryable.value)
-        assertTrue(vm.draftProblem.value.orEmpty().contains("이 기기에는 저장"))
+        val events = vm.collectEvents(backgroundScope)
+        vm.leave()
+        assertTrue(checkpointed)
+        assertTrue(PhotoReviewEvent.Leave in events)
     }
 
     @Test fun laterLeavesWithoutPublishingAndKeepsTheDraft() = runTest(dispatcher) {
@@ -676,8 +769,10 @@ class PhotoReviewViewModelTest {
         viewModel.confirmPublish()
         assertEquals(1, flushes)
         assertEquals(0, submissions)
-        assertEquals(PublishFailure.CONFLICT,
-            (viewModel.publishOutcome.value as PublishOutcome.Failed).reason)
+        assertNull(viewModel.publishOutcome.value)
+        assertTrue(viewModel.load.value is PhotoReviewLoad.Ready)
+        // Draft-only CAS mismatch automatically reloads the server editor;
+        // it never opens a conflict result/choice UI.
     }
 
     @Test fun doublePublishTapSubmitsExactlyOnceAndDisablesWhileSaving() = runTest(dispatcher) {
@@ -1291,8 +1386,8 @@ class PhotoReviewViewModelTest {
         vm.requestPublish() // first save succeeds
         vm.confirmPublish() // final pre-submit CAS detects remote conflict
         assertEquals(0, publishes)
-        assertEquals(PublishFailure.CONFLICT,
-            (vm.publishOutcome.value as PublishOutcome.Failed).reason)
+        assertNull(vm.publishOutcome.value)
+        assertTrue(vm.load.value is PhotoReviewLoad.Ready)
         assertTrue(writes >= 2)
     }
 
@@ -1320,5 +1415,45 @@ class PhotoReviewViewModelTest {
         vm.confirmPublish()
         assertEquals(60.0, published?.defaultPour ?: -1.0, 0.0)
     }
+
+    @Test fun uatReviewBackLeavesWhenCasConflictsButDeviceBackupIsSafe() =
+        runTest(dispatcher) {
+            val base = MockPhotoReviewRepository(MockPhotoReviewScenario.BASIC)
+            var checkpointed = false
+            var remoteWrites = 0
+            val repo = object : PhotoReviewRepository by base {
+                override suspend fun checkpointDraft(state: PhotoReviewState) {
+                    checkpointed = true
+                }
+                override fun hasPendingLocalDraft(): Boolean = checkpointed
+                override suspend fun saveDraft(state: PhotoReviewState) {
+                    remoteWrites++
+                    throw ReviewDraftConflictException()
+                }
+            }
+            val vm = PhotoReviewViewModel(repo)
+            val events = vm.collectEvents(backgroundScope)
+            vm.leave()
+            assertTrue(checkpointed)
+            assertEquals(1, remoteWrites)
+            assertTrue(PhotoReviewEvent.Leave in events)
+            assertFalse(vm.draftRetryable.value)
+        }
+
+    @Test fun uatReviewBackStillBlocksWhenCasConflictHasNoDeviceBackup() =
+        runTest(dispatcher) {
+            val base = MockPhotoReviewRepository(MockPhotoReviewScenario.BASIC)
+            val repo = object : PhotoReviewRepository by base {
+                override suspend fun checkpointDraft(state: PhotoReviewState) = Unit
+                override fun hasPendingLocalDraft(): Boolean = false
+                override suspend fun saveDraft(state: PhotoReviewState) {
+                    throw ReviewDraftConflictException()
+                }
+            }
+            val vm = PhotoReviewViewModel(repo)
+            val events = vm.collectEvents(backgroundScope)
+            vm.leave()
+            assertFalse(PhotoReviewEvent.Leave in events)
+        }
 
 }

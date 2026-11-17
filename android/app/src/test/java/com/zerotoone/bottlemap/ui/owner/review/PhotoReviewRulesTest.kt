@@ -296,6 +296,21 @@ class PhotoReviewRulesTest {
             PhotoReviewState(items=listOf(a,a.copy(id="line4",price=18000.0,excluded=true)))).isEmpty())
     }
 
+    @Test fun nonWhiskyFourthServingIsNotPublishable() {
+        val options = listOf(
+            ReviewOption(volume = 60.0, price = 9000.0),
+            ReviewOption(volume = 90.0, price = 11000.0),
+            ReviewOption(volume = 120.0, price = 14000.0),
+        )
+        val other = ReviewItem(
+            id = "beer", name = "맥주", type = ReviewItemType.OTHER,
+            volume = 30.0, price = 7000.0, options = options,
+        )
+        assertTrue(ReviewIssue.OPTION in PhotoReviewRules.problems(other))
+        assertFalse(PhotoReviewRules.stats(PhotoReviewState(items = listOf(other))).canPublish)
+        assertTrue(PhotoReviewRules.problems(other.copy(options = options.take(2))).isEmpty())
+    }
+
     @Test fun otherMultiPriceLineRequiresEveryPriceAndSupportsPerOptionEdit() {
         val other=ReviewItem(id="beer",name="맥주",type=ReviewItemType.OTHER,
             price=8000.0,volume=Double.NaN,primaryOptionLabel="잔",

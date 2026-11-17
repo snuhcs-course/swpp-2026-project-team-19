@@ -2,6 +2,9 @@ package com.zerotoone.bottlemap.data.owner
 
 import android.content.Context
 import android.net.Uri
+import android.os.SystemClock
+import android.util.Log
+import com.zerotoone.bottlemap.BuildConfig
 import com.zerotoone.bottlemap.data.ImageUploadPreparer
 import com.zerotoone.bottlemap.data.AppAuth
 import com.zerotoone.bottlemap.data.OwnerRepository
@@ -19,6 +22,8 @@ import java.time.LocalTime
 import java.time.ZoneOffset
 import java.util.concurrent.atomic.AtomicInteger
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -137,6 +142,28 @@ internal fun partitionOwnerApplicationBarCandidates(
         items.filter { it.hasOwner }.map(convert)
 }
 
+/** The Owner GET is asynchronous; its snapshot may predate local form edits.
+ * Only server-owned fields come from the refresh. The latest locally saved
+ * business number/name/opening date and navigation checkpoint always win.
+ */
+/** A cancellation is visible as soon as the server confirms it, without
+ * waiting for unrelated menu/history GETs. Never change published menu rows. */
+/** Never expose a previously loaded owner's cached bar data before checking
+ * the current authenticated subject. Token absence is NOT proof of same user. */
+internal fun canRestoreVisibleOwnerCache(
+    loaded: Boolean, cachedSubject: String?, verifiedSubject: String?,
+): Boolean = loaded && cachedSubject != null && cachedSubject == verifiedSubject
+
+internal fun ownerSnapshotAfterConfirmedCancel(
+    snapshot: MockOwnerSnapshot, importId: String,
+): MockOwnerSnapshot = snapshot.copy(imports = snapshot.imports.map { job ->
+    if (job.menuImportId == importId) job.copy(status = MockImportStatus.CANCELED) else job
+})
+
+internal fun keepLatestOwnerRegistrationDraft(
+    refreshed: MockOwnerSnapshot, current: MockOwnerSnapshot,
+): MockOwnerSnapshot = refreshed.copy(registrationDraft = current.registrationDraft)
+
 class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
     private val app = context.applicationContext
     private val local = LocalOwnerMockRepository(InMemoryMockOwnerStateStore())
@@ -159,6 +186,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
     private val generation = AtomicInteger(0)
     private val versionByBar = mutableMapOf<String, Int?>()
     private var sessionSubject: String? = null
+    @Volatile private var hasLoadedOwnerSnapshot = false
     private var pendingPhotoRetry: Pair<List<String>, String>? = null
     private var pendingPhotoRetryBarId: String? = null
 
@@ -185,10 +213,22 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         else -> error("알 수 없는 서버 작업 상태: $value")
     }
     @Volatile private var lastReadySnapshot = MockOwnerSnapshot()
+    // Registration is an Android-local form. A GET started earlier must not
+    // restore its stale opening date after the owner corrected and checked it.
+    private val registrationDraftLock = Any()
 
-    private fun publishSnapshot(value: MockOwnerSnapshot) {
-        lastReadySnapshot = value
-        local.replaceFromBackend(value)
+    private fun publishSnapshot(
+        value: MockOwnerSnapshot, resetSessionDraft: Boolean = false,
+    ) = synchronized(registrationDraftLock) {
+        val current = when (val now = local.state.value) {
+            is MockOwnerLoadState.Ready -> now.snapshot
+            is MockOwnerLoadState.Empty -> now.snapshot
+            else -> lastReadySnapshot
+        }
+        val effective = if (resetSessionDraft) value
+            else keepLatestOwnerRegistrationDraft(value, current)
+        lastReadySnapshot = effective
+        local.replaceFromBackend(effective)
     }
     override val state = local.state
 
@@ -301,16 +341,18 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         }
 
     private suspend fun refresh(expectedGeneration: Int? = null) {
+        val refreshStarted = SystemClock.elapsedRealtime()
         val refreshGeneration = expectedGeneration ?: generation.get()
         val token = AppAuth.gateway.currentAccessTokenOrNull()
         if(token == null) {
             pendingCoverWarning = null
             sessionSubject = null
+            hasLoadedOwnerSnapshot = false
             pendingPhotoRetry = null
             pendingPhotoRetryBarId = null
             pendingApplicationId = null
             versionByBar.clear()
-            publishSnapshot(MockOwnerSnapshot())
+            publishSnapshot(MockOwnerSnapshot(), resetSessionDraft = true)
             return
         }
         val subject = sessionKey(token)
@@ -319,20 +361,27 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
             // The singleton is shared across sign-in sessions. Never retain another
             // Owner's bars, imports, registration photos or unsent decisions.
             sessionSubject = subject
+            hasLoadedOwnerSnapshot = false
             pendingPhotoRetry = null
             pendingPhotoRetryBarId = null
             pendingApplicationId = null
             versionByBar.clear()
-            publishSnapshot(MockOwnerSnapshot())
+            publishSnapshot(MockOwnerSnapshot(), resetSessionDraft = true)
         }
         val old = snapshot()
-        val bars = remote.getOwnedBars().map { bar ->
+        // Independent account reads must overlap on a high-latency network.
+        val (ownedBars, applications) = coroutineScope {
+            val barsRequest = async { remote.getOwnedBars() }
+            val applicationRequest = async { remote.getMyApplications() }
+            barsRequest.await() to applicationRequest.await()
+        }
+        val accountReadsDone = SystemClock.elapsedRealtime()
+        val bars = ownedBars.map { bar ->
             // Existing unconfigured bars follow the Android decision: persist 30 ml.
             if(bar.defaultPourMl == null) runCatching {
                 remote.updateBar(bar.barId, mapOf("defaultPourMl" to 30))
             }.getOrDefault(bar) else bar
         }
-        val applications = remote.getMyApplications()
         // A freshly approved application now has barId, but its selected cover
         // was not accepted by POST /api/owner-applications. Upload to the first
         // available photo slot using the existing bar photo API, once.
@@ -390,12 +439,22 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                     pendingCoverStore.read(subject, application.applicationId) != null
             }.mapTo(mutableSetOf()) { it.applicationId }
         }
-        val importHistory = barsWithCovers.associate { bar ->
-            bar.barId to remote.getMenuImports(bar.barId).items
+        // Import history and published menus are separate read-only endpoints.
+        // Start both together instead of paying two round trips per bar.
+        val (importHistory, menus) = coroutineScope {
+            val historyRequest = async {
+                barsWithCovers.associate { bar ->
+                    bar.barId to remote.getMenuImports(bar.barId).items
+                }
+            }
+            val menuRequest = async {
+                barsWithCovers.associate { bar ->
+                    bar.barId to remote.getOwnedMenu(bar.barId)
+                }
+            }
+            historyRequest.await() to menuRequest.await()
         }
-        val menus = barsWithCovers.associate { bar ->
-            bar.barId to remote.getOwnedMenu(bar.barId)
-        }
+        val detailsReadDone = SystemClock.elapsedRealtime()
         // Do not let an older in-flight Owner entry request publish after a newer one.
         if (refreshGeneration != generation.get()) return
         versionByBar.clear()
@@ -473,15 +532,32 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
             selectedBarId = selected,
             imports = importedJobs,
         ))
+        hasLoadedOwnerSnapshot = true
+        if (BuildConfig.DEBUG) Log.d("BottleMapPerf",
+            "owner_refresh_ms=${SystemClock.elapsedRealtime() - refreshStarted} " +
+                "account_get_ms=${accountReadsDone - refreshStarted} " +
+                "menu_history_ms=${detailsReadDone - accountReadsDone}")
     }
 
     override fun retryLoad() {
-        lastReadySnapshot = snapshot()
+        val cached = snapshot()
+        lastReadySnapshot = cached
         val requested = generation.incrementAndGet()
+        // Credentials can change while this singleton lives (including SDK 401
+        // logout). Hide previous-owner data synchronously, BEFORE an async
+        // token lookup. After verifying the SAME subject, cached data may be
+        // restored immediately while the slower full refresh runs.
         local.serverLoading()
         scope.launch {
             try {
-                if(requested == generation.get()) refresh(requested)
+                val verifiedSubject = AppAuth.gateway.currentAccessTokenOrNull()
+                    ?.let(::sessionKey)
+                if (requested != generation.get()) return@launch
+                if (canRestoreVisibleOwnerCache(
+                        hasLoadedOwnerSnapshot, sessionSubject, verifiedSubject)) {
+                    local.replaceFromBackend(cached)
+                }
+                refresh(requested)
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (error: Exception) {
@@ -507,6 +583,8 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
     private fun write(op: suspend () -> Unit) {
         scope.launch {
             writeMutex.withLock {
+                // An earlier detached cancellation refresh must not overwrite this write.
+                generation.incrementAndGet()
                 try {
                     op()
                 } catch (cancelled: CancellationException) {
@@ -673,6 +751,8 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         item: MockBarMenuItem, newProduct: MockCatalogProduct?, newBrand: MockBrand?,
     ) {
         writeMutex.withLock {
+            // Invalidate any older in-flight Owner refresh before applying this mutation.
+            generation.incrementAndGet()
             try {
                 sendManualItemToServer(item, newProduct, newBrand, snapshot())
             } catch(cancelled: CancellationException) {
@@ -697,6 +777,8 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
 
     private suspend fun confirmedWrite(operation: suspend () -> Unit) {
         writeMutex.withLock {
+            // Every new mutation supersedes the detached GET after import cancellation.
+            generation.incrementAndGet()
             try {
                 operation()
             } catch(cancelled: CancellationException) {
@@ -730,8 +812,42 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         remote.confirmMenu(barId, versionByBar[barId])
     }
 
-    suspend fun cancelPhotoImportLive(importId: String) = confirmedWrite {
-        remote.cancelMenuImport(importId)
+    suspend fun cancelPhotoImportLive(importId: String) {
+        // The POST is authoritative. Never show success or delete local
+        // photo copies until the server actually acknowledges cancellation.
+        val queuedAt = SystemClock.elapsedRealtime()
+        writeMutex.withLock {
+            if (BuildConfig.DEBUG) Log.d("BottleMapPerf",
+                "photo_cancel_mutex_wait_ms=${SystemClock.elapsedRealtime() - queuedAt}")
+            val cancelStarted = SystemClock.elapsedRealtime()
+            val confirmed = remote.cancelMenuImport(importId)
+            if (BuildConfig.DEBUG) Log.d("BottleMapPerf",
+                "photo_cancel_http_ms=${SystemClock.elapsedRealtime() - cancelStarted}")
+            check(confirmed.menuImportId == importId && confirmed.status == "canceled") {
+                "메뉴판 작업 취소 결과를 확인하지 못했어요."
+            }
+            // Invalidate any older full Owner GET before updating local state.
+            val requested = generation.incrementAndGet()
+            val previous = when (val current = state.value) {
+                is MockOwnerLoadState.Ready -> current.snapshot
+                is MockOwnerLoadState.Empty -> current.snapshot
+                else -> lastReadySnapshot
+            }
+            publishSnapshot(ownerSnapshotAfterConfirmedCancel(previous, importId))
+            // Full refresh is best effort and must not hold the confirm sheet
+            // open after the server has already canceled the import.
+            scope.launch {
+                try {
+                    refresh(requested)
+                    lastRefreshWarning = null
+                } catch (cancelled: CancellationException) {
+                    throw cancelled
+                } catch (error: Exception) {
+                    lastRefreshWarning =
+                        "취소는 완료됐지만 목록을 새로고침하지 못했어요. 다시 불러와 주세요."
+                }
+            }
+        }
     }
 
     override fun setSoldOut(barMenuItemId: String, value: Boolean) {
@@ -1205,7 +1321,12 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
     }
 
     override fun saveRegistrationDraft(draft: MockRegistrationDraft?) =
-        local.saveRegistrationDraft(draft)
+        synchronized(registrationDraftLock) {
+            local.saveRegistrationDraft(draft)
+            // Keep the fallback snapshot equally current while Owner refresh
+            // is in flight; preserve the form even when refresh finishes last.
+            lastReadySnapshot = lastReadySnapshot.copy(registrationDraft = draft)
+        }
     override fun seedExistingCandidateForFixture(bar: MockBar) =
         error("매장 검색은 서버 검색 API를 사용해 주세요.")
     override fun dismissRejectedForFixture(applicationId: String) =

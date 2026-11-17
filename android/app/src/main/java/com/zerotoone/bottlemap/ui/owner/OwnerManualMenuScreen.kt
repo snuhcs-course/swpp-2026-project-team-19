@@ -25,6 +25,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -164,6 +167,13 @@ private val htmlCatalog = listOf(
         ageYears = 16)
 )
 private val htmlBrands = listOf(MockBrand("mock-brand-lagavulin", "라가불린"))
+
+/** User-facing failure notices never leak Retrofit/OkHttp's English message. */
+internal fun photoCancelFailureNotice(error: Throwable): String =
+    if (error is com.zerotoone.bottlemap.network.BottleMapApiException &&
+        error.code == "NETWORK_ERROR")
+        "작업 취소에 실패했어요. 인터넷 연결을 확인해 주세요."
+    else "작업 취소에 실패했어요. 메뉴 등록 상태를 확인해 주세요."
 
 @Composable
 internal fun OwnerManualMenuScreen(
@@ -541,11 +551,21 @@ internal fun OwnerManualMenuScreen(
                             cancelPhotoConfirm = false
                             error = null
                             screen = "list"
-                            photoCopies.forEach(photoStore::delete)
+                            // File cleanup is independent of server confirmation and
+                            // must not block the main thread or screen transition.
+                            withContext(NonCancellable + Dispatchers.IO) {
+                                photoCopies.forEach(photoStore::delete)
+                            }
                         } catch (cancelled: CancellationException) {
                             throw cancelled
                         } catch (e: Exception) {
-                            error = e.message ?: "사진 등록 작업을 취소하지 못했어요."
+                            // A failed or lost response is NOT confirmed cancellation.
+                            // Leave the active job and photos untouched; never print
+                            // raw English retrofit/OkHttp messages in the UI.
+                            cancelPhotoConfirm = false
+                            screen = "list"
+                            error = null
+                            onNotice(photoCancelFailureNotice(e))
                         } finally { saving = false }
                     }
                 }

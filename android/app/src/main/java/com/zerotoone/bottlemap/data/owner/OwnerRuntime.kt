@@ -11,14 +11,24 @@ import android.content.Context
  */
 object OwnerRuntime {
     @Volatile private var instance: OwnerMockRepository? = null
+    private var boundUserId: String? = null
 
-    fun repository(context: Context): OwnerMockRepository = instance ?: synchronized(this) {
+    /** Bind the Owner adapter to the profile already verified by /api/me.
+     * Do not reuse an adapter carrying a different account's cached bars. */
+    fun repository(context: Context, userId: String): OwnerMockRepository = synchronized(this) {
+        require(userId.isNotBlank()) { "업주 계정을 확인해 주세요." }
+        if (boundUserId != userId) {
+            instance = null
+            ReviewSourceBitmapCache.clearForAccountChange()
+            boundUserId = userId
+        }
         instance ?: LiveOwnerScreenRepository(context.applicationContext).also { instance = it }
     }
 
     /** Never reuse cached owner bars or imports after an account change. */
     fun invalidateForAccountChange() = synchronized(this) {
         instance = null
+        boundUserId = null
         ReviewSourceBitmapCache.clearForAccountChange()
     }
 }

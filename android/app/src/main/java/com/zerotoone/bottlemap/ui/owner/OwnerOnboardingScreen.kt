@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import com.zerotoone.bottlemap.data.owner.*
 import com.zerotoone.bottlemap.network.BottleMapApiException
 import com.zerotoone.bottlemap.ui.common.*
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -60,6 +61,18 @@ private fun regStage(page: RegPage): Int = when(page) {
     RegPage.CONTACT, RegPage.REVIEW -> 4
     else -> 0
 }
+/** Verification belongs to the exact inputs sent to the live business check. */
+internal fun ownerBusinessVerificationKey(draft: MockRegistrationDraft): String =
+    listOf(
+        draft.businessNumberDigits.filter(Char::isDigit),
+        draft.representativeName.trim(),
+        draft.openingDateIso.trim().replace(".", "-"),
+    ).joinToString("|")
+
+internal fun ownerBusinessVerificationIsCurrent(
+    verifiedKey: String?, draft: MockRegistrationDraft,
+): Boolean = verifiedKey != null && verifiedKey == ownerBusinessVerificationKey(draft)
+
 private fun bnFormat(s:String):String {
     val n=ownerBusinessDigits(s)
     return when {
@@ -110,6 +123,7 @@ fun OwnerOnboardingScreen(
     var history by rememberSaveable { mutableStateOf(listOf<String>()) }
     var inputMethod by rememberSaveable { mutableStateOf("manual") }
     var verify by rememberSaveable { mutableStateOf(VerifyFixture.MATCHED) }
+    var verifiedBusinessKey by rememberSaveable { mutableStateOf<String?>(null) }
     var showCertificateSheet by remember { mutableStateOf(false) }
     var certificateCapturePath by rememberSaveable { mutableStateOf<String?>(null) }
     var showMenuPhotoSource by remember { mutableStateOf(false) }
@@ -132,7 +146,16 @@ fun OwnerOnboardingScreen(
         is MockOwnerLoadState.Empty -> now.snapshot.registrationDraft
         else -> null
     }
-    fun save(value:MockRegistrationDraft){ viewModel.saveRegistrationDraft(value);error=null }
+    fun save(value:MockRegistrationDraft){
+        if(ownerBusinessVerificationKey(value) !=
+            ownerBusinessVerificationKey(latestDraft() ?: draft)) {
+            // Any edited BN/name/opening date invalidates the previous check.
+            verifiedBusinessKey = null
+            verify = VerifyFixture.UNAVAILABLE
+        }
+        viewModel.saveRegistrationDraft(value)
+        error=null
+    }
     fun checkpoint(target:RegPage){
         if(!registrationCheckpointable(target.name))return
         val current=latestDraft() ?: if(target==RegPage.METHOD) MockRegistrationDraft() else return
@@ -166,6 +189,17 @@ fun OwnerOnboardingScreen(
     }
     fun forward(target:RegPage) {
         if(editingReview) { editingReview=false;go(RegPage.REVIEW) } else go(target)
+    }
+    fun continueAfterBusinessCheck() {
+        // Re-verification is a fresh forward transition. Do not append an
+        // old failed VERIFIED/BIZCHECK/BACK cycle to the navigation stack.
+        editingReview = false
+        val next = RegPage.BARNAME
+        val kind = (latestDraft() ?: draft).kind
+        checkpoint(next)
+        history = historyFor(next.name, kind)
+        screen = next
+        error = null
     }
     fun edit(target:RegPage){ editingReview=true;go(target) }
     BackHandler(enabled=screen!=RegPage.HOME && screen!=RegPage.DONE) { back() }
@@ -269,6 +303,10 @@ fun OwnerOnboardingScreen(
                         proposedBarName="몰트 앤 무드"))
                 }
                 go(RegPage.BIZCHECK)
+            } catch(cancelled: CancellationException) {
+                // Leaving this page cancels its LaunchedEffect normally.
+                // Cancellation is never a user-facing NTS or OCR error.
+                throw cancelled
             } catch(e: Exception) {
                 go(RegPage.BIZCHECK)
                 error=e.message ?: "사업자등록증을 읽지 못했어요. 직접 입력해 주세요."
@@ -324,7 +362,10 @@ fun OwnerOnboardingScreen(
             delay(300)
             runCatching {
                 viewModel.searchExistingBarCandidatesLive(draft.proposedBarName)
-            }.onFailure { error=it.message ?: "기존 매장을 검색하지 못했어요." }
+            }.onFailure {
+                if(it is CancellationException) throw it
+                error=it.message ?: "기존 매장을 검색하지 못했어요."
+            }
         }
     }
     val exactMatches=candidates.filter{
@@ -337,6 +378,27 @@ fun OwnerOnboardingScreen(
         draft.proposedBarName.isNotBlank() &&
             it.name.trim().equals(draft.proposedBarName.trim(),ignoreCase=true)
     }
+    // StateFlow collection can trail a synchronous local draft edit for a
+    // composition. Use the repository's *current* fields for verification
+    // validity, never a captured stale Compose copy from before correction.
+    val verificationCurrent = !viewModel.usesProductionOwnerApi() ||
+        ownerBusinessVerificationIsCurrent(
+            verifiedBusinessKey, latestDraft() ?: draft)
+    val displayedVerification = if(verificationCurrent) verify else VerifyFixture.UNAVAILABLE
+    // A stale matched result must never become another result screen when
+    // going Back or restoring saved navigation state.
+    LaunchedEffect(screen, verificationCurrent) {
+        if(viewModel.usesProductionOwnerApi() &&
+            screen in listOf(RegPage.VERIFIED, RegPage.REVIEW) &&
+            !verificationCurrent) {
+            // No unverified edits may reach submission, even after process
+            // recreation or navigating backward through prior result pages.
+            screen = RegPage.BIZCHECK
+            history = history.filterNot {
+                it == RegPage.VERIFIED.name || it == RegPage.REVIEW.name
+            }.dropLastWhile { it == RegPage.BIZCHECK.name }
+        }
+    }
     val validContact=draft.contactPhone.isNotBlank()&&validOwnerPhone(draft.contactPhone)
     val businessPrecheck=ownerRegistrationPrecheckError(
         draft.businessNumberDigits, draft.representativeName, draft.openingDateIso)
@@ -347,7 +409,7 @@ fun OwnerOnboardingScreen(
         RegPage.BARNAME,RegPage.BARPHOTO,RegPage.ADDRESS,RegPage.BARPHONE,
         RegPage.MENUS,RegPage.CONTACT->"다음"
         RegPage.BIZCHECK->"확인하기"
-        RegPage.VERIFIED->when(verify) {
+        RegPage.VERIFIED->when(displayedVerification) {
             VerifyFixture.FAILED->"다시 확인하기"
             VerifyFixture.UNAVAILABLE->"계속하기"
             VerifyFixture.LIMITED->"돌아가기"
@@ -372,7 +434,7 @@ fun OwnerOnboardingScreen(
         RegPage.MENUS->draft.initialMenuPhotos.isNotEmpty()
         RegPage.CONTACT->validContact
         RegPage.REVIEW->validContact&&draft.initialMenuPhotos.isNotEmpty()&&
-            businessPrecheck==null
+            businessPrecheck==null&&verificationCurrent
         else->true
     }
     fun primaryAction(){
@@ -384,11 +446,22 @@ fun OwnerOnboardingScreen(
             RegPage.BIZCHECK->if(viewModel.usesProductionOwnerApi()) {
                 if(!busy) {
                     busy=true
+                    val requested = latestDraft() ?: draft
+                    val requestKey = ownerBusinessVerificationKey(requested)
+                    verifiedBusinessKey = null
                     submitScope.launch {
                         try {
-                            verify=when(viewModel.verifyBusinessBeforeApplicationLive(
-                                draft.businessNumberDigits,draft.representativeName,
-                                draft.openingDateIso)) {
+                            val observed = viewModel.verifyBusinessBeforeApplicationLive(
+                                requested.businessNumberDigits,requested.representativeName,
+                                requested.openingDateIso)
+                            if(ownerBusinessVerificationKey(latestDraft() ?: requested) != requestKey) {
+                                // An asynchronous response is not valid for changed inputs.
+                                verify = VerifyFixture.UNAVAILABLE
+                                go(RegPage.BIZCHECK)
+                                return@launch
+                            }
+                            verifiedBusinessKey = requestKey
+                            verify=when(observed) {
                                 "matched" -> VerifyFixture.MATCHED
                                 "not_matched" -> VerifyFixture.FAILED
                                 else -> VerifyFixture.UNAVAILABLE
@@ -398,28 +471,48 @@ fun OwnerOnboardingScreen(
                             when {
                                 e.httpStatus==404 && e.code=="HTTP_404" -> {
                                     // The existing POST still performs NTS verification.
+                                    verifiedBusinessKey = requestKey
                                     verify=VerifyFixture.UNAVAILABLE
                                     go(RegPage.VERIFIED)
                                 }
                                 e.code=="RATE_LIMITED" -> {
+                                    verifiedBusinessKey = requestKey
                                     verify=VerifyFixture.LIMITED
                                     go(RegPage.VERIFIED)
                                 }
                                 e.code=="BUSINESS_VERIFICATION_UNAVAILABLE" -> {
+                                    verifiedBusinessKey = requestKey
                                     verify=VerifyFixture.UNAVAILABLE
                                     go(RegPage.VERIFIED)
                                 }
                                 else -> error=e.message ?: "사업자 정보를 확인하지 못했어요."
                             }
+                        } catch(cancelled: CancellationException) {
+                            throw cancelled
                         } catch(e: Exception) {
                             error=e.message ?: "사업자 정보를 확인하지 못했어요."
                         } finally { busy=false }
                     }
                 }
             } else go(RegPage.VERIFYING)
-            RegPage.VERIFIED->when(verify){
-                VerifyFixture.MATCHED,VerifyFixture.UNAVAILABLE->forward(RegPage.BARNAME)
-                VerifyFixture.FAILED->go(RegPage.BIZCHECK)
+            RegPage.VERIFIED->if(viewModel.usesProductionOwnerApi() &&
+                !ownerBusinessVerificationIsCurrent(
+                    verifiedBusinessKey, latestDraft() ?: draft)) {
+                // Fail closed only for genuinely edited business fields, not
+                // a stale recomposition or old saved navigation history.
+                go(RegPage.BIZCHECK)
+            } else when(verify){
+                VerifyFixture.MATCHED,VerifyFixture.UNAVAILABLE->{
+                    continueAfterBusinessCheck()
+                }
+                VerifyFixture.FAILED->{
+                    go(RegPage.BIZCHECK)
+                    // A failed result must not remain the previous Back
+                    // destination after an owner corrects the opening date.
+                    history=history.dropLastWhile {
+                        it==RegPage.VERIFIED.name || it==RegPage.BIZCHECK.name
+                    }
+                }
                 VerifyFixture.LIMITED->{history=emptyList();onBack()}
             }
             RegPage.BARNAME->forward(RegPage.BARPHOTO)
@@ -438,12 +531,19 @@ fun OwnerOnboardingScreen(
                             history=emptyList()
                             screen=RegPage.DONE
                             error=null
+                        } catch(cancelled: CancellationException) {
+                            throw cancelled
                         } catch(e: Exception) {
                             val code=(e as? BottleMapApiException)?.code
                             when(code) {
                                 "BUSINESS_VERIFICATION_FAILED" -> {
-                                    go(RegPage.BIZCHECK)
-                                    error="국세청 정보와 일치하지 않아요. 사업자번호·대표자명·개업일을 수정해 주세요."
+                                    // The server rejected exactly the three submitted
+                                    // fields: show the pre-existing mismatch result
+                                    // (not a new error screen or an inline workaround).
+                                    verifiedBusinessKey =
+                                        ownerBusinessVerificationKey(latestDraft() ?: draft)
+                                    verify = VerifyFixture.FAILED
+                                    go(RegPage.VERIFIED)
                                 }
                                 "INVALID_BUSINESS_NUMBER","DATE_IN_FUTURE" -> {
                                     go(RegPage.BIZCHECK)
@@ -477,6 +577,8 @@ fun OwnerOnboardingScreen(
                             viewModel.cancelOwnerApplicationLive(id)
                             cancelId=null
                             error=null
+                        } catch(cancelled: CancellationException) {
+                            throw cancelled
                         } catch(e: Exception) {
                             error=e.message ?: "신청을 취소하지 못했어요."
                         } finally {busy=false}
@@ -629,7 +731,8 @@ fun OwnerOnboardingScreen(
                         Spacer(Modifier.height(0.dp))
                         RegistrationInput(bnFormat(draft.businessNumberDigits),{ entered ->
                             save(draft.copy(businessNumberDigits=entered.filter(Char::isDigit).take(10)))
-                        },"000-00-00000",tag="registration-business-number",highlight=true)
+                        },"000-00-00000",keyboard=KeyboardType.Number,
+                            tag="registration-business-number",highlight=true)
                         Text("숫자 10자리. 하이픈은 자동으로 들어가요.",
                             fontSize=12.sp,color=RegistrationV4.secondary)
                         if(draft.businessNumberDigits.length==10 &&
@@ -657,7 +760,8 @@ fun OwnerOnboardingScreen(
                                 else -> digits.take(4)+"-"+digits.slice(4..5)+"-"+digits.drop(6)
                             }
                             save(draft.copy(openingDateIso=formatted))
-                        },"YYYY.MM.DD",tag="registration-opening-date",highlight=true)
+                        },"YYYY.MM.DD",keyboard=KeyboardType.Number,
+                            tag="registration-opening-date",highlight=true)
                         if(draft.openingDateIso.length==10 && !validOpeningDate(draft.openingDateIso))
                             Text("날짜를 다시 확인해 주세요. 오늘 이후 날짜는 넣을 수 없어요.",
                                 fontSize=12.sp,color=RegistrationV4.error)
@@ -705,7 +809,7 @@ fun OwnerOnboardingScreen(
                     RegPage.VERIFYING -> RegistrationCenterContent(
                         "사업자 정보를\n확인하고 있어요","국세청 정보와 비교하고 있어요.",loading=true)
                     RegPage.VERIFIED -> {
-                        when(verify){
+                        when(displayedVerification){
                             VerifyFixture.MATCHED->RegistrationCenterContent(
                                 "사업자 정보가\n확인됐어요","이제 매장 정보를 알려주세요.")
                             VerifyFixture.FAILED->RegistrationVerifyException(OwnerVerifyOutcome.MISMATCH)
@@ -984,28 +1088,27 @@ fun OwnerOnboardingScreen(
                     }
                 }
             }
-            error?.let{Text(it,color=MaterialTheme.colorScheme.error)}
+            // For application submission, the exact existing message moves
+            // to the persistent CTA region below; other screens stay inline.
+            if(screen != RegPage.REVIEW) {
+                error?.let{Text(it,color=MaterialTheme.colorScheme.error)}
+            }
         }
         if(cta!=null&&state !is MockOwnerLoadState.Error) {
-            Box(Modifier.fillMaxWidth()
+            Column(Modifier.fillMaxWidth()
                 .then(if(screen==RegPage.BN||screen==RegPage.DATE)Modifier
                     else Modifier.navigationBarsPadding())
                 .padding(start=20.dp,end=20.dp,top=12.dp,
-                    bottom=if(screen==RegPage.BN||screen==RegPage.DATE)8.dp else 24.dp)) {
+                    bottom=if(screen==RegPage.BN||screen==RegPage.DATE)8.dp else 24.dp),
+                verticalArrangement=Arrangement.spacedBy(8.dp)) {
+                if(screen==RegPage.REVIEW) {
+                    error?.let {
+                        Text(it,color=MaterialTheme.colorScheme.error,fontSize=13.sp,
+                            modifier=Modifier.testTag("registration-submit-error"))
+                    }
+                }
                 RegistrationButton(cta,enabled=enabled,onClick=::primaryAction)
             }
-        }
-        if(screen==RegPage.BN || screen==RegPage.DATE) {
-            RegistrationDigitsKeypad(onDigit={ digit ->
-                if(screen==RegPage.BN)save(draft.copy(
-                    businessNumberDigits=(draft.businessNumberDigits+digit).take(10)))
-                else save(draft.copy(openingDateIso=dateInput(draft.openingDateIso+digit)))
-            },onDelete={
-                if(screen==RegPage.BN)save(draft.copy(
-                    businessNumberDigits=draft.businessNumberDigits.dropLast(1)))
-                else save(draft.copy(openingDateIso=dateInput(
-                    draft.openingDateIso.filter(Char::isDigit).dropLast(1))))
-            })
         }
     }
 }

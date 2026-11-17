@@ -5,6 +5,7 @@ import android.util.Base64
 import com.zerotoone.bottlemap.network.ReviewDraftDto
 import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewState
 import com.zerotoone.bottlemap.ui.owner.review.ReviewItem
+import com.zerotoone.bottlemap.ui.owner.review.ReviewOption
 import java.io.File
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -63,6 +64,218 @@ class PendingReviewDraftStoreTest {
         assertNotNull(recreated.read("import-1"))
         recreated.clear("import-1")
         assertNull(recreated.read("import-1"))
+    }
+
+
+    @Test fun matchingWorkingDraftCanAutoResumeButCannotReplaceNewerCheckpoint() {
+        fun content(label: String) = ServerReviewDraftCodec.encode(
+            PhotoReviewState(items = listOf(ReviewItem(id = "ocr-1", name = label))))
+        val initial = content("previously saved")
+        val current = content("latest owner edit")
+        val newer = content("another unsent device edit")
+        val server = ReviewDraftDto(
+            draftVersion = 5, reviewVersion = 7,
+            savedAt = "2026-11-17T00:00:00Z", content = initial)
+        val working = PendingReviewDraftStore.Envelope(
+            reviewVersion = 7, expectedDraftVersion = 5,
+            itemIds = listOf("ocr-1"), content = current)
+        val outcome = DraftRecoveryPolicy.decide(server, working, null, 7)
+        assertEquals(DraftRecoveryPolicy.Outcome.RESTORE, outcome)
+        assertTrue(canResumeLocalReview(
+            outcome, true, true, true, working, null, server))
+        assertTrue(canResumeLocalReview(
+            outcome, true, true, true, working,
+            working.copy(content = initial), server))
+        assertFalse(canResumeLocalReview(
+            outcome, true, true, true, working,
+            working.copy(content = newer), server))
+        assertFalse(canResumeLocalReview(
+            outcome, true, false, true, working, null, server))
+        assertFalse(canResumeLocalReview(
+            DraftRecoveryPolicy.Outcome.CONFLICT, true, true, true,
+            working, null, server))
+
+        val earlierAck = working.copy(
+            expectedDraftVersion = 4, content = initial)
+        val rebasing = working.copy(expectedDraftVersion = 4)
+        assertEquals(DraftRecoveryPolicy.Outcome.REBASE,
+            DraftRecoveryPolicy.decide(server, rebasing, earlierAck, 7))
+        assertTrue(canResumeLocalReview(
+            DraftRecoveryPolicy.Outcome.REBASE, true, true,
+            true, rebasing, null, server))
+        assertFalse(canResumeLocalReview(
+            DraftRecoveryPolicy.Outcome.REBASE, false, true,
+            true, rebasing, null, server))
+    }
+
+    @Test fun oldPendingAttemptCannotBlockAcknowledgedNewerCheckpoint() {
+        fun content(name: String) = ServerReviewDraftCodec.encode(
+            PhotoReviewState(items = listOf(ReviewItem(id = "ocr-1", name = name))))
+        val pending = PendingReviewDraftStore.Envelope(
+            reviewVersion = 7, expectedDraftVersion = 3,
+            itemIds = listOf("ocr-1"), content = content("earlier price"))
+        val newest = pending.copy(expectedDraftVersion = 4,
+            content = content("latest price and volume"))
+        val remote = ReviewDraftDto(
+            draftVersion = 5, reviewVersion = 7,
+            savedAt = "2026-11-17T00:00:00Z", content = newest.content)
+        assertTrue(supersededPendingReview(pending, newest, remote))
+        assertFalse(supersededPendingReview(pending, newest,
+            remote.copy(content = content("someone else's change"))))
+        assertFalse(supersededPendingReview(
+            pending.copy(expectedDraftVersion = 5), newest, remote))
+        assertFalse(supersededPendingReview(pending, null, remote))
+    }
+
+    @Test fun workingCopyAckAfterPendingWasClearedDoesNotCreateFalseConflict() {
+        fun content(name: String) = ServerReviewDraftCodec.encode(
+            PhotoReviewState(items = listOf(ReviewItem(id = "ocr-1", name = name))))
+        val value = content("latest owner edit")
+        val remote = ReviewDraftDto(8, 3, "2026-11-17T00:00:00Z", value)
+        val working = PendingReviewDraftStore.Envelope(
+            reviewVersion = 3, expectedDraftVersion = 7,
+            itemIds = listOf("ocr-1"), content = value)
+        assertEquals(DraftRecoveryPolicy.Outcome.ACKNOWLEDGED,
+            DraftRecoveryPolicy.decide(remote, working, null, 3))
+        assertTrue(acknowledgedWorkingReview(remote, working, null))
+        assertFalse(acknowledgedWorkingReview(
+            remote, working, working.copy(content = content("newer unsent edit"))))
+        assertFalse(acknowledgedWorkingReview(
+            remote.copy(content = content("foreign edit")), working, null))
+        assertFalse(acknowledgedWorkingReview(
+            remote.copy(reviewVersion = 4), working, null))
+    }
+
+    @Test fun acknowledgedWorkingCopyRetainsOlderProtectedBackup() = runBlocking {
+        fun content(name: String) = ServerReviewDraftCodec.encode(
+            PhotoReviewState(items = listOf(ReviewItem(id = "ocr-1", name = name))),
+        )
+        val original = PendingReviewDraftStore.Envelope(
+            reviewVersion = 7, expectedDraftVersion = 3,
+            itemIds = listOf("ocr-1"), content = content("before conflict"),
+        )
+        val working = original.copy(content = content("explicitly edited copy"))
+        val originalStore = PendingReviewDraftStore(context) { jwt("working-ack") }
+        val workingStore = PendingReviewDraftStore(context, slot = "working") {
+            jwt("working-ack")
+        }
+        originalStore.write("import-ack", original)
+        workingStore.write("import-ack", working)
+        val server = ReviewDraftDto(4, 7, "2026-11-17T00:00:00Z", working.content)
+        val againOriginal = requireNotNull(originalStore.read("import-ack"))
+        val againWorking = requireNotNull(workingStore.read("import-ack"))
+        assertEquals(DraftRecoveryPolicy.Outcome.ACKNOWLEDGED,
+            DraftRecoveryPolicy.decide(server, againWorking, againOriginal, 7))
+        assertTrue(DraftSaveSafety.latestCopyAcknowledged(
+            server, againOriginal, againWorking))
+        assertFalse(DraftSaveSafety.latestCopyAcknowledged(
+            server, againOriginal, againWorking,
+            againWorking.copy(content = content("newer unsaved keystroke"))))
+        assertTrue(ServerReviewDraftCodec.sameAndroidSnapshot(
+            original.content, requireNotNull(originalStore.read("import-ack")).content))
+        assertFalse(DraftSaveSafety.latestCopyAcknowledged(
+            server.copy(content = content("third party")), againOriginal, againWorking))
+    }
+
+    @Test fun acknowledgedWorkingCopyCanBeRetiredSoNextDeviceSaveBecomesAuthoritative() = runBlocking {
+        fun content(value: String) = ServerReviewDraftCodec.encode(PhotoReviewState(
+            items = listOf(ReviewItem(id = "ocr-1", name = value))))
+        val account = jwt("acknowledged-owner")
+        val pending = PendingReviewDraftStore(context) { account }
+        val working = PendingReviewDraftStore(context, slot = "working") { account }
+        val checkpoint = PendingReviewDraftStore(context, slot = "checkpoint") { account }
+        val original = PendingReviewDraftStore.Envelope(7, 3, listOf("ocr-1"), content("original"))
+        val accepted = original.copy(content = content("confirmed on the server"))
+        pending.write("import-ack-2", original)
+        working.write("import-ack-2", accepted)
+        checkpoint.write("import-ack-2", accepted)
+        val server = ReviewDraftDto(4, 7, "2026-11-18T00:00:00Z", accepted.content)
+        assertTrue(canRetireAcknowledgedWorkingReview(server, original, accepted, accepted))
+        checkpoint.clear("import-ack-2")
+        pending.clear("import-ack-2")
+        working.clear("import-ack-2")
+        assertNull(checkpoint.read("import-ack-2"))
+        assertNull(pending.read("import-ack-2"))
+        assertNull(working.read("import-ack-2"))
+        val laterRemote = server.copy(draftVersion = 5, content = content("second device edit"))
+        assertEquals(DraftRecoveryPolicy.Outcome.NONE,
+            DraftRecoveryPolicy.decide(laterRemote, working.read("import-ack-2"), null, 7))
+    }
+
+    @Test fun newerUnsentPendingCopyMustNotBeRetiredByOlderWorkingAck() {
+        fun content(value: String) = ServerReviewDraftCodec.encode(PhotoReviewState(
+            items = listOf(ReviewItem(id = "ocr-1", name = value))))
+        val working = PendingReviewDraftStore.Envelope(7, 3, listOf("ocr-1"), content("saved"))
+        val remote = ReviewDraftDto(4, 7, "2026-11-18T00:00:00Z", working.content)
+        assertTrue(canRetireAcknowledgedWorkingReview(remote, null, working, null))
+        assertTrue(canRetireAcknowledgedWorkingReview(remote, working, working, null))
+        assertFalse(canRetireAcknowledgedWorkingReview(remote,
+            working.copy(expectedDraftVersion = 4, content = content("new unsent edit")),
+            working, null))
+        assertFalse(canRetireAcknowledgedWorkingReview(remote, null, working,
+            working.copy(content = content("new unsent checkpoint"))))
+        assertFalse(canRetireAcknowledgedWorkingReview(remote.copy(content = content("other device")),
+            null, working, null))
+    }
+
+    @Test fun selfWrittenOutdatedCasIsAcknowledgedButForeignDraftStillConflicts() {
+        fun content(name: String) = ServerReviewDraftCodec.encode(
+            PhotoReviewState(items = listOf(ReviewItem(id = "ocr-1", name = name))))
+        val written = content("our latest version")
+        val server = ReviewDraftDto(
+            draftVersion = 4, reviewVersion = 7,
+            savedAt = "2026-11-17T00:00:00Z", content = written)
+        assertTrue(DraftSaveSafety.ownCasAcknowledged(server, written, 3, 7))
+        assertFalse(DraftSaveSafety.ownCasAcknowledged(
+            server.copy(content = content("different device")), written, 3, 7))
+        assertFalse(DraftSaveSafety.ownCasAcknowledged(
+            server.copy(draftVersion = 5), written, 3, 7))
+        assertFalse(DraftSaveSafety.ownCasAcknowledged(
+            server.copy(reviewVersion = 8), written, 3, 7))
+        assertFalse(DraftSaveSafety.ownCasAcknowledged(null, written, 3, 7))
+    }
+
+    @Test fun currentBaseCheckpointTakesPriorityOverOlderWorkingCopy() {
+        fun content(name: String) = ServerReviewDraftCodec.encode(
+            PhotoReviewState(items = listOf(ReviewItem(id = "ocr-1", name = name))))
+        val server = ReviewDraftDto(5, 7, "2026-11-18T00:00:00Z", content("B accepted"))
+        val staleWorking = PendingReviewDraftStore.Envelope(
+            7, 4, listOf("ocr-1"), content("A old working"))
+        val newestCheckpoint = staleWorking.copy(expectedDraftVersion = 5,
+            content = content("A newer, unsent edit"))
+        assertEquals(newestCheckpoint, currentBaseUnsentReviewCopy(
+            server, 7, newestCheckpoint, staleWorking, staleWorking))
+        assertNull(currentBaseUnsentReviewCopy(server, 7, null, staleWorking, staleWorking))
+        assertNull(currentBaseUnsentReviewCopy(
+            server.copy(reviewVersion = 8), 7, newestCheckpoint, staleWorking, null))
+        assertNull(currentBaseUnsentReviewCopy(server, 7,
+            newestCheckpoint.copy(content = server.content), staleWorking, null))
+    }
+
+    @Test fun sequentialDeviceHandoffUsesNewerAcknowledgedServerWithoutCasBypass() {
+        fun content(name: String) = ServerReviewDraftCodec.encode(
+            PhotoReviewState(items = listOf(ReviewItem(id = "ocr-1", name = name))))
+        val stale = PendingReviewDraftStore.Envelope(
+            reviewVersion = 7, expectedDraftVersion = 3,
+            itemIds = listOf("ocr-1"), content = content("A's older local copy"))
+        val latestServer = ReviewDraftDto(4, 7, "2026-11-18T00:00:00Z",
+            content("B's accepted update"))
+        assertEquals(DraftRecoveryPolicy.Outcome.CONFLICT,
+            DraftRecoveryPolicy.decide(latestServer, stale, null, 7))
+        assertTrue(canAdoptNewerServerReview(DraftRecoveryPolicy.Outcome.CONFLICT,
+            latestServer, stale, 7, serverReadable = true))
+        // Never discard when the server has not advanced or its data cannot
+        // be restored; a pending locally edited draft may be the only copy.
+        assertFalse(canAdoptNewerServerReview(DraftRecoveryPolicy.Outcome.CONFLICT,
+            latestServer.copy(draftVersion = 3), stale, 7, serverReadable = true))
+        assertFalse(canAdoptNewerServerReview(DraftRecoveryPolicy.Outcome.CONFLICT,
+            latestServer, stale, 7, serverReadable = false))
+        assertFalse(canAdoptNewerServerReview(DraftRecoveryPolicy.Outcome.CONFLICT,
+            latestServer, stale.copy(reviewVersion = 6), 7, serverReadable = true))
+        assertFalse(canAdoptNewerServerReview(DraftRecoveryPolicy.Outcome.REBASE,
+            latestServer, stale, 7, serverReadable = true))
+        assertFalse(canAdoptNewerServerReview(DraftRecoveryPolicy.Outcome.ACKNOWLEDGED,
+            latestServer, stale, 7, serverReadable = true))
     }
 
     @Test fun recoveryPolicyRestoresOnlyMatchingReviewAndServerCas() {
@@ -171,6 +384,42 @@ class PendingReviewDraftStoreTest {
         assertNotNull(origAgain.read("import-working"))
     }
 
+    @Test fun reorderingCardsDoesNotChangeOcrIdentityButMissingOrDuplicateDoes() {
+        assertTrue(sameReviewSourceIds(
+            listOf("line-a", "line-b"), listOf("line-b", "line-a")))
+        assertFalse(sameReviewSourceIds(
+            listOf("line-a", "line-a"), listOf("line-a", "line-b")))
+        assertFalse(sameReviewSourceIds(
+            listOf("line-a"), listOf("line-a", "line-b")))
+        assertFalse(sameReviewSourceIds(
+            listOf("line-a", "line-z"), listOf("line-a", "line-b")))
+    }
+
+    @Test fun uneditedReloadDoesNotReplaceProtectedConflictDraft() = runBlocking {
+        fun snapshot(name: String) = ServerReviewDraftCodec.encode(
+            PhotoReviewState(items = listOf(ReviewItem(id = "ocr-1", name = name))))
+        val remoteDisplay = snapshot("current server version")
+        val protectedLocal = snapshot("edited on this device")
+        val store = PendingReviewDraftStore(context, slot = "working") {
+            jwt("protected-conflict")
+        }
+        val envelope = PendingReviewDraftStore.Envelope(
+            reviewVersion = 7, expectedDraftVersion = 5,
+            itemIds = listOf("ocr-1"), content = protectedLocal,
+        )
+        store.write("import-conflict-preserve", envelope)
+        assertFalse(isNewConflictReviewEdit(remoteDisplay, remoteDisplay))
+        // The Back handler must not write the displayed remote state over the
+        // protected local copy when the user made no edits after reloading.
+        if (isNewConflictReviewEdit(remoteDisplay, remoteDisplay)) {
+            store.write("import-conflict-preserve", envelope.copy(content = remoteDisplay))
+        }
+        assertTrue(ServerReviewDraftCodec.sameAndroidSnapshot(
+            protectedLocal,
+            requireNotNull(store.read("import-conflict-preserve")).content))
+        assertTrue(isNewConflictReviewEdit(protectedLocal, remoteDisplay))
+    }
+
     @Test fun manuallySplitChildIsCompatibleForBothRestoreAndExplicitOverwrite() {
         val fresh = PhotoReviewState(items = listOf(
             ReviewItem(id = "master", name = "위스키"),
@@ -184,8 +433,16 @@ class PendingReviewDraftStoreTest {
                 excluded = false),
         ))
         assertTrue(compatibleOwnerReviewDraft(split, fresh))
-        assertFalse(compatibleOwnerReviewDraft(
+        // Display/group ordering is not OCR identity. Restoring the same
+        // extracted IDs must not discard the owner's latest edits.
+        assertTrue(compatibleOwnerReviewDraft(
             split.copy(items = split.items.reversed()), fresh))
+        val changedSelection = split.copy(items = listOf(
+            split.items.first(),
+            split.items.last().copy(volumeChoices = emptyList(),
+                chosenVolumeKeys = setOf("ml:30")),
+        ))
+        assertTrue(compatibleOwnerReviewDraft(changedSelection, fresh))
         assertFalse(compatibleOwnerReviewDraft(
             split.copy(items = listOf(split.items.first(),
                 split.items.last().copy(manuallySplitGroup = false))), fresh))
@@ -295,5 +552,27 @@ class PendingReviewDraftStoreTest {
         } catch (_: IllegalStateException) {
             assertTrue(folder.listFiles()?.isEmpty() != false)
         }
+    }
+
+    /** UAT 4.4 / #190: the device file is JSON too, so an owner-added option
+     * (no extractedOptionId, no optionLabel) loses its null keys on disk. */
+    @Test fun deviceDraftWithOwnerAddedOptionRestoresAfterRecreation() = runBlocking {
+        val state = PhotoReviewState(items = listOf(ReviewItem(
+            id = "line", name = "업주가 고친 위스키", price = 15000.0, volume = 30.0,
+            primarySourceOptionId = "opt-1", primaryOptionLabel = "잔",
+            options = listOf(ReviewOption(volume = 60.0, price = 28000.0)),
+        )))
+        PendingReviewDraftStore(context) { jwt("owner-a") }.write(
+            "import-1", PendingReviewDraftStore.Envelope(
+                reviewVersion = 3, expectedDraftVersion = 4,
+                itemIds = listOf("line"), content = ServerReviewDraftCodec.encode(state),
+            ))
+        val stored = requireNotNull(
+            PendingReviewDraftStore(context) { jwt("owner-a") }.read("import-1"))
+        val restored = requireNotNull(ServerReviewDraftCodec.decode(ReviewDraftDto(
+            4, 3, "1970-01-01T00:00:00Z", stored.content,
+        ))) { "A device draft with an owner-added option must restore" }
+        assertEquals(listOf(ReviewOption(volume = 60.0, price = 28000.0)),
+            restored.items.single().options)
     }
 }

@@ -17,8 +17,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.Composable
+import android.os.SystemClock
+import android.util.Log
+import com.zerotoone.bottlemap.BuildConfig
 import androidx.compose.runtime.produceState
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -76,8 +81,15 @@ fun AccountScreen(
             value=OwnerAreaLoad.Ready(false,false)
         } else try {
             val owner=OwnerRepository()
-            val bars=owner.getOwnedBars()
-            val applications=owner.getMyApplications()
+            val startedAt = SystemClock.elapsedRealtime()
+            // Independent reads: one slow endpoint must not delay starting the other.
+            val (bars, applications) = coroutineScope {
+                val barsRequest = async { owner.getOwnedBars() }
+                val applicationsRequest = async { owner.getMyApplications() }
+                barsRequest.await() to applicationsRequest.await()
+            }
+            if (BuildConfig.DEBUG) Log.d("BottleMapPerf",
+                "account_owner_read_ms=${SystemClock.elapsedRealtime() - startedAt}")
             value=OwnerAreaLoad.Ready(
                 bars.isNotEmpty(), applications.any {
                     it.status=="pending" || it.status=="rejected"

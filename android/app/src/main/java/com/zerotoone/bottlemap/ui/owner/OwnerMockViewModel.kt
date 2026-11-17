@@ -23,7 +23,14 @@ import kotlinx.coroutines.flow.StateFlow
  * Shared mock-data ViewModel. Inject [OwnerMockRepository] in tests and later replace its
  * implementation with an adapter to only the agreed real API contract.
  */
-class OwnerMockViewModel(private val repository: OwnerMockRepository) : ViewModel() {
+class OwnerMockViewModel(
+    private val repository: OwnerMockRepository,
+    // Android Compose tests can exercise the REAL production routing without
+    // spending an NTS quota. Null in all production ViewModel factories.
+    private val businessVerificationFixture:
+        (suspend (String, String, String) -> String)? = null,
+    private val registrationSubmissionFixture: (suspend () -> Unit)? = null,
+) : ViewModel() {
     val state: StateFlow<MockOwnerLoadState> = repository.state
     fun retry() = repository.retryLoad()
     fun register(application: MockOwnerApplication) = repository.registerApplication(application)
@@ -31,16 +38,23 @@ class OwnerMockViewModel(private val repository: OwnerMockRepository) : ViewMode
     /** Production registration stays suspend so UI waits for both submission and menu-photo upload. */
     suspend fun verifyBusinessBeforeApplicationLive(
         registrationNumber: String, representativeName: String, openingDate: String,
-    ): String =
-        if(repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
+    ): String = when {
+        businessVerificationFixture != null ->
+            businessVerificationFixture.invoke(
+                registrationNumber, representativeName, openingDate)
+        repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository ->
             repository.verifyBusinessBeforeApplicationLive(
-                registrationNumber,representativeName,openingDate)
-        else "matched"
+                registrationNumber, representativeName, openingDate)
+        else -> "matched"
+    }
 
     suspend fun submitRegistrationDraftLive() {
-        if (repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
-            repository.submitRegistrationDraftLive()
-        else repository.submitRegistrationDraftForFixture()
+        when {
+            registrationSubmissionFixture != null -> registrationSubmissionFixture.invoke()
+            repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository ->
+                repository.submitRegistrationDraftLive()
+            else -> repository.submitRegistrationDraftForFixture()
+        }
     }
 
     suspend fun readBusinessCertificateLive(uri: String):
@@ -140,7 +154,8 @@ class OwnerMockViewModel(private val repository: OwnerMockRepository) : ViewMode
         else emptyList()
 
     fun usesProductionOwnerApi(): Boolean =
-        repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository
+        businessVerificationFixture != null || registrationSubmissionFixture != null ||
+            repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository
     fun pendingRepresentativePhotoWarning(): String? =
         (repository as? com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
             ?.pendingCoverWarning

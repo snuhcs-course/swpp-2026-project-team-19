@@ -526,7 +526,7 @@ private fun IssueRowFor(x: ReviewItem, issue: ReviewIssue, vm: PhotoReviewViewMo
             ReviewVolumeSelection(x, vm)
         else IssueRow(
             if (PhotoReviewRules.countOptions(x) > PhotoReviewRules.MAX_OPTIONS)
-                "검수 옵션은 최대 10개까지 게시할 수 있어요."
+                "검수 옵션은 최대 3개까지 게시할 수 있어요."
             else if (x.type == ReviewItemType.WHISKY &&
                 PhotoReviewRules.countOptions(x) > PhotoReviewRules.MAX_PICKED_VOLUMES)
                 "용량은 최대 3가지까지 설정 가능해요."

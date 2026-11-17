@@ -37,6 +37,97 @@ class BarDetailViewModelTest {
     }
 
     @Test
+    fun settledValidSearchWithNoMatchesShowsCenteredEmptyHint() {
+        val settled = BarAliasLookupState(query = "찾을수없는메뉴")
+        assertTrue(barMenuSearchHasNoResults(
+            "찾을수없는메뉴", true, false, null, settled))
+        assertFalse(barMenuSearchHasNoResults(
+            "", true, false, null, settled))
+        assertFalse(barMenuSearchHasNoResults(
+            "찾을수없는메뉴", false, false, null, settled))
+        assertFalse(barMenuSearchHasNoResults(
+            "찾을수없는메뉴", true, true, null, settled))
+        assertFalse(barMenuSearchHasNoResults(
+            "!!!", true, false, "검색할 수 있는 문자가 없어요.",
+            BarAliasLookupState(query = "!!!", validationMessage = "invalid")))
+        assertFalse(barMenuSearchHasNoResults(
+            "찾을수없는메뉴", true, false, null, null)) // debouncing
+        assertFalse(barMenuSearchHasNoResults(
+            "찾을수없는메뉴", true, false, null,
+            BarAliasLookupState(query = "찾을수없는메뉴", loading = true)))
+        assertFalse(barMenuSearchHasNoResults(
+            "찾을수없는메뉴", true, false, null,
+            BarAliasLookupState(query = "찾을수없는메뉴", failed = true)))
+        assertFalse(barMenuSearchHasNoResults(
+            "찾을수없는메뉴", true, false, null,
+            BarAliasLookupState(query = "이전검색어")))
+    }
+
+    @Test
+    fun barDetailUnsearchableQueryShowsValidationNotNetworkRetry() {
+        assertEquals("검색할 수 있는 문자가 없어요. 검색어를 다시 입력해 주세요.",
+            barAliasLocalValidation("!!!"))
+        assertEquals("검색할 수 있는 문자가 없어요. 검색어를 다시 입력해 주세요.",
+            barAliasLocalValidation(" - - "))
+        assertNull(barAliasLocalValidation(""))
+        assertNull(barAliasLocalValidation("맥캘란 12"))
+        assertNull(barAliasLocalValidation("a"))
+        assertEquals("검색어는 100자 이내로 입력해 주세요.",
+            barAliasLocalValidation("a".repeat(101)))
+        val invalidQuery = BottleMapApiException(
+            httpStatus = 422, code = "VALIDATION_FAILED", message = "Invalid query",
+            fieldErrors = listOf(com.zerotoone.bottlemap.network.FieldErrorDto(
+                "query", "NOT_SEARCHABLE", "Invalid text")))
+        assertEquals("검색할 수 있는 문자가 없어요. 검색어를 다시 입력해 주세요.",
+            barAliasServerValidation(invalidQuery))
+        assertNull(barAliasServerValidation(BottleMapApiException(
+            httpStatus = 503, code = "HTTP_503", message = "Temporary failure")))
+    }
+
+    @Test
+    fun queryScopedValidationDoesNotRemainAfterNewSearchText() {
+        val invalid = BarAliasLookupState(query = "!!!", validationMessage =
+            "검색할 수 있는 문자가 없어요. 검색어를 다시 입력해 주세요.")
+        assertEquals(invalid, queryScopedBarAlias(invalid, "!!!"))
+        assertNull(queryScopedBarAlias(invalid, "아드벡"))
+        assertNull(queryScopedBarAlias(invalid, ""))
+        val retryable = BarAliasLookupState(query = "아드벡", failed = true)
+        assertEquals(retryable, queryScopedBarAlias(retryable, "아드벡"))
+        assertNull(queryScopedBarAlias(retryable, "!!!"))
+    }
+
+    @Test
+    fun aliasFallbackTriggersOnlyForActualLocalMiss() {
+        assertTrue(barAliasLookupNeeded("ardbeg10", hasLocalMatch = false))
+        assertFalse(barAliasLookupNeeded("ardbeg10", hasLocalMatch = true))
+        // §3.10 accepts one searchable character and no artificial 2-char limit.
+        assertTrue(barAliasLookupNeeded("a", hasLocalMatch = false))
+        assertFalse(barAliasLookupNeeded("  ", hasLocalMatch = false))
+        assertFalse(barAliasLookupNeeded("!!!", hasLocalMatch = false))
+    }
+
+    @Test
+    fun strippedPunctuationNeverMatchesEveryBarMenu() {
+        assertFalse(barMenuMatchesQuery("라가불린 16", "라가불린", "---"))
+        assertFalse(barMenuMatchesQuery("라가불린 16", "라가불린", " - - "))
+        assertTrue(barMenuMatchesQuery("라가불린 16", "라가불린", ""))
+        assertTrue(barMenuMatchesQuery("라가불린 16", "라가불린", "라가-불린"))
+    }
+
+    @Test
+    fun aliasFallbackStatesDoNotLeakAcrossEditedQueries() {
+        val failed = BarAliasLookupState(query = "ardbeg10", failed = true)
+        assertEquals(failed, queryScopedBarAlias(failed, "ardbeg10"))
+        assertNull(queryScopedBarAlias(failed, "lagavulin"))
+        assertNull(queryScopedBarAlias(failed, ""))
+        val loading = BarAliasLookupState(query = "ardbeg10", loading = true)
+        assertTrue(queryScopedBarAlias(loading, "ardbeg10")!!.loading)
+        val ready = BarAliasLookupState(query = "ardbeg10", productIds = setOf("p-1"))
+        assertEquals(setOf("p-1"), queryScopedBarAlias(ready, "ardbeg10")!!.productIds)
+        assertNull(queryScopedBarAlias(ready, "ardbeg10 16"))
+    }
+
+    @Test
     fun loadsGivenBarIdAndPreservesAllPublishedEntriesAndOptions() = runTest(dispatcher) {
         val fake = FakeSource { response(it) }
         val vm = BarDetailViewModel(fake)

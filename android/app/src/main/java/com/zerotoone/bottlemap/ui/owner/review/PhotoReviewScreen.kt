@@ -201,12 +201,34 @@ fun PhotoReviewScreen(
                     CircularProgressIndicator(color = UxColor.gold)
                 }
             }
-            is PhotoReviewLoad.Error -> Column(Modifier.fillMaxSize()) {
+            is PhotoReviewLoad.Error -> Column(Modifier.fillMaxSize()
+                .testTag("review-load-error-screen")) {
                 ReviewAppBar(vm::leave)
-                Column(Modifier.fillMaxSize().padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
-                    horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(current.message, style = uxText(13f, 400, UxColor.sub), textAlign = TextAlign.Center)
-                    UxMainButton("다시 시도", vm::reload)
+                Box(Modifier.weight(1f).fillMaxWidth().padding(horizontal = 24.dp),
+                    contentAlignment = Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        Box(Modifier.size(84.dp)
+                            .background(UxColor.elevated, RoundedCornerShape(50)),
+                            contentAlignment = Alignment.Center) {
+                            Text("!", style = uxText(44f, 700, UxColor.error),
+                                modifier = Modifier.testTag("review-load-error-symbol"))
+                        }
+                        Text("검수 정보를\n불러오지 못했어요",
+                            style = uxText(25f, 700, UxColor.text, serif = true),
+                            textAlign = TextAlign.Center)
+                        Text(current.message, style = uxText(13f, 450, UxColor.sub),
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.testTag("review-load-error-message"))
+                    }
+                }
+                Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp)
+                    .padding(bottom = 24.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    UxMainButton("다시 시도", vm::reload,
+                        Modifier.fillMaxWidth().testTag("review-load-retry"))
+                    UxSecondaryButton("메뉴 관리로 돌아가기", vm::leave,
+                        Modifier.fillMaxWidth().testTag("review-load-leave"))
                 }
             }
             is PhotoReviewLoad.Ready -> {
@@ -407,31 +429,9 @@ private fun AllDoneRow(onJump: () -> Unit) {
 private fun PublishFooter(stats: ReviewStats, vm: PhotoReviewViewModel) {
     val savingPour by vm.savingDefaultPour.collectAsStateWithLifecycle()
     val draftProblem by vm.draftProblem.collectAsStateWithLifecycle()
-    val draftRetryable by vm.draftRetryable.collectAsStateWithLifecycle()
     val draftOversized by vm.draftOversized.collectAsStateWithLifecycle()
-    val draftConflictChoice by vm.draftConflictChoice.collectAsStateWithLifecycle()
-    val draftEditingLocal by vm.draftEditingLocal.collectAsStateWithLifecycle()
-    val draftResolving by vm.draftResolving.collectAsStateWithLifecycle()
-    var pendingChoice by remember { mutableStateOf<Boolean?>(null) }
-    if (pendingChoice != null) {
-        val useLocal = pendingChoice == true
-        AlertDialog(
-            onDismissRequest = { pendingChoice = null },
-            title = { Text(if (useLocal) "이 기기 초안으로 덮어쓸까요?" else "서버 초안을 사용할까요?") },
-            text = { Text(if (useLocal)
-                "다른 기기나 운영자가 서버에 저장한 수정사항이 덮어써질 수 있어요. 이 기기의 보관 초안을 사용합니다."
-                else "이 기기에만 보관된 미저장 수정사항을 삭제하고 서버의 최신 초안으로 이어서 작업합니다.") },
-            confirmButton = {
-                TextButton(onClick = {
-                    vm.resolveDraftConflict(useLocal)
-                    pendingChoice = null
-                }) { Text("선택") }
-            },
-            dismissButton = {
-                TextButton(onClick = { pendingChoice = null }) { Text("취소") }
-            },
-        )
-    }
+    // The latest recoverable edit is loaded on entry; no manual draft
+    // selection, overwrite, discard, or "latest review" UI controls.
     val canSubmit = stats.canPublish && !savingPour && draftProblem == null
     Column(
         Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(bottom = 43.dp)
@@ -463,45 +463,9 @@ private fun PublishFooter(stats: ReviewStats, vm: PhotoReviewViewModel) {
             draftProblem != null -> Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(draftProblem.orEmpty(), style = uxText(12f, 450, UxColor.error),
                     modifier = Modifier.testTag("review-draft-error"))
-                Text(when {
-                    draftEditingLocal ->
-                        "현재 화면은 이 기기에만 보관한 초안이에요. 수정해도 서버로 자동 전송되지 않아요."
-                    draftConflictChoice ->
-                        "현재 화면은 새로 불러온 서버 초안이에요. 기기 초안과 비교한 뒤 명시적으로 선택해 주세요."
-                    draftOversized ->
-                        "이 기기에는 보관했어요. 검수 입력을 줄여 서버 256KB 제한 이내로 만들면 다시 저장할 수 있어요."
-                    draftRetryable ->
-                        "현재 변경 내용은 이 기기에 보관했어요. 서버 저장을 재시도할 수 있어요."
-                    else -> "최신 서버 검수를 불러오면 이 화면의 미저장 수정은 사라질 수 있어요."
-                }, style = uxText(11f, 400, UxColor.muted))
-                if (draftRetryable) {
-                    UxSecondaryButton("서버 저장 다시 시도", vm::retryDraftSave,
-                        Modifier.testTag("review-draft-retry"))
-                }
-                if (draftConflictChoice) {
-                    Text("선택 전까지 두 초안을 자동으로 합치거나 덮어쓰지 않아요.",
-                        style = uxText(11f, 400, UxColor.muted))
-                    if (!draftResolving) {
-                        if (!draftEditingLocal) {
-                            UxSecondaryButton("이 기기 초안 열어 수정하기",
-                                vm::editConflictedLocalDraft,
-                                Modifier.testTag("review-draft-edit-local"))
-                        }
-                        UxSecondaryButton("서버 초안 사용 (기기 수정 삭제)",
-                            { pendingChoice = false },
-                            Modifier.testTag("review-draft-use-server"))
-                        if (!draftOversized) {
-                            UxSecondaryButton("이 기기 초안으로 서버 덮어쓰기",
-                                { pendingChoice = true },
-                                Modifier.testTag("review-draft-use-local"))
-                        } else {
-                            Text("서버에 반영하려면 이 기기 초안을 256KB 이하로 줄여 주세요.",
-                                style = uxText(11f, 400, UxColor.muted))
-                        }
-                    }
-                }
-                UxSecondaryButton("최신 검수 불러오기", vm::reload,
-                    Modifier.testTag("review-draft-reload"))
+                if (draftOversized) Text(
+                    "검수 입력을 줄이면 서버 저장을 다시 시도할 수 있어요.",
+                    style = uxText(11f, 400, UxColor.muted))
             }
             savingPour -> Text("기본 잔 용량을 저장하는 중이에요.", style = uxText(12f, 450, UxColor.muted))
             stats.noDefault -> Text("매장 기본 잔 용량을 입력해주세요.", style = uxText(12f, 400, UxColor.error, lineHeight = 1.65f),

@@ -7,6 +7,15 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 
 class OwnerManualCatalogMatchTest {
+    @Test fun networkCancelFailureUsesKoreanTopToastTextNotRawEnglish() {
+        val offline = com.zerotoone.bottlemap.network.BottleMapApiException(
+            code = "NETWORK_ERROR", message = "Cannot reach the BottleMap backend.")
+        assertEquals("작업 취소에 실패했어요. 인터넷 연결을 확인해 주세요.",
+            photoCancelFailureNotice(offline))
+        assertEquals("작업 취소에 실패했어요. 메뉴 등록 상태를 확인해 주세요.",
+            photoCancelFailureNotice(IllegalStateException("HTTP 409 raw internal error")))
+    }
+
     private val brand=MockBrand("brand-gf","Glenfiddich","글렌피딕")
     private val twelve=MockCatalogProduct(
         productId="product-12",brandId="brand-gf",

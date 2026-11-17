@@ -571,13 +571,24 @@ class LivePhotoReviewMappingTest {
             .copy(extractedKind="other",candidates=emptyList(),newProductDraft=null)
         val card=mapServerPhotoReview(response(dto),fixture()).items.single()
             .copy(price=15000.0)
-        val decision=mapConfirmedReviewDecision(card,dto,30.0,emptyMap())
+        // OCR must preserve all four candidates for owner review, but the
+        // explicitly approved Android UI limits publication to three.
+        assertEquals(4, PhotoReviewRules.countOptions(card))
+        assertTrue(com.zerotoone.bottlemap.ui.owner.review.ReviewIssue.OPTION in
+            PhotoReviewRules.problems(card))
+        try {
+            mapConfirmedReviewDecision(card,dto,30.0,emptyMap())
+            fail("four non-whisky options must not bypass the approved limit")
+        } catch (_: IllegalArgumentException) { }
+        val chosen = card.copy(options = card.options.take(2))
+        val decision=mapConfirmedReviewDecision(chosen,dto,30.0,emptyMap())
         val actual=requireNotNull(decision.correctedOptions)
-        assertEquals(4,actual.size)
-        assertEquals(options.map { it.extractedOptionId },actual.map { it.optionId })
+        assertEquals(3,actual.size)
+        assertEquals(options.take(3).map { it.extractedOptionId },actual.map { it.optionId })
         assertEquals(15000,actual.first().priceKrw)
-        assertEquals(options.last().extractedPriceKrw,actual.last().priceKrw)
-        assertEquals(null,actual.last().pourMl)
+        // The third OCR label is "잔 3", so the existing default glass
+        // serving (30ml) is retained. Only an explicit Bottle has null pour.
+        assertEquals(30,actual.last().pourMl)
     }
 
     @Test fun missingSecondaryBeerPriceBlocksPublishUntilOwnerEditsThatOption() {

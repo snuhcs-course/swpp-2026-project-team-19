@@ -4,10 +4,12 @@ import androidx.activity.ComponentActivity
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTextReplacement
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.zerotoone.bottlemap.data.owner.*
 import org.junit.Assert.assertEquals
@@ -54,13 +56,17 @@ class OwnerRegistrationV4ComposeTest {
         compose.onNodeWithText("시작하기").performClick()
         compose.onNodeWithText("직접 입력하기").performClick()
         compose.onNodeWithText("사업자등록번호를\n알려주세요").assertExists()
-        for(digit in "1234567891")compose.onNodeWithText(digit.toString()).performClick()
+        compose.onNodeWithTag("registration-business-number")
+            .performTextInput("1234567891")
+        // No app-owned keypad; the system number IME is attached to the field.
+        assertEquals(0, compose.onAllNodesWithText("⌫").fetchSemanticsNodes().size)
         compose.onNodeWithText("123-45-67891").assertExists()
         compose.onNodeWithText("다음").performClick()
         compose.onNodeWithTag("registration-representative").performTextInput("김민준")
         compose.onNodeWithText("다음").performClick()
         compose.onNodeWithText("개업일을\n알려주세요").assertExists()
-        for(digit in "20190514")compose.onNodeWithText(digit.toString()).performClick()
+        compose.onNodeWithTag("registration-opening-date")
+            .performTextInput("20190514")
         compose.onNodeWithText("2019-05-14".replace("-",".")).assertExists()
         compose.onNodeWithText("다음").performClick()
         compose.onNodeWithText("이 정보로\n확인할게요").assertExists()
@@ -76,6 +82,192 @@ class OwnerRegistrationV4ComposeTest {
                 .fetchSemanticsNodes().isNotEmpty()
         }
         compose.onNodeWithText("다음").performClick()
+        compose.onNodeWithText("매장 이름을\n알려주세요").assertExists()
+    }
+
+    @Test fun mismatchBackCorrectedDateThenContinueAdvancesWithoutLoop() {
+        // This reproduces the failing LIVE navigation, not the Mock VERIFYING
+        // animation. The server responses are faked so no NTS quota is used.
+        val initial = MockRegistrationDraft(
+            businessNumberDigits = "1234567891",
+            representativeName = "김민준",
+            openingDateIso = "2019-05-13",
+            resumePageKey = "BIZCHECK",
+        )
+        val repo = LocalOwnerMockRepository(
+            InMemoryMockOwnerStateStore(MockOwnerSnapshot(registrationDraft = initial)))
+        val requests = mutableListOf<String>()
+        val vm = OwnerMockViewModel(repo,
+            businessVerificationFixture = { number, name, date ->
+                assertEquals("1234567891", number)
+                assertEquals("김민준", name)
+                requests.add(date)
+                if (date == "2019-05-13") "not_matched" else "unavailable"
+            })
+        compose.setContent {
+            MaterialTheme {
+                OwnerOnboardingScreen(vm, onBack = {}, onManagerPreview = {},
+                    startRegistration = true)
+            }
+        }
+
+        fun waitFor(text: String) {
+            compose.waitUntil(5000) {
+                compose.onAllNodesWithText(text).fetchSemanticsNodes().isNotEmpty()
+            }
+        }
+        waitFor("이 정보로\n확인할게요")
+        compose.onNodeWithText("확인하기").performClick()
+        compose.waitUntil(5000) {
+            compose.onAllNodesWithText("사업자 정보가\n맞지 않아요")
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        // Hardware Back, as in the Galaxy S23 reproduction.
+        compose.runOnUiThread {
+            compose.activity.onBackPressedDispatcher.onBackPressed()
+        }
+        waitFor("이 정보로\n확인할게요")
+        compose.onAllNodesWithTag("registration-review-edit")[2].performClick()
+        waitFor("개업일을\n알려주세요")
+        compose.onNodeWithTag("registration-opening-date")
+            .performTextReplacement("2019.05.14")
+        compose.onNodeWithText("다음").performClick()
+        waitFor("이 정보로\n확인할게요")
+        compose.onNodeWithText("확인하기").performClick()
+        compose.waitUntil(5000) {
+            compose.onAllNodesWithText("지금은 국세청 확인이\n어려워요")
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithText("계속하기").performClick()
+        waitFor("매장 이름을\n알려주세요")
+        compose.runOnIdle {
+            assertEquals(listOf("2019-05-13", "2019-05-14"), requests)
+            val saved = (vm.state.value as MockOwnerLoadState.Ready)
+                .snapshot.registrationDraft!!
+            assertEquals("2019-05-14", saved.openingDateIso)
+            assertEquals("BARNAME", saved.resumePageKey)
+        }
+        // The old success/failure history must not bounce to another
+        // mismatch result on the next user Back.
+        compose.runOnUiThread {
+            compose.activity.onBackPressedDispatcher.onBackPressed()
+        }
+        waitFor("이 정보로\n확인할게요")
+    }
+
+    @Test fun actualApplicationMismatchThenCorrectDateMustAdvanceToBarDetails() {
+        // UAT 4.9 exact transition: POST fails with BUSINESS_VERIFICATION_FAILED,
+        // return to the read-back page, edit the date and verify successfully.
+        // No real NTS or application API calls are made.
+        val certificate = MockPhoto(
+            "cover-test", "content://fixture/cover", MockPhotoKind.BAR_GALLERY)
+        val menu = MockPhoto(
+            "menu-test", "content://fixture/menu", MockPhotoKind.MENU_CAPTURE)
+        val original = MockRegistrationDraft(
+            businessNumberDigits = "1234567891",
+            representativeName = "김민준",
+            openingDateIso = "2019-05-13",
+            proposedBarName = "테스트 매장",
+            proposedBarAddress = "서울특별시 관악구 봉천로 12",
+            storePhone = "02-555-1234",
+            contactPhone = "010-1234-5678",
+            applicantGallery = listOf(certificate),
+            initialMenuPhotos = listOf(menu),
+            resumePageKey = "BIZCHECK",
+        )
+        val repo = LocalOwnerMockRepository(InMemoryMockOwnerStateStore(
+            MockOwnerSnapshot(registrationDraft = original)))
+        val requestedDates = mutableListOf<String>()
+        var submitAttempts = 0
+        val vm = OwnerMockViewModel(
+            repo,
+            businessVerificationFixture = { _, _, date ->
+                requestedDates.add(date)
+                "matched"
+            },
+            registrationSubmissionFixture = {
+                submitAttempts++
+                throw com.zerotoone.bottlemap.network.BottleMapApiException(
+                    code = "BUSINESS_VERIFICATION_FAILED",
+                    message = "Business registration mismatch",
+                    httpStatus = 400)
+            },
+        )
+        compose.setContent {
+            MaterialTheme {
+                OwnerOnboardingScreen(vm, onBack = {}, onManagerPreview = {},
+                    startRegistration = true)
+            }
+        }
+        fun waitFor(title: String) {
+            compose.waitUntil(5000) {
+                compose.onAllNodesWithText(title).fetchSemanticsNodes().isNotEmpty()
+            }
+        }
+        waitFor("이 정보로\n확인할게요")
+        compose.onNodeWithText("확인하기").performClick()
+        waitFor("사업자 정보가\n확인됐어요")
+        compose.onNodeWithText("다음").performClick()
+        for (page in listOf("매장 이름을\n알려주세요", "매장 사진을\n올려 주세요",
+            "매장 주소를\n알려주세요", "매장 전화번호를\n알려주세요",
+            "메뉴판 사진을\n올려 주세요", "연락받을 번호를\n알려주세요")) {
+            waitFor(page)
+            compose.onNodeWithText("다음").performClick()
+        }
+        waitFor("이렇게\n신청할게요")
+        compose.onNodeWithText("신청하기").performClick()
+        waitFor("사업자 정보가\n맞지 않아요")
+        compose.onNodeWithText("다시 확인하기").performClick()
+        waitFor("이 정보로\n확인할게요")
+        compose.onAllNodesWithTag("registration-review-edit")[2].performClick()
+        waitFor("개업일을\n알려주세요")
+        compose.onNodeWithTag("registration-opening-date")
+            .performTextReplacement("2019.05.14")
+        compose.onNodeWithText("다음").performClick()
+        waitFor("이 정보로\n확인할게요")
+        compose.onNodeWithText("확인하기").performClick()
+        waitFor("사업자 정보가\n확인됐어요")
+        compose.onNodeWithText("다음").performClick()
+        waitFor("매장 이름을\n알려주세요")
+        compose.runOnIdle {
+            assertEquals(1, submitAttempts)
+            assertEquals(listOf("2019-05-13", "2019-05-14"), requestedDates)
+            val saved = (vm.state.value as MockOwnerLoadState.Ready)
+                .snapshot.registrationDraft!!
+            assertEquals("2019-05-14", saved.openingDateIso)
+            assertEquals("BARNAME", saved.resumePageKey)
+        }
+    }
+
+    @Test fun unavailable404VerificationContinuesWithoutAnotherReadback() {
+        val draft = MockRegistrationDraft(
+            businessNumberDigits = "1234567891",
+            representativeName = "김민준", openingDateIso = "2019-05-14",
+            resumePageKey = "BIZCHECK",
+        )
+        val repo = LocalOwnerMockRepository(InMemoryMockOwnerStateStore(
+            MockOwnerSnapshot(registrationDraft = draft)))
+        val vm = OwnerMockViewModel(repo,
+            businessVerificationFixture = { _, _, _ ->
+                throw com.zerotoone.bottlemap.network.BottleMapApiException(
+                    httpStatus = 404, code = "HTTP_404", message = "Not Found")
+            })
+        compose.setContent {
+            MaterialTheme {
+                OwnerOnboardingScreen(vm, onBack = {}, onManagerPreview = {},
+                    startRegistration = true)
+            }
+        }
+        compose.waitUntil(5000) {
+            compose.onAllNodesWithText("이 정보로\n확인할게요")
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithText("확인하기").performClick()
+        compose.waitUntil(5000) {
+            compose.onAllNodesWithText("지금은 국세청 확인이\n어려워요")
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithText("계속하기").performClick()
         compose.onNodeWithText("매장 이름을\n알려주세요").assertExists()
     }
 

@@ -20,6 +20,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zerotoone.bottlemap.data.owner.OwnerRuntime
+import com.zerotoone.bottlemap.ui.auth.AuthViewModel
+import com.zerotoone.bottlemap.ui.auth.AuthUiState
 import com.zerotoone.bottlemap.ui.owner.OwnerMockViewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
@@ -47,21 +49,64 @@ import com.zerotoone.bottlemap.ui.owner.OwnerSkeletonScreen
 internal const val variantStartDestination = "customer"
 
 @OptIn(ExperimentalMaterial3Api::class)
+internal enum class OwnerAuthRecoveryAction { WAIT, LOGIN, ACCOUNT_RETRY }
+
+internal fun ownerAuthRecoveryAction(state: AuthUiState): OwnerAuthRecoveryAction = when (state) {
+    AuthUiState.Guest -> OwnerAuthRecoveryAction.LOGIN
+    is AuthUiState.SignInError -> OwnerAuthRecoveryAction.ACCOUNT_RETRY
+    else -> OwnerAuthRecoveryAction.WAIT
+}
+
+/** Never leave an expired Owner destination showing an endless spinner. */
+@androidx.compose.runtime.Composable
+private fun OwnerAuthGuard(
+    state: AuthUiState,
+    onSignOut: () -> Unit,
+    onRecoverableAccountError: () -> Unit,
+) {
+    LaunchedEffect(state) {
+        when (ownerAuthRecoveryAction(state)) {
+            OwnerAuthRecoveryAction.LOGIN -> onSignOut()
+            OwnerAuthRecoveryAction.ACCOUNT_RETRY -> onRecoverableAccountError()
+            OwnerAuthRecoveryAction.WAIT -> Unit
+        }
+    }
+    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        CircularProgressIndicator()
+    }
+}
+
 internal fun NavGraphBuilder.registerVariantRoutes(
     navController: NavHostController,
     onNotice: (String) -> Unit = {},
+    authViewModel: AuthViewModel,
     onForceOwnerReauthentication: () -> Unit,
+    onRecoverableOwnerAuthError: () -> Unit,
 ) {
     // Shared by both ends of the Owner manage <-> preview round trip.
     val previewSwitchCooldown = OwnerPreviewSwitchCooldown()
     navigation(route = OwnerRoutes.GRAPH, startDestination = OwnerRoutes.ENTRY) {
         composable(OwnerRoutes.ENTRY) {
+            val authState = authViewModel.state.collectAsStateWithLifecycle().value
+            val ownerId = (authState as? AuthUiState.SignedIn)?.user?.userId
+            if (ownerId == null) {
+                OwnerAuthGuard(authState, onForceOwnerReauthentication,
+                    onRecoverableOwnerAuthError)
+                return@composable
+            }
                 CompositionLocalProvider(
                     LocalRippleConfiguration provides null,
                 ) {
-            val ownerViewModel: OwnerMockViewModel = viewModel(factory = OwnerMockViewModel.Factory(
-                OwnerRuntime.repository(LocalContext.current)))
-            LaunchedEffect(ownerViewModel) { ownerViewModel.retry() }
+            val ownerViewModel: OwnerMockViewModel = viewModel(
+                key = "owner-entry-$ownerId",
+                factory = OwnerMockViewModel.Factory(
+                    OwnerRuntime.repository(LocalContext.current, ownerId)))
+            // LiveOwnerScreenRepository starts its first load on creation.
+            // Do not start a duplicate full Owner fetch while that load is in flight.
+            LaunchedEffect(ownerViewModel) {
+                if (ownerViewModel.state.value != MockOwnerLoadState.Loading)
+                    ownerViewModel.retry()
+            }
             // Always show the owned-bar list. One or many bars use the same flow;
             // the user explicitly selects which bar to manage.
             OwnerOnboardingScreen(
@@ -72,12 +117,20 @@ internal fun NavGraphBuilder.registerVariantRoutes(
             }
         }
         composable(OwnerRoutes.ADD_BAR) {
+            val authState = authViewModel.state.collectAsStateWithLifecycle().value
+            val ownerId = (authState as? AuthUiState.SignedIn)?.user?.userId
+            if (ownerId == null) {
+                OwnerAuthGuard(authState, onForceOwnerReauthentication,
+                    onRecoverableOwnerAuthError)
+                return@composable
+            }
                 CompositionLocalProvider(
                     LocalRippleConfiguration provides null,
                 ) {
             OwnerOnboardingScreen(
-                viewModel = viewModel(factory = OwnerMockViewModel.Factory(
-                    OwnerRuntime.repository(LocalContext.current))),
+                viewModel = viewModel(key = "owner-add-bar-$ownerId",
+                    factory = OwnerMockViewModel.Factory(
+                        OwnerRuntime.repository(LocalContext.current, ownerId))),
                 onBack = { navController.popBackStack() },
                 onManagerPreview = { navController.navigate(OwnerPage.MGR_HOME.route) },
                 startRegistration = true,
@@ -86,8 +139,16 @@ internal fun NavGraphBuilder.registerVariantRoutes(
         }
         OwnerPage.entries.forEach { page ->
             composable(page.route) { reviewEntry ->
-                val data: OwnerMockViewModel = viewModel(factory = OwnerMockViewModel.Factory(
-                    OwnerRuntime.repository(LocalContext.current)))
+                val authState = authViewModel.state.collectAsStateWithLifecycle().value
+                val ownerId = (authState as? AuthUiState.SignedIn)?.user?.userId
+                if (ownerId == null) {
+                    OwnerAuthGuard(authState, onForceOwnerReauthentication,
+                        onRecoverableOwnerAuthError)
+                    return@composable
+                }
+                val data: OwnerMockViewModel = viewModel(key = "owner-page-${page.route}-$ownerId",
+                    factory = OwnerMockViewModel.Factory(
+                        OwnerRuntime.repository(LocalContext.current, ownerId)))
                 val mockState = data.state.collectAsStateWithLifecycle().value
                 // Owner-wide policy: no transient bright/ripple feedback on press.
                 // Stateful selected/checked indicators are intentionally preserved.

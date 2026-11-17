@@ -15,6 +15,7 @@ import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewRules.OptionField
 import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewRules.RematchOutcome
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -27,8 +28,25 @@ import kotlinx.coroutines.sync.withLock
 sealed interface PhotoReviewLoad {
     data object Loading : PhotoReviewLoad
     data object Applied : PhotoReviewLoad
-    data class Error(val message: String) : PhotoReviewLoad
+    data class Error(val message: String, val kind: ReviewLoadErrorKind = ReviewLoadErrorKind.OTHER) : PhotoReviewLoad
     data class Ready(val review: PhotoReviewState) : PhotoReviewLoad
+}
+
+enum class ReviewLoadErrorKind { NETWORK, AUTH, FORBIDDEN, OTHER }
+
+/** Screen-safe message: never print Retrofit/OkHttp or coroutine diagnostics. */
+internal fun reviewLoadError(error: Throwable): PhotoReviewLoad.Error {
+    val api = error as? BottleMapApiException
+    return when {
+        api?.code == "NETWORK_ERROR" ->
+            PhotoReviewLoad.Error("인터넷 연결을 확인한 뒤 다시 시도해 주세요.", ReviewLoadErrorKind.NETWORK)
+        api?.httpStatus == 401 ->
+            PhotoReviewLoad.Error("로그인이 만료됐어요. 다시 로그인해 주세요.", ReviewLoadErrorKind.AUTH)
+        api?.httpStatus == 403 ->
+            PhotoReviewLoad.Error("검수할 권한이 없어요. 매장 관리에서 권한을 확인해 주세요.", ReviewLoadErrorKind.FORBIDDEN)
+        else ->
+            PhotoReviewLoad.Error("검수 정보를 불러오지 못했어요. 다시 시도해 주세요.")
+    }
 }
 
 enum class PublishFailure { NETWORK, SERVER, FORBIDDEN, VALIDATION, CONFLICT, AUTH, UNKNOWN }
@@ -103,6 +121,7 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
     // Device file IO must never queue behind a slow remote PUT.
     private val draftCheckpointMutex = Mutex()
     private var latestDraftRevision = 0L
+    private var offlineCheckpoint: Job? = null
     private var leaving = false
     private val latestRematchRequest = mutableMapOf<String, Int>()
     private val latestCatalogSearchRequest = mutableMapOf<String, Int>()
@@ -122,6 +141,7 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
         ++latestDraftRevision
         _load.value = PhotoReviewLoad.Loading
         viewModelScope.launch {
+            var resumeServerSync: PhotoReviewState? = null
             draftSaveMutex.withLock {
                 // No checkpoint from the old screen may land after a reload
                 // has read the server and recovered the latest device edit.
@@ -134,19 +154,21 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                             val resumable = repository.hasPendingLocalDraft() &&
                                 !_draftConflictChoice.value &&
                                 !repository.hasOversizedPendingDraft()
-                            // An unsynced device draft must not appear fully
-                            // persisted or publishable before a server CAS ACK.
-                            // Keep the existing retry behavior; do not start
-                            // a competing save while the reload holds locks.
-                            _draftRetryable.value = resumable
+                            // Restore immediately and attempt a normal CAS
+                            // automatically after both load locks are released.
+                            // No user-visible "reload/choose draft" control.
+                            _draftRetryable.value = false
                             _draftProblem.value = when {
                                 _draftConflictChoice.value ->
-                                    "최신 서버 초안을 불러왔어요. 화면에 표시된 서버 초안과 이 기기의 미저장 초안 중 선택해 주세요."
+                                    "서버 검수와 기기에 보관된 내용이 달라요. 기기 수정사항은 보존했어요."
                                 repository.hasOversizedPendingDraft() -> oversizedNotice
                                 resumable -> localOnlyNotice
                                 else -> null
                             }
-                            repository.consumeDraftNotice()?.let(::toast)
+                            repository.consumeDraftNotice()?.let { notice ->
+                                if (_draftProblem.value == null) _draftProblem.value = notice
+                            }
+                            if (resumable) resumeServerSync = fresh
                             PhotoReviewLoad.Ready(fresh)
                         }
                     } catch (applied: ReviewAlreadyAppliedException) {
@@ -154,10 +176,13 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                     } catch (cancelled: CancellationException) {
                         throw cancelled
                     } catch (error: Exception) {
-                        PhotoReviewLoad.Error(error.message ?: "검수 정보를 불러오지 못했어요.")
+                        reviewLoadError(error)
                     }
                 }
             }
+            // This must run OUTSIDE the reload mutexes: saveDraft takes
+            // draftSaveMutex itself and checkpoints to an independent file.
+            resumeServerSync?.let(::saveDraft)
         }
     }
 
@@ -170,11 +195,34 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
         _events.trySend(PhotoReviewEvent.Toast(message))
     }
 
+    /** The owner requires online-only review. A disconnected interaction is
+     * rejected before it changes UI state. Preserve only the PREVIOUS valid
+     * draft; never delete its recoverable device backup on a failed network.
+     * Reuse the existing Review Error / Retry page, not a new toast or modal.
+     */
+    private fun blockDisconnectedReview(): Boolean {
+        if (repository.hasUsableNetwork()) return false
+        val previous = review ?: return true
+        ++latestDraftRevision // Older queued saves cannot overwrite this checkpoint.
+        _load.value = PhotoReviewLoad.Error(
+            "인터넷 연결을 확인한 뒤 다시 시도해 주세요.", ReviewLoadErrorKind.NETWORK)
+        offlineCheckpoint = viewModelScope.launch(start = CoroutineStart.UNDISPATCHED) {
+            try {
+                draftCheckpointMutex.withLock { repository.checkpointDraft(previous) }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                _draftProblem.value = "기기 검수 초안 저장에 실패했어요."
+            }
+        }
+        return true
+    }
+
     /** Replaces the state without regrouping (typing, opening a modal). */
     private fun set(state: PhotoReviewState) {
         // Freeze the reviewed snapshot after the owner confirms a conflict
         // choice. Late input callbacks must not create edits during CAS.
-        if (_draftResolving.value) return
+        if (_draftResolving.value || blockDisconnectedReview()) return
         _load.value = PhotoReviewLoad.Ready(state)
         // Persist every field change, including unfinished typing, so a
         // process kill never discards the current owner review draft.
@@ -187,7 +235,7 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
      * "확인이 필요해요" group.
      */
     private fun mutate(change: (PhotoReviewState) -> PhotoReviewState) {
-        if (_draftResolving.value) return
+        if (_draftResolving.value || blockDisconnectedReview()) return
         val before = review ?: return
         val pendingBefore = PhotoReviewRules.stats(before).pending.size
         val oldGroups = before.items.associate { it.id to PhotoReviewRules.displayGroup(before, it) }
@@ -202,7 +250,8 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
         }
         val next = changed.copy(items = items, show = show, typingSnapshots = emptyMap())
         set(next)
-        if (PhotoReviewRules.stats(next).pending.size < pendingBefore) toast("확인 완료")
+        if (review === next && PhotoReviewRules.stats(next).pending.size < pendingBefore)
+            toast("확인 완료")
     }
 
     private fun mutateItem(id: String, change: (ReviewItem) -> ReviewItem) = mutate { s ->
@@ -246,21 +295,21 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                         _draftEditingLocal.value = false
                     } catch (cancelled: CancellationException) {
                         throw cancelled
-                    } catch (error: ReviewDraftConflictException) {
-                        _draftProblem.value = error.message
+                    } catch (_: ReviewDraftConflictException) {
+                        // The server has a newer acknowledged CAS version.
+                        // No conflict copy/choice UI or toast is shown: the
+                        // repository will select its latest readable draft and
+                        // resume only a newer current-base unsent checkpoint.
+                        _draftProblem.value = null
                         _draftRetryable.value = false
-                        _draftConflictChoice.value = false
-                        // §5.9: do not offer discard/overwrite actions against
-                        // stale content. Refresh and DISPLAY the newer draft first.
-                        if (repository.hasPendingDraftConflict()) reload()
-                        else toast(error.message.orEmpty())
+                        reload()
                     } catch (error: ReviewDraftLocalEditingException) {
                         _draftEditingLocal.value = true
                         _draftConflictChoice.value = true
                         _draftOversized.value = repository.hasOversizedPendingDraft()
                         _draftRetryable.value = false
                         _draftProblem.value =
-                            "이 기기 초안 편집 중이에요. 서버에 반영하려면 확인 후 덮어쓰기를 선택해 주세요."
+                            "서버 검수와 기기 수정사항이 달라요. 수정 내용은 기기에 보관했어요."
                     } catch (error: ReviewDraftTooLargeLocalException) {
                         _draftProblem.value = oversizedNotice
                         _draftRetryable.value = false
@@ -280,7 +329,16 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                             _draftRetryable.value = recoverable
                             _draftProblem.value = if (recoverable) localOnlyNotice
                                 else error.message
-                            toast(_draftProblem.value.orEmpty())
+                            // A retryable saved-on-device draft must have a visible
+                            // recovery path. Reuse the existing Error/Retry page;
+                            // reloading restores the protected checkpoint and
+                            // resumes a version-checked server save.
+                            if (recoverable) _load.value = when {
+                                error.code == "NETWORK_ERROR" -> reviewLoadError(error)
+                                else -> PhotoReviewLoad.Error(
+                                    "검수 초안을 서버에 저장하지 못했어요. 다시 시도해 주세요.")
+                            }
+                            else toast(_draftProblem.value.orEmpty())
                         }
                     } catch (error: IllegalStateException) {
                         _draftProblem.value = error.message ?: "검수 초안 저장에 실패했어요."
@@ -290,7 +348,10 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                         _draftRetryable.value = repository.hasPendingLocalDraft()
                         _draftProblem.value = if (_draftRetryable.value) localOnlyNotice
                             else error.message ?: "검수 초안 저장에 실패했어요."
-                        toast(_draftProblem.value.orEmpty())
+                        if (_draftRetryable.value)
+                            _load.value = PhotoReviewLoad.Error(
+                                "검수 초안을 서버에 저장하지 못했어요. 다시 시도해 주세요.")
+                        else toast(_draftProblem.value.orEmpty())
                     }
                 }
             }
@@ -402,7 +463,15 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
         leaving = true
         val final = review?.takeIf { _publishOutcome.value == null }?.copy(modal = null)
         if (final == null) {
-            _events.trySend(PhotoReviewEvent.Leave)
+            // The network error screen can appear before its last safe local
+            // checkpoint completes. Do not dispose the ViewModel mid-write.
+            val pending = offlineCheckpoint
+            if (pending?.isActive == true) {
+                viewModelScope.launch {
+                    pending.join()
+                    _events.send(PhotoReviewEvent.Leave)
+                }
+            } else _events.trySend(PhotoReviewEvent.Leave)
             return
         }
         // Do not pop the ViewModel until its final draft is durably saved.
@@ -435,7 +504,7 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                     // The working copy was committed to device storage. Leave
                     // without submitting an unconfirmed conflicting server PUT.
                     _draftProblem.value =
-                        "이 기기 초안만 저장됐어요. 서버 반영은 초안 선택에서 확인해 주세요."
+                        "검수 수정사항은 기기에 안전하게 보관했어요."
                     repository.hasPendingLocalDraft()
                 } catch (error: ReviewDraftTooLargeLocalException) {
                     // §5.9 allows device-only storage above the server limit.
@@ -445,13 +514,23 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                     _draftProblem.value = oversizedNotice
                     repository.hasPendingLocalDraft() &&
                         repository.hasOversizedPendingDraft()
+                } catch (error: ReviewDraftConflictException) {
+                    // UAT 4.4: an already-preserved device draft must not trap
+                    // the owner in the review screen when another CAS advanced.
+                    // Never PUT or discard it; leave only with a durable backup.
+                    _draftRetryable.value = false
+                    _draftProblem.value = error.message
+                    repository.hasPendingLocalDraft()
                 } catch (error: Exception) {
-                    _draftRetryable.value = repository.hasPendingLocalDraft() &&
-                        error !is ReviewDraftConflictException &&
+                    // An offline/5xx server failure must never lock the owner
+                    // on screen when the latest edit is already durable on
+                    // this device. Do not interpret device-only as server ACK.
+                    val safeDeviceCopy = repository.hasPendingLocalDraft()
+                    _draftRetryable.value = safeDeviceCopy &&
                         !repository.hasOversizedPendingDraft()
-                    _draftProblem.value = if (_draftRetryable.value) localOnlyNotice
+                    _draftProblem.value = if (safeDeviceCopy) localOnlyNotice
                         else error.message ?: "검수 초안 저장에 실패했어요."
-                    false
+                    safeDeviceCopy
                 }
             }
             if (saved) {
@@ -480,7 +559,7 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
     }
 
     fun saveDefaultPour(text: String) {
-        if (_savingDefaultPour.value || _publishing.value) return
+        if (_savingDefaultPour.value || _publishing.value || blockDisconnectedReview()) return
         val n = readNumeric(text)
         if (!validDefaultPour(n)) {
             toast("1 ~ 999 사이의 숫자를 입력해주세요.")
@@ -507,7 +586,7 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
     }
 
     fun requestPublish() {
-        if (_publishing.value) return
+        if (_publishing.value || blockDisconnectedReview()) return
         if (_savingDefaultPour.value) {
             toast("기본 잔 용량을 저장하는 중이에요.")
             return
@@ -546,6 +625,14 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                     summary, newWhisky, repository.publishedAddedCount())
             } catch (cancelled: CancellationException) {
                 throw cancelled
+            } catch (_: ReviewDraftConflictException) {
+                // A newer server draft won the CAS. Re-open the review against
+                // its latest acknowledged content; never display the generic
+                // PublishFailure.CONFLICT page for this draft-only condition.
+                // No blind overwrite or second publish request is issued.
+                _publishOutcome.value = null
+                _publishing.value = false
+                reload()
             } catch (error: Exception) {
                 val reason = classifyPublishFailure(error)
                 _publishOutcome.value = PublishOutcome.Failed(
@@ -560,7 +647,7 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
     }
 
     fun confirmPublish() {
-        if (_publishing.value || _savingDefaultPour.value ||
+        if (_publishing.value || blockDisconnectedReview() || _savingDefaultPour.value ||
             _draftProblem.value != null || _publishOutcome.value != null) return
         val state = review ?: return
         if (state.modal?.type != ReviewModalType.PUBLISH ||
@@ -1067,7 +1154,7 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                     PhotoReviewRules.MAX_PICKED_VOLUMES else PhotoReviewRules.MAX_OPTIONS) ->
                 toast(if (x.type == ReviewItemType.WHISKY)
                     "용량은 최대 3가지까지 설정 가능해요."
-                else "검수 옵션은 최대 10개까지 등록할 수 있어요.")
+                else "검수 옵션은 최대 3개까지 등록할 수 있어요.")
             else -> mutateItem(id) { PhotoReviewRules.addOption(it, pour) }
         }
     }

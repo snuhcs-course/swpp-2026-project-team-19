@@ -118,25 +118,34 @@ internal object ServerReviewDraftCodec {
     fun exceedsServerLimit(content: Map<String, Any?>): Boolean =
         mapAdapter.toJson(content).toByteArray(Charsets.UTF_8).size > MAX_BYTES
 
+    /** Content as it reads back after a JSON round trip, so an in-memory
+     * draft compares equal to a copy read from the server or a device file.
+     * Moshi parses JSON integers as Doubles, and it omits object keys whose
+     * value is null when it writes (no serializeNulls): an owner-added option
+     * has no extractedOptionId or optionLabel, so those keys never reach the
+     * server or the device file (#190). Null and absent mean the same here.
+     */
+    private fun jsonEquivalent(value: Any?): Any? = when (value) {
+        is Number -> value.toDouble()
+        is List<*> -> value.map(::jsonEquivalent)
+        is Map<*, *> -> value.entries
+            .filter { (_, v) -> v != null }
+            .associate { (k, v) -> k to jsonEquivalent(v) }
+        else -> value
+    }
+
     /** Compare the COMPLETE draft, not just Android UI state: an operator may
      * change standard decisions while leaving clientState untouched.
-     * Moshi may parse JSON integers as Doubles; normalize only numeric type.
      */
     fun sameAndroidSnapshot(
         attempted: Map<String, Any?>?,
         observed: Map<String, Any?>?,
     ): Boolean {
-        fun normalize(value: Any?): Any? = when (value) {
-            is Number -> value.toDouble()
-            is List<*> -> value.map(::normalize)
-            is Map<*, *> -> value.entries.associate { (k, v) -> k to normalize(v) }
-            else -> value
-        }
         val left = attempted ?: return false
         val right = observed ?: return false
         if (((left["clientState"] as? Map<*, *>)?.get("androidStateJson")) !is String)
             return false
-        return normalize(left) == normalize(right)
+        return jsonEquivalent(left) == jsonEquivalent(right)
     }
 
     /** A regenerated §5.4 review may reorder, add or remove extracted lines.
@@ -262,13 +271,9 @@ internal object ServerReviewDraftCodec {
         val serverDecisions = saved.content["itemDecisions"] ?: return null
         val locallyDerived = runCatching { encode(restored)["itemDecisions"] }.getOrNull()
             ?: return null
-        fun normalize(value: Any?): Any? = when (value) {
-            is Number -> value.toDouble()
-            is List<*> -> value.map(::normalize)
-            is Map<*, *> -> value.entries.associate { (k, v) -> k to normalize(v) }
-            else -> value
+        return restored.takeIf {
+            jsonEquivalent(serverDecisions) == jsonEquivalent(locallyDerived)
         }
-        return restored.takeIf { normalize(serverDecisions) == normalize(locallyDerived) }
     }
     /**
      * Drafts written by the operator web may not contain Android's UI

@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.BitmapFactory
 import android.net.Uri
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -18,7 +19,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -59,6 +63,9 @@ import com.zerotoone.bottlemap.network.BarWeeklyHoursDto
 import com.zerotoone.bottlemap.ui.common.BmIcon
 import com.zerotoone.bottlemap.ui.common.BmIconId
 import com.zerotoone.bottlemap.ui.theme.BottleMapPalette
+import com.zerotoone.bottlemap.data.CustomerRepository
+import com.zerotoone.bottlemap.network.BottleMapApiException
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -71,6 +78,67 @@ import java.time.ZonedDateTime
 import java.util.Locale
 
 private val KST=ZoneId.of("Asia/Seoul")
+/** Bar-local text search only: tolerate spacing and hyphen differences.
+ * Embedding/catalog matching remains a separate server-owned search path.
+ */
+internal fun barMenuMatchesQuery(name: String, brand: String?, query: String): Boolean {
+    fun canonical(s: String): String =
+        s.lowercase(Locale.ROOT).filterNot { it.isWhitespace() || it == '-' }
+    val needle = canonical(query)
+    // Blank filter shows everything; a nonblank token stripped to empty (---)
+    // must NOT accidentally match every row.
+    return (needle.isEmpty() && query.isBlank()) ||
+        (needle.isNotEmpty() && (canonical(name).contains(needle) ||
+            canonical(brand.orEmpty()).contains(needle)))
+}
+
+
+/** A menu-local miss may require the public catalog alias search (§3.10.5). */
+internal fun barAliasLookupNeeded(query: String, hasLocalMatch: Boolean): Boolean =
+    query.isNotBlank() && query.any(Char::isLetterOrDigit) && !hasLocalMatch
+
+/** The bar-detail search has the same nonsearchable-query guard as search home.
+ * A deterministic invalid query should not be labelled a network failure. */
+internal fun barAliasLocalValidation(query: String): String? = when {
+    query.trim().length > 100 -> "검색어는 100자 이내로 입력해 주세요."
+    query.isNotBlank() && query.none(Char::isLetterOrDigit) ->
+        "검색할 수 있는 문자가 없어요. 검색어를 다시 입력해 주세요."
+    else -> null
+}
+
+internal fun barAliasServerValidation(error: BottleMapApiException): String? {
+    if (error.httpStatus != 422) return null
+    return when (error.fieldErrors.firstOrNull { it.path == "query" }?.code) {
+        "NOT_SEARCHABLE" -> "검색할 수 있는 문자가 없어요. 검색어를 다시 입력해 주세요."
+        "STRING_TOO_LONG" -> "검색어는 100자 이내로 입력해 주세요."
+        "BLANK" -> "검색어를 입력해 주세요."
+        else -> null
+    }
+}
+
+/** Keep outcomes query-scoped so stale errors/results never appear for new input. */
+internal data class BarAliasLookupState(
+    val query: String = "",
+    val loading: Boolean = false,
+    val failed: Boolean = false,
+    val validationMessage: String? = null,
+    val productIds: Set<String> = emptySet(),
+)
+
+internal fun queryScopedBarAlias(state: BarAliasLookupState, query: String): BarAliasLookupState? =
+    state.takeIf { it.query.isNotEmpty() && it.query == query.trim() }
+
+/** A real empty result must wait until alias lookup finishes; never show it
+ * during debouncing, validation, network failure, or on an empty bar menu. */
+internal fun barMenuSearchHasNoResults(
+    query: String,
+    hasPublishedItems: Boolean,
+    hasMatches: Boolean,
+    validationMessage: String?,
+    alias: BarAliasLookupState?,
+): Boolean = query.isNotBlank() && hasPublishedItems && !hasMatches &&
+    validationMessage == null && alias != null && alias.query == query.trim() &&
+    !alias.loading && !alias.failed && alias.validationMessage == null
 
 internal data class P18BusinessStatus(val text:String,val next:String?=null,
     val note:String?=null, val open:Boolean=false)
@@ -185,6 +253,40 @@ internal fun CustomerP18BarDetail(
     // Owner customer-preview uses one exclusive panel: hours | address | phone.
     var expanded by rememberSaveable(bar.barId) {mutableStateOf("")}
     var menuQuery by rememberSaveable(bar.barId) {mutableStateOf("")}
+    var aliasLookup by remember(bar.barId) { mutableStateOf(BarAliasLookupState()) }
+    var aliasRetryNonce by remember(bar.barId) { mutableIntStateOf(0) }
+    // A local miss may be an alias. Keep the existing public catalog API,
+    // but distinguish a failed request from a genuine empty search result.
+    LaunchedEffect(bar.barId, menuQuery, aliasRetryNonce) {
+        aliasLookup = BarAliasLookupState()
+        val query = menuQuery.trim()
+        barAliasLocalValidation(query)?.let { message ->
+            aliasLookup = BarAliasLookupState(query = query, validationMessage = message)
+            return@LaunchedEffect
+        }
+        val hasLocalMatch = bar.items.any {
+            barMenuMatchesQuery(it.menuDisplayName, it.brandName, query)
+        }
+        if (!barAliasLookupNeeded(query, hasLocalMatch)) return@LaunchedEffect
+        delay(350)
+        aliasLookup = BarAliasLookupState(query = query, loading = true)
+        try {
+            val result = CustomerRepository().searchProduct(
+                query = query, productId = null, source = "input",
+                latitude = null, longitude = null)
+            val ids = result.matchedProducts.map { it.productId }.toSet() +
+                result.items.filter { it.barId == bar.barId }.map { it.productId }
+            aliasLookup = BarAliasLookupState(query = query, productIds = ids)
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (error: BottleMapApiException) {
+            val validation = barAliasServerValidation(error)
+            aliasLookup = BarAliasLookupState(query = query,
+                failed = validation == null, validationMessage = validation)
+        } catch (_: Exception) {
+            aliasLookup = BarAliasLookupState(query = query, failed = true)
+        }
+    }
     // Product-search navigation opens only the matching category. Once opened,
     // the regular category accordion still closes and reopens on user taps.
     // A normal bar visit has no search target. Product-less rows also
@@ -375,13 +477,63 @@ internal fun CustomerP18BarDetail(
             P18SearchField(menuQuery,{menuQuery=it},{},
                 placeholder="메뉴 검색",modifier=Modifier.fillMaxWidth().height(48.dp),
                 focused=false)
+            // Only render outcomes for the current query. Local invalid text
+            // is detected immediately (no debounced request or stale flicker).
+            val queryScopedAlias = queryScopedBarAlias(aliasLookup, menuQuery)
+            val validationText = barAliasLocalValidation(menuQuery)
+                ?: queryScopedAlias?.validationMessage
+            if (queryScopedAlias?.loading == true && validationText == null) {
+                Row(Modifier.fillMaxWidth().testTag("customer-bar-alias-loading"),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center) {
+                    CircularProgressIndicator(Modifier.size(16.dp),
+                        strokeWidth = 2.dp, color = P18Gold)
+                    Spacer(Modifier.width(8.dp))
+                    Text("메뉴를 검색하고 있어요.", color = P18Muted, fontSize = 12.sp)
+                }
+            }
+            if (validationText != null) {
+                Text(validationText, color = P18Muted, fontSize = 12.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+                        .testTag("customer-bar-alias-validation"))
+            }
+            if (queryScopedAlias?.failed == true && validationText == null) {
+                Column(Modifier.fillMaxWidth().testTag("customer-bar-alias-error"),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text("검색 결과를 불러오지 못했어요. 인터넷 연결을 확인해 주세요.",
+                        color = P18Muted, fontSize = 12.sp, textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth())
+                    OutlinedButton(onClick = { aliasRetryNonce++ },
+                        border = BorderStroke(1.dp, P18Gold),
+                        shape = RoundedCornerShape(9.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = P18Gold),
+                        modifier = Modifier.heightIn(min = 44.dp)
+                            .testTag("customer-bar-alias-retry")) {
+                        Text("다시 시도", fontSize = 13.sp)
+                    }
+                }
+            }
             if(empty!=null) Text(if(empty==EmptyMenuReason.NO_PUBLISHED_MENU)
                 "등록된 메뉴가 없습니다" else "현재 판매 중인 메뉴가 없습니다",
                 modifier=Modifier.fillMaxWidth().padding(16.dp),
                 color=P18Muted,textAlign=TextAlign.Center)
             val filtered=bar.items.filter {
-                menuQuery.isBlank() || it.menuDisplayName.contains(menuQuery,true) ||
-                    it.brandName.orEmpty().contains(menuQuery,true)
+                validationText == null && (
+                barMenuMatchesQuery(it.menuDisplayName,it.brandName,menuQuery) ||
+                    (menuQuery.isNotBlank() &&
+                        queryScopedAlias != null && !queryScopedAlias.failed &&
+                        !queryScopedAlias.loading &&
+                        it.productId != null && it.productId in queryScopedAlias.productIds))
+            }
+            if (barMenuSearchHasNoResults(
+                    menuQuery, empty == null && bar.items.isNotEmpty(),
+                    filtered.isNotEmpty(), validationText, queryScopedAlias)) {
+                Text("검색 결과가 없어요.",
+                    color = P18Muted, fontSize = 12.sp, textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+                        .testTag("customer-bar-menu-no-results"))
             }
             val categories=filtered.groupBy{it.category.ifBlank{"whisky"}}
             categories.forEach { (category,menu) ->
