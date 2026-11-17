@@ -177,6 +177,47 @@ class PendingReviewDraftStoreTest {
             server.copy(content = content("third party")), againOriginal, againWorking))
     }
 
+    @Test fun acknowledgedWorkingCopyCanBeRetiredSoNextDeviceSaveBecomesAuthoritative() = runBlocking {
+        fun content(value: String) = ServerReviewDraftCodec.encode(PhotoReviewState(
+            items = listOf(ReviewItem(id = "ocr-1", name = value))))
+        val account = jwt("acknowledged-owner")
+        val pending = PendingReviewDraftStore(context) { account }
+        val working = PendingReviewDraftStore(context, slot = "working") { account }
+        val checkpoint = PendingReviewDraftStore(context, slot = "checkpoint") { account }
+        val original = PendingReviewDraftStore.Envelope(7, 3, listOf("ocr-1"), content("original"))
+        val accepted = original.copy(content = content("confirmed on the server"))
+        pending.write("import-ack-2", original)
+        working.write("import-ack-2", accepted)
+        checkpoint.write("import-ack-2", accepted)
+        val server = ReviewDraftDto(4, 7, "2026-11-18T00:00:00Z", accepted.content)
+        assertTrue(canRetireAcknowledgedWorkingReview(server, original, accepted, accepted))
+        checkpoint.clear("import-ack-2")
+        pending.clear("import-ack-2")
+        working.clear("import-ack-2")
+        assertNull(checkpoint.read("import-ack-2"))
+        assertNull(pending.read("import-ack-2"))
+        assertNull(working.read("import-ack-2"))
+        val laterRemote = server.copy(draftVersion = 5, content = content("second device edit"))
+        assertEquals(DraftRecoveryPolicy.Outcome.NONE,
+            DraftRecoveryPolicy.decide(laterRemote, working.read("import-ack-2"), null, 7))
+    }
+
+    @Test fun newerUnsentPendingCopyMustNotBeRetiredByOlderWorkingAck() {
+        fun content(value: String) = ServerReviewDraftCodec.encode(PhotoReviewState(
+            items = listOf(ReviewItem(id = "ocr-1", name = value))))
+        val working = PendingReviewDraftStore.Envelope(7, 3, listOf("ocr-1"), content("saved"))
+        val remote = ReviewDraftDto(4, 7, "2026-11-18T00:00:00Z", working.content)
+        assertTrue(canRetireAcknowledgedWorkingReview(remote, null, working, null))
+        assertTrue(canRetireAcknowledgedWorkingReview(remote, working, working, null))
+        assertFalse(canRetireAcknowledgedWorkingReview(remote,
+            working.copy(expectedDraftVersion = 4, content = content("new unsent edit")),
+            working, null))
+        assertFalse(canRetireAcknowledgedWorkingReview(remote, null, working,
+            working.copy(content = content("new unsent checkpoint"))))
+        assertFalse(canRetireAcknowledgedWorkingReview(remote.copy(content = content("other device")),
+            null, working, null))
+    }
+
     @Test fun selfWrittenOutdatedCasIsAcknowledgedButForeignDraftStillConflicts() {
         fun content(name: String) = ServerReviewDraftCodec.encode(
             PhotoReviewState(items = listOf(ReviewItem(id = "ocr-1", name = name))))
