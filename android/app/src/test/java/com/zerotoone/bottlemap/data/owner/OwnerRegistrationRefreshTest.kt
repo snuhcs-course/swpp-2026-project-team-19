@@ -42,4 +42,24 @@ class OwnerRegistrationRefreshTest {
         assertEquals(21L, result.nextLocalId)
         assertEquals("2019-05-14", result.registrationDraft!!.openingDateIso)
     }
+    @Test fun confirmedCancelUpdatesOnlySelectedImportWithoutTouchingMenus() {
+        val processing = MockMenuImport("job-1", "bar-1",
+            MockImportStatus.PROCESSING, 1, emptyList())
+        val applied = MockMenuImport("job-2", "bar-1",
+            MockImportStatus.APPLIED, 1, emptyList())
+        val snapshot = MockOwnerSnapshot(
+            registrationDraft = MockRegistrationDraft(openingDateIso = "2020-01-01"),
+            imports = listOf(processing, applied),
+            menuItems = listOf(MockBarMenuItem("item-1", "bar-1", "product-1",
+                emptyList())),
+        )
+        val canceled = ownerSnapshotAfterConfirmedCancel(snapshot, "job-1")
+        assertEquals(MockImportStatus.CANCELED, canceled.imports[0].status)
+        assertEquals(MockImportStatus.APPLIED, canceled.imports[1].status)
+        assertEquals(snapshot.menuItems, canceled.menuItems)
+        assertEquals(snapshot.registrationDraft, canceled.registrationDraft)
+        // A repeated 200 cancellation is idempotent.
+        assertEquals(canceled, ownerSnapshotAfterConfirmedCancel(canceled, "job-1"))
+    }
+
 }
