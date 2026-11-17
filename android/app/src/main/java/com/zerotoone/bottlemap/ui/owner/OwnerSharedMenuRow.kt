@@ -121,7 +121,7 @@ internal fun OwnerMenuFlatRow(
             }
             Column(Modifier.width(priceSlotWidth),
                 horizontalAlignment = Alignment.End,
-                verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                verticalArrangement = Arrangement.spacedBy(0.dp)) {
                 item.options.forEach { option ->
                     OwnerMenuPriceLine(option, nowEpochMs, soldOut, pourWidth)
                 }
@@ -169,10 +169,10 @@ internal fun OwnerMenuPriceLine(option: MockMenuOption, atEpochMs: Long, soldOut
         }
         Text(servingDisplayLabel(option.pourMl, option.label),
             modifier = Modifier.width(pourWidth), color = textColor,
-            fontSize = 10.sp, maxLines = 1, textAlign = TextAlign.End)
+            fontSize = 10.sp, lineHeight = 11.sp, maxLines = 1, textAlign = TextAlign.End)
         Text("%,d원".format(option.displayPrice(atEpochMs)),
             modifier = Modifier.weight(1f),
-            color = priceColor, fontSize = 10.sp,
+            color = priceColor, fontSize = 10.sp, lineHeight = 11.sp,
             maxLines = 1, textAlign = TextAlign.End)
     }
 }
