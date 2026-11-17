@@ -61,6 +61,7 @@ import com.zerotoone.bottlemap.ui.common.BmIcon
 import com.zerotoone.bottlemap.ui.common.BmIconId
 import com.zerotoone.bottlemap.ui.theme.BottleMapPalette
 import com.zerotoone.bottlemap.data.CustomerRepository
+import com.zerotoone.bottlemap.network.BottleMapApiException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -90,11 +91,30 @@ internal fun barMenuMatchesQuery(name: String, brand: String?, query: String): B
 internal fun barAliasLookupNeeded(query: String, hasLocalMatch: Boolean): Boolean =
     query.trim().length >= 2 && !hasLocalMatch
 
+/** §3.10.5: invalid search text is a form hint, not an offline error. */
+internal fun barAliasLocalValidation(query: String): String? = when {
+    query.length > 100 -> "검색어는 100자 이내로 입력해 주세요."
+    query.isNotBlank() && query.none { it.isLetterOrDigit() } ->
+        "검색할 수 있는 문자가 없어요. 검색어를 다시 입력해 주세요."
+    else -> null
+}
+
+internal fun barAliasServerValidation(error: BottleMapApiException): String? {
+    if (error.httpStatus != 422) return null
+    return when (error.fieldErrors.firstOrNull { it.path == "query" }?.code) {
+        "NOT_SEARCHABLE" -> "검색할 수 있는 문자가 없어요. 검색어를 다시 입력해 주세요."
+        "STRING_TOO_LONG" -> "검색어는 100자 이내로 입력해 주세요."
+        "BLANK" -> "검색어를 입력해 주세요."
+        else -> null
+    }
+}
+
 /** Keep outcomes query-scoped so stale errors/results never appear for new input. */
 internal data class BarAliasLookupState(
     val query: String = "",
     val loading: Boolean = false,
     val failed: Boolean = false,
+    val validationMessage: String? = null,
     val productIds: Set<String> = emptySet(),
 )
 
@@ -225,6 +245,10 @@ internal fun CustomerP18BarDetail(
             barMenuMatchesQuery(it.menuDisplayName, it.brandName, query)
         }
         if (!barAliasLookupNeeded(query, hasLocalMatch)) return@LaunchedEffect
+        barAliasLocalValidation(query)?.let { message ->
+            aliasLookup = BarAliasLookupState(query = query, validationMessage = message)
+            return@LaunchedEffect
+        }
         delay(350)
         aliasLookup = BarAliasLookupState(query = query, loading = true)
         try {
@@ -236,6 +260,10 @@ internal fun CustomerP18BarDetail(
             aliasLookup = BarAliasLookupState(query = query, productIds = ids)
         } catch (cancelled: CancellationException) {
             throw cancelled
+        } catch (error: BottleMapApiException) {
+            val validation = barAliasServerValidation(error)
+            aliasLookup = BarAliasLookupState(query = query,
+                failed = validation == null, validationMessage = validation)
         } catch (_: Exception) {
             aliasLookup = BarAliasLookupState(query = query, failed = true)
         }
@@ -441,6 +469,10 @@ internal fun CustomerP18BarDetail(
                         strokeWidth = 2.dp, color = P18Gold)
                     Text("메뉴를 검색하고 있어요.", color = P18Muted, fontSize = 12.sp)
                 }
+            }
+            if (queryScopedAlias?.validationMessage != null) {
+                Text(queryScopedAlias.validationMessage, color = P18Muted, fontSize = 12.sp,
+                    modifier = Modifier.testTag("customer-bar-alias-validation"))
             }
             if (queryScopedAlias?.failed == true) {
                 Column(Modifier.fillMaxWidth().testTag("customer-bar-alias-error"),
