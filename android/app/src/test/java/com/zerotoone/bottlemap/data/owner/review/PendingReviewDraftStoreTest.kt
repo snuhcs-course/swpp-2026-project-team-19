@@ -235,6 +235,23 @@ class PendingReviewDraftStoreTest {
         assertFalse(DraftSaveSafety.ownCasAcknowledged(null, written, 3, 7))
     }
 
+    @Test fun currentBaseCheckpointTakesPriorityOverOlderWorkingCopy() {
+        fun content(name: String) = ServerReviewDraftCodec.encode(
+            PhotoReviewState(items = listOf(ReviewItem(id = "ocr-1", name = name))))
+        val server = ReviewDraftDto(5, 7, "2026-11-18T00:00:00Z", content("B accepted"))
+        val staleWorking = PendingReviewDraftStore.Envelope(
+            7, 4, listOf("ocr-1"), content("A old working"))
+        val newestCheckpoint = staleWorking.copy(expectedDraftVersion = 5,
+            content = content("A newer, unsent edit"))
+        assertEquals(newestCheckpoint, currentBaseUnsentReviewCopy(
+            server, 7, newestCheckpoint, staleWorking, staleWorking))
+        assertNull(currentBaseUnsentReviewCopy(server, 7, null, staleWorking, staleWorking))
+        assertNull(currentBaseUnsentReviewCopy(
+            server.copy(reviewVersion = 8), 7, newestCheckpoint, staleWorking, null))
+        assertNull(currentBaseUnsentReviewCopy(server, 7,
+            newestCheckpoint.copy(content = server.content), staleWorking, null))
+    }
+
     @Test fun sequentialDeviceHandoffUsesNewerAcknowledgedServerWithoutCasBypass() {
         fun content(name: String) = ServerReviewDraftCodec.encode(
             PhotoReviewState(items = listOf(ReviewItem(id = "ocr-1", name = name))))
