@@ -17,6 +17,10 @@ interface PhotoReviewRepository {
     /** The review to show, mapped into the screen model. A saved draft is restored here. */
     suspend fun loadReview(): PhotoReviewState
 
+    /** Android-only preflight: do not accept offline review interactions.
+     * The live API remains the authority if an apparently online socket fails. */
+    fun hasUsableNetwork(): Boolean = true
+
     /** Catalog search for "아니에요" and "다른 위스키 검색" (spec 4.x catalog search). */
     suspend fun searchCatalog(query: String): List<CatalogProduct>
 
