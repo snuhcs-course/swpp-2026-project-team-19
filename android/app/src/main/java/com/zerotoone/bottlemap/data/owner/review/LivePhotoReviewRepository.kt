@@ -337,6 +337,10 @@ class LivePhotoReviewRepository(
             when {
                 recovery == DraftRecoveryPolicy.Outcome.ACKNOWLEDGED &&
                     working != null && pending != null && canRestore && safeLocal &&
+                    // A later local keystroke must not be discarded just because
+                    // an older explicit conflict working copy reached the server.
+                    (checkpoint == null || ServerReviewDraftCodec.sameAndroidSnapshot(
+                        checkpoint.content, working.content)) &&
                     DraftSaveSafety.latestCopyAcknowledged(saved, pending, working) -> {
                     // A lost response to an explicit local CAS can leave both
                     // the protected original and its later working copy on device.
