@@ -48,6 +48,33 @@ class PhotoReviewViewModelTest {
         return events
     }
 
+    @Test fun offlineLoadExposesKoreanReviewErrorInsteadOfRawRetrofitText() =
+        runTest(dispatcher) {
+            val base = MockPhotoReviewRepository(MockPhotoReviewScenario.READY)
+            val repo = object : PhotoReviewRepository by base {
+                override suspend fun loadReview(): PhotoReviewState {
+                    throw BottleMapApiException(
+                        code = "NETWORK_ERROR",
+                        message = "Cannot reach the BottleMap backend. Check the server and network.")
+                }
+            }
+            val vm = PhotoReviewViewModel(repo)
+            val state = vm.load.value as PhotoReviewLoad.Error
+            assertEquals(ReviewLoadErrorKind.NETWORK, state.kind)
+            assertEquals("인터넷 연결을 확인한 뒤 다시 시도해 주세요.", state.message)
+            val events = vm.collectEvents(backgroundScope)
+            vm.leave()
+            assertTrue(PhotoReviewEvent.Leave in events)
+        }
+
+    @Test fun reviewLoadHttpFailureDoesNotExposeServerExceptionDetails() {
+        val state = reviewLoadError(BottleMapApiException(
+            httpStatus = 500, code = "HTTP_500",
+            message = "Internal server stack trace with secrets"))
+        assertEquals(ReviewLoadErrorKind.OTHER, state.kind)
+        assertFalse(state.message.contains("stack trace"))
+    }
+
     @Test fun cardsStartFoldedAndExpandOnlyWhenAsked() = runTest(dispatcher) {
         val vm = vm()
         assertTrue(vm.state.items.none { it.expanded })
