@@ -37,6 +37,27 @@ class BarDetailViewModelTest {
     }
 
     @Test
+    fun aliasFallbackTriggersOnlyForActualLocalMiss() {
+        assertTrue(barAliasLookupNeeded("ardbeg10", hasLocalMatch = false))
+        assertFalse(barAliasLookupNeeded("ardbeg10", hasLocalMatch = true))
+        assertFalse(barAliasLookupNeeded("a", hasLocalMatch = false))
+        assertFalse(barAliasLookupNeeded("  ", hasLocalMatch = false))
+    }
+
+    @Test
+    fun aliasFallbackStatesDoNotLeakAcrossEditedQueries() {
+        val failed = BarAliasLookupState(query = "ardbeg10", failed = true)
+        assertEquals(failed, queryScopedBarAlias(failed, "ardbeg10"))
+        assertNull(queryScopedBarAlias(failed, "lagavulin"))
+        assertNull(queryScopedBarAlias(failed, ""))
+        val loading = BarAliasLookupState(query = "ardbeg10", loading = true)
+        assertTrue(queryScopedBarAlias(loading, "ardbeg10")!!.loading)
+        val ready = BarAliasLookupState(query = "ardbeg10", productIds = setOf("p-1"))
+        assertEquals(setOf("p-1"), queryScopedBarAlias(ready, "ardbeg10")!!.productIds)
+        assertNull(queryScopedBarAlias(ready, "ardbeg10 16"))
+    }
+
+    @Test
     fun loadsGivenBarIdAndPreservesAllPublishedEntriesAndOptions() = runTest(dispatcher) {
         val fake = FakeSource { response(it) }
         val vm = BarDetailViewModel(fake)
