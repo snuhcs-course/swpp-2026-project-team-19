@@ -205,7 +205,7 @@ class OwnerRegistrationV4ComposeTest {
         waitFor("사업자 정보가\n확인됐어요")
         compose.onNodeWithText("다음").performClick()
         for (page in listOf("매장 이름을\n알려주세요", "매장 사진을\n올려 주세요",
-            "매장 주소를\n알려주세요", "매장 번호를\n알려주세요",
+            "매장 주소를\n알려주세요", "매장 전화번호를\n알려주세요",
             "메뉴판 사진을\n올려 주세요", "연락받을 번호를\n알려주세요")) {
             waitFor(page)
             compose.onNodeWithText("다음").performClick()
