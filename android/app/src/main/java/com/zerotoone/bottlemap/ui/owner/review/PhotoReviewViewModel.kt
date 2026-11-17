@@ -27,8 +27,25 @@ import kotlinx.coroutines.sync.withLock
 sealed interface PhotoReviewLoad {
     data object Loading : PhotoReviewLoad
     data object Applied : PhotoReviewLoad
-    data class Error(val message: String) : PhotoReviewLoad
+    data class Error(val message: String, val kind: ReviewLoadErrorKind = ReviewLoadErrorKind.OTHER) : PhotoReviewLoad
     data class Ready(val review: PhotoReviewState) : PhotoReviewLoad
+}
+
+enum class ReviewLoadErrorKind { NETWORK, AUTH, FORBIDDEN, OTHER }
+
+/** Screen-safe message: never print Retrofit/OkHttp or coroutine diagnostics. */
+internal fun reviewLoadError(error: Throwable): PhotoReviewLoad.Error {
+    val api = error as? BottleMapApiException
+    return when {
+        api?.code == "NETWORK_ERROR" ->
+            PhotoReviewLoad.Error("인터넷 연결을 확인한 뒤 다시 시도해 주세요.", ReviewLoadErrorKind.NETWORK)
+        api?.httpStatus == 401 ->
+            PhotoReviewLoad.Error("로그인이 만료됐어요. 다시 로그인해 주세요.", ReviewLoadErrorKind.AUTH)
+        api?.httpStatus == 403 ->
+            PhotoReviewLoad.Error("검수할 권한이 없어요. 매장 관리에서 권한을 확인해 주세요.", ReviewLoadErrorKind.FORBIDDEN)
+        else ->
+            PhotoReviewLoad.Error("검수 정보를 불러오지 못했어요. 다시 시도해 주세요.")
+    }
 }
 
 enum class PublishFailure { NETWORK, SERVER, FORBIDDEN, VALIDATION, CONFLICT, AUTH, UNKNOWN }
@@ -157,7 +174,7 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                     } catch (cancelled: CancellationException) {
                         throw cancelled
                     } catch (error: Exception) {
-                        PhotoReviewLoad.Error(error.message ?: "검수 정보를 불러오지 못했어요.")
+                        reviewLoadError(error)
                     }
                 }
             }
