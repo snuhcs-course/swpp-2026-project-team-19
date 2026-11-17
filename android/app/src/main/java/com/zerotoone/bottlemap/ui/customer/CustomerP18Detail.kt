@@ -59,6 +59,7 @@ import com.zerotoone.bottlemap.network.BarWeeklyHoursDto
 import com.zerotoone.bottlemap.ui.common.BmIcon
 import com.zerotoone.bottlemap.ui.common.BmIconId
 import com.zerotoone.bottlemap.ui.theme.BottleMapPalette
+import com.zerotoone.bottlemap.data.CustomerRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -196,6 +197,29 @@ internal fun CustomerP18BarDetail(
     // Owner customer-preview uses one exclusive panel: hours | address | phone.
     var expanded by rememberSaveable(bar.barId) {mutableStateOf("")}
     var menuQuery by rememberSaveable(bar.barId) {mutableStateOf("")}
+    var resolvedProductQuery by remember(bar.barId) {mutableStateOf("")}
+    var resolvedProductIds by remember(bar.barId) {mutableStateOf<Set<String>>(emptySet())}
+    // The local bar-menu filter cannot interpret catalog aliases and
+    // embeddings. If no local row matches, reuse the EXISTING public product
+    // search contract (§3.10) and intersect product IDs with this bar's menu.
+    // Product-less bar-local menu rows continue to use on-device text only.
+    LaunchedEffect(bar.barId, menuQuery) {
+        resolvedProductQuery = ""
+        resolvedProductIds = emptySet()
+        val query = menuQuery.trim()
+        if (query.length < 2 || bar.items.any {
+                barMenuMatchesQuery(it.menuDisplayName, it.brandName, query)
+            }) return@LaunchedEffect
+        delay(350)
+        val result = runCatching {
+            CustomerRepository().searchProduct(
+                query = query, productId = null, source = "input",
+                latitude = null, longitude = null)
+        }.getOrNull() ?: return@LaunchedEffect
+        resolvedProductIds = result.matchedProducts.map { it.productId }.toSet() +
+            result.items.filter { it.barId == bar.barId }.map { it.productId }
+        resolvedProductQuery = query
+    }
     // Product-search navigation opens only the matching category. Once opened,
     // the regular category accordion still closes and reopens on user taps.
     // A normal bar visit has no search target. Product-less rows also
@@ -391,7 +415,10 @@ internal fun CustomerP18BarDetail(
                 modifier=Modifier.fillMaxWidth().padding(16.dp),
                 color=P18Muted,textAlign=TextAlign.Center)
             val filtered=bar.items.filter {
-                barMenuMatchesQuery(it.menuDisplayName,it.brandName,menuQuery)
+                barMenuMatchesQuery(it.menuDisplayName,it.brandName,menuQuery) ||
+                    (menuQuery.isNotBlank() &&
+                        resolvedProductQuery == menuQuery.trim() &&
+                        it.productId != null && it.productId in resolvedProductIds)
             }
             val categories=filtered.groupBy{it.category.ifBlank{"whisky"}}
             categories.forEach { (category,menu) ->
