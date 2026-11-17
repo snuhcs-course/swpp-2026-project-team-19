@@ -37,6 +37,33 @@ class BarDetailViewModelTest {
     }
 
     @Test
+    fun settledValidSearchWithNoMatchesShowsCenteredEmptyHint() {
+        val settled = BarAliasLookupState(query = "찾을수없는메뉴")
+        assertTrue(barMenuSearchHasNoResults(
+            "찾을수없는메뉴", true, false, null, settled))
+        assertFalse(barMenuSearchHasNoResults(
+            "", true, false, null, settled))
+        assertFalse(barMenuSearchHasNoResults(
+            "찾을수없는메뉴", false, false, null, settled))
+        assertFalse(barMenuSearchHasNoResults(
+            "찾을수없는메뉴", true, true, null, settled))
+        assertFalse(barMenuSearchHasNoResults(
+            "!!!", true, false, "검색할 수 있는 문자가 없어요.",
+            BarAliasLookupState(query = "!!!", validationMessage = "invalid")))
+        assertFalse(barMenuSearchHasNoResults(
+            "찾을수없는메뉴", true, false, null, null)) // debouncing
+        assertFalse(barMenuSearchHasNoResults(
+            "찾을수없는메뉴", true, false, null,
+            BarAliasLookupState(query = "찾을수없는메뉴", loading = true)))
+        assertFalse(barMenuSearchHasNoResults(
+            "찾을수없는메뉴", true, false, null,
+            BarAliasLookupState(query = "찾을수없는메뉴", failed = true)))
+        assertFalse(barMenuSearchHasNoResults(
+            "찾을수없는메뉴", true, false, null,
+            BarAliasLookupState(query = "이전검색어")))
+    }
+
+    @Test
     fun barDetailUnsearchableQueryShowsValidationNotNetworkRetry() {
         assertEquals("검색할 수 있는 문자가 없어요. 검색어를 다시 입력해 주세요.",
             barAliasLocalValidation("!!!"))
