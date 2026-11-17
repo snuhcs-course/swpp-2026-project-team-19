@@ -60,6 +60,18 @@ private fun regStage(page: RegPage): Int = when(page) {
     RegPage.CONTACT, RegPage.REVIEW -> 4
     else -> 0
 }
+/** Verification belongs to the exact inputs sent to the live business check. */
+internal fun ownerBusinessVerificationKey(draft: MockRegistrationDraft): String =
+    listOf(
+        draft.businessNumberDigits.filter(Char::isDigit),
+        draft.representativeName.trim(),
+        draft.openingDateIso.trim().replace(".", "-"),
+    ).joinToString("|")
+
+internal fun ownerBusinessVerificationIsCurrent(
+    verifiedKey: String?, draft: MockRegistrationDraft,
+): Boolean = verifiedKey != null && verifiedKey == ownerBusinessVerificationKey(draft)
+
 private fun bnFormat(s:String):String {
     val n=ownerBusinessDigits(s)
     return when {
@@ -110,6 +122,7 @@ fun OwnerOnboardingScreen(
     var history by rememberSaveable { mutableStateOf(listOf<String>()) }
     var inputMethod by rememberSaveable { mutableStateOf("manual") }
     var verify by rememberSaveable { mutableStateOf(VerifyFixture.MATCHED) }
+    var verifiedBusinessKey by rememberSaveable { mutableStateOf<String?>(null) }
     var showCertificateSheet by remember { mutableStateOf(false) }
     var certificateCapturePath by rememberSaveable { mutableStateOf<String?>(null) }
     var showMenuPhotoSource by remember { mutableStateOf(false) }
@@ -132,7 +145,16 @@ fun OwnerOnboardingScreen(
         is MockOwnerLoadState.Empty -> now.snapshot.registrationDraft
         else -> null
     }
-    fun save(value:MockRegistrationDraft){ viewModel.saveRegistrationDraft(value);error=null }
+    fun save(value:MockRegistrationDraft){
+        if(ownerBusinessVerificationKey(value) !=
+            ownerBusinessVerificationKey(latestDraft() ?: draft)) {
+            // Any edited BN/name/opening date invalidates the previous check.
+            verifiedBusinessKey = null
+            verify = VerifyFixture.UNAVAILABLE
+        }
+        viewModel.saveRegistrationDraft(value)
+        error=null
+    }
     fun checkpoint(target:RegPage){
         if(!registrationCheckpointable(target.name))return
         val current=latestDraft() ?: if(target==RegPage.METHOD) MockRegistrationDraft() else return
@@ -337,6 +359,9 @@ fun OwnerOnboardingScreen(
         draft.proposedBarName.isNotBlank() &&
             it.name.trim().equals(draft.proposedBarName.trim(),ignoreCase=true)
     }
+    val verificationCurrent = !viewModel.usesProductionOwnerApi() ||
+        ownerBusinessVerificationIsCurrent(verifiedBusinessKey, draft)
+    val displayedVerification = if(verificationCurrent) verify else VerifyFixture.UNAVAILABLE
     val validContact=draft.contactPhone.isNotBlank()&&validOwnerPhone(draft.contactPhone)
     val businessPrecheck=ownerRegistrationPrecheckError(
         draft.businessNumberDigits, draft.representativeName, draft.openingDateIso)
@@ -347,7 +372,7 @@ fun OwnerOnboardingScreen(
         RegPage.BARNAME,RegPage.BARPHOTO,RegPage.ADDRESS,RegPage.BARPHONE,
         RegPage.MENUS,RegPage.CONTACT->"다음"
         RegPage.BIZCHECK->"확인하기"
-        RegPage.VERIFIED->when(verify) {
+        RegPage.VERIFIED->when(displayedVerification) {
             VerifyFixture.FAILED->"다시 확인하기"
             VerifyFixture.UNAVAILABLE->"계속하기"
             VerifyFixture.LIMITED->"돌아가기"
@@ -384,11 +409,22 @@ fun OwnerOnboardingScreen(
             RegPage.BIZCHECK->if(viewModel.usesProductionOwnerApi()) {
                 if(!busy) {
                     busy=true
+                    val requested = latestDraft() ?: draft
+                    val requestKey = ownerBusinessVerificationKey(requested)
+                    verifiedBusinessKey = null
                     submitScope.launch {
                         try {
-                            verify=when(viewModel.verifyBusinessBeforeApplicationLive(
-                                draft.businessNumberDigits,draft.representativeName,
-                                draft.openingDateIso)) {
+                            val observed = viewModel.verifyBusinessBeforeApplicationLive(
+                                requested.businessNumberDigits,requested.representativeName,
+                                requested.openingDateIso)
+                            if(ownerBusinessVerificationKey(latestDraft() ?: requested) != requestKey) {
+                                // An asynchronous response is not valid for changed inputs.
+                                verify = VerifyFixture.UNAVAILABLE
+                                go(RegPage.BIZCHECK)
+                                return@launch
+                            }
+                            verifiedBusinessKey = requestKey
+                            verify=when(observed) {
                                 "matched" -> VerifyFixture.MATCHED
                                 "not_matched" -> VerifyFixture.FAILED
                                 else -> VerifyFixture.UNAVAILABLE
@@ -398,14 +434,17 @@ fun OwnerOnboardingScreen(
                             when {
                                 e.httpStatus==404 && e.code=="HTTP_404" -> {
                                     // The existing POST still performs NTS verification.
+                                    verifiedBusinessKey = requestKey
                                     verify=VerifyFixture.UNAVAILABLE
                                     go(RegPage.VERIFIED)
                                 }
                                 e.code=="RATE_LIMITED" -> {
+                                    verifiedBusinessKey = requestKey
                                     verify=VerifyFixture.LIMITED
                                     go(RegPage.VERIFIED)
                                 }
                                 e.code=="BUSINESS_VERIFICATION_UNAVAILABLE" -> {
+                                    verifiedBusinessKey = requestKey
                                     verify=VerifyFixture.UNAVAILABLE
                                     go(RegPage.VERIFIED)
                                 }
@@ -417,7 +456,9 @@ fun OwnerOnboardingScreen(
                     }
                 }
             } else go(RegPage.VERIFYING)
-            RegPage.VERIFIED->when(verify){
+            RegPage.VERIFIED->if(!verificationCurrent) {
+                go(RegPage.BIZCHECK)
+            } else when(displayedVerification){
                 VerifyFixture.MATCHED,VerifyFixture.UNAVAILABLE->forward(RegPage.BARNAME)
                 VerifyFixture.FAILED->go(RegPage.BIZCHECK)
                 VerifyFixture.LIMITED->{history=emptyList();onBack()}
@@ -705,7 +746,7 @@ fun OwnerOnboardingScreen(
                     RegPage.VERIFYING -> RegistrationCenterContent(
                         "사업자 정보를\n확인하고 있어요","국세청 정보와 비교하고 있어요.",loading=true)
                     RegPage.VERIFIED -> {
-                        when(verify){
+                        when(displayedVerification){
                             VerifyFixture.MATCHED->RegistrationCenterContent(
                                 "사업자 정보가\n확인됐어요","이제 매장 정보를 알려주세요.")
                             VerifyFixture.FAILED->RegistrationVerifyException(OwnerVerifyOutcome.MISMATCH)
