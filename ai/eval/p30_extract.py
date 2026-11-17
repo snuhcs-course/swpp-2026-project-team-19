@@ -160,7 +160,10 @@ FROZEN_MATCHING = {
 # the matching rules. The I3 hashes above stay as the record of what P30 ran with. The check skips
 # the released files and every command says so, since a run on this checkout no longer measures
 # the I3 configuration.
-RELEASED_MATCHING = ("backend/app/matching/staged.py",)
+# 2026-11-17 (I4-P46): ai/eval/i3_match_eval.py too. It gained the ops catalog, bar groups and
+# --server-steps; its asis and full catalogs and its rules and LLM results are as before (the
+# recorded I3 asis digest is pinned in test_i3_match_eval.py).
+RELEASED_MATCHING = ("backend/app/matching/staged.py", "ai/eval/i3_match_eval.py")
 RUNS = (1, 2, 3)  # freeze 3장: r1-r3
 PHOTO_HASHES = REPO_ROOT / "ai" / "eval" / "i3_photo_sha256.json"
 # SHA-256 (CRLF read as LF) of ai/eval/i3_photo_sha256.json as frozen in 15b1eff (#69). The photo

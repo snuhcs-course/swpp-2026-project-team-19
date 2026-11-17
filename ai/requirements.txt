@@ -4,3 +4,5 @@ pydantic==2.13.5
 python-dotenv==1.2.4
 pytest==9.1.1
 pytest-cov==7.1.0
+# i3_match_eval.py --server-steps imports the server embedding step (app.matching.embedding), which imports the models
+sqlalchemy==2.1.3

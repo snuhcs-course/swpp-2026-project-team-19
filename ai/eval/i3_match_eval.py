@@ -26,6 +26,25 @@ Catalogs (built per bar; aliases whose only sources are that bar's own menu are 
   i3   asis           the catalog file as served (aliases as in service); I3-only products absent
        full           asis + every new:<key> product the gold refers to, with its standard English
                       name as the only alias (a new brand gets its English name as the only alias)
+       ops            (I4-P46) the catalog the server loads: the catalog file plus
+                      catalog_v2_service_i3_additions.json (the 61 I3 products with their Korean
+                      aliases, added after the I3 test). Not unseen: see "ops" below
+
+A bar's own menu aliases are dropped as before, and so are those of the bars in its group
+(BAR_GROUPS: the two 연림 branches print the same menu, so one branch's spellings are the
+other's own). The service catalog has no alias from an I3 menu, so asis and full are unchanged.
+
+ops: the I3 additions were written from the I3 gold after the test, and their generated Korean
+aliases were written by someone who had seen the I3 menus. Numbers on ops say what the deployed
+catalog does on these bars; they are not a measurement on unseen bars, and asis/full stay the
+comparison with I3.
+
+--server-steps (I4-P46) adds result["server"]: the result of the matcher (rules, or rules + LLM
+with --llm) taken through the rest of menu import as deployed code runs it
+(menu_import_processing._resolve_and_draft): the embedding candidate step (TF-IDF, the server's
+default floor) on the bar's catalog texts, the linking guards, and the stored status
+(review_state.stored_status: exact_match only for a line that needs no review, so a line naming
+two products is stored ambiguous). It needs the rules checkout to have those modules.
 
 Gemini responses are cached by (model, thinking level, prompt SHA-256, input JSON), the
 key and file format of ai/match_llm/llm.py, so the E8 cache answers the dev check. A run
@@ -64,7 +83,10 @@ DEV_GOLD = {"위스키복춘": "eval/match_gold_v1_1.json", "서로상": "eval/m
 DEV_LABELS = {"위스키복춘": "eval/labels_v1_1.json", "서로상": "eval/labels_v1_1.json",
               "미라보": "eval/labels_heldout_v1_1.json", "수이": "eval/labels_final_v1.json",
               "오드비": "eval/labels_final_v1.json"}
-CATALOGS = {"dev": ("eval", "eval_dropprod", "service"), "i3": ("full", "asis")}
+CATALOGS = {"dev": ("eval", "eval_dropprod", "service"), "i3": ("full", "asis", "ops")}
+# Bars that print the same menu: one's menu aliases count as the other's own (I4-P46).
+BAR_GROUPS = (frozenset({"연림 서울대입구역점", "연림 봉천역점"}),)
+ADDITIONS_FILE = "ai/catalog/catalog_v2_service_i3_additions.json"  # loaded by seed_catalog.py with the catalog
 STAGES = frozenset({"S1", "S2", "S2b", "S3"})
 CONFIRMED = ("exact_match", "multi")
 NEW_NS = uuid.UUID("6f1d3f0e-6c8a-4d5e-9b1a-2b7c3d4e5f60")  # match_eval.NEW_NS: ids of new:<key> products
@@ -202,12 +224,27 @@ class BarCatalog:
     key_to_id: dict
     display: dict  # product id -> display name (every seed product and every added new product)
     digest: str
+    entries: list = field(default_factory=list)  # (text, product id): display names and kept aliases (embedding index)
+
+
+def own_bars(bar: str) -> frozenset[str]:
+    """The bar and the bars of its group (BAR_GROUPS)."""
+    return next((group for group in BAR_GROUPS if bar in group), frozenset({bar}))
+
+
+def with_additions(seed: dict, additions: dict) -> dict:
+    """The catalog the server loads: the service catalog and the I3 additions as one seed."""
+    keys = {p["key"] for p in seed["products"]}
+    clash = sorted(p["key"] for p in additions["products"] if p["key"] in keys)
+    if clash:
+        raise SystemExit(f"products in both the catalog and the additions: {clash[:5]}")
+    return {**seed, "brands": seed["brands"] + additions["brands"], "products": seed["products"] + additions["products"]}
 
 
 def build_catalog(be: Backend, bar: str, variant: str, seed: dict, new_products: dict | None = None,
                   eval_filter: str = "only-generated") -> BarCatalog:
     """One bar's catalog (see the module docstring). `new_products`: added for "full"."""
-    own = {f"menu:{bar}"}
+    own = {f"menu:{b}" for b in own_bars(bar)}
     drop_prod = set()
     if variant == "eval_dropprod":
         drop_prod = {p["key"] for p in seed["products"] if set(p.get("sources", [])) == own}
@@ -267,8 +304,10 @@ def build_catalog(be: Backend, bar: str, variant: str, seed: dict, new_products:
         "aliases": sorted([str(pid), text] for pid, text in aliases),
         "brand_aliases": sorted([str(bid), text] for bid, text in brand_aliases),
     }, ensure_ascii=False, sort_keys=True)
+    entries = list(dict.fromkeys([(x.display_name, x.product_id) for x in products]
+                                 + [(text, pid) for pid, text in aliases]))
     return BarCatalog(be.InMemoryCatalog(products, aliases, brand_aliases), key_to_id, display,
-                      sha256_bytes(canonical.encode("utf-8")))
+                      sha256_bytes(canonical.encode("utf-8")), entries)
 
 
 def catalog_digest(bar_catalogs: dict[str, BarCatalog]) -> str:
@@ -425,13 +464,20 @@ def product_meta(layer, seed: dict, new_products: dict | None) -> dict:
     return out
 
 
+def dotenv_key() -> str:
+    """GEMINI_API_KEY of the repo .env, as the extraction runners read it; never printed."""
+    from dotenv import dotenv_values
+    return (dotenv_values(REPO_ROOT / ".env").get("GEMINI_API_KEY") or "").strip()
+
+
 def make_llm(args, layer):
     from app.adapters.matching_llm import MODEL, THINKING_LEVEL
     inner = None
     if not args.cache_only:
-        key = os.environ.get("GEMINI_API_KEY")
+        key = os.environ.get("GEMINI_API_KEY") or dotenv_key()
         if not key:
-            raise SystemExit("GEMINI_API_KEY is not set (use --cache-only to score from the cache)")
+            raise SystemExit("GEMINI_API_KEY is not set in the environment or the repo .env "
+                             "(use --cache-only to score from the cache)")
         from app.adapters.gemini_matching_llm import GeminiMatchingLLM
         inner = GeminiMatchingLLM(key)
     kinds = {sha256_bytes(layer.load_prompt(layer.TRANSLATE_PROMPT).encode("utf-8")): "m3a",
@@ -568,9 +614,10 @@ def run_tools(args, layer, be, seed, new_products, photos, bars, bar_catalogs, t
     elif args.cache_only:
         inners = {}
     else:
-        key = os.environ.get("GEMINI_API_KEY")
+        key = os.environ.get("GEMINI_API_KEY") or dotenv_key()
         if not key:
-            raise SystemExit("GEMINI_API_KEY is not set (use --cache-only to score from the cache)")
+            raise SystemExit("GEMINI_API_KEY is not set in the environment or the repo .env "
+                             "(use --cache-only to score from the cache)")
         from app.adapters.gemini_tool_llm import GeminiToolLLM
         inners = {m: GeminiToolLLM(key, m) for m in models}
     llm = CachedToolLLM(inners, models, args.cache, args.seed_cache, thinking="low", cache_only=args.cache_only,
@@ -626,6 +673,48 @@ def run_tools(args, layer, be, seed, new_products, photos, bars, bar_catalogs, t
         "tool_prompt_sha256": sha256_bytes(layer.load_prompt(tool_layer.TOOL_PROMPT).encode("utf-8")),
         "tool_layer_sha256": sha256_file(Path(tool_layer.__file__)),
     }
+
+
+# ---- the rest of menu import (--server-steps) ---------------------------------------------
+
+def server_steps(photos: list[Photo], bar_catalogs: dict[str, BarCatalog], resolved: dict) -> tuple[dict, dict]:
+    """`resolved` through what menu import does after the matcher (_resolve_and_draft): the
+    embedding candidate step, the linking guards and the stored status. Returns the results and
+    what each step changed. The embedding index of a bar holds that bar's catalog texts
+    (display names and kept aliases), as the server indexes what the rule matcher matches."""
+    from dataclasses import replace
+    try:
+        embedding = importlib.import_module("app.matching.embedding")
+        provider_module = importlib.import_module("app.adapters.embedding")
+        guards = importlib.import_module("app.matching.linking_guards")
+        review = importlib.import_module("app.matching.review_state")
+    except ModuleNotFoundError as error:
+        raise SystemExit(f"--server-steps needs the I4 server matching steps in the rules checkout: {error}") from None
+    provider = provider_module.CharTfidfProvider()
+    floor = provider_module.DEFAULT_MIN_SIMILARITY["tfidf"]
+    indexes = {bar: embedding.EmbeddingIndex(provider, bc.entries, ("harness", bc.digest))
+               for bar, bc in bar_catalogs.items()}
+    out, counts = {}, Counter()
+    for photo in photos:
+        bc = bar_catalogs[photo.bar]
+        names = list(dict.fromkeys(name for name, _ in photo.lines))
+        targets = [n for n in names if embedding._is_target(resolved[(photo.photo_id, n)])]
+        rankings = dict(zip(targets, indexes[photo.bar].search(targets))) if targets else {}
+        for name in names:
+            before = resolved[(photo.photo_id, name)]
+            after = before
+            if name in rankings:
+                after = embedding.apply_policy(before, rankings[name], min_similarity=floor, model_id=provider.model_id)
+                if after is not before:
+                    counts["embedding_filled" if before.status == "unmatched" else "embedding_reordered"] += 1
+            guarded = guards.apply_linking_guards(name, after, bc.catalog)
+            counts["guard_took_confirmation"] += guarded.status != after.status
+            status = review.stored_status(guarded)
+            if status != guarded.status:
+                counts[f"stored_{guarded.status}_as_{status}"] += 1
+                guarded = replace(guarded, status=status)
+            out[(photo.photo_id, name)] = guarded
+    return out, {"embedding_model": provider.model_id, "embedding_min_similarity": floor, "changed": dict(counts)}
 
 
 # ---- scoring ------------------------------------------------------------------------------
@@ -755,6 +844,9 @@ def parse_args(argv=None):
     ap.add_argument("--tools-model", default="gemini-3.1-flash-lite")
     ap.add_argument("--tools-fallback", default="gemini-3.5-flash-lite", help="used after a quota error; '' for none")
     ap.add_argument("--tools-stub", action="store_true", help="TEST ONLY: a local stub instead of Gemini")
+    ap.add_argument("--additions-file", type=Path, help=f"--catalog ops; default: <rules-repo>/{ADDITIONS_FILE}")
+    ap.add_argument("--server-steps", action="store_true",
+                    help="also score the result after the embedding step, the linking guards and the stored status")
     ap.add_argument("--json", type=Path, required=True)
     args = ap.parse_args(argv)
     if args.catalog not in CATALOGS[args.set_]:
@@ -765,6 +857,8 @@ def parse_args(argv=None):
         ap.error("--extraction and --run go together")
     if args.extraction and args.set_ != "i3":
         ap.error("--extraction is for --set i3")
+    if args.server_steps and args.llm and args.llm_mode == "tools":
+        ap.error("--server-steps is for rules or rules + M3a")
     return args
 
 
@@ -775,6 +869,11 @@ def main(argv=None) -> dict:
     catalog_file = (args.catalog_file or rules_repo / "ai" / "catalog" / "catalog_v2_service.json").resolve()
     seed = json.loads(catalog_file.read_text(encoding="utf-8"))
     dev = args.set_ == "dev"
+    additions_sha = None
+    if args.catalog == "ops":
+        additions_file = (args.additions_file or rules_repo / ADDITIONS_FILE).resolve()
+        seed = with_additions(seed, json.loads(additions_file.read_text(encoding="utf-8")))
+        additions_sha = sha256_file(additions_file)
 
     gold_sha = None
     new_products = None
@@ -822,12 +921,15 @@ def main(argv=None) -> dict:
         "rules_repo_head": git_head(rules_repo), "catalog_file": catalog_file.name,
         "catalog_version": seed.get("version"), "catalog_file_sha256": sha256_file(catalog_file),
         "catalog_digest": catalog_digest(bar_catalogs), "gold_sha256": gold_sha,
+        "additions_file_sha256": additions_sha,
+        "bar_groups": [sorted(group) for group in BAR_GROUPS if group & set(bars)],
         "new_products_added": len(new_products or {}), "eval_filter": args.eval_filter if dev else None,
         "coverage": coverage(be, photos, bar_catalogs, dev),
         "photos": len(photos), "lines": sum(len(p.lines) for p in photos),
         "rules": {**summarize(rules_rows, photos, missed_known), "rows": rules_rows},
     }
 
+    final, final_complete = base, True  # what the matcher (rules, or rules + M3a) gave: input of --server-steps
     if args.llm and args.llm_mode == "tools":
         layer = load_llm_layer()
         result["llm"] = run_tools(args, layer, be, seed, new_products, photos, bars, bar_catalogs, targets, base,
@@ -875,6 +977,7 @@ def main(argv=None) -> dict:
                 resolved[(photo.photo_id, name)] = (b if b.status in CONFIRMED else engines[photo.bar].resolve(
                     photo.photo_id, name, bar_catalogs[photo.bar].catalog, b, use_m3b=False))
         llm_rows = rows_for(resolved)
+        final, final_complete = resolved, stop is None and llm.counts["cache_miss"] == 0
         lat = [p["latency_ms"] for p in photo_runs if p.get("latency_ms") is not None]
         result["llm"] = {
             **summarize(llm_rows, photos, missed_known), "rows": llm_rows, "photo_runs": photo_runs,
@@ -887,6 +990,11 @@ def main(argv=None) -> dict:
             "translate_prompt_sha256": sha256_bytes(layer.load_prompt(layer.TRANSLATE_PROMPT).encode("utf-8")),
             "llm_layer_sha256": sha256_file(Path(layer.__file__)),
         }
+
+    if args.server_steps:
+        served, steps = server_steps(photos, bar_catalogs, final)
+        result["server"] = {**summarize(rows_for(served), photos, missed_known), "rows": rows_for(served),
+                            "after": "llm" if final is not base else "rules", "complete": final_complete, **steps}
 
     args.json.parent.mkdir(parents=True, exist_ok=True)
     args.json.write_text(json.dumps(result, ensure_ascii=False, indent=1, default=str) + "\n", encoding="utf-8")
@@ -905,11 +1013,11 @@ def print_summary(result: dict) -> None:
     print(f"{result['set']}/{result['catalog']} ({result['input']}): {result['photos']} photos, {result['lines']} lines,"
           f" catalog {result['catalog_version']} digest {result['catalog_digest'][:12]},"
           f" coverage {cov['covered']}/{cov['product_lines']}")
-    for matcher in ("rules", "llm"):
+    for matcher in ("rules", "llm", "server"):
         if matcher not in result:
             continue
         a = result[matcher]["all"]
-        print(f"  {matcher:5s} Top-1 {fmt(a['top1'])} ({a['correct']}/{a['known']})  FM {a['fm']}"
+        print(f"  {matcher:6s} Top-1 {fmt(a['top1'])} ({a['correct']}/{a['known']})  FM {a['fm']}"
               f"  wrong CR {a['wrong_cr']}  accept-err {fmt(a['accept_err_rate'], 4)}"
               f"  hard/photo {fmt(a['hard_per_photo'], 2)}  CR rule {a['cr_rule']['correct']}/{a['cr_rule']['n']}"
               f"  CR LLM {a['cr_llm']['correct']}/{a['cr_llm']['n']}")
