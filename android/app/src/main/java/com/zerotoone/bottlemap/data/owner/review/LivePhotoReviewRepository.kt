@@ -135,6 +135,24 @@ internal object DraftRecoveryPolicy {
     }
 }
 
+/** Prefer the latest known locally edited checkpoint when it was based on
+ * the *current* server CAS. An older working/pending file cannot replace it.
+ * The caller still verifies OCR identity and decodability before restoring. */
+internal fun currentBaseUnsentReviewCopy(
+    server: ReviewDraftDto?, reviewVersion: Int,
+    checkpoint: PendingReviewDraftStore.Envelope?,
+    working: PendingReviewDraftStore.Envelope?,
+    pending: PendingReviewDraftStore.Envelope?,
+): PendingReviewDraftStore.Envelope? = server?.takeIf {
+    it.reviewVersion == reviewVersion
+}?.let { current ->
+    listOfNotNull(checkpoint, working, pending).firstOrNull { copy ->
+        copy.reviewVersion == reviewVersion &&
+            copy.expectedDraftVersion == current.draftVersion &&
+            !ServerReviewDraftCodec.sameAndroidSnapshot(copy.content, current.content)
+    }
+}
+
 /** Automatic, prompt-free sequential device handoff. A newer, readable server
  * CAS version is authoritative when an old device has a divergent stale copy.
  * Never discard pending work when the server has NOT advanced, nor when the
@@ -471,6 +489,8 @@ class LivePhotoReviewRepository(
         val previousAttempt = if (newerCheckpoint) working else pending
         val recovery = DraftRecoveryPolicy.decide(
             saved, device, previousAttempt, reviewVersion)
+        val currentBaseEdit = currentBaseUnsentReviewCopy(
+            saved, reviewVersion, checkpoint, working, pending)
         if (device != null) {
             val local = ServerReviewDraftCodec.decode(ReviewDraftDto(
                 device.expectedDraftVersion, device.reviewVersion,
@@ -479,6 +499,25 @@ class LivePhotoReviewRepository(
             val safeLocal = sameReviewSourceIds(
                 device.itemIds, state.items.map { it.id }) && compatible(local)
             when {
+                currentBaseEdit != null && canRestore -> {
+                    // This is a *newer local edit*, not a stale device copy.
+                    // Resume its version-checked PUT; do not discard it when
+                    // an older working file happens to be selected first.
+                    val currentEditState = ServerReviewDraftCodec.decode(ReviewDraftDto(
+                        currentBaseEdit.expectedDraftVersion,
+                        currentBaseEdit.reviewVersion,
+                        "1970-01-01T00:00:00Z", currentBaseEdit.content,
+                    ))?.takeIf(::compatible)
+                        ?: error("검수 내용을 안전하게 복원하지 못했어요. 다시 시도해 주세요.")
+                    require(sameReviewSourceIds(
+                        currentBaseEdit.itemIds, state.items.map { it.id })) {
+                        "검수 항목을 다시 확인해 주세요."
+                    }
+                    chosen = currentEditState
+                    pendingLocally = true
+                    pendingOversized = ServerReviewDraftCodec.exceedsServerLimit(
+                        currentBaseEdit.content)
+                }
                 recovery == DraftRecoveryPolicy.Outcome.ACKNOWLEDGED &&
                     selectedWorking && canRestore && safeLocal &&
                     // A successful CAS can clear pending before the following
