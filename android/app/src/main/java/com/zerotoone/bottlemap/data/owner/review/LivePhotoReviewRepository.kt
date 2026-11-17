@@ -336,6 +336,23 @@ class LivePhotoReviewRepository(
                 compatible(local)
             when {
                 recovery == DraftRecoveryPolicy.Outcome.ACKNOWLEDGED &&
+                    working != null && pending != null && canRestore && safeLocal &&
+                    DraftSaveSafety.latestCopyAcknowledged(saved, pending, working) -> {
+                    // A lost response to an explicit local CAS can leave both
+                    // the protected original and its later working copy on device.
+                    // The server already has the *working* content. Do not
+                    // incorrectly enter conflict again or discard the original.
+                    chosen = requireNotNull(local)
+                    pendingLocally = false
+                    pendingOversized = false
+                    // Preserve both local copies: the working one proves this
+                    // acknowledgement on a later reload; the older backup is
+                    // still protected until a subsequent accepted write.
+                    if (checkpoint != null &&
+                        ServerReviewDraftCodec.sameAndroidSnapshot(
+                            checkpoint.content, working.content)) checkpointStore.clear(id)
+                }
+                recovery == DraftRecoveryPolicy.Outcome.ACKNOWLEDGED &&
                     working == null && canRestore && safeLocal -> {
                     // This exact edit reached the server (including a lost
                     // 200 response). Only now can its device copies be removed.
@@ -662,6 +679,9 @@ class LivePhotoReviewRepository(
             // Clearing last is important for crashes during version rebase:
             // this attempted snapshot proves a lost server ACK was ours.
             pendingStore.clear(id)
+            // A later successful normal CAS supersedes any acknowledged
+            // conflict working-copy marker left for crash recovery.
+            if (!draftConflict && !pendingDraftConflict) workingStore.clear(id)
         }
     }
 
