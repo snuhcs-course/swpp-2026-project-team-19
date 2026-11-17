@@ -144,6 +144,30 @@ internal object DraftRecoveryPolicy {
  * A now-missing older pending backup cannot turn this into a foreign conflict.
  * Never acknowledge it if a newer checkpoint differs.
  */
+/** Resume a matching local CAS without a confirmation button.
+ * An independent, different checkpoint can still contain newer keystrokes,
+ * so never replace it with an older working copy.
+ */
+internal fun canResumeLocalReview(
+    outcome: DraftRecoveryPolicy.Outcome,
+    serverReadable: Boolean,
+    localCompatible: Boolean,
+    selectedWorking: Boolean,
+    local: PendingReviewDraftStore.Envelope,
+    checkpoint: PendingReviewDraftStore.Envelope?,
+    server: ReviewDraftDto?,
+): Boolean {
+    if (!serverReadable || !localCompatible ||
+        outcome !in setOf(
+            DraftRecoveryPolicy.Outcome.RESTORE,
+            DraftRecoveryPolicy.Outcome.REBASE)) return false
+    if (!selectedWorking || checkpoint == null) return true
+    return ServerReviewDraftCodec.sameAndroidSnapshot(
+        checkpoint.content, local.content) ||
+        ServerReviewDraftCodec.sameAndroidSnapshot(
+            checkpoint.content, server?.content)
+}
+
 /** A pre-ACK network attempt is not a newer edit than an acknowledged
  * checkpoint of the same review. Ignore only that proven stale pending slot. */
 internal fun supersededPendingReview(
@@ -466,16 +490,9 @@ class LivePhotoReviewRepository(
                             checkpoint, working).any {
                             ServerReviewDraftCodec.exceedsServerLimit(it.content) }
                 }
-                canRestore && safeLocal &&
-                    recovery in setOf(DraftRecoveryPolicy.Outcome.RESTORE,
-                        DraftRecoveryPolicy.Outcome.REBASE) &&
-                    // A working snapshot is safe to resume at matching CAS.
-                    // Never hide a different, still-unsent checkpoint.
-                    (!selectedWorking || checkpoint == null ||
-                        ServerReviewDraftCodec.sameAndroidSnapshot(
-                            checkpoint.content, device.content) ||
-                        ServerReviewDraftCodec.sameAndroidSnapshot(
-                            checkpoint.content, saved?.content)) -> {
+                canResumeLocalReview(
+                    recovery, canRestore, safeLocal, selectedWorking,
+                    device, checkpoint, saved) -> {
                     // Compatible unsent changes are editable immediately;
                     // normal CAS will synchronize them after the screen loads.
                     chosen = requireNotNull(local)
