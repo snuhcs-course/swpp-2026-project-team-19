@@ -231,6 +231,31 @@ class PendingReviewDraftStoreTest {
             listOf("line-a", "line-z"), listOf("line-a", "line-b")))
     }
 
+    @Test fun uneditedReloadDoesNotReplaceProtectedConflictDraft() = runBlocking {
+        fun snapshot(name: String) = ServerReviewDraftCodec.encode(
+            PhotoReviewState(items = listOf(ReviewItem(id = "ocr-1", name = name))))
+        val remoteDisplay = snapshot("current server version")
+        val protectedLocal = snapshot("edited on this device")
+        val store = PendingReviewDraftStore(context, slot = "working") {
+            jwt("protected-conflict")
+        }
+        val envelope = PendingReviewDraftStore.Envelope(
+            reviewVersion = 7, expectedDraftVersion = 5,
+            itemIds = listOf("ocr-1"), content = protectedLocal,
+        )
+        store.write("import-conflict-preserve", envelope)
+        assertFalse(isNewConflictReviewEdit(remoteDisplay, remoteDisplay))
+        // The Back handler must not write the displayed remote state over the
+        // protected local copy when the user made no edits after reloading.
+        if (isNewConflictReviewEdit(remoteDisplay, remoteDisplay)) {
+            store.write("import-conflict-preserve", envelope.copy(content = remoteDisplay))
+        }
+        assertTrue(ServerReviewDraftCodec.sameAndroidSnapshot(
+            protectedLocal,
+            requireNotNull(store.read("import-conflict-preserve")).content))
+        assertTrue(isNewConflictReviewEdit(protectedLocal, remoteDisplay))
+    }
+
     @Test fun manuallySplitChildIsCompatibleForBothRestoreAndExplicitOverwrite() {
         val fresh = PhotoReviewState(items = listOf(
             ReviewItem(id = "master", name = "위스키"),
