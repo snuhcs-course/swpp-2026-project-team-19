@@ -15,6 +15,7 @@ import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewRules.OptionField
 import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewRules.RematchOutcome
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -120,6 +121,7 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
     // Device file IO must never queue behind a slow remote PUT.
     private val draftCheckpointMutex = Mutex()
     private var latestDraftRevision = 0L
+    private var offlineCheckpoint: Job? = null
     private var leaving = false
     private val latestRematchRequest = mutableMapOf<String, Int>()
     private val latestCatalogSearchRequest = mutableMapOf<String, Int>()
@@ -193,11 +195,34 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
         _events.trySend(PhotoReviewEvent.Toast(message))
     }
 
+    /** The owner requires online-only review. A disconnected interaction is
+     * rejected before it changes UI state. Preserve only the PREVIOUS valid
+     * draft; never delete its recoverable device backup on a failed network.
+     * Reuse the existing Review Error / Retry page, not a new toast or modal.
+     */
+    private fun blockDisconnectedReview(): Boolean {
+        if (repository.hasUsableNetwork()) return false
+        val previous = review ?: return true
+        ++latestDraftRevision // Older queued saves cannot overwrite this checkpoint.
+        _load.value = PhotoReviewLoad.Error(
+            "인터넷 연결을 확인한 뒤 다시 시도해 주세요.", ReviewLoadErrorKind.NETWORK)
+        offlineCheckpoint = viewModelScope.launch(start = CoroutineStart.UNDISPATCHED) {
+            try {
+                draftCheckpointMutex.withLock { repository.checkpointDraft(previous) }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                _draftProblem.value = "기기 검수 초안 저장에 실패했어요."
+            }
+        }
+        return true
+    }
+
     /** Replaces the state without regrouping (typing, opening a modal). */
     private fun set(state: PhotoReviewState) {
         // Freeze the reviewed snapshot after the owner confirms a conflict
         // choice. Late input callbacks must not create edits during CAS.
-        if (_draftResolving.value) return
+        if (_draftResolving.value || blockDisconnectedReview()) return
         _load.value = PhotoReviewLoad.Ready(state)
         // Persist every field change, including unfinished typing, so a
         // process kill never discards the current owner review draft.
@@ -210,7 +235,7 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
      * "확인이 필요해요" group.
      */
     private fun mutate(change: (PhotoReviewState) -> PhotoReviewState) {
-        if (_draftResolving.value) return
+        if (_draftResolving.value || blockDisconnectedReview()) return
         val before = review ?: return
         val pendingBefore = PhotoReviewRules.stats(before).pending.size
         val oldGroups = before.items.associate { it.id to PhotoReviewRules.displayGroup(before, it) }
@@ -225,7 +250,8 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
         }
         val next = changed.copy(items = items, show = show, typingSnapshots = emptyMap())
         set(next)
-        if (PhotoReviewRules.stats(next).pending.size < pendingBefore) toast("확인 완료")
+        if (review === next && PhotoReviewRules.stats(next).pending.size < pendingBefore)
+            toast("확인 완료")
     }
 
     private fun mutateItem(id: String, change: (ReviewItem) -> ReviewItem) = mutate { s ->
@@ -305,7 +331,9 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                             _draftRetryable.value = recoverable
                             _draftProblem.value = if (recoverable) localOnlyNotice
                                 else error.message
-                            toast(_draftProblem.value.orEmpty())
+                            if (error.code == "NETWORK_ERROR" || (error.httpStatus ?: 0) >= 500)
+                                _load.value = reviewLoadError(error)
+                            else toast(_draftProblem.value.orEmpty())
                         }
                     } catch (error: IllegalStateException) {
                         _draftProblem.value = error.message ?: "검수 초안 저장에 실패했어요."
@@ -427,7 +455,15 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
         leaving = true
         val final = review?.takeIf { _publishOutcome.value == null }?.copy(modal = null)
         if (final == null) {
-            _events.trySend(PhotoReviewEvent.Leave)
+            // The network error screen can appear before its last safe local
+            // checkpoint completes. Do not dispose the ViewModel mid-write.
+            val pending = offlineCheckpoint
+            if (pending?.isActive == true) {
+                viewModelScope.launch {
+                    pending.join()
+                    _events.send(PhotoReviewEvent.Leave)
+                }
+            } else _events.trySend(PhotoReviewEvent.Leave)
             return
         }
         // Do not pop the ViewModel until its final draft is durably saved.
@@ -515,7 +551,7 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
     }
 
     fun saveDefaultPour(text: String) {
-        if (_savingDefaultPour.value || _publishing.value) return
+        if (_savingDefaultPour.value || _publishing.value || blockDisconnectedReview()) return
         val n = readNumeric(text)
         if (!validDefaultPour(n)) {
             toast("1 ~ 999 사이의 숫자를 입력해주세요.")
@@ -542,7 +578,7 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
     }
 
     fun requestPublish() {
-        if (_publishing.value) return
+        if (_publishing.value || blockDisconnectedReview()) return
         if (_savingDefaultPour.value) {
             toast("기본 잔 용량을 저장하는 중이에요.")
             return
@@ -595,7 +631,7 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
     }
 
     fun confirmPublish() {
-        if (_publishing.value || _savingDefaultPour.value ||
+        if (_publishing.value || blockDisconnectedReview() || _savingDefaultPour.value ||
             _draftProblem.value != null || _publishOutcome.value != null) return
         val state = review ?: return
         if (state.modal?.type != ReviewModalType.PUBLISH ||
