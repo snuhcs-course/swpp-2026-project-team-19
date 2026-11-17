@@ -1074,7 +1074,7 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                     PhotoReviewRules.MAX_PICKED_VOLUMES else PhotoReviewRules.MAX_OPTIONS) ->
                 toast(if (x.type == ReviewItemType.WHISKY)
                     "용량은 최대 3가지까지 설정 가능해요."
-                else "검수 옵션은 최대 10개까지 등록할 수 있어요.")
+                else "검수 옵션은 최대 3개까지 등록할 수 있어요.")
             else -> mutateItem(id) { PhotoReviewRules.addOption(it, pour) }
         }
     }
