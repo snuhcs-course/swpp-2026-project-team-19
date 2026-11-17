@@ -61,7 +61,12 @@ internal fun NavGraphBuilder.registerVariantRoutes(
                 ) {
             val ownerViewModel: OwnerMockViewModel = viewModel(factory = OwnerMockViewModel.Factory(
                 OwnerRuntime.repository(LocalContext.current)))
-            LaunchedEffect(ownerViewModel) { ownerViewModel.retry() }
+            // LiveOwnerScreenRepository starts its first load on creation.
+            // Do not start a duplicate full Owner fetch while that load is in flight.
+            LaunchedEffect(ownerViewModel) {
+                if (ownerViewModel.state.value != MockOwnerLoadState.Loading)
+                    ownerViewModel.retry()
+            }
             // Always show the owned-bar list. One or many bars use the same flow;
             // the user explicitly selects which bar to manage.
             OwnerOnboardingScreen(
