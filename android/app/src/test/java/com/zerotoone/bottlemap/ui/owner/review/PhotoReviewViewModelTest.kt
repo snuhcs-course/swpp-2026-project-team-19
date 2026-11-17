@@ -67,6 +67,45 @@ class PhotoReviewViewModelTest {
             assertTrue(PhotoReviewEvent.Leave in events)
         }
 
+    @Test fun offlineInteractionIsIgnoredAndShowsExistingNetworkErrorPage() = runTest(dispatcher) {
+        val base = MockPhotoReviewRepository(MockPhotoReviewScenario.BASIC)
+        var connected = true
+        var checkpoint: PhotoReviewState? = null
+        val repo = object : PhotoReviewRepository by base {
+            override fun hasUsableNetwork(): Boolean = connected
+            override suspend fun checkpointDraft(state: PhotoReviewState) {
+                checkpoint = state
+            }
+        }
+        val vm = PhotoReviewViewModel(repo)
+        val before = vm.state
+        val events = vm.collectEvents(backgroundScope)
+        connected = false
+        vm.toggleExpanded("glen12")
+        val error = vm.load.value as PhotoReviewLoad.Error
+        assertEquals(ReviewLoadErrorKind.NETWORK, error.kind)
+        // Do not accept the attempted input; protect the previous review.
+        assertEquals(before, checkpoint)
+        assertTrue(events.none { it is PhotoReviewEvent.Toast })
+    }
+
+    @Test fun networkSaveFailureShowsRetryPageWithoutOfflineToast() = runTest(dispatcher) {
+        val base = MockPhotoReviewRepository(MockPhotoReviewScenario.BASIC)
+        val repo = object : PhotoReviewRepository by base {
+            override fun hasPendingLocalDraft() = true
+            override suspend fun saveDraft(state: PhotoReviewState) {
+                throw BottleMapApiException(code = "NETWORK_ERROR",
+                    message = "Cannot reach the BottleMap backend.")
+            }
+        }
+        val vm = PhotoReviewViewModel(repo)
+        val events = vm.collectEvents(backgroundScope)
+        vm.toggleExpanded("glen12")
+        val error = vm.load.value as PhotoReviewLoad.Error
+        assertEquals(ReviewLoadErrorKind.NETWORK, error.kind)
+        assertTrue(events.none { it is PhotoReviewEvent.Toast })
+    }
+
     @Test fun reviewLoadHttpFailureDoesNotExposeServerExceptionDetails() {
         val state = reviewLoadError(BottleMapApiException(
             httpStatus = 500, code = "HTTP_500",
