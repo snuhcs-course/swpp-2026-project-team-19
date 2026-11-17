@@ -48,7 +48,7 @@ internal fun RegistrationVerifyException(outcome:OwnerVerifyOutcome) {
         OwnerVerifyOutcome.UNAVAILABLE ->
             "신청은 이어서 할 수 있어요. 운영팀이 나중에 다시 확인해요."
         OwnerVerifyOutcome.LIMIT ->
-            "사업자 정보 확인은 하루 5번까지 시도할 수 있어요.\n내일 0시부터 다시 진행해 주세요."
+            "사업자 정보 확인은 하루 30번까지 시도할 수 있어요.\n내일 0시부터 다시 진행해 주세요."
     }
     Column(Modifier.fillMaxWidth().testTag("registration-verify-${outcome.name.lowercase()}"),
         horizontalAlignment=Alignment.CenterHorizontally,

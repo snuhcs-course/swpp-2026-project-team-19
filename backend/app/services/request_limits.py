@@ -1,7 +1,8 @@
 """Daily per-user limits on requests that call an external API (spec 3.11.14).
 
 Each kind of request (the certificate OCR of 3.11.12 and the NTS business verification of 3.11.2) has
-its own count per token `sub`, and every count resets at midnight KST. A caller acquires one
+its own count per token `sub` and its own daily limit (`DAILY_LIMITS`), and every count resets at
+midnight KST. A caller acquires one
 unit right before the external call and gets `429 RATE_LIMITED` when today's limit is used up,
 so the external API is never called over the limit.
 
@@ -18,10 +19,16 @@ from typing import Protocol
 from app.core.errors import ApiError
 
 KST = timezone(timedelta(hours=9), "KST")  # Korea has no daylight saving time
-DAILY_LIMIT = 5
 
 BUSINESS_CERTIFICATE_OCR = "business_certificate_ocr"
 BUSINESS_VERIFICATION = "business_verification"
+
+BUSINESS_CERTIFICATE_OCR_DAILY_LIMIT = 5
+BUSINESS_VERIFICATION_DAILY_LIMIT = 30
+DAILY_LIMITS: dict[str, int] = {
+    BUSINESS_CERTIFICATE_OCR: BUSINESS_CERTIFICATE_OCR_DAILY_LIMIT,
+    BUSINESS_VERIFICATION: BUSINESS_VERIFICATION_DAILY_LIMIT,
+}
 
 DEFAULT_RATE_LIMITED_MESSAGE = "오늘 사업자등록 정보 확인 횟수를 모두 사용했습니다. 내일 다시 시도해 주세요."
 
@@ -72,9 +79,11 @@ class DailyRequestLimiter(Protocol):
 
 
 class InMemoryDailyLimiter:
-    """Counts in a dict guarded by a lock; the routes run in a thread pool. Holds only today's counts."""
+    """Counts in a dict guarded by a lock; the routes run in a thread pool. Holds only today's counts.
 
-    def __init__(self, daily_limit: int = DAILY_LIMIT) -> None:
+    Each kind has its limit from `DAILY_LIMITS`; `daily_limit` (for tests) sets one limit for every kind."""
+
+    def __init__(self, daily_limit: int | None = None) -> None:
         self.daily_limit = daily_limit
         self._lock = threading.Lock()
         self._day: date | None = None
@@ -90,12 +99,16 @@ class InMemoryDailyLimiter:
             self._counts.clear()
         return self._day
 
+    def limit_for(self, kind: str) -> int:
+        """Today's limit for `kind`. An unknown kind is a KeyError rather than an unlimited count."""
+        return self.daily_limit if self.daily_limit is not None else DAILY_LIMITS[kind]
+
     def acquire(self, subject: str, kind: str, now: datetime) -> Acquisition:
         with self._lock:
             day = self._roll_over(now)
             key = (subject, kind)
             used = self._counts.get(key, 0)
-            if used >= self.daily_limit:
+            if used >= self.limit_for(kind):
                 return Acquisition(day, counted=False)
             self._counts[key] = used + 1
             return Acquisition(day, counted=True)

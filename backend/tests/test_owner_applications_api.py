@@ -22,7 +22,11 @@ from app.models import (
     UserType,
 )
 from app.services.business_check import RecentBusinessChecks
-from app.services.request_limits import BUSINESS_VERIFICATION, DAILY_LIMIT, InMemoryDailyLimiter
+from app.services.request_limits import (
+    BUSINESS_VERIFICATION,
+    BUSINESS_VERIFICATION_DAILY_LIMIT,
+    InMemoryDailyLimiter,
+)
 from tests.factories import BUSINESS_NUMBER, make_application, make_bar, make_owner, make_user
 
 SUBJECT = "0b6b3f5e-6f1f-4c2a-9a55-6d3e2f1a7c10"
@@ -242,7 +246,7 @@ def test_without_an_nts_key_applications_are_unavailable_and_not_counted(client,
 
 def test_the_nts_check_is_limited_per_day(client, auth, verifier, limiter):
     verifier.answer = BusinessCheck(False)
-    for _ in range(DAILY_LIMIT):
+    for _ in range(BUSINESS_VERIFICATION_DAILY_LIMIT):
         assert error_of(apply(client, auth, new_bar_body())) == (422, "BUSINESS_VERIFICATION_FAILED")
 
     response = apply(client, auth, new_bar_body())
@@ -250,7 +254,7 @@ def test_the_nts_check_is_limited_per_day(client, auth, verifier, limiter):
     assert error_of(response) == (429, "RATE_LIMITED")
     # Midnight KST at the end of 2026-10-30.
     assert response.json()["error"]["details"] == {"retryAfter": "2026-10-30T15:00:00Z"}
-    assert len(verifier.calls) == DAILY_LIMIT
+    assert len(verifier.calls) == BUSINESS_VERIFICATION_DAILY_LIMIT
 
 
 BAD_NUMBER = ("businessRegistrationNumber", "INVALID_BUSINESS_NUMBER")

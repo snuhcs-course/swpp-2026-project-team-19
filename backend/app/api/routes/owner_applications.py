@@ -57,7 +57,7 @@ from app.services.owner_applications import (
     replace_menu_photos,
     submit_application,
 )
-from app.services.request_limits import DAILY_LIMIT, DailyRequestLimiter
+from app.services.request_limits import BUSINESS_VERIFICATION_DAILY_LIMIT, DailyRequestLimiter
 
 router = APIRouter(prefix="/api", tags=["owner applications"])
 
@@ -81,8 +81,8 @@ _NOT_PENDING = "`INVALID_APPLICATION_STATE`: the application is not `pending`; `
         "`POST /api/owner-applications`. Creates nothing, and returns no business status.\n\n"
         "- `result` is `matched`, `not_matched`, or `unavailable` when NTS could not be asked (including a server "
         "without the NTS key).\n"
-        f"- Counted together with applying: at most {DAILY_LIMIT} NTS checks per user (token `sub`) per day, reset "
-        "at midnight KST; only requests that call NTS count.\n"
+        f"- Counted together with applying: at most {BUSINESS_VERIFICATION_DAILY_LIMIT} NTS checks per user "
+        "(token `sub`) per day, reset at midnight KST; only requests that call NTS count.\n"
         f"- A `matched` result is remembered for {RECENT_CHECK_TTL.seconds // 60} minutes: applying with the same "
         "three values in that time uses it instead of calling NTS, and is not counted.\n"
         "- The values are not logged."
@@ -123,9 +123,9 @@ def check_owner_application_business(
         "A mismatch creates nothing (`422 BUSINESS_VERIFICATION_FAILED`). When NTS cannot be reached or the "
         "server has no NTS key, the application is created with the result `unavailable` for an operator "
         "to check again.\n"
-        f"- At most {DAILY_LIMIT} NTS checks per user (token `sub`) per day, counted together with "
-        "`POST /api/owner-applications/business-verification`, reset at midnight KST; only requests that call "
-        "NTS count.\n"
+        f"- At most {BUSINESS_VERIFICATION_DAILY_LIMIT} NTS checks per user (token `sub`) per day, counted "
+        "together with `POST /api/owner-applications/business-verification`, reset at midnight KST; only "
+        "requests that call NTS count.\n"
         "- A `matched` result of that check for the same three values in the last "
         f"{RECENT_CHECK_TTL.seconds // 60} minutes is used instead of calling NTS, and is not counted.\n"
         "- `Location` is the new application. `businessVerification` is null unless the caller is an operator."
