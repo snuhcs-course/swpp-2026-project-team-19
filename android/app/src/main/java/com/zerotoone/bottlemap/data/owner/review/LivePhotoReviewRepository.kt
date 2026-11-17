@@ -140,6 +140,20 @@ internal object DraftRecoveryPolicy {
  */
 /** Source identities are a set; changing review-card order is not new OCR. */
 /** An unchanged server display is not a new local edit after a conflict. */
+/** A working copy that exactly matches the server is ALREADY saved.
+ * A now-missing older pending backup cannot turn this into a foreign conflict.
+ * Never acknowledge it if a newer checkpoint differs.
+ */
+internal fun acknowledgedWorkingReview(
+    server: ReviewDraftDto?,
+    working: PendingReviewDraftStore.Envelope?,
+    checkpoint: PendingReviewDraftStore.Envelope?,
+): Boolean = server != null && working != null &&
+    server.reviewVersion == working.reviewVersion &&
+    ServerReviewDraftCodec.sameAndroidSnapshot(working.content, server.content) &&
+    (checkpoint == null || ServerReviewDraftCodec.sameAndroidSnapshot(
+        checkpoint.content, working.content))
+
 internal fun isNewConflictReviewEdit(
     current: Map<String, Any?>,
     displayedAtLoad: Map<String, Any?>?,
@@ -390,12 +404,10 @@ class LivePhotoReviewRepository(
                 device.itemIds, state.items.map { it.id }) && compatible(local)
             when {
                 recovery == DraftRecoveryPolicy.Outcome.ACKNOWLEDGED &&
-                    selectedWorking && working != null && pending != null &&
-                    canRestore && safeLocal &&
-                    // A later local keystroke must not be discarded just because
-                    // an older explicit conflict working copy reached the server.
-                    DraftSaveSafety.latestCopyAcknowledged(
-                        saved, pending, working, checkpoint) -> {
+                    selectedWorking && canRestore && safeLocal &&
+                    // A successful CAS can clear pending before the following
+                    // reload; an exact remote ACK still clears false conflicts.
+                    acknowledgedWorkingReview(saved, working, checkpoint) -> {
                     // A lost response to an explicit local CAS can leave both
                     // the protected original and its later working copy on device.
                     // The server already has the *working* content. Do not
