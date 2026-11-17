@@ -97,6 +97,23 @@ class PendingReviewDraftStoreTest {
             server.copy(content = content("third party")), againOriginal, againWorking))
     }
 
+    @Test fun selfWrittenOutdatedCasIsAcknowledgedButForeignDraftStillConflicts() {
+        fun content(name: String) = ServerReviewDraftCodec.encode(
+            PhotoReviewState(items = listOf(ReviewItem(id = "ocr-1", name = name))))
+        val written = content("our latest version")
+        val server = ReviewDraftDto(
+            draftVersion = 4, reviewVersion = 7,
+            savedAt = "2026-11-17T00:00:00Z", content = written)
+        assertTrue(DraftSaveSafety.ownCasAcknowledged(server, written, 3, 7))
+        assertFalse(DraftSaveSafety.ownCasAcknowledged(
+            server.copy(content = content("different device")), written, 3, 7))
+        assertFalse(DraftSaveSafety.ownCasAcknowledged(
+            server.copy(draftVersion = 5), written, 3, 7))
+        assertFalse(DraftSaveSafety.ownCasAcknowledged(
+            server.copy(reviewVersion = 8), written, 3, 7))
+        assertFalse(DraftSaveSafety.ownCasAcknowledged(null, written, 3, 7))
+    }
+
     @Test fun recoveryPolicyRestoresOnlyMatchingReviewAndServerCas() {
         fun content(name: String) = ServerReviewDraftCodec.encode(
             PhotoReviewState(items = listOf(ReviewItem(id = "ocr-1", name = name)))
