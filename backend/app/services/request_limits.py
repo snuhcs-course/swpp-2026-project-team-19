@@ -1,12 +1,14 @@
 """Daily per-user limits on requests that call an external API (spec 3.11.14).
 
 Each kind of request (the certificate OCR of 3.11.12 and the NTS business verification of 3.11.2) has
-its own count per token `sub`, and every count resets at midnight KST. A caller acquires one
+its own count per token `sub` and its own daily limit (`DAILY_LIMITS`), and every count resets at
+midnight KST. A caller acquires one
 unit right before the external call and gets `429 RATE_LIMITED` when today's limit is used up,
 so the external API is never called over the limit.
 
 The counts live in this process's memory, as the spec decides: a restart resets them, and they
 are exact only while the API runs as a single process (backend/deploy/bottlemap-api.service).
+An operator can also reset them without a restart (spec 3.11.19, `reset`).
 `DailyRequestLimiter` is the seam for a shared store if that ever changes.
 """
 
@@ -18,10 +20,16 @@ from typing import Protocol
 from app.core.errors import ApiError
 
 KST = timezone(timedelta(hours=9), "KST")  # Korea has no daylight saving time
-DAILY_LIMIT = 5
 
 BUSINESS_CERTIFICATE_OCR = "business_certificate_ocr"
 BUSINESS_VERIFICATION = "business_verification"
+
+BUSINESS_CERTIFICATE_OCR_DAILY_LIMIT = 5
+BUSINESS_VERIFICATION_DAILY_LIMIT = 30
+DAILY_LIMITS: dict[str, int] = {
+    BUSINESS_CERTIFICATE_OCR: BUSINESS_CERTIFICATE_OCR_DAILY_LIMIT,
+    BUSINESS_VERIFICATION: BUSINESS_VERIFICATION_DAILY_LIMIT,
+}
 
 DEFAULT_RATE_LIMITED_MESSAGE = "오늘 사업자등록 정보 확인 횟수를 모두 사용했습니다. 내일 다시 시도해 주세요."
 
@@ -70,11 +78,18 @@ class DailyRequestLimiter(Protocol):
         made after all. Nothing happens once that day is over: its counts are gone."""
         ...
 
+    def reset(self, subject: str | None, kind: str | None, now: datetime) -> int:
+        """Clear today's counts of `subject` (every subject if None) for `kind` (every kind if None),
+        and return how many counts were cleared."""
+        ...
+
 
 class InMemoryDailyLimiter:
-    """Counts in a dict guarded by a lock; the routes run in a thread pool. Holds only today's counts."""
+    """Counts in a dict guarded by a lock; the routes run in a thread pool. Holds only today's counts.
 
-    def __init__(self, daily_limit: int = DAILY_LIMIT) -> None:
+    Each kind has its limit from `DAILY_LIMITS`; `daily_limit` (for tests) sets one limit for every kind."""
+
+    def __init__(self, daily_limit: int | None = None) -> None:
         self.daily_limit = daily_limit
         self._lock = threading.Lock()
         self._day: date | None = None
@@ -90,12 +105,16 @@ class InMemoryDailyLimiter:
             self._counts.clear()
         return self._day
 
+    def limit_for(self, kind: str) -> int:
+        """Today's limit for `kind`. An unknown kind is a KeyError rather than an unlimited count."""
+        return self.daily_limit if self.daily_limit is not None else DAILY_LIMITS[kind]
+
     def acquire(self, subject: str, kind: str, now: datetime) -> Acquisition:
         with self._lock:
             day = self._roll_over(now)
             key = (subject, kind)
             used = self._counts.get(key, 0)
-            if used >= self.daily_limit:
+            if used >= self.limit_for(kind):
                 return Acquisition(day, counted=False)
             self._counts[key] = used + 1
             return Acquisition(day, counted=True)
@@ -111,6 +130,23 @@ class InMemoryDailyLimiter:
                 self._counts[key] = used - 1
             else:
                 self._counts.pop(key, None)
+
+    def reset(self, subject: str | None, kind: str | None, now: datetime) -> int:
+        if kind is not None and kind not in DAILY_LIMITS:
+            raise KeyError(kind)
+        with self._lock:
+            # Past midnight the counts are gone already; never clear a newer day's counts by an old one.
+            self._roll_over(now)
+            cleared = [
+                key
+                for key in self._counts
+                if (subject is None or key[0] == subject) and (kind is None or key[1] == kind)
+            ]
+            for key in cleared:
+                del self._counts[key]
+            # A unit acquired before the reset and released after it is dropped from the new count,
+            # so that request may get one extra call today; the spec accepts this.
+            return len(cleared)
 
     def used(self, subject: str, kind: str, now: datetime) -> int:
         """Today's count, for tests and diagnostics."""

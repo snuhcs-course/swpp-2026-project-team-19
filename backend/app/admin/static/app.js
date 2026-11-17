@@ -1,5 +1,6 @@
 // Operator dashboard for owner applications (API spec 3.11.4, 3.11.6-3.11.8, 3.11.13).
-// The menu item check tab (3.18) is in checks.js, which uses the helpers here.
+// The menu item check tab (3.18) is in checks.js and the request count reset tab (3.11.19) in limits.js;
+// both use the helpers here.
 // Data from the API is always put on the page as text (textContent), never as HTML.
 "use strict";
 
@@ -229,6 +230,7 @@ function clearDashboard() {
   $("load-more").hidden = true;
   closeDetail();
   clearChecks();
+  clearLimits();
 }
 
 async function loginWithGoogle() {
@@ -266,6 +268,7 @@ async function start() {
   showView("dashboard");
   loadList(true);
   if (location.hash === "#checks") selectTab("checks");
+  else if (location.hash === "#limits") selectTab("limits");
 }
 
 // ---------- list (3.11.6) ----------
@@ -430,6 +433,26 @@ function fields(pairs) {
   return el("dl", { class: "fields" }, pairs.flatMap(([name, value]) => [el("dt", {}, name), el("dd", {}, value ?? "-")]));
 }
 
+function copyableId(value) {
+  const text = el("code", { class: "id" }, value);
+  const button = el("button", { type: "button", class: "secondary small", onclick: () => copyText(value, text, button) }, "복사");
+  return el("span", { class: "copyable" }, text, button);
+}
+
+async function copyText(value, node, button) {
+  try {
+    await navigator.clipboard.writeText(value);
+    button.textContent = "복사했어요";
+  } catch {
+    // No clipboard access (permission denied, or not https): select it for the operator to copy.
+    window.getSelection().selectAllChildren(node);
+    button.textContent = "선택했어요. Ctrl+C로 복사하세요";
+  }
+  setTimeout(() => {
+    button.textContent = "복사";
+  }, 2000);
+}
+
 function mapSearchLink(address) {
   return el(
     "a",
@@ -494,6 +517,8 @@ function renderDetail() {
   children.push(
     fields([
       ["신청자", [app.applicant.displayName, app.applicant.email].filter(Boolean).join(" / ") || "-"],
+      // For resetting the applicant's daily request counts in the "요청 수 초기화" tab (3.11.19).
+      ["사용자 ID", copyableId(app.applicant.userId)],
       ["연락처", app.contactPhone],
       ["메모", app.applicantNote],
       ["신청 시각", formatTime(app.createdAt)],

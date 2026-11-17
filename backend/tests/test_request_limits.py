@@ -8,7 +8,9 @@ import pytest
 from app.core.errors import ApiError
 from app.services.request_limits import (
     BUSINESS_CERTIFICATE_OCR,
-    DAILY_LIMIT,
+    BUSINESS_CERTIFICATE_OCR_DAILY_LIMIT,
+    BUSINESS_VERIFICATION,
+    BUSINESS_VERIFICATION_DAILY_LIMIT,
     Acquisition,
     InMemoryDailyLimiter,
     acquire_or_raise,
@@ -21,7 +23,6 @@ from app.services.request_limits import (
 # 2026-10-28 23:59:59 KST and the next second, 2026-10-29 00:00:00 KST.
 BEFORE_MIDNIGHT = datetime(2026, 10, 28, 14, 59, 59, tzinfo=UTC)
 AT_MIDNIGHT = datetime(2026, 10, 28, 15, 0, 0, tzinfo=UTC)
-OTHER = "business_verification"
 
 
 def test_kst_day_and_next_reset():
@@ -35,9 +36,9 @@ def test_kst_day_and_next_reset():
     assert utc_now().tzinfo is UTC
 
 
-def test_limit_per_subject_and_kind():
+def test_ocr_is_limited_to_5_a_day():
     limiter = InMemoryDailyLimiter()
-    assert DAILY_LIMIT == 5
+    assert BUSINESS_CERTIFICATE_OCR_DAILY_LIMIT == 5
     results = [limiter.acquire("a", BUSINESS_CERTIFICATE_OCR, BEFORE_MIDNIGHT) for _ in range(6)]
     day = date(2026, 10, 28)
     assert results == [Acquisition(day, counted=True)] * 5 + [Acquisition(day, counted=False)]
@@ -45,7 +46,31 @@ def test_limit_per_subject_and_kind():
     assert limiter.used("a", BUSINESS_CERTIFICATE_OCR, BEFORE_MIDNIGHT) == 5
     # Another user, and another kind for the same user, have their own counts.
     assert limiter.acquire("b", BUSINESS_CERTIFICATE_OCR, BEFORE_MIDNIGHT).counted
-    assert limiter.acquire("a", OTHER, BEFORE_MIDNIGHT).counted
+    assert limiter.acquire("a", BUSINESS_VERIFICATION, BEFORE_MIDNIGHT).counted
+
+
+def test_nts_check_is_limited_to_30_a_day():
+    limiter = InMemoryDailyLimiter()
+    assert BUSINESS_VERIFICATION_DAILY_LIMIT == 30
+    results = [limiter.acquire("a", BUSINESS_VERIFICATION, BEFORE_MIDNIGHT) for _ in range(31)]
+    day = date(2026, 10, 28)
+    assert results == [Acquisition(day, counted=True)] * 30 + [Acquisition(day, counted=False)]
+    assert limiter.used("a", BUSINESS_VERIFICATION, BEFORE_MIDNIGHT) == 30
+    # The OCR count of the same user is untouched.
+    assert limiter.used("a", BUSINESS_CERTIFICATE_OCR, BEFORE_MIDNIGHT) == 0
+
+
+def test_a_daily_limit_override_applies_to_every_kind():
+    limiter = InMemoryDailyLimiter(daily_limit=1)
+    for kind in (BUSINESS_CERTIFICATE_OCR, BUSINESS_VERIFICATION):
+        assert limiter.acquire("a", kind, BEFORE_MIDNIGHT).counted
+        assert not limiter.acquire("a", kind, BEFORE_MIDNIGHT).counted
+
+
+def test_an_unknown_kind_has_no_limit_and_is_refused():
+    limiter = InMemoryDailyLimiter()
+    with pytest.raises(KeyError):
+        limiter.acquire("a", "unknown", BEFORE_MIDNIGHT)
 
 
 def test_counts_reset_at_midnight_kst():
@@ -104,7 +129,7 @@ def test_concurrent_requests_never_exceed_the_limit():
         thread.start()
     for thread in threads:
         thread.join()
-    assert results.count(True) == DAILY_LIMIT
+    assert results.count(True) == BUSINESS_CERTIFICATE_OCR_DAILY_LIMIT
 
 
 def test_acquire_or_raise_returns_429_with_the_next_reset():
@@ -129,3 +154,93 @@ def test_a_late_request_refused_by_the_new_day_gets_the_next_reset():
 
     assert caught.value.code == "RATE_LIMITED"
     assert caught.value.details == {"retryAfter": "2026-10-29T15:00:00Z"}
+
+
+# ---- reset by an operator (3.11.19) ----
+
+
+def filled_limiter() -> InMemoryDailyLimiter:
+    limiter = InMemoryDailyLimiter()
+    for subject in ("a", "b"):
+        for kind in (BUSINESS_CERTIFICATE_OCR, BUSINESS_VERIFICATION):
+            limiter.acquire(subject, kind, BEFORE_MIDNIGHT)
+    return limiter
+
+
+def counts(limiter: InMemoryDailyLimiter) -> dict[tuple[str, str], int]:
+    return {
+        (subject, kind): limiter.used(subject, kind, BEFORE_MIDNIGHT)
+        for subject in ("a", "b")
+        for kind in (BUSINESS_CERTIFICATE_OCR, BUSINESS_VERIFICATION)
+    }
+
+
+@pytest.mark.parametrize(
+    ("subject", "kind", "left"),
+    [
+        (None, None, set()),
+        ("a", None, {("b", BUSINESS_CERTIFICATE_OCR), ("b", BUSINESS_VERIFICATION)}),
+        (None, BUSINESS_VERIFICATION, {("a", BUSINESS_CERTIFICATE_OCR), ("b", BUSINESS_CERTIFICATE_OCR)}),
+        (
+            "a",
+            BUSINESS_VERIFICATION,
+            {("a", BUSINESS_CERTIFICATE_OCR), ("b", BUSINESS_CERTIFICATE_OCR), ("b", BUSINESS_VERIFICATION)},
+        ),
+    ],
+)
+def test_reset_clears_the_counts_in_scope(subject, kind, left):
+    limiter = filled_limiter()
+
+    assert limiter.reset(subject, kind, BEFORE_MIDNIGHT) == 4 - len(left)
+
+    assert {key for key, used in counts(limiter).items() if used} == left
+
+
+def test_a_reset_user_gets_the_whole_limit_again():
+    limiter = InMemoryDailyLimiter(daily_limit=2)
+    for _ in range(2):
+        limiter.acquire("a", BUSINESS_VERIFICATION, BEFORE_MIDNIGHT)
+    assert not limiter.acquire("a", BUSINESS_VERIFICATION, BEFORE_MIDNIGHT).counted
+
+    assert limiter.reset("a", None, BEFORE_MIDNIGHT) == 1
+
+    assert [limiter.acquire("a", BUSINESS_VERIFICATION, BEFORE_MIDNIGHT).counted for _ in range(3)] == [True, True, False]
+
+
+def test_reset_of_nothing_clears_nothing():
+    limiter = InMemoryDailyLimiter()
+    assert limiter.reset(None, None, BEFORE_MIDNIGHT) == 0
+    assert limiter.reset("a", BUSINESS_VERIFICATION, BEFORE_MIDNIGHT) == 0
+
+
+def test_reset_after_midnight_clears_only_the_new_day():
+    limiter = filled_limiter()
+
+    # Yesterday's counts are gone with the day; only today's single count is cleared.
+    limiter.acquire("a", BUSINESS_VERIFICATION, AT_MIDNIGHT)
+    assert limiter.reset(None, None, AT_MIDNIGHT) == 1
+    assert limiter.used("a", BUSINESS_VERIFICATION, AT_MIDNIGHT) == 0
+
+
+def test_a_late_reset_does_not_go_back_to_the_old_day():
+    limiter = InMemoryDailyLimiter()
+    limiter.acquire("a", BUSINESS_VERIFICATION, AT_MIDNIGHT)
+
+    # The clock read before midnight still clears the limiter's current (new) day.
+    assert limiter.reset("a", None, BEFORE_MIDNIGHT) == 1
+    assert limiter.used("a", BUSINESS_VERIFICATION, AT_MIDNIGHT) == 0
+
+
+def test_a_release_after_a_reset_never_goes_below_zero():
+    limiter = InMemoryDailyLimiter()
+    day = limiter.acquire("a", BUSINESS_VERIFICATION, BEFORE_MIDNIGHT).day
+    limiter.reset(None, None, BEFORE_MIDNIGHT)
+
+    limiter.release("a", BUSINESS_VERIFICATION, day)
+
+    assert limiter.used("a", BUSINESS_VERIFICATION, BEFORE_MIDNIGHT) == 0
+
+
+def test_reset_of_an_unknown_kind_is_refused():
+    with pytest.raises(KeyError):
+        InMemoryDailyLimiter().reset(None, "unknown", BEFORE_MIDNIGHT)

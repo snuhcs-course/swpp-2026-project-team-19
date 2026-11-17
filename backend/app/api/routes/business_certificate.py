@@ -12,7 +12,7 @@ from app.schemas.business_certificate import BusinessCertificateOcrResponse
 from app.schemas.errors import AUTH_UNAVAILABLE_DESCRIPTION, error_responses
 from app.services.business_certificate import CertificateUpload, read_business_certificate
 from app.services.menu_import_upload import MAX_IMAGE_BYTES
-from app.services.request_limits import DAILY_LIMIT, DailyRequestLimiter
+from app.services.request_limits import BUSINESS_CERTIFICATE_OCR_DAILY_LIMIT, DailyRequestLimiter
 
 router = APIRouter(prefix="/api", tags=["owner applications"])
 
@@ -28,8 +28,9 @@ router = APIRouter(prefix="/api", tags=["owner applications"])
         "(that happens in `POST /api/owner-applications`).\n\n"
         f"- `image`: exactly one JPEG or PNG of at most {MAX_IMAGE_BYTES // 2**20} MB, checked like menu uploads.\n"
         "- Fields that were not read are null; reading nothing is still `200` with every field null.\n"
-        f"- At most {DAILY_LIMIT} OCR calls per user (token `sub`) per day, reset at midnight KST. A request is "
-        "counted when it passes the `413`/`415`/`422` checks and the OCR is called, even if the call fails.\n"
+        f"- At most {BUSINESS_CERTIFICATE_OCR_DAILY_LIMIT} OCR calls per user (token `sub`) per day, reset at "
+        "midnight KST. A request is counted when it passes the `413`/`415`/`422` checks and the OCR is called, "
+        "even if the call fails.\n"
         "- The photo and the values are not stored and not logged."
     ),
     responses=error_responses(

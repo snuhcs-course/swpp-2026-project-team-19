@@ -25,7 +25,11 @@ from app.models import (
     UserType,
 )
 from app.services import owner_application_review
-from app.services.request_limits import BUSINESS_VERIFICATION, InMemoryDailyLimiter
+from app.services.request_limits import (
+    BUSINESS_VERIFICATION,
+    BUSINESS_VERIFICATION_DAILY_LIMIT,
+    InMemoryDailyLimiter,
+)
 from tests.factories import (
     make_application,
     make_application_menu_image,
@@ -614,12 +618,12 @@ def test_the_recheck_is_not_counted_against_the_daily_limit(client, db_session, 
     app.dependency_overrides[deps.get_request_limiter] = lambda: limiter
     try:
         application = make_application(db_session, applicant)
-        for _ in range(6):
+        for _ in range(BUSINESS_VERIFICATION_DAILY_LIMIT + 1):
             assert verify_business(client, auth, application.id).status_code == 200
     finally:
         app.dependency_overrides.pop(deps.get_request_limiter, None)
 
-    assert len(verifier.calls) == 6
+    assert len(verifier.calls) == BUSINESS_VERIFICATION_DAILY_LIMIT + 1
     assert limiter.used(OPERATOR_SUBJECT, BUSINESS_VERIFICATION, NOW) == 0
 
 

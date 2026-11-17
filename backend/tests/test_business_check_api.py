@@ -21,7 +21,7 @@ from app.models import (
 )
 from app.schemas.owner_application import BusinessFieldsInput
 from app.services.business_check import RECENT_CHECK_TTL, RecentBusinessChecks, RecentMatch
-from app.services.request_limits import BUSINESS_VERIFICATION, DAILY_LIMIT
+from app.services.request_limits import BUSINESS_VERIFICATION, BUSINESS_VERIFICATION_DAILY_LIMIT
 from tests.factories import make_user
 from tests.test_owner_applications_api import (  # noqa: F401 (fixtures)
     NOW,
@@ -152,7 +152,7 @@ def test_missing_fields_are_listed_together(client, auth, verifier, limiter, rec
 
 def test_checking_and_applying_share_the_daily_limit(client, auth, verifier, limiter, recent):
     verifier.answer = BusinessCheck(False)
-    for _ in range(DAILY_LIMIT - 1):
+    for _ in range(BUSINESS_VERIFICATION_DAILY_LIMIT - 1):
         assert result_of(check(client, auth)) == "not_matched"
     assert error_of(apply(client, auth, new_bar_body())) == (422, "BUSINESS_VERIFICATION_FAILED")
 
@@ -161,7 +161,7 @@ def test_checking_and_applying_share_the_daily_limit(client, auth, verifier, lim
     assert error_of(refused) == (429, "RATE_LIMITED")
     assert refused.json()["error"]["details"] == {"retryAfter": "2026-10-30T15:00:00Z"}
     assert error_of(apply(client, auth, new_bar_body())) == (429, "RATE_LIMITED")
-    assert len(verifier.calls) == DAILY_LIMIT
+    assert len(verifier.calls) == BUSINESS_VERIFICATION_DAILY_LIMIT
 
 
 # ---- applying with a recent match (3.11.2, step 5) ----
@@ -184,7 +184,7 @@ def test_applying_after_a_match_does_not_call_nts_again(client, db_session, auth
 
 def test_a_match_is_used_even_when_the_limit_is_used_up(client, db_session, auth, verifier, limiter, recent):
     assert result_of(check(client, auth)) == "matched"
-    for _ in range(DAILY_LIMIT - 1):
+    for _ in range(BUSINESS_VERIFICATION_DAILY_LIMIT - 1):
         check(client, auth, representativeName="이사장")
     assert error_of(check(client, auth)) == (429, "RATE_LIMITED")
 
