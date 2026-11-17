@@ -190,6 +190,17 @@ fun OwnerOnboardingScreen(
     fun forward(target:RegPage) {
         if(editingReview) { editingReview=false;go(RegPage.REVIEW) } else go(target)
     }
+    fun continueAfterBusinessCheck() {
+        // Re-verification is a fresh forward transition. Do not append an
+        // old failed VERIFIED/BIZCHECK/BACK cycle to the navigation stack.
+        editingReview = false
+        val next = RegPage.BARNAME
+        val kind = (latestDraft() ?: draft).kind
+        checkpoint(next)
+        history = historyFor(next.name, kind)
+        screen = next
+        error = null
+    }
     fun edit(target:RegPage){ editingReview=true;go(target) }
     BackHandler(enabled=screen!=RegPage.HOME && screen!=RegPage.DONE) { back() }
 
@@ -367,8 +378,12 @@ fun OwnerOnboardingScreen(
         draft.proposedBarName.isNotBlank() &&
             it.name.trim().equals(draft.proposedBarName.trim(),ignoreCase=true)
     }
+    // StateFlow collection can trail a synchronous local draft edit for a
+    // composition. Use the repository's *current* fields for verification
+    // validity, never a captured stale Compose copy from before correction.
     val verificationCurrent = !viewModel.usesProductionOwnerApi() ||
-        ownerBusinessVerificationIsCurrent(verifiedBusinessKey, draft)
+        ownerBusinessVerificationIsCurrent(
+            verifiedBusinessKey, latestDraft() ?: draft)
     val displayedVerification = if(verificationCurrent) verify else VerifyFixture.UNAVAILABLE
     // A stale matched result must never become another result screen when
     // going Back or restoring saved navigation state.
@@ -480,15 +495,15 @@ fun OwnerOnboardingScreen(
                     }
                 }
             } else go(RegPage.VERIFYING)
-            RegPage.VERIFIED->if(!verificationCurrent) {
+            RegPage.VERIFIED->if(viewModel.usesProductionOwnerApi() &&
+                !ownerBusinessVerificationIsCurrent(
+                    verifiedBusinessKey, latestDraft() ?: draft)) {
+                // Fail closed only for genuinely edited business fields, not
+                // a stale recomposition or old saved navigation history.
                 go(RegPage.BIZCHECK)
-            } else when(displayedVerification){
+            } else when(verify){
                 VerifyFixture.MATCHED,VerifyFixture.UNAVAILABLE->{
-                    // Verification is a new forward checkpoint, not an edit
-                    // shortcut back to the pre-verification REVIEW page.
-                    // Otherwise editingReview can loop through BIZCHECK forever.
-                    editingReview=false
-                    go(RegPage.BARNAME)
+                    continueAfterBusinessCheck()
                 }
                 VerifyFixture.FAILED->{
                     go(RegPage.BIZCHECK)
