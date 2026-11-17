@@ -83,6 +83,18 @@ internal object DraftSaveSafety {
         ServerReviewDraftCodec.sameAndroidSnapshot(
             (working ?: original).content, remote.content)
 
+    /** A stale CAS can be our own lost acknowledgement, not a second device.
+     * Match one exact version advance and the complete serialized decisions. */
+    fun ownCasAcknowledged(
+        remote: ReviewDraftDto?,
+        submitted: Map<String, Any?>,
+        expectedDraftVersion: Int,
+        reviewVersion: Int,
+    ): Boolean = remote != null &&
+        remote.reviewVersion == reviewVersion &&
+        remote.draftVersion == expectedDraftVersion + 1 &&
+        ServerReviewDraftCodec.sameAndroidSnapshot(submitted, remote.content)
+
     fun canSkip(
         forced: Boolean,
         pendingLocally: Boolean,
@@ -754,25 +766,24 @@ class LivePhotoReviewRepository(
                     pendingOversized = true
                     throw ReviewDraftTooLargeLocalException()
                 }
-                if (error.code == "REVIEW_DRAFT_OUTDATED") {
-                    draftConflict = true
-                    pendingDraftConflict = true
-                    throw ReviewDraftConflictException()
-                }
-                // A lost 200 response can mean the server committed. Check the
-                // exact content before retrying with an obsolete draftVersion.
+                // UAT 4.4 / #179: a failed response followed by an obsolete
+                // version retry must not be mistaken for another device's edit.
+                // Query the authoritative draft before declaring a conflict.
                 val observed = runCatching { remote.getMenuImport(id) }.getOrNull()
-                val currentDraft = observed?.reviewDraft
-                if (currentDraft != null &&
-                    ServerReviewDraftCodec.sameAndroidSnapshot(content, currentDraft.content) &&
-                    currentDraft.reviewVersion == version &&
-                    currentDraft.draftVersion > draftVersion) {
-                    draftVersion = currentDraft.draftVersion
+                val currentDraft = observed?.takeIf {
+                    it.menuImportId == id && it.status == "ready_for_review" &&
+                        it.reviewVersion == version
+                }?.reviewDraft
+                if (DraftSaveSafety.ownCasAcknowledged(
+                        currentDraft, content, draftVersion, version)) {
+                    draftVersion = requireNotNull(currentDraft).draftVersion
                     lastSavedContent = content
+                    pendingDraftConflict = false
                     acknowledgeDeviceDraft(id, content)
                     return@withLock
                 }
-                if (currentDraft != null && currentDraft.draftVersion > draftVersion) {
+                if (error.code == "REVIEW_DRAFT_OUTDATED" ||
+                    (currentDraft != null && currentDraft.draftVersion > draftVersion)) {
                     draftConflict = true
                     pendingDraftConflict = true
                     throw ReviewDraftConflictException()
