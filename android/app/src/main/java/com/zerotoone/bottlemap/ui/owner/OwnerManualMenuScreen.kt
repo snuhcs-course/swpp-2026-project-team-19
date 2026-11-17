@@ -168,6 +168,13 @@ private val htmlCatalog = listOf(
 )
 private val htmlBrands = listOf(MockBrand("mock-brand-lagavulin", "라가불린"))
 
+/** User-facing failure notices never leak Retrofit/OkHttp's English message. */
+internal fun photoCancelFailureNotice(error: Throwable): String =
+    if (error is com.zerotoone.bottlemap.network.BottleMapApiException &&
+        error.code == "NETWORK_ERROR")
+        "작업 취소에 실패했어요. 인터넷 연결을 확인해 주세요."
+    else "작업 취소에 실패했어요. 메뉴 등록 상태를 확인해 주세요."
+
 @Composable
 internal fun OwnerManualMenuScreen(
     state: MockOwnerLoadState,
@@ -558,10 +565,7 @@ internal fun OwnerManualMenuScreen(
                             cancelPhotoConfirm = false
                             screen = "list"
                             error = null
-                            onNotice(if (e is com.zerotoone.bottlemap.network.BottleMapApiException &&
-                                e.code == "NETWORK_ERROR")
-                                "작업 취소에 실패했어요. 인터넷 연결을 확인해 주세요."
-                            else "작업 취소에 실패했어요. 메뉴 등록 상태를 확인해 주세요.")
+                            onNotice(photoCancelFailureNotice(e))
                         } finally { saving = false }
                     }
                 }
