@@ -140,24 +140,34 @@ internal object DraftRecoveryPolicy {
  */
 internal fun compatibleOwnerReviewDraft(
     candidate: PhotoReviewState?, freshState: PhotoReviewState,
-): Boolean = candidate != null &&
-    candidate.items.map { it.id } == freshState.items.map { it.id } &&
-    candidate.items.zip(freshState.items).all { (old, fresh) ->
-        val freshIds = (
+): Boolean {
+    val saved = candidate ?: return false
+    val freshById = freshState.items.associateBy { it.id }
+    val savedIds = saved.items.map { it.id }
+    // A card may be moved between accordion groups, or OCR choices may be
+    // manually selected, without changing the underlying review. Neither
+    // the list position nor selected volumeChoices is OCR identity.
+    if (savedIds.size != freshState.items.size ||
+        savedIds.toSet().size != savedIds.size ||
+        freshById.size != freshState.items.size ||
+        savedIds.toSet() != freshById.keys) return false
+    return saved.items.all { old ->
+        val fresh = freshById.getValue(old.id)
+        val freshOptions = (
             PhotoReviewRules.optionSummary(fresh) + fresh.volumeChoices +
                 fresh.preMergeOptions
         ).mapNotNull { it.sourceOptionId }.toSet()
-        val savedIds = (
+        val oldSourceOptions = (
             PhotoReviewRules.optionSummary(old) + old.volumeChoices +
                 old.preMergeOptions + old.classificationSnapshot?.options.orEmpty()
         ).mapNotNull { it.sourceOptionId } +
             listOfNotNull(old.classificationSnapshot?.primarySourceOptionId)
-        savedIds.all { it in freshIds } && (if (old.manuallySplitGroup)
-            fresh.mergedInto != null || fresh.mergeSources.isNotEmpty()
-        else old.mergedInto == fresh.mergedInto &&
-            old.volumeChoices.map { it.sourceOptionId } ==
-                fresh.volumeChoices.map { it.sourceOptionId })
+        oldSourceOptions.all { it in freshOptions } &&
+            (if (old.manuallySplitGroup)
+                fresh.mergedInto != null || fresh.mergeSources.isNotEmpty()
+            else old.mergedInto == fresh.mergedInto)
     }
+}
 
 /**
  * The device draft deliberately omits existingServingPricesByProductId to
