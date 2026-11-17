@@ -515,21 +515,45 @@ class LivePhotoReviewRepository(
                     if (working != null &&
                         ServerReviewDraftCodec.sameAndroidSnapshot(
                             working.content, saved?.content)) workingStore.clear(id)
-                    val hasDifferentLocal = listOfNotNull(
-                        pending.takeUnless { obsoletePending }, checkpoint, working
-                    ).any { !ServerReviewDraftCodec.sameAndroidSnapshot(
-                            it.content, saved?.content) }
-                    pendingLocally = hasDifferentLocal
-                    // Do not auto-save the server display over an unmatched
-                    // protected device copy; its contents are not acknowledged.
-                    if (hasDifferentLocal) {
-                        draftConflict = true
-                        pendingDraftConflict = true
+                    val divergent = listOfNotNull(
+                        checkpoint, pending.takeUnless { obsoletePending }, working
+                    ).filterNot {
+                        ServerReviewDraftCodec.sameAndroidSnapshot(it.content, saved?.content)
                     }
-                    pendingOversized = hasDifferentLocal &&
-                        listOfNotNull(pending.takeUnless { obsoletePending },
-                            checkpoint, working).any {
-                            ServerReviewDraftCodec.exceedsServerLimit(it.content) }
+                    // A newer local edit based on the current server CAS may
+                    // resume without prompts. Stale copies based on an earlier
+                    // server version are superseded by the acknowledged server.
+                    val currentLocal = divergent.firstNotNullOfOrNull { copy ->
+                        if (copy.reviewVersion != reviewVersion ||
+                            copy.expectedDraftVersion != draftVersion ||
+                            !sameReviewSourceIds(copy.itemIds, state.items.map { it.id }))
+                            return@firstNotNullOfOrNull null
+                        ServerReviewDraftCodec.decode(ReviewDraftDto(
+                            copy.expectedDraftVersion, copy.reviewVersion,
+                            "1970-01-01T00:00:00Z", copy.content,
+                        ))?.takeIf(::compatible)?.let { copy to it }
+                    }
+                    when {
+                        currentLocal != null -> {
+                            chosen = currentLocal.second
+                            pendingLocally = true
+                            pendingOversized = ServerReviewDraftCodec.exceedsServerLimit(
+                                currentLocal.first.content)
+                        }
+                        divergent.all { it.reviewVersion == reviewVersion &&
+                            it.expectedDraftVersion < draftVersion } -> {
+                            // No unsent current-base edit remains. A future
+                            // device load must not resurrect old local files.
+                            checkpointMutex.withLock {
+                                checkpointStore.clear(id)
+                                pendingStore.clear(id)
+                                workingStore.clear(id)
+                            }
+                            pendingLocally = false
+                            pendingOversized = false
+                        }
+                        else -> error("검수 내용을 안전하게 불러오지 못했어요. 다시 시도해 주세요.")
+                    }
                 }
                 canResumeLocalReview(
                     recovery, canRestore, safeLocal, selectedWorking,
