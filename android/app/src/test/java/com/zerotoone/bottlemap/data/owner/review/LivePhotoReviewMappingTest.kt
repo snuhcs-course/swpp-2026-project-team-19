@@ -586,7 +586,9 @@ class LivePhotoReviewMappingTest {
         assertEquals(3,actual.size)
         assertEquals(options.take(3).map { it.extractedOptionId },actual.map { it.optionId })
         assertEquals(15000,actual.first().priceKrw)
-        assertEquals(null,actual.last().pourMl)
+        // The third OCR label is "잔 3", so the existing default glass
+        // serving (30ml) is retained. Only an explicit Bottle has null pour.
+        assertEquals(30,actual.last().pourMl)
     }
 
     @Test fun missingSecondaryBeerPriceBlocksPublishUntilOwnerEditsThatOption() {
