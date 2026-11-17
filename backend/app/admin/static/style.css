@@ -197,3 +197,27 @@ ul.plain-list { margin: 0; padding-left: 18px; }
 .line-crop img { display: block; width: 100%; }
 .line-crop.cropped img { position: absolute; max-width: none; }
 .line-crop.whole { width: 160px; }
+
+/* The request count reset tab (limits.js) and copyable ids. */
+.limits-pane {
+  max-width: 640px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 16px;
+}
+.limits-pane h2 { font-size: 16px; margin: 0 0 8px; }
+.limits-pane h3 { font-size: 14px; margin: 0 0 8px; color: var(--muted); }
+.limits-pane .notice ul { margin: 0; padding-left: 18px; }
+.limit-form { display: grid; gap: 10px; margin-top: 16px; }
+.danger-zone {
+  margin-top: 40px;
+  padding: 12px;
+  border: 1px solid var(--danger);
+  border-radius: 6px;
+}
+.danger-zone h3 { color: var(--danger); }
+.danger-zone .hint { margin: 0 0 10px; }
+code.id, input.id { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; }
+.copyable { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+button.small { padding: 1px 8px; font-size: 12px; }

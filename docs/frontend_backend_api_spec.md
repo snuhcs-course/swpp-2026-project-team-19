@@ -132,7 +132,7 @@ GET 주변 업장 조회 (위치 + 반경)
 
 `/media/{key}`는 로컬 저장소를 쓰는 개발 환경에서만 있는 사진 파일 경로이며 API 계약이 아니다. 배포 서버(S3)에는 없다. 매장 사진은 이 경로가 아니라 `GET /api/bar-photos/{photoId}`와 `GET /api/bar-photos/{photoId}/thumbnail`(3.16.5)로 전달하며, 이 경로는 모든 환경에 있다.
 
-`/admin/`은 operator 웹 대시보드의 정적 파일(HTML, JS, CSS)이며 API 계약이 아니다. 페이지가 브라우저에서 Supabase Google 로그인을 하고 3.11의 API를 그대로 호출하므로, 권한은 위 표와 같다(operator만 신청 목록을 보고 승인·거절한다). 메뉴 항목 확인 화면도 같은 방식으로 3.18의 API를 호출한다. `/admin/config.js`는 페이지에 공개 설정만 준다: Supabase 프로젝트 URL과 publishable key, 그리고 `new_bar` 승인 화면의 지도와 주소 검색에 쓰는 Kakao JavaScript 키(등록한 도메인에서만 동작). 좌표는 브라우저에서 Kakao Maps JavaScript SDK로 찾으며 백엔드 API는 쓰지 않는다. 승인 요청(3.11.7)의 `latitude`, `longitude`는 지금과 같다.
+`/admin/`은 operator 웹 대시보드의 정적 파일(HTML, JS, CSS)이며 API 계약이 아니다. 페이지가 브라우저에서 Supabase Google 로그인을 하고 3.11의 API를 그대로 호출하므로, 권한은 위 표와 같다(operator만 신청 목록을 보고 승인·거절한다). 메뉴 항목 확인 화면도 같은 방식으로 3.18의 API를 호출하고, 요청 수 초기화 화면은 3.11.19의 API를 호출한다. `/admin/config.js`는 페이지에 공개 설정만 준다: Supabase 프로젝트 URL과 publishable key, 그리고 `new_bar` 승인 화면의 지도와 주소 검색에 쓰는 Kakao JavaScript 키(등록한 도메인에서만 동작). 좌표는 브라우저에서 Kakao Maps JavaScript SDK로 찾으며 백엔드 API는 쓰지 않는다. 승인 요청(3.11.7)의 `latitude`, `longitude`는 지금과 같다.
 
 인증이 필요한 요청에서 백엔드는 다음 순서로 검증한다. 단, JSON 본문을 읽을 수 없거나 multipart 본문의 구조(경계 문자열 등)가 깨졌으면 이 순서와 관계없이 먼저 `400 INVALID_REQUEST`다(9.2).
 
@@ -2428,7 +2428,7 @@ Content-Type: application/json
 }
 ```
 
-operator만 호출할 수 있다. 3.11.14의 오늘 요청 수를 서버 재시작 없이 지운다. 지운 사용자는 바로 다시 한도만큼 호출할 수 있다. 사용자가 입력 실수로 한도를 다 써서 신청을 못 할 때 쓴다.
+operator만 호출할 수 있다. 3.11.14의 오늘 요청 수를 서버 재시작 없이 지운다. 지운 사용자는 바로 다시 한도만큼 호출할 수 있다. 사용자가 입력 실수로 한도를 다 써서 신청을 못 할 때 쓴다. 운영자 대시보드(`/admin/`)의 "요청 수 초기화" 탭이 이 API를 호출하며, 신청자의 `userId`는 업주 신청 상세(`applicant.userId`)에서 복사한다.
 
 | 필드 | 필수 | 규칙 |
 |---|---|---|

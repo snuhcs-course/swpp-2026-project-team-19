@@ -69,14 +69,16 @@ function productText(product) {
 
 // ---------- tabs ----------
 
+// The request count reset tab's panel is in limits.js.
+const TABS = ["applications", "checks", "limits"];
+
 function selectTab(name) {
-  const onChecks = name === "checks";
-  $("panel-applications").hidden = onChecks;
-  $("panel-checks").hidden = !onChecks;
-  $("tab-applications").setAttribute("aria-selected", String(!onChecks));
-  $("tab-checks").setAttribute("aria-selected", String(onChecks));
-  history.replaceState(null, "", onChecks ? "#checks" : location.pathname);
-  if (onChecks && !checks.started) {
+  for (const tab of TABS) {
+    $(`panel-${tab}`).hidden = tab !== name;
+    $(`tab-${tab}`).setAttribute("aria-selected", String(tab === name));
+  }
+  history.replaceState(null, "", name === "applications" ? location.pathname : `#${name}`);
+  if (name === "checks" && !checks.started) {
     checks.started = true;
     loadChecks(true);
   }
@@ -954,6 +956,7 @@ function handleResolveError(check, error, form) {
 
 $("tab-applications").addEventListener("click", () => selectTab("applications"));
 $("tab-checks").addEventListener("click", () => selectTab("checks"));
+$("tab-limits").addEventListener("click", () => selectTab("limits"));
 $("check-filters").addEventListener("change", (event) => {
   if (event.target.name !== "status") return;
   checks.filters.status = event.target.value;

@@ -34,8 +34,10 @@ def test_the_page_and_its_files_are_served(client):
     assert page.headers["content-type"].startswith("text/html")
     assert '<script src="app.js" defer></script>' in page.text
     assert '<script src="checks.js" defer></script>' in page.text
+    assert '<script src="limits.js" defer></script>' in page.text
     assert client.get("/admin/app.js").status_code == 200
     assert client.get("/admin/checks.js").status_code == 200
+    assert client.get("/admin/limits.js").status_code == 200
     assert client.get("/admin/style.css").status_code == 200
 
 

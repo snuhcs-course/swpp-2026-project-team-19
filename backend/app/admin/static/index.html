@@ -13,6 +13,7 @@
   <script src="config.js"></script>
   <script src="app.js" defer></script>
   <script src="checks.js" defer></script>
+  <script src="limits.js" defer></script>
 </head>
 <body>
   <header class="topbar">
@@ -41,6 +42,7 @@
       <nav class="tabs" role="tablist">
         <button type="button" role="tab" id="tab-applications" aria-selected="true">업주 신청</button>
         <button type="button" role="tab" id="tab-checks" aria-selected="false">메뉴 확인</button>
+        <button type="button" role="tab" id="tab-limits" aria-selected="false">요청 수 초기화</button>
       </nav>
 
       <div id="panel-applications" class="dashboard">
@@ -141,6 +143,45 @@
         <aside id="check-detail" class="detail-pane">
           <p class="placeholder">목록에서 확인할 항목을 고르세요.</p>
         </aside>
+      </div>
+
+      <div id="panel-limits" class="limits-pane" hidden>
+        <h2>요청 수 초기화</h2>
+        <div class="notice warn">
+          <ul>
+            <li>사용자마다 국세청 진위확인은 하루 30회, 사업자등록증 OCR은 하루 5회까지 할 수 있고, 한국 시간 자정에 초기화돼요.</li>
+            <li>횟수는 서버 메모리에 있어서 서버를 재시작해도 초기화돼요.</li>
+            <li>앱에서 아직 BottleMap 사용자로 등록되지 않은 사람은 개별 초기화가 안 되고, 전체 사용자 초기화로만 풀려요.</li>
+            <li>사용자 ID는 업주 신청 상세의 "사용자 ID"에서 복사할 수 있어요.</li>
+          </ul>
+        </div>
+
+        <p id="limit-notice" class="notice" role="status" hidden></p>
+
+        <form id="limit-user-form" class="limit-form" novalidate>
+          <h3>한 사용자 초기화</h3>
+          <div class="form-grid">
+            <label for="limit-user-id">사용자 ID</label>
+            <input id="limit-user-id" name="userId" class="id" placeholder="8c1f0b6e-2d3a-4f5b-9c7d-1e2f3a4b5c6d"
+                   autocomplete="off" spellcheck="false" maxlength="64">
+            <p id="limit-user-id-error" class="field-error" hidden></p>
+            <label for="limit-kind">종류</label>
+            <select id="limit-kind" name="kind">
+              <option value="">전체 (국세청 진위확인과 OCR)</option>
+              <option value="business_verification">국세청 진위확인</option>
+              <option value="business_certificate_ocr">사업자등록증 OCR</option>
+            </select>
+          </div>
+          <div class="action-row">
+            <button type="submit">이 사용자 초기화</button>
+          </div>
+        </form>
+
+        <section class="danger-zone">
+          <h3>전체 사용자 초기화</h3>
+          <p class="hint">모든 사용자의 국세청 진위확인과 OCR 횟수를 한꺼번에 지워요. 되돌릴 수 없어요.</p>
+          <button type="button" id="limit-reset-all" class="danger">전체 사용자 초기화</button>
+        </section>
       </div>
     </section>
   </main>
