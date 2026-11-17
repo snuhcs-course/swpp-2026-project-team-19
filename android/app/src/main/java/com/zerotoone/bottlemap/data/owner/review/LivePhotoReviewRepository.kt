@@ -144,6 +144,18 @@ internal object DraftRecoveryPolicy {
  * A now-missing older pending backup cannot turn this into a foreign conflict.
  * Never acknowledge it if a newer checkpoint differs.
  */
+/** A pre-ACK network attempt is not a newer edit than an acknowledged
+ * checkpoint of the same review. Ignore only that proven stale pending slot. */
+internal fun supersededPendingReview(
+    pending: PendingReviewDraftStore.Envelope?,
+    current: PendingReviewDraftStore.Envelope?,
+    server: ReviewDraftDto?,
+): Boolean = pending != null && current != null && server != null &&
+    pending.reviewVersion == server.reviewVersion &&
+    current.reviewVersion == server.reviewVersion &&
+    pending.expectedDraftVersion < server.draftVersion &&
+    ServerReviewDraftCodec.sameAndroidSnapshot(current.content, server.content)
+
 internal fun acknowledgedWorkingReview(
     server: ReviewDraftDto?,
     working: PendingReviewDraftStore.Envelope?,
@@ -430,14 +442,17 @@ class LivePhotoReviewRepository(
                     if (checkpoint != null &&
                         ServerReviewDraftCodec.sameAndroidSnapshot(
                             checkpoint.content, saved?.content)) checkpointStore.clear(id)
-                    if (pending != null &&
+                    val obsoletePending = supersededPendingReview(
+                        pending, device, saved)
+                    if (pending != null && (obsoletePending ||
                         ServerReviewDraftCodec.sameAndroidSnapshot(
-                            pending.content, saved?.content)) pendingStore.clear(id)
+                            pending.content, saved?.content))) pendingStore.clear(id)
                     if (working != null &&
                         ServerReviewDraftCodec.sameAndroidSnapshot(
                             working.content, saved?.content)) workingStore.clear(id)
-                    val hasDifferentLocal = listOfNotNull(pending, checkpoint, working)
-                        .any { !ServerReviewDraftCodec.sameAndroidSnapshot(
+                    val hasDifferentLocal = listOfNotNull(
+                        pending.takeUnless { obsoletePending }, checkpoint, working
+                    ).any { !ServerReviewDraftCodec.sameAndroidSnapshot(
                             it.content, saved?.content) }
                     pendingLocally = hasDifferentLocal
                     // Do not auto-save the server display over an unmatched
@@ -447,7 +462,8 @@ class LivePhotoReviewRepository(
                         pendingDraftConflict = true
                     }
                     pendingOversized = hasDifferentLocal &&
-                        listOfNotNull(pending, checkpoint, working).any {
+                        listOfNotNull(pending.takeUnless { obsoletePending },
+                            checkpoint, working).any {
                             ServerReviewDraftCodec.exceedsServerLimit(it.content) }
                 }
                 !selectedWorking && canRestore && safeLocal &&
