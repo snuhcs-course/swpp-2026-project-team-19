@@ -627,6 +627,14 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                     summary, newWhisky, repository.publishedAddedCount())
             } catch (cancelled: CancellationException) {
                 throw cancelled
+            } catch (_: ReviewDraftConflictException) {
+                // A newer server draft won the CAS. Re-open the review against
+                // its latest acknowledged content; never display the generic
+                // PublishFailure.CONFLICT page for this draft-only condition.
+                // No blind overwrite or second publish request is issued.
+                _publishOutcome.value = null
+                _publishing.value = false
+                reload()
             } catch (error: Exception) {
                 val reason = classifyPublishFailure(error)
                 _publishOutcome.value = PublishOutcome.Failed(
