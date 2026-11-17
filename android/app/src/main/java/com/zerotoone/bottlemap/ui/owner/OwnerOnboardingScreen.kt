@@ -373,7 +373,7 @@ fun OwnerOnboardingScreen(
             screen = RegPage.BIZCHECK
             history = history.filterNot {
                 it == RegPage.VERIFIED.name || it == RegPage.REVIEW.name
-            }
+            }.dropLastWhile { it == RegPage.BIZCHECK.name }
         }
     }
     val validContact=draft.contactPhone.isNotBlank()&&validOwnerPhone(draft.contactPhone)
@@ -480,7 +480,14 @@ fun OwnerOnboardingScreen(
                     editingReview=false
                     go(RegPage.BARNAME)
                 }
-                VerifyFixture.FAILED->go(RegPage.BIZCHECK)
+                VerifyFixture.FAILED->{
+                    go(RegPage.BIZCHECK)
+                    // A failed result must not remain the previous Back
+                    // destination after an owner corrects the opening date.
+                    history=history.dropLastWhile {
+                        it==RegPage.VERIFIED.name || it==RegPage.BIZCHECK.name
+                    }
+                }
                 VerifyFixture.LIMITED->{history=emptyList();onBack()}
             }
             RegPage.BARNAME->forward(RegPage.BARPHOTO)
