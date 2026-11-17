@@ -76,6 +76,27 @@ class PhotoReviewPublicationUatTest {
         assertEquals(2, PhotoReviewRules.publicationPreview(state).changedExistingPrices)
     }
 
+    @Test fun uat45ChangedPriceExcludedByStep10CorrectlyReportsZero() {
+        val serving = PhotoReviewRules.servingKey(ReviewOption(30.0, 15000.0))
+        val selected = ReviewItem(
+            id = "chosen-price", name = "가격 변경한 위스키", price = 15000.0,
+            linkedProductId = "known-product",
+            existingServingPricesByProductId = mapOf(
+                "known-product" to listOf(ReviewPriceCandidate(
+                    servingKey = serving, volumeMl = 30,
+                    priceKrw = 12000, existing = true,
+                )),
+            ),
+            chosenServingPrices = mapOf(serving to 15000),
+        )
+        assertEquals(1, PhotoReviewRules.publicationPreview(
+            PhotoReviewState(items = listOf(selected))).changedExistingPrices)
+        // In the actual UAT sequence step 10 excluded the same changed card.
+        assertEquals(0, PhotoReviewRules.publicationPreview(
+            PhotoReviewState(items = listOf(selected.copy(excluded = true)))
+        ).changedExistingPrices)
+    }
+
     @Test fun unlinkedExcludedMergedUnchangedAndNewServingsDoNotInflateChangedCount() {
         val thirty = PhotoReviewRules.servingKey(ReviewOption(30.0, 12000.0))
         val sixty = PhotoReviewRules.servingKey(ReviewOption(60.0, 19000.0))
