@@ -473,7 +473,13 @@ fun OwnerOnboardingScreen(
             RegPage.VERIFIED->if(!verificationCurrent) {
                 go(RegPage.BIZCHECK)
             } else when(displayedVerification){
-                VerifyFixture.MATCHED,VerifyFixture.UNAVAILABLE->forward(RegPage.BARNAME)
+                VerifyFixture.MATCHED,VerifyFixture.UNAVAILABLE->{
+                    // Verification is a new forward checkpoint, not an edit
+                    // shortcut back to the pre-verification REVIEW page.
+                    // Otherwise editingReview can loop through BIZCHECK forever.
+                    editingReview=false
+                    go(RegPage.BARNAME)
+                }
                 VerifyFixture.FAILED->go(RegPage.BIZCHECK)
                 VerifyFixture.LIMITED->{history=emptyList();onBack()}
             }
