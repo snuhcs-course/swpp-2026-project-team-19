@@ -8,6 +8,7 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTextReplacement
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.zerotoone.bottlemap.data.owner.*
 import org.junit.Assert.assertEquals
@@ -77,6 +78,76 @@ class OwnerRegistrationV4ComposeTest {
         }
         compose.onNodeWithText("다음").performClick()
         compose.onNodeWithText("매장 이름을\n알려주세요").assertExists()
+    }
+
+    @Test fun mismatchBackCorrectedDateThenContinueAdvancesWithoutLoop() {
+        // This reproduces the failing LIVE navigation, not the Mock VERIFYING
+        // animation. The server responses are faked so no NTS quota is used.
+        val initial = MockRegistrationDraft(
+            businessNumberDigits = "1234567891",
+            representativeName = "김민준",
+            openingDateIso = "2019-05-13",
+            resumePageKey = "BIZCHECK",
+        )
+        val repo = LocalOwnerMockRepository(
+            InMemoryMockOwnerStateStore(MockOwnerSnapshot(registrationDraft = initial)))
+        val requests = mutableListOf<String>()
+        val vm = OwnerMockViewModel(repo,
+            businessVerificationFixture = { number, name, date ->
+                assertEquals("1234567891", number)
+                assertEquals("김민준", name)
+                requests.add(date)
+                if (date == "2019-05-13") "not_matched" else "unavailable"
+            })
+        compose.setContent {
+            MaterialTheme {
+                OwnerOnboardingScreen(vm, onBack = {}, onManagerPreview = {},
+                    startRegistration = true)
+            }
+        }
+
+        fun waitFor(text: String) {
+            compose.waitUntil(5000) {
+                compose.onAllNodesWithText(text).fetchSemanticsNodes().isNotEmpty()
+            }
+        }
+        waitFor("이 정보로\n확인할게요")
+        compose.onNodeWithText("확인하기").performClick()
+        compose.waitUntil(5000) {
+            compose.onAllNodesWithText("사업자 정보가\n맞지 않아요")
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        // Hardware Back, as in the Galaxy S23 reproduction.
+        compose.runOnUiThread {
+            compose.activity.onBackPressedDispatcher.onBackPressed()
+        }
+        waitFor("이 정보로\n확인할게요")
+        compose.onAllNodesWithTag("registration-review-edit")[2].performClick()
+        waitFor("개업일을\n알려주세요")
+        compose.onNodeWithTag("registration-opening-date")
+            .performTextReplacement("2019.05.14")
+        compose.onNodeWithText("다음").performClick()
+        waitFor("이 정보로\n확인할게요")
+        compose.onNodeWithText("확인하기").performClick()
+        compose.waitUntil(5000) {
+            compose.onAllNodesWithText("지금은 국세청 확인이\n어려워요")
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithText("계속하기").performClick()
+        waitFor("매장 이름을\n알려주세요")
+        compose.runOnIdle {
+            assertEquals(listOf("2019-05-13", "2019-05-14"), requests)
+            val saved = (vm.state.value as MockOwnerLoadState.Ready)
+                .snapshot.registrationDraft!!
+            assertEquals("2019-05-14", saved.openingDateIso)
+            assertEquals("BARNAME", saved.resumePageKey)
+        }
+        // The old success/failure history must not bounce to another
+        // mismatch result on the next user Back.
+        compose.runOnUiThread {
+            compose.activity.onBackPressedDispatcher.onBackPressed()
+        }
+        waitFor("이 정보로\n확인할게요")
     }
 
     @Test fun registrationMenuUsesPr96HorizontalPhotoSourceDialogWithoutChangingText() {
