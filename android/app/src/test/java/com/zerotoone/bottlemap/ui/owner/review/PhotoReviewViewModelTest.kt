@@ -268,8 +268,8 @@ class PhotoReviewViewModelTest {
         vm.addOption("gin")
         assertTrue(PhotoReviewRules.countOptions(vm.item("gin")) >= 2)
         repeat(10) { vm.addOption("gin") }
-        assertEquals(10, PhotoReviewRules.countOptions(vm.item("gin")))
-        assertTrue(PhotoReviewEvent.Toast("검수 옵션은 최대 10개까지 등록할 수 있어요.") in events)
+        assertEquals(3, PhotoReviewRules.countOptions(vm.item("gin")))
+        assertTrue(PhotoReviewEvent.Toast("검수 옵션은 최대 3개까지 등록할 수 있어요.") in events)
     }
 
     @Test fun reclassifyMovesToOtherAndBackRestoringOptions() = runTest(dispatcher) {
