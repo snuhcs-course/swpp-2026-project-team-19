@@ -37,6 +37,39 @@ class BarDetailViewModelTest {
     }
 
     @Test
+    fun barDetailUnsearchableQueryShowsValidationNotNetworkRetry() {
+        assertEquals("검색할 수 있는 문자가 없어요. 검색어를 다시 입력해 주세요.",
+            barAliasLocalValidation("!!!"))
+        assertEquals("검색할 수 있는 문자가 없어요. 검색어를 다시 입력해 주세요.",
+            barAliasLocalValidation(" - - "))
+        assertNull(barAliasLocalValidation(""))
+        assertNull(barAliasLocalValidation("맥캘란 12"))
+        assertNull(barAliasLocalValidation("a"))
+        assertEquals("검색어는 100자 이내로 입력해 주세요.",
+            barAliasLocalValidation("a".repeat(101)))
+        val invalidQuery = BottleMapApiException(
+            httpStatus = 422, code = "VALIDATION_FAILED", message = "Invalid query",
+            fieldErrors = listOf(com.zerotoone.bottlemap.network.FieldErrorDto(
+                "query", "NOT_SEARCHABLE", "Invalid text")))
+        assertEquals("검색할 수 있는 문자가 없어요. 검색어를 다시 입력해 주세요.",
+            barAliasServerValidation(invalidQuery))
+        assertNull(barAliasServerValidation(BottleMapApiException(
+            httpStatus = 503, code = "HTTP_503", message = "Temporary failure")))
+    }
+
+    @Test
+    fun queryScopedValidationDoesNotRemainAfterNewSearchText() {
+        val invalid = BarAliasLookupState(query = "!!!", validationMessage =
+            "검색할 수 있는 문자가 없어요. 검색어를 다시 입력해 주세요.")
+        assertEquals(invalid, queryScopedBarAlias(invalid, "!!!"))
+        assertNull(queryScopedBarAlias(invalid, "아드벡"))
+        assertNull(queryScopedBarAlias(invalid, ""))
+        val retryable = BarAliasLookupState(query = "아드벡", failed = true)
+        assertEquals(retryable, queryScopedBarAlias(retryable, "아드벡"))
+        assertNull(queryScopedBarAlias(retryable, "!!!"))
+    }
+
+    @Test
     fun aliasFallbackTriggersOnlyForActualLocalMiss() {
         assertTrue(barAliasLookupNeeded("ardbeg10", hasLocalMatch = false))
         assertFalse(barAliasLookupNeeded("ardbeg10", hasLocalMatch = true))
