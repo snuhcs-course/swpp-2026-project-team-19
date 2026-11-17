@@ -362,6 +362,15 @@ fun OwnerOnboardingScreen(
     val verificationCurrent = !viewModel.usesProductionOwnerApi() ||
         ownerBusinessVerificationIsCurrent(verifiedBusinessKey, draft)
     val displayedVerification = if(verificationCurrent) verify else VerifyFixture.UNAVAILABLE
+    // A stale matched result must never become another result screen when
+    // going Back or restoring saved navigation state.
+    LaunchedEffect(screen, verificationCurrent) {
+        if(viewModel.usesProductionOwnerApi() &&
+            screen == RegPage.VERIFIED && !verificationCurrent) {
+            screen = RegPage.BIZCHECK
+            history = history.filterNot { it == RegPage.VERIFIED.name }
+        }
+    }
     val validContact=draft.contactPhone.isNotBlank()&&validOwnerPhone(draft.contactPhone)
     val businessPrecheck=ownerRegistrationPrecheckError(
         draft.businessNumberDigits, draft.representativeName, draft.openingDateIso)
@@ -483,8 +492,13 @@ fun OwnerOnboardingScreen(
                             val code=(e as? BottleMapApiException)?.code
                             when(code) {
                                 "BUSINESS_VERIFICATION_FAILED" -> {
-                                    go(RegPage.BIZCHECK)
-                                    error="국세청 정보와 일치하지 않아요. 사업자번호·대표자명·개업일을 수정해 주세요."
+                                    // The server rejected exactly the three submitted
+                                    // fields: show the pre-existing mismatch result
+                                    // (not a new error screen or an inline workaround).
+                                    verifiedBusinessKey =
+                                        ownerBusinessVerificationKey(latestDraft() ?: draft)
+                                    verify = VerifyFixture.FAILED
+                                    go(RegPage.VERIFIED)
                                 }
                                 "INVALID_BUSINESS_NUMBER","DATE_IN_FUTURE" -> {
                                     go(RegPage.BIZCHECK)
@@ -1025,14 +1039,25 @@ fun OwnerOnboardingScreen(
                     }
                 }
             }
-            error?.let{Text(it,color=MaterialTheme.colorScheme.error)}
+            // For application submission, the exact existing message moves
+            // to the persistent CTA region below; other screens stay inline.
+            if(screen != RegPage.REVIEW) {
+                error?.let{Text(it,color=MaterialTheme.colorScheme.error)}
+            }
         }
         if(cta!=null&&state !is MockOwnerLoadState.Error) {
-            Box(Modifier.fillMaxWidth()
+            Column(Modifier.fillMaxWidth()
                 .then(if(screen==RegPage.BN||screen==RegPage.DATE)Modifier
                     else Modifier.navigationBarsPadding())
                 .padding(start=20.dp,end=20.dp,top=12.dp,
-                    bottom=if(screen==RegPage.BN||screen==RegPage.DATE)8.dp else 24.dp)) {
+                    bottom=if(screen==RegPage.BN||screen==RegPage.DATE)8.dp else 24.dp),
+                verticalArrangement=Arrangement.spacedBy(8.dp)) {
+                if(screen==RegPage.REVIEW) {
+                    error?.let {
+                        Text(it,color=MaterialTheme.colorScheme.error,fontSize=13.sp,
+                            modifier=Modifier.testTag("registration-submit-error"))
+                    }
+                }
                 RegistrationButton(cta,enabled=enabled,onClick=::primaryAction)
             }
         }
