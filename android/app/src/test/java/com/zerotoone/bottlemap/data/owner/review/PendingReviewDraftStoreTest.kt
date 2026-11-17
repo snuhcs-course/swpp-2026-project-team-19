@@ -233,8 +233,16 @@ class PendingReviewDraftStoreTest {
                 excluded = false),
         ))
         assertTrue(compatibleOwnerReviewDraft(split, fresh))
-        assertFalse(compatibleOwnerReviewDraft(
+        // Display/group ordering is not OCR identity. Restoring the same
+        // extracted IDs must not discard the owner's latest edits.
+        assertTrue(compatibleOwnerReviewDraft(
             split.copy(items = split.items.reversed()), fresh))
+        val changedSelection = split.copy(items = listOf(
+            split.items.first(),
+            split.items.last().copy(volumeChoices = emptyList(),
+                chosenVolumeKeys = setOf("ml:30")),
+        ))
+        assertTrue(compatibleOwnerReviewDraft(changedSelection, fresh))
         assertFalse(compatibleOwnerReviewDraft(
             split.copy(items = listOf(split.items.first(),
                 split.items.last().copy(manuallySplitGroup = false))), fresh))
