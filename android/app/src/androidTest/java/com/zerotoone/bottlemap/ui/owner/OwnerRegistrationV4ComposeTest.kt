@@ -151,6 +151,38 @@ class OwnerRegistrationV4ComposeTest {
         waitFor("이 정보로\n확인할게요")
     }
 
+    @Test fun unavailable404VerificationContinuesWithoutAnotherReadback() {
+        val draft = MockRegistrationDraft(
+            businessNumberDigits = "1234567891",
+            representativeName = "김민준", openingDateIso = "2019-05-14",
+            resumePageKey = "BIZCHECK",
+        )
+        val repo = LocalOwnerMockRepository(InMemoryMockOwnerStateStore(
+            MockOwnerSnapshot(registrationDraft = draft)))
+        val vm = OwnerMockViewModel(repo,
+            businessVerificationFixture = { _, _, _ ->
+                throw com.zerotoone.bottlemap.network.BottleMapApiException(
+                    httpStatus = 404, code = "HTTP_404", message = "Not Found")
+            })
+        compose.setContent {
+            MaterialTheme {
+                OwnerOnboardingScreen(vm, onBack = {}, onManagerPreview = {},
+                    startRegistration = true)
+            }
+        }
+        compose.waitUntil(5000) {
+            compose.onAllNodesWithText("이 정보로\n확인할게요")
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithText("확인하기").performClick()
+        compose.waitUntil(5000) {
+            compose.onAllNodesWithText("지금은 국세청 확인이\n어려워요")
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithText("계속하기").performClick()
+        compose.onNodeWithText("매장 이름을\n알려주세요").assertExists()
+    }
+
     @Test fun registrationMenuUsesPr96HorizontalPhotoSourceDialogWithoutChangingText() {
         val photo=MockPhoto("preexisting","content://mock/preexisting",
             MockPhotoKind.MENU_CAPTURE)
