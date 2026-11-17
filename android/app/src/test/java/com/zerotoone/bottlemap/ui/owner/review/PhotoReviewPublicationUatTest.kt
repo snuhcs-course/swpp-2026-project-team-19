@@ -50,4 +50,54 @@ class PhotoReviewPublicationUatTest {
         assertEquals(0, counts.changedExistingPrices)
         assertEquals(0, counts.publishWithoutProduct)
     }
+    @Test fun existingUnlinkedOtherAndWhiskyCountChangedServingOnlyOncePerCard() {
+        val thirty = PhotoReviewRules.servingKey(ReviewOption(30.0, 15000.0))
+        val sixty = PhotoReviewRules.servingKey(ReviewOption(60.0, 23000.0))
+        val oldThirty = ReviewPriceCandidate(
+            servingKey = thirty, volumeMl = 30, priceKrw = 12000, existing = true,
+        )
+        val oldSixty = ReviewPriceCandidate(
+            servingKey = sixty, volumeMl = 60, priceKrw = 20000, existing = true,
+        )
+        val other = ReviewItem(
+            id = "other", name = "바 전용 칵테일", type = ReviewItemType.OTHER,
+            price = 15000.0,
+            options = listOf(ReviewOption(60.0, 23000.0)),
+            priceCandidates = listOf(oldThirty, oldSixty),
+        )
+        val unlinkedWhisky = ReviewItem(
+            id = "whisky", name = "바 전용 위스키", match = ReviewMatch.NEW,
+            nameSaved = true, newConfirmed = true, price = 15000.0,
+            priceCandidates = listOf(oldThirty),
+        )
+        val state = PhotoReviewState(items = listOf(other, unlinkedWhisky))
+        assertEquals(2, PhotoReviewRules.publicationPreview(state).changedExistingPrices)
+    }
+
+    @Test fun unlinkedExcludedMergedUnchangedAndNewServingsDoNotInflateChangedCount() {
+        val thirty = PhotoReviewRules.servingKey(ReviewOption(30.0, 12000.0))
+        val sixty = PhotoReviewRules.servingKey(ReviewOption(60.0, 19000.0))
+        val saved = ReviewPriceCandidate(
+            servingKey = thirty, volumeMl = 30, priceKrw = 12000, existing = true,
+        )
+        val unchanged = ReviewItem(
+            id = "unchanged", name = "그대로", type = ReviewItemType.OTHER,
+            price = 12000.0, options = listOf(ReviewOption(60.0, 19000.0)),
+            priceCandidates = listOf(saved),
+        )
+        val excluded = unchanged.copy(id = "excluded", name = "제외", price = 14000.0,
+            excluded = true)
+        val merged = unchanged.copy(id = "merged", name = "병합", price = 14000.0,
+            mergedInto = "unchanged")
+        val newlyAdded = unchanged.copy(id = "new-size", name = "새 용량", price = 19000.0,
+            volume = 60.0,
+            options = emptyList(),
+            priceCandidates = listOf(saved),
+        )
+        assertEquals(sixty, PhotoReviewRules.servingKey(ReviewOption(60.0, 19000.0)))
+        val preview = PhotoReviewRules.publicationPreview(
+            PhotoReviewState(items = listOf(unchanged, excluded, merged, newlyAdded)))
+        assertEquals(0, preview.changedExistingPrices)
+    }
+
 }
