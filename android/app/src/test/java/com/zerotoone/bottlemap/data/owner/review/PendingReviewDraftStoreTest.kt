@@ -66,6 +66,25 @@ class PendingReviewDraftStoreTest {
     }
 
 
+    @Test fun oldPendingAttemptCannotBlockAcknowledgedNewerCheckpoint() {
+        fun content(name: String) = ServerReviewDraftCodec.encode(
+            PhotoReviewState(items = listOf(ReviewItem(id = "ocr-1", name = name))))
+        val pending = PendingReviewDraftStore.Envelope(
+            reviewVersion = 7, expectedDraftVersion = 3,
+            itemIds = listOf("ocr-1"), content = content("earlier price"))
+        val newest = pending.copy(expectedDraftVersion = 4,
+            content = content("latest price and volume"))
+        val remote = ReviewDraftDto(
+            draftVersion = 5, reviewVersion = 7,
+            savedAt = "2026-11-17T00:00:00Z", content = newest.content)
+        assertTrue(supersededPendingReview(pending, newest, remote))
+        assertFalse(supersededPendingReview(pending, newest,
+            remote.copy(content = content("someone else's change"))))
+        assertFalse(supersededPendingReview(
+            pending.copy(expectedDraftVersion = 5), newest, remote))
+        assertFalse(supersededPendingReview(pending, null, remote))
+    }
+
     @Test fun workingCopyAckAfterPendingWasClearedDoesNotCreateFalseConflict() {
         fun content(name: String) = ServerReviewDraftCodec.encode(
             PhotoReviewState(items = listOf(ReviewItem(id = "ocr-1", name = name))))
