@@ -1,6 +1,8 @@
 package com.zerotoone.bottlemap.data.owner.review
 
 import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import com.zerotoone.bottlemap.data.OwnerRepository
 import com.zerotoone.bottlemap.data.owner.MockImportStatus
 import com.zerotoone.bottlemap.data.owner.MockOwnerLoadState
@@ -297,6 +299,15 @@ class LivePhotoReviewRepository(
     private val remote: OwnerRepository = OwnerRepository(),
 ) : PhotoReviewRepository {
     private val appContext = context.applicationContext
+
+    override fun hasUsableNetwork(): Boolean {
+        val manager = appContext.getSystemService(Context.CONNECTIVITY_SERVICE)
+            as? ConnectivityManager ?: return true // Let the API report the failure.
+        val active = manager.activeNetwork ?: return false
+        val capabilities = manager.getNetworkCapabilities(active) ?: return false
+        return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
+            capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+    }
     private val pendingStore = PendingReviewDraftStore(appContext)
     // An explicitly chosen local conflict edit never mutates the original
     // pending file. It lives in its own auth/import-scoped AtomicFile.
