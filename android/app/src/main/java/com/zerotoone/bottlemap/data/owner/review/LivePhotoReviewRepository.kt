@@ -418,6 +418,12 @@ class LivePhotoReviewRepository(
                         .any { !ServerReviewDraftCodec.sameAndroidSnapshot(
                             it.content, saved?.content) }
                     pendingLocally = hasDifferentLocal
+                    // Do not auto-save the server display over an unmatched
+                    // protected device copy; its contents are not acknowledged.
+                    if (hasDifferentLocal) {
+                        draftConflict = true
+                        pendingDraftConflict = true
+                    }
                     pendingOversized = hasDifferentLocal &&
                         listOfNotNull(pending, checkpoint, working).any {
                             ServerReviewDraftCodec.exceedsServerLimit(it.content) }
