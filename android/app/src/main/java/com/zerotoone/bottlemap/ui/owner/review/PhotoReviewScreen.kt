@@ -214,7 +214,7 @@ fun PhotoReviewScreen(
                             Text("!", style = uxText(44f, 700, UxColor.error),
                                 modifier = Modifier.testTag("review-load-error-symbol"))
                         }
-                        Text("검수 정보를\\n불러오지 못했어요",
+                        Text("검수 정보를\n불러오지 못했어요",
                             style = uxText(25f, 700, UxColor.text, serif = true),
                             textAlign = TextAlign.Center)
                         Text(current.message, style = uxText(13f, 450, UxColor.sub),
