@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.BitmapFactory
 import android.net.Uri
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -20,6 +21,8 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -61,6 +64,7 @@ import com.zerotoone.bottlemap.ui.common.BmIcon
 import com.zerotoone.bottlemap.ui.common.BmIconId
 import com.zerotoone.bottlemap.ui.theme.BottleMapPalette
 import com.zerotoone.bottlemap.data.CustomerRepository
+import com.zerotoone.bottlemap.network.BottleMapApiException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -93,11 +97,31 @@ internal fun barMenuMatchesQuery(name: String, brand: String?, query: String): B
 internal fun barAliasLookupNeeded(query: String, hasLocalMatch: Boolean): Boolean =
     query.isNotBlank() && query.any(Char::isLetterOrDigit) && !hasLocalMatch
 
+/** The bar-detail search has the same nonsearchable-query guard as search home.
+ * A deterministic invalid query should not be labelled a network failure. */
+internal fun barAliasLocalValidation(query: String): String? = when {
+    query.trim().length > 100 -> "검색어는 100자 이내로 입력해 주세요."
+    query.isNotBlank() && query.none(Char::isLetterOrDigit) ->
+        "검색할 수 있는 문자가 없어요. 검색어를 다시 입력해 주세요."
+    else -> null
+}
+
+internal fun barAliasServerValidation(error: BottleMapApiException): String? {
+    if (error.httpStatus != 422) return null
+    return when (error.fieldErrors.firstOrNull { it.path == "query" }?.code) {
+        "NOT_SEARCHABLE" -> "검색할 수 있는 문자가 없어요. 검색어를 다시 입력해 주세요."
+        "STRING_TOO_LONG" -> "검색어는 100자 이내로 입력해 주세요."
+        "BLANK" -> "검색어를 입력해 주세요."
+        else -> null
+    }
+}
+
 /** Keep outcomes query-scoped so stale errors/results never appear for new input. */
 internal data class BarAliasLookupState(
     val query: String = "",
     val loading: Boolean = false,
     val failed: Boolean = false,
+    val validationMessage: String? = null,
     val productIds: Set<String> = emptySet(),
 )
 
@@ -224,6 +248,10 @@ internal fun CustomerP18BarDetail(
     LaunchedEffect(bar.barId, menuQuery, aliasRetryNonce) {
         aliasLookup = BarAliasLookupState()
         val query = menuQuery.trim()
+        barAliasLocalValidation(query)?.let { message ->
+            aliasLookup = BarAliasLookupState(query = query, validationMessage = message)
+            return@LaunchedEffect
+        }
         val hasLocalMatch = bar.items.any {
             barMenuMatchesQuery(it.menuDisplayName, it.brandName, query)
         }
@@ -239,6 +267,10 @@ internal fun CustomerP18BarDetail(
             aliasLookup = BarAliasLookupState(query = query, productIds = ids)
         } catch (cancelled: CancellationException) {
             throw cancelled
+        } catch (error: BottleMapApiException) {
+            val validation = barAliasServerValidation(error)
+            aliasLookup = BarAliasLookupState(query = query,
+                failed = validation == null, validationMessage = validation)
         } catch (_: Exception) {
             aliasLookup = BarAliasLookupState(query = query, failed = true)
         }
@@ -433,26 +465,41 @@ internal fun CustomerP18BarDetail(
             P18SearchField(menuQuery,{menuQuery=it},{},
                 placeholder="메뉴 검색",modifier=Modifier.fillMaxWidth().height(48.dp),
                 focused=false)
-            // Only render the outcome for the currently displayed query.
-            // Clearing/editing the query immediately hides a stale result.
+            // Only render outcomes for the current query. Local invalid text
+            // is detected immediately (no debounced request or stale flicker).
             val queryScopedAlias = queryScopedBarAlias(aliasLookup, menuQuery)
-            if (queryScopedAlias?.loading == true) {
+            val validationText = barAliasLocalValidation(menuQuery)
+                ?: queryScopedAlias?.validationMessage
+            if (queryScopedAlias?.loading == true && validationText == null) {
                 Row(Modifier.fillMaxWidth().testTag("customer-bar-alias-loading"),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    horizontalArrangement = Arrangement.Center) {
                     CircularProgressIndicator(Modifier.size(16.dp),
                         strokeWidth = 2.dp, color = P18Gold)
+                    Spacer(Modifier.width(8.dp))
                     Text("메뉴를 검색하고 있어요.", color = P18Muted, fontSize = 12.sp)
                 }
             }
-            if (queryScopedAlias?.failed == true) {
+            if (validationText != null) {
+                Text(validationText, color = P18Muted, fontSize = 12.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+                        .testTag("customer-bar-alias-validation"))
+            }
+            if (queryScopedAlias?.failed == true && validationText == null) {
                 Column(Modifier.fillMaxWidth().testTag("customer-bar-alias-error"),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text("검색 결과를 불러오지 못했어요. 인터넷 연결을 확인해 주세요.",
-                        color = P18Muted, fontSize = 12.sp)
-                    TextButton(onClick = { aliasRetryNonce++ },
-                        modifier = Modifier.testTag("customer-bar-alias-retry")) {
-                        Text("다시 시도", color = P18Gold, fontSize = 13.sp)
+                        color = P18Muted, fontSize = 12.sp, textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth())
+                    OutlinedButton(onClick = { aliasRetryNonce++ },
+                        border = BorderStroke(1.dp, P18Gold),
+                        shape = RoundedCornerShape(9.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = P18Gold),
+                        modifier = Modifier.heightIn(min = 44.dp)
+                            .testTag("customer-bar-alias-retry")) {
+                        Text("다시 시도", fontSize = 13.sp)
                     }
                 }
             }
@@ -461,11 +508,12 @@ internal fun CustomerP18BarDetail(
                 modifier=Modifier.fillMaxWidth().padding(16.dp),
                 color=P18Muted,textAlign=TextAlign.Center)
             val filtered=bar.items.filter {
+                validationText == null && (
                 barMenuMatchesQuery(it.menuDisplayName,it.brandName,menuQuery) ||
                     (menuQuery.isNotBlank() &&
                         queryScopedAlias != null && !queryScopedAlias.failed &&
                         !queryScopedAlias.loading &&
-                        it.productId != null && it.productId in queryScopedAlias.productIds)
+                        it.productId != null && it.productId in queryScopedAlias.productIds))
             }
             val categories=filtered.groupBy{it.category.ifBlank{"whisky"}}
             categories.forEach { (category,menu) ->
