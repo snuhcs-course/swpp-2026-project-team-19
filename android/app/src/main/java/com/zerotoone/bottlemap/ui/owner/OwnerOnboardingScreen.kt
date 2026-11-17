@@ -298,7 +298,7 @@ fun OwnerOnboardingScreen(
                 throw cancelled
             } catch(e: Exception) {
                 go(RegPage.BIZCHECK)
-                error="사업자등록증을 읽지 못했어요. 직접 입력해 주세요."
+                error=e.message ?: "사업자등록증을 읽지 못했어요. 직접 입력해 주세요."
             }
         } else if(screen==RegPage.VERIFYING){
             // The actual NTS verification happens on POST /api/owner-applications.
@@ -351,7 +351,10 @@ fun OwnerOnboardingScreen(
             delay(300)
             runCatching {
                 viewModel.searchExistingBarCandidatesLive(draft.proposedBarName)
-            }.onFailure { error=it.message ?: "기존 매장을 검색하지 못했어요." }
+            }.onFailure {
+                if(it is CancellationException) throw it
+                error=it.message ?: "기존 매장을 검색하지 못했어요."
+            }
         }
     }
     val exactMatches=candidates.filter{
@@ -472,7 +475,7 @@ fun OwnerOnboardingScreen(
                         } catch(cancelled: CancellationException) {
                             throw cancelled
                         } catch(e: Exception) {
-                            error="사업자 정보를 확인하지 못했어요."
+                            error=e.message ?: "사업자 정보를 확인하지 못했어요."
                         } finally { busy=false }
                     }
                 }
@@ -559,6 +562,8 @@ fun OwnerOnboardingScreen(
                             viewModel.cancelOwnerApplicationLive(id)
                             cancelId=null
                             error=null
+                        } catch(cancelled: CancellationException) {
+                            throw cancelled
                         } catch(e: Exception) {
                             error=e.message ?: "신청을 취소하지 못했어요."
                         } finally {busy=false}
