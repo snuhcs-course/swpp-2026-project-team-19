@@ -2,6 +2,9 @@ package com.zerotoone.bottlemap.data.owner
 
 import android.content.Context
 import android.net.Uri
+import android.os.SystemClock
+import android.util.Log
+import com.zerotoone.bottlemap.BuildConfig
 import com.zerotoone.bottlemap.data.ImageUploadPreparer
 import com.zerotoone.bottlemap.data.AppAuth
 import com.zerotoone.bottlemap.data.OwnerRepository
@@ -332,6 +335,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         }
 
     private suspend fun refresh(expectedGeneration: Int? = null) {
+        val refreshStarted = SystemClock.elapsedRealtime()
         val refreshGeneration = expectedGeneration ?: generation.get()
         val token = AppAuth.gateway.currentAccessTokenOrNull()
         if(token == null) {
@@ -365,6 +369,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
             val applicationRequest = async { remote.getMyApplications() }
             barsRequest.await() to applicationRequest.await()
         }
+        val accountReadsDone = SystemClock.elapsedRealtime()
         val bars = ownedBars.map { bar ->
             // Existing unconfigured bars follow the Android decision: persist 30 ml.
             if(bar.defaultPourMl == null) runCatching {
@@ -443,6 +448,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
             }
             historyRequest.await() to menuRequest.await()
         }
+        val detailsReadDone = SystemClock.elapsedRealtime()
         // Do not let an older in-flight Owner entry request publish after a newer one.
         if (refreshGeneration != generation.get()) return
         versionByBar.clear()
@@ -521,6 +527,10 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
             imports = importedJobs,
         ))
         hasLoadedOwnerSnapshot = true
+        if (BuildConfig.DEBUG) Log.d("BottleMapPerf",
+            "owner_refresh_ms=${SystemClock.elapsedRealtime() - refreshStarted} " +
+                "account_get_ms=${accountReadsDone - refreshStarted} " +
+                "menu_history_ms=${detailsReadDone - accountReadsDone}")
     }
 
     override fun retryLoad() {
@@ -784,7 +794,10 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         // The POST is authoritative. Never show success or delete local
         // photo copies until the server actually acknowledges cancellation.
         writeMutex.withLock {
+            val cancelStarted = SystemClock.elapsedRealtime()
             val confirmed = remote.cancelMenuImport(importId)
+            if (BuildConfig.DEBUG) Log.d("BottleMapPerf",
+                "photo_cancel_http_ms=${SystemClock.elapsedRealtime() - cancelStarted}")
             check(confirmed.menuImportId == importId && confirmed.status == "canceled") {
                 "메뉴판 작업 취소 결과를 확인하지 못했어요."
             }
