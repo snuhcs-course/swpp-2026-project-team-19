@@ -135,6 +135,21 @@ internal object DraftRecoveryPolicy {
     }
 }
 
+/** Automatic, prompt-free sequential device handoff. A newer, readable server
+ * CAS version is authoritative when an old device has a divergent stale copy.
+ * Never discard pending work when the server has NOT advanced, nor when the
+ * review source is incompatible/unknown. No forced PUT or CAS bypass. */
+internal fun canAdoptNewerServerReview(
+    outcome: DraftRecoveryPolicy.Outcome,
+    server: ReviewDraftDto?,
+    device: PendingReviewDraftStore.Envelope?,
+    reviewVersion: Int,
+    serverReadable: Boolean,
+): Boolean = serverReadable && outcome == DraftRecoveryPolicy.Outcome.CONFLICT &&
+    server != null && device != null && server.reviewVersion == reviewVersion &&
+    device.reviewVersion == reviewVersion &&
+    server.draftVersion > device.expectedDraftVersion
+
 /**
  * Treat a deliberate split of a previously merged OCR child as compatible.
  * Fresh OCR source identities must still be present. Used for both normal
@@ -434,8 +449,10 @@ class LivePhotoReviewRepository(
             (if (regenerated) parsed != null else compatible(parsed))
         var chosen = parsed.takeIf { canRestore } ?: state
         if (saved != null && !canRestore) {
-            draftConflict = true
-            draftNotice = "서버 초안의 일부 내용을 복원할 수 없어요. 담당자에게 확인해 주세요."
+            // Invalid OCR identities must never trigger a silent overwrite.
+            // Reuse the existing generic Retry page instead of any draft
+            // conflict message or an inaccessible resolution dialog.
+            error("검수 정보를 안전하게 복원하지 못했어요. 다시 시도해 주세요.")
         }
 
         val pending = pendingStore.read(id)
@@ -532,26 +549,32 @@ class LivePhotoReviewRepository(
                         pendingStore.clear(id)
                     }
                 }
+                canAdoptNewerServerReview(
+                    recovery, saved, device, reviewVersion, canRestore) -> {
+                    // Owner-approved sequential-device policy: use the last
+                    // ACKNOWLEDGED server version, not delayed wall-clock PUT
+                    // order. This branch does NOT overwrite anyone's server
+                    // work or bypass §5.9 compare-and-swap.
+                    chosen = requireNotNull(parsed)
+                    pendingLocally = false
+                    pendingOversized = false
+                    draftNotice = null
+                    // Retire stale account/import-scoped files so a later
+                    // reload cannot resurrect the outdated device version.
+                    // This policy knowingly chooses server-confirmed content
+                    // over a divergent unsent copy after a foreign CAS.
+                    checkpointMutex.withLock {
+                        checkpointStore.clear(id)
+                        pendingStore.clear(id)
+                        workingStore.clear(id)
+                    }
+                }
                 else -> {
-                    // A genuine CAS conflict cannot be auto-published, but
-                    // hiding the compatible device edit behind the server
-                    // preview looks exactly like data loss on re-entry.
-                    // Show the protected latest device decisions while keeping
-                    // the server immutable and publication blocked.
-                    if (safeLocal && canRestore) chosen = requireNotNull(local)
-                    if (!selectedWorking && checkpoint != null && safeLocal &&
-                        pending == null)
-                        pendingStore.write(id, checkpoint)
-                    draftConflict = true
-                    // Even an incompatible same-account backup remains durable
-                    // evidence. Do not auto PUT, suppress Back, or erase it.
-                    pendingDraftConflict = true
-                    pendingLocally = true
-                    pendingOversized =
-                        ServerReviewDraftCodec.exceedsServerLimit(device.content)
-                    draftNotice = if (safeLocal)
-                        "서버와 기기에 서로 다른 검수 초안이 있어요. 먼저 확인해 주세요."
-                    else "기기 초안의 OCR 항목이 변경되어 자동 복원을 중단했어요."
+                    // Equal/unknown server version or incompatible OCR is NOT
+                    // proof that the device copy is stale. Retain the files and
+                    // show the existing generic Retry screen, never a Draft
+                    // conflict-choice UI or destructive automatic PUT.
+                    error("검수 내용을 안전하게 불러오지 못했어요. 다시 시도해 주세요.")
                 }
             }
         }
