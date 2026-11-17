@@ -192,6 +192,18 @@ internal fun acknowledgedWorkingReview(
     (checkpoint == null || ServerReviewDraftCodec.sameAndroidSnapshot(
         checkpoint.content, working.content))
 
+/** Retire proven server-acknowledged copies, but never an independent unsent
+ * pending attempt with a newer base than the acknowledged working copy. */
+internal fun canRetireAcknowledgedWorkingReview(
+    server: ReviewDraftDto?,
+    pending: PendingReviewDraftStore.Envelope?,
+    working: PendingReviewDraftStore.Envelope?,
+    checkpoint: PendingReviewDraftStore.Envelope?,
+): Boolean = acknowledgedWorkingReview(server, working, checkpoint) &&
+    (pending == null ||
+        ServerReviewDraftCodec.sameAndroidSnapshot(pending.content, server?.content) ||
+        (working != null && supersededPendingReview(pending, working, server)))
+
 internal fun isNewConflictReviewEdit(
     current: Map<String, Any?>,
     displayedAtLoad: Map<String, Any?>?,
@@ -454,20 +466,21 @@ class LivePhotoReviewRepository(
                     selectedWorking && canRestore && safeLocal &&
                     // A successful CAS can clear pending before the following
                     // reload; an exact remote ACK still clears false conflicts.
-                    acknowledgedWorkingReview(saved, working, checkpoint) -> {
-                    // A lost response to an explicit local CAS can leave both
-                    // the protected original and its later working copy on device.
-                    // The server already has the *working* content. Do not
-                    // incorrectly enter conflict again or discard the original.
+                    canRetireAcknowledgedWorkingReview(saved, pending, working, checkpoint) -> {
+                    // This exact working content is already on the server. The
+                    // old backup is superseded, not a new owner edit. Keeping
+                    // it would produce a false conflict after a second device
+                    // legitimately updates the server draft.
                     chosen = requireNotNull(local)
                     pendingLocally = false
                     pendingOversized = false
-                    // Preserve both local copies: the working one proves this
-                    // acknowledgement on a later reload; the older backup is
-                    // still protected until a subsequent accepted write.
-                    if (checkpoint != null &&
-                        ServerReviewDraftCodec.sameAndroidSnapshot(
-                            checkpoint.content, working.content)) checkpointStore.clear(id)
+                    checkpointMutex.withLock {
+                        if (checkpoint != null &&
+                            ServerReviewDraftCodec.sameAndroidSnapshot(
+                                checkpoint.content, working.content)) checkpointStore.clear(id)
+                        if (pending != null) pendingStore.clear(id)
+                        workingStore.clear(id)
+                    }
                 }
                 recovery == DraftRecoveryPolicy.Outcome.ACKNOWLEDGED &&
                     !selectedWorking && canRestore && safeLocal -> {
