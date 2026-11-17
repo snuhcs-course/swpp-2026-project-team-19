@@ -92,6 +92,8 @@ OPERATOR_ONLY = [
     Route("delete", "/api/bars/{barId}/owner", {}, (404, "BAR_NOT_FOUND"), (404, "USER_NOT_FOUND")),
     Route("get", "/api/menu-item-checks", {}, (200, None)),
     Route("post", "/api/menu-item-checks/{checkId}/resolve", {"json": {"resolution": "keep"}}, (404, "MENU_ITEM_CHECK_NOT_FOUND")),
+    # Called with a missing user, so the shared limiter is left alone.
+    Route("post", "/api/request-limits/reset", {"json": {"userId": MISSING_ID}}, (404, "USER_NOT_FOUND")),
 ]
 BAR_MANAGER = [
     ManagerRoute("get", "/api/bars/{barId}", {}, (404, "BAR_NOT_FOUND"), (200, None)),

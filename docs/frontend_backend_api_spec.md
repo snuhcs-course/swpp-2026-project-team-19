@@ -114,6 +114,7 @@ GET 주변 업장 조회 (위치 + 반경)
 | `GET /api/owner-applications/{applicationId}` | | 본인 신청만 | 본인 신청만 | O |
 | `POST /api/owner-applications/{applicationId}/cancel`, `PUT /api/owner-applications/{applicationId}/menu-photos`, `PUT`과 `DELETE /api/owner-applications/{applicationId}/cover-photo` | | 본인 신청만 | 본인 신청만 | 본인 신청만 |
 | `GET /api/owner-applications`, `POST .../approve`, `POST .../reject`, `POST .../verify-business` | | | | O |
+| `POST /api/request-limits/reset` | | | | O |
 | `DELETE /api/bars/{barId}/owner` | | | | O |
 | `GET /api/menu-item-checks`, `POST /api/menu-item-checks/{checkId}/resolve` | | | | O |
 | `GET /api/bars`, `POST /api/bars`(지금은 구현하지 않음, 3.5) | | | | O |
@@ -305,6 +306,7 @@ ignore
 | `POST` | `/api/owner-applications/{applicationId}/approve` | 업주 신청 승인 |
 | `POST` | `/api/owner-applications/{applicationId}/reject` | 업주 신청 거절 |
 | `POST` | `/api/owner-applications/{applicationId}/verify-business` | 사업자등록 정보 다시 검증 |
+| `POST` | `/api/request-limits/reset` | 진위확인과 OCR의 오늘 요청 수 초기화 (operator) |
 | `GET` | `/api/me/bars` | 내가 업주인 업장 목록 |
 | `DELETE` | `/api/bars/{barId}/owner` | 업주 해제 |
 | `GET` | `/api/menu-item-checks` | 운영자가 확인할 메뉴 항목 목록 |
@@ -1382,7 +1384,7 @@ matchedProducts ≠ [] 이고 items = []    → 상품은 확인했지만 현재
 - `new_bar` 신청은 매장 대표 사진 한 장을 함께 올릴 수 있다(선택, 3.11.17). operator가 신청을 볼 때 실제 매장인지 확인하는 데 쓰고, 승인하면 새 업장의 첫 매장 사진(3.16)이 된다.
 - 백엔드는 신청을 받을 때 국세청 사업자등록정보 진위확인 API로 사업자등록번호, 대표자명, 개업일자가 서로 맞는지 1차 검증한다(3.11.2). 맞지 않으면 신청을 만들지 않고 신청자가 입력을 고치게 한다. 검증 서비스에 연결하지 못하면 신청은 받고 결과를 `unavailable`로 남긴다.
 - 신청서의 나머지를 채우기 전에 세 값만 먼저 확인할 수도 있다(3.11.16). 확인 결과가 맞으면 백엔드가 잠시 기억했다가, 같은 값으로 신청하면 국세청을 다시 부르지 않고 그 결과를 쓴다.
-- 외부 API를 부르는 요청은 사용자마다 하루 횟수를 제한한다: 국세청 진위확인(신청할 때 3.11.2와 신청 전 확인 3.11.16을 합쳐서) 30회, 사업자등록증 OCR(3.11.12) 5회. 남의 사업자등록번호로 대표자명과 개업일자를 맞춰 보는 시도와 외부 API 호출 한도 소진을 막기 위해서다. 규칙은 3.11.14에 있다.
+- 외부 API를 부르는 요청은 사용자마다 하루 횟수를 제한한다: 국세청 진위확인(신청할 때 3.11.2와 신청 전 확인 3.11.16을 합쳐서) 30회, 사업자등록증 OCR(3.11.12) 5회. 남의 사업자등록번호로 대표자명과 개업일자를 맞춰 보는 시도와 외부 API 호출 한도 소진을 막기 위해서다. 규칙은 3.11.14에 있다. operator는 서버 재시작 없이 횟수를 지울 수 있다(3.11.19).
 - operator는 웹 대시보드에서 신청과 검증 결과를 보고, 실제 매장이 있는지 확인한 뒤 승인하거나 거절한다.
 - 사업자등록번호, 대표자명, 개업일자, 연락처는 신청자 본인과 operator에게만 보여 준다. 검증 결과 중 신청자에게는 사업자 상태(`businessStatus`)만 보여 준다. 백엔드는 이 값들을 로그에 남기지 않는다.
 - 사업자등록번호는 DB에 암호화해 저장한다(`docs/schema_guide.md` 5.3). API 응답에는 지금처럼 원래 번호가 나오며, 클라이언트가 할 일은 없다.
@@ -2046,6 +2048,7 @@ operator만 호출할 수 있다. 요청 본문은 없다. 신청에 저장된 �
 ```
 
 - 횟수는 서버 메모리에 저장한다. 서버가 재시작되면 횟수가 초기화되며, 이 한계는 받아들인다. API 프로세스가 하나(worker 1개)일 때만 한도가 정확하다.
+- operator는 서버를 재시작하지 않고 오늘 횟수를 지울 수 있다(3.11.19). 사용자 한 명이나 한 종류만 지울 수도 있다.
 
 #### 3.11.15 업주 신청 메뉴판 사진
 
@@ -2409,6 +2412,49 @@ curl -X PUT https://bottlemap.o-r.kr/api/owner-applications/cccccccc-cccc-4ccc-8
 | `GET /api/me/bars` | `401` | `200` (`items = []`) | `200` (본인 업장만) | `200` (`items = []`) |
 
 `POST /api/owner-applications`의 `201`은 각자 자기 신청을 만든 결과다. operator가 아닌 호출자는 대상이 없거나 끝난 신청에도 `403`을 받는다(2.2의 검사 순서).
+
+#### 3.11.19 요청 수 초기화
+
+```http
+POST /api/request-limits/reset
+Authorization: Bearer <access-token>
+Content-Type: application/json
+```
+
+```json
+{
+  "userId": "8c1f0b6e-2d3a-4f5b-9c7d-1e2f3a4b5c6d",
+  "kind": "business_verification"
+}
+```
+
+operator만 호출할 수 있다. 3.11.14의 오늘 요청 수를 서버 재시작 없이 지운다. 지운 사용자는 바로 다시 한도만큼 호출할 수 있다. 사용자가 입력 실수로 한도를 다 써서 신청을 못 할 때 쓴다.
+
+| 필드 | 필수 | 규칙 |
+|---|---|---|
+| `userId` | 아니오 | UUID(`users.id`). 이 사용자의 횟수만 지운다. 없거나 `null`이면 모든 사용자 |
+| `kind` | 아니오 | `business_verification`(국세청 진위확인) 또는 `business_certificate_ocr`(사업자등록증 OCR). 이 종류만 지운다. 없거나 `null`이면 둘 다 |
+
+- 본문이 없거나 `{}`이면 모든 사용자의 두 종류 횟수를 모두 지운다.
+- 횟수는 token의 `sub`로 센다(3.11.14). 백엔드는 `userId`를 `users`에서 찾아 그 사용자의 `sub`로 지운다. `users` 행이 없는 사용자(`GET /api/me`를 부르기 전에 OCR만 쓴 사용자 등)는 `userId`로 지정할 수 없고, 모든 사용자를 지울 때만 풀린다.
+- 지우는 것은 오늘(KST) 횟수뿐이다. 자정 초기화 규칙은 그대로다.
+- 초기화하는 순간 처리 중이던 요청이 외부 API를 부르지 못하고 끝나면, 그 사용자는 그날 한 번을 더 쓸 수 있다. 운영자가 직접 하는 드문 작업이므로 이 한계는 받아들인다.
+- 검사 순서: 인증(`401`), operator(`403`), 본문(`422`), 사용자(`404`).
+- 백엔드는 누가 누구의 어떤 횟수를 지웠는지 `users.id`로 로그에 남긴다. `sub`와 이메일은 남기지 않는다.
+
+`200 OK`. `clearedCount`는 지운 횟수 기록의 수다. 사용자와 종류 하나마다 하나이며(오늘 몇 번 썼는지와 관계없음), 지울 것이 없었으면 `0`이다.
+
+```json
+{
+  "clearedCount": 1
+}
+```
+
+| HTTP | code | 발생 조건 | 프론트엔드 처리 |
+|---|---|---|---|
+| `403` | `FORBIDDEN` | operator가 아님 | 3.1.5 |
+| `404` | `USER_NOT_FOUND` | `userId`인 `users` 행이 없음. 호출자가 아니라 대상 사용자의 행이다 | 사용자 id 확인 |
+| `422` | `VALIDATION_FAILED` | `userId`가 UUID가 아님(`UUID_PARSING`), `kind`가 위의 두 값이 아님(`LITERAL_ERROR`), 모르는 필드(`EXTRA_FORBIDDEN`) | 입력값 수정 |
 
 ### 3.12 내 주변 업장 조회
 
@@ -5333,7 +5379,7 @@ API가 보내는 오류는 예상하지 못한 서버 오류(`500 INTERNAL_ERROR
 | `404` | `MENU_ITEM_NOT_FOUND` | 직접 수정, 삭제할 항목이 현재 메뉴판에 없음. `details.barMenuItemId` (3.14) | 메뉴 다시 조회 |
 | `404` | `MENU_ITEM_CHECK_NOT_FOUND` | 운영자가 처리할 메뉴 항목 확인이 없음. `details.checkId` (3.18.3) | 확인 목록 다시 조회 |
 | `404` | `PHOTO_NOT_FOUND` | 삭제하거나 조회할 매장 사진이 없음. `details.photoId` (3.16) | 업장 상세 다시 조회 |
-| `404` | `USER_NOT_FOUND` | `GET /api/me`로 사용자를 만들기 전에 `PATCH /api/me`, `POST /api/owner-applications`, 업주 신청 승인과 거절(3.11.7, 3.11.8), 업주 해제(3.11.10) 호출 | `GET /api/me` 호출 후 같은 요청 재시도 |
+| `404` | `USER_NOT_FOUND` | `GET /api/me`로 사용자를 만들기 전에 `PATCH /api/me`, `POST /api/owner-applications`, 업주 신청 승인과 거절(3.11.7, 3.11.8), 업주 해제(3.11.10) 호출. 요청 수 초기화(3.11.19)에서는 대상 `userId`의 `users` 행이 없음 | `GET /api/me` 호출 후 같은 요청 재시도. 3.11.19는 사용자 id 확인 |
 | `404` | `NOT_FOUND` | 존재하지 않는 경로, 또는 비활성화된 임시 로그인 호출 | 요청 경로·서버 설정 확인 |
 | `405` | `METHOD_NOT_ALLOWED` | 경로는 있지만 허용하지 않는 HTTP 메서드 | 요청 메서드 확인 |
 | `409` | `BAR_OWNER_EXISTS` | 이미 현재 업주가 있는 업장에 신청 또는 승인 (3.11) | 안내. operator는 해당 신청을 거절 |
@@ -5359,7 +5405,7 @@ API가 보내는 오류는 예상하지 못한 서버 오류(`500 INTERNAL_ERROR
 | `415` | `UNSUPPORTED_IMAGE_TYPE` | 지원하지 않는 이미지 형식 | 지원 형식 안내 |
 | `422` | `VALIDATION_FAILED` | 필드 값이나 옵션 구성이 잘못됨 | `fieldErrors` 표시 |
 | `422` | `BUSINESS_VERIFICATION_FAILED` | 업주 신청의 사업자등록번호, 대표자명, 개업일자가 국세청 정보와 맞지 않음 (3.11.2) | 입력값을 유지한 채 수정 안내 |
-| `429` | `RATE_LIMITED` | 진위확인(업주 신청과 신청 전 확인 합산)을 오늘 30회, 또는 사업자등록증 OCR을 오늘 5회 했음. `details.retryAfter`에 다음 초기화 시각 (3.11.14) | 내일 다시 시도 안내. OCR은 직접 입력 안내 |
+| `429` | `RATE_LIMITED` | 진위확인(업주 신청과 신청 전 확인 합산)을 오늘 30회, 또는 사업자등록증 OCR을 오늘 5회 했음. `details.retryAfter`에 다음 초기화 시각 (3.11.14) | 내일 다시 시도 안내. OCR은 직접 입력 안내. operator가 초기화하면(3.11.19) 바로 다시 시도할 수 있다 |
 | `503` | `OCR_UNAVAILABLE` | 사업자등록증 사진을 읽는 OCR 설정이 없거나 호출 실패 (3.11.12) | 직접 입력 안내 |
 | `503` | `BUSINESS_VERIFICATION_UNAVAILABLE` | operator의 다시 검증에서 국세청 API에 연결하지 못함 (3.11.13) | 잠시 후 재시도 안내 |
 | `500` | `BUSINESS_NUMBER_UNREADABLE` | operator의 다시 검증에서 저장된 사업자등록번호를 복호화하지 못함 (3.11.13) | 서버 키 설정 문제라고 안내. 재시도하지 않음 |

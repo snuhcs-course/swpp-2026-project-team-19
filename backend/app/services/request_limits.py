@@ -8,6 +8,7 @@ so the external API is never called over the limit.
 
 The counts live in this process's memory, as the spec decides: a restart resets them, and they
 are exact only while the API runs as a single process (backend/deploy/bottlemap-api.service).
+An operator can also reset them without a restart (spec 3.11.19, `reset`).
 `DailyRequestLimiter` is the seam for a shared store if that ever changes.
 """
 
@@ -77,6 +78,11 @@ class DailyRequestLimiter(Protocol):
         made after all. Nothing happens once that day is over: its counts are gone."""
         ...
 
+    def reset(self, subject: str | None, kind: str | None, now: datetime) -> int:
+        """Clear today's counts of `subject` (every subject if None) for `kind` (every kind if None),
+        and return how many counts were cleared."""
+        ...
+
 
 class InMemoryDailyLimiter:
     """Counts in a dict guarded by a lock; the routes run in a thread pool. Holds only today's counts.
@@ -124,6 +130,23 @@ class InMemoryDailyLimiter:
                 self._counts[key] = used - 1
             else:
                 self._counts.pop(key, None)
+
+    def reset(self, subject: str | None, kind: str | None, now: datetime) -> int:
+        if kind is not None and kind not in DAILY_LIMITS:
+            raise KeyError(kind)
+        with self._lock:
+            # Past midnight the counts are gone already; never clear a newer day's counts by an old one.
+            self._roll_over(now)
+            cleared = [
+                key
+                for key in self._counts
+                if (subject is None or key[0] == subject) and (kind is None or key[1] == kind)
+            ]
+            for key in cleared:
+                del self._counts[key]
+            # A unit acquired before the reset and released after it is dropped from the new count,
+            # so that request may get one extra call today; the spec accepts this.
+            return len(cleared)
 
     def used(self, subject: str, kind: str, now: datetime) -> int:
         """Today's count, for tests and diagnostics."""
