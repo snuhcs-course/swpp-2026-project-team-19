@@ -65,6 +65,35 @@ class PendingReviewDraftStoreTest {
         assertNull(recreated.read("import-1"))
     }
 
+
+    @Test fun acknowledgedWorkingCopyRetainsOlderProtectedBackup() = runBlocking {
+        fun content(name: String) = ServerReviewDraftCodec.encode(
+            PhotoReviewState(items = listOf(ReviewItem(id = "ocr-1", name = name))),
+        )
+        val original = PendingReviewDraftStore.Envelope(
+            reviewVersion = 7, expectedDraftVersion = 3,
+            itemIds = listOf("ocr-1"), content = content("before conflict"),
+        )
+        val working = original.copy(content = content("explicitly edited copy"))
+        val originalStore = PendingReviewDraftStore(context) { jwt("working-ack") }
+        val workingStore = PendingReviewDraftStore(context, slot = "working") {
+            jwt("working-ack")
+        }
+        originalStore.write("import-ack", original)
+        workingStore.write("import-ack", working)
+        val server = ReviewDraftDto(4, 7, "2026-11-17T00:00:00Z", working.content)
+        val againOriginal = requireNotNull(originalStore.read("import-ack"))
+        val againWorking = requireNotNull(workingStore.read("import-ack"))
+        assertEquals(DraftRecoveryPolicy.Outcome.ACKNOWLEDGED,
+            DraftRecoveryPolicy.decide(server, againWorking, againOriginal, 7))
+        assertTrue(DraftSaveSafety.latestCopyAcknowledged(
+            server, againOriginal, againWorking))
+        assertTrue(ServerReviewDraftCodec.sameAndroidSnapshot(
+            original.content, requireNotNull(originalStore.read("import-ack")).content))
+        assertFalse(DraftSaveSafety.latestCopyAcknowledged(
+            server.copy(content = content("third party")), againOriginal, againWorking))
+    }
+
     @Test fun recoveryPolicyRestoresOnlyMatchingReviewAndServerCas() {
         fun content(name: String) = ServerReviewDraftCodec.encode(
             PhotoReviewState(items = listOf(ReviewItem(id = "ocr-1", name = name)))
