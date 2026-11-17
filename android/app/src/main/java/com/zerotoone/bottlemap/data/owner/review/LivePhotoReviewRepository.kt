@@ -466,9 +466,16 @@ class LivePhotoReviewRepository(
                             checkpoint, working).any {
                             ServerReviewDraftCodec.exceedsServerLimit(it.content) }
                 }
-                !selectedWorking && canRestore && safeLocal &&
+                canRestore && safeLocal &&
                     recovery in setOf(DraftRecoveryPolicy.Outcome.RESTORE,
-                        DraftRecoveryPolicy.Outcome.REBASE) -> {
+                        DraftRecoveryPolicy.Outcome.REBASE) &&
+                    // A working snapshot is safe to resume at matching CAS.
+                    // Never hide a different, still-unsent checkpoint.
+                    (!selectedWorking || checkpoint == null ||
+                        ServerReviewDraftCodec.sameAndroidSnapshot(
+                            checkpoint.content, device.content) ||
+                        ServerReviewDraftCodec.sameAndroidSnapshot(
+                            checkpoint.content, saved?.content)) -> {
                     // Compatible unsent changes are editable immediately;
                     // normal CAS will synchronize them after the screen loads.
                     chosen = requireNotNull(local)
