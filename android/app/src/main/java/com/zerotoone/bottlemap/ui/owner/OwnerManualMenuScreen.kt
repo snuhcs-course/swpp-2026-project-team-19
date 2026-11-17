@@ -552,7 +552,16 @@ internal fun OwnerManualMenuScreen(
                         } catch (cancelled: CancellationException) {
                             throw cancelled
                         } catch (e: Exception) {
-                            error = e.message ?: "사진 등록 작업을 취소하지 못했어요."
+                            // A failed or lost response is NOT confirmed cancellation.
+                            // Leave the active job and photos untouched; never print
+                            // raw English retrofit/OkHttp messages in the UI.
+                            cancelPhotoConfirm = false
+                            screen = "list"
+                            error = null
+                            onNotice(if (e is com.zerotoone.bottlemap.network.BottleMapApiException &&
+                                e.code == "NETWORK_ERROR")
+                                "작업 취소에 실패했어요. 인터넷 연결을 확인해 주세요."
+                            else "작업 취소에 실패했어요. 메뉴 등록 상태를 확인해 주세요.")
                         } finally { saving = false }
                     }
                 }
