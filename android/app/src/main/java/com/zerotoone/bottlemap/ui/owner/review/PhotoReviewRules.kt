@@ -292,12 +292,15 @@ object PhotoReviewRules {
             item.mergedInto == null && !item.excluded && problems(item, state).isEmpty()
         }
         val updatedExisting = approved.count { item ->
-            val productId = item.linkedProductId ?: return@count false
-            val saved = item.existingServingPricesByProductId[productId].orEmpty()
-                .filter { it.existing }
+            // Existing bar-local items have no catalog ID. Their current serving
+            // prices arrive as existing candidates from the live menu mapping.
+            val saved = item.linkedProductId?.let { productId ->
+                item.existingServingPricesByProductId[productId].orEmpty()
+            } ?: item.priceCandidates
+            val existingPrices = saved.filter { it.existing }
             optionSummary(item).any { option ->
                 val key = servingKey(option)
-                val old = saved.firstOrNull { it.servingKey == key }
+                val old = existingPrices.firstOrNull { it.servingKey == key }
                 old != null && validPrice(option.price) &&
                     old.priceKrw != option.price.toInt()
             }
