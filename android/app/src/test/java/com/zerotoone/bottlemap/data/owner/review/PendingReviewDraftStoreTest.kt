@@ -88,6 +88,9 @@ class PendingReviewDraftStoreTest {
             DraftRecoveryPolicy.decide(server, againWorking, againOriginal, 7))
         assertTrue(DraftSaveSafety.latestCopyAcknowledged(
             server, againOriginal, againWorking))
+        assertFalse(DraftSaveSafety.latestCopyAcknowledged(
+            server, againOriginal, againWorking,
+            againWorking.copy(content = content("newer unsaved keystroke"))))
         assertTrue(ServerReviewDraftCodec.sameAndroidSnapshot(
             original.content, requireNotNull(originalStore.read("import-ack")).content))
         assertFalse(DraftSaveSafety.latestCopyAcknowledged(
