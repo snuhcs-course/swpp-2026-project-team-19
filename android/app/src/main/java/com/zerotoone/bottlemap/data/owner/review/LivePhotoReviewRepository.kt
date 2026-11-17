@@ -138,6 +138,13 @@ internal object DraftRecoveryPolicy {
  * Fresh OCR source identities must still be present. Used for both normal
  * draft restore and explicit conflict overwrite; keep their gates identical.
  */
+/** Source identities are a set; changing review-card order is not new OCR. */
+internal fun sameReviewSourceIds(saved: List<String>, current: List<String>): Boolean =
+    saved.size == current.size &&
+        saved.toSet().size == saved.size &&
+        current.toSet().size == current.size &&
+        saved.toSet() == current.toSet()
+
 internal fun compatibleOwnerReviewDraft(
     candidate: PhotoReviewState?, freshState: PhotoReviewState,
 ): Boolean {
@@ -369,8 +376,8 @@ class LivePhotoReviewRepository(
                 device.expectedDraftVersion, device.reviewVersion,
                 "1970-01-01T00:00:00Z", device.content,
             ))
-            val safeLocal = device.itemIds == state.items.map { it.id } &&
-                compatible(local)
+            val safeLocal = sameReviewSourceIds(
+                device.itemIds, state.items.map { it.id }) && compatible(local)
             when {
                 recovery == DraftRecoveryPolicy.Outcome.ACKNOWLEDGED &&
                     selectedWorking && working != null && pending != null &&
@@ -573,7 +580,8 @@ class LivePhotoReviewRepository(
             val fresh = freshReview ?: error("최신 OCR 항목을 불러와 주세요.")
             require(original.reviewVersion == displayed.reviewVersion &&
                 selected.reviewVersion == displayed.reviewVersion &&
-                selected.itemIds == fresh.items.map { it.id } &&
+                sameReviewSourceIds(
+                    selected.itemIds, fresh.items.map { it.id }) &&
                 compatibleOwnerReviewDraft(local, fresh)) {
                 "기기 초안의 OCR 항목이 최신 서버 검수와 달라요. 원본을 유지했어요."
             }
@@ -634,7 +642,8 @@ class LivePhotoReviewRepository(
                 pending.expectedDraftVersion, version, "1970-01-01T00:00:00Z",
                 pending.content,
             )) ?: error("기기 보관 초안을 안전하게 읽을 수 없어요.")
-            require(pending.itemIds == fresh.items.map { it.id } &&
+            require(sameReviewSourceIds(
+                pending.itemIds, fresh.items.map { it.id }) &&
                 compatibleOwnerReviewDraft(local, fresh)) {
                 "OCR 항목이나 옵션이 변경됐어요. 자동 덮어쓰기를 중단했어요."
             }
