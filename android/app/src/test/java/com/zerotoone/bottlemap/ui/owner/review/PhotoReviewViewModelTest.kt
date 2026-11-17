@@ -635,16 +635,42 @@ class PhotoReviewViewModelTest {
         assertNull(vm.draftProblem.value)
     }
 
-    @Test fun locallyRestoredDraftRequiresRetryBeforePublication() = runTest(dispatcher) {
+    @Test fun locallyRestoredDraftSynchronizesAutomaticallyOnEntry() = runTest(dispatcher) {
         val base = MockPhotoReviewRepository(MockPhotoReviewScenario.READY)
+        var pending = true
+        var saveCalls = 0
         val repo = object : PhotoReviewRepository by base {
-            override fun hasPendingLocalDraft() = true
-            override suspend fun saveDraft(state: PhotoReviewState) { }
+            override fun hasPendingLocalDraft() = pending
+            override suspend fun saveDraft(state: PhotoReviewState) {
+                saveCalls++
+                pending = false
+            }
         }
         val vm = PhotoReviewViewModel(repo)
         assertTrue(vm.load.value is PhotoReviewLoad.Ready)
-        assertTrue(vm.draftRetryable.value)
-        assertTrue(vm.draftProblem.value.orEmpty().contains("이 기기에는 저장"))
+        assertEquals(1, saveCalls)
+        assertFalse(vm.draftRetryable.value)
+        assertNull(vm.draftProblem.value)
+    }
+
+    @Test fun networkFailureOnBackLeavesWithDurableLocalDraft() = runTest(dispatcher) {
+        val base = MockPhotoReviewRepository(MockPhotoReviewScenario.READY)
+        var checkpointed = false
+        val repo = object : PhotoReviewRepository by base {
+            override suspend fun checkpointDraft(state: PhotoReviewState) {
+                checkpointed = true
+            }
+            override fun hasPendingLocalDraft() = checkpointed
+            override suspend fun saveDraft(state: PhotoReviewState) {
+                throw BottleMapApiException(
+                    code = "NETWORK_ERROR", message = "offline")
+            }
+        }
+        val vm = PhotoReviewViewModel(repo)
+        val events = vm.collectEvents(backgroundScope)
+        vm.leave()
+        assertTrue(checkpointed)
+        assertTrue(PhotoReviewEvent.Leave in events)
     }
 
     @Test fun laterLeavesWithoutPublishingAndKeepsTheDraft() = runTest(dispatcher) {
