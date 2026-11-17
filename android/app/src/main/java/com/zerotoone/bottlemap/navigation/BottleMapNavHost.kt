@@ -301,6 +301,7 @@ private fun NavGraphBuilder.accountGraph(
             )
         }
         registerVariantRoutes(navController, showToast,
+            authViewModel = authViewModel,
             onForceOwnerReauthentication = {
                 // Drop previous owner's ViewModels AND cached repository before
                 // permitting a different Google account to sign in.
