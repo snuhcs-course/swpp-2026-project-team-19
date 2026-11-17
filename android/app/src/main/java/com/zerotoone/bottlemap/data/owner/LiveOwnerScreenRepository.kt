@@ -567,6 +567,8 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
     private fun write(op: suspend () -> Unit) {
         scope.launch {
             writeMutex.withLock {
+                // An earlier detached cancellation refresh must not overwrite this write.
+                generation.incrementAndGet()
                 try {
                     op()
                 } catch (cancelled: CancellationException) {
@@ -733,6 +735,8 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         item: MockBarMenuItem, newProduct: MockCatalogProduct?, newBrand: MockBrand?,
     ) {
         writeMutex.withLock {
+            // Invalidate any older in-flight Owner refresh before applying this mutation.
+            generation.incrementAndGet()
             try {
                 sendManualItemToServer(item, newProduct, newBrand, snapshot())
             } catch(cancelled: CancellationException) {
@@ -757,6 +761,8 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
 
     private suspend fun confirmedWrite(operation: suspend () -> Unit) {
         writeMutex.withLock {
+            // Every new mutation supersedes the detached GET after import cancellation.
+            generation.incrementAndGet()
             try {
                 operation()
             } catch(cancelled: CancellationException) {
