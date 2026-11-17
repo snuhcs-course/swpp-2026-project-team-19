@@ -793,7 +793,10 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
     suspend fun cancelPhotoImportLive(importId: String) {
         // The POST is authoritative. Never show success or delete local
         // photo copies until the server actually acknowledges cancellation.
+        val queuedAt = SystemClock.elapsedRealtime()
         writeMutex.withLock {
+            if (BuildConfig.DEBUG) Log.d("BottleMapPerf",
+                "photo_cancel_mutex_wait_ms=${SystemClock.elapsedRealtime() - queuedAt}")
             val cancelStarted = SystemClock.elapsedRealtime()
             val confirmed = remote.cancelMenuImport(importId)
             if (BuildConfig.DEBUG) Log.d("BottleMapPerf",
