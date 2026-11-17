@@ -71,6 +71,17 @@ import java.time.ZonedDateTime
 import java.util.Locale
 
 private val KST=ZoneId.of("Asia/Seoul")
+/** Bar-local text search only: tolerate spacing and hyphen differences.
+ * Embedding/catalog matching remains a separate server-owned search path.
+ */
+internal fun barMenuMatchesQuery(name: String, brand: String?, query: String): Boolean {
+    fun canonical(s: String): String =
+        s.lowercase(Locale.ROOT).filterNot { it.isWhitespace() || it == '-' }
+    val needle = canonical(query)
+    return needle.isEmpty() || canonical(name).contains(needle) ||
+        canonical(brand.orEmpty()).contains(needle)
+}
+
 
 internal data class P18BusinessStatus(val text:String,val next:String?=null,
     val note:String?=null, val open:Boolean=false)
@@ -380,8 +391,7 @@ internal fun CustomerP18BarDetail(
                 modifier=Modifier.fillMaxWidth().padding(16.dp),
                 color=P18Muted,textAlign=TextAlign.Center)
             val filtered=bar.items.filter {
-                menuQuery.isBlank() || it.menuDisplayName.contains(menuQuery,true) ||
-                    it.brandName.orEmpty().contains(menuQuery,true)
+                barMenuMatchesQuery(it.menuDisplayName,it.brandName,menuQuery)
             }
             val categories=filtered.groupBy{it.category.ifBlank{"whisky"}}
             categories.forEach { (category,menu) ->
