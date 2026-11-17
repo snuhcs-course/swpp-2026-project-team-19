@@ -64,11 +64,13 @@ class PhotoReviewPublicationUatTest {
             price = 15000.0,
             options = listOf(ReviewOption(60.0, 23000.0)),
             priceCandidates = listOf(oldThirty, oldSixty),
+            chosenServingPrices = mapOf(thirty to 15000, sixty to 23000),
         )
         val unlinkedWhisky = ReviewItem(
             id = "whisky", name = "바 전용 위스키", match = ReviewMatch.NEW,
             nameSaved = true, newConfirmed = true, price = 15000.0,
             priceCandidates = listOf(oldThirty),
+            chosenServingPrices = mapOf(thirty to 15000),
         )
         val state = PhotoReviewState(items = listOf(other, unlinkedWhisky))
         assertEquals(2, PhotoReviewRules.publicationPreview(state).changedExistingPrices)
