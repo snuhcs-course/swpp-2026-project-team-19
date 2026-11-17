@@ -220,6 +220,17 @@ class PendingReviewDraftStoreTest {
         assertNotNull(origAgain.read("import-working"))
     }
 
+    @Test fun reorderingCardsDoesNotChangeOcrIdentityButMissingOrDuplicateDoes() {
+        assertTrue(sameReviewSourceIds(
+            listOf("line-a", "line-b"), listOf("line-b", "line-a")))
+        assertFalse(sameReviewSourceIds(
+            listOf("line-a", "line-a"), listOf("line-a", "line-b")))
+        assertFalse(sameReviewSourceIds(
+            listOf("line-a"), listOf("line-a", "line-b")))
+        assertFalse(sameReviewSourceIds(
+            listOf("line-a", "line-z"), listOf("line-a", "line-b")))
+    }
+
     @Test fun manuallySplitChildIsCompatibleForBothRestoreAndExplicitOverwrite() {
         val fresh = PhotoReviewState(items = listOf(
             ReviewItem(id = "master", name = "위스키"),
