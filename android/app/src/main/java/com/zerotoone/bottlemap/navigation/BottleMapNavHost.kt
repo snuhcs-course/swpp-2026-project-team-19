@@ -302,6 +302,11 @@ private fun NavGraphBuilder.accountGraph(
         }
         registerVariantRoutes(navController, showToast,
             authViewModel = authViewModel,
+            onRecoverableOwnerAuthError = {
+                // A transient SDK or /api/me outage is not evidence of a
+                // revoked session: return to existing Account retry UI.
+                navController.popBackStack(OwnerRoutes.GRAPH, inclusive = true)
+            },
             onForceOwnerReauthentication = {
                 // Drop previous owner's ViewModels AND cached repository before
                 // permitting a different Google account to sign in.
