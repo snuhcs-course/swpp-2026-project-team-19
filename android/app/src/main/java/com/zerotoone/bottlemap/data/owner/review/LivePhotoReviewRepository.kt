@@ -54,7 +54,7 @@ class ReviewDraftTooLargeLocalException : IllegalStateException(
 
 /** Edits were saved only to the explicit conflict working copy, never PUT. */
 class ReviewDraftLocalEditingException : IllegalStateException(
-    "이 기기 초안 편집 중이에요. 서버에 반영하려면 명시적으로 덮어쓰기를 선택해 주세요."
+    "서버 검수와 다른 수정사항을 이 기기에 안전하게 보관했어요."
 )
 
 /**
