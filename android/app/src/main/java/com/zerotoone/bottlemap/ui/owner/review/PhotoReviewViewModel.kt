@@ -331,8 +331,15 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                             _draftRetryable.value = recoverable
                             _draftProblem.value = if (recoverable) localOnlyNotice
                                 else error.message
-                            if (error.code == "NETWORK_ERROR" || (error.httpStatus ?: 0) >= 500)
-                                _load.value = reviewLoadError(error)
+                            // A retryable saved-on-device draft must have a visible
+                            // recovery path. Reuse the existing Error/Retry page;
+                            // reloading restores the protected checkpoint and
+                            // resumes a version-checked server save.
+                            if (recoverable) _load.value = when {
+                                error.code == "NETWORK_ERROR" -> reviewLoadError(error)
+                                else -> PhotoReviewLoad.Error(
+                                    "검수 초안을 서버에 저장하지 못했어요. 다시 시도해 주세요.")
+                            }
                             else toast(_draftProblem.value.orEmpty())
                         }
                     } catch (error: IllegalStateException) {
@@ -343,7 +350,10 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                         _draftRetryable.value = repository.hasPendingLocalDraft()
                         _draftProblem.value = if (_draftRetryable.value) localOnlyNotice
                             else error.message ?: "검수 초안 저장에 실패했어요."
-                        toast(_draftProblem.value.orEmpty())
+                        if (_draftRetryable.value)
+                            _load.value = PhotoReviewLoad.Error(
+                                "검수 초안을 서버에 저장하지 못했어요. 다시 시도해 주세요.")
+                        else toast(_draftProblem.value.orEmpty())
                     }
                 }
             }
