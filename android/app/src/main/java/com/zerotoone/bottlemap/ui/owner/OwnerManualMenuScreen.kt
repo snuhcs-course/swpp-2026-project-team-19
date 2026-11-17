@@ -25,6 +25,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import androidx.compose.ui.platform.LocalContext
@@ -545,7 +546,7 @@ internal fun OwnerManualMenuScreen(
                             screen = "list"
                             // File cleanup is independent of server confirmation and
                             // must not block the main thread or screen transition.
-                            withContext(Dispatchers.IO) {
+                            withContext(NonCancellable + Dispatchers.IO) {
                                 photoCopies.forEach(photoStore::delete)
                             }
                         } catch (cancelled: CancellationException) {
