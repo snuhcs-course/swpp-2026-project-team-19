@@ -366,9 +366,14 @@ fun OwnerOnboardingScreen(
     // going Back or restoring saved navigation state.
     LaunchedEffect(screen, verificationCurrent) {
         if(viewModel.usesProductionOwnerApi() &&
-            screen == RegPage.VERIFIED && !verificationCurrent) {
+            screen in listOf(RegPage.VERIFIED, RegPage.REVIEW) &&
+            !verificationCurrent) {
+            // No unverified edits may reach submission, even after process
+            // recreation or navigating backward through prior result pages.
             screen = RegPage.BIZCHECK
-            history = history.filterNot { it == RegPage.VERIFIED.name }
+            history = history.filterNot {
+                it == RegPage.VERIFIED.name || it == RegPage.REVIEW.name
+            }
         }
     }
     val validContact=draft.contactPhone.isNotBlank()&&validOwnerPhone(draft.contactPhone)
@@ -406,7 +411,7 @@ fun OwnerOnboardingScreen(
         RegPage.MENUS->draft.initialMenuPhotos.isNotEmpty()
         RegPage.CONTACT->validContact
         RegPage.REVIEW->validContact&&draft.initialMenuPhotos.isNotEmpty()&&
-            businessPrecheck==null
+            businessPrecheck==null&&verificationCurrent
         else->true
     }
     fun primaryAction(){
