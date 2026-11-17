@@ -148,6 +148,12 @@ internal fun partitionOwnerApplicationBarCandidates(
  */
 /** A cancellation is visible as soon as the server confirms it, without
  * waiting for unrelated menu/history GETs. Never change published menu rows. */
+/** Never expose a previously loaded owner's cached bar data before checking
+ * the current authenticated subject. Token absence is NOT proof of same user. */
+internal fun canRestoreVisibleOwnerCache(
+    loaded: Boolean, cachedSubject: String?, verifiedSubject: String?,
+): Boolean = loaded && cachedSubject != null && cachedSubject == verifiedSubject
+
 internal fun ownerSnapshotAfterConfirmedCancel(
     snapshot: MockOwnerSnapshot, importId: String,
 ): MockOwnerSnapshot = snapshot.copy(imports = snapshot.imports.map { job ->
@@ -534,14 +540,24 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
     }
 
     override fun retryLoad() {
-        lastReadySnapshot = snapshot()
+        val cached = snapshot()
+        lastReadySnapshot = cached
         val requested = generation.incrementAndGet()
-        // Keep a previously verified Owner screen visible while refreshing.
-        // The initial/auth-changed load still uses the existing loading screen.
-        if (!hasLoadedOwnerSnapshot) local.serverLoading()
+        // Credentials can change while this singleton lives (including SDK 401
+        // logout). Hide previous-owner data synchronously, BEFORE an async
+        // token lookup. After verifying the SAME subject, cached data may be
+        // restored immediately while the slower full refresh runs.
+        local.serverLoading()
         scope.launch {
             try {
-                if(requested == generation.get()) refresh(requested)
+                val verifiedSubject = AppAuth.gateway.currentAccessTokenOrNull()
+                    ?.let(::sessionKey)
+                if (requested != generation.get()) return@launch
+                if (canRestoreVisibleOwnerCache(
+                        hasLoadedOwnerSnapshot, sessionSubject, verifiedSubject)) {
+                    local.replaceFromBackend(cached)
+                }
+                refresh(requested)
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (error: Exception) {
