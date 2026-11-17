@@ -10,9 +10,9 @@ import com.zerotoone.bottlemap.data.owner.canonicalServingLabel
  * so every rule is unit tested on the JVM.
  */
 object PhotoReviewRules {
-    // Backend #164 allows up to 10, but the Owner-confirmed whisky UX
-    // requires a maximum of THREE distinct serving sizes.
-    const val MAX_OPTIONS = 10
+    // Android Owner UI accepts at most THREE servings for both whisky
+    // and non-whisky; backend's larger limit does not expand the UX.
+    const val MAX_OPTIONS = 3
 
     fun optionSummary(x: ReviewItem): List<ReviewOption> =
         (if (x.primaryHasOption) listOf(ReviewOption(x.volume, x.price, x.bottle,
