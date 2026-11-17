@@ -769,8 +769,10 @@ class PhotoReviewViewModelTest {
         viewModel.confirmPublish()
         assertEquals(1, flushes)
         assertEquals(0, submissions)
-        assertEquals(PublishFailure.CONFLICT,
-            (viewModel.publishOutcome.value as PublishOutcome.Failed).reason)
+        assertNull(viewModel.publishOutcome.value)
+        assertTrue(viewModel.load.value is PhotoReviewLoad.Ready)
+        // Draft-only CAS mismatch automatically reloads the server editor;
+        // it never opens a conflict result/choice UI.
     }
 
     @Test fun doublePublishTapSubmitsExactlyOnceAndDisablesWhileSaving() = runTest(dispatcher) {
@@ -1384,8 +1386,8 @@ class PhotoReviewViewModelTest {
         vm.requestPublish() // first save succeeds
         vm.confirmPublish() // final pre-submit CAS detects remote conflict
         assertEquals(0, publishes)
-        assertEquals(PublishFailure.CONFLICT,
-            (vm.publishOutcome.value as PublishOutcome.Failed).reason)
+        assertNull(vm.publishOutcome.value)
+        assertTrue(vm.load.value is PhotoReviewLoad.Ready)
         assertTrue(writes >= 2)
     }
 
