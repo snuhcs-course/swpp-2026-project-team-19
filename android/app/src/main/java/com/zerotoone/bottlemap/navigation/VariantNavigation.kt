@@ -49,22 +49,41 @@ import com.zerotoone.bottlemap.ui.owner.OwnerSkeletonScreen
 internal const val variantStartDestination = "customer"
 
 @OptIn(ExperimentalMaterial3Api::class)
+/** Never leave an expired Owner destination showing an endless spinner. */
+@androidx.compose.runtime.Composable
+private fun OwnerAuthGuard(
+    state: AuthUiState,
+    onSignOut: () -> Unit,
+    onRecoverableAccountError: () -> Unit,
+) {
+    LaunchedEffect(state) {
+        when (state) {
+            AuthUiState.Guest -> onSignOut()
+            is AuthUiState.SignInError -> onRecoverableAccountError()
+            else -> Unit // Initialization and in-progress sign-out are transient.
+        }
+    }
+    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        CircularProgressIndicator()
+    }
+}
+
 internal fun NavGraphBuilder.registerVariantRoutes(
     navController: NavHostController,
     onNotice: (String) -> Unit = {},
     authViewModel: AuthViewModel,
     onForceOwnerReauthentication: () -> Unit,
+    onRecoverableOwnerAuthError: () -> Unit,
 ) {
     // Shared by both ends of the Owner manage <-> preview round trip.
     val previewSwitchCooldown = OwnerPreviewSwitchCooldown()
     navigation(route = OwnerRoutes.GRAPH, startDestination = OwnerRoutes.ENTRY) {
         composable(OwnerRoutes.ENTRY) {
-            val ownerId = (authViewModel.state.collectAsStateWithLifecycle().value
-                as? AuthUiState.SignedIn)?.user?.userId
+            val authState = authViewModel.state.collectAsStateWithLifecycle().value
+            val ownerId = (authState as? AuthUiState.SignedIn)?.user?.userId
             if (ownerId == null) {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
+                OwnerAuthGuard(authState, onForceOwnerReauthentication,
+                    onRecoverableOwnerAuthError)
                 return@composable
             }
                 CompositionLocalProvider(
@@ -90,12 +109,11 @@ internal fun NavGraphBuilder.registerVariantRoutes(
             }
         }
         composable(OwnerRoutes.ADD_BAR) {
-            val ownerId = (authViewModel.state.collectAsStateWithLifecycle().value
-                as? AuthUiState.SignedIn)?.user?.userId
+            val authState = authViewModel.state.collectAsStateWithLifecycle().value
+            val ownerId = (authState as? AuthUiState.SignedIn)?.user?.userId
             if (ownerId == null) {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
+                OwnerAuthGuard(authState, onForceOwnerReauthentication,
+                    onRecoverableOwnerAuthError)
                 return@composable
             }
                 CompositionLocalProvider(
@@ -113,12 +131,11 @@ internal fun NavGraphBuilder.registerVariantRoutes(
         }
         OwnerPage.entries.forEach { page ->
             composable(page.route) { reviewEntry ->
-                val ownerId = (authViewModel.state.collectAsStateWithLifecycle().value
-                    as? AuthUiState.SignedIn)?.user?.userId
+                val authState = authViewModel.state.collectAsStateWithLifecycle().value
+                val ownerId = (authState as? AuthUiState.SignedIn)?.user?.userId
                 if (ownerId == null) {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
-                    }
+                    OwnerAuthGuard(authState, onForceOwnerReauthentication,
+                        onRecoverableOwnerAuthError)
                     return@composable
                 }
                 val data: OwnerMockViewModel = viewModel(key = "owner-page-${page.route}-$ownerId",
