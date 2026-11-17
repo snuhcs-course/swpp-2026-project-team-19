@@ -5,6 +5,18 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class OwnerNavigationContractTest {
+    @Test fun expiredOwnerSessionUsesExistingLoginAndRecoverableErrorUsesAccountRetry() {
+        assertEquals(OwnerAuthRecoveryAction.LOGIN,
+            ownerAuthRecoveryAction(com.zerotoone.bottlemap.ui.auth.AuthUiState.Guest))
+        assertEquals(OwnerAuthRecoveryAction.ACCOUNT_RETRY,
+            ownerAuthRecoveryAction(com.zerotoone.bottlemap.ui.auth.AuthUiState.SignInError(
+                "일시적인 연결 오류", canRetryProfile = true)))
+        assertEquals(OwnerAuthRecoveryAction.WAIT,
+            ownerAuthRecoveryAction(com.zerotoone.bottlemap.ui.auth.AuthUiState.Initializing))
+        assertEquals(OwnerAuthRecoveryAction.WAIT,
+            ownerAuthRecoveryAction(com.zerotoone.bottlemap.ui.auth.AuthUiState.SigningOut))
+    }
+
     @Test fun unifiedBuildStillStartsWithCustomer() {
         assertEquals("customer", variantStartDestination)
         assertEquals("owner", OwnerRoutes.GRAPH)
