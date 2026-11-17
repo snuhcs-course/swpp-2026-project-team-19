@@ -235,6 +235,32 @@ class PendingReviewDraftStoreTest {
         assertFalse(DraftSaveSafety.ownCasAcknowledged(null, written, 3, 7))
     }
 
+    @Test fun sequentialDeviceHandoffUsesNewerAcknowledgedServerWithoutCasBypass() {
+        fun content(name: String) = ServerReviewDraftCodec.encode(
+            PhotoReviewState(items = listOf(ReviewItem(id = "ocr-1", name = name))))
+        val stale = PendingReviewDraftStore.Envelope(
+            reviewVersion = 7, expectedDraftVersion = 3,
+            itemIds = listOf("ocr-1"), content = content("A's older local copy"))
+        val latestServer = ReviewDraftDto(4, 7, "2026-11-18T00:00:00Z",
+            content("B's accepted update"))
+        assertEquals(DraftRecoveryPolicy.Outcome.CONFLICT,
+            DraftRecoveryPolicy.decide(latestServer, stale, null, 7))
+        assertTrue(canAdoptNewerServerReview(DraftRecoveryPolicy.Outcome.CONFLICT,
+            latestServer, stale, 7, serverReadable = true))
+        // Never discard when the server has not advanced or its data cannot
+        // be restored; a pending locally edited draft may be the only copy.
+        assertFalse(canAdoptNewerServerReview(DraftRecoveryPolicy.Outcome.CONFLICT,
+            latestServer.copy(draftVersion = 3), stale, 7, serverReadable = true))
+        assertFalse(canAdoptNewerServerReview(DraftRecoveryPolicy.Outcome.CONFLICT,
+            latestServer, stale, 7, serverReadable = false))
+        assertFalse(canAdoptNewerServerReview(DraftRecoveryPolicy.Outcome.CONFLICT,
+            latestServer, stale.copy(reviewVersion = 6), 7, serverReadable = true))
+        assertFalse(canAdoptNewerServerReview(DraftRecoveryPolicy.Outcome.REBASE,
+            latestServer, stale, 7, serverReadable = true))
+        assertFalse(canAdoptNewerServerReview(DraftRecoveryPolicy.Outcome.ACKNOWLEDGED,
+            latestServer, stale, 7, serverReadable = true))
+    }
+
     @Test fun recoveryPolicyRestoresOnlyMatchingReviewAndServerCas() {
         fun content(name: String) = ServerReviewDraftCodec.encode(
             PhotoReviewState(items = listOf(ReviewItem(id = "ocr-1", name = name)))
