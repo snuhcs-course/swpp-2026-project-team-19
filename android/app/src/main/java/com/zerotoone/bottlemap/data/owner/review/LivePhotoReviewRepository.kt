@@ -72,10 +72,14 @@ internal object DraftSaveSafety {
         remote: ReviewDraftDto?,
         original: PendingReviewDraftStore.Envelope,
         working: PendingReviewDraftStore.Envelope?,
+        checkpoint: PendingReviewDraftStore.Envelope? = null,
     ): Boolean = remote != null &&
         remote.reviewVersion == original.reviewVersion &&
         remote.draftVersion > original.expectedDraftVersion &&
         (working == null || working.reviewVersion == original.reviewVersion) &&
+        // Only the latest owner edit may be considered acknowledged.
+        (checkpoint == null || ServerReviewDraftCodec.sameAndroidSnapshot(
+            checkpoint.content, (working ?: original).content)) &&
         ServerReviewDraftCodec.sameAndroidSnapshot(
             (working ?: original).content, remote.content)
 
@@ -339,9 +343,8 @@ class LivePhotoReviewRepository(
                     working != null && pending != null && canRestore && safeLocal &&
                     // A later local keystroke must not be discarded just because
                     // an older explicit conflict working copy reached the server.
-                    (checkpoint == null || ServerReviewDraftCodec.sameAndroidSnapshot(
-                        checkpoint.content, working.content)) &&
-                    DraftSaveSafety.latestCopyAcknowledged(saved, pending, working) -> {
+                    DraftSaveSafety.latestCopyAcknowledged(
+                        saved, pending, working, checkpoint) -> {
                     // A lost response to an explicit local CAS can leave both
                     // the protected original and its later working copy on device.
                     // The server already has the *working* content. Do not
