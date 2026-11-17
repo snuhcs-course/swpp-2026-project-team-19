@@ -128,6 +128,18 @@ internal data class BarAliasLookupState(
 internal fun queryScopedBarAlias(state: BarAliasLookupState, query: String): BarAliasLookupState? =
     state.takeIf { it.query.isNotEmpty() && it.query == query.trim() }
 
+/** A real empty result must wait until alias lookup finishes; never show it
+ * during debouncing, validation, network failure, or on an empty bar menu. */
+internal fun barMenuSearchHasNoResults(
+    query: String,
+    hasPublishedItems: Boolean,
+    hasMatches: Boolean,
+    validationMessage: String?,
+    alias: BarAliasLookupState?,
+): Boolean = query.isNotBlank() && hasPublishedItems && !hasMatches &&
+    validationMessage == null && alias != null && alias.query == query.trim() &&
+    !alias.loading && !alias.failed && alias.validationMessage == null
+
 internal data class P18BusinessStatus(val text:String,val next:String?=null,
     val note:String?=null, val open:Boolean=false)
 
@@ -514,6 +526,14 @@ internal fun CustomerP18BarDetail(
                         queryScopedAlias != null && !queryScopedAlias.failed &&
                         !queryScopedAlias.loading &&
                         it.productId != null && it.productId in queryScopedAlias.productIds))
+            }
+            if (barMenuSearchHasNoResults(
+                    menuQuery, empty == null && bar.items.isNotEmpty(),
+                    filtered.isNotEmpty(), validationText, queryScopedAlias)) {
+                Text("검색 결과가 없어요.",
+                    color = P18Muted, fontSize = 12.sp, textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+                        .testTag("customer-bar-menu-no-results"))
             }
             val categories=filtered.groupBy{it.category.ifBlank{"whisky"}}
             categories.forEach { (category,menu) ->
