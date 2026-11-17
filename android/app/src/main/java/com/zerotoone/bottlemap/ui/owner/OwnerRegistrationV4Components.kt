@@ -332,30 +332,6 @@ internal fun RegistrationInput(
     }
 }
 @Composable
-internal fun RegistrationDigitsKeypad(
-    onDigit:(String)->Unit,onDelete:()->Unit,
-) {
-    val rows=listOf(listOf("1","2","3"),listOf("4","5","6"),
-        listOf("7","8","9"),listOf("","0","⌫"))
-    Column(Modifier.fillMaxWidth().padding(start=12.dp,end=12.dp,bottom=8.dp)) {
-        rows.forEach { row ->
-            Row(Modifier.fillMaxWidth()) {
-                row.forEach { key ->
-                    Box(Modifier.weight(1f).height(54.dp)
-                        .then(if(key.isNotEmpty())Modifier.ownerQuietClick(onClick={
-                            if(key=="⌫") onDelete() else onDigit(key)
-                        }) else Modifier),
-                        contentAlignment=Alignment.Center) {
-                        if(key=="⌫")RegistrationGlyph("delete",color=RegistrationV4.text,size=22.dp)
-                        else Text(key,color=RegistrationV4.text,fontSize=20.sp,
-                            fontWeight=FontWeight.Medium,lineHeight=28.sp)
-                    }
-                }
-            }
-        }
-    }
-}
-@Composable
 internal fun RegistrationRow(label:String,value:String,onEdit:(()->Unit)?=null) {
     Row(Modifier.fillMaxWidth().heightIn(min=48.dp),
         verticalAlignment=Alignment.CenterVertically,
