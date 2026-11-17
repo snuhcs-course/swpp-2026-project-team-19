@@ -139,6 +139,12 @@ internal object DraftRecoveryPolicy {
  * draft restore and explicit conflict overwrite; keep their gates identical.
  */
 /** Source identities are a set; changing review-card order is not new OCR. */
+/** An unchanged server display is not a new local edit after a conflict. */
+internal fun isNewConflictReviewEdit(
+    current: Map<String, Any?>,
+    displayedAtLoad: Map<String, Any?>?,
+): Boolean = !ServerReviewDraftCodec.sameAndroidSnapshot(current, displayedAtLoad)
+
 internal fun sameReviewSourceIds(saved: List<String>, current: List<String>): Boolean =
     saved.size == current.size &&
         saved.toSet().size == saved.size &&
@@ -719,7 +725,7 @@ class LivePhotoReviewRepository(
                 // A Back with NO edits after loading the server must not
                 // replace a protected local working copy. Only real owner
                 // edits become a new device-only working snapshot.
-                if (ServerReviewDraftCodec.sameAndroidSnapshot(
+                if (!isNewConflictReviewEdit(
                         content, displayedAtLoadContent)) return@withLock
                 workingStore.write(id, PendingReviewDraftStore.Envelope(
                     reviewVersion = version,
