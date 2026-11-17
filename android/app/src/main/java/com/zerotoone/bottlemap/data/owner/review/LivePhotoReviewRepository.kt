@@ -410,7 +410,8 @@ class LivePhotoReviewRepository(
                     // Never silently overwrite another device or an unknown
                     // operator schema. Preserve the freshest local copy and
                     // expose only the already-existing explicit conflict flow.
-                    if (working == null && checkpoint != null && safeLocal)
+                    if (working == null && checkpoint != null && safeLocal &&
+                        pending == null)
                         pendingStore.write(id, checkpoint)
                     draftConflict = true
                     pendingDraftConflict = safeLocal
@@ -664,15 +665,21 @@ class LivePhotoReviewRepository(
         val content = ServerReviewDraftCodec.encode(state)
         checkpointMutex.withLock {
             if (published) return@withLock
-            if (editingLocalConflict && draftConflict) {
-                val original = pendingStore.read(id)
-                    ?: error("보호된 기기 원본 초안을 찾지 못했어요.")
-                workingStore.write(id, original.copy(
-                    content = content, itemIds = state.items.map { it.id },
+            if (draftConflict) {
+                // Keep the prior pending snapshot immutable and checkpoint
+                // *every* new edit into the separate working AtomicFile.
+                // The old code skipped this write until a user tapped an
+                // explicit conflict button, silently losing edits on exit.
+                workingStore.write(id, PendingReviewDraftStore.Envelope(
+                    reviewVersion = version,
+                    expectedDraftVersion = draftVersion,
+                    itemIds = state.items.map { it.id },
+                    content = content,
                 ))
+                editingLocalConflict = true
                 pendingLocally = true
                 pendingOversized = ServerReviewDraftCodec.exceedsServerLimit(content)
-            } else if (!draftConflict) {
+            } else {
                 checkpointStore.write(id, PendingReviewDraftStore.Envelope(
                     reviewVersion = version,
                     expectedDraftVersion = draftVersion,
@@ -729,16 +736,11 @@ class LivePhotoReviewRepository(
             // The pending file is the ONLY copy of the offline edits when
             // an operator/device has advanced the server CAS. Do not touch it
             // until the owner explicitly resolves the conflict.
-            if (editingLocalConflict && draftConflict) {
-                // No server PUT is allowed during conflict editing, even
-                // after the working copy is reduced under the server limit.
-                // Explicit confirmation in chooseLocalDraft is required.
-                val original = pendingStore.read(id)
-                    ?: error("보호된 기기 원본 초안을 찾지 못했어요.")
-                workingStore.write(id, original.copy(content = content,
-                    itemIds = state.items.map { it.id }))
-                pendingLocally = true
-                pendingOversized = ServerReviewDraftCodec.exceedsServerLimit(content)
+            if (draftConflict) {
+                // The current visible review was already saved by
+                // checkpointDraft. Never replace that newer working copy
+                // with an older in-flight network snapshot here.
+                // A real foreign CAS must not be overwritten automatically.
                 throw ReviewDraftLocalEditingException()
             }
             DraftSaveSafety.assertWritable(draftConflict)
