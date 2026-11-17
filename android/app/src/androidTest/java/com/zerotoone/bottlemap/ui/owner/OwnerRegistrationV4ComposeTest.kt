@@ -151,6 +151,90 @@ class OwnerRegistrationV4ComposeTest {
         waitFor("이 정보로\n확인할게요")
     }
 
+    @Test fun actualApplicationMismatchThenCorrectDateMustAdvanceToBarDetails() {
+        // UAT 4.9 exact transition: POST fails with BUSINESS_VERIFICATION_FAILED,
+        // return to the read-back page, edit the date and verify successfully.
+        // No real NTS or application API calls are made.
+        val certificate = MockPhoto(
+            "cover-test", "content://fixture/cover", MockPhotoKind.BAR_GALLERY)
+        val menu = MockPhoto(
+            "menu-test", "content://fixture/menu", MockPhotoKind.MENU_CAPTURE)
+        val original = MockRegistrationDraft(
+            businessNumberDigits = "1234567891",
+            representativeName = "김민준",
+            openingDateIso = "2019-05-13",
+            proposedBarName = "테스트 매장",
+            proposedBarAddress = "서울특별시 관악구 봉천로 12",
+            storePhone = "02-555-1234",
+            contactPhone = "010-1234-5678",
+            applicantGallery = listOf(certificate),
+            initialMenuPhotos = listOf(menu),
+            resumePageKey = "BIZCHECK",
+        )
+        val repo = LocalOwnerMockRepository(InMemoryMockOwnerStateStore(
+            MockOwnerSnapshot(registrationDraft = original)))
+        val requestedDates = mutableListOf<String>()
+        var submitAttempts = 0
+        val vm = OwnerMockViewModel(
+            repo,
+            businessVerificationFixture = { _, _, date ->
+                requestedDates.add(date)
+                "matched"
+            },
+            registrationSubmissionFixture = {
+                submitAttempts++
+                throw com.zerotoone.bottlemap.network.BottleMapApiException(
+                    code = "BUSINESS_VERIFICATION_FAILED",
+                    message = "Business registration mismatch",
+                    httpStatus = 400)
+            },
+        )
+        compose.setContent {
+            MaterialTheme {
+                OwnerOnboardingScreen(vm, onBack = {}, onManagerPreview = {},
+                    startRegistration = true)
+            }
+        }
+        fun waitFor(title: String) {
+            compose.waitUntil(5000) {
+                compose.onAllNodesWithText(title).fetchSemanticsNodes().isNotEmpty()
+            }
+        }
+        waitFor("이 정보로\n확인할게요")
+        compose.onNodeWithText("확인하기").performClick()
+        waitFor("사업자 정보가\n확인됐어요")
+        compose.onNodeWithText("다음").performClick()
+        for (page in listOf("매장 이름을\n알려주세요", "매장 사진을\n올려 주세요",
+            "매장 주소를\n알려주세요", "매장 번호를\n알려주세요",
+            "메뉴판 사진을\n올려 주세요", "연락받을 번호를\n알려주세요")) {
+            waitFor(page)
+            compose.onNodeWithText("다음").performClick()
+        }
+        waitFor("이렇게\n신청할게요")
+        compose.onNodeWithText("신청하기").performClick()
+        waitFor("사업자 정보가\n맞지 않아요")
+        compose.onNodeWithText("다시 확인하기").performClick()
+        waitFor("이 정보로\n확인할게요")
+        compose.onAllNodesWithTag("registration-review-edit")[2].performClick()
+        waitFor("개업일을\n알려주세요")
+        compose.onNodeWithTag("registration-opening-date")
+            .performTextReplacement("2019.05.14")
+        compose.onNodeWithText("다음").performClick()
+        waitFor("이 정보로\n확인할게요")
+        compose.onNodeWithText("확인하기").performClick()
+        waitFor("사업자 정보가\n확인됐어요")
+        compose.onNodeWithText("다음").performClick()
+        waitFor("매장 이름을\n알려주세요")
+        compose.runOnIdle {
+            assertEquals(1, submitAttempts)
+            assertEquals(listOf("2019-05-13", "2019-05-14"), requestedDates)
+            val saved = (vm.state.value as MockOwnerLoadState.Ready)
+                .snapshot.registrationDraft!!
+            assertEquals("2019-05-14", saved.openingDateIso)
+            assertEquals("BARNAME", saved.resumePageKey)
+        }
+    }
+
     @Test fun unavailable404VerificationContinuesWithoutAnotherReadback() {
         val draft = MockRegistrationDraft(
             businessNumberDigits = "1234567891",
