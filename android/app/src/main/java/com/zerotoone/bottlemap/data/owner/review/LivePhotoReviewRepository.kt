@@ -402,10 +402,25 @@ class LivePhotoReviewRepository(
                 }
                 recovery == DraftRecoveryPolicy.Outcome.ACKNOWLEDGED &&
                     !selectedWorking && canRestore && safeLocal -> {
-                    // This exact edit reached the server (including a lost
-                    // 200 response). Only now can its device copies be removed.
-                    checkpointStore.clear(id)
-                    pendingStore.clear(id)
+                    // Delete ONLY the exact snapshot already acknowledged by
+                    // the server. A different pending/working copy may be
+                    // the last unsent edit and must never be erased here.
+                    if (checkpoint != null &&
+                        ServerReviewDraftCodec.sameAndroidSnapshot(
+                            checkpoint.content, saved?.content)) checkpointStore.clear(id)
+                    if (pending != null &&
+                        ServerReviewDraftCodec.sameAndroidSnapshot(
+                            pending.content, saved?.content)) pendingStore.clear(id)
+                    if (working != null &&
+                        ServerReviewDraftCodec.sameAndroidSnapshot(
+                            working.content, saved?.content)) workingStore.clear(id)
+                    val hasDifferentLocal = listOfNotNull(pending, checkpoint, working)
+                        .any { !ServerReviewDraftCodec.sameAndroidSnapshot(
+                            it.content, saved?.content) }
+                    pendingLocally = hasDifferentLocal
+                    pendingOversized = hasDifferentLocal &&
+                        listOfNotNull(pending, checkpoint, working).any {
+                            ServerReviewDraftCodec.exceedsServerLimit(it.content) }
                 }
                 !selectedWorking && canRestore && safeLocal &&
                     recovery in setOf(DraftRecoveryPolicy.Outcome.RESTORE,
