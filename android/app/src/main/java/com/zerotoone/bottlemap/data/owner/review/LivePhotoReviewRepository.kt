@@ -351,8 +351,19 @@ class LivePhotoReviewRepository(
         val pending = pendingStore.read(id)
         val checkpoint = checkpointStore.read(id)
         val working = workingStore.read(id)
-        val device = working ?: checkpoint ?: pending
-        val recovery = DraftRecoveryPolicy.decide(saved, device, pending, reviewVersion)
+        // An old working copy may still be present after its server ACK was
+        // lost. If a later device checkpoint is explicitly based on the
+        // current server version, it is the *latest* edit: do not restore the
+        // earlier working copy and erase a newer keystroke.
+        val newerCheckpoint = checkpoint != null && working != null &&
+            saved != null && checkpoint.expectedDraftVersion == saved.draftVersion &&
+            ServerReviewDraftCodec.sameAndroidSnapshot(working.content, saved.content) &&
+            !ServerReviewDraftCodec.sameAndroidSnapshot(checkpoint.content, saved.content)
+        val device = if (newerCheckpoint) checkpoint else working ?: checkpoint ?: pending
+        val selectedWorking = device === working && working != null
+        val previousAttempt = if (newerCheckpoint) working else pending
+        val recovery = DraftRecoveryPolicy.decide(
+            saved, device, previousAttempt, reviewVersion)
         if (device != null) {
             val local = ServerReviewDraftCodec.decode(ReviewDraftDto(
                 device.expectedDraftVersion, device.reviewVersion,
@@ -362,7 +373,8 @@ class LivePhotoReviewRepository(
                 compatible(local)
             when {
                 recovery == DraftRecoveryPolicy.Outcome.ACKNOWLEDGED &&
-                    working != null && pending != null && canRestore && safeLocal &&
+                    selectedWorking && working != null && pending != null &&
+                    canRestore && safeLocal &&
                     // A later local keystroke must not be discarded just because
                     // an older explicit conflict working copy reached the server.
                     DraftSaveSafety.latestCopyAcknowledged(
@@ -382,13 +394,13 @@ class LivePhotoReviewRepository(
                             checkpoint.content, working.content)) checkpointStore.clear(id)
                 }
                 recovery == DraftRecoveryPolicy.Outcome.ACKNOWLEDGED &&
-                    working == null && canRestore && safeLocal -> {
+                    !selectedWorking && canRestore && safeLocal -> {
                     // This exact edit reached the server (including a lost
                     // 200 response). Only now can its device copies be removed.
                     checkpointStore.clear(id)
                     pendingStore.clear(id)
                 }
-                working == null && canRestore && safeLocal &&
+                !selectedWorking && canRestore && safeLocal &&
                     recovery in setOf(DraftRecoveryPolicy.Outcome.RESTORE,
                         DraftRecoveryPolicy.Outcome.REBASE) -> {
                     // Compatible unsent changes are editable immediately;
@@ -410,7 +422,7 @@ class LivePhotoReviewRepository(
                     // Never silently overwrite another device or an unknown
                     // operator schema. Preserve the freshest local copy and
                     // expose only the already-existing explicit conflict flow.
-                    if (working == null && checkpoint != null && safeLocal &&
+                    if (!selectedWorking && checkpoint != null && safeLocal &&
                         pending == null)
                         pendingStore.write(id, checkpoint)
                     draftConflict = true
