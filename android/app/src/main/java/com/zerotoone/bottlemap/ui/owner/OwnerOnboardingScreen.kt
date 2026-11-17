@@ -731,7 +731,8 @@ fun OwnerOnboardingScreen(
                         Spacer(Modifier.height(0.dp))
                         RegistrationInput(bnFormat(draft.businessNumberDigits),{ entered ->
                             save(draft.copy(businessNumberDigits=entered.filter(Char::isDigit).take(10)))
-                        },"000-00-00000",tag="registration-business-number",highlight=true)
+                        },"000-00-00000",keyboard=KeyboardType.Number,
+                            tag="registration-business-number",highlight=true)
                         Text("숫자 10자리. 하이픈은 자동으로 들어가요.",
                             fontSize=12.sp,color=RegistrationV4.secondary)
                         if(draft.businessNumberDigits.length==10 &&
@@ -759,7 +760,8 @@ fun OwnerOnboardingScreen(
                                 else -> digits.take(4)+"-"+digits.slice(4..5)+"-"+digits.drop(6)
                             }
                             save(draft.copy(openingDateIso=formatted))
-                        },"YYYY.MM.DD",tag="registration-opening-date",highlight=true)
+                        },"YYYY.MM.DD",keyboard=KeyboardType.Number,
+                            tag="registration-opening-date",highlight=true)
                         if(draft.openingDateIso.length==10 && !validOpeningDate(draft.openingDateIso))
                             Text("날짜를 다시 확인해 주세요. 오늘 이후 날짜는 넣을 수 없어요.",
                                 fontSize=12.sp,color=RegistrationV4.error)
@@ -1107,18 +1109,6 @@ fun OwnerOnboardingScreen(
                 }
                 RegistrationButton(cta,enabled=enabled,onClick=::primaryAction)
             }
-        }
-        if(screen==RegPage.BN || screen==RegPage.DATE) {
-            RegistrationDigitsKeypad(onDigit={ digit ->
-                if(screen==RegPage.BN)save(draft.copy(
-                    businessNumberDigits=(draft.businessNumberDigits+digit).take(10)))
-                else save(draft.copy(openingDateIso=dateInput(draft.openingDateIso+digit)))
-            },onDelete={
-                if(screen==RegPage.BN)save(draft.copy(
-                    businessNumberDigits=draft.businessNumberDigits.dropLast(1)))
-                else save(draft.copy(openingDateIso=dateInput(
-                    draft.openingDateIso.filter(Char::isDigit).dropLast(1))))
-            })
         }
     }
 }
