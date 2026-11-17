@@ -201,12 +201,34 @@ fun PhotoReviewScreen(
                     CircularProgressIndicator(color = UxColor.gold)
                 }
             }
-            is PhotoReviewLoad.Error -> Column(Modifier.fillMaxSize()) {
+            is PhotoReviewLoad.Error -> Column(Modifier.fillMaxSize()
+                .testTag("review-load-error-screen")) {
                 ReviewAppBar(vm::leave)
-                Column(Modifier.fillMaxSize().padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
-                    horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(current.message, style = uxText(13f, 400, UxColor.sub), textAlign = TextAlign.Center)
-                    UxMainButton("다시 시도", vm::reload)
+                Box(Modifier.weight(1f).fillMaxWidth().padding(horizontal = 24.dp),
+                    contentAlignment = Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        Box(Modifier.size(84.dp)
+                            .background(UxColor.elevated, RoundedCornerShape(50)),
+                            contentAlignment = Alignment.Center) {
+                            Text("!", style = uxText(44f, 700, UxColor.error),
+                                modifier = Modifier.testTag("review-load-error-symbol"))
+                        }
+                        Text("검수 정보를\\n불러오지 못했어요",
+                            style = uxText(25f, 700, UxColor.text, serif = true),
+                            textAlign = TextAlign.Center)
+                        Text(current.message, style = uxText(13f, 450, UxColor.sub),
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.testTag("review-load-error-message"))
+                    }
+                }
+                Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp)
+                    .padding(bottom = 24.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    UxMainButton("다시 시도", vm::reload,
+                        Modifier.fillMaxWidth().testTag("review-load-retry"))
+                    UxSecondaryButton("메뉴 관리로 돌아가기", vm::leave,
+                        Modifier.fillMaxWidth().testTag("review-load-leave"))
                 }
             }
             is PhotoReviewLoad.Ready -> {
