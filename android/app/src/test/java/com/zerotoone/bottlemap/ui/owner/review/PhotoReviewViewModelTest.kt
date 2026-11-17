@@ -1321,4 +1321,44 @@ class PhotoReviewViewModelTest {
         assertEquals(60.0, published?.defaultPour ?: -1.0, 0.0)
     }
 
+    @Test fun uatReviewBackLeavesWhenCasConflictsButDeviceBackupIsSafe() =
+        runTest(dispatcher) {
+            val base = MockPhotoReviewRepository(MockPhotoReviewScenario.BASIC)
+            var checkpointed = false
+            var remoteWrites = 0
+            val repo = object : PhotoReviewRepository by base {
+                override suspend fun checkpointDraft(state: PhotoReviewState) {
+                    checkpointed = true
+                }
+                override fun hasPendingLocalDraft(): Boolean = checkpointed
+                override suspend fun saveDraft(state: PhotoReviewState) {
+                    remoteWrites++
+                    throw ReviewDraftConflictException()
+                }
+            }
+            val vm = PhotoReviewViewModel(repo)
+            val events = vm.collectEvents(backgroundScope)
+            vm.leave()
+            assertTrue(checkpointed)
+            assertEquals(1, remoteWrites)
+            assertTrue(PhotoReviewEvent.Leave in events)
+            assertFalse(vm.draftRetryable.value)
+        }
+
+    @Test fun uatReviewBackStillBlocksWhenCasConflictHasNoDeviceBackup() =
+        runTest(dispatcher) {
+            val base = MockPhotoReviewRepository(MockPhotoReviewScenario.BASIC)
+            val repo = object : PhotoReviewRepository by base {
+                override suspend fun checkpointDraft(state: PhotoReviewState) = Unit
+                override fun hasPendingLocalDraft(): Boolean = false
+                override suspend fun saveDraft(state: PhotoReviewState) {
+                    throw ReviewDraftConflictException()
+                }
+            }
+            val vm = PhotoReviewViewModel(repo)
+            val events = vm.collectEvents(backgroundScope)
+            vm.leave()
+            assertFalse(PhotoReviewEvent.Leave in events)
+        }
+
 }
