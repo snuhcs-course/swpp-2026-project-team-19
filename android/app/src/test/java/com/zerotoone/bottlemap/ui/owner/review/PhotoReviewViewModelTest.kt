@@ -397,7 +397,7 @@ class PhotoReviewViewModelTest {
         runTest(dispatcher) {
             val base = MockPhotoReviewRepository(MockPhotoReviewScenario.READY)
             var reads = 0
-            var conflicted = false
+            var attemptedWrites = 0
             val repo = object : PhotoReviewRepository by base {
                 override suspend fun loadReview(): PhotoReviewState {
                     reads++
@@ -407,21 +407,21 @@ class PhotoReviewViewModelTest {
                             it.copy(name = "다른 기기에서 고친 최신 이름") else it },
                     )
                 }
-                override fun hasPendingDraftConflict() = conflicted
                 override suspend fun saveDraft(state: PhotoReviewState) {
-                    conflicted = true
-                    throw ReviewDraftConflictException()
+                    attemptedWrites++
+                    if (attemptedWrites == 1) throw ReviewDraftConflictException()
                 }
             }
             val vm = PhotoReviewViewModel(repo)
             assertEquals(1, reads)
             vm.typeInlinePrice("glen12", "22000")
             assertEquals(2, reads)
-            assertTrue(vm.draftConflictChoice.value)
+            assertEquals(1, attemptedWrites)
+            assertFalse(vm.draftConflictChoice.value)
             assertEquals("다른 기기에서 고친 최신 이름",
                 vm.state.items.first { it.id == "glen12" }.name)
-            assertTrue(vm.draftProblem.value.orEmpty().contains("기기에"))
-            // Never overwrite a genuinely newer server draft automatically.
+            assertNull(vm.draftProblem.value)
+            assertTrue(vm.load.value is PhotoReviewLoad.Ready)
             assertFalse(vm.draftRetryable.value)
         }
 
