@@ -49,6 +49,14 @@ import com.zerotoone.bottlemap.ui.owner.OwnerSkeletonScreen
 internal const val variantStartDestination = "customer"
 
 @OptIn(ExperimentalMaterial3Api::class)
+internal enum class OwnerAuthRecoveryAction { WAIT, LOGIN, ACCOUNT_RETRY }
+
+internal fun ownerAuthRecoveryAction(state: AuthUiState): OwnerAuthRecoveryAction = when (state) {
+    AuthUiState.Guest -> OwnerAuthRecoveryAction.LOGIN
+    is AuthUiState.SignInError -> OwnerAuthRecoveryAction.ACCOUNT_RETRY
+    else -> OwnerAuthRecoveryAction.WAIT
+}
+
 /** Never leave an expired Owner destination showing an endless spinner. */
 @androidx.compose.runtime.Composable
 private fun OwnerAuthGuard(
@@ -57,10 +65,10 @@ private fun OwnerAuthGuard(
     onRecoverableAccountError: () -> Unit,
 ) {
     LaunchedEffect(state) {
-        when (state) {
-            AuthUiState.Guest -> onSignOut()
-            is AuthUiState.SignInError -> onRecoverableAccountError()
-            else -> Unit // Initialization and in-progress sign-out are transient.
+        when (ownerAuthRecoveryAction(state)) {
+            OwnerAuthRecoveryAction.LOGIN -> onSignOut()
+            OwnerAuthRecoveryAction.ACCOUNT_RETRY -> onRecoverableAccountError()
+            OwnerAuthRecoveryAction.WAIT -> Unit
         }
     }
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
