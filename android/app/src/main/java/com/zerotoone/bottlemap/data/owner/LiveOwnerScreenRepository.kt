@@ -137,6 +137,14 @@ internal fun partitionOwnerApplicationBarCandidates(
         items.filter { it.hasOwner }.map(convert)
 }
 
+/** The Owner GET is asynchronous; its snapshot may predate local form edits.
+ * Only server-owned fields come from the refresh. The latest locally saved
+ * business number/name/opening date and navigation checkpoint always win.
+ */
+internal fun keepLatestOwnerRegistrationDraft(
+    refreshed: MockOwnerSnapshot, current: MockOwnerSnapshot,
+): MockOwnerSnapshot = refreshed.copy(registrationDraft = current.registrationDraft)
+
 class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
     private val app = context.applicationContext
     private val local = LocalOwnerMockRepository(InMemoryMockOwnerStateStore())
@@ -185,10 +193,22 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         else -> error("알 수 없는 서버 작업 상태: $value")
     }
     @Volatile private var lastReadySnapshot = MockOwnerSnapshot()
+    // Registration is an Android-local form. A GET started earlier must not
+    // restore its stale opening date after the owner corrected and checked it.
+    private val registrationDraftLock = Any()
 
-    private fun publishSnapshot(value: MockOwnerSnapshot) {
-        lastReadySnapshot = value
-        local.replaceFromBackend(value)
+    private fun publishSnapshot(
+        value: MockOwnerSnapshot, resetSessionDraft: Boolean = false,
+    ) = synchronized(registrationDraftLock) {
+        val current = when (val now = local.state.value) {
+            is MockOwnerLoadState.Ready -> now.snapshot
+            is MockOwnerLoadState.Empty -> now.snapshot
+            else -> lastReadySnapshot
+        }
+        val effective = if (resetSessionDraft) value
+            else keepLatestOwnerRegistrationDraft(value, current)
+        lastReadySnapshot = effective
+        local.replaceFromBackend(effective)
     }
     override val state = local.state
 
@@ -310,7 +330,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
             pendingPhotoRetryBarId = null
             pendingApplicationId = null
             versionByBar.clear()
-            publishSnapshot(MockOwnerSnapshot())
+            publishSnapshot(MockOwnerSnapshot(), resetSessionDraft = true)
             return
         }
         val subject = sessionKey(token)
@@ -323,7 +343,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
             pendingPhotoRetryBarId = null
             pendingApplicationId = null
             versionByBar.clear()
-            publishSnapshot(MockOwnerSnapshot())
+            publishSnapshot(MockOwnerSnapshot(), resetSessionDraft = true)
         }
         val old = snapshot()
         val bars = remote.getOwnedBars().map { bar ->
@@ -1205,7 +1225,12 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
     }
 
     override fun saveRegistrationDraft(draft: MockRegistrationDraft?) =
-        local.saveRegistrationDraft(draft)
+        synchronized(registrationDraftLock) {
+            local.saveRegistrationDraft(draft)
+            // Keep the fallback snapshot equally current while Owner refresh
+            // is in flight; preserve the form even when refresh finishes last.
+            lastReadySnapshot = lastReadySnapshot.copy(registrationDraft = draft)
+        }
     override fun seedExistingCandidateForFixture(bar: MockBar) =
         error("매장 검색은 서버 검색 API를 사용해 주세요.")
     override fun dismissRejectedForFixture(applicationId: String) =
