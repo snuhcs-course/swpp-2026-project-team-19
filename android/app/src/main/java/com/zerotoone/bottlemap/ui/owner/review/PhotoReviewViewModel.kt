@@ -122,6 +122,7 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
         ++latestDraftRevision
         _load.value = PhotoReviewLoad.Loading
         viewModelScope.launch {
+            var resumeServerSync: PhotoReviewState? = null
             draftSaveMutex.withLock {
                 // No checkpoint from the old screen may land after a reload
                 // has read the server and recovered the latest device edit.
@@ -134,19 +135,21 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                             val resumable = repository.hasPendingLocalDraft() &&
                                 !_draftConflictChoice.value &&
                                 !repository.hasOversizedPendingDraft()
-                            // An unsynced device draft must not appear fully
-                            // persisted or publishable before a server CAS ACK.
-                            // Keep the existing retry behavior; do not start
-                            // a competing save while the reload holds locks.
-                            _draftRetryable.value = resumable
+                            // Restore immediately and attempt a normal CAS
+                            // automatically after both load locks are released.
+                            // No user-visible "reload/choose draft" control.
+                            _draftRetryable.value = false
                             _draftProblem.value = when {
                                 _draftConflictChoice.value ->
-                                    "최신 서버 초안을 불러왔어요. 화면에 표시된 서버 초안과 이 기기의 미저장 초안 중 선택해 주세요."
+                                    "서버 검수와 기기에 보관된 내용이 달라요. 기기 수정사항은 보존했어요."
                                 repository.hasOversizedPendingDraft() -> oversizedNotice
                                 resumable -> localOnlyNotice
                                 else -> null
                             }
-                            repository.consumeDraftNotice()?.let(::toast)
+                            repository.consumeDraftNotice()?.let { notice ->
+                                if (_draftProblem.value == null) _draftProblem.value = notice
+                            }
+                            if (resumable) resumeServerSync = fresh
                             PhotoReviewLoad.Ready(fresh)
                         }
                     } catch (applied: ReviewAlreadyAppliedException) {
@@ -158,6 +161,9 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                     }
                 }
             }
+            // This must run OUTSIDE the reload mutexes: saveDraft takes
+            // draftSaveMutex itself and checkpoints to an independent file.
+            resumeServerSync?.let(::saveDraft)
         }
     }
 
@@ -260,7 +266,7 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                         _draftOversized.value = repository.hasOversizedPendingDraft()
                         _draftRetryable.value = false
                         _draftProblem.value =
-                            "이 기기 초안 편집 중이에요. 서버에 반영하려면 확인 후 덮어쓰기를 선택해 주세요."
+                            "서버 검수와 기기 수정사항이 달라요. 수정 내용은 기기에 보관했어요."
                     } catch (error: ReviewDraftTooLargeLocalException) {
                         _draftProblem.value = oversizedNotice
                         _draftRetryable.value = false
@@ -435,7 +441,7 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                     // The working copy was committed to device storage. Leave
                     // without submitting an unconfirmed conflicting server PUT.
                     _draftProblem.value =
-                        "이 기기 초안만 저장됐어요. 서버 반영은 초안 선택에서 확인해 주세요."
+                        "검수 수정사항은 기기에 안전하게 보관했어요."
                     repository.hasPendingLocalDraft()
                 } catch (error: ReviewDraftTooLargeLocalException) {
                     // §5.9 allows device-only storage above the server limit.
@@ -453,12 +459,15 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                     _draftProblem.value = error.message
                     repository.hasPendingLocalDraft()
                 } catch (error: Exception) {
-                    _draftRetryable.value = repository.hasPendingLocalDraft() &&
-                        error !is ReviewDraftConflictException &&
+                    // An offline/5xx server failure must never lock the owner
+                    // on screen when the latest edit is already durable on
+                    // this device. Do not interpret device-only as server ACK.
+                    val safeDeviceCopy = repository.hasPendingLocalDraft()
+                    _draftRetryable.value = safeDeviceCopy &&
                         !repository.hasOversizedPendingDraft()
-                    _draftProblem.value = if (_draftRetryable.value) localOnlyNotice
+                    _draftProblem.value = if (safeDeviceCopy) localOnlyNotice
                         else error.message ?: "검수 초안 저장에 실패했어요."
-                    false
+                    safeDeviceCopy
                 }
             }
             if (saved) {
