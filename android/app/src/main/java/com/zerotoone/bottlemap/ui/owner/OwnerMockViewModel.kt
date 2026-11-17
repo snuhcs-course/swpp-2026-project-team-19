@@ -29,6 +29,7 @@ class OwnerMockViewModel(
     // spending an NTS quota. Null in all production ViewModel factories.
     private val businessVerificationFixture:
         (suspend (String, String, String) -> String)? = null,
+    private val registrationSubmissionFixture: (suspend () -> Unit)? = null,
 ) : ViewModel() {
     val state: StateFlow<MockOwnerLoadState> = repository.state
     fun retry() = repository.retryLoad()
@@ -48,9 +49,12 @@ class OwnerMockViewModel(
     }
 
     suspend fun submitRegistrationDraftLive() {
-        if (repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
-            repository.submitRegistrationDraftLive()
-        else repository.submitRegistrationDraftForFixture()
+        when {
+            registrationSubmissionFixture != null -> registrationSubmissionFixture.invoke()
+            repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository ->
+                repository.submitRegistrationDraftLive()
+            else -> repository.submitRegistrationDraftForFixture()
+        }
     }
 
     suspend fun readBusinessCertificateLive(uri: String):
@@ -150,7 +154,7 @@ class OwnerMockViewModel(
         else emptyList()
 
     fun usesProductionOwnerApi(): Boolean =
-        businessVerificationFixture != null ||
+        businessVerificationFixture != null || registrationSubmissionFixture != null ||
             repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository
     fun pendingRepresentativePhotoWarning(): String? =
         (repository as? com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
