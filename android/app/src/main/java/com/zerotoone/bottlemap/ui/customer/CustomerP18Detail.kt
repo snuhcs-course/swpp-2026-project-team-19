@@ -98,6 +98,9 @@ internal data class BarAliasLookupState(
     val productIds: Set<String> = emptySet(),
 )
 
+internal fun queryScopedBarAlias(state: BarAliasLookupState, query: String): BarAliasLookupState? =
+    state.takeIf { it.query.isNotEmpty() && it.query == query.trim() }
+
 internal data class P18BusinessStatus(val text:String,val next:String?=null,
     val note:String?=null, val open:Boolean=false)
 
@@ -429,9 +432,7 @@ internal fun CustomerP18BarDetail(
                 focused=false)
             // Only render the outcome for the currently displayed query.
             // Clearing/editing the query immediately hides a stale result.
-            val queryScopedAlias = aliasLookup.takeIf {
-                it.query.isNotEmpty() && it.query == menuQuery.trim()
-            }
+            val queryScopedAlias = queryScopedBarAlias(aliasLookup, menuQuery)
             if (queryScopedAlias?.loading == true) {
                 Row(Modifier.fillMaxWidth().testTag("customer-bar-alias-loading"),
                     verticalAlignment = Alignment.CenterVertically,
