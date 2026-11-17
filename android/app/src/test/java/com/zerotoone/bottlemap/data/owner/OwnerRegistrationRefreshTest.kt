@@ -6,6 +6,14 @@ import org.junit.Test
 
 /** An asynchronous Owner GET must never roll back newer local registration input. */
 class OwnerRegistrationRefreshTest {
+    @Test fun cachedOwnerDataIsShownOnlyAfterSameSessionWasVerified() {
+        assertEquals(true, canRestoreVisibleOwnerCache(true, "owner-A", "owner-A"))
+        assertEquals(false, canRestoreVisibleOwnerCache(true, "owner-A", "owner-B"))
+        assertEquals(false, canRestoreVisibleOwnerCache(true, "owner-A", null))
+        assertEquals(false, canRestoreVisibleOwnerCache(true, null, "owner-A"))
+        assertEquals(false, canRestoreVisibleOwnerCache(false, "owner-A", "owner-A"))
+    }
+
     @Test fun slowOwnerRefreshCannotRestoreStaleOpeningDateAfterCorrection() {
         val old = MockRegistrationDraft(
             businessNumberDigits = "1234567891",
