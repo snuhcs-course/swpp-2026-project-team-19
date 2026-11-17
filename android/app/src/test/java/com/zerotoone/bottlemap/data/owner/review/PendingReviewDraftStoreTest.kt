@@ -66,6 +66,47 @@ class PendingReviewDraftStoreTest {
     }
 
 
+    @Test fun matchingWorkingDraftCanAutoResumeButCannotReplaceNewerCheckpoint() {
+        fun content(label: String) = ServerReviewDraftCodec.encode(
+            PhotoReviewState(items = listOf(ReviewItem(id = "ocr-1", name = label))))
+        val initial = content("previously saved")
+        val current = content("latest owner edit")
+        val newer = content("another unsent device edit")
+        val server = ReviewDraftDto(
+            draftVersion = 5, reviewVersion = 7,
+            savedAt = "2026-11-17T00:00:00Z", content = initial)
+        val working = PendingReviewDraftStore.Envelope(
+            reviewVersion = 7, expectedDraftVersion = 5,
+            itemIds = listOf("ocr-1"), content = current)
+        val outcome = DraftRecoveryPolicy.decide(server, working, null, 7)
+        assertEquals(DraftRecoveryPolicy.Outcome.RESTORE, outcome)
+        assertTrue(canResumeLocalReview(
+            outcome, true, true, true, working, null, server))
+        assertTrue(canResumeLocalReview(
+            outcome, true, true, true, working,
+            working.copy(content = initial), server))
+        assertFalse(canResumeLocalReview(
+            outcome, true, true, true, working,
+            working.copy(content = newer), server))
+        assertFalse(canResumeLocalReview(
+            outcome, true, false, true, working, null, server))
+        assertFalse(canResumeLocalReview(
+            DraftRecoveryPolicy.Outcome.CONFLICT, true, true, true,
+            working, null, server))
+
+        val earlierAck = working.copy(
+            expectedDraftVersion = 4, content = initial)
+        val rebasing = working.copy(expectedDraftVersion = 4)
+        assertEquals(DraftRecoveryPolicy.Outcome.REBASE,
+            DraftRecoveryPolicy.decide(server, rebasing, earlierAck, 7))
+        assertTrue(canResumeLocalReview(
+            DraftRecoveryPolicy.Outcome.REBASE, true, true,
+            true, rebasing, null, server))
+        assertFalse(canResumeLocalReview(
+            DraftRecoveryPolicy.Outcome.REBASE, false, true,
+            true, rebasing, null, server))
+    }
+
     @Test fun oldPendingAttemptCannotBlockAcknowledgedNewerCheckpoint() {
         fun content(name: String) = ServerReviewDraftCodec.encode(
             PhotoReviewState(items = listOf(ReviewItem(id = "ocr-1", name = name))))
