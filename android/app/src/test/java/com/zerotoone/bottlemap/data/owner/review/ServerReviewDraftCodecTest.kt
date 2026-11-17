@@ -1,6 +1,8 @@
 package com.zerotoone.bottlemap.data.owner.review
 
+import com.zerotoone.bottlemap.network.ApiClient
 import com.zerotoone.bottlemap.network.ReviewDraftDto
+import com.zerotoone.bottlemap.network.ReviewDraftSaveRequestDto
 import com.zerotoone.bottlemap.ui.owner.review.ClassificationSnapshot
 import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewState
 import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewRules
@@ -695,5 +697,48 @@ class ServerReviewDraftCodecTest {
         assertEquals(32767.0, restored.volume, 0.0)
         assertFalse(ReviewIssue.VOLUME in PhotoReviewRules.problems(restored))
         assertNull(ServerReviewDraftCodec.restoreStandard(draft(32768), fresh))
+    }
+
+    /** UAT 4.4 / #190: an OCR glass option plus a serving the owner added by
+     * hand, which has no extractedOptionId and no optionLabel. */
+    private fun reviewWithOwnerAddedOption() = PhotoReviewState(items = listOf(ReviewItem(
+        id = "line", name = "업주가 고친 위스키", price = 15000.0, volume = 30.0,
+        primarySourceOptionId = "opt-1", primaryOptionLabel = "잔",
+        linkedProductId = "p1", matchConfirmed = true,
+        options = listOf(ReviewOption(volume = 60.0, price = 28000.0)),
+    )))
+
+    /** The JSON the app actually sends (the app's Moshi) and gets back: the
+     * server stores and returns the draft content verbatim (spec 5.9). */
+    private fun throughServer(content: Map<String, Any?>): ReviewDraftDto {
+        val adapter = ApiClient.moshi.adapter(ReviewDraftSaveRequestDto::class.java)
+        val sent = requireNotNull(adapter.fromJson(adapter.toJson(
+            ReviewDraftSaveRequestDto(draftVersion = 4, reviewVersion = 3, content = content))))
+        return ReviewDraftDto(5, 3, "2026-11-18T00:00:00Z", sent.content)
+    }
+
+    @Test fun ownerAddedOptionDraftRestoresAfterRealServerJsonRoundTrip() {
+        val state = reviewWithOwnerAddedOption()
+        val saved = throughServer(ServerReviewDraftCodec.encode(state))
+        // The wire JSON drops the owner option's null keys, as seen on the
+        // deployed database for #190.
+        val wireOptions = ((saved.content["itemDecisions"] as List<*>).single()
+            as Map<*, *>)["options"] as List<*>
+        assertFalse((wireOptions[1] as Map<*, *>).containsKey("extractedOptionId"))
+
+        val restored = requireNotNull(ServerReviewDraftCodec.decode(saved)) {
+            "A draft with an owner-added option must restore after the server round trip"
+        }.items.single()
+        assertEquals("업주가 고친 위스키", restored.name)
+        assertTrue(restored.matchConfirmed)
+        assertEquals(listOf(ReviewOption(volume = 60.0, price = 28000.0)), restored.options)
+    }
+
+    @Test fun lostSaveResponseWithOwnerAddedOptionIsRecognizedAsOwnSave() {
+        val submitted = ServerReviewDraftCodec.encode(reviewWithOwnerAddedOption())
+        val server = throughServer(submitted)
+        assertTrue(ServerReviewDraftCodec.sameAndroidSnapshot(submitted, server.content))
+        assertTrue(DraftSaveSafety.ownCasAcknowledged(
+            server, submitted, expectedDraftVersion = 4, reviewVersion = 3))
     }
 }

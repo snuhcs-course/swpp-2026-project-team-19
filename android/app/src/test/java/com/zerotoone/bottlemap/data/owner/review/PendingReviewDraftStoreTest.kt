@@ -5,6 +5,7 @@ import android.util.Base64
 import com.zerotoone.bottlemap.network.ReviewDraftDto
 import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewState
 import com.zerotoone.bottlemap.ui.owner.review.ReviewItem
+import com.zerotoone.bottlemap.ui.owner.review.ReviewOption
 import java.io.File
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -467,5 +468,27 @@ class PendingReviewDraftStoreTest {
         } catch (_: IllegalStateException) {
             assertTrue(folder.listFiles()?.isEmpty() != false)
         }
+    }
+
+    /** UAT 4.4 / #190: the device file is JSON too, so an owner-added option
+     * (no extractedOptionId, no optionLabel) loses its null keys on disk. */
+    @Test fun deviceDraftWithOwnerAddedOptionRestoresAfterRecreation() = runBlocking {
+        val state = PhotoReviewState(items = listOf(ReviewItem(
+            id = "line", name = "업주가 고친 위스키", price = 15000.0, volume = 30.0,
+            primarySourceOptionId = "opt-1", primaryOptionLabel = "잔",
+            options = listOf(ReviewOption(volume = 60.0, price = 28000.0)),
+        )))
+        PendingReviewDraftStore(context) { jwt("owner-a") }.write(
+            "import-1", PendingReviewDraftStore.Envelope(
+                reviewVersion = 3, expectedDraftVersion = 4,
+                itemIds = listOf("line"), content = ServerReviewDraftCodec.encode(state),
+            ))
+        val stored = requireNotNull(
+            PendingReviewDraftStore(context) { jwt("owner-a") }.read("import-1"))
+        val restored = requireNotNull(ServerReviewDraftCodec.decode(ReviewDraftDto(
+            4, 3, "1970-01-01T00:00:00Z", stored.content,
+        ))) { "A device draft with an owner-added option must restore" }
+        assertEquals(listOf(ReviewOption(volume = 60.0, price = 28000.0)),
+            restored.items.single().options)
     }
 }
