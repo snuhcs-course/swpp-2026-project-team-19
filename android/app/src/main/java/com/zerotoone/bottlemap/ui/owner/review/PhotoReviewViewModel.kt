@@ -445,6 +445,13 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                     _draftProblem.value = oversizedNotice
                     repository.hasPendingLocalDraft() &&
                         repository.hasOversizedPendingDraft()
+                } catch (error: ReviewDraftConflictException) {
+                    // UAT 4.4: an already-preserved device draft must not trap
+                    // the owner in the review screen when another CAS advanced.
+                    // Never PUT or discard it; leave only with a durable backup.
+                    _draftRetryable.value = false
+                    _draftProblem.value = error.message
+                    repository.hasPendingLocalDraft()
                 } catch (error: Exception) {
                     _draftRetryable.value = repository.hasPendingLocalDraft() &&
                         error !is ReviewDraftConflictException &&
