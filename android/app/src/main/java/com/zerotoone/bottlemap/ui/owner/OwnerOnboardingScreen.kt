@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import com.zerotoone.bottlemap.data.owner.*
 import com.zerotoone.bottlemap.network.BottleMapApiException
 import com.zerotoone.bottlemap.ui.common.*
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -291,9 +292,13 @@ fun OwnerOnboardingScreen(
                         proposedBarName="몰트 앤 무드"))
                 }
                 go(RegPage.BIZCHECK)
+            } catch(cancelled: CancellationException) {
+                // Leaving this page cancels its LaunchedEffect normally.
+                // Cancellation is never a user-facing NTS or OCR error.
+                throw cancelled
             } catch(e: Exception) {
                 go(RegPage.BIZCHECK)
-                error=e.message ?: "사업자등록증을 읽지 못했어요. 직접 입력해 주세요."
+                error="사업자등록증을 읽지 못했어요. 직접 입력해 주세요."
             }
         } else if(screen==RegPage.VERIFYING){
             // The actual NTS verification happens on POST /api/owner-applications.
@@ -464,8 +469,10 @@ fun OwnerOnboardingScreen(
                                 }
                                 else -> error=e.message ?: "사업자 정보를 확인하지 못했어요."
                             }
+                        } catch(cancelled: CancellationException) {
+                            throw cancelled
                         } catch(e: Exception) {
-                            error=e.message ?: "사업자 정보를 확인하지 못했어요."
+                            error="사업자 정보를 확인하지 못했어요."
                         } finally { busy=false }
                     }
                 }
@@ -506,6 +513,8 @@ fun OwnerOnboardingScreen(
                             history=emptyList()
                             screen=RegPage.DONE
                             error=null
+                        } catch(cancelled: CancellationException) {
+                            throw cancelled
                         } catch(e: Exception) {
                             val code=(e as? BottleMapApiException)?.code
                             when(code) {
