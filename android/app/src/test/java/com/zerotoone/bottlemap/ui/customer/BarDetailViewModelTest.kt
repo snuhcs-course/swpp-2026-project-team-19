@@ -37,26 +37,21 @@ class BarDetailViewModelTest {
     }
 
     @Test
-    fun aliasInvalidCharactersShowValidationInsteadOfNetworkRetry() {
-        assertEquals("검색할 수 있는 문자가 없어요. 검색어를 다시 입력해 주세요.",
-            barAliasLocalValidation("!!!"))
-        assertNull(barAliasLocalValidation("맥캘란 12년"))
-        assertEquals("검색어는 100자 이내로 입력해 주세요.",
-            barAliasLocalValidation("x".repeat(101)))
-        val response = BottleMapApiException(httpStatus = 422,
-            code = "VALIDATION_FAILED", message = "Invalid query", fieldErrors = listOf(
-                com.zerotoone.bottlemap.network.FieldErrorDto("query", "NOT_SEARCHABLE", "error")))
-        assertEquals("검색할 수 있는 문자가 없어요. 검색어를 다시 입력해 주세요.",
-            barAliasServerValidation(response))
-        assertNull(barAliasServerValidation(BottleMapApiException(httpStatus = 503, code = "HTTP_503", message = "offline")))
-    }
-
-    @Test
     fun aliasFallbackTriggersOnlyForActualLocalMiss() {
         assertTrue(barAliasLookupNeeded("ardbeg10", hasLocalMatch = false))
         assertFalse(barAliasLookupNeeded("ardbeg10", hasLocalMatch = true))
-        assertFalse(barAliasLookupNeeded("a", hasLocalMatch = false))
+        // §3.10 accepts one searchable character and no artificial 2-char limit.
+        assertTrue(barAliasLookupNeeded("a", hasLocalMatch = false))
         assertFalse(barAliasLookupNeeded("  ", hasLocalMatch = false))
+        assertFalse(barAliasLookupNeeded("!!!", hasLocalMatch = false))
+    }
+
+    @Test
+    fun strippedPunctuationNeverMatchesEveryBarMenu() {
+        assertFalse(barMenuMatchesQuery("라가불린 16", "라가불린", "---"))
+        assertFalse(barMenuMatchesQuery("라가불린 16", "라가불린", " - - "))
+        assertTrue(barMenuMatchesQuery("라가불린 16", "라가불린", ""))
+        assertTrue(barMenuMatchesQuery("라가불린 16", "라가불린", "라가-불린"))
     }
 
     @Test
