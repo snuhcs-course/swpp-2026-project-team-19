@@ -253,13 +253,15 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                     } catch (cancelled: CancellationException) {
                         throw cancelled
                     } catch (error: ReviewDraftConflictException) {
-                        _draftProblem.value = error.message
+                        val alreadyKnown = _draftConflictChoice.value
+                        _draftProblem.value =
+                            "서버 검수와 기기 저장 내용이 달라요. 기기 수정사항은 보존했어요."
                         _draftRetryable.value = false
-                        _draftConflictChoice.value = false
-                        // §5.9: do not offer discard/overwrite actions against
-                        // stale content. Refresh and DISPLAY the newer draft first.
-                        if (repository.hasPendingDraftConflict()) reload()
-                        else toast(error.message.orEmpty())
+                        // One automatic refresh for a newly discovered CAS.
+                        // When a real conflict persists, a second refresh on
+                        // every keystroke would keep discarding the visible
+                        // editor and trapping the owner in a toast loop.
+                        if (!alreadyKnown) reload()
                     } catch (error: ReviewDraftLocalEditingException) {
                         _draftEditingLocal.value = true
                         _draftConflictChoice.value = true
