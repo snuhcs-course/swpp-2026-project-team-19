@@ -30,7 +30,6 @@ jobs:
     outputs:
       web: ${{ steps.filter.outputs.web }}
       api: ${{ steps.filter.outputs.api }}
-      backend-deploy: ${{ steps.filter.outputs.backend-deploy }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -40,7 +39,6 @@ jobs:
         uses: dorny/paths-filter@v3
         with:
           # api: what changes the OpenAPI document, so the generated types may be out of date.
-          # backend-deploy: the paths of Backend CI/CD, whose deployment the upload waits for.
           filters: |
             web:
               - 'owner-web/**'
@@ -50,11 +48,6 @@ jobs:
               - 'backend/scripts/export_openapi.py'
               - 'backend/pyproject.toml'
               - 'backend/uv.lock'
-            backend-deploy:
-              - 'backend/**'
-              - 'ai/catalog/**'
-              - 'eval/**'
-              - '.github/workflows/backend-ci-cd.yml'
 
   checks:
     name: Owner web / typecheck, tests, build
@@ -124,14 +117,16 @@ jobs:
 
   wait-for-backend:
     name: Owner web / wait for the backend deployment
-    # When the same push also deploys the backend, upload the page only once the server runs this commit or
-    # a newer one (deploy.sh deploys the latest main, which may already be past this commit), so the page
-    # never calls an API older than the one it was built against. A separate job outside the
-    # deploy-production group, so the backend deployment it waits for is not queued behind it.
+    # Upload the page only once the server runs the backend it was built against: the last commit up to this
+    # one that Backend CI/CD deploys (its paths below), or a newer commit, since deploy.sh deploys the latest
+    # main. Checked on every upload, not only when this push changed the backend: a web-only commit merged
+    # right after a backend commit must wait for that commit's deployment too. When the server already has
+    # it, this passes at once. A separate job outside the deploy-production group, so the backend deployment
+    # it waits for is not queued behind it.
     needs: [changes, checks, api-types]
     if: >-
       github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
-      && needs.changes.outputs.backend-deploy == 'true'
+      && (needs.changes.outputs.web == 'true' || github.event_name == 'workflow_dispatch')
       && needs.checks.result == 'success' && needs.api-types.result == 'success'
     runs-on: ubuntu-24.04
     timeout-minutes: 45
@@ -140,35 +135,40 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          # The whole history, to tell whether the deployed commit includes this one.
+          # The whole history, to find the last backend commit and whether the deployed commit includes it.
           fetch-depth: 0
-      - name: Wait until /health reports this commit or a newer one
+      - name: Wait until the server includes the last backend change
         run: |
+          # The same paths as the triggers of .github/workflows/backend-ci-cd.yml; keep them in sync.
+          need="$(git log -1 --format=%H "$GITHUB_SHA" -- backend ai/catalog eval .github/workflows/backend-ci-cd.yml)"
+          if [ -z "$need" ]; then
+            echo "No backend commit up to ${GITHUB_SHA::7}; nothing to wait for."
+            exit 0
+          fi
+          echo "The page needs the backend of ${need::7} ($(git log -1 --format=%s "$need"))."
           for _ in $(seq 1 80); do
             version="$(curl -fsS "https://$DEPLOY_HOST/health" | jq -r '.version // empty')" || version=""
             if [ -n "$version" ]; then
               git fetch --quiet origin main || true
-              # /health reports a short hash; it includes this commit when this commit is its ancestor.
+              # /health reports a short hash; the server has the backend change when it is an ancestor.
               if deployed="$(git rev-parse --verify --quiet "$version^{commit}")" \
-                && git merge-base --is-ancestor "$GITHUB_SHA" "$deployed"; then
-                echo "Server runs $version, which includes ${GITHUB_SHA::7}"
+                && git merge-base --is-ancestor "$need" "$deployed"; then
+                echo "Server runs $version, which includes ${need::7}"
                 exit 0
               fi
             fi
             sleep 30
           done
-          echo "::error::The server still runs '${version:-unknown}', which does not include ${GITHUB_SHA::7}. Check Backend CI/CD for this commit. Once main is deployed, run this workflow on main from the Actions tab (Run workflow), which uploads the latest owner web without waiting."
+          echo "::error::The server still runs '${version:-unknown}', which does not include the backend change ${need::7} this page was built against. Check Backend CI/CD for that commit; once it is deployed, re-run this job or run this workflow on main from the Actions tab."
           exit 1
 
   deploy:
     name: Owner web / deploy
     needs: [changes, checks, api-types, wait-for-backend]
+    # Runs only after every job it needs has passed, wait-for-backend included.
     if: >-
-      always()
-      && github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+      github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
       && (needs.changes.outputs.web == 'true' || github.event_name == 'workflow_dispatch')
-      && needs.checks.result == 'success' && needs.api-types.result == 'success'
-      && (needs.wait-for-backend.result == 'success' || needs.wait-for-backend.result == 'skipped')
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     environment:
