@@ -89,7 +89,8 @@ def test_the_table_says_which_thresholds_are_met(tmp_path, monkeypatch):
     run_dir = tmp_path / "v2"
     run_dir.mkdir()
     spread = lambda v: {"mean": v, "min": v, "max": v, "n": 3}
-    (run_dir / "scores.json").write_text(json.dumps({"failed_calls": [], "summary": {
+    runs = {r: {"missing_photos": []} for r in p46.RUNS}
+    (run_dir / "scores.json").write_text(json.dumps({"failed_calls": [], "runs": runs, "summary": {
         "f1_strict": spread(0.95), "price_accuracy": spread(0.94), "item_accuracy": spread(0.9)}}), encoding="utf-8")
     match = tmp_path / "m.json"
     match.write_text(json.dumps(matching_result("full", 0.774)), encoding="utf-8")
@@ -99,6 +100,25 @@ def test_the_table_says_which_thresholds_are_met(tmp_path, monkeypatch):
     assert "0.950 [0.950-0.950] (NFR-1 >= 0.9: met)" in text and "0.940 [0.940-0.940] (NFR-2 >= 0.95: NOT met)" in text
     assert "| full/label/rules | 0.774 (NFR-3 >= 0.9: NOT met) | 0.0000 (NFR-4 <= 0.02: met)" in text
     assert p46.verdict("hard_per_photo", 1.0) == "" and p46._cell(None) == "-"
+
+
+def test_an_incomplete_extraction_run_dir_gets_no_verdict(tmp_path):
+    spread = lambda v: {"mean": v, "min": v, "max": v, "n": 2}
+    for rel, data in ((p46.LABELS, LABELS), (p46.GOLD, GOLD), (p46.PHOTO_HASHES, HASHES),
+                      (p46.MIXED_LINES, {"reviewed": None, "photos": LINES})):
+        (tmp_path / rel).parent.mkdir(parents=True, exist_ok=True)
+        (tmp_path / rel).write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+    run_dir = tmp_path / "v2"
+    run_dir.mkdir()
+    (run_dir / "scores.json").write_text(json.dumps({
+        "failed_calls": ["a_r2.json"], "runs": {"1": {"missing_photos": []}, "2": {"missing_photos": ["p7"]}},
+        "summary": {"f1_strict": spread(0.95), "price_accuracy": spread(0.96), "item_accuracy": spread(0.9)}}),
+        encoding="utf-8")
+    report = p46.build({"v2": run_dir}, [], repo=tmp_path)
+    assert report["extraction"]["v2"]["problems"] == ["run 3 missing", "run 2 misses 1 photos", "1 failed calls"]
+    text = p46.markdown(report)
+    assert "NFR-1" not in text and "NFR-2" not in text
+    assert "Incomplete, no verdict: v2 (run 3 missing, run 2 misses 1 photos, 1 failed calls)" in text
 
 
 def test_the_i3_non_whisky_lines_file_has_the_fields_the_report_reads():

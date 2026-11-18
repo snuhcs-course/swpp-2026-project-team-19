@@ -45,6 +45,7 @@ PHOTO_HASHES = "ai/eval/i3_photo_sha256.json"
 THRESHOLDS = {"f1_strict": (">=", 0.90, "NFR-1"), "price_accuracy": (">=", 0.95, "NFR-2"),
               "top1": (">=", 0.90, "NFR-3"), "fm_rate": ("<=", 0.02, "NFR-4")}
 MATCH_KEYS = ("top1", "fm_rate", "accept_err_rate", "hard_per_photo")
+RUNS = ("1", "2", "3")  # the extraction runs a verdict needs, each with every photo
 
 
 def i3_fixtures(labels: dict, gold: dict, hashes: dict) -> list[dict]:
@@ -135,6 +136,18 @@ def matching_groups(paths: list[Path]) -> dict[str, dict]:
     return {"groups": out, "incomplete_left_out": incomplete}
 
 
+def extraction_problems(scores: dict) -> list[str]:
+    """Why a score.py result cannot carry a verdict: score.py leaves out absent runs and scores
+    missing photos as empty output, so it gives a summary for an incomplete run dir too."""
+    runs = scores.get("runs", {})
+    problems = [f"run {r} missing" for r in RUNS if r not in runs]
+    problems += [f"run {r} misses {len(run['missing_photos'])} photos"
+                 for r, run in sorted(runs.items()) if run.get("missing_photos")]
+    if scores["failed_calls"]:
+        problems.append(f"{len(scores['failed_calls'])} failed calls")
+    return problems
+
+
 def verdict(key: str, value: float | None) -> str:
     if key not in THRESHOLDS or value is None:
         return ""
@@ -156,12 +169,18 @@ def markdown(report: dict) -> str:
     if report["extraction"]:
         lines += ["## Extraction (whisky lines, score.py --set i3)", "",
                   "| prompt | name F1 strict | price accuracy | item accuracy | runs |", "|---|---|---|---|---|"]
+        incomplete = []
         for name, e in report["extraction"].items():
             s = e["summary"]
-            lines.append(f"| {name} | {_cell(s['f1_strict'])}{verdict('f1_strict', s['f1_strict']['mean'])} "
-                         f"| {_cell(s['price_accuracy'])}{verdict('price_accuracy', s['price_accuracy']['mean'])} "
+            v = (lambda key: verdict(key, s[key]["mean"])) if not e["problems"] else (lambda key: "")
+            lines.append(f"| {name} | {_cell(s['f1_strict'])}{v('f1_strict')} "
+                         f"| {_cell(s['price_accuracy'])}{v('price_accuracy')} "
                          f"| {_cell(s['item_accuracy'])} | {s['f1_strict']['n']} |")
+            if e["problems"]:
+                incomplete.append(f"{name} ({', '.join(e['problems'])})")
         lines.append("")
+        if incomplete:
+            lines += ["Incomplete, no verdict: " + "; ".join(incomplete), ""]
     if report["mixed"]:
         lines += ["## All lines of the photos (counts over the records of a run dir)", "",
                   "| prompt | records | whisky lines paired | non-whisky lines paired | whisky as non-whisky "
@@ -202,7 +221,8 @@ def build(extraction: dict[str, Path], matching: list[Path], repo: Path = REPO_R
             if scores.is_file():
                 data = json.loads(scores.read_text(encoding="utf-8"))
                 report["extraction"][name] = {"run_dir": run_dir.as_posix(), "summary": data["summary"],
-                                              "failed_calls": len(data["failed_calls"])}
+                                              "failed_calls": len(data["failed_calls"]),
+                                              "problems": extraction_problems(data)}
             report["mixed"][name] = {"run_dir": run_dir.as_posix(), **mixed_report(run_dir, fixtures, lines["photos"])}
     return report
 

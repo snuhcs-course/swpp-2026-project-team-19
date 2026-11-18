@@ -304,8 +304,15 @@ def build_catalog(be: Backend, bar: str, variant: str, seed: dict, new_products:
         "aliases": sorted([str(pid), text] for pid, text in aliases),
         "brand_aliases": sorted([str(bid), text] for bid, text in brand_aliases),
     }, ensure_ascii=False, sort_keys=True)
+    # The database keeps one alias per (product, normalized alias): seed_catalog.py inserts with
+    # ON CONFLICT DO NOTHING, so the first alias of a group stays. catalog_entries() embeds those rows.
+    stored: dict[tuple, str] = {}
+    for pid, text in aliases:
+        n = be.normalize(text)
+        if n:
+            stored.setdefault((pid, n), text)
     entries = list(dict.fromkeys([(x.display_name, x.product_id) for x in products]
-                                 + [(text, pid) for pid, text in aliases]))
+                                 + [(text, pid) for (pid, _), text in stored.items()]))
     return BarCatalog(be.InMemoryCatalog(products, aliases, brand_aliases), key_to_id, display,
                       sha256_bytes(canonical.encode("utf-8")), entries)
 

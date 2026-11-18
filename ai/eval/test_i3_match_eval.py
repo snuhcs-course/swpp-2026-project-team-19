@@ -309,6 +309,18 @@ def test_a_group_of_bars_shares_its_own_menu_aliases(be, monkeypatch):
     assert be.normalize("글렌피딕 12년") in h.build_catalog(be, "바C", "asis", SEED).catalog.get_normalized_aliases(pid)
 
 
+def test_embedded_entries_keep_one_alias_per_normalized_value_like_the_database(be):
+    seed = json.loads((h.REPO_ROOT / "ai" / "catalog" / "catalog_v2_service.json").read_text(encoding="utf-8"))
+    entries = h.build_catalog(be, "바C", "asis", seed).entries
+    keys = [(pid, be.normalize(text)) for text, pid in entries]
+    products = {pid for _, pid in entries}
+    names = {p.display_name for p in h.build_catalog(be, "바C", "asis", seed).catalog._products.values()}
+    alias_keys = [k for (text, _), k in zip(entries, keys) if text not in names]
+    assert len(alias_keys) == len(set(alias_keys)) and products
+    ardbeg = [text for text, _ in entries if be.normalize(text) == be.normalize("Ardbeg 10")]
+    assert len(ardbeg) <= 2  # the display name and at most one stored alias
+
+
 def test_the_i3_asis_catalogs_are_the_recorded_ones(be):
     seed = json.loads((h.REPO_ROOT / "ai" / "catalog" / "catalog_v2_service.json").read_text(encoding="utf-8"))
     digest = h.catalog_digest({bar: h.build_catalog(be, bar, "asis", seed) for bar in I3_BARS})
