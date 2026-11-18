@@ -61,6 +61,32 @@ describe("createAuthFetch (spec 3.1.5)", () => {
     expect(gateway.calls.refresh).toBe(1);
   });
 
+  it("reuses an earlier refresh for a 401 that arrives after it", async () => {
+    // Both requests leave with the old token; the second 401 arrives only after the first refresh is done.
+    let releaseSecond: () => void = () => undefined;
+    const secondArrives = new Promise<void>((resolve) => {
+      releaseSecond = resolve;
+    });
+    const seen: (string | null)[] = [];
+    const fetch = vi.fn(async (input: RequestInfo | URL) => {
+      const authorization = (input as Request).headers.get("Authorization");
+      seen.push(authorization);
+      if (authorization === "Bearer old" && seen.length === 2) await secondArrives;
+      return new Response(null, { status: authorization === "Bearer old" ? 401 : 200 });
+    }) as unknown as typeof globalThis.fetch;
+    const gateway = new FakeGateway({ token: "old" });
+    const send = createAuthFetch(gateway, vi.fn(), fetch);
+
+    const first = send(new Request(URL));
+    const second = send(new Request(URL));
+    expect((await first).status).toBe(200);
+    releaseSecond();
+
+    expect((await second).status).toBe(200);
+    expect(gateway.calls.refresh).toBe(1);
+    expect(seen.filter((authorization) => authorization === "Bearer refreshed-token")).toHaveLength(2);
+  });
+
   it("ends the session when the refresh fails", async () => {
     const api = scriptedFetch(401);
     const gateway = new FakeGateway();
