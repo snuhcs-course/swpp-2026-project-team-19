@@ -605,10 +605,10 @@ def test_an_empty_existing_run_dir_starts_a_new_manifest(setup):
     made = manifest(setup.out)
     assert made["frozen_matching"] == {rel: pin for rel, pin in p30.FROZEN_MATCHING.items()
                                        if rel not in p30.RELEASED_MATCHING}
-    [released] = p30.RELEASED_MATCHING
-    assert made["released_matching"][released]["i3_sha256"] == p30.FROZEN_MATCHING[released]
-    assert made["released_matching"][released]["sha256"] == p30.sha256_bytes((p30.REPO_ROOT / released).read_bytes())
-    assert made["released_matching"][released]["sha256"] != p30.FROZEN_MATCHING[released]
+    for released in p30.RELEASED_MATCHING:
+        assert made["released_matching"][released]["i3_sha256"] == p30.FROZEN_MATCHING[released]
+        assert made["released_matching"][released]["sha256"] == p30.sha256_bytes((p30.REPO_ROOT / released).read_bytes())
+        assert made["released_matching"][released]["sha256"] != p30.FROZEN_MATCHING[released]
 
 
 def raw_pins(tmp_path: Path, data: bytes) -> dict[str, str]:
@@ -652,17 +652,18 @@ def test_matching_component_change_stops_check(setup, capsys, monkeypatch, chang
 
 
 def test_a_released_matching_file_is_not_checked_and_the_command_says_so(setup, capsys):
-    # staged.py was released from the I3 freeze on 2026-11-13; its I3 hash stays as the record
-    assert p30.RELEASED_MATCHING == ("backend/app/matching/staged.py",)
+    # staged.py was released from the I3 freeze on 2026-11-13 and the harness i3_match_eval.py on
+    # 2026-11-17 (I4-P46); their I3 hashes stay as the record
+    assert p30.RELEASED_MATCHING == ("backend/app/matching/staged.py", "ai/eval/i3_match_eval.py")
     assert set(p30.RELEASED_MATCHING) <= set(p30.FROZEN_MATCHING)
     with pytest.raises(p30.Stop, match="staged.py"):
         p30.check_raw_files(p30.REPO_ROOT, p30.FROZEN_MATCHING, "matching")
     code, gemini, _ = run(setup, "--check")
     assert code == 0 and gemini.requests == []
     printed = capsys.readouterr().out
-    assert "NOTE: not the I3 configuration: released from the freeze: backend/app/matching/staged.py" in printed
+    assert "NOTE: not the I3 configuration: released from the freeze: backend/app/matching/staged.py, ai/eval/i3_match_eval.py" in printed
     # the success line does not call the skipped file verified
-    assert "matching files (4.5) OK, except backend/app/matching/staged.py: released from the freeze, NOT checked" in printed
+    assert "matching files (4.5) OK, except backend/app/matching/staged.py, ai/eval/i3_match_eval.py: released from the freeze, NOT checked" in printed
     assert p30.released_matching(setup.out / "nowhere")[p30.RELEASED_MATCHING[0]]["sha256"] is None
 
 

@@ -1,0 +1,1912 @@
+{
+ "report": "frozen-set metrics (I4-P46)",
+ "extraction": {
+  "v2": {
+   "run_dir": "ai/runs/2026-11-17_p46/hybrid_v2_i3",
+   "summary": {
+    "item_accuracy": {
+     "mean": 0.8691772832155482,
+     "min": 0.8540856031128404,
+     "max": 0.8826979472140762,
+     "n": 3
+    },
+    "f1_strict": {
+     "mean": 0.9354453229846317,
+     "min": 0.9340153452685421,
+     "max": 0.9364754098360655,
+     "n": 3
+    },
+    "f1_lenient": {
+     "mean": 0.9507734503582336,
+     "min": 0.9483375959079283,
+     "max": 0.9521384928716904,
+     "n": 3
+    },
+    "price_accuracy": {
+     "mean": 0.9590876397356135,
+     "min": 0.9471413160733549,
+     "max": 0.9719222462203023,
+     "n": 3
+    },
+    "unit_confusion": {
+     "mean": 13.333333333333334,
+     "min": 10,
+     "max": 17,
+     "n": 3
+    },
+    "fp": {
+     "mean": 48.666666666666664,
+     "min": 45,
+     "max": 51,
+     "n": 3
+    },
+    "fn": {
+     "mean": 47.666666666666664,
+     "min": 43,
+     "max": 51,
+     "n": 3
+    }
+   },
+   "failed_calls": 0,
+   "problems": []
+  },
+  "v1": {
+   "run_dir": "../_outgoing/p30_run/out/2026-10-30_p30/hybrid_i3",
+   "summary": {
+    "item_accuracy": {
+     "mean": 0.8675853742000953,
+     "min": 0.815668202764977,
+     "max": 0.9076620825147348,
+     "n": 3
+    },
+    "f1_strict": {
+     "mean": 0.9307964475846354,
+     "min": 0.9048330842052815,
+     "max": 0.9496183206106871,
+     "n": 3
+    },
+    "f1_lenient": {
+     "mean": 0.9455352978464836,
+     "min": 0.9187842551071251,
+     "max": 0.9638676844783716,
+     "n": 3
+    },
+    "price_accuracy": {
+     "mean": 0.9663042524378912,
+     "min": 0.9594742606790799,
+     "max": 0.975531914893617,
+     "n": 3
+    },
+    "unit_confusion": {
+     "mean": 7.666666666666667,
+     "min": 6,
+     "max": 10,
+     "n": 3
+    },
+    "fp": {
+     "mean": 71.33333333333333,
+     "min": 40,
+     "max": 107,
+     "n": 3
+    },
+    "fn": {
+     "mean": 37.333333333333336,
+     "min": 25,
+     "max": 56,
+     "n": 3
+    }
+   },
+   "failed_calls": 0,
+   "problems": []
+  }
+ },
+ "mixed": {
+  "v2": {
+   "run_dir": "ai/runs/2026-11-17_p46/hybrid_v2_i3",
+   "pinned_mixed_lines_sha256": null,
+   "counts": {
+    "records": 99,
+    "rejected": 0,
+    "expected": 2976,
+    "expected_whisky": 2916,
+    "expected_non_whisky": 60,
+    "output": 2973,
+    "paired": 2833,
+    "paired_whisky": 2775,
+    "paired_non_whisky": 58,
+    "extra": 140,
+    "priced": 2828,
+    "price_correct": 2714,
+    "duplicates": 0,
+    "whisky_as_non_whisky": 0,
+    "non_whisky_as_whisky": 22,
+    "wrong_kind": 0
+   },
+   "rates": {
+    "line_recall": 0.9519,
+    "whisky_line_recall": 0.9516,
+    "non_whisky_line_recall": 0.9667,
+    "extra_line_rate": 0.0471,
+    "price_accuracy": 0.9597,
+    "duplicate_line_rate": 0.0,
+    "classification_error_rate": 0.0078
+   },
+   "confusion": {
+    "cocktail->cocktail": 6,
+    "other->other": 30,
+    "other->whisky": 22,
+    "whisky->whisky": 2775
+   },
+   "per_run": {
+    "1": {
+     "counts": {
+      "records": 33,
+      "rejected": 0,
+      "expected": 992,
+      "expected_whisky": 972,
+      "expected_non_whisky": 20,
+      "output": 994,
+      "paired": 949,
+      "paired_whisky": 929,
+      "paired_non_whisky": 20,
+      "extra": 45,
+      "priced": 947,
+      "price_correct": 908,
+      "duplicates": 0,
+      "whisky_as_non_whisky": 0,
+      "non_whisky_as_whisky": 12,
+      "wrong_kind": 0
+     },
+     "rates": {
+      "line_recall": 0.9567,
+      "whisky_line_recall": 0.9558,
+      "non_whisky_line_recall": 1.0,
+      "extra_line_rate": 0.0453,
+      "price_accuracy": 0.9588,
+      "duplicate_line_rate": 0.0,
+      "classification_error_rate": 0.0126
+     },
+     "confusion": {
+      "cocktail->cocktail": 2,
+      "other->other": 6,
+      "other->whisky": 12,
+      "whisky->whisky": 929
+     }
+    },
+    "2": {
+     "counts": {
+      "records": 33,
+      "rejected": 0,
+      "expected": 992,
+      "expected_whisky": 972,
+      "expected_non_whisky": 20,
+      "output": 988,
+      "paired": 943,
+      "paired_whisky": 924,
+      "paired_non_whisky": 19,
+      "extra": 45,
+      "priced": 940,
+      "price_correct": 914,
+      "duplicates": 0,
+      "whisky_as_non_whisky": 0,
+      "non_whisky_as_whisky": 5,
+      "wrong_kind": 0
+     },
+     "rates": {
+      "line_recall": 0.9506,
+      "whisky_line_recall": 0.9506,
+      "non_whisky_line_recall": 0.95,
+      "extra_line_rate": 0.0455,
+      "price_accuracy": 0.9723,
+      "duplicate_line_rate": 0.0,
+      "classification_error_rate": 0.0053
+     },
+     "confusion": {
+      "cocktail->cocktail": 2,
+      "other->other": 12,
+      "other->whisky": 5,
+      "whisky->whisky": 924
+     }
+    },
+    "3": {
+     "counts": {
+      "records": 33,
+      "rejected": 0,
+      "expected": 992,
+      "expected_whisky": 972,
+      "expected_non_whisky": 20,
+      "output": 991,
+      "paired": 941,
+      "paired_whisky": 922,
+      "paired_non_whisky": 19,
+      "extra": 50,
+      "priced": 941,
+      "price_correct": 892,
+      "duplicates": 0,
+      "whisky_as_non_whisky": 0,
+      "non_whisky_as_whisky": 5,
+      "wrong_kind": 0
+     },
+     "rates": {
+      "line_recall": 0.9486,
+      "whisky_line_recall": 0.9486,
+      "non_whisky_line_recall": 0.95,
+      "extra_line_rate": 0.0505,
+      "price_accuracy": 0.9479,
+      "duplicate_line_rate": 0.0,
+      "classification_error_rate": 0.0053
+     },
+     "confusion": {
+      "cocktail->cocktail": 2,
+      "other->other": 12,
+      "other->whisky": 5,
+      "whisky->whisky": 922
+     }
+    }
+   },
+   "misclassified": [
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "Legacy — Foursquare Rum SC",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "014_테일오브테일즈_04",
+     "record": "014_tale_04_r1.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "Legacy — Foursquare Rum SC",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "014_테일오브테일즈_04",
+     "record": "014_tale_04_r2.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "Legacy — Foursquare Rum SC",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "014_테일오브테일즈_04",
+     "record": "014_tale_04_r3.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "헤네시 V.S.O.P / Hennesy V.S.O.P",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "017_리틀 갤러리_01",
+     "record": "017_littlegallery_01_r1.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "헤네시 V.S.O.P / Hennesy V.S.O.P",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "017_리틀 갤러리_01",
+     "record": "017_littlegallery_01_r1.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "레미 마틴 V.S.O.P / Rémy Martin V.S.O.P",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "017_리틀 갤러리_01",
+     "record": "017_littlegallery_01_r1.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "레미 마틴 V.S.O.P / Rémy Martin V.S.O.P",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "017_리틀 갤러리_01",
+     "record": "017_littlegallery_01_r1.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "까뮤 보더리 X.O / Camus Boderies X.O",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "017_리틀 갤러리_01",
+     "record": "017_littlegallery_01_r1.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "까뮤 보더리 X.O / Camus Boderies X.O",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "017_리틀 갤러리_01",
+     "record": "017_littlegallery_01_r1.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "헤네시 VSOP",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "019_쏘댓page2_04",
+     "record": "019_sodat_04_r1.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "헤네시 VSOP",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "019_쏘댓page2_04",
+     "record": "019_sodat_04_r1.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "헤네시 VSOP",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "019_쏘댓page2_04",
+     "record": "019_sodat_04_r1.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "헤네시 XO",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "019_쏘댓page2_04",
+     "record": "019_sodat_04_r1.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "헤네시 VSOP",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "019_쏘댓page2_04",
+     "record": "019_sodat_04_r2.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "헤네시 VSOP",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "019_쏘댓page2_04",
+     "record": "019_sodat_04_r2.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "헤네시 VSOP",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "019_쏘댓page2_04",
+     "record": "019_sodat_04_r2.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "헤네시 VSOP",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "019_쏘댓page2_04",
+     "record": "019_sodat_04_r3.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "헤네시 VSOP",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "019_쏘댓page2_04",
+     "record": "019_sodat_04_r3.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "헤네시 VSOP",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "019_쏘댓page2_04",
+     "record": "019_sodat_04_r3.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "헤네시 VSOP",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "021_무용의 유용_02",
+     "record": "021_muyong_02_r1.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "헤네시 VSOP",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "021_무용의 유용_02",
+     "record": "021_muyong_02_r2.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "헤네시 VSOP",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "021_무용의 유용_02",
+     "record": "021_muyong_02_r3.json"
+    }
+   ],
+   "missed_non_whisky": [
+    {
+     "line": "헤네시 XO",
+     "expected": "other",
+     "photo_id": "019_쏘댓page2_04",
+     "record": "019_sodat_04_r2.json"
+    },
+    {
+     "line": "헤네시 XO",
+     "expected": "other",
+     "photo_id": "019_쏘댓page2_04",
+     "record": "019_sodat_04_r3.json"
+    }
+   ],
+   "records": 99
+  },
+  "v1": {
+   "run_dir": "../_outgoing/p30_run/out/2026-10-30_p30/hybrid_i3",
+   "pinned_mixed_lines_sha256": null,
+   "counts": {
+    "records": 99,
+    "rejected": 0,
+    "expected": 2976,
+    "expected_whisky": 2916,
+    "expected_non_whisky": 60,
+    "output": 3036,
+    "paired": 2846,
+    "paired_whisky": 2807,
+    "paired_non_whisky": 39,
+    "extra": 190,
+    "priced": 2819,
+    "price_correct": 2725,
+    "duplicates": 0,
+    "whisky_as_non_whisky": 0,
+    "non_whisky_as_whisky": 39,
+    "wrong_kind": 0
+   },
+   "rates": {
+    "line_recall": 0.9563,
+    "whisky_line_recall": 0.9626,
+    "non_whisky_line_recall": 0.65,
+    "extra_line_rate": 0.0626,
+    "price_accuracy": 0.9667,
+    "duplicate_line_rate": 0.0,
+    "classification_error_rate": 0.0137
+   },
+   "confusion": {
+    "other->whisky": 39,
+    "whisky->whisky": 2807
+   },
+   "per_run": {
+    "1": {
+     "counts": {
+      "records": 33,
+      "rejected": 0,
+      "expected": 992,
+      "expected_whisky": 972,
+      "expected_non_whisky": 20,
+      "output": 1029,
+      "paired": 932,
+      "paired_whisky": 916,
+      "paired_non_whisky": 16,
+      "extra": 97,
+      "priced": 923,
+      "price_correct": 886,
+      "duplicates": 0,
+      "whisky_as_non_whisky": 0,
+      "non_whisky_as_whisky": 16,
+      "wrong_kind": 0
+     },
+     "rates": {
+      "line_recall": 0.9395,
+      "whisky_line_recall": 0.9424,
+      "non_whisky_line_recall": 0.8,
+      "extra_line_rate": 0.0943,
+      "price_accuracy": 0.9599,
+      "duplicate_line_rate": 0.0,
+      "classification_error_rate": 0.0172
+     },
+     "confusion": {
+      "other->whisky": 16,
+      "whisky->whisky": 916
+     }
+    },
+    "2": {
+     "counts": {
+      "records": 33,
+      "rejected": 0,
+      "expected": 992,
+      "expected_whisky": 972,
+      "expected_non_whisky": 20,
+      "output": 1020,
+      "paired": 961,
+      "paired_whisky": 948,
+      "paired_non_whisky": 13,
+      "extra": 59,
+      "priced": 950,
+      "price_correct": 916,
+      "duplicates": 0,
+      "whisky_as_non_whisky": 0,
+      "non_whisky_as_whisky": 13,
+      "wrong_kind": 0
+     },
+     "rates": {
+      "line_recall": 0.9688,
+      "whisky_line_recall": 0.9753,
+      "non_whisky_line_recall": 0.65,
+      "extra_line_rate": 0.0578,
+      "price_accuracy": 0.9642,
+      "duplicate_line_rate": 0.0,
+      "classification_error_rate": 0.0135
+     },
+     "confusion": {
+      "other->whisky": 13,
+      "whisky->whisky": 948
+     }
+    },
+    "3": {
+     "counts": {
+      "records": 33,
+      "rejected": 0,
+      "expected": 992,
+      "expected_whisky": 972,
+      "expected_non_whisky": 20,
+      "output": 987,
+      "paired": 953,
+      "paired_whisky": 943,
+      "paired_non_whisky": 10,
+      "extra": 34,
+      "priced": 946,
+      "price_correct": 923,
+      "duplicates": 0,
+      "whisky_as_non_whisky": 0,
+      "non_whisky_as_whisky": 10,
+      "wrong_kind": 0
+     },
+     "rates": {
+      "line_recall": 0.9607,
+      "whisky_line_recall": 0.9702,
+      "non_whisky_line_recall": 0.5,
+      "extra_line_rate": 0.0344,
+      "price_accuracy": 0.9757,
+      "duplicate_line_rate": 0.0,
+      "classification_error_rate": 0.0105
+     },
+     "confusion": {
+      "other->whisky": 10,
+      "whisky->whisky": 943
+     }
+    }
+   },
+   "misclassified": [
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "Legacy — Foursquare Rum SC",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "014_테일오브테일즈_04",
+     "record": "014_tale_04_r1.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "Legacy — Foursquare Rum SC",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "014_테일오브테일즈_04",
+     "record": "014_tale_04_r2.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "Legacy — Foursquare Rum SC",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "014_테일오브테일즈_04",
+     "record": "014_tale_04_r3.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "후세쿠엘보 실버",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "015_연림 서울대입구역점_01",
+     "record": "015_yeonrim_snu_01_r1.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "스파클링 와인 하프 (375ml)",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "015_연림 서울대입구역점_01",
+     "record": "015_yeonrim_snu_01_r1.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "후세쿠엘보 실버",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "015_연림 서울대입구역점_01",
+     "record": "015_yeonrim_snu_01_r2.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "스파클링 와인 하프 (375ml)",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "015_연림 서울대입구역점_01",
+     "record": "015_yeonrim_snu_01_r2.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "헤네시 V.S.O.P / Hennesy V.S.O.P",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "017_리틀 갤러리_01",
+     "record": "017_littlegallery_01_r1.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "헤네시 V.S.O.P / Hennesy V.S.O.P",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "017_리틀 갤러리_01",
+     "record": "017_littlegallery_01_r1.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "레미 마틴 V.S.O.P / Rémy Martin V.S.O.P",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "017_리틀 갤러리_01",
+     "record": "017_littlegallery_01_r1.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "레미 마틴 V.S.O.P / Rémy Martin V.S.O.P",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "017_리틀 갤러리_01",
+     "record": "017_littlegallery_01_r1.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "까뮤 보더리 X.O / Camus Boderies X.O",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "017_리틀 갤러리_01",
+     "record": "017_littlegallery_01_r1.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "까뮤 보더리 X.O / Camus Boderies X.O",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "017_리틀 갤러리_01",
+     "record": "017_littlegallery_01_r1.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "호세 쿠엘보 / Jose Cuervo",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "017_리틀 갤러리_01",
+     "record": "017_littlegallery_01_r1.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "호세 쿠엘보 / Jose Cuervo",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "017_리틀 갤러리_01",
+     "record": "017_littlegallery_01_r1.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "헤네시 V.S.O.P / Hennesy V.S.O.P",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "017_리틀 갤러리_01",
+     "record": "017_littlegallery_01_r2.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "헤네시 V.S.O.P / Hennesy V.S.O.P",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "017_리틀 갤러리_01",
+     "record": "017_littlegallery_01_r2.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "레미 마틴 V.S.O.P / Rémy Martin V.S.O.P",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "017_리틀 갤러리_01",
+     "record": "017_littlegallery_01_r2.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "레미 마틴 V.S.O.P / Rémy Martin V.S.O.P",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "017_리틀 갤러리_01",
+     "record": "017_littlegallery_01_r2.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "까뮤 보더리 X.O / Camus Boderies X.O",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "017_리틀 갤러리_01",
+     "record": "017_littlegallery_01_r2.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "까뮤 보더리 X.O / Camus Boderies X.O",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "017_리틀 갤러리_01",
+     "record": "017_littlegallery_01_r2.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "헤네시 V.S.O.P / Hennesy V.S.O.P",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "017_리틀 갤러리_01",
+     "record": "017_littlegallery_01_r3.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "헤네시 V.S.O.P / Hennesy V.S.O.P",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "017_리틀 갤러리_01",
+     "record": "017_littlegallery_01_r3.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "레미 마틴 V.S.O.P / Rémy Martin V.S.O.P",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "017_리틀 갤러리_01",
+     "record": "017_littlegallery_01_r3.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "레미 마틴 V.S.O.P / Rémy Martin V.S.O.P",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "017_리틀 갤러리_01",
+     "record": "017_littlegallery_01_r3.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "까뮤 보더리 X.O / Camus Boderies X.O",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "017_리틀 갤러리_01",
+     "record": "017_littlegallery_01_r3.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "까뮤 보더리 X.O / Camus Boderies X.O",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "017_리틀 갤러리_01",
+     "record": "017_littlegallery_01_r3.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "헤네시 VSOP",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "019_쏘댓page2_04",
+     "record": "019_sodat_04_r1.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "헤네시 VSOP",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "019_쏘댓page2_04",
+     "record": "019_sodat_04_r1.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "헤네시 VSOP",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "019_쏘댓page2_04",
+     "record": "019_sodat_04_r1.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "헤네시 XO",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "019_쏘댓page2_04",
+     "record": "019_sodat_04_r1.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "헤네시 VSOP",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "019_쏘댓page2_04",
+     "record": "019_sodat_04_r2.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "헤네시 VSOP",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "019_쏘댓page2_04",
+     "record": "019_sodat_04_r2.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "헤네시 VSOP",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "019_쏘댓page2_04",
+     "record": "019_sodat_04_r2.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "헤네시 VSOP",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "019_쏘댓page2_04",
+     "record": "019_sodat_04_r3.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "헤네시 VSOP",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "019_쏘댓page2_04",
+     "record": "019_sodat_04_r3.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "헤네시 VSOP",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "021_무용의 유용_02",
+     "record": "021_muyong_02_r1.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "헤네시 VSOP",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "021_무용의 유용_02",
+     "record": "021_muyong_02_r2.json"
+    },
+    {
+     "type": "non_whisky_as_whisky",
+     "line": "헤네시 VSOP",
+     "expected": "other",
+     "got": "whisky",
+     "photo_id": "021_무용의 유용_02",
+     "record": "021_muyong_02_r3.json"
+    }
+   ],
+   "missed_non_whisky": [
+    {
+     "line": "후세쿠엘보 실버",
+     "expected": "other",
+     "photo_id": "015_연림 서울대입구역점_01",
+     "record": "015_yeonrim_snu_01_r3.json"
+    },
+    {
+     "line": "스파클링 와인 하프 (375ml)",
+     "expected": "other",
+     "photo_id": "015_연림 서울대입구역점_01",
+     "record": "015_yeonrim_snu_01_r3.json"
+    },
+    {
+     "line": "산토리 하이볼 / Suntory Highball",
+     "expected": "cocktail",
+     "photo_id": "017_리틀 갤러리_01",
+     "record": "017_littlegallery_01_r1.json"
+    },
+    {
+     "line": "짐빔 하이볼 / Jim Beam Highball",
+     "expected": "cocktail",
+     "photo_id": "017_리틀 갤러리_01",
+     "record": "017_littlegallery_01_r1.json"
+    },
+    {
+     "line": "아사이 / Asahi",
+     "expected": "other",
+     "photo_id": "017_리틀 갤러리_01",
+     "record": "017_littlegallery_01_r1.json"
+    },
+    {
+     "line": "기네스 / Guinness",
+     "expected": "other",
+     "photo_id": "017_리틀 갤러리_01",
+     "record": "017_littlegallery_01_r1.json"
+    },
+    {
+     "line": "호세 쿠엘보 / Jose Cuervo",
+     "expected": "other",
+     "photo_id": "017_리틀 갤러리_01",
+     "record": "017_littlegallery_01_r2.json"
+    },
+    {
+     "line": "호세 쿠엘보 / Jose Cuervo",
+     "expected": "other",
+     "photo_id": "017_리틀 갤러리_01",
+     "record": "017_littlegallery_01_r2.json"
+    },
+    {
+     "line": "산토리 하이볼 / Suntory Highball",
+     "expected": "cocktail",
+     "photo_id": "017_리틀 갤러리_01",
+     "record": "017_littlegallery_01_r2.json"
+    },
+    {
+     "line": "짐빔 하이볼 / Jim Beam Highball",
+     "expected": "cocktail",
+     "photo_id": "017_리틀 갤러리_01",
+     "record": "017_littlegallery_01_r2.json"
+    },
+    {
+     "line": "아사이 / Asahi",
+     "expected": "other",
+     "photo_id": "017_리틀 갤러리_01",
+     "record": "017_littlegallery_01_r2.json"
+    },
+    {
+     "line": "기네스 / Guinness",
+     "expected": "other",
+     "photo_id": "017_리틀 갤러리_01",
+     "record": "017_littlegallery_01_r2.json"
+    },
+    {
+     "line": "호세 쿠엘보 / Jose Cuervo",
+     "expected": "other",
+     "photo_id": "017_리틀 갤러리_01",
+     "record": "017_littlegallery_01_r3.json"
+    },
+    {
+     "line": "호세 쿠엘보 / Jose Cuervo",
+     "expected": "other",
+     "photo_id": "017_리틀 갤러리_01",
+     "record": "017_littlegallery_01_r3.json"
+    },
+    {
+     "line": "산토리 하이볼 / Suntory Highball",
+     "expected": "cocktail",
+     "photo_id": "017_리틀 갤러리_01",
+     "record": "017_littlegallery_01_r3.json"
+    },
+    {
+     "line": "짐빔 하이볼 / Jim Beam Highball",
+     "expected": "cocktail",
+     "photo_id": "017_리틀 갤러리_01",
+     "record": "017_littlegallery_01_r3.json"
+    },
+    {
+     "line": "아사이 / Asahi",
+     "expected": "other",
+     "photo_id": "017_리틀 갤러리_01",
+     "record": "017_littlegallery_01_r3.json"
+    },
+    {
+     "line": "기네스 / Guinness",
+     "expected": "other",
+     "photo_id": "017_리틀 갤러리_01",
+     "record": "017_littlegallery_01_r3.json"
+    },
+    {
+     "line": "헤네시 XO",
+     "expected": "other",
+     "photo_id": "019_쏘댓page2_04",
+     "record": "019_sodat_04_r2.json"
+    },
+    {
+     "line": "헤네시 VSOP",
+     "expected": "other",
+     "photo_id": "019_쏘댓page2_04",
+     "record": "019_sodat_04_r3.json"
+    },
+    {
+     "line": "헤네시 XO",
+     "expected": "other",
+     "photo_id": "019_쏘댓page2_04",
+     "record": "019_sodat_04_r3.json"
+    }
+   ],
+   "records": 99
+  }
+ },
+ "matching": {
+  "groups": {
+   "asis/e2e/rules": {
+    "files": [
+     "asis_e2e_rules_r1.json",
+     "asis_e2e_rules_r2.json",
+     "asis_e2e_rules_r3.json"
+    ],
+    "catalog_digest": [
+     "7c65fa51c4c8370b7d2f6bf5a2f1328668ffb02c5c753ed64f381fa25dfc628a"
+    ],
+    "rules_repo_head": [
+     "184fb307b4bcf6004babee0ac3970235ec022237"
+    ],
+    "lines": [
+     648,
+     655
+    ],
+    "top1": {
+     "mean": 0.8251386136965317,
+     "min": 0.8239564428312159,
+     "max": 0.8257713248638838,
+     "n": 3
+    },
+    "fm_rate": {
+     "mean": 0.0015322149970156756,
+     "min": 0.0015267175572519084,
+     "max": 0.0015432098765432098,
+     "n": 3
+    },
+    "accept_err_rate": {
+     "mean": 0.009702195834511356,
+     "min": 0.00916030534351145,
+     "max": 0.010687022900763359,
+     "n": 3
+    },
+    "hard_per_photo": {
+     "mean": 4.515151515151516,
+     "min": 4.515151515151516,
+     "max": 4.515151515151516,
+     "n": 3
+    },
+    "top1_missed_as_fail": {
+     "mean": 0.8031914893617021,
+     "min": 0.7978723404255319,
+     "max": 0.8067375886524822,
+     "n": 3
+    },
+    "runs_required": 3
+   },
+   "asis/e2e/server after rules": {
+    "files": [
+     "asis_e2e_rules_r1.json",
+     "asis_e2e_rules_r2.json",
+     "asis_e2e_rules_r3.json"
+    ],
+    "catalog_digest": [
+     "7c65fa51c4c8370b7d2f6bf5a2f1328668ffb02c5c753ed64f381fa25dfc628a"
+    ],
+    "rules_repo_head": [
+     "184fb307b4bcf6004babee0ac3970235ec022237"
+    ],
+    "lines": [
+     648,
+     655
+    ],
+    "top1": {
+     "mean": 0.8251386136965317,
+     "min": 0.8239564428312159,
+     "max": 0.8257713248638838,
+     "n": 3
+    },
+    "fm_rate": {
+     "mean": 0.0015322149970156756,
+     "min": 0.0015267175572519084,
+     "max": 0.0015432098765432098,
+     "n": 3
+    },
+    "accept_err_rate": {
+     "mean": 0.009702195834511356,
+     "min": 0.00916030534351145,
+     "max": 0.010687022900763359,
+     "n": 3
+    },
+    "hard_per_photo": {
+     "mean": 4.212121212121212,
+     "min": 4.212121212121212,
+     "max": 4.212121212121212,
+     "n": 3
+    },
+    "top1_missed_as_fail": {
+     "mean": 0.8031914893617021,
+     "min": 0.7978723404255319,
+     "max": 0.8067375886524822,
+     "n": 3
+    },
+    "runs_required": 3
+   },
+   "asis/label/llm": {
+    "files": [
+     "asis_label_llm_r1.json",
+     "asis_label_llm_r2.json",
+     "asis_label_llm_r3.json"
+    ],
+    "catalog_digest": [
+     "7c65fa51c4c8370b7d2f6bf5a2f1328668ffb02c5c753ed64f381fa25dfc628a"
+    ],
+    "rules_repo_head": [
+     "184fb307b4bcf6004babee0ac3970235ec022237"
+    ],
+    "lines": [
+     675
+    ],
+    "top1": {
+     "mean": 0.8368794326241135,
+     "min": 0.8368794326241135,
+     "max": 0.8368794326241135,
+     "n": 3
+    },
+    "fm_rate": {
+     "mean": 0.0014814814814814814,
+     "min": 0.0014814814814814814,
+     "max": 0.0014814814814814814,
+     "n": 3
+    },
+    "accept_err_rate": {
+     "mean": 0.010864197530864197,
+     "min": 0.01037037037037037,
+     "max": 0.011851851851851851,
+     "n": 3
+    },
+    "hard_per_photo": {
+     "mean": 4.141414141414141,
+     "min": 4.121212121212121,
+     "max": 4.151515151515151,
+     "n": 3
+    },
+    "top1_missed_as_fail": null,
+    "runs_required": 3
+   },
+   "asis/label/rules": {
+    "files": [
+     "asis_label_rules.json"
+    ],
+    "catalog_digest": [
+     "7c65fa51c4c8370b7d2f6bf5a2f1328668ffb02c5c753ed64f381fa25dfc628a"
+    ],
+    "rules_repo_head": [
+     "184fb307b4bcf6004babee0ac3970235ec022237"
+    ],
+    "lines": [
+     675
+    ],
+    "top1": {
+     "mean": 0.8368794326241135,
+     "min": 0.8368794326241135,
+     "max": 0.8368794326241135,
+     "n": 1
+    },
+    "fm_rate": {
+     "mean": 0.0014814814814814814,
+     "min": 0.0014814814814814814,
+     "max": 0.0014814814814814814,
+     "n": 1
+    },
+    "accept_err_rate": {
+     "mean": 0.008888888888888889,
+     "min": 0.008888888888888889,
+     "max": 0.008888888888888889,
+     "n": 1
+    },
+    "hard_per_photo": {
+     "mean": 4.636363636363637,
+     "min": 4.636363636363637,
+     "max": 4.636363636363637,
+     "n": 1
+    },
+    "top1_missed_as_fail": null,
+    "runs_required": 1
+   },
+   "asis/label/server after llm": {
+    "files": [
+     "asis_label_llm_r1.json",
+     "asis_label_llm_r2.json",
+     "asis_label_llm_r3.json"
+    ],
+    "catalog_digest": [
+     "7c65fa51c4c8370b7d2f6bf5a2f1328668ffb02c5c753ed64f381fa25dfc628a"
+    ],
+    "rules_repo_head": [
+     "184fb307b4bcf6004babee0ac3970235ec022237"
+    ],
+    "lines": [
+     675
+    ],
+    "top1": {
+     "mean": 0.8368794326241135,
+     "min": 0.8368794326241135,
+     "max": 0.8368794326241135,
+     "n": 3
+    },
+    "fm_rate": {
+     "mean": 0.0014814814814814814,
+     "min": 0.0014814814814814814,
+     "max": 0.0014814814814814814,
+     "n": 3
+    },
+    "accept_err_rate": {
+     "mean": 0.010864197530864197,
+     "min": 0.01037037037037037,
+     "max": 0.011851851851851851,
+     "n": 3
+    },
+    "hard_per_photo": {
+     "mean": 3.95959595959596,
+     "min": 3.9393939393939394,
+     "max": 3.9696969696969697,
+     "n": 3
+    },
+    "top1_missed_as_fail": null,
+    "runs_required": 3
+   },
+   "asis/label/server after rules": {
+    "files": [
+     "asis_label_rules.json"
+    ],
+    "catalog_digest": [
+     "7c65fa51c4c8370b7d2f6bf5a2f1328668ffb02c5c753ed64f381fa25dfc628a"
+    ],
+    "rules_repo_head": [
+     "184fb307b4bcf6004babee0ac3970235ec022237"
+    ],
+    "lines": [
+     675
+    ],
+    "top1": {
+     "mean": 0.8368794326241135,
+     "min": 0.8368794326241135,
+     "max": 0.8368794326241135,
+     "n": 1
+    },
+    "fm_rate": {
+     "mean": 0.0014814814814814814,
+     "min": 0.0014814814814814814,
+     "max": 0.0014814814814814814,
+     "n": 1
+    },
+    "accept_err_rate": {
+     "mean": 0.008888888888888889,
+     "min": 0.008888888888888889,
+     "max": 0.008888888888888889,
+     "n": 1
+    },
+    "hard_per_photo": {
+     "mean": 4.333333333333333,
+     "min": 4.333333333333333,
+     "max": 4.333333333333333,
+     "n": 1
+    },
+    "top1_missed_as_fail": null,
+    "runs_required": 1
+   },
+   "full/e2e/llm": {
+    "files": [
+     "full_e2e_llm_r1.json",
+     "full_e2e_llm_r2.json",
+     "full_e2e_llm_r3.json"
+    ],
+    "catalog_digest": [
+     "633682b4ef2eaf8d600a03d6bcb01b4df6c12bdf2f544123a900188b12fc6701"
+    ],
+    "rules_repo_head": [
+     "184fb307b4bcf6004babee0ac3970235ec022237"
+    ],
+    "lines": [
+     648,
+     655
+    ],
+    "top1": {
+     "mean": 0.7648003040832941,
+     "min": 0.7639553429027113,
+     "max": 0.7655502392344498,
+     "n": 3
+    },
+    "fm_rate": {
+     "mean": 0.0015322149970156756,
+     "min": 0.0015267175572519084,
+     "max": 0.0015432098765432098,
+     "n": 3
+    },
+    "accept_err_rate": {
+     "mean": 0.007152169132661075,
+     "min": 0.0061068702290076335,
+     "max": 0.007716049382716049,
+     "n": 3
+    },
+    "hard_per_photo": {
+     "mean": 2.0303030303030303,
+     "min": 2.0,
+     "max": 2.0606060606060606,
+     "n": 3
+    },
+    "top1_missed_as_fail": {
+     "mean": 0.739938080495356,
+     "min": 0.7352941176470589,
+     "max": 0.7430340557275542,
+     "n": 3
+    },
+    "runs_required": 3
+   },
+   "full/e2e/rules": {
+    "files": [
+     "full_e2e_llm_r1.json",
+     "full_e2e_llm_r2.json",
+     "full_e2e_llm_r3.json"
+    ],
+    "catalog_digest": [
+     "633682b4ef2eaf8d600a03d6bcb01b4df6c12bdf2f544123a900188b12fc6701"
+    ],
+    "rules_repo_head": [
+     "184fb307b4bcf6004babee0ac3970235ec022237"
+    ],
+    "lines": [
+     648,
+     655
+    ],
+    "top1": {
+     "mean": 0.7648003040832941,
+     "min": 0.7639553429027113,
+     "max": 0.7655502392344498,
+     "n": 3
+    },
+    "fm_rate": {
+     "mean": 0.0015322149970156756,
+     "min": 0.0015267175572519084,
+     "max": 0.0015432098765432098,
+     "n": 3
+    },
+    "accept_err_rate": {
+     "mean": 0.0066377658404800045,
+     "min": 0.0061068702290076335,
+     "max": 0.007633587786259542,
+     "n": 3
+    },
+    "hard_per_photo": {
+     "mean": 3.0303030303030303,
+     "min": 3.0303030303030303,
+     "max": 3.0303030303030303,
+     "n": 3
+    },
+    "top1_missed_as_fail": {
+     "mean": 0.739938080495356,
+     "min": 0.7352941176470589,
+     "max": 0.7430340557275542,
+     "n": 3
+    },
+    "runs_required": 3
+   },
+   "full/e2e/server after llm": {
+    "files": [
+     "full_e2e_llm_r1.json",
+     "full_e2e_llm_r2.json",
+     "full_e2e_llm_r3.json"
+    ],
+    "catalog_digest": [
+     "633682b4ef2eaf8d600a03d6bcb01b4df6c12bdf2f544123a900188b12fc6701"
+    ],
+    "rules_repo_head": [
+     "184fb307b4bcf6004babee0ac3970235ec022237"
+    ],
+    "lines": [
+     648,
+     655
+    ],
+    "top1": {
+     "mean": 0.7648003040832941,
+     "min": 0.7639553429027113,
+     "max": 0.7655502392344498,
+     "n": 3
+    },
+    "fm_rate": {
+     "mean": 0.0015322149970156756,
+     "min": 0.0015267175572519084,
+     "max": 0.0015432098765432098,
+     "n": 3
+    },
+    "accept_err_rate": {
+     "mean": 0.007152169132661075,
+     "min": 0.0061068702290076335,
+     "max": 0.007716049382716049,
+     "n": 3
+    },
+    "hard_per_photo": {
+     "mean": 1.7474747474747474,
+     "min": 1.7272727272727273,
+     "max": 1.7878787878787878,
+     "n": 3
+    },
+    "top1_missed_as_fail": {
+     "mean": 0.739938080495356,
+     "min": 0.7352941176470589,
+     "max": 0.7430340557275542,
+     "n": 3
+    },
+    "runs_required": 3
+   },
+   "full/label/llm": {
+    "files": [
+     "full_label_llm_r1.json",
+     "full_label_llm_r2.json",
+     "full_label_llm_r3.json"
+    ],
+    "catalog_digest": [
+     "633682b4ef2eaf8d600a03d6bcb01b4df6c12bdf2f544123a900188b12fc6701"
+    ],
+    "rules_repo_head": [
+     "184fb307b4bcf6004babee0ac3970235ec022237"
+    ],
+    "lines": [
+     675
+    ],
+    "top1": {
+     "mean": 0.7739938080495357,
+     "min": 0.7739938080495357,
+     "max": 0.7739938080495357,
+     "n": 3
+    },
+    "fm_rate": {
+     "mean": 0.0014814814814814814,
+     "min": 0.0014814814814814814,
+     "max": 0.0014814814814814814,
+     "n": 3
+    },
+    "accept_err_rate": {
+     "mean": 0.00691358024691358,
+     "min": 0.005925925925925926,
+     "max": 0.008888888888888889,
+     "n": 3
+    },
+    "hard_per_photo": {
+     "mean": 1.9494949494949496,
+     "min": 1.9393939393939394,
+     "max": 1.9696969696969697,
+     "n": 3
+    },
+    "top1_missed_as_fail": null,
+    "runs_required": 3
+   },
+   "full/label/rules": {
+    "files": [
+     "full_label_rules.json"
+    ],
+    "catalog_digest": [
+     "633682b4ef2eaf8d600a03d6bcb01b4df6c12bdf2f544123a900188b12fc6701"
+    ],
+    "rules_repo_head": [
+     "184fb307b4bcf6004babee0ac3970235ec022237"
+    ],
+    "lines": [
+     675
+    ],
+    "top1": {
+     "mean": 0.7739938080495357,
+     "min": 0.7739938080495357,
+     "max": 0.7739938080495357,
+     "n": 1
+    },
+    "fm_rate": {
+     "mean": 0.0014814814814814814,
+     "min": 0.0014814814814814814,
+     "max": 0.0014814814814814814,
+     "n": 1
+    },
+    "accept_err_rate": {
+     "mean": 0.005925925925925926,
+     "min": 0.005925925925925926,
+     "max": 0.005925925925925926,
+     "n": 1
+    },
+    "hard_per_photo": {
+     "mean": 2.9393939393939394,
+     "min": 2.9393939393939394,
+     "max": 2.9393939393939394,
+     "n": 1
+    },
+    "top1_missed_as_fail": null,
+    "runs_required": 1
+   },
+   "full/label/server after llm": {
+    "files": [
+     "full_label_llm_r1.json",
+     "full_label_llm_r2.json",
+     "full_label_llm_r3.json"
+    ],
+    "catalog_digest": [
+     "633682b4ef2eaf8d600a03d6bcb01b4df6c12bdf2f544123a900188b12fc6701"
+    ],
+    "rules_repo_head": [
+     "184fb307b4bcf6004babee0ac3970235ec022237"
+    ],
+    "lines": [
+     675
+    ],
+    "top1": {
+     "mean": 0.7739938080495357,
+     "min": 0.7739938080495357,
+     "max": 0.7739938080495357,
+     "n": 3
+    },
+    "fm_rate": {
+     "mean": 0.0014814814814814814,
+     "min": 0.0014814814814814814,
+     "max": 0.0014814814814814814,
+     "n": 3
+    },
+    "accept_err_rate": {
+     "mean": 0.00691358024691358,
+     "min": 0.005925925925925926,
+     "max": 0.008888888888888889,
+     "n": 3
+    },
+    "hard_per_photo": {
+     "mean": 1.676767676767677,
+     "min": 1.6666666666666667,
+     "max": 1.696969696969697,
+     "n": 3
+    },
+    "top1_missed_as_fail": null,
+    "runs_required": 3
+   },
+   "full/label/server after rules": {
+    "files": [
+     "full_label_rules.json"
+    ],
+    "catalog_digest": [
+     "633682b4ef2eaf8d600a03d6bcb01b4df6c12bdf2f544123a900188b12fc6701"
+    ],
+    "rules_repo_head": [
+     "184fb307b4bcf6004babee0ac3970235ec022237"
+    ],
+    "lines": [
+     675
+    ],
+    "top1": {
+     "mean": 0.7739938080495357,
+     "min": 0.7739938080495357,
+     "max": 0.7739938080495357,
+     "n": 1
+    },
+    "fm_rate": {
+     "mean": 0.0014814814814814814,
+     "min": 0.0014814814814814814,
+     "max": 0.0014814814814814814,
+     "n": 1
+    },
+    "accept_err_rate": {
+     "mean": 0.005925925925925926,
+     "min": 0.005925925925925926,
+     "max": 0.005925925925925926,
+     "n": 1
+    },
+    "hard_per_photo": {
+     "mean": 2.484848484848485,
+     "min": 2.484848484848485,
+     "max": 2.484848484848485,
+     "n": 1
+    },
+    "top1_missed_as_fail": null,
+    "runs_required": 1
+   },
+   "ops/e2e/llm": {
+    "files": [
+     "ops_e2e_llm_r1.json",
+     "ops_e2e_llm_r2.json",
+     "ops_e2e_llm_r3.json"
+    ],
+    "catalog_digest": [
+     "23a66ea4c99f6df6b134e9a8fb9a254e5a6fa0b16ac299dfefc539221734a0f7"
+    ],
+    "rules_repo_head": [
+     "184fb307b4bcf6004babee0ac3970235ec022237"
+    ],
+    "lines": [
+     648,
+     655
+    ],
+    "top1": {
+     "mean": 0.7824006656958602,
+     "min": 0.7814992025518341,
+     "max": 0.7830940988835726,
+     "n": 3
+    },
+    "fm_rate": {
+     "mean": 0.0015322149970156756,
+     "min": 0.0015267175572519084,
+     "max": 0.0015432098765432098,
+     "n": 3
+    },
+    "accept_err_rate": {
+     "mean": 0.0066377658404800045,
+     "min": 0.0061068702290076335,
+     "max": 0.007633587786259542,
+     "n": 3
+    },
+    "hard_per_photo": {
+     "mean": 2.0202020202020203,
+     "min": 2.0,
+     "max": 2.0303030303030303,
+     "n": 3
+    },
+    "top1_missed_as_fail": {
+     "mean": 0.7569659442724458,
+     "min": 0.7523219814241486,
+     "max": 0.760061919504644,
+     "n": 3
+    },
+    "runs_required": 3
+   },
+   "ops/e2e/rules": {
+    "files": [
+     "ops_e2e_llm_r1.json",
+     "ops_e2e_llm_r2.json",
+     "ops_e2e_llm_r3.json"
+    ],
+    "catalog_digest": [
+     "23a66ea4c99f6df6b134e9a8fb9a254e5a6fa0b16ac299dfefc539221734a0f7"
+    ],
+    "rules_repo_head": [
+     "184fb307b4bcf6004babee0ac3970235ec022237"
+    ],
+    "lines": [
+     648,
+     655
+    ],
+    "top1": {
+     "mean": 0.7824006656958602,
+     "min": 0.7814992025518341,
+     "max": 0.7830940988835726,
+     "n": 3
+    },
+    "fm_rate": {
+     "mean": 0.0015322149970156756,
+     "min": 0.0015267175572519084,
+     "max": 0.0015432098765432098,
+     "n": 3
+    },
+    "accept_err_rate": {
+     "mean": 0.0066377658404800045,
+     "min": 0.0061068702290076335,
+     "max": 0.007633587786259542,
+     "n": 3
+    },
+    "hard_per_photo": {
+     "mean": 2.606060606060606,
+     "min": 2.606060606060606,
+     "max": 2.606060606060606,
+     "n": 3
+    },
+    "top1_missed_as_fail": {
+     "mean": 0.7569659442724458,
+     "min": 0.7523219814241486,
+     "max": 0.760061919504644,
+     "n": 3
+    },
+    "runs_required": 3
+   },
+   "ops/e2e/server after llm": {
+    "files": [
+     "ops_e2e_llm_r1.json",
+     "ops_e2e_llm_r2.json",
+     "ops_e2e_llm_r3.json"
+    ],
+    "catalog_digest": [
+     "23a66ea4c99f6df6b134e9a8fb9a254e5a6fa0b16ac299dfefc539221734a0f7"
+    ],
+    "rules_repo_head": [
+     "184fb307b4bcf6004babee0ac3970235ec022237"
+    ],
+    "lines": [
+     648,
+     655
+    ],
+    "top1": {
+     "mean": 0.7824006656958602,
+     "min": 0.7814992025518341,
+     "max": 0.7830940988835726,
+     "n": 3
+    },
+    "fm_rate": {
+     "mean": 0.0015322149970156756,
+     "min": 0.0015267175572519084,
+     "max": 0.0015432098765432098,
+     "n": 3
+    },
+    "accept_err_rate": {
+     "mean": 0.0066377658404800045,
+     "min": 0.0061068702290076335,
+     "max": 0.007633587786259542,
+     "n": 3
+    },
+    "hard_per_photo": {
+     "mean": 1.7373737373737375,
+     "min": 1.7272727272727273,
+     "max": 1.7575757575757576,
+     "n": 3
+    },
+    "top1_missed_as_fail": {
+     "mean": 0.7569659442724458,
+     "min": 0.7523219814241486,
+     "max": 0.760061919504644,
+     "n": 3
+    },
+    "runs_required": 3
+   },
+   "ops/label/llm": {
+    "files": [
+     "ops_label_llm_r1.json",
+     "ops_label_llm_r2.json",
+     "ops_label_llm_r3.json"
+    ],
+    "catalog_digest": [
+     "23a66ea4c99f6df6b134e9a8fb9a254e5a6fa0b16ac299dfefc539221734a0f7"
+    ],
+    "rules_repo_head": [
+     "184fb307b4bcf6004babee0ac3970235ec022237"
+    ],
+    "lines": [
+     675
+    ],
+    "top1": {
+     "mean": 0.7910216718266254,
+     "min": 0.7910216718266254,
+     "max": 0.7910216718266254,
+     "n": 3
+    },
+    "fm_rate": {
+     "mean": 0.0014814814814814814,
+     "min": 0.0014814814814814814,
+     "max": 0.0014814814814814814,
+     "n": 3
+    },
+    "accept_err_rate": {
+     "mean": 0.005925925925925926,
+     "min": 0.005925925925925926,
+     "max": 0.005925925925925926,
+     "n": 3
+    },
+    "hard_per_photo": {
+     "mean": 1.8585858585858586,
+     "min": 1.8484848484848484,
+     "max": 1.878787878787879,
+     "n": 3
+    },
+    "top1_missed_as_fail": null,
+    "runs_required": 3
+   },
+   "ops/label/rules": {
+    "files": [
+     "ops_label_rules.json"
+    ],
+    "catalog_digest": [
+     "23a66ea4c99f6df6b134e9a8fb9a254e5a6fa0b16ac299dfefc539221734a0f7"
+    ],
+    "rules_repo_head": [
+     "184fb307b4bcf6004babee0ac3970235ec022237"
+    ],
+    "lines": [
+     675
+    ],
+    "top1": {
+     "mean": 0.7910216718266254,
+     "min": 0.7910216718266254,
+     "max": 0.7910216718266254,
+     "n": 1
+    },
+    "fm_rate": {
+     "mean": 0.0014814814814814814,
+     "min": 0.0014814814814814814,
+     "max": 0.0014814814814814814,
+     "n": 1
+    },
+    "accept_err_rate": {
+     "mean": 0.005925925925925926,
+     "min": 0.005925925925925926,
+     "max": 0.005925925925925926,
+     "n": 1
+    },
+    "hard_per_photo": {
+     "mean": 2.515151515151515,
+     "min": 2.515151515151515,
+     "max": 2.515151515151515,
+     "n": 1
+    },
+    "top1_missed_as_fail": null,
+    "runs_required": 1
+   },
+   "ops/label/server after llm": {
+    "files": [
+     "ops_label_llm_r1.json",
+     "ops_label_llm_r2.json",
+     "ops_label_llm_r3.json"
+    ],
+    "catalog_digest": [
+     "23a66ea4c99f6df6b134e9a8fb9a254e5a6fa0b16ac299dfefc539221734a0f7"
+    ],
+    "rules_repo_head": [
+     "184fb307b4bcf6004babee0ac3970235ec022237"
+    ],
+    "lines": [
+     675
+    ],
+    "top1": {
+     "mean": 0.7910216718266254,
+     "min": 0.7910216718266254,
+     "max": 0.7910216718266254,
+     "n": 3
+    },
+    "fm_rate": {
+     "mean": 0.0014814814814814814,
+     "min": 0.0014814814814814814,
+     "max": 0.0014814814814814814,
+     "n": 3
+    },
+    "accept_err_rate": {
+     "mean": 0.005925925925925926,
+     "min": 0.005925925925925926,
+     "max": 0.005925925925925926,
+     "n": 3
+    },
+    "hard_per_photo": {
+     "mean": 1.5858585858585859,
+     "min": 1.5757575757575757,
+     "max": 1.606060606060606,
+     "n": 3
+    },
+    "top1_missed_as_fail": null,
+    "runs_required": 3
+   },
+   "ops/label/server after rules": {
+    "files": [
+     "ops_label_rules.json"
+    ],
+    "catalog_digest": [
+     "23a66ea4c99f6df6b134e9a8fb9a254e5a6fa0b16ac299dfefc539221734a0f7"
+    ],
+    "rules_repo_head": [
+     "184fb307b4bcf6004babee0ac3970235ec022237"
+    ],
+    "lines": [
+     675
+    ],
+    "top1": {
+     "mean": 0.7910216718266254,
+     "min": 0.7910216718266254,
+     "max": 0.7910216718266254,
+     "n": 1
+    },
+    "fm_rate": {
+     "mean": 0.0014814814814814814,
+     "min": 0.0014814814814814814,
+     "max": 0.0014814814814814814,
+     "n": 1
+    },
+    "accept_err_rate": {
+     "mean": 0.005925925925925926,
+     "min": 0.005925925925925926,
+     "max": 0.005925925925925926,
+     "n": 1
+    },
+    "hard_per_photo": {
+     "mean": 2.0606060606060606,
+     "min": 2.0606060606060606,
+     "max": 2.0606060606060606,
+     "n": 1
+    },
+    "top1_missed_as_fail": null,
+    "runs_required": 1
+   }
+  },
+  "incomplete_left_out": [],
+  "rules_differ": [],
+  "missing_groups": []
+ },
+ "expected_rows": {
+  "whisky": 972,
+  "cocktail": 2,
+  "food": 0,
+  "other": 18
+ },
+ "non_whisky_lines_reviewed": "Jinwoo Park, 2026-11-18: the 14 rows and the 28 photos without a non-whisky line checked against the photos; nothing changed",
+ "non_whisky_lines_sha256": "84775e16fd0917e762d89f2d390b8980362bce08d03216252de83c49bd75c6c5"
+}

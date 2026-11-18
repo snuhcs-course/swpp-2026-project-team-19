@@ -1,0 +1,115 @@
+{
+ "_about": [
+  "Non-whisky lines of the 33 I3 photos that the whisky labels (eval/labels_i3_v1.json) do not have. Read by ai/eval/p46_report.py (I4-P46). Same fields as ai/regression/mixed_lines.json.",
+  "Made on 2026-11-17 before prompt v2 was run on these photos: labelers A and B (both Claude) listed the non-whisky lines of every photo from the photos only, without the labels, the gold, OCR or any model output. They found the same 20 rows on the same 5 photos and no other photo with a non-whisky line. The two differences were judged against the photo: the tequila on the 연림 promotion page is printed '후세쿠엘보 실버' (A), and the Korean name comes first as in the whisky labels of that page (A).",
+  "6 of the 20 rows are already in the labels with match gold non_whisky (a rum on 테일오브테일즈_04, cognac on 쏘댓page2_04 and 무용의 유용_02); they count as non-whisky lines of category other and are not repeated here. The 14 rows below are the rest.",
+  "Not rows: the footnote '하이볼 제작비 1,000' (연림 서울대입구역점_02-04) and the tab titles of other pages (무용의 유용_01-02), as labels_i3_v1.json excluded_sections records.",
+  "category: cocktail, food or other (other spirits, wine, beer). unit: glass, bottle or null. The two beers have one price and no unit printed; glass by the price rule of the prompt."
+ ],
+ "created": "2026-11-17",
+ "reviewed": "Jinwoo Park, 2026-11-18: the 14 rows and the 28 photos without a non-whisky line checked against the photos; nothing changed",
+ "photos": {
+  "015_연림 서울대입구역점_01": [
+   {
+    "raw_name": "후세쿠엘보 실버",
+    "category": "other",
+    "price_krw": 70000,
+    "pour_ml": null,
+    "unit": "bottle"
+   },
+   {
+    "raw_name": "스파클링 와인 하프 (375ml)",
+    "category": "other",
+    "price_krw": 25000,
+    "pour_ml": null,
+    "unit": "bottle"
+   }
+  ],
+  "017_리틀 갤러리_01": [
+   {
+    "raw_name": "헤네시 V.S.O.P / Hennesy V.S.O.P",
+    "category": "other",
+    "price_krw": 18000,
+    "pour_ml": null,
+    "unit": "glass"
+   },
+   {
+    "raw_name": "헤네시 V.S.O.P / Hennesy V.S.O.P",
+    "category": "other",
+    "price_krw": 290000,
+    "pour_ml": null,
+    "unit": "bottle"
+   },
+   {
+    "raw_name": "레미 마틴 V.S.O.P / Rémy Martin V.S.O.P",
+    "category": "other",
+    "price_krw": 17000,
+    "pour_ml": null,
+    "unit": "glass"
+   },
+   {
+    "raw_name": "레미 마틴 V.S.O.P / Rémy Martin V.S.O.P",
+    "category": "other",
+    "price_krw": 280000,
+    "pour_ml": null,
+    "unit": "bottle"
+   },
+   {
+    "raw_name": "까뮤 보더리 X.O / Camus Boderies X.O",
+    "category": "other",
+    "price_krw": 60000,
+    "pour_ml": null,
+    "unit": "glass"
+   },
+   {
+    "raw_name": "까뮤 보더리 X.O / Camus Boderies X.O",
+    "category": "other",
+    "price_krw": 850000,
+    "pour_ml": null,
+    "unit": "bottle"
+   },
+   {
+    "raw_name": "호세 쿠엘보 / Jose Cuervo",
+    "category": "other",
+    "price_krw": 9000,
+    "pour_ml": null,
+    "unit": "glass"
+   },
+   {
+    "raw_name": "호세 쿠엘보 / Jose Cuervo",
+    "category": "other",
+    "price_krw": 120000,
+    "pour_ml": null,
+    "unit": "bottle"
+   },
+   {
+    "raw_name": "산토리 하이볼 / Suntory Highball",
+    "category": "cocktail",
+    "price_krw": 10000,
+    "pour_ml": null,
+    "unit": "glass"
+   },
+   {
+    "raw_name": "짐빔 하이볼 / Jim Beam Highball",
+    "category": "cocktail",
+    "price_krw": 10000,
+    "pour_ml": null,
+    "unit": "glass"
+   },
+   {
+    "raw_name": "아사이 / Asahi",
+    "category": "other",
+    "price_krw": 10000,
+    "pour_ml": null,
+    "unit": "glass"
+   },
+   {
+    "raw_name": "기네스 / Guinness",
+    "category": "other",
+    "price_krw": 12000,
+    "pour_ml": null,
+    "unit": "glass"
+   }
+  ]
+ }
+}

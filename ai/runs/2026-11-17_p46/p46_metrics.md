@@ -1,0 +1,43 @@
+# P46: frozen-set metrics (Iteration 4)
+
+## Extraction (whisky lines, score.py --set i3)
+
+| prompt | name F1 strict | price accuracy | item accuracy | runs |
+|---|---|---|---|---|
+| v2 | 0.935 [0.934-0.936] (NFR-1 >= 0.9: met) | 0.959 [0.947-0.972] (NFR-2 >= 0.95: met) | 0.869 [0.854-0.883] | 3 |
+| v1 | 0.931 [0.905-0.950] (NFR-1 >= 0.9: met) | 0.966 [0.959-0.976] (NFR-2 >= 0.95: met) | 0.868 [0.816-0.908] | 3 |
+
+## All lines of the photos (counts over the records of a run dir)
+
+| prompt | records | whisky lines paired | non-whisky lines paired | whisky as non-whisky | non-whisky as whisky | wrong kind | duplicates |
+|---|---|---|---|---|---|---|---|
+| v2 | 99 | 2775/2916 | 58/60 | 0 | 22 | 0 | 0 |
+| v1 | 99 | 2807/2916 | 39/60 | 0 | 39 | 0 | 0 |
+
+## Matching (i3_match_eval.py)
+
+| catalog / input / matcher | Top-1 | false-merge rate | acceptance error | hard lines per photo | runs |
+|---|---|---|---|---|---|
+| asis/e2e/rules | 0.825 [0.824-0.826] | 0.0015 [0.0015-0.0015] | 0.0097 [0.0092-0.0107] | 4.52 [4.52-4.52] | 3 |
+| asis/e2e/server after rules | 0.825 [0.824-0.826] | 0.0015 [0.0015-0.0015] | 0.0097 [0.0092-0.0107] | 4.21 [4.21-4.21] | 3 |
+| asis/label/llm | 0.837 [0.837-0.837] | 0.0015 [0.0015-0.0015] (NFR-4 <= 0.02: met) | 0.0109 [0.0104-0.0119] | 4.14 [4.12-4.15] | 3 |
+| asis/label/rules | 0.837 | 0.0015 (NFR-4 <= 0.02: met) | 0.0089 | 4.64 | 1 |
+| asis/label/server after llm | 0.837 [0.837-0.837] | 0.0015 [0.0015-0.0015] (NFR-4 <= 0.02: met) | 0.0109 [0.0104-0.0119] | 3.96 [3.94-3.97] | 3 |
+| asis/label/server after rules | 0.837 | 0.0015 (NFR-4 <= 0.02: met) | 0.0089 | 4.33 | 1 |
+| full/e2e/llm | 0.765 [0.764-0.766] | 0.0015 [0.0015-0.0015] | 0.0072 [0.0061-0.0077] | 2.03 [2.00-2.06] | 3 |
+| full/e2e/rules | 0.765 [0.764-0.766] | 0.0015 [0.0015-0.0015] | 0.0066 [0.0061-0.0076] | 3.03 [3.03-3.03] | 3 |
+| full/e2e/server after llm | 0.765 [0.764-0.766] | 0.0015 [0.0015-0.0015] | 0.0072 [0.0061-0.0077] | 1.75 [1.73-1.79] | 3 |
+| full/label/llm | 0.774 [0.774-0.774] (NFR-3 >= 0.9: NOT met) | 0.0015 [0.0015-0.0015] (NFR-4 <= 0.02: met) | 0.0069 [0.0059-0.0089] | 1.95 [1.94-1.97] | 3 |
+| full/label/rules | 0.774 (NFR-3 >= 0.9: NOT met) | 0.0015 (NFR-4 <= 0.02: met) | 0.0059 | 2.94 | 1 |
+| full/label/server after llm | 0.774 [0.774-0.774] (NFR-3 >= 0.9: NOT met) | 0.0015 [0.0015-0.0015] (NFR-4 <= 0.02: met) | 0.0069 [0.0059-0.0089] | 1.68 [1.67-1.70] | 3 |
+| full/label/server after rules | 0.774 (NFR-3 >= 0.9: NOT met) | 0.0015 (NFR-4 <= 0.02: met) | 0.0059 | 2.48 | 1 |
+| ops/e2e/llm | 0.782 [0.781-0.783] | 0.0015 [0.0015-0.0015] | 0.0066 [0.0061-0.0076] | 2.02 [2.00-2.03] | 3 |
+| ops/e2e/rules | 0.782 [0.781-0.783] | 0.0015 [0.0015-0.0015] | 0.0066 [0.0061-0.0076] | 2.61 [2.61-2.61] | 3 |
+| ops/e2e/server after llm | 0.782 [0.781-0.783] | 0.0015 [0.0015-0.0015] | 0.0066 [0.0061-0.0076] | 1.74 [1.73-1.76] | 3 |
+| ops/label/llm | 0.791 [0.791-0.791] | 0.0015 [0.0015-0.0015] | 0.0059 [0.0059-0.0059] | 1.86 [1.85-1.88] | 3 |
+| ops/label/rules | 0.791 | 0.0015 | 0.0059 | 2.52 | 1 |
+| ops/label/server after llm | 0.791 [0.791-0.791] | 0.0015 [0.0015-0.0015] | 0.0059 [0.0059-0.0059] | 1.59 [1.58-1.61] | 3 |
+| ops/label/server after rules | 0.791 | 0.0015 | 0.0059 | 2.06 | 1 |
+
+NFR-3 is decided on full and NFR-4 on full and asis, label input (ai/docs/i3_eval_freeze.md); ops and end-to-end rows are descriptive. A label-input rules row is one deterministic evaluation.
+

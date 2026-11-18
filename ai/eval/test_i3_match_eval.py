@@ -280,3 +280,96 @@ def test_end_to_end_lines_are_paired_to_the_labels(files, tmp_path, monkeypatch)
     a = out["rules"]["all"]
     assert (a["correct"], a["known"]) == (2, 2)
     assert e2e["top1_missed_as_fail"] == 2 / 5
+
+
+# ---------- I4-P46: bar groups, the ops catalog, the server steps ----------
+
+ADDITIONS = {
+    "version": "test_additions", "brands": [],
+    "products": [
+        {"id": str(uuid.uuid4()), "key": "glenfiddich-15", "brand_id": BRAND_GF, "display_name": "Glenfiddich 15",
+         "age_years": 15, "edition_name": None,
+         "aliases": [alias("Glenfiddich 15", "standard"), alias("글렌피딕 15", "menu:바B"),
+                     alias("글렌피딕 15년산", "generated:test")]},
+    ],
+}
+# The I3 catalogs as P10 recorded them (c2_{asis,full}_rules.json, 2026-10-29): bar groups and the
+# ops catalog must leave them as they were.
+I3_BARS = ("테일오브테일즈", "연림 서울대입구역점", "연림 봉천역점", "리틀 갤러리", "청춘위스키 봉천", "쏘댓page2", "네스트",
+           "무용의 유용")
+I3_ASIS_DIGEST = "7c65fa51c4c8370b"
+
+
+def test_a_group_of_bars_shares_its_own_menu_aliases(be, monkeypatch):
+    pid = uuid.UUID(P12)
+    assert be.normalize("글렌피딕 12년") in h.build_catalog(be, "바B", "asis", SEED).catalog.get_normalized_aliases(pid)
+    monkeypatch.setattr(h, "BAR_GROUPS", (frozenset({"바A", "바B"}),))
+    assert h.own_bars("바B") == {"바A", "바B"} and h.own_bars("바C") == {"바C"}
+    assert be.normalize("글렌피딕 12년") not in h.build_catalog(be, "바B", "asis", SEED).catalog.get_normalized_aliases(pid)
+    assert be.normalize("글렌피딕 12년") in h.build_catalog(be, "바C", "asis", SEED).catalog.get_normalized_aliases(pid)
+
+
+def test_embedded_entries_keep_one_alias_per_normalized_value_like_the_database(be):
+    seed = json.loads((h.REPO_ROOT / "ai" / "catalog" / "catalog_v2_service.json").read_text(encoding="utf-8"))
+    entries = h.build_catalog(be, "바C", "asis", seed).entries
+    keys = [(pid, be.normalize(text)) for text, pid in entries]
+    products = {pid for _, pid in entries}
+    names = {p.display_name for p in h.build_catalog(be, "바C", "asis", seed).catalog._products.values()}
+    alias_keys = [k for (text, _), k in zip(entries, keys) if text not in names]
+    assert len(alias_keys) == len(set(alias_keys)) and products
+    ardbeg = [text for text, _ in entries if be.normalize(text) == be.normalize("Ardbeg 10")]
+    assert len(ardbeg) <= 2  # the display name and at most one stored alias
+
+
+def test_the_i3_asis_catalogs_are_the_recorded_ones(be):
+    seed = json.loads((h.REPO_ROOT / "ai" / "catalog" / "catalog_v2_service.json").read_text(encoding="utf-8"))
+    digest = h.catalog_digest({bar: h.build_catalog(be, bar, "asis", seed) for bar in I3_BARS})
+    assert digest.startswith(I3_ASIS_DIGEST)
+
+
+def test_ops_is_the_catalog_with_the_additions_minus_own_menu_aliases(files, tmp_path):
+    gold, labels, cat = files
+    additions = tmp_path / "additions.json"
+    additions.write_text(json.dumps(ADDITIONS, ensure_ascii=False), encoding="utf-8")
+    result = h.main(["--set", "i3", "--catalog", "ops", "--catalog-file", str(cat), "--additions-file", str(additions),
+                     "--gold", str(gold), "--labels", str(labels), "--no-gold-sha-check",
+                     "--json", str(tmp_path / "ops.json")])
+    assert result["new_products_added"] == 0 and result["additions_file_sha256"]
+    assert result["coverage"]["covered"] == 4  # glenfiddich-15 is now a catalog product
+    rows = {r["name"]: r for r in result["rules"]["rows"]}
+    assert rows["Glenfiddich 15"]["kind"] == "known" and rows["Glenfiddich 15"]["outcome"] == "correct"
+    merged = h.with_additions(SEED, ADDITIONS)
+    at_b = h.build_catalog(h.Backend(h.REPO_ROOT), "바B", "ops", merged)
+    aliases = at_b.catalog.get_normalized_aliases(at_b.key_to_id["glenfiddich-15"])
+    assert h.Backend(h.REPO_ROOT).normalize("글렌피딕 15") not in aliases  # 바B's own menu spelling
+    assert h.Backend(h.REPO_ROOT).normalize("글렌피딕 15년산") in aliases
+    with pytest.raises(SystemExit, match="both the catalog and the additions"):
+        h.with_additions(merged, ADDITIONS)
+
+
+def test_server_steps_add_candidates_and_never_confirm(files, tmp_path):
+    gold, labels, cat = files
+    result = h.main(["--set", "i3", "--catalog", "asis", "--catalog-file", str(cat), "--gold", str(gold),
+                     "--labels", str(labels), "--no-gold-sha-check", "--server-steps",
+                     "--json", str(tmp_path / "server.json")])
+    rules = {r["name"]: r for r in result["rules"]["rows"]}
+    server = {r["name"]: r for r in result["server"]["rows"]}
+    assert result["server"]["after"] == "rules" and result["server"]["embedding_model"] == "tfidf-char"
+    # "Glenfiddich 15" is not in the catalog: the rules offer nothing, the embedding step offers its siblings
+    assert rules["Glenfiddich 15"]["status"] == "unmatched" and server["Glenfiddich 15"]["status"] == "ambiguous"
+    assert server["Glenfiddich 15"]["rank1_method"] == "embedding"
+    assert result["server"]["changed"]["embedding_filled"] >= 1
+    for name, row in rules.items():  # the steps never add or change a confirmation
+        if row["status"] in h.CONFIRMED:
+            assert server[name]["status"] == row["status"] and server[name]["cands"] == row["cands"]
+        else:
+            assert server[name]["status"] not in h.CONFIRMED
+    assert result["server"]["all"]["correct"] == result["rules"]["all"]["correct"]
+    assert result["server"]["all"]["fm"] == result["rules"]["all"]["fm"]
+
+
+def test_server_steps_are_not_for_the_tool_layer(capsys):
+    with pytest.raises(SystemExit):
+        h.parse_args(["--set", "i3", "--catalog", "asis", "--llm", "--llm-mode", "tools", "--cache", "c",
+                      "--server-steps", "--json", "x.json"])
+    assert "--server-steps is for rules or rules + M3a" in capsys.readouterr().err
