@@ -226,7 +226,7 @@ One-time setup. Steps 1 to 4 can be done before the workflow first runs on `main
      "$(cat bottlemap-owner-web-upload.pub)" | ssh -i bottlemap-key.pem ubuntu@bottlemap.o-r.kr 'cat >> ~/.ssh/authorized_keys'
    ```
 
-   The script takes only a full commit SHA as its command and a gzip tar of the build on stdin. It refuses an archive over 50 MB or that unpacks to over 200 MB or takes over 60 seconds to unpack, one without `index.html`, and anything but plain files and directories inside the build. It keeps the last three releases.
+   The script takes only a full commit SHA as its command and a gzip tar of the build on stdin. It refuses an archive over 50 MB or that unpacks to over 200 MB or takes over 60 seconds to unpack, one without `index.html`, and anything but plain files and directories inside the build. It keeps the last three releases. It copies the hashed files (`assets/`) of the build being replaced, from the last 7 days, into the new one, so a page opened before the switch still loads its scripts after it.
 
 3. **GitHub secret.** In the `production` environment, add `OWNER_WEB_UPLOAD_SSH_KEY`: the whole private key file `bottlemap-owner-web-upload`. The job reuses `DEPLOY_KNOWN_HOSTS`. Then delete the local private key.
 

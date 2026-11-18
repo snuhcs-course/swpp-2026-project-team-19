@@ -20,6 +20,9 @@ MAX_ARCHIVE_BYTES=$((50 * 1024 * 1024))
 MAX_UNPACKED_BYTES=$((200 * 1024 * 1024))
 UNPACK_SECONDS=60
 KEEP_RELEASES=3
+# Vite's directory of files named by content hash (backend/app/owner_web serves them as immutable).
+ASSETS_DIR=assets
+CARRY_ASSET_DAYS=7
 
 fail() {
 	echo "owner-web-upload: $*" >&2
@@ -64,6 +67,17 @@ build="$work/build"
 mkdir "$build"
 tar -xf "$tarball" -C "$build" --no-same-owner --no-same-permissions
 [ -f "$build/index.html" ] || fail "the archive has no index.html at its top"
+
+# Carry the hashed files of the build being replaced into the new one, so a page loaded before the switch
+# still finds its scripts and styles (and later its lazily loaded chunks) after it. Their names hold their
+# content hash, so a name in both builds is the same file; --update=none keeps the new build's copy (coreutils 9.3+).
+# Only files from the last CARRY_ASSET_DAYS days (-p keeps their time), so carried files age out instead
+# of piling up from release to release.
+if [ -d "$OWNER_WEB_ROOT/current/$ASSETS_DIR" ]; then
+	mkdir -p "$build/$ASSETS_DIR"
+	find "$OWNER_WEB_ROOT/current/$ASSETS_DIR/" -maxdepth 1 -type f -mtime "-$CARRY_ASSET_DAYS" \
+		-exec cp -p --update=none -t "$build/$ASSETS_DIR/" {} +
+fi
 chmod -R u=rwX,go=rX "$build"
 
 # A new name for every upload: uploading the SHA that is already served (a re-run) must not remove the
