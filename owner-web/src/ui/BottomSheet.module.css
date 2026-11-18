@@ -11,7 +11,8 @@
 }
 
 .sheet::backdrop {
-  background: rgb(0 0 0 / 0.6);
+  /* 60% of the scrim token (BottleMapPalette.scrim). */
+  background: color-mix(in srgb, var(--bm-color-scrim) 60%, transparent);
 }
 
 .content {
