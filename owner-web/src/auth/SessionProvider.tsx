@@ -39,16 +39,20 @@ function clearRedirectParams(): boolean {
 }
 
 /**
- * The owner's session and the API client that carries it. Signing out, or a session that ends (spec 3.1.5),
- * clears every cached server response, so nothing of one account is shown to the next.
+ * The owner's session and the API client that carries it. Signing out, a session that ends (spec 3.1.5), or
+ * another account signing in from another tab clears every cached server response, so nothing of one account
+ * is shown to the next.
  */
 export function SessionProvider({ gateway, children }: { gateway: AuthGateway; children: ReactNode }) {
   const queryClient = useQueryClient();
   const [status, setStatus] = useState<SessionStatus>("restoring");
   const [notice, setNotice] = useState<string | null>(null);
+  // Whose data the cache holds, to notice another account signing in without a sign-out here.
+  const userId = useRef<string | null>(null);
 
   const endSession = useCallback(
     (reason: string | null) => {
+      userId.current = null;
       queryClient.clear();
       setNotice(reason);
       setStatus("signedOut");
@@ -70,25 +74,33 @@ export function SessionProvider({ gateway, children }: { gateway: AuthGateway; c
     let active = true;
     gateway
       .restoreSession()
-      .catch(() => false)
-      .then((signedIn) => {
+      .catch(() => null)
+      .then((restored) => {
         if (!active) return;
         const failed = clearRedirectParams();
-        if (signedIn) {
+        if (restored) {
+          userId.current = restored;
           setStatus("signedIn");
         } else {
           setNotice(failed ? SIGN_IN_FAILED_NOTICE : null);
           setStatus("signedOut");
         }
       });
-    const unsubscribe = gateway.onSessionChange((signedIn) => {
+    const unsubscribe = gateway.onSessionChange((signedInAs) => {
       if (!active) return;
-      if (signedIn) {
+      if (signedInAs) {
+        if (userId.current !== null && userId.current !== signedInAs) {
+          // Another tab signed in as someone else: drop the previous account's data, cancel its requests,
+          // and load the screen again for the new account.
+          void queryClient.cancelQueries().then(() => queryClient.resetQueries());
+        }
+        userId.current = signedInAs;
         setStatus("signedIn");
         return;
       }
       // Our own sign-outs end in this event too (Supabase sends SIGNED_OUT for a local sign-out), after the
       // screen already has its reason, such as an expired session. Keep that reason; only the data goes.
+      userId.current = null;
       queryClient.clear();
       setStatus("signedOut");
     });

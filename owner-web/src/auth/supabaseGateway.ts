@@ -32,8 +32,11 @@ export function createSupabaseGateway(config: OwnerWebConfig): AuthGateway {
   return {
     configured: client !== null,
     // getSession waits for supabase-js to exchange the ?code of a sign-in redirect.
-    restoreSession: async () => (await session()) !== null,
-    accessToken: async () => (await session())?.access_token ?? null,
+    restoreSession: async () => (await session())?.user.id ?? null,
+    currentSession: async () => {
+      const current = await session();
+      return current ? { accessToken: current.access_token, userId: current.user.id } : null;
+    },
     refreshSession: async () => {
       if (!client) return false;
       const { data, error } = await client.auth.refreshSession();
@@ -51,8 +54,8 @@ export function createSupabaseGateway(config: OwnerWebConfig): AuthGateway {
     onSessionChange: (listener) => {
       if (!client) return () => undefined;
       const { data } = client.auth.onAuthStateChange((event, current) => {
-        if (event === "SIGNED_OUT") listener(false);
-        else if (event === "SIGNED_IN" && current) listener(true);
+        if (event === "SIGNED_OUT") listener(null);
+        else if (event === "SIGNED_IN" && current) listener(current.user.id);
       });
       return () => data.subscription.unsubscribe();
     },

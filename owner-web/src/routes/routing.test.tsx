@@ -231,6 +231,46 @@ describe("sign-out and session end", () => {
     await waitFor(() => expect(gateway.calls.signOut).toBe(1));
   });
 
+  it("drops the previous account's data when another tab signs in as someone else", async () => {
+    // Each account sees its own bars; the API tells them apart by the token.
+    server.use(
+      http.get("/api/me", () => HttpResponse.json(ME)),
+      http.get("/api/me/owner-applications", () => HttpResponse.json({ items: [] })),
+      http.get("/api/me/bars", ({ request }) =>
+        HttpResponse.json({
+          items: request.headers.get("Authorization") === "Bearer token-a" ? [bar(BAR_ID, "관악 위스키 바")] : [],
+        }),
+      ),
+    );
+    const gateway = new FakeGateway({ userId: "user-a", token: "token-a" });
+    renderOwnerWeb(`/bars/${BAR_ID}`, { gateway });
+    await heading("관악 위스키 바");
+
+    gateway.switchAccount("user-b", "token-b");
+
+    expect(await screen.findByText("이 매장을 관리할 권한이 없어요.")).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "관악 위스키 바" })).not.toBeInTheDocument();
+  });
+
+  it("keeps the data when the same account signs in again from another tab", async () => {
+    let barsCalls = 0;
+    useOwnerApi();
+    server.use(
+      http.get("/api/me/bars", () => {
+        barsCalls++;
+        return HttpResponse.json({ items: [bar(BAR_ID, "관악 위스키 바")] });
+      }),
+    );
+    const gateway = new FakeGateway({ userId: "user-a" });
+    renderOwnerWeb(`/bars/${BAR_ID}`, { gateway });
+    await heading("관악 위스키 바");
+
+    gateway.switchAccount("user-a", "token-a2");
+
+    await heading("관악 위스키 바");
+    expect(barsCalls).toBe(1);
+  });
+
   it("returns to sign-in when the session ends in another tab", async () => {
     useOwnerApi({ bars: [bar(BAR_ID, "관악 위스키 바")] });
     const { router, gateway, queryClient } = renderOwnerWeb("/");

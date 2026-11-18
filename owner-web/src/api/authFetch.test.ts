@@ -87,6 +87,42 @@ describe("createAuthFetch (spec 3.1.5)", () => {
     expect(seen.filter((authorization) => authorization === "Bearer refreshed-token")).toHaveLength(2);
   });
 
+  it("never resends a request for another account that signed in meanwhile", async () => {
+    // Sent as account A; before its 401 arrives, another tab signs in as B.
+    const gateway = new FakeGateway({ userId: "user-a", token: "token-a" });
+    const fetch = vi.fn(async () => {
+      gateway.switchAccount("user-b", "token-b");
+      return new Response(null, { status: 401 });
+    }) as unknown as typeof globalThis.fetch;
+    const expired = vi.fn();
+
+    const response = await createAuthFetch(gateway, expired, fetch)(
+      new Request(URL, { method: "POST", body: "{}" }),
+    );
+
+    expect(response.status).toBe(401);
+    expect(fetch).toHaveBeenCalledOnce();
+    expect(gateway.calls.refresh).toBe(0);
+    expect(expired).not.toHaveBeenCalled();
+  });
+
+  it("never resends when the account changes while the session is being refreshed", async () => {
+    const gateway = new FakeGateway({ userId: "user-a", token: "token-a" });
+    gateway.refreshSession = async () => {
+      gateway.calls.refresh++;
+      gateway.switchAccount("user-b", "token-b");
+      return true;
+    };
+    const fetch = vi.fn(async () => new Response(null, { status: 401 })) as unknown as typeof globalThis.fetch;
+    const expired = vi.fn();
+
+    const response = await createAuthFetch(gateway, expired, fetch)(new Request(URL));
+
+    expect(response.status).toBe(401);
+    expect(fetch).toHaveBeenCalledOnce();
+    expect(expired).not.toHaveBeenCalled();
+  });
+
   it("ends the session when the refresh fails", async () => {
     const api = scriptedFetch(401);
     const gateway = new FakeGateway();
