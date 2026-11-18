@@ -20,6 +20,8 @@
 /backend/head-tests.txt
 /backend/test-report.md
 /backend/var/
+/owner-web/node_modules/
+/owner-web/dist/
 /_ref/
 
 # Secrets: never commit any .env (only .env.example)

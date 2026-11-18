@@ -1,0 +1,22 @@
+.page {
+  box-sizing: border-box;
+  max-width: var(--bm-content-max-width);
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding: var(--bm-space-xxl) var(--bm-screen-horizontal);
+}
+
+.title {
+  margin: 0 0 var(--bm-space-xs);
+  font-family: var(--bm-font-serif);
+  font-size: var(--bm-type-screen-title);
+  line-height: var(--bm-type-screen-title-line-height);
+  font-weight: 700;
+}
+
+.message {
+  margin: 0;
+  color: var(--bm-color-text-secondary);
+  font-size: var(--bm-type-body);
+  line-height: var(--bm-type-body-line-height);
+}
