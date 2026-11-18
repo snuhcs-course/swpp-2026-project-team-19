@@ -203,7 +203,7 @@ Deployments run one at a time, and a running one is never cancelled. Each deploy
 
 ### Owner web (`/owner/`)
 
-The owner web (`owner-web/`, a React build) is not built on the server: the instance has 1 GiB of memory, and the build would compete with the API for it. The **Owner web CI/CD** workflow (`.github/workflows/owner-web-ci-cd.yml`) builds and tests it on every pull request that changes it. On a push to `main` that changes `owner-web/`, its `deploy` job uploads that tested build over SSH with a separate upload key. On the server, `deploy/owner-web-upload.sh` unpacks it into `~/bottlemap-owner-web/releases/<commit>` and switches the symlink `~/bottlemap-owner-web/current` to it in one step. The API serves `OWNER_WEB_DIR` (that symlink) at `/owner/` and looks it up on every request, so no restart is needed. It runs in the `deploy-production` group, one at a time with the backend deployment and the seed.
+The owner web (`owner-web/`, a React build) is not built on the server: the instance has 1 GiB of memory, and the build would compete with the API for it. The **Owner web CI/CD** workflow (`.github/workflows/owner-web-ci-cd.yml`) builds and tests it on every pull request that changes it. On a push to `main` that changes `owner-web/`, its `deploy` job uploads that tested build over SSH with a separate upload key. On the server, `deploy/owner-web-upload.sh` unpacks it into a new directory `~/bottlemap-owner-web/releases/<commit>-<time>-<pid>` (a new one even when the same commit is uploaded again) and switches the symlink `~/bottlemap-owner-web/current` to it in one step. The API serves `OWNER_WEB_DIR` (that symlink) at `/owner/` and looks it up on every request, so no restart is needed. It runs in the `deploy-production` group, one at a time with the backend deployment and the seed.
 
 - When the same push also changes the backend, the upload waits until `/health` reports that commit, so the page never calls an older API than the one it was built against.
 - `deploy.sh` does not touch the owner web, and the owner web upload does not restart the API.
@@ -225,7 +225,7 @@ One-time setup. Steps 1 to 4 can be done before the workflow first runs on `main
      "$(cat bottlemap-owner-web-upload.pub)" | ssh -i bottlemap-key.pem ubuntu@bottlemap.o-r.kr 'cat >> ~/.ssh/authorized_keys'
    ```
 
-   The script takes only a full commit SHA as its command and a gzip tar of the build on stdin. It refuses an archive over 50 MB, one without `index.html`, and anything but plain files and directories inside the build. It keeps the last three releases.
+   The script takes only a full commit SHA as its command and a gzip tar of the build on stdin. It refuses an archive over 50 MB or that unpacks to over 200 MB or takes over 60 seconds to unpack, one without `index.html`, and anything but plain files and directories inside the build. It keeps the last three releases.
 
 3. **GitHub secret.** In the `production` environment, add `OWNER_WEB_UPLOAD_SSH_KEY`: the whole private key file `bottlemap-owner-web-upload`. The job reuses `DEPLOY_KNOWN_HOSTS`. Then delete the local private key.
 
@@ -233,7 +233,7 @@ One-time setup. Steps 1 to 4 can be done before the workflow first runs on `main
 
 5. **Check.** Run the workflow on `main` (Run workflow). Its last step compares `https://bottlemap.o-r.kr/owner/` with the build it uploaded.
 
-A leaked upload key can put any page at `/owner/`, on the same origin as `/admin` and the API, so it is more powerful than the deploy key. Keep it only in the `production` environment, and remove its `authorized_keys` line if it may have leaked. To roll back by hand: `ln -sfn releases/<older commit> ~/bottlemap-owner-web/current` on the server (no restart).
+A leaked upload key can put any page at `/owner/`, on the same origin as `/admin` and the API, so it is more powerful than the deploy key. Keep it only in the `production` environment, and remove its `authorized_keys` line if it may have leaked. To roll back by hand: `ls -t ~/bottlemap-owner-web/releases` on the server, then `ln -sfn releases/<older directory> ~/bottlemap-owner-web/current` (no restart).
 
 ### Loading the catalog seed
 
