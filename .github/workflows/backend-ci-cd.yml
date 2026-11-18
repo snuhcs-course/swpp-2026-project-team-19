@@ -150,9 +150,12 @@ jobs:
       name: production
       url: https://bottlemap.o-r.kr
     # One deployment at a time; a running one is never cancelled (migrations may be in progress).
+    # queue: max keeps every pending job of deploy-production (shared with the seed and the owner web upload)
+    # instead of replacing the pending one; all three use it, so the group behaves the same for each.
     concurrency:
       group: deploy-production
       cancel-in-progress: false
+      queue: max
 
     env:
       DEPLOY_HOST: bottlemap.o-r.kr

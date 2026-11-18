@@ -150,7 +150,7 @@ It pulls, runs `uv sync --frozen --no-dev` and the migrations, restarts the serv
 
 When a push to `main` changes the backend, the **Backend CI/CD** workflow (`.github/workflows/backend-ci-cd.yml`) runs the tests. If they pass, its `deploy` job connects over SSH, runs `deploy.sh main`, and checks from outside that `https://bottlemap.o-r.kr/health` reports the commit it deployed (`version`). Pull requests only run the tests. A deployment can also be started from the Actions tab (Backend CI/CD → Run workflow on `main`); it runs the tests first as well.
 
-Deployments run one at a time, and a running one is never cancelled. Each deploys the latest `main`.
+Deployments run one at a time, and a running one is never cancelled. Each deploys the latest `main`. The jobs that change the server (this deploy, the seed, and the owner web upload) share the `deploy-production` concurrency group with `queue: max`: pending jobs wait in order instead of a newer one replacing the pending one.
 
 ### One-time setup
 
@@ -203,9 +203,10 @@ Deployments run one at a time, and a running one is never cancelled. Each deploy
 
 ### Owner web (`/owner/`)
 
-The owner web (`owner-web/`, a React build) is not built on the server: the instance has 1 GiB of memory, and the build would compete with the API for it. The **Owner web CI/CD** workflow (`.github/workflows/owner-web-ci-cd.yml`) builds and tests it on every pull request that changes it. On a push to `main` that changes `owner-web/`, its `deploy` job uploads that tested build over SSH with a separate upload key. On the server, `deploy/owner-web-upload.sh` unpacks it into a new directory `~/bottlemap-owner-web/releases/<commit>-<time>-<pid>` (a new one even when the same commit is uploaded again) and switches the symlink `~/bottlemap-owner-web/current` to it in one step. The API serves `OWNER_WEB_DIR` (that symlink) at `/owner/` and looks it up on every request, so no restart is needed. It runs in the `deploy-production` group, one at a time with the backend deployment and the seed.
+The owner web (`owner-web/`, a React build) is not built on the server: the instance has 1 GiB of memory, and the build would compete with the API for it. The **Owner web CI/CD** workflow (`.github/workflows/owner-web-ci-cd.yml`) builds and tests it on every pull request that changes it. On a push to `main` that changes `owner-web/`, its `deploy` job uploads that tested build over SSH with a separate upload key. On the server, `deploy/owner-web-upload.sh` unpacks it into a new directory `~/bottlemap-owner-web/releases/<commit>-<time>-<pid>` (a new one even when the same commit is uploaded again) and switches the symlink `~/bottlemap-owner-web/current` to it in one step. The API serves `OWNER_WEB_DIR` (that symlink) at `/owner/` and looks it up on every request, so no restart is needed. It runs in the `deploy-production` queue, one at a time with the backend deployment and the seed.
 
-- When the same push also changes the backend, the upload waits until `/health` reports that commit, so the page never calls an older API than the one it was built against.
+- When the same push also changes the backend, the upload waits until `/health` reports that commit or a newer one (`deploy.sh` deploys the latest `main`), so the page never calls an older API than the one it was built against.
+- Queued uploads run in the order they started waiting, so an older build can get its turn after a newer one. The upload is skipped when a newer `main` commit has changed `owner-web/` since; that commit's run uploads its own build. A newer commit that left `owner-web/` alone does not upload, so the older run still does.
 - `deploy.sh` does not touch the owner web, and the owner web upload does not restart the API.
 - Until the first upload, `https://bottlemap.o-r.kr/owner/` answers `503` with a short notice, and the API works as usual.
 - To upload the current `main` again (after a failed upload, or once the setup below is done): Actions → **Owner web CI/CD** → Run workflow on `main`.

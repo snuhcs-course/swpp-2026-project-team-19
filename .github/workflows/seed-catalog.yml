@@ -13,9 +13,11 @@ on:
 permissions: {}
 
 # Same group as the deploy job, so a seed never runs while a deployment is running.
+# queue: max, like the other deploy-production jobs: a queued seed is never replaced by a later deployment.
 concurrency:
   group: deploy-production
   cancel-in-progress: false
+  queue: max
 
 jobs:
   seed:
