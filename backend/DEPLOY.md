@@ -150,7 +150,7 @@ It pulls, runs `uv sync --frozen --no-dev` and the migrations, restarts the serv
 
 When a push to `main` changes the backend, the **Backend CI/CD** workflow (`.github/workflows/backend-ci-cd.yml`) runs the tests. If they pass, its `deploy` job connects over SSH, runs `deploy.sh main`, and checks from outside that `https://bottlemap.o-r.kr/health` reports the commit it deployed (`version`). Pull requests only run the tests. A deployment can also be started from the Actions tab (Backend CI/CD → Run workflow on `main`); it runs the tests first as well.
 
-Deployments run one at a time, and a running one is never cancelled. Each deploys the latest `main`.
+Deployments run one at a time, and a running one is never cancelled. Each deploys the latest `main`. The jobs that change the server (this deploy, the seed, and the owner web upload) share the `deploy-production` concurrency group with `queue: max`: pending jobs wait in order instead of a newer one replacing the pending one.
 
 ### One-time setup
 
@@ -191,15 +191,50 @@ Deployments run one at a time, and a running one is never cancelled. Each deploy
    | `DEPLOY_SSH_KEY` | The whole private key file `bottlemap-deploy`, including the `BEGIN` and `END` lines |
    | `DEPLOY_KNOWN_HOSTS` | The `bottlemap.o-r.kr ssh-ed25519 AAAA...` line from step 3 |
 
-   Only jobs that declare the `production` environment can read them: the `deploy` job here and the `seed` job of the Seed catalog workflow ([Loading the catalog seed](#loading-the-catalog-seed)). After saving, delete the local private key; GitHub is the only place that needs it.
+   Only jobs that declare the `production` environment can read them: the `deploy` job here, the `seed` job of the Seed catalog workflow ([Loading the catalog seed](#loading-the-catalog-seed)), and the `deploy` job of the Owner web CI/CD workflow ([Owner web](#owner-web-owner)). After saving, delete the local private key; GitHub is the only place that needs it.
 
-5. **Security group.** GitHub-hosted runners connect from changing addresses, so `bottlemap-ec2` must allow SSH (22) from anywhere (`0.0.0.0/0`). Password login is off on Ubuntu EC2 images, so only the keys in `authorized_keys` can log in: your own key, the deploy key, which can only run `deploy.sh`, and the seed key of the Seed catalog workflow, which can only run `deploy/seed.sh`.
+5. **Security group.** GitHub-hosted runners connect from changing addresses, so `bottlemap-ec2` must allow SSH (22) from anywhere (`0.0.0.0/0`). Password login is off on Ubuntu EC2 images, so only the keys in `authorized_keys` can log in: your own key, the deploy key, which can only run `deploy.sh`, the seed key of the Seed catalog workflow, which can only run `deploy/seed.sh`, and the owner web upload key, which can only run `deploy/owner-web-upload.sh` ([Owner web](#owner-web-owner)).
 
 ### When a deployment fails
 
 - Open the failed run → `deploy` → **Run deploy.sh on the server**. It shows the output of `deploy.sh`, including the last 50 service log lines when `/health` does not come up.
 - To roll back, revert the commit on `main` (`git revert <commit>`) and push. The revert is tested and deployed like any other change.
 - To pause automatic deployment, remove the deploy key line from `authorized_keys`. Deploy jobs then fail at SSH; the tests still run.
+
+### Owner web (`/owner/`)
+
+The owner web (`owner-web/`, a React build) is not built on the server: the instance has 1 GiB of memory, and the build would compete with the API for it. The **Owner web CI/CD** workflow (`.github/workflows/owner-web-ci-cd.yml`) builds and tests it on every pull request that changes it. On a push to `main` that changes `owner-web/`, its `deploy` job uploads that tested build over SSH with a separate upload key. On the server, `deploy/owner-web-upload.sh` unpacks it into a new directory `~/bottlemap-owner-web/releases/<commit>-<time>-<pid>` (a new one even when the same commit is uploaded again) and switches the symlink `~/bottlemap-owner-web/current` to it in one step. The API serves `OWNER_WEB_DIR` (that symlink) at `/owner/` and looks it up on every request, so no restart is needed. It runs in the `deploy-production` queue, one at a time with the backend deployment and the seed.
+
+- Every upload first waits until `/health` reports a commit that includes the last backend change up to the page's commit: the last commit touching the paths Backend CI/CD deploys. A newer commit also counts, since `deploy.sh` deploys the latest `main`. The page never calls an older API than the one it was built against, even when a web-only commit is merged right after a backend commit. When the server already has that change, the wait passes at once. If that backend deployment fails, the upload fails after about 40 minutes instead of serving a page the server cannot answer.
+- Queued uploads run in the order they started waiting, so an older build can get its turn after a newer one. The upload is skipped when a newer `main` commit has changed `owner-web/` since; that commit's run uploads its own build. A newer commit that left `owner-web/` alone does not upload, so the older run still does.
+- `deploy.sh` does not touch the owner web, and the owner web upload does not restart the API.
+- Until the first upload, `https://bottlemap.o-r.kr/owner/` answers `503` with a short notice, and the API works as usual.
+- To upload the current `main` again (after a failed upload, or once the setup below is done): Actions → **Owner web CI/CD** → Run workflow on `main`.
+
+One-time setup. Steps 1 to 4 can be done before the workflow first runs on `main`: the upload script reaches the server with that commit's backend deployment, which the upload waits for.
+
+1. **Upload key.** On your PC, create a key used only for the upload, without a passphrase:
+
+   ```sh
+   ssh-keygen -t ed25519 -N "" -C bottlemap-owner-web-upload -f bottlemap-owner-web-upload
+   ```
+
+2. **Allow the key on the server, for the upload script only:**
+
+   ```sh
+   printf 'restrict,command="/home/ubuntu/swpp-2026-project-team-19/backend/deploy/owner-web-upload.sh" %s\n' \
+     "$(cat bottlemap-owner-web-upload.pub)" | ssh -i bottlemap-key.pem ubuntu@bottlemap.o-r.kr 'cat >> ~/.ssh/authorized_keys'
+   ```
+
+   The script takes only a full commit SHA as its command and a gzip tar of the build on stdin. It refuses an archive over 50 MB or that unpacks to over 200 MB or takes over 60 seconds to unpack, one without `index.html`, and anything but plain files and directories inside the build. It keeps the last three releases. It copies the hashed files (`assets/`) of the build being replaced, from the last 7 days, into the new one, so a page opened before the switch still loads its scripts after it.
+
+3. **GitHub secret.** In the `production` environment, add `OWNER_WEB_UPLOAD_SSH_KEY`: the whole private key file `bottlemap-owner-web-upload`. The job reuses `DEPLOY_KNOWN_HOSTS`. Then delete the local private key.
+
+4. **Settings.** Add `OWNER_WEB_DIR=/home/ubuntu/bottlemap-owner-web/current` to `backend/.env` and restart once (`sudo systemctl restart bottlemap-api`).
+
+5. **Check.** Run the workflow on `main` (Run workflow). Its last step compares `https://bottlemap.o-r.kr/owner/` with the build it uploaded.
+
+A leaked upload key can put any page at `/owner/`, on the same origin as `/admin` and the API, so it is more powerful than the deploy key. Keep it only in the `production` environment, and remove its `authorized_keys` line if it may have leaked. To roll back by hand: `ls -t ~/bottlemap-owner-web/releases` on the server, then `ln -sfn releases/<older directory> ~/bottlemap-owner-web/current` (no restart).
 
 ### Loading the catalog seed
 
@@ -232,6 +267,7 @@ The seed upserts by id: rows in the seed overwrite changes made to the same rows
   4. For the map and address search in new_bar approvals: `KAKAO_JAVASCRIPT_KEY` in `.env` (Kakao Developers > the team's app > App Keys: the JavaScript key, from the same app as the Android native app key). It is public by design and is sent to the browser, so it works only on the domains registered under Platform > Web: register `https://bottlemap.o-r.kr` (and `http://localhost:8000` for local development), and keep the Kakao Map service enabled for the app. Never put the REST API or Admin key here. Without it, or on an unregistered domain, the approval form says so and the operator types the coordinates. On an unregistered domain the map still loads but the address search fails with `401`; locally, open `http://localhost:8000/admin/`, not `127.0.0.1` (uvicorn prints the latter), because Kakao treats them as different domains.
   5. Restart after changing these keys (`sudo systemctl restart bottlemap-api`); the service reads `.env` only when it starts.
   6. Check: open `$BASE/admin/`, sign in with an operator's Google account, and see the pending list. Open a pending `new_bar` application and press 주소로 좌표 찾기: the coordinates fill in and the map shows a marker. A signed-in user who is not an operator sees an access message; the APIs themselves refuse them (`403`).
+- **Owner web (`/owner/`):** the bar management pages for owners without an Android phone, served by the API at `$BASE/owner/` from `OWNER_WEB_DIR` and uploaded by GitHub Actions ([Owner web](#owner-web-owner)). It uses the same `SUPABASE_PUBLISHABLE_KEY` and `KAKAO_JAVASCRIPT_KEY` as `/admin` (`/owner/config.js`). Once it signs in with Google, add `https://bottlemap.o-r.kr/owner/` (and `http://localhost:5173/owner/` for `npm run dev`) to the Supabase Redirect URLs.
 - **Temporary login** is off on the server since 2026-11-02 (`TEMP_AUTH_ENABLED=false`); everyone signs in with Google. Keep it off: while it is on, anyone who reaches the server gets an operator token. `curl -i -X POST $BASE/api/auth/temp-login` must return `404`, and the start log must not show `Temporary login is on` (`journalctl -u bottlemap-api | grep "Temporary login is on"`).
 - **Known limitation:** an import that is `processing` when the service restarts stays there; delete it with `reset_menu_imports.py` and upload again.
 - **Cost:** stop the EC2 and RDS instances when idle. A stopped RDS instance starts again by itself after 7 days, and the Elastic IP is billed while the instance is stopped.
@@ -269,4 +305,4 @@ uv run python -c "from cryptography.fernet import Fernet; print(Fernet.generate_
 
 ## 7. Teardown
 
-When the project ends: delete the RDS instance (and any snapshots), terminate the EC2 instance, release the Elastic IP, empty and delete the S3 bucket, delete the IAM role and the `bottlemap-*` security groups, remove the DNS record, and delete the `production` environment (with its deploy key) on GitHub.
+When the project ends: delete the RDS instance (and any snapshots), terminate the EC2 instance, release the Elastic IP, empty and delete the S3 bucket, delete the IAM role and the `bottlemap-*` security groups, remove the DNS record, and delete the `production` environment (with its deploy, seed, and owner web upload keys) on GitHub.

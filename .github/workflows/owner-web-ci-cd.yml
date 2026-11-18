@@ -1,0 +1,262 @@
+name: Owner web CI/CD
+
+# The owner web (owner-web/, served by the API at /owner/). Pull requests run the checks; a push to main
+# that changes owner-web/ also builds the page here and uploads it to the server (DEPLOY.md, section 5).
+# No workflow-level path filter, for the same reason as Android CI: a skipped workflow leaves a required
+# check Pending. The changes job skips the jobs on unrelated changes instead.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Pull requests: a newer push cancels the outdated run. Other runs get a group of their own, so they never
+# replace one another while pending; only the deploy job takes turns, in the deploy-production queue.
+concurrency:
+  group: owner-web-ci-cd-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || format('run-{0}', github.run_id) }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  changes:
+    name: Owner web / changes
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      web: ${{ steps.filter.outputs.web }}
+      api: ${{ steps.filter.outputs.api }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Detect owner web and API changes
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          # api: what changes the OpenAPI document, so the generated types may be out of date.
+          filters: |
+            web:
+              - 'owner-web/**'
+              - '.github/workflows/owner-web-ci-cd.yml'
+            api:
+              - 'backend/app/**'
+              - 'backend/scripts/export_openapi.py'
+              - 'backend/pyproject.toml'
+              - 'backend/uv.lock'
+
+  checks:
+    name: Owner web / typecheck, tests, build
+    needs: changes
+    if: ${{ needs.changes.outputs.web == 'true' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: owner-web
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: owner-web/.nvmrc
+          cache: npm
+          cache-dependency-path: owner-web/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Type check
+        run: npm run typecheck
+      - name: Unit tests
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Upload the build
+        # The deploy job uploads exactly this tested build to the server.
+        uses: actions/upload-artifact@v7
+        with:
+          name: owner-web-dist
+          path: owner-web/dist
+          if-no-files-found: error
+          retention-days: 7
+
+  api-types:
+    name: Owner web / API types up to date
+    needs: changes
+    if: ${{ needs.changes.outputs.web == 'true' || needs.changes.outputs.api == 'true' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      UV_PYTHON: "3.12"
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: owner-web/.nvmrc
+          cache: npm
+          cache-dependency-path: owner-web/package-lock.json
+      - uses: astral-sh/setup-uv@v10.2.0
+        with:
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+      - name: Install dependencies
+        run: |
+          (cd backend && uv sync --frozen)
+          (cd owner-web && npm ci)
+      - name: Regenerate src/api/schema.d.ts from the backend
+        working-directory: owner-web
+        run: npm run gen:api
+      - name: Fail when the committed types differ
+        run: |
+          if ! git diff --exit-code -- owner-web/src/api/schema.d.ts; then
+            echo "::error::owner-web/src/api/schema.d.ts does not match the backend's OpenAPI document. Run 'npm run gen:api' in owner-web/ and commit the result."
+            exit 1
+          fi
+
+  wait-for-backend:
+    name: Owner web / wait for the backend deployment
+    # Upload the page only once the server runs the backend it was built against: the last commit up to this
+    # one that Backend CI/CD deploys (its paths below), or a newer commit, since deploy.sh deploys the latest
+    # main. Checked on every upload, not only when this push changed the backend: a web-only commit merged
+    # right after a backend commit must wait for that commit's deployment too. When the server already has
+    # it, this passes at once. A separate job outside the deploy-production group, so the backend deployment
+    # it waits for is not queued behind it.
+    needs: [changes, checks, api-types]
+    if: >-
+      github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+      && (needs.changes.outputs.web == 'true' || github.event_name == 'workflow_dispatch')
+      && needs.checks.result == 'success' && needs.api-types.result == 'success'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      DEPLOY_HOST: bottlemap.o-r.kr
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # The whole history, to find the last backend commit and whether the deployed commit includes it.
+          fetch-depth: 0
+      - name: Wait until the server includes the last backend change
+        run: |
+          # The same paths as the triggers of .github/workflows/backend-ci-cd.yml; keep them in sync.
+          need="$(git log -1 --format=%H "$GITHUB_SHA" -- backend ai/catalog eval .github/workflows/backend-ci-cd.yml)"
+          if [ -z "$need" ]; then
+            echo "No backend commit up to ${GITHUB_SHA::7}; nothing to wait for."
+            exit 0
+          fi
+          echo "The page needs the backend of ${need::7} ($(git log -1 --format=%s "$need"))."
+          for _ in $(seq 1 80); do
+            version="$(curl -fsS "https://$DEPLOY_HOST/health" | jq -r '.version // empty')" || version=""
+            if [ -n "$version" ]; then
+              git fetch --quiet origin main || true
+              # /health reports a short hash; the server has the backend change when it is an ancestor.
+              if deployed="$(git rev-parse --verify --quiet "$version^{commit}")" \
+                && git merge-base --is-ancestor "$need" "$deployed"; then
+                echo "Server runs $version, which includes ${need::7}"
+                exit 0
+              fi
+            fi
+            sleep 30
+          done
+          echo "::error::The server still runs '${version:-unknown}', which does not include the backend change ${need::7} this page was built against. Check Backend CI/CD for that commit; once it is deployed, re-run this job or run this workflow on main from the Actions tab."
+          exit 1
+
+  deploy:
+    name: Owner web / deploy
+    needs: [changes, checks, api-types, wait-for-backend]
+    # Runs only after every job it needs has passed, wait-for-backend included.
+    if: >-
+      github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+      && (needs.changes.outputs.web == 'true' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    environment:
+      name: production
+      url: https://bottlemap.o-r.kr/owner/
+    # Same group as the backend deploy and the catalog seed: one change to the server at a time.
+    # queue: max keeps every pending deployment (first in, first out) instead of replacing the pending one,
+    # so an owner web upload is never dropped because another deployment was queued after it.
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+      queue: max
+    env:
+      DEPLOY_HOST: bottlemap.o-r.kr
+      DEPLOY_USER: ubuntu
+    steps:
+      - name: Check the upload secrets
+        env:
+          OWNER_WEB_UPLOAD_SSH_KEY: ${{ secrets.OWNER_WEB_UPLOAD_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          missing=()
+          for name in OWNER_WEB_UPLOAD_SSH_KEY DEPLOY_KNOWN_HOSTS; do
+            [ -n "${!name}" ] || missing+=("$name")
+          done
+          if [ "${#missing[@]}" -gt 0 ]; then
+            echo "::error::Missing secrets in the production environment: ${missing[*]}. See backend/DEPLOY.md, section 5, Owner web."
+            exit 1
+          fi
+
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Skip when a newer main commit changed the owner web
+        # Queued deployments run in the order they started waiting, so an older build may get its turn after
+        # a newer one. Upload only when main's owner-web/ is still what this build was made from; otherwise
+        # the run of the newer commit uploads its own build. A newer commit that left owner-web/ alone does
+        # not upload, so this run still does.
+        id: latest
+        run: |
+          git fetch --quiet origin main
+          if git diff --quiet "$GITHUB_SHA" origin/main -- owner-web/; then
+            echo "upload=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "upload=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::main is at $(git rev-parse --short origin/main), which changed owner-web/ after ${GITHUB_SHA::7}; that commit's run uploads the newer build." | tee -a "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Download the tested build
+        if: steps.latest.outputs.upload == 'true'
+        uses: actions/download-artifact@v8
+        with:
+          name: owner-web-dist
+          path: dist
+
+      - name: Set up SSH
+        if: steps.latest.outputs.upload == 'true'
+        env:
+          OWNER_WEB_UPLOAD_SSH_KEY: ${{ secrets.OWNER_WEB_UPLOAD_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$OWNER_WEB_UPLOAD_SSH_KEY" > ~/.ssh/owner_web_upload_key
+          chmod 600 ~/.ssh/owner_web_upload_key
+          # The pinned host key: never connect to a server that answers with another one.
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+
+      - name: Upload the build to the server
+        if: steps.latest.outputs.upload == 'true'
+        # The upload key is restricted on the server to deploy/owner-web-upload.sh, which reads the build
+        # from stdin and takes only the commit SHA as its command.
+        run: >-
+          tar -C dist -czf - . |
+          ssh -i ~/.ssh/owner_web_upload_key
+          -o BatchMode=yes -o StrictHostKeyChecking=yes -o ServerAliveInterval=30
+          "$DEPLOY_USER@$DEPLOY_HOST" "$GITHUB_SHA"
+
+      - name: Check the deployed page
+        if: steps.latest.outputs.upload == 'true'
+        # The page's index.html names its hashed files, so an equal index.html means this build is served.
+        run: |
+          for _ in $(seq 1 10); do
+            if curl -fsS "https://$DEPLOY_HOST/owner/" -o served.html && cmp -s served.html dist/index.html; then
+              echo "Deployed the owner web of ${GITHUB_SHA::7} to https://$DEPLOY_HOST/owner/" | tee -a "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            sleep 3
+          done
+          echo "::error::https://$DEPLOY_HOST/owner/ does not serve this build. Check OWNER_WEB_DIR in backend/.env on the server (DEPLOY.md, section 5)."
+          exit 1

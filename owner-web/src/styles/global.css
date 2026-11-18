@@ -1,0 +1,14 @@
+/* Dark first, like the app (Tokens.kt: no light scheme is approved yet). */
+:root {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  background: var(--bm-color-canvas);
+  color: var(--bm-color-text-primary);
+  font-family: var(--bm-font-sans);
+  font-size: var(--bm-type-body);
+  line-height: var(--bm-type-body-line-height);
+  -webkit-text-size-adjust: 100%;
+}

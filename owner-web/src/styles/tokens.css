@@ -1,0 +1,112 @@
+/*
+ * BottleMap design tokens for the owner web, copied from the Android app:
+ * android/app/src/main/java/com/zerotoone/bottlemap/ui/theme/Tokens.kt (design-system v1.0, 2026-10-27).
+ * When a value changes there, change it here too; names follow the Kotlin ones in kebab case.
+ *
+ * Units: dp becomes px. sp becomes rem (16sp = 1rem), so text follows the browser's font size the way
+ * sp follows the phone's font size.
+ */
+:root {
+  /* BottleMapPalette: Cocoa Charcoal, dark first. */
+  --bm-color-canvas: #211e1b;
+  --bm-color-surface: #302b27;
+  --bm-color-surface-elevated: #3a332e;
+  --bm-color-surface-variant: #403832;
+
+  --bm-color-primary: #c99d6b;
+  --bm-color-on-primary: #211a14;
+  --bm-color-primary-container: #503c29;
+  --bm-color-on-primary-container: #f7dfbf;
+
+  --bm-color-text-primary: #f2ede8;
+  --bm-color-text-secondary: #c7bbb0;
+  --bm-color-text-muted: #b9aea4;
+  --bm-color-outline: #786a60;
+  --bm-color-outline-variant: #51473f;
+
+  --bm-color-error: #ffb4ab;
+  --bm-color-on-error: #690005;
+  --bm-color-error-container: #8e3736;
+  --bm-color-on-error-container: #ffd8cc;
+  --bm-color-success: #b9dfc8;
+  --bm-color-on-success: #163624;
+  --bm-color-success-container: #244c38;
+  --bm-color-on-success-container: #d6eedc;
+
+  --bm-color-price-option-background: var(--bm-color-surface-elevated);
+  --bm-color-divider: var(--bm-color-outline-variant);
+  --bm-color-scrim: #000000;
+
+  /* BottleMapSpacing */
+  --bm-space-xxs: 4px;
+  --bm-space-xs: 8px;
+  --bm-space-sm: 12px;
+  --bm-space-md: 16px;
+  --bm-space-lg: 20px;
+  --bm-space-xl: 24px;
+  --bm-space-xxl: 32px;
+  --bm-space-xxxl: 40px;
+
+  --bm-screen-horizontal: var(--bm-space-lg);
+  --bm-section-gap: var(--bm-space-xl);
+  --bm-card-padding: var(--bm-space-md);
+  --bm-row-gap: var(--bm-space-sm);
+  --bm-price-to-pour-gap: var(--bm-space-xs);
+
+  /* BottleMapRadii and BottleMapShapes */
+  --bm-radius-small: 8px;
+  --bm-radius-medium: 12px;
+  --bm-radius-large: 16px;
+  --bm-radius-pill: 100px;
+
+  --bm-radius-button: var(--bm-radius-medium);
+  --bm-radius-text-field: var(--bm-radius-medium);
+  --bm-radius-card: var(--bm-radius-large);
+  --bm-radius-price-row: var(--bm-radius-small);
+  --bm-radius-chip: var(--bm-radius-pill);
+
+  /* BottleMapSizes: minimums, never fixed heights that clip scaled text. */
+  --bm-min-touch-target: 48px;
+  --bm-primary-button-min-height: 56px;
+  --bm-secondary-button-min-height: 48px;
+  --bm-search-field-min-height: 56px;
+  --bm-bar-card-thumbnail: 64px;
+
+  /* BottleMapMotion, in milliseconds. Honor prefers-reduced-motion where they are used. */
+  --bm-motion-tap-feedback: 150ms;
+  --bm-motion-selection: 180ms;
+  --bm-motion-content-transition: 240ms;
+
+  /* BottleMapTypeScale */
+  --bm-type-display: 1.75rem;
+  --bm-type-display-line-height: 2.25rem;
+  --bm-type-screen-title: 1.5rem;
+  --bm-type-screen-title-line-height: 2rem;
+  --bm-type-section-title: 1.25rem;
+  --bm-type-section-title-line-height: 1.75rem;
+  --bm-type-card-title: 1rem;
+  --bm-type-card-title-line-height: 1.4375rem;
+  --bm-type-body: 1rem;
+  --bm-type-body-line-height: 1.5rem;
+  --bm-type-label: 0.875rem;
+  --bm-type-label-line-height: 1.25rem;
+  --bm-type-caption: 0.75rem;
+  --bm-type-caption-line-height: 1.125rem;
+  --bm-type-price: 1rem;
+  --bm-type-price-line-height: 1.4375rem;
+  --bm-type-pour-amount: 0.8125rem;
+  --bm-type-pour-amount-line-height: 1.25rem;
+  --bm-type-unit-rate: 0.75rem;
+  --bm-type-unit-rate-line-height: 1rem;
+
+  /*
+   * Fonts. The design names Pretendard (text) and Bookk Myungjo (screen titles), but the app does not
+   * ship them yet: BottleMapTheme.kt uses the system SansSerif and Serif. The web does the same with the
+   * system's Korean fonts. When the app adds the font files, add them here (and check their web license).
+   */
+  --bm-font-sans: system-ui, -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
+  --bm-font-serif: "Noto Serif KR", "AppleMyungjo", "Batang", serif;
+
+  /* Web only: pages keep a phone-like column on wide screens. */
+  --bm-content-max-width: 480px;
+}
