@@ -1,0 +1,35 @@
+.sheet {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: var(--bm-content-max-width);
+  margin: auto auto 0;
+  padding: 0;
+  border: none;
+  border-radius: var(--bm-radius-large) var(--bm-radius-large) 0 0;
+  background: var(--bm-color-surface);
+  color: var(--bm-color-text-primary);
+}
+
+.sheet::backdrop {
+  background: rgb(0 0 0 / 0.6);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bm-space-md);
+  padding: var(--bm-space-xl) var(--bm-screen-horizontal) calc(var(--bm-space-xl) + env(safe-area-inset-bottom));
+}
+
+.title {
+  margin: 0;
+  font-size: var(--bm-type-section-title);
+  line-height: var(--bm-type-section-title-line-height);
+}
+
+@media (min-width: 600px) {
+  .sheet {
+    margin: auto;
+    border-radius: var(--bm-radius-large);
+  }
+}
