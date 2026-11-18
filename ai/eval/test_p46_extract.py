@@ -137,6 +137,18 @@ def test_another_configuration_in_the_run_dir_stops(setup, monkeypatch):
     assert client.calls == 2
 
 
+def test_the_manifest_pins_the_non_whisky_lines(setup):
+    argv, client, tmp_path = setup
+    assert run(argv, "--runs", "1") == 0
+    manifest = json.loads((tmp_path / "out" / "manifest.json").read_text(encoding="utf-8"))
+    assert manifest["configuration"]["mixed_lines_sha256"] == p46.sha256_lf(tmp_path / "mixed_lines.json")
+    (tmp_path / "mixed_lines.json").write_text(json.dumps({"reviewed": "tester 2026-11-18", "photos": {}}),
+                                               encoding="utf-8")
+    with pytest.raises(SystemExit, match="another configuration \\(mixed_lines_sha256\\)"):
+        run(argv, "--runs", "2")
+    assert client.calls == 2
+
+
 def test_a_run_waits_for_the_review_of_the_non_whisky_lines(setup, capsys):
     argv, client, tmp_path = setup
     (tmp_path / "mixed_lines.json").write_text(json.dumps({"reviewed": None, "photos": {}}), encoding="utf-8")

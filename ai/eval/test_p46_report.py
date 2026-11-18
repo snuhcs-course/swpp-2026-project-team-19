@@ -77,8 +77,10 @@ def test_matching_results_are_grouped_and_incomplete_runs_left_out(tmp_path):
     groups = grouped["groups"]
     assert set(groups) == {"full/label/rules", "full/label/llm", "full/label/server after llm", "ops/e2e/rules"}
     assert groups["full/label/llm"]["top1"] == {"mean": 0.75, "min": 0.7, "max": 0.8, "n": 2}
-    assert groups["full/label/rules"]["top1"]["n"] == 3
-    assert grouped["incomplete_left_out"] == ["c.json:llm"]
+    assert groups["full/label/rules"]["top1"]["n"] == 1  # the same rules block in a, b and c counts once
+    assert grouped["incomplete_left_out"] == ["c.json:llm"] and grouped["rules_differ"] == []
+    (tmp_path / "e.json").write_text(json.dumps(matching_result("full", 0.65, llm=0.7)), encoding="utf-8")
+    assert p46.matching_groups([tmp_path / n for n in (*files, "e.json")])["rules_differ"] == ["e.json"]
 
 
 def test_the_table_says_which_thresholds_are_met(tmp_path, monkeypatch):
@@ -92,13 +94,40 @@ def test_the_table_says_which_thresholds_are_met(tmp_path, monkeypatch):
     runs = {r: {"missing_photos": []} for r in p46.RUNS}
     (run_dir / "scores.json").write_text(json.dumps({"failed_calls": [], "runs": runs, "summary": {
         "f1_strict": spread(0.95), "price_accuracy": spread(0.94), "item_accuracy": spread(0.9)}}), encoding="utf-8")
-    match = tmp_path / "m.json"
-    match.write_text(json.dumps(matching_result("full", 0.774)), encoding="utf-8")
-    report = p46.build({"v2": run_dir}, [match], repo=tmp_path)
+    matches = []
+    for catalog, top1 in (("full", 0.774), ("asis", 0.837), ("ops", 0.791)):
+        for r in (1, 2, 3):
+            path = tmp_path / f"{catalog}_label_llm_r{r}.json"
+            path.write_text(json.dumps(matching_result(catalog, top1, llm=top1)), encoding="utf-8")
+            matches.append(path)
+    report = p46.build({"v2": run_dir}, matches, repo=tmp_path)
     assert report["expected_rows"] == {"whisky": 1, "cocktail": 1, "food": 0, "other": 1}
     text = p46.markdown(report)
     assert "0.950 [0.950-0.950] (NFR-1 >= 0.9: met)" in text and "0.940 [0.940-0.940] (NFR-2 >= 0.95: NOT met)" in text
     assert "| full/label/rules | 0.774 (NFR-3 >= 0.9: NOT met) | 0.0000 (NFR-4 <= 0.02: met)" in text
+    assert "| asis/label/llm | 0.837 [0.837-0.837] | 0.0000 [0.0000-0.0000] (NFR-4 <= 0.02: met)" in text
+    assert "| ops/label/llm | 0.791 [0.791-0.791] | 0.0000 [0.0000-0.0000] | " in text  # descriptive: no verdict
+    assert report["non_whisky_lines_sha256"] == p46.sha256_lf(tmp_path / p46.MIXED_LINES)
+
+
+def test_a_group_short_of_its_runs_or_a_missing_group_gets_no_verdict(tmp_path):
+    def build(names):
+        paths = []
+        for name in names:
+            catalog, r = name.split("_")
+            path = tmp_path / f"{catalog}_label_llm_{r}.json"
+            path.write_text(json.dumps(matching_result(catalog, 0.8, llm=0.8)), encoding="utf-8")
+            paths.append(path)
+        return {"extraction": {}, "mixed": {}, "matching": p46.matching_groups(paths)}
+    report = build(["full_r1", "full_r2", "asis_r1", "asis_r2", "asis_r3"])
+    text = p46.markdown(report)
+    assert "| full/label/llm | 0.800 [0.800-0.800] | 0.0000 [0.0000-0.0000] | 0.0100 [0.0100-0.0100] | 2.00 [2.00-2.00] | 2 of 3 |" in text
+    assert "| asis/label/llm | 0.800 [0.800-0.800] | 0.0000 [0.0000-0.0000] (NFR-4 <= 0.02: met)" in text
+    for f in tmp_path.glob("asis_*"):
+        f.unlink()
+    text = p46.markdown(build(["full_r1", "full_r2", "full_r3"]))
+    assert "NFR-" not in text.split("## Matching")[1].split("NFR-3 is decided")[0]
+    assert "Missing, so no matching verdict: asis/label/rules, asis/label/llm" in text
     assert p46.verdict("hard_per_photo", 1.0) == "" and p46._cell(None) == "-"
 
 

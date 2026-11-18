@@ -47,7 +47,8 @@
      "n": 3
     }
    },
-   "failed_calls": 0
+   "failed_calls": 0,
+   "problems": []
   },
   "v1": {
    "run_dir": "../_outgoing/p30_run/out/2026-10-30_p30/hybrid_i3",
@@ -95,12 +96,14 @@
      "n": 3
     }
    },
-   "failed_calls": 0
+   "failed_calls": 0,
+   "problems": []
   }
  },
  "mixed": {
   "v2": {
    "run_dir": "ai/runs/2026-11-17_p46/hybrid_v2_i3",
+   "pinned_mixed_lines_sha256": null,
    "counts": {
     "records": 99,
     "rejected": 0,
@@ -437,6 +440,7 @@
   },
   "v1": {
    "run_dir": "../_outgoing/p30_run/out/2026-10-30_p30/hybrid_i3",
+   "pinned_mixed_lines_sha256": null,
    "counts": {
     "records": 99,
     "rejected": 0,
@@ -1061,7 +1065,8 @@
      "min": 0.7978723404255319,
      "max": 0.8067375886524822,
      "n": 3
-    }
+    },
+    "runs_required": 3
    },
    "asis/e2e/server after rules": {
     "files": [
@@ -1108,7 +1113,8 @@
      "min": 0.7978723404255319,
      "max": 0.8067375886524822,
      "n": 3
-    }
+    },
+    "runs_required": 3
    },
    "asis/label/llm": {
     "files": [
@@ -1149,13 +1155,11 @@
      "max": 4.151515151515151,
      "n": 3
     },
-    "top1_missed_as_fail": null
+    "top1_missed_as_fail": null,
+    "runs_required": 3
    },
    "asis/label/rules": {
     "files": [
-     "asis_label_llm_r1.json",
-     "asis_label_llm_r2.json",
-     "asis_label_llm_r3.json",
      "asis_label_rules.json"
     ],
     "catalog_digest": [
@@ -1171,27 +1175,28 @@
      "mean": 0.8368794326241135,
      "min": 0.8368794326241135,
      "max": 0.8368794326241135,
-     "n": 4
+     "n": 1
     },
     "fm_rate": {
      "mean": 0.0014814814814814814,
      "min": 0.0014814814814814814,
      "max": 0.0014814814814814814,
-     "n": 4
+     "n": 1
     },
     "accept_err_rate": {
      "mean": 0.008888888888888889,
      "min": 0.008888888888888889,
      "max": 0.008888888888888889,
-     "n": 4
+     "n": 1
     },
     "hard_per_photo": {
      "mean": 4.636363636363637,
      "min": 4.636363636363637,
      "max": 4.636363636363637,
-     "n": 4
+     "n": 1
     },
-    "top1_missed_as_fail": null
+    "top1_missed_as_fail": null,
+    "runs_required": 1
    },
    "asis/label/server after llm": {
     "files": [
@@ -1232,7 +1237,8 @@
      "max": 3.9696969696969697,
      "n": 3
     },
-    "top1_missed_as_fail": null
+    "top1_missed_as_fail": null,
+    "runs_required": 3
    },
    "asis/label/server after rules": {
     "files": [
@@ -1271,7 +1277,8 @@
      "max": 4.333333333333333,
      "n": 1
     },
-    "top1_missed_as_fail": null
+    "top1_missed_as_fail": null,
+    "runs_required": 1
    },
    "full/e2e/llm": {
     "files": [
@@ -1318,7 +1325,8 @@
      "min": 0.7352941176470589,
      "max": 0.7430340557275542,
      "n": 3
-    }
+    },
+    "runs_required": 3
    },
    "full/e2e/rules": {
     "files": [
@@ -1365,7 +1373,8 @@
      "min": 0.7352941176470589,
      "max": 0.7430340557275542,
      "n": 3
-    }
+    },
+    "runs_required": 3
    },
    "full/e2e/server after llm": {
     "files": [
@@ -1412,7 +1421,8 @@
      "min": 0.7352941176470589,
      "max": 0.7430340557275542,
      "n": 3
-    }
+    },
+    "runs_required": 3
    },
    "full/label/llm": {
     "files": [
@@ -1453,13 +1463,11 @@
      "max": 1.9696969696969697,
      "n": 3
     },
-    "top1_missed_as_fail": null
+    "top1_missed_as_fail": null,
+    "runs_required": 3
    },
    "full/label/rules": {
     "files": [
-     "full_label_llm_r1.json",
-     "full_label_llm_r2.json",
-     "full_label_llm_r3.json",
      "full_label_rules.json"
     ],
     "catalog_digest": [
@@ -1475,27 +1483,28 @@
      "mean": 0.7739938080495357,
      "min": 0.7739938080495357,
      "max": 0.7739938080495357,
-     "n": 4
+     "n": 1
     },
     "fm_rate": {
      "mean": 0.0014814814814814814,
      "min": 0.0014814814814814814,
      "max": 0.0014814814814814814,
-     "n": 4
+     "n": 1
     },
     "accept_err_rate": {
      "mean": 0.005925925925925926,
      "min": 0.005925925925925926,
      "max": 0.005925925925925926,
-     "n": 4
+     "n": 1
     },
     "hard_per_photo": {
      "mean": 2.9393939393939394,
      "min": 2.9393939393939394,
      "max": 2.9393939393939394,
-     "n": 4
+     "n": 1
     },
-    "top1_missed_as_fail": null
+    "top1_missed_as_fail": null,
+    "runs_required": 1
    },
    "full/label/server after llm": {
     "files": [
@@ -1536,7 +1545,8 @@
      "max": 1.696969696969697,
      "n": 3
     },
-    "top1_missed_as_fail": null
+    "top1_missed_as_fail": null,
+    "runs_required": 3
    },
    "full/label/server after rules": {
     "files": [
@@ -1575,7 +1585,8 @@
      "max": 2.484848484848485,
      "n": 1
     },
-    "top1_missed_as_fail": null
+    "top1_missed_as_fail": null,
+    "runs_required": 1
    },
    "ops/e2e/llm": {
     "files": [
@@ -1622,7 +1633,8 @@
      "min": 0.7523219814241486,
      "max": 0.760061919504644,
      "n": 3
-    }
+    },
+    "runs_required": 3
    },
    "ops/e2e/rules": {
     "files": [
@@ -1669,7 +1681,8 @@
      "min": 0.7523219814241486,
      "max": 0.760061919504644,
      "n": 3
-    }
+    },
+    "runs_required": 3
    },
    "ops/e2e/server after llm": {
     "files": [
@@ -1716,7 +1729,8 @@
      "min": 0.7523219814241486,
      "max": 0.760061919504644,
      "n": 3
-    }
+    },
+    "runs_required": 3
    },
    "ops/label/llm": {
     "files": [
@@ -1757,13 +1771,11 @@
      "max": 1.878787878787879,
      "n": 3
     },
-    "top1_missed_as_fail": null
+    "top1_missed_as_fail": null,
+    "runs_required": 3
    },
    "ops/label/rules": {
     "files": [
-     "ops_label_llm_r1.json",
-     "ops_label_llm_r2.json",
-     "ops_label_llm_r3.json",
      "ops_label_rules.json"
     ],
     "catalog_digest": [
@@ -1779,27 +1791,28 @@
      "mean": 0.7910216718266254,
      "min": 0.7910216718266254,
      "max": 0.7910216718266254,
-     "n": 4
+     "n": 1
     },
     "fm_rate": {
      "mean": 0.0014814814814814814,
      "min": 0.0014814814814814814,
      "max": 0.0014814814814814814,
-     "n": 4
+     "n": 1
     },
     "accept_err_rate": {
      "mean": 0.005925925925925926,
      "min": 0.005925925925925926,
      "max": 0.005925925925925926,
-     "n": 4
+     "n": 1
     },
     "hard_per_photo": {
      "mean": 2.515151515151515,
      "min": 2.515151515151515,
      "max": 2.515151515151515,
-     "n": 4
+     "n": 1
     },
-    "top1_missed_as_fail": null
+    "top1_missed_as_fail": null,
+    "runs_required": 1
    },
    "ops/label/server after llm": {
     "files": [
@@ -1840,7 +1853,8 @@
      "max": 1.606060606060606,
      "n": 3
     },
-    "top1_missed_as_fail": null
+    "top1_missed_as_fail": null,
+    "runs_required": 3
    },
    "ops/label/server after rules": {
     "files": [
@@ -1879,10 +1893,13 @@
      "max": 2.0606060606060606,
      "n": 1
     },
-    "top1_missed_as_fail": null
+    "top1_missed_as_fail": null,
+    "runs_required": 1
    }
   },
-  "incomplete_left_out": []
+  "incomplete_left_out": [],
+  "rules_differ": [],
+  "missing_groups": []
  },
  "expected_rows": {
   "whisky": 972,
@@ -1890,5 +1907,6 @@
   "food": 0,
   "other": 18
  },
- "non_whisky_lines_reviewed": "Jinwoo Park, 2026-11-18: the 14 rows and the 28 photos without a non-whisky line checked against the photos; nothing changed"
+ "non_whisky_lines_reviewed": "Jinwoo Park, 2026-11-18: the 14 rows and the 28 photos without a non-whisky line checked against the photos; nothing changed",
+ "non_whisky_lines_sha256": "84775e16fd0917e762d89f2d390b8980362bce08d03216252de83c49bd75c6c5"
 }

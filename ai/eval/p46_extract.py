@@ -98,11 +98,12 @@ def check_inputs(photos: list[dict], data_dir: Path) -> list[str]:
     return problems
 
 
-def configuration() -> dict:
+def configuration(mixed_lines: Path = MIXED_LINES) -> dict:
     return {"prompt": PROMPT, "prompt_version": hybrid_v2.PROMPT_VERSION,
             "prompt_sha256": hashlib.sha256(hybrid_v2.load_prompt().encode("utf-8")).hexdigest(),
             "model": rx.MODEL, "thinking_level": rx.THINKING_LEVEL,
             "max_attempts": ExtractionSettings.max_attempts, "photo_hashes_sha256": PHOTO_HASHES_SHA256,
+            "mixed_lines_sha256": sha256_lf(mixed_lines),
             "ocr": "P30 CLOVA cache, table detection off"}
 
 
@@ -115,10 +116,10 @@ def git_head() -> str | None:
         return None
 
 
-def update_manifest(out: Path, command: dict) -> None:
+def update_manifest(out: Path, command: dict, mixed_lines: Path = MIXED_LINES) -> None:
     """Keep one configuration per run dir; a command with another configuration stops."""
     path = out / "manifest.json"
-    config = configuration()
+    config = configuration(mixed_lines)
     manifest = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {"configuration": config, "commands": []}
     if manifest["configuration"] != config:
         different = sorted(k for k in config if manifest["configuration"].get(k) != config[k])
@@ -147,7 +148,7 @@ def main(argv=None, *, sleep=time.sleep) -> int:
         print("\n".join(problems))
         raise SystemExit(f"STOP: {len(problems)} of {len(photos)} photos cannot be run; nothing was sent")
     print(f"photos and OCR caches verified: {len(photos)}; prompt {hybrid_v2.PROMPT_VERSION} "
-          f"{configuration()['prompt_sha256'][:12]}, {rx.MODEL}, thinking {rx.THINKING_LEVEL}")
+          f"{configuration(args.mixed_lines)['prompt_sha256'][:12]}, {rx.MODEL}, thinking {rx.THINKING_LEVEL}")
     reviewed = json.loads(args.mixed_lines.read_text(encoding="utf-8")).get("reviewed")
     print(f"non-whisky lines ({args.mixed_lines.name}): " + (f"reviewed: {reviewed}" if reviewed else "NOT reviewed yet"))
     if args.check:
@@ -163,7 +164,7 @@ def main(argv=None, *, sleep=time.sleep) -> int:
     args.out.mkdir(parents=True, exist_ok=True)
     command = {"started_at": datetime.now(timezone.utc).isoformat(), "runs": args.runs, "code_commit": git_head(),
                "calls": 0, "stopped": None}
-    update_manifest(args.out, command)
+    update_manifest(args.out, command, args.mixed_lines)
 
     def finish(code: int) -> int:
         manifest = json.loads((args.out / "manifest.json").read_text(encoding="utf-8"))

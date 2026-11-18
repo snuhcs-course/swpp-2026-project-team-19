@@ -26,6 +26,7 @@ counts are reported as counts, and rates over them move by several points per li
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import statistics
 import sys
@@ -46,6 +47,16 @@ THRESHOLDS = {"f1_strict": (">=", 0.90, "NFR-1"), "price_accuracy": (">=", 0.95,
               "top1": (">=", 0.90, "NFR-3"), "fm_rate": ("<=", 0.02, "NFR-4")}
 MATCH_KEYS = ("top1", "fm_rate", "accept_err_rate", "hard_per_photo")
 RUNS = ("1", "2", "3")  # the extraction runs a verdict needs, each with every photo
+# Where the frozen definition takes the NFR-3/4 decision (ai/docs/i3_eval_freeze.md: label input;
+# NFR-3 on full, NFR-4 on full and asis). Other rows (ops, end to end) are descriptive.
+VERDICT_ROWS = {"top1": ("full/label/",), "fm_rate": ("full/label/", "asis/label/")}
+# Runs a group needs before it gets a verdict: the label-input rules evaluation is deterministic
+# and counted once; every other group is one result per run r1-r3.
+REQUIRED_GROUPS = ("full/label/rules", "full/label/llm", "asis/label/rules", "asis/label/llm")
+
+
+def required_runs(name: str) -> int:
+    return 1 if name.endswith("/label/rules") or name.endswith("/label/server after rules") else len(RUNS)
 
 
 def i3_fixtures(labels: dict, gold: dict, hashes: dict) -> list[dict]:
@@ -95,6 +106,10 @@ def mixed_report(run_dir: Path, fixtures: list[dict], lines: dict[str, list[dict
             "records": len(records)}
 
 
+def sha256_lf(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
+
+
 def spread(values: list[float]) -> dict | None:
     values = [v for v in values if v is not None]
     return {"mean": statistics.mean(values), "min": min(values), "max": max(values), "n": len(values)} if values else None
@@ -104,7 +119,9 @@ def matching_groups(paths: list[Path]) -> dict[str, dict]:
     """Result JSONs grouped by (catalog, input kind, matcher); incomplete LLM runs are left out and listed."""
     groups: dict[str, dict] = {}
     incomplete = []
-    for path in sorted(paths):
+    rules_seen: dict[tuple, dict] = {}  # every LLM result repeats its rules block: count it once
+    rules_differ = []
+    for path in sorted(paths, key=lambda p: ("_rules" not in p.name, p.name)):
         result = json.loads(path.read_text(encoding="utf-8"))
         kind = "e2e" if result["input"].startswith("extraction") else "label"
         for matcher in ("rules", "llm", "server"):
@@ -114,6 +131,13 @@ def matching_groups(paths: list[Path]) -> dict[str, dict]:
             if matcher != "rules" and block.get("complete") is False:
                 incomplete.append(f"{path.name}:{matcher}")
                 continue
+            if matcher == "rules":
+                key = (result["catalog"], result["input"], result["catalog_digest"])
+                if key in rules_seen:
+                    if rules_seen[key] != block["all"]:
+                        rules_differ.append(path.name)
+                    continue
+                rules_seen[key] = block["all"]
             name = f"{result['catalog']}/{kind}/{matcher}" + (
                 f" after {block['after']}" if matcher == "server" else "")
             group = groups.setdefault(name, {"files": [], "catalog_digest": set(), "rules_repo_head": set(),
@@ -132,8 +156,21 @@ def matching_groups(paths: list[Path]) -> dict[str, dict]:
                      "rules_repo_head": sorted(h for h in group["rules_repo_head"] if h),
                      "lines": sorted(set(group["lines"])),
                      **{key: spread(values) for key, values in group["values"].items()},
-                     "top1_missed_as_fail": spread(group["e2e_top1"])}
-    return {"groups": out, "incomplete_left_out": incomplete}
+                     "top1_missed_as_fail": spread(group["e2e_top1"]),
+                     "runs_required": required_runs(name)}
+    return {"groups": out, "incomplete_left_out": incomplete, "rules_differ": rules_differ,
+            "missing_groups": [name for name in REQUIRED_GROUPS if name not in out]}
+
+
+def matching_verdict(report: dict, name: str, key: str) -> str:
+    """A verdict only on the rows the frozen definition names, from all their runs, and only when
+    every group the decision rests on is there and the repeated rules blocks agree."""
+    m = report["matching"]
+    g = m["groups"][name]
+    if (not name.startswith(VERDICT_ROWS[key]) or g[key]["n"] < g["runs_required"]
+            or m["missing_groups"] or m["rules_differ"]):
+        return ""
+    return verdict(key, g[key]["mean"])
 
 
 def extraction_problems(scores: dict) -> list[str]:
@@ -191,18 +228,30 @@ def markdown(report: dict) -> str:
                          f"| {c['paired_non_whisky']}/{c['expected_non_whisky']} | {c['whisky_as_non_whisky']} "
                          f"| {c['non_whisky_as_whisky']} | {c['wrong_kind']} | {c['duplicates']} |")
         lines.append("")
+        changed = [name for name, m in report["mixed"].items()
+                   if m["pinned_mixed_lines_sha256"] not in (None, report["non_whisky_lines_sha256"])]
+        if changed:
+            lines += ["The non-whisky lines changed after these runs, so their counts are against other labels: "
+                      + ", ".join(changed), ""]
     if report["matching"]["groups"]:
         lines += ["## Matching (i3_match_eval.py)", "",
                   "| catalog / input / matcher | Top-1 | false-merge rate | acceptance error | hard lines per photo | runs |",
                   "|---|---|---|---|---|---|"]
         for name, g in report["matching"]["groups"].items():
-            judged = name.startswith("full/label/")
-            lines.append(f"| {name} | {_cell(g['top1'])}{verdict('top1', g['top1']['mean']) if judged else ''} "
-                         f"| {_cell(g['fm_rate'], 4)}{verdict('fm_rate', g['fm_rate']['mean'])} "
-                         f"| {_cell(g['accept_err_rate'], 4)} | {_cell(g['hard_per_photo'], 2)} | {g['top1']['n']} |")
-        lines.append("")
-        if report["matching"]["incomplete_left_out"]:
-            lines += ["Incomplete LLM runs left out: " + ", ".join(report["matching"]["incomplete_left_out"]), ""]
+            runs = f"{g['top1']['n']}" + ("" if g["top1"]["n"] >= g["runs_required"] else f" of {g['runs_required']}")
+            lines.append(f"| {name} | {_cell(g['top1'])}{matching_verdict(report, name, 'top1')} "
+                         f"| {_cell(g['fm_rate'], 4)}{matching_verdict(report, name, 'fm_rate')} "
+                         f"| {_cell(g['accept_err_rate'], 4)} | {_cell(g['hard_per_photo'], 2)} | {runs} |")
+        lines += ["", "NFR-3 is decided on full and NFR-4 on full and asis, label input (ai/docs/i3_eval_freeze.md); "
+                  "ops and end-to-end rows are descriptive. A label-input rules row is one deterministic evaluation.", ""]
+        m = report["matching"]
+        if m["incomplete_left_out"]:
+            lines += ["Incomplete LLM runs left out: " + ", ".join(m["incomplete_left_out"]), ""]
+        if m["missing_groups"]:
+            lines += ["Missing, so no matching verdict: " + ", ".join(m["missing_groups"]), ""]
+        if m["rules_differ"]:
+            lines += ["Rules blocks that differ from the first one, so no matching verdict: "
+                      + ", ".join(m["rules_differ"]), ""]
     return "\n".join(lines)
 
 
@@ -216,6 +265,7 @@ def build(extraction: dict[str, Path], matching: list[Path], repo: Path = REPO_R
         expected = [row for fx in fixtures for row in mixed.expected_rows(fx, lines["photos"])]
         report["expected_rows"] = {c: sum(row["category"] == c for row in expected) for c in mixed.CATEGORIES}
         report["non_whisky_lines_reviewed"] = lines.get("reviewed")
+        report["non_whisky_lines_sha256"] = sha256_lf(repo / MIXED_LINES)
         for name, run_dir in extraction.items():
             scores = run_dir / "scores.json"
             if scores.is_file():
@@ -223,7 +273,11 @@ def build(extraction: dict[str, Path], matching: list[Path], repo: Path = REPO_R
                 report["extraction"][name] = {"run_dir": run_dir.as_posix(), "summary": data["summary"],
                                               "failed_calls": len(data["failed_calls"]),
                                               "problems": extraction_problems(data)}
-            report["mixed"][name] = {"run_dir": run_dir.as_posix(), **mixed_report(run_dir, fixtures, lines["photos"])}
+            manifest = run_dir / "manifest.json"
+            pinned = (json.loads(manifest.read_text(encoding="utf-8")).get("configuration", {})
+                      .get("mixed_lines_sha256") if manifest.is_file() else None)
+            report["mixed"][name] = {"run_dir": run_dir.as_posix(), "pinned_mixed_lines_sha256": pinned,
+                                     **mixed_report(run_dir, fixtures, lines["photos"])}
     return report
 
 
