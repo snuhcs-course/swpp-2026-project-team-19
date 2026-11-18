@@ -60,8 +60,8 @@ export function SessionProvider({ gateway, children }: { gateway: AuthGateway; c
   const onExpired = useRef<() => void>(() => undefined);
   useEffect(() => {
     onExpired.current = () => {
-      void gateway.signOut();
       endSession(SESSION_EXPIRED_NOTICE);
+      void gateway.signOut();
     };
   }, [gateway, endSession]);
   const api = useMemo(() => createApiClient(createAuthFetch(gateway, () => onExpired.current())), [gateway]);
@@ -83,14 +83,20 @@ export function SessionProvider({ gateway, children }: { gateway: AuthGateway; c
       });
     const unsubscribe = gateway.onSessionChange((signedIn) => {
       if (!active) return;
-      if (signedIn) setStatus("signedIn");
-      else endSession(null);
+      if (signedIn) {
+        setStatus("signedIn");
+        return;
+      }
+      // Our own sign-outs end in this event too (Supabase sends SIGNED_OUT for a local sign-out), after the
+      // screen already has its reason, such as an expired session. Keep that reason; only the data goes.
+      queryClient.clear();
+      setStatus("signedOut");
     });
     return () => {
       active = false;
       unsubscribe();
     };
-  }, [gateway, endSession]);
+  }, [gateway, queryClient]);
 
   const signIn = useCallback(
     async (returnPath?: string) => {

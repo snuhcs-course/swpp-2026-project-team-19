@@ -26,9 +26,12 @@ export class FakeGateway implements AuthGateway {
   signInWithGoogle = async (redirectTo: string) => {
     this.calls.signIn.push(redirectTo);
   };
+  // Like Supabase, whose local sign-out also sends SIGNED_OUT to every listener.
   signOut = async () => {
     this.calls.signOut++;
     this.signedIn = false;
+    await Promise.resolve();
+    for (const listener of this.listeners) listener(false);
   };
   onSessionChange = (listener: (signedIn: boolean) => void) => {
     this.listeners.add(listener);
