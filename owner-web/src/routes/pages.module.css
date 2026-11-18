@@ -1,0 +1,33 @@
+.login {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bm-space-md);
+  box-sizing: border-box;
+  max-width: var(--bm-content-max-width);
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding: var(--bm-space-xxxl) var(--bm-screen-horizontal);
+}
+
+.loginTitle {
+  margin: 0;
+  font-family: var(--bm-font-serif);
+  font-size: var(--bm-type-display);
+  line-height: var(--bm-type-display-line-height);
+  font-weight: 700;
+}
+
+.loginText {
+  margin: 0 0 var(--bm-space-md);
+  color: var(--bm-color-text-secondary);
+}
+
+.notice {
+  margin: 0;
+  padding: var(--bm-space-sm) var(--bm-space-md);
+  border-radius: var(--bm-radius-medium);
+  background: var(--bm-color-error-container);
+  color: var(--bm-color-on-error-container);
+  font-size: var(--bm-type-label);
+  line-height: var(--bm-type-label-line-height);
+}

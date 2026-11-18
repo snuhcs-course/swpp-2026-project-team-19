@@ -1,0 +1,58 @@
+.shell {
+  box-sizing: border-box;
+  max-width: var(--bm-content-max-width);
+  min-height: 100dvh;
+  margin: 0 auto;
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: var(--bm-space-xs);
+  min-height: 56px;
+  padding: 0 var(--bm-space-xs) 0 var(--bm-screen-horizontal);
+  border-bottom: 1px solid var(--bm-color-divider);
+}
+
+.back {
+  min-width: var(--bm-min-touch-target);
+  min-height: var(--bm-min-touch-target);
+  margin-left: calc(-1 * var(--bm-space-sm));
+  border: none;
+  background: transparent;
+  color: var(--bm-color-text-primary);
+  font-size: 1.75rem;
+  cursor: pointer;
+}
+
+.title {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  font-family: var(--bm-font-serif);
+  font-size: var(--bm-type-section-title);
+  line-height: var(--bm-type-section-title-line-height);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.account {
+  display: flex;
+  align-items: center;
+  gap: var(--bm-space-xxs);
+  min-width: 0;
+}
+
+.email {
+  overflow: hidden;
+  max-width: 140px;
+  color: var(--bm-color-text-muted);
+  font-size: var(--bm-type-caption);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.main {
+  padding: var(--bm-space-xl) var(--bm-screen-horizontal) var(--bm-space-xxxl);
+}

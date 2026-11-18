@@ -1,11 +1,19 @@
-import styles from "./App.module.css";
+import { QueryClientProvider, type QueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { createBrowserRouter } from "react-router";
+import { RouterProvider } from "react-router/dom";
+import type { AuthGateway } from "./auth/gateway";
+import { SessionProvider } from "./auth/SessionProvider";
+import { OWNER_BASENAME, ownerRoutes } from "./routes/routes";
 
-/** The owner web's first page. The owner screens of the Android app come in later tasks. */
-export default function App() {
+/** The owner web: server data (TanStack Query), the owner's session, and the screens (React Router). */
+export default function App({ gateway, queryClient }: { gateway: AuthGateway; queryClient: QueryClient }) {
+  const [router] = useState(() => createBrowserRouter(ownerRoutes, { basename: OWNER_BASENAME }));
   return (
-    <main className={styles.page}>
-      <h1 className={styles.title}>BottleMap 사장님</h1>
-      <p className={styles.message}>바 관리 기능을 준비하고 있어요.</p>
-    </main>
+    <QueryClientProvider client={queryClient}>
+      <SessionProvider gateway={gateway}>
+        <RouterProvider router={router} />
+      </SessionProvider>
+    </QueryClientProvider>
   );
 }
