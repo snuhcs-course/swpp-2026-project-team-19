@@ -1,6 +1,5 @@
-import { useEffect, useRef, type ReactNode } from "react";
-import { Navigate, Outlet, useLocation, useNavigate, useParams } from "react-router";
-import { takeReturnPath } from "../auth/returnPath";
+import type { ReactNode } from "react";
+import { Navigate, Outlet, useLocation, useParams } from "react-router";
 import { useSession } from "../auth/SessionProvider";
 import { useMe, useMyBars, type OwnedBar } from "../owner/queries";
 import { ErrorState, LoadingState } from "../ui/states";
@@ -8,26 +7,20 @@ import { QueryView } from "../ui/QueryView";
 import { ButtonLink } from "../ui/Button";
 
 /**
- * Every screen but sign-in: a signed-out visitor goes to sign-in and comes back here afterwards. Once signed
- * in, GET /api/me runs before anything else, since it creates the users row the other APIs need (spec 3.1.4).
+ * Every screen but sign-in: a signed-out visitor goes to sign-in, and the start screen sends them back here
+ * afterwards (EntryPage). Once signed in, GET /api/me runs before anything else, since it creates the users
+ * row the other APIs need (spec 3.1.4).
  */
 export function RequireSignIn() {
   const { status } = useSession();
   const location = useLocation();
-  const navigate = useNavigate();
-  const returned = useRef(false);
-
-  // After the Google round trip the page restarts at /owner/; continue to where the owner was going.
-  useEffect(() => {
-    if (status !== "signedIn" || returned.current) return;
-    returned.current = true;
-    const path = takeReturnPath();
-    if (path && path !== location.pathname + location.search) void navigate(path, { replace: true });
-  }, [status, location.pathname, location.search, navigate]);
 
   if (status === "restoring") return <LoadingState message="로그인 정보를 확인하고 있어요." />;
   if (status === "signedOut") {
-    return <Navigate to="/login" replace state={{ from: location.pathname + location.search }} />;
+    // The start screen is where every sign-in ends anyway, so it is not passed on: a destination saved
+    // before a failed Google sign-in (which returns to /owner/) stays for the next attempt.
+    const from = location.pathname + location.search;
+    return <Navigate to="/login" replace state={from === "/" ? null : { from }} />;
   }
   return <SignedIn />;
 }

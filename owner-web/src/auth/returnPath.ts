@@ -19,12 +19,20 @@ export function saveReturnPath(path: string): void {
   }
 }
 
-export function takeReturnPath(): string | null {
+/** The saved page, if any, without removing it: reading has no side effect, so a render may call it. */
+export function readReturnPath(): string | null {
   try {
     const path = sessionStorage.getItem(KEY);
-    sessionStorage.removeItem(KEY);
     return isSafeReturnPath(path) ? path : null;
   } catch {
     return null;
+  }
+}
+
+export function clearReturnPath(): void {
+  try {
+    sessionStorage.removeItem(KEY);
+  } catch {
+    // Nothing was kept.
   }
 }

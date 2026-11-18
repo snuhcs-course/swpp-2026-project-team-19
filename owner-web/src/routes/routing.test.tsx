@@ -55,6 +55,20 @@ describe("sign-in", () => {
     expect(window.location.search).toBe("");
   });
 
+  it("keeps the saved page when Google sign-in fails and the owner tries again", async () => {
+    // The owner went to a bar, was sent to sign-in, and Google returned an error to /owner/.
+    sessionStorage.setItem("bottlemap-owner-web-return-path", `/bars/${BAR_ID}`);
+    window.history.replaceState(null, "", "/owner/?error=server_error");
+    const gateway = new FakeGateway({ signedIn: false });
+    renderOwnerWeb("/", { gateway });
+
+    expect(await screen.findByText(SIGN_IN_FAILED_NOTICE)).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Google로 로그인" }));
+
+    expect(gateway.calls.signIn).toHaveLength(1);
+    expect(sessionStorage.getItem("bottlemap-owner-web-return-path")).toBe(`/bars/${BAR_ID}`);
+  });
+
   it("removes the sign-in code from the address bar after a successful sign-in", async () => {
     useOwnerApi();
     window.history.replaceState(null, "", "/owner/?code=pkce-code&keep=1");

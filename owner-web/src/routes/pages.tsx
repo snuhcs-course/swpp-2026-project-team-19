@@ -1,5 +1,7 @@
+import { useEffect, useState } from "react";
 import { Navigate, useLocation } from "react-router";
 import { errorMessage } from "../api/errors";
+import { clearReturnPath, readReturnPath } from "../auth/returnPath";
 import { useSession } from "../auth/SessionProvider";
 import { ownerEntry } from "../owner/entry";
 import { useMe, useMyApplications, useMyBars, type OwnedBar } from "../owner/queries";
@@ -49,10 +51,22 @@ export function LoginPage() {
   );
 }
 
-/** /owner/: sends the owner to bars, application status or a new application (src/owner/entry.ts). */
+/**
+ * /owner/, where every Google sign-in returns: continues to the page the owner was going to before signing in,
+ * or else sends them to bars, application status or a new application (src/owner/entry.ts). Deciding both
+ * here keeps a single redirect, so the two can never race.
+ */
 export function EntryPage() {
   const bars = useMyBars();
   const applications = useMyApplications();
+  // Read once: the stored copy is removed below, and a later render (e.g. when the bars arrive) must still
+  // redirect to the same page rather than fall through to the status screens.
+  const [returnPath] = useState(readReturnPath);
+  useEffect(() => {
+    if (returnPath) clearReturnPath();
+  }, [returnPath]);
+  if (returnPath) return <Navigate to={returnPath} replace />;
+
   const failed = bars.error ?? applications.error;
   if (failed) {
     return (
