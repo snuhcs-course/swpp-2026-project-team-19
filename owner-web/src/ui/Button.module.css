@@ -1,0 +1,71 @@
+.button {
+  display: inline-flex;
+  text-decoration: none;
+  align-items: center;
+  justify-content: center;
+  gap: var(--bm-space-xs);
+  box-sizing: border-box;
+  width: 100%;
+  min-height: var(--bm-secondary-button-min-height);
+  padding: var(--bm-space-sm) var(--bm-space-md);
+  border: 1px solid transparent;
+  border-radius: var(--bm-radius-button);
+  font: inherit;
+  font-size: var(--bm-type-label);
+  line-height: var(--bm-type-label-line-height);
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color var(--bm-motion-tap-feedback), opacity var(--bm-motion-tap-feedback);
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--bm-color-primary);
+  outline-offset: 2px;
+}
+
+.primary {
+  min-height: var(--bm-primary-button-min-height);
+  background: var(--bm-color-primary);
+  color: var(--bm-color-on-primary);
+}
+
+.secondary {
+  background: var(--bm-color-surface-elevated);
+  border-color: var(--bm-color-outline-variant);
+  color: var(--bm-color-text-primary);
+}
+
+.text {
+  width: auto;
+  background: transparent;
+  color: var(--bm-color-primary);
+}
+
+.spinner {
+  width: 1em;
+  height: 1em;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button {
+    transition: none;
+  }
+  .spinner {
+    animation-duration: 2.4s;
+  }
+}

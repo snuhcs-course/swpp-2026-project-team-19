@@ -1,0 +1,61 @@
+.state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--bm-space-sm);
+  padding: var(--bm-space-xxxl) var(--bm-space-md);
+  text-align: center;
+}
+
+.title {
+  margin: 0;
+  font-size: var(--bm-type-card-title);
+  line-height: var(--bm-type-card-title-line-height);
+  font-weight: 600;
+}
+
+.message {
+  margin: 0;
+  color: var(--bm-color-text-secondary);
+  font-size: var(--bm-type-label);
+  line-height: var(--bm-type-label-line-height);
+}
+
+.action {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bm-space-xs);
+  width: 100%;
+  max-width: 280px;
+  margin-top: var(--bm-space-xs);
+}
+
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid var(--bm-color-outline-variant);
+  border-top-color: var(--bm-color-primary);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 2.7s;
+  }
+}

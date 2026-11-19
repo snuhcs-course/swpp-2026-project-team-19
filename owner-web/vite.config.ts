@@ -18,6 +18,9 @@ export default defineConfig({
   build: {
     outDir: "dist",
     emptyOutDir: true,
+    // supabase-js (Google sign-in) makes up most of the bundle: about 170 kB gzipped in all. Warn again
+    // only when the page grows well past that.
+    chunkSizeWarningLimit: 800,
   },
   test: {
     environment: "jsdom",

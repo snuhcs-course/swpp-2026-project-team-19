@@ -1,0 +1,49 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bm-space-xs);
+}
+
+.label {
+  font-size: var(--bm-type-label);
+  line-height: var(--bm-type-label-line-height);
+  font-weight: 600;
+}
+
+.input {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: var(--bm-min-touch-target);
+  padding: 0 var(--bm-space-sm);
+  border: 1px solid var(--bm-color-outline-variant);
+  border-radius: var(--bm-radius-text-field);
+  background: var(--bm-color-surface-elevated);
+  color: var(--bm-color-text-primary);
+  /* 16px keeps iOS Safari from zooming into the field. */
+  font: inherit;
+  font-size: var(--bm-type-body);
+}
+
+.input:focus-visible {
+  outline: 2px solid var(--bm-color-primary);
+  outline-offset: 1px;
+}
+
+.input[aria-invalid="true"] {
+  border-color: var(--bm-color-error);
+}
+
+.hint,
+.error {
+  margin: 0;
+  font-size: var(--bm-type-caption);
+  line-height: var(--bm-type-caption-line-height);
+}
+
+.hint {
+  color: var(--bm-color-text-secondary);
+}
+
+.error {
+  color: var(--bm-color-error);
+}
