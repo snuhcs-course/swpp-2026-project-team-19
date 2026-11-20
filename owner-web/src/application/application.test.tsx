@@ -244,6 +244,33 @@ describe("certificate reading (spec 3.11.12)", () => {
     expect(await screen.findByText(new RegExp(message.replace(/[.()]/g, "\\$&")))).toBeInTheDocument();
     expect(screen.getAllByRole("button", { name: /입력$/ })).toHaveLength(3);
   });
+
+  it("keeps what the owner typed after leaving a slow reading", async () => {
+    let answer: (() => void) | undefined;
+    let answered = false;
+    server.use(
+      http.post("/api/owner-applications/business-certificate-ocr", async () => {
+        await new Promise<void>((resolve) => (answer = resolve));
+        answered = true;
+        return HttpResponse.json({ businessRegistrationNumber: "2208162517", representativeName: "OCR", openingDate: "2019-01-01", businessName: "OCR 바", address: null });
+      }),
+    );
+    const u = user();
+    const { router } = renderOwnerWeb("/apply/method");
+    await u.upload(await screen.findByLabelText("사업자등록증 사진"), photo("certificate.jpg"));
+    await heading("사업자등록증을\n읽고 있어요");
+    await waitFor(() => expect(answer).toBeDefined());
+
+    await u.click(screen.getByRole("button", { name: "뒤로" }));
+    await u.click(await screen.findByRole("button", { name: /직접 입력하기/ }));
+    await u.type(await screen.findByRole("textbox"), "1234567891");
+    answer?.();
+    await waitFor(() => expect(answered).toBe(true));
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    expect(router.state.location.pathname).toBe("/owner/apply/number");
+    expect(loadDraft(ME.userId)).toMatchObject({ inputMethod: "manual", businessNumber: "1234567891", representativeName: "", proposedBarName: "" });
+  });
 });
 
 describe("bar (spec 3.11.11)", () => {
@@ -399,6 +426,41 @@ describe("submission (spec 3.11.2, 3.11.17, 3.11.15)", () => {
 
     await heading("신청을 마쳤어요");
     expect(calls.map((call) => call.path)).toEqual(["applications", `cover:${APPLICATION_ID}`, `menus:${APPLICATION_ID}`, `menus:${APPLICATION_ID}`]);
+  });
+
+  it("keeps the created application as it is and lets only the photos change", async () => {
+    seed("contact", { applicationId: APPLICATION_ID, uploaded: { cover: true, menus: false } });
+    renderOwnerWeb("/apply/contact");
+
+    await heading("이렇게\n신청할게요");
+    expect(screen.getByText("신청은 접수됐어요. 남은 사진만 올리면 돼요. 신청 내용은 바꿀 수 없어요.")).toBeInTheDocument();
+    for (const section of ["사업자 정보", "매장 정보", "연락처"]) {
+      expect(screen.queryByRole("button", { name: `${section} 수정` })).not.toBeInTheDocument();
+    }
+    expect(screen.getByRole("button", { name: "메뉴판 수정" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /바꾸기/ })).toBeInTheDocument();
+  });
+
+  it("sends a cover photo replaced after the first one was sent", async () => {
+    const calls = submissionApi();
+    seed("review", { applicationId: APPLICATION_ID, uploaded: { cover: true, menus: false } });
+    const u = user();
+    renderOwnerWeb("/apply/review");
+
+    await u.click(await screen.findByRole("button", { name: /바꾸기/ }));
+    await u.upload(await screen.findByLabelText("대표 사진"), photo("cover-2.jpg"));
+    await u.click(next());
+    await u.click(await screen.findByRole("button", { name: "메뉴판 수정" }));
+    await u.upload(await screen.findByLabelText("메뉴판 사진 추가"), photo("menu-1.jpg"));
+    await u.click(next());
+    await heading("이렇게\n신청할게요");
+    await u.click(next("신청하기"));
+
+    await heading("신청을 마쳤어요");
+    expect(calls.map((call) => [call.path, call.files])).toEqual([
+      [`cover:${APPLICATION_ID}`, ["img-cover-2.jpg"]],
+      [`menus:${APPLICATION_ID}`, ["img-menu-1.jpg"]],
+    ]);
   });
 
   it("shows the mismatch result when the server refuses the business details", async () => {

@@ -19,6 +19,7 @@ interface Application {
   latest: () => ApplicationDraft;
   update: (change: Partial<ApplicationDraft> | ((draft: ApplicationDraft) => ApplicationDraft)) => void;
   cover: PickedPhoto | null;
+  /** Picks the cover photo. A new one is sent again on the next submission, even if an earlier one was. */
   setCover: (image: PreparedImage | null) => void;
   menus: PickedPhoto[];
   setMenus: (change: (menus: PickedPhoto[]) => PickedPhoto[]) => void;
@@ -36,7 +37,15 @@ interface Application {
   isAt: (step: StepId) => boolean;
   /** Whether a business certificate is being read, so the reading screen has something to wait for. */
   reading: boolean;
-  setReading: (reading: boolean) => void;
+  /** Starts reading a certificate and returns its run, which finishReading takes back. */
+  startReading: () => number;
+  /**
+   * Ends a run. True only if it is the latest run and the owner is still waiting on the reading screen:
+   * a result that comes after they left (or picked another photo) must not overwrite what they typed.
+   */
+  finishReading: (run: number) => boolean;
+  /** The application exists on the server (its photos are still to be sent): only the photos can change. */
+  locked: boolean;
 }
 
 const ApplicationContext = createContext<Application | null>(null);
@@ -52,6 +61,7 @@ export function ApplicationProvider({ children }: { children: ReactNode }) {
   const [menus, setMenusState] = useState<PickedPhoto[]>([]);
   const [notices, setNotices] = useState<Partial<Record<StepId, string>>>({});
   const [reading, setReading] = useState(false);
+  const readingRun = useRef(0);
   const finished = useRef(false);
   const path = useRef(location.pathname);
   useEffect(() => {
@@ -68,12 +78,17 @@ export function ApplicationProvider({ children }: { children: ReactNode }) {
     [userId],
   );
 
-  const setCover = useCallback((image: PreparedImage | null) => {
-    setCoverState((previous) => {
-      if (previous) URL.revokeObjectURL(previous.previewUrl);
-      return image ? pickedPhoto(image) : null;
-    });
-  }, []);
+  const setCover = useCallback(
+    (image: PreparedImage | null) => {
+      setCoverState((previous) => {
+        if (previous) URL.revokeObjectURL(previous.previewUrl);
+        return image ? pickedPhoto(image) : null;
+      });
+      // The server keeps the photo sent before; the replacement has to be sent too (PUT replaces it).
+      if (image && latestDraft.current.uploaded.cover) update((current) => ({ ...current, uploaded: { ...current.uploaded, cover: false } }));
+    },
+    [update],
+  );
 
   const setMenus = useCallback((change: (current: PickedPhoto[]) => PickedPhoto[]) => {
     setMenusState((previous) => {
@@ -98,6 +113,18 @@ export function ApplicationProvider({ children }: { children: ReactNode }) {
   );
 
   const forward = useCallback((step: StepId) => go(editingReview ? "review" : step), [go, editingReview]);
+
+  const startReading = useCallback(() => {
+    readingRun.current += 1;
+    setReading(true);
+    return readingRun.current;
+  }, []);
+
+  const finishReading = useCallback((run: number) => {
+    if (run !== readingRun.current) return false;
+    setReading(false);
+    return path.current === "/apply/reading";
+  }, []);
 
   const finish = useCallback(() => {
     finished.current = true;
@@ -136,9 +163,11 @@ export function ApplicationProvider({ children }: { children: ReactNode }) {
       finish,
       isAt: (step: StepId) => path.current === `/apply/${step}`,
       reading,
-      setReading,
+      startReading,
+      finishReading,
+      locked: draft.applicationId !== null,
     }),
-    [draft, update, cover, setCover, menus, setMenus, notices, setNotice, editingReview, go, forward, finish, reading],
+    [draft, update, cover, setCover, menus, setMenus, notices, setNotice, editingReview, go, forward, finish, reading, startReading, finishReading],
   );
   return <ApplicationContext.Provider value={value}>{children}</ApplicationContext.Provider>;
 }

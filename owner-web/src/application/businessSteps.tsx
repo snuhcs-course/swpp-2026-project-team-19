@@ -61,33 +61,37 @@ function ocrFailure(error: unknown): string {
 
 export function MethodStep() {
   const { api } = useSession();
-  const { update, go, isAt, setNotice, setReading } = useApplication();
+  const { update, go, setNotice, startReading, finishReading } = useApplication();
   const picker = useRef<HTMLInputElement>(null);
 
   // Reads the certificate (spec 3.11.12) and fills the fields to check; nothing is submitted unseen.
   async function read(file: File) {
     update({ inputMethod: "photo" });
     setNotice("check", null);
-    setReading(true);
+    const run = startReading();
     go("reading");
+    let reading: Awaited<ReturnType<typeof readCertificate>>;
     try {
       const image = await prepareImage(file, IMAGE_RULES.certificate);
-      const reading = await readCertificate(api, image);
-      update((draft) => ({
-        ...draft,
-        businessNumber: reading.businessRegistrationNumber ? businessDigits(reading.businessRegistrationNumber) : draft.businessNumber,
-        representativeName: reading.representativeName ?? draft.representativeName,
-        openingDate: reading.openingDate ?? draft.openingDate,
-        proposedBarName: reading.businessName ?? draft.proposedBarName,
-        address: reading.address ?? draft.address,
-      }));
+      reading = await readCertificate(api, image);
     } catch (error) {
-      setNotice("check", ocrFailure(error));
-    } finally {
-      setReading(false);
+      if (finishReading(run)) {
+        setNotice("check", ocrFailure(error));
+        go("check", { replace: true });
+      }
+      return;
     }
-    // Leaving the reading screen meanwhile keeps the values but does not move the owner.
-    if (isAt("reading")) go("check", { replace: true });
+    // The owner left the reading screen meanwhile (e.g. to type the values): what they type stays.
+    if (!finishReading(run)) return;
+    update((draft) => ({
+      ...draft,
+      businessNumber: reading.businessRegistrationNumber ? businessDigits(reading.businessRegistrationNumber) : draft.businessNumber,
+      representativeName: reading.representativeName ?? draft.representativeName,
+      openingDate: reading.openingDate ?? draft.openingDate,
+      proposedBarName: reading.businessName ?? draft.proposedBarName,
+      address: reading.address ?? draft.address,
+    }));
+    go("check", { replace: true });
   }
 
   return (

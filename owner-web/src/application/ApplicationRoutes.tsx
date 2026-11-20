@@ -14,6 +14,9 @@ import {
 import { businessVerificationIsCurrent } from "./rules";
 import { isStepId, type StepId } from "./steps";
 
+/** Steps open once the application exists: the review and its photos (see ReviewStep). */
+const LOCKED_STEPS: readonly StepId[] = ["review", "cover", "menus", "done"];
+
 /** /apply/*: the owner application (P11), with its draft and photos shared by every step. */
 export function ApplicationLayout() {
   return (
@@ -51,8 +54,9 @@ const SCREENS: Record<StepId, () => React.ReactNode> = {
 /** /apply/:step, with the app's rules for steps that need something first (OwnerOnboardingScreen.kt). */
 export function ApplicationStep() {
   const { step } = useParams();
-  const { draft, reading } = useApplication();
+  const { draft, reading, locked } = useApplication();
   if (!isStepId(step)) return <Navigate to="/apply" replace />;
+  if (locked && !LOCKED_STEPS.includes(step)) return <Navigate to="/apply/review" replace />;
 
   // Nothing is being read (e.g. after a reload): go on to check the fields.
   if (step === "reading" && !reading) return <Navigate to="/apply/check" replace />;

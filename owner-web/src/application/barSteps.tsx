@@ -33,6 +33,7 @@ import styles from "./application.module.css";
 // BARPHOTO, ADDRESS, BARPHONE, MENUS, CONTACT, REVIEW and DONE, with the copy of the app.
 
 export const OWNED_BAR_NOTICE = "이미 업주가 등록된 매장입니다. 운영자에게 문의해 주세요.";
+export const LOCKED_NOTICE = "신청은 접수됐어요. 남은 사진만 올리면 돼요. 신청 내용은 바꿀 수 없어요.";
 
 function useDebounced<T>(value: T, delayMs: number): T {
   const [debounced, setDebounced] = useState(value);
@@ -383,7 +384,7 @@ export function ReviewStep() {
   const { api } = useSession();
   const queryClient = useQueryClient();
   const application = useApplication();
-  const { draft, cover, menus, update, go, setNotice, finish } = application;
+  const { draft, cover, menus, update, go, setNotice, finish, locked } = application;
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<{ message: string; toStatus?: boolean } | null>(null);
   const newBar = draft.kind === "new_bar";
@@ -400,6 +401,9 @@ export function ReviewStep() {
     registrationPrecheckError(draft.businessNumber, draft.representativeName, draft.openingDate) === null &&
     verificationCurrent;
   const edit = (step: StepId) => go(step, { fromReview: true });
+  // Once the application exists only its photos are left to send: the server has the rest, and there is no
+  // API to change it, so the text is shown but not edited (it would look saved while the server kept the old).
+  const editText = (step: StepId) => (locked ? undefined : () => edit(step));
 
   async function submit() {
     setBusy(true);
@@ -482,13 +486,14 @@ export function ReviewStep() {
   return (
     <StepFrame step="review" action={{ label: "신청하기", enabled: ready && !busy, busy, onClick: () => void submit() }}>
       <Question title={"이렇게\n신청할게요"} subtitle="한 번 더 확인하고 신청해 주세요." />
-      {draft.verification?.result !== "matched" ? <Hint>국세청 정보 확인은 '신청하기'를 누를 때 진행돼요.</Hint> : null}
-      <ReviewSection title="사업자 정보" onEdit={() => edit("check")}>
+      {locked ? <p className={styles.notice}>{LOCKED_NOTICE}</p> : null}
+      {!locked && draft.verification?.result !== "matched" ? <Hint>국세청 정보 확인은 '신청하기'를 누를 때 진행돼요.</Hint> : null}
+      <ReviewSection title="사업자 정보" onEdit={editText("check")}>
         <SummaryRow label="등록번호" value={formatBusinessNumber(draft.businessNumber)} />
         <SummaryRow label="대표자" value={draft.representativeName} />
         <SummaryRow label="개업일" value={draft.openingDate.replaceAll("-", ".")} />
       </ReviewSection>
-      <ReviewSection title="매장 정보" onEdit={() => edit("bar-name")}>
+      <ReviewSection title="매장 정보" onEdit={editText("bar-name")}>
         <SummaryRow label="이름" value={draft.proposedBarName} />
         {newBar ? (
           <>
@@ -503,7 +508,7 @@ export function ReviewStep() {
       <ReviewSection title="메뉴판" onEdit={() => edit("menus")}>
         <SummaryRow label="메뉴판 사진" value={menusReady ? `${draft.uploaded.menus ? "올림 완료" : `${menus.length}장`}` : "다시 골라 주세요"} />
       </ReviewSection>
-      <ReviewSection title="연락처" onEdit={() => edit("contact")}>
+      <ReviewSection title="연락처" onEdit={editText("contact")}>
         <SummaryRow label="연락받을 번호" value={formatOwnerPhone(draft.contactPhone)} />
       </ReviewSection>
       {!menusReady || !coverReady ? <Hint>새로고침하면 고른 사진이 지워져요. 사진을 다시 골라 주세요.</Hint> : null}
@@ -518,14 +523,16 @@ export function ReviewStep() {
   );
 }
 
-function ReviewSection({ title, onEdit, children }: { title: string; onEdit: () => void; children: React.ReactNode }) {
+function ReviewSection({ title, onEdit, children }: { title: string; onEdit?: () => void; children: React.ReactNode }) {
   return (
     <section className={styles.section} aria-label={title}>
       <div className={styles.sectionHead}>
         <h3 className={styles.sectionTitle}>{title}</h3>
-        <button type="button" className={styles.linkButton} onClick={onEdit} aria-label={`${title} 수정`}>
-          수정
-        </button>
+        {onEdit ? (
+          <button type="button" className={styles.linkButton} onClick={onEdit} aria-label={`${title} 수정`}>
+            수정
+          </button>
+        ) : null}
       </div>
       {children}
     </section>
