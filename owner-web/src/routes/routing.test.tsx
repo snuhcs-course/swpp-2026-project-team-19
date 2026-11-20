@@ -115,8 +115,8 @@ describe("start screen (src/owner/entry.ts)", () => {
     ["an owner with a bar", { bars: [bar(BAR_ID, "관악 위스키 바")], applications: [application("pending")] }, "/owner/bars", "내 매장"],
     ["a pending application", { applications: [application("pending")] }, "/owner/applications", "등록 신청 상태"],
     ["a rejected application", { applications: [application("rejected")] }, "/owner/applications", "등록 신청 상태"],
-    ["no application", {}, "/owner/apply", "매장 등록"],
-    ["only a canceled application", { applications: [application("canceled")] }, "/owner/apply", "매장 등록"],
+    ["no application", {}, "/owner/apply/intro", "매장 등록"],
+    ["only a canceled application", { applications: [application("canceled")] }, "/owner/apply/intro", "매장 등록"],
   ])("sends %s to the right screen", async (_, api, path, title) => {
     useOwnerApi(api);
     const { router } = renderOwnerWeb("/");

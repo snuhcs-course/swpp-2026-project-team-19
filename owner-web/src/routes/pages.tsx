@@ -103,10 +103,6 @@ function ComingSoon({ title, description }: { title: string; description: string
 }
 
 // Placeholders: the screens themselves come in later tasks (P11, P16, P22 and on).
-export function ApplyPage() {
-  return <ComingSoon title="매장 등록" description="매장 등록 신청을 곧 웹에서도 할 수 있어요." />;
-}
-
 export function ApplicationStatusPage() {
   return <ComingSoon title="등록 신청 상태" description="신청 상태를 곧 웹에서도 확인할 수 있어요." />;
 }

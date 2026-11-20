@@ -3,6 +3,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { createAuthFetch } from "../api/authFetch";
 import { createApiClient, type ApiClient } from "../api/client";
 import type { AuthGateway } from "./gateway";
+import { clearAllDrafts } from "../application/draft";
 import { saveReturnPath } from "./returnPath";
 
 export type SessionStatus = "restoring" | "signedOut" | "signedIn";
@@ -124,6 +125,8 @@ export function SessionProvider({ gateway, children }: { gateway: AuthGateway; c
   );
 
   const signOut = useCallback(async () => {
+    // An application in progress holds business details: none stays on a shared computer after sign-out.
+    clearAllDrafts();
     await gateway.signOut();
     endSession(null);
   }, [gateway, endSession]);
