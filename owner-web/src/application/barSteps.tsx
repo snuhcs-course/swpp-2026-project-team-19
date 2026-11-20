@@ -50,7 +50,8 @@ export function BarNameStep() {
   const [ownedNotice, setOwnedNotice] = useState<string | null>(null);
   const name = draft.proposedBarName.trim();
   const query = useDebounced(name, 300);
-  const searchable = query.length >= 2 && query.length <= 100;
+  // Spec 3.11.11 searches 1 to 100 characters, so a one-character name is checked too (the app starts at 2).
+  const searchable = query.length >= 1 && query.length <= 100;
   // Spec 3.11.11: bars by name; one whose name is the typed name is asked about, as in the app.
   const search = useQuery({
     queryKey: ["bar-names", query],

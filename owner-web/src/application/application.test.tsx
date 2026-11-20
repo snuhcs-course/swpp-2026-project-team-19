@@ -332,6 +332,18 @@ describe("bar (spec 3.11.11)", () => {
     await heading("매장 사진을\n올려 주세요");
   });
 
+  it("asks about a bar whose name is one character", async () => {
+    barNames([{ barId: BAR_ID, name: "취", address: "관악로 1", hasOwner: false }]);
+    seed("bar-name", { proposedBarName: "" });
+    const u = user();
+    renderOwnerWeb("/apply/bar-name");
+
+    await u.type(await screen.findByLabelText("매장 이름"), "취");
+
+    expect(await screen.findByRole("region", { name: "취 확인" })).toBeInTheDocument();
+    expect(next()).toBeDisabled();
+  });
+
   it("moves on with a name nobody has, once the search has answered", async () => {
     barNames([{ barId: BAR_ID, name: "신림 몰트 하우스 2호점", address: "신림로 3", hasOwner: false }]);
     seed("bar-name", { proposedBarName: "" });
