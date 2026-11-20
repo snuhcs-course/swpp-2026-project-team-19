@@ -1,7 +1,7 @@
-import { useId, type InputHTMLAttributes } from "react";
+import { useId, type ComponentProps } from "react";
 import styles from "./TextField.module.css";
 
-interface TextFieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "id"> {
+interface TextFieldProps extends Omit<ComponentProps<"input">, "id"> {
   label: string;
   /** A hint under the field, shown while there is no error. */
   hint?: string;

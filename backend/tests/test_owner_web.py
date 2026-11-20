@@ -117,6 +117,8 @@ def test_the_page_allows_only_known_sources(client, build, monkeypatch):
         assert "default-src 'self'" in policy
         assert "script-src 'self' https://cdn.jsdelivr.net dapi.kakao.com *.kakaocdn.net *.daumcdn.net" in policy
         assert f"connect-src 'self' {SUPABASE_URL} dapi.kakao.com" in policy
+        # Previews of the photos an owner picks are blob: URLs (owner-web/src/application/photos.ts).
+        assert "img-src 'self' https: data: blob: " in policy
         assert "frame-ancestors 'none'" in policy
         assert headers["referrer-policy"] == "no-referrer"
         assert headers["x-content-type-options"] == "nosniff"

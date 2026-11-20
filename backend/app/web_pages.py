@@ -33,8 +33,10 @@ def content_security_policy() -> str:
             # strict, and the pages put data on the page only as text.
             "style-src 'self' 'unsafe-inline'",
             # Menu photos are signed object-storage URLs (S3) or /media paths on this server (local),
-            # and Kakao map tiles and marker images come from kakaocdn.net and daumcdn.net hosts.
-            f"img-src 'self' https: data: {KAKAO_CDN_HOSTS}",
+            # and Kakao map tiles and marker images come from kakaocdn.net and daumcdn.net hosts. blob: is
+            # for the owner web's previews of the photos picked on the device (URL.createObjectURL), which
+            # only the page itself can create.
+            f"img-src 'self' https: data: blob: {KAKAO_CDN_HOSTS}",
             f"connect-src 'self'{supabase} dapi.kakao.com",
             "frame-ancestors 'none'",
             "base-uri 'none'",
