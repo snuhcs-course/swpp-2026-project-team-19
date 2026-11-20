@@ -449,6 +449,26 @@ describe("submission (spec 3.11.2, 3.11.17, 3.11.15)", () => {
     });
   });
 
+  it("shows the new application's status after the done screen, not a new form", async () => {
+    const calls = submissionApi();
+    server.use(
+      http.get("/api/me/owner-applications", () =>
+        HttpResponse.json({ items: calls.length > 0 ? [{ applicationId: APPLICATION_ID, status: "pending" }] : [] }),
+      ),
+    );
+    seed("menus", { kind: "existing_bar", existingBar: { barId: BAR_ID, name: "관악 위스키 바", address: "관악로 1" }, proposedBarName: "관악 위스키 바" });
+    const u = user();
+    const { router } = renderOwnerWeb("/");
+    await heading("메뉴판 사진을\n올려 주세요");
+    await pickPhotosAndReview(u, { cover: false });
+    await u.click(next("신청하기"));
+    await heading("신청을 마쳤어요");
+
+    await u.click(next("확인"));
+
+    await waitFor(() => expect(router.state.location.pathname).toBe("/owner/applications"));
+  });
+
   it("retries only the failed photo upload, never the application", async () => {
     let failures = 1;
     const calls = submissionApi({ menus: () => (failures-- > 0 ? HttpResponse.json(errorBody("INTERNAL_ERROR"), { status: 500 }) : HttpResponse.json({})) });

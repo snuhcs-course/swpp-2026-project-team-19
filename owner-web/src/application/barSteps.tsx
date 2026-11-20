@@ -418,7 +418,10 @@ export function ReviewStep() {
         onProgress: (progress) => update(progress),
       });
       finish();
-      await queryClient.invalidateQueries({ queryKey: ownerQueryKeys.myApplications });
+      // Nothing on the form shows the applications, so their cached list is inactive: refetch it anyway
+      // (the default refetches active queries only), or the start screen would read the list from before
+      // this application and open a new form.
+      await queryClient.invalidateQueries({ queryKey: ownerQueryKeys.myApplications, refetchType: "all" });
       go("done", { replace: true });
     } catch (failure) {
       handleFailure(failure);
