@@ -152,6 +152,32 @@ describe("business check (spec 3.11.16)", () => {
     expect(loadDraft(ME.userId)?.verification).toBeNull();
   });
 
+  it("stays where the owner went when a result comes after they left the check", async () => {
+    let answer: (() => void) | undefined;
+    let answered = false;
+    server.use(
+      http.post("/api/owner-applications/business-verification", async () => {
+        await new Promise<void>((resolve) => (answer = resolve));
+        answered = true;
+        return HttpResponse.json({ result: "matched" });
+      }),
+    );
+    seed("check", { verification: null });
+    const u = user();
+    const { router } = renderOwnerWeb("/apply/check");
+
+    await u.click(await screen.findByRole("button", { name: "확인하기" }));
+    await waitFor(() => expect(answer).toBeDefined());
+    await u.click(screen.getByRole("button", { name: "뒤로" }));
+    await heading("개업일을\n알려주세요");
+    answer?.();
+    await waitFor(() => expect(answered).toBe(true));
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    expect(router.state.location.pathname).toBe("/owner/apply/opening-date");
+    expect(loadDraft(ME.userId)?.verification).toBeNull();
+  });
+
   it("explains a mismatch and returns to the values to correct them", async () => {
     server.use(http.post("/api/owner-applications/business-verification", () => HttpResponse.json({ result: "not_matched" })));
     seed("check", { verification: null });

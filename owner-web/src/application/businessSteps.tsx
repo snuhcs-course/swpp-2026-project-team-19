@@ -222,7 +222,7 @@ function checkValidationMessage(error: ApiError): string {
 
 export function CheckStep() {
   const { api } = useSession();
-  const { draft, update, go, latest, setNotice } = useApplication();
+  const { draft, update, go, latest, setNotice, isAt } = useApplication();
   const [busy, setBusy] = useState(false);
   const precheck = registrationPrecheckError(draft.businessNumber, draft.representativeName, draft.openingDate);
   const photo = draft.inputMethod === "photo";
@@ -238,7 +238,9 @@ export function CheckStep() {
   );
 
   // The NTS check of exactly the values on screen; a result for values changed meanwhile is dropped
-  // (ownerBusinessVerificationKey in OwnerOnboardingScreen.kt).
+  // (ownerBusinessVerificationKey in OwnerOnboardingScreen.kt), and so is one that comes after the owner
+  // left this step: it must not pull them to the result from where they went.
+  const stale = (key: string) => businessVerificationKey(latest()) !== key || !isAt("check");
   async function check() {
     if (busy) return;
     setBusy(true);
@@ -248,11 +250,11 @@ export function CheckStep() {
     update({ verification: null });
     try {
       const result = await checkBusiness(api, requested);
-      if (businessVerificationKey(latest()) !== key) return;
+      if (stale(key)) return;
       update({ verification: { key, result, retryAfter: null } });
       go("result");
     } catch (error) {
-      if (businessVerificationKey(latest()) !== key) return;
+      if (stale(key)) return;
       if (error instanceof ApiError && error.code === "RATE_LIMITED") {
         const retryAfter = typeof error.details?.retryAfter === "string" ? error.details.retryAfter : null;
         update({ verification: { key, result: "limited", retryAfter } });
