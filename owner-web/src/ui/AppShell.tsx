@@ -8,20 +8,27 @@ interface AppShellProps {
   title: string;
   /** Shows a back button that goes to this path inside the app. */
   backTo?: string;
+  /** Shows a back button that runs this instead (e.g. the previous step of a form). */
+  onBack?: () => void;
   /** The signed-in account, shown next to sign-out. */
   account?: string | null;
   children: ReactNode;
 }
 
 /** The frame of every signed-in screen: a top bar with back, title and sign-out, and a phone-wide column. */
-export function AppShell({ title, backTo, account, children }: AppShellProps) {
+export function AppShell({ title, backTo, onBack, account, children }: AppShellProps) {
   const { signOut } = useSession();
   const navigate = useNavigate();
   return (
     <div className={styles.shell}>
       <header className={styles.bar}>
-        {backTo ? (
-          <button type="button" className={styles.back} onClick={() => void navigate(backTo)} aria-label="뒤로">
+        {backTo || onBack ? (
+          <button
+            type="button"
+            className={styles.back}
+            onClick={() => (onBack ? onBack() : void navigate(backTo ?? "/"))}
+            aria-label="뒤로"
+          >
             ‹
           </button>
         ) : null}
