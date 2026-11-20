@@ -3,6 +3,7 @@ import { Navigate, useLocation } from "react-router";
 import { errorMessage } from "../api/errors";
 import { clearReturnPath, readReturnPath } from "../auth/returnPath";
 import { useSession } from "../auth/SessionProvider";
+import { hasPhotosToSend, loadDraft } from "../application/draft";
 import { ownerEntry } from "../owner/entry";
 import { useMe, useMyApplications, useMyBars, type OwnedBar } from "../owner/queries";
 import { AppShell } from "../ui/AppShell";
@@ -57,6 +58,7 @@ export function LoginPage() {
  * here keeps a single redirect, so the two can never race.
  */
 export function EntryPage() {
+  const me = useMe();
   const bars = useMyBars();
   const applications = useMyApplications();
   // Read once: the stored copy is removed below, and a later render (e.g. when the bars arrive) must still
@@ -88,6 +90,11 @@ export function EntryPage() {
     case "bars":
       return <Navigate to="/bars" replace />;
     case "application":
+      // An application sent from this browser whose photos failed to upload: only the form can send them.
+      if (me.isPending) return <LoadingState message="매장 상태를 확인하고 있어요." />;
+      if (me.data && hasPhotosToSend(loadDraft(me.data.userId), applications.data?.items ?? [])) {
+        return <Navigate to="/apply" replace />;
+      }
       return <Navigate to="/applications" replace />;
     case "apply":
       return <Navigate to="/apply" replace />;

@@ -64,9 +64,11 @@ export function ApplicationProvider({ children }: { children: ReactNode }) {
   const readingRun = useRef(0);
   const finished = useRef(false);
   const path = useRef(location.pathname);
+  const fromStep = useRef(false);
   useEffect(() => {
     path.current = location.pathname;
-  }, [location.pathname]);
+    fromStep.current = (location.state as { fromStep?: boolean } | null)?.fromStep === true;
+  }, [location.pathname, location.state]);
 
   const update = useCallback(
     (change: Partial<ApplicationDraft> | ((current: ApplicationDraft) => ApplicationDraft)) => {
@@ -107,7 +109,10 @@ export function ApplicationProvider({ children }: { children: ReactNode }) {
   const go = useCallback(
     (step: StepId, options: { replace?: boolean; fromReview?: boolean } = {}) => {
       if (step !== "reading" && step !== "done") update({ step });
-      void navigate(`/apply/${step}`, { replace: options.replace, state: options.fromReview ? { fromReview: true } : null });
+      // fromStep: the entry before this one is a step of the form, so Back can be the browser's own. A
+      // replacement keeps the entry before the current one, and so its fromStep.
+      const state = { fromStep: options.replace ? fromStep.current : true, fromReview: options.fromReview === true };
+      void navigate(`/apply/${step}`, { replace: options.replace, state });
     },
     [navigate, update],
   );

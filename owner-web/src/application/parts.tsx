@@ -25,10 +25,13 @@ export function StepFrame({ step, children, action, centered = false }: StepFram
   const navigate = useNavigate();
   const location = useLocation();
   const stage = stageOf(step);
-  // Back follows the browser history inside the app; a resumed step goes to the one before it on the path.
+  // Back follows the browser history when this step was opened from another step. Otherwise (a resumed or
+  // redirected step: the entry before it is outside the form, or there is none) it goes to the step before
+  // it on the path.
+  const fromStep = (location.state as { fromStep?: boolean } | null)?.fromStep === true;
   const previous = stepsBefore(step, draft.kind).at(-1);
-  const canGoBack = location.key !== "default" || previous !== undefined;
-  const back = () => (location.key !== "default" ? void navigate(-1) : void navigate(`/apply/${previous}`, { replace: true }));
+  const canGoBack = fromStep || previous !== undefined;
+  const back = () => (fromStep ? void navigate(-1) : void navigate(`/apply/${previous}`, { replace: true }));
   const notice = notices[step];
 
   return (

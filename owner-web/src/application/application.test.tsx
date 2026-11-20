@@ -555,6 +555,34 @@ describe("draft", () => {
     expect(next("신청하기")).toBeDisabled();
   });
 
+  it("goes back one step on the path after resuming, not out of the form", async () => {
+    seed("contact");
+    const u = user();
+    renderOwnerWeb("/apply");
+    await heading("연락받을 번호를\n알려주세요");
+
+    await u.click(screen.getByRole("button", { name: "뒤로" }));
+
+    await heading("메뉴판 사진을\n올려 주세요");
+  });
+
+  it("takes the owner from the start back to an application whose photos were not sent", async () => {
+    useOwnerApi({ applications: [{ applicationId: APPLICATION_ID, status: "pending" } as never] });
+    seed("review", { applicationId: APPLICATION_ID, uploaded: { cover: true, menus: false } });
+    const { router } = renderOwnerWeb("/");
+
+    await heading("이렇게\n신청할게요");
+    expect(router.state.location.pathname).toBe("/owner/apply/review");
+  });
+
+  it("shows the status of an application sent elsewhere", async () => {
+    useOwnerApi({ applications: [{ applicationId: APPLICATION_ID, status: "pending" } as never] });
+    seed("contact");
+    const { router } = renderOwnerWeb("/");
+
+    await waitFor(() => expect(router.state.location.pathname).toBe("/owner/applications"));
+  });
+
   it("is removed when the owner signs out", async () => {
     seed("contact");
     const u = user();

@@ -37,6 +37,18 @@ export interface Verification {
   retryAfter: string | null;
 }
 
+/**
+ * Whether the draft is an application already sent whose photos are not all uploaded yet, and that
+ * application is still pending: only the form can send them, so the owner is taken back to it.
+ */
+export function hasPhotosToSend(
+  draft: ApplicationDraft | null,
+  applications: readonly { applicationId: string; status: string }[],
+): boolean {
+  if (!draft?.applicationId || draft.uploaded.menus) return false;
+  return applications.some((application) => application.applicationId === draft.applicationId && application.status === "pending");
+}
+
 export function emptyDraft(): ApplicationDraft {
   return {
     version: 1,

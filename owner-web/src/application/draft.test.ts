@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { clearAllDrafts, clearDraft, emptyDraft, loadDraft, saveDraft } from "./draft";
+import { clearAllDrafts, clearDraft, emptyDraft, hasPhotosToSend, loadDraft, saveDraft } from "./draft";
 import { stageOf, stepsBefore } from "./steps";
 
 describe("application draft storage", () => {
@@ -78,5 +78,18 @@ describe("application steps", () => {
 
   it("shows the four stages", () => {
     expect((["method", "check", "bar-name", "address", "menus", "review", "intro", "done"] as const).map(stageOf)).toEqual([1, 1, 2, 2, 3, 4, 0, 0]);
+  });
+});
+
+describe("hasPhotosToSend", () => {
+  const sent = { ...emptyDraft(), applicationId: "app-1", uploaded: { cover: true, menus: false } };
+
+  it("is true only for a pending application of this draft whose menu photos are not sent", () => {
+    expect(hasPhotosToSend(sent, [{ applicationId: "app-1", status: "pending" }])).toBe(true);
+    expect(hasPhotosToSend(sent, [{ applicationId: "app-1", status: "rejected" }])).toBe(false);
+    expect(hasPhotosToSend(sent, [{ applicationId: "app-2", status: "pending" }])).toBe(false);
+    expect(hasPhotosToSend({ ...sent, uploaded: { cover: true, menus: true } }, [{ applicationId: "app-1", status: "pending" }])).toBe(false);
+    expect(hasPhotosToSend(emptyDraft(), [{ applicationId: "app-1", status: "pending" }])).toBe(false);
+    expect(hasPhotosToSend(null, [])).toBe(false);
   });
 });
