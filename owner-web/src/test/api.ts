@@ -9,8 +9,29 @@ export const ME: Me = {
   userType: "customer",
 } as Me;
 
+/** A whole bar as GET /api/bars/{barId} and GET /api/me/bars return it (spec 3.6). */
 export function bar(barId: string, name: string, extra: Partial<MyBars["items"][number]> = {}): MyBars["items"][number] {
-  return { barId, name, address: "서울특별시 관악구 관악로 1", currentMenu: null, ...extra } as MyBars["items"][number];
+  return {
+    barId,
+    name,
+    address: "서울특별시 관악구 관악로 1",
+    latitude: 37.478321,
+    longitude: 126.951234,
+    phone: null,
+    status: "active",
+    activeMenuImport: null,
+    description: null,
+    defaultPourMl: null,
+    tags: [],
+    weeklyHours: [],
+    operatingException: null,
+    photos: [],
+    currentMenu: null,
+    owner: null,
+    createdAt: "2026-11-01T03:00:00Z",
+    updatedAt: "2026-11-01T03:00:00Z",
+    ...extra,
+  } as MyBars["items"][number];
 }
 
 export function application(status: MyApplications["items"][number]["status"]): MyApplications["items"][number] {
@@ -56,5 +77,10 @@ export function useOwnerApi({ bars = [], applications = [] }: { bars?: MyBars["i
     http.get("/api/me", () => HttpResponse.json(ME)),
     http.get("/api/me/bars", () => HttpResponse.json({ items: bars })),
     http.get("/api/me/owner-applications", () => HttpResponse.json({ items: applications })),
+    // Spec 3.6: an owned bar, or 403 for a bar the user does not own.
+    http.get("/api/bars/:barId", ({ params }) => {
+      const found = bars.find((item) => item.barId === params.barId);
+      return found ? HttpResponse.json(found) : HttpResponse.json(errorBody("FORBIDDEN"), { status: 403 });
+    }),
   );
 }
