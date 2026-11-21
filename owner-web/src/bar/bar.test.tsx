@@ -68,9 +68,10 @@ describe("bar home (/bars/:barId, spec 3.6)", () => {
 
     await title("관악 위스키 바");
     const info = await screen.findByRole("link", { name: /매장 정보 관리/ });
-    expect(info).toHaveTextContent("사진 · 소개 · 영업시간");
-    // The status and menu cards hold their place until their tasks.
-    expect(screen.getByRole("region", { name: "영업 상태 변경" })).toHaveTextContent("웹에서는 준비 중이에요.");
+    // The app's fixed line, with commas instead of middle dots.
+    expect(info).toHaveTextContent("사진, 소개, 영업시간");
+    expect(screen.getByRole("region", { name: "영업 상태" })).toHaveTextContent("영업 상태 변경");
+    // The menu card holds its place until its tasks.
     expect(screen.getByRole("region", { name: "메뉴 관리" })).toHaveTextContent("웹에서는 준비 중이에요.");
 
     await user().click(info);
