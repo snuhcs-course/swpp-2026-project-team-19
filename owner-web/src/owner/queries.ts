@@ -1,4 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ApiError } from "../api/errors";
+import { clearDraft, loadDraft } from "../application/draft";
 import { unwrap } from "../api/client";
 import type { paths } from "../api/schema";
 import { useSession } from "../auth/SessionProvider";
@@ -13,11 +15,13 @@ export type Me = Json<"/api/me", "get">;
 export type MyBars = Json<"/api/me/bars", "get">;
 export type OwnedBar = MyBars["items"][number];
 export type MyApplications = Json<"/api/me/owner-applications", "get">;
+export type OwnerApplicationDetail = Json<"/api/owner-applications/{applicationId}", "get">;
 
 export const ownerQueryKeys = {
   me: ["me"] as const,
   myBars: ["me", "bars"] as const,
   myApplications: ["me", "owner-applications"] as const,
+  application: (applicationId: string) => ["owner-applications", applicationId] as const,
 };
 
 /** The account rarely changes during a visit; screens reuse it instead of asking again on every mount. */
@@ -48,5 +52,45 @@ export function useMyApplications() {
   return useQuery({
     queryKey: ownerQueryKeys.myApplications,
     queryFn: async ({ signal }) => unwrap(await api.GET("/api/me/owner-applications", { signal })),
+  });
+}
+
+/** GET /api/owner-applications/{applicationId}: one of this user's applications (spec 3.11.4). */
+export function useOwnerApplication(applicationId: string) {
+  const { api } = useSession();
+  return useQuery({
+    queryKey: ownerQueryKeys.application(applicationId),
+    queryFn: async ({ signal }) =>
+      unwrap(await api.GET("/api/owner-applications/{applicationId}", { params: { path: { applicationId } }, signal })),
+  });
+}
+
+/**
+ * POST /api/owner-applications/{applicationId}/cancel (spec 3.11.5). Whatever the answer, the list and the
+ * application are read again: on success to show it canceled, on 404 the list (it is gone or not this
+ * user's), on 409 the application (its status changed meanwhile, e.g. approved, or canceled by a first
+ * request whose answer was lost).
+ *
+ * A draft on this browser for the same application is removed: its photos can no longer be sent
+ * (android/.../data/owner/LiveOwnerScreenRepository.kt `cancelOwnerApplicationLive` drops its staged cover).
+ */
+export function useCancelApplication() {
+  const { api } = useSession();
+  const userId = useMe().data?.userId;
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (applicationId: string) =>
+      unwrap(await api.POST("/api/owner-applications/{applicationId}/cancel", { params: { path: { applicationId } } })),
+    onSuccess: (application) => {
+      queryClient.setQueryData(ownerQueryKeys.application(application.applicationId), application);
+    },
+    onSettled: async (_data, error, applicationId) => {
+      const stale = !error || (error instanceof ApiError && error.code === "INVALID_APPLICATION_STATE");
+      if (userId && stale && loadDraft(userId)?.applicationId === applicationId) clearDraft(userId);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ownerQueryKeys.myApplications, refetchType: "all" }),
+        error ? queryClient.invalidateQueries({ queryKey: ownerQueryKeys.application(applicationId) }) : null,
+      ]);
+    },
   });
 }
