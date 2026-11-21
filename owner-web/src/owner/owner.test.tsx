@@ -126,6 +126,24 @@ describe("application status (/applications)", () => {
     await waitFor(() => expect(router.state.location.pathname).toBe("/owner/apply/intro"));
   });
 
+  it("tells an owner with a bar that no application is open, and offers another bar", async () => {
+    // The approval of their only bar is on the bar list, so no card is left here.
+    useOwnerApi({
+      bars: [bar(BAR_ID, "관악 위스키 바")],
+      applications: [ownerApplication({ status: "approved", applicationType: "existing_bar", proposedBar: null, bar: { barId: BAR_ID, name: "관악 위스키 바", address: "주소" } })],
+    });
+    const { router } = renderOwnerWeb("/applications");
+
+    expect(await screen.findByText("진행 중인 신청이 없어요")).toBeInTheDocument();
+    expect(screen.queryByText("아직 신청한 매장이 없어요")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "매장 등록 신청하기" })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "내 매장 목록으로" })).toHaveAttribute("href", "/owner/bars");
+
+    await user().click(screen.getByRole("button", { name: "다른 매장 등록하기" }));
+
+    await waitFor(() => expect(router.state.location.pathname).toBe("/owner/apply/intro"));
+  });
+
   it("shows loading while the list is slow to arrive", async () => {
     let answer = () => {};
     useOwnerApi();

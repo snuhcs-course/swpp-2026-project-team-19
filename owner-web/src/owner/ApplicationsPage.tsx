@@ -63,7 +63,14 @@ export function ApplicationsPage() {
                       {notice}
                     </p>
                   ) : null}
-                  {shown.length === 0 ? (
+                  {shown.length === 0 && barData.items.length > 0 ? (
+                    // An owner whose approvals are all on the bar list: nothing open, but not a first application.
+                    <EmptyState
+                      title="진행 중인 신청이 없어요"
+                      description="관리하는 매장은 내 매장 목록에서 볼 수 있어요."
+                      action={<AddBarButton onClick={startApplication} />}
+                    />
+                  ) : shown.length === 0 ? (
                     <EmptyState
                       title="아직 신청한 매장이 없어요"
                       description="매장을 등록하면 운영팀이 확인한 뒤 승인해요."
