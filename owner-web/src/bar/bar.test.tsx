@@ -279,6 +279,84 @@ describe("bar info editor (/bars/:barId/info, spec 3.7)", () => {
     expect(api.patches).toHaveLength(1);
   });
 
+  it("locks the form while saving, so no edit is made that the request would not carry", async () => {
+    let answer = () => {};
+    const api = barServer({}, async () => {
+      await new Promise<void>((resolve) => (answer = resolve));
+      return undefined;
+    });
+    await openForm();
+
+    await user().type(screen.getByLabelText("한 줄 소개"), "!");
+    await user().click(save());
+
+    expect(screen.getByLabelText("한 줄 소개")).toBeDisabled();
+    expect(screen.getByLabelText("전화번호")).toBeDisabled();
+    expect(screen.getByLabelText("태그 검색")).toBeDisabled();
+    expect(screen.getByRole("button", { name: "싱글몰트 빼기" })).toBeDisabled();
+
+    await waitFor(() => expect(api.patches).toHaveLength(1));
+    answer();
+
+    await title("관악 위스키 바");
+    expect(api.patches).toEqual([{ description: "싱글몰트 위주의 조용한 바!" }]);
+  });
+
+  it("keeps changes made elsewhere when the bar is read again while editing", async () => {
+    // The form compares with the bar as it was opened, not with a later refetch (e.g. after a reconnect).
+    const api = barServer();
+    const { queryClient } = await openForm();
+
+    // Someone else (the app, an operator) changes the phone and the tags; then the bar is read again.
+    const reads = api.reads.bar;
+    api.current().phone = "02-999-0000";
+    api.current().tags = ["운영자 태그"];
+    await queryClient.invalidateQueries({ queryKey: ["bars", BAR_ID] });
+    await waitFor(() => expect(api.reads.bar).toBeGreaterThan(reads));
+
+    await user().type(screen.getByLabelText("한 줄 소개"), "!");
+    await user().click(save());
+
+    await title("관악 위스키 바");
+    expect(api.patches).toEqual([{ description: "싱글몰트 위주의 조용한 바!" }]);
+    expect(api.current().phone).toBe("02-999-0000");
+    expect(api.current().tags).toEqual(["운영자 태그"]);
+  });
+
+  it("does not ask to discard after a refetch alone", async () => {
+    const api = barServer();
+    const { queryClient } = await openForm();
+
+    const reads = api.reads.bar;
+    api.current().description = "운영자가 바꾼 소개";
+    await queryClient.invalidateQueries({ queryKey: ["bars", BAR_ID] });
+    await waitFor(() => expect(api.reads.bar).toBeGreaterThan(reads));
+    await user().click(screen.getByRole("button", { name: "뒤로" }));
+
+    await title("관악 위스키 바");
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("saves other fields when a stored phone does not fit the app's rule, and checks it once edited", async () => {
+    // An operator may store any phone up to 30 characters (spec 3.7); the app's rule applies to new input.
+    const api = barServer({ phone: "02-123 내선 4" });
+    await openForm();
+
+    expect(screen.queryByText("전화번호는 숫자와 전화번호 기호만 입력해 주세요.")).not.toBeInTheDocument();
+    await user().type(screen.getByLabelText("한 줄 소개"), "!");
+    expect(save()).toBeEnabled();
+
+    await user().type(screen.getByLabelText("전화번호"), "0");
+    expect(screen.getByText("전화번호는 숫자와 전화번호 기호만 입력해 주세요.")).toBeInTheDocument();
+    expect(save()).toBeDisabled();
+
+    await user().type(screen.getByLabelText("전화번호"), "{Backspace}");
+    await user().click(save());
+
+    await title("관악 위스키 바");
+    expect(api.patches).toEqual([{ description: "싱글몰트 위주의 조용한 바!" }]);
+  });
+
   it("shows the server's field errors under their fields (422)", async () => {
     const api = barServer({}, () =>
       HttpResponse.json(

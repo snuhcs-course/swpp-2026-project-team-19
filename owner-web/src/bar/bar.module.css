@@ -4,6 +4,14 @@
   gap: var(--bm-space-md);
 }
 
+/* The form's fieldset only groups the fields to lock them while saving; it draws nothing. */
+.fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
 /* OwnerManagementHomeScreen.kt: the quick cards, two side by side. */
 .cards {
   display: grid;

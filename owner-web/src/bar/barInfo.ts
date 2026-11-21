@@ -45,11 +45,16 @@ const PHONE_PATTERN = /^[+0-9() .-]{1,30}$/;
 /**
  * The errors of the typed values, by field (OwnerBarEditRules.kt `barInfoError`, same messages). The
  * description is counted after trimming, as the server does (spec 3.7).
+ *
+ * The phone is checked only once the owner edits it (`loaded` is the form as opened). The API takes any text up
+ * to 30 characters, and an operator may have saved one the app's rule refuses (e.g. "02-123 내선 4"): left
+ * as it is, such a phone must not keep the owner from saving the other fields.
  */
-export function barInfoErrors(form: BarInfoForm): Partial<Record<BarInfoField, string>> {
+export function barInfoErrors(form: BarInfoForm, loaded: BarInfoForm): Partial<Record<BarInfoField, string>> {
   const errors: Partial<Record<BarInfoField, string>> = {};
   if (characterCount(form.description.trim()) > MAX_DESCRIPTION) errors.description = "한 줄 소개는 100자 이하여야 해요.";
-  if (form.phone.length > MAX_PHONE || (form.phone.trim() !== "" && !PHONE_PATTERN.test(form.phone))) {
+  const phoneEdited = form.phone !== loaded.phone;
+  if (phoneEdited && (form.phone.length > MAX_PHONE || (form.phone.trim() !== "" && !PHONE_PATTERN.test(form.phone)))) {
     errors.phone = "전화번호는 숫자와 전화번호 기호만 입력해 주세요.";
   }
   if (form.pourMl !== "") {

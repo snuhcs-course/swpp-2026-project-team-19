@@ -15,17 +15,19 @@ import {
 
 const BAR_ID = "22222222-2222-4222-8222-222222222222";
 const form = (change: Partial<BarInfoForm> = {}): BarInfoForm => ({ description: "", phone: "", pourMl: "", tags: [], ...change });
+/** The errors of a form opened on a bar with nothing set, so every typed value counts as edited. */
+const errorsOf = (typed: BarInfoForm) => barInfoErrors(typed, form());
 
 // Ported from android/.../ui/owner/OwnerBarEditRulesTest.kt (photo and hours tests wait for I5-P6).
 describe("bar info rules (OwnerBarEditRules.kt)", () => {
   it("validates each field and never clears unrelated data", () => {
     // basicFieldsValidateAndNeverClearUnrelatedData: name and address are not edited on the web, so their
     // cases are left out; the unrelated data check becomes "only changed fields are sent".
-    expect(barInfoErrors(form({ phone: "1234X" })).phone).toBeDefined();
-    expect(barInfoErrors(form({ pourMl: "0" })).defaultPourMl).toBeDefined();
-    expect(barInfoErrors(form({ description: "x".repeat(101) })).description).toBeDefined();
-    expect(barInfoErrors(form({ description: "소개", phone: "02-1234-5678", pourMl: "30" }))).toEqual({});
-    expect(barInfoErrors(form({ description: "소개", pourMl: "1000" })).defaultPourMl).toBeDefined();
+    expect(errorsOf(form({ phone: "1234X" })).phone).toBeDefined();
+    expect(errorsOf(form({ pourMl: "0" })).defaultPourMl).toBeDefined();
+    expect(errorsOf(form({ description: "x".repeat(101) })).description).toBeDefined();
+    expect(errorsOf(form({ description: "소개", phone: "02-1234-5678", pourMl: "30" }))).toEqual({});
+    expect(errorsOf(form({ description: "소개", pourMl: "1000" })).defaultPourMl).toBeDefined();
 
     const before = bar(BAR_ID, "바", {
       tags: ["몰트"],
@@ -63,17 +65,26 @@ describe("bar info rules (OwnerBarEditRules.kt)", () => {
 describe("bar info rules (web)", () => {
   it("counts characters as the server does, so an emoji is one", () => {
     expect(characterCount("🥃")).toBe(1);
-    expect(barInfoErrors(form({ description: "🥃".repeat(100) })).description).toBeUndefined();
-    expect(barInfoErrors(form({ description: "🥃".repeat(101) })).description).toBeDefined();
+    expect(errorsOf(form({ description: "🥃".repeat(100) })).description).toBeUndefined();
+    expect(errorsOf(form({ description: "🥃".repeat(101) })).description).toBeDefined();
     // Counted after trimming (spec 3.7), and line breaks count as one.
-    expect(barInfoErrors(form({ description: `  ${"가".repeat(98)}\n가  ` })).description).toBeUndefined();
+    expect(errorsOf(form({ description: `  ${"가".repeat(98)}\n가  ` })).description).toBeUndefined();
     expect(toggleTag([], "🥃".repeat(24))).toEqual(["🥃".repeat(24)]);
   });
 
   it("accepts the phone characters the app accepts (OwnerBarEditRules.kt)", () => {
-    expect(barInfoErrors(form({ phone: "+82 (2) 555.1234" })).phone).toBeUndefined();
-    expect(barInfoErrors(form({ phone: "02-123 내선 4" })).phone).toBeDefined();
-    expect(barInfoErrors(form({ phone: "1".repeat(31) })).phone).toBeDefined();
+    expect(errorsOf(form({ phone: "+82 (2) 555.1234" })).phone).toBeUndefined();
+    expect(errorsOf(form({ phone: "02-123 내선 4" })).phone).toBeDefined();
+    expect(errorsOf(form({ phone: "1".repeat(31) })).phone).toBeDefined();
+  });
+
+  it("checks the phone only once the owner edits it", () => {
+    // An operator may have saved a phone the app's rule refuses; left as it is, it must not block saving.
+    const opened = form({ phone: "02-123 내선 4" });
+    expect(barInfoErrors(opened, opened)).toEqual({});
+    expect(barInfoErrors({ ...opened, description: "새 소개" }, opened)).toEqual({});
+    expect(barInfoErrors({ ...opened, phone: "02-123 내선 5" }, opened).phone).toBeDefined();
+    expect(barInfoErrors({ ...opened, phone: "02-123-4567" }, opened).phone).toBeUndefined();
   });
 
   it("sends null for a cleared description, phone or pour, and the whole tag list when it changes", () => {
