@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router";
-import { ApiError, fieldErrorMessages } from "../api/errors";
+import { ApiError, fieldErrorMessages, isRetryable } from "../api/errors";
 import { OwnerScreen } from "../owner/OwnerScreen";
 import { useApplyException, useBar, type OperatingExceptionInput, type OwnedBar } from "../owner/queries";
 import { BottomSheet } from "../ui/BottomSheet";
@@ -37,6 +37,8 @@ const FIELD_COPY: Record<string, string> = {
   INVALID_TIME: "5분 단위로 골라 주세요.",
 };
 
+const sameInput = (a: OperatingExceptionInput, b: OperatingExceptionInput) => JSON.stringify(a) === JSON.stringify(b);
+
 /**
  * /owner/bars/:barId/status: a temporary closure applied at once (spec 3.15.2), as the app's
  * OwnerOperatingQuickScreen. It replaces the bar's current closure, so applying asks first.
@@ -65,6 +67,10 @@ function StatusForm({ barId }: { barId: string }) {
   const [asking, setAsking] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<Field, string>>>({});
+  // A request whose answer was lost (network failure or 5xx) may have been saved. Applying the same input
+  // again sends it unchanged, with its date, even after midnight: spec 3.15.2 answers 200 to the same
+  // request, so it is not applied to the next day instead. Any other answer, or a changed input, clears it.
+  const unanswered = useRef<OperatingExceptionInput | null>(null);
   const guard = useLeaveGuard(choice !== null || note !== "", apply.isPending);
   const fail = useBarFailure(guard.release);
   // Read when shown; the date that is sent is read again when the owner applies (spec 3.15.2).
@@ -90,15 +96,19 @@ function StatusForm({ barId }: { barId: string }) {
 
   function confirm() {
     if (apply.isPending || !choice) return;
-    // The date is Seoul's today when the owner applies, not when the screen opened (ownerQuickApplyDay).
+    const last = unanswered.current;
+    unanswered.current = null;
+    const again = last && sameInput(last, body("date" in last ? last.date : "")) ? last : null;
+    // Otherwise the date is Seoul's today when the owner applies, not when the screen opened (ownerQuickApplyDay).
     const date = applyDate(Date.now());
-    if (choice === "vacation" && !validVacationAtApply(startDate, endDate, date)) {
+    if (!again && choice === "vacation" && !validVacationAtApply(startDate, endDate, date)) {
       setAsking(false);
       return setError(BAD_RANGE);
     }
+    const sent = again ?? body(date);
     setError(null);
     setFieldErrors({});
-    apply.mutate(body(date), {
+    apply.mutate(sent, {
       onSuccess: () => {
         setAsking(false);
         guard.release();
@@ -106,6 +116,7 @@ function StatusForm({ barId }: { barId: string }) {
       },
       onError: (failure) => {
         setAsking(false);
+        if (isRetryable(failure)) unanswered.current = sent;
         handleFailure(failure);
       },
     });

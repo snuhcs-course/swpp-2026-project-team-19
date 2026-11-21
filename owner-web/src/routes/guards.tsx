@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 import { Navigate, Outlet, useLocation, useParams } from "react-router";
 import { useSession } from "../auth/SessionProvider";
 import { useMe, useMyBars, type OwnedBar } from "../owner/queries";
@@ -48,7 +48,9 @@ export function RequireOwnedBar({ children }: { children: (bar: OwnedBar) => Rea
       {(data) => {
         const bar = data.items.find((item) => item.barId === barId);
         if (!bar) return <NoAccess />;
-        return children(bar);
+        // Keyed by the bar: moving straight to the same screen of another bar (e.g. through the browser's
+        // history) starts it afresh, so no unsaved input or failed upload of one bar is sent to the other.
+        return <Fragment key={bar.barId}>{children(bar)}</Fragment>;
       }}
     </QueryView>
   );

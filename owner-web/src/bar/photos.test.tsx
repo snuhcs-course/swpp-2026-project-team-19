@@ -156,6 +156,33 @@ describe("bar photos (OwnerPhotoHtmlV4Screen.kt, spec 3.16)", () => {
     expect(api.calls).toEqual(["POST a.jpg"]);
   });
 
+  it("lets a photo stopped by the limit try again once a photo is deleted", async () => {
+    // Codex review on #198: the failed photo already holds its place, so it is not counted against itself.
+    // Another device fills the bar just before this upload arrives.
+    const fourteen = Array.from({ length: 14 }, (_, index) => `p${index}`);
+    let full = true;
+    const api = photoServer(fourteen, ({ kind }) => {
+      if (kind !== "POST" || !full) return undefined;
+      api.setPhotos([...fourteen, "other"]);
+      return HttpResponse.json(errorBody("PHOTO_LIMIT_REACHED"), { status: 409 });
+    });
+    await openPhotos();
+    await upload("a.jpg");
+    await screen.findByText("사진이 이미 15장이에요. 사진을 지운 뒤 다시 추가해 주세요.");
+    await waitFor(() => expect(tiles()).toHaveLength(16));
+    expect(screen.getByRole("button", { name: "다시 시도" })).toBeDisabled();
+
+    await user().click(screen.getByRole("button", { name: "사진 15 메뉴" }));
+    await user().click(screen.getByRole("button", { name: "삭제하기" }));
+    await user().click(within(screen.getByRole("dialog", { name: "사진을 삭제할까요?" })).getByRole("button", { name: "삭제하기" }));
+    await waitFor(() => expect(screen.getByRole("button", { name: "다시 시도" })).toBeEnabled());
+    full = false;
+    await user().click(screen.getByRole("button", { name: "다시 시도" }));
+
+    await waitFor(() => expect(api.photos()).toHaveLength(15));
+    expect(api.calls).toEqual(["POST a.jpg", "DELETE other", "POST a.jpg"]);
+  });
+
   it("takes only as many photos as the bar has room for", async () => {
     const api = photoServer(Array.from({ length: 14 }, (_, index) => `p${index}`));
     await openPhotos();
@@ -267,6 +294,39 @@ describe("bar photos (OwnerPhotoHtmlV4Screen.kt, spec 3.16)", () => {
 
     expect(await screen.findByRole("dialog", { name: "변경을 취소할까요?" })).toBeInTheDocument();
     expect(api.calls).toEqual(["POST a.jpg"]);
+  });
+});
+
+describe("photos of two bars", () => {
+  it("starts afresh on another bar's photos, so a failed photo of one bar is never sent to the other", async () => {
+    // Codex review on #198: the same screen of another bar, reached straight through the browser's history.
+    const OTHER_ID = "33333333-3333-4333-8333-333333333333";
+    const posts: string[] = [];
+    useOwnerApi({ bars: [bar(BAR_ID, "관악 위스키 바", { photos: [photo("p1")] }), bar(OTHER_ID, "신림 바", { photos: [photo("q1")] })] });
+    server.use(
+      http.post("/api/bars/:barId/photos", ({ params }) => {
+        posts.push(String(params.barId));
+        return HttpResponse.json(errorBody("INTERNAL_ERROR"), { status: 500 });
+      }),
+    );
+    // The other bar was opened before, so it is cached and shows at once.
+    const { router } = await openPhotos();
+    await router.navigate(`/bars/${OTHER_ID}/photos`);
+    await waitFor(() => expect(screen.getByRole("list", { name: "매장 사진" }).querySelector("img")?.getAttribute("src")).toContain("/q1/"));
+    await router.navigate(`/bars/${BAR_ID}/photos`);
+    await waitFor(() => expect(screen.getByRole("list", { name: "매장 사진" }).querySelector("img")?.getAttribute("src")).toContain("/p1/"));
+    await upload("a.jpg");
+    await screen.findByRole("button", { name: "다시 시도" });
+
+    void router.navigate(`/bars/${OTHER_ID}/photos`);
+    await user().click(within(await screen.findByRole("dialog", { name: "변경을 취소할까요?" })).getByRole("button", { name: "변경 취소" }));
+
+    await waitFor(() => expect(router.state.location.pathname).toBe(`/owner/bars/${OTHER_ID}/photos`));
+    await waitFor(() => expect(screen.getByRole("list", { name: "매장 사진" }).querySelector("img")?.getAttribute("src")).toContain("/q1/"));
+    expect(tileNames()).toEqual(["대표 사진"]);
+    expect(screen.queryByRole("listitem", { name: "올리는 사진 a.jpg" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "다시 시도" })).not.toBeInTheDocument();
+    expect(posts).toEqual([BAR_ID]);
   });
 });
 

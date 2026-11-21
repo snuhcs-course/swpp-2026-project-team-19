@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { bar, errorBody, useOwnerApi } from "../test/api";
 import { renderOwnerWeb } from "../test/render";
 import { server } from "../test/server";
+import { ownerQueryKeys } from "../owner/queries";
 import type { OperatingException } from "./operating";
 import type { BarDetail } from "./barInfo";
 
@@ -320,6 +321,73 @@ describe("operating status page (OwnerOperatingQuickScreen, spec 3.15.2)", () =>
 
     await title("관악 위스키 바");
     expect(api.requests).toHaveLength(2);
+  });
+
+  it("sends the same request again after its answer was lost, after midnight too (spec 3.15.2 retry)", async () => {
+    // The first answer is lost just before midnight; the request may have been saved. Sent again unchanged,
+    // the server answers 200 for the same closure instead of closing the next day. Only DATE_NOT_TODAY (it
+    // was not saved) makes the date be worked out again.
+    setSeoulTime(SATURDAY, 23, 59);
+    const notToday = { error: { code: "VALIDATION_FAILED", message: "날짜", details: null, fieldErrors: [{ path: "date", code: "DATE_NOT_TODAY", message: "오늘" }] } };
+    const answers = [() => HttpResponse.error(), () => HttpResponse.json(notToday, { status: 422 })];
+    const api = statusServer({}, () => answers.shift()?.());
+    await openStatus();
+    await user().click(screen.getByRole("radio", { name: /오늘 휴무/ }));
+    await applyWithSheet();
+    expect(await screen.findByText("서버에 연결하지 못했어요. 네트워크를 확인해 주세요.")).toBeInTheDocument();
+
+    setSeoulTime("2026-11-01", 0, 1);
+    await applyWithSheet();
+    expect(await screen.findByText("날짜가 바뀌었어요. 확인한 뒤 다시 적용해 주세요.")).toBeInTheDocument();
+    await applyWithSheet();
+
+    await title("관악 위스키 바");
+    expect(api.requests.map((request) => request.body?.date)).toEqual([SATURDAY, SATURDAY, "2026-11-01"]);
+  });
+
+  it("works out the date again when the input changed after a lost answer", async () => {
+    setSeoulTime(SATURDAY, 23, 59);
+    let failures = 1;
+    const api = statusServer({}, () => (failures-- > 0 ? HttpResponse.error() : undefined));
+    await openStatus();
+    await user().click(screen.getByRole("radio", { name: /오늘 휴무/ }));
+    await applyWithSheet();
+    await screen.findByText("서버에 연결하지 못했어요. 네트워크를 확인해 주세요.");
+
+    setSeoulTime("2026-11-01", 0, 1);
+    await user().type(screen.getByLabelText("고객 안내 (선택)"), "쉽니다");
+    await applyWithSheet();
+
+    await title("관악 위스키 바");
+    expect(api.requests.map((request) => request.body)).toEqual([
+      { kind: "closed_today", date: SATURDAY, note: null },
+      { kind: "closed_today", date: "2026-11-01", note: "쉽니다" },
+    ]);
+  });
+
+  it("starts afresh on another bar's status page, so one bar's input is never applied to the other", async () => {
+    // Codex review on #198: the same screen of another bar, reached straight through the browser's history.
+    const OTHER_ID = "33333333-3333-4333-8333-333333333333";
+    useOwnerApi({ bars: [bar(BAR_ID, "관악 위스키 바"), bar(OTHER_ID, "신림 바")] });
+    // Both bars were opened before, so they are cached and show at once.
+    const { router, queryClient } = await openStatus();
+    await router.navigate(`/bars/${OTHER_ID}/status`);
+    await waitFor(() => expect(queryClient.getQueryData(ownerQueryKeys.bar(OTHER_ID))).toBeDefined());
+    await router.navigate(`/bars/${BAR_ID}/status`);
+    // Clicked again until it lands on this bar's form, not the other bar's one being removed.
+    await waitFor(async () => {
+      await user().click(screen.getByRole("radio", { name: /오늘 휴무/ }));
+      expect(screen.getByRole("radio", { name: /오늘 휴무/ })).toHaveAttribute("aria-checked", "true");
+    });
+    await user().type(screen.getByLabelText("고객 안내 (선택)"), "쉽니다");
+
+    void router.navigate(`/bars/${OTHER_ID}/status`);
+    await user().click(within(await screen.findByRole("dialog", { name: "변경을 취소할까요?" })).getByRole("button", { name: "변경 취소" }));
+
+    await waitFor(() => expect(router.state.location.pathname).toBe(`/owner/bars/${OTHER_ID}/status`));
+    expect(await screen.findByRole("radio", { name: /오늘 휴무/ })).toHaveAttribute("aria-checked", "false");
+    await user().click(screen.getByRole("radio", { name: /오늘 휴무/ }));
+    expect(screen.getByLabelText("고객 안내 (선택)")).toHaveValue("");
   });
 
   it("goes to the bar list when the bar is gone (404)", async () => {

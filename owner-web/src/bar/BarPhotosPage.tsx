@@ -257,7 +257,12 @@ function PhotoEditor({ bar }: { bar: BarDetail }) {
                   {item.error ?? "사진을 올리지 못했어요."}
                 </p>
                 <div className={styles.actions}>
-                  <Button variant="secondary" disabled={item.error === LIMIT_REACHED && full} onClick={() => update(item.key, { status: "waiting", error: undefined })}>
+                  <Button
+                    variant="secondary"
+                    // The photo already holds a place in the queue: it may retry once the bar has room for it.
+                    disabled={item.error === LIMIT_REACHED && photoSlots(photos.length, queue.length - 1) === 0}
+                    onClick={() => update(item.key, { status: "waiting", error: undefined })}
+                  >
                     다시 시도
                   </Button>
                   <Button variant="secondary" onClick={() => update(item.key, null)}>
