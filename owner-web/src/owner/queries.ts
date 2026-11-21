@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ApiError } from "../api/errors";
 import { clearDraft, loadDraft } from "../application/draft";
 import { unwrap } from "../api/client";
-import type { paths } from "../api/schema";
+import type { components, paths } from "../api/schema";
 import { useSession } from "../auth/SessionProvider";
 
 type Json<P extends keyof paths, M extends keyof paths[P]> = paths[P][M] extends {
@@ -16,12 +16,15 @@ export type MyBars = Json<"/api/me/bars", "get">;
 export type OwnedBar = MyBars["items"][number];
 export type MyApplications = Json<"/api/me/owner-applications", "get">;
 export type OwnerApplicationDetail = Json<"/api/owner-applications/{applicationId}", "get">;
+export type BarDetail = Json<"/api/bars/{barId}", "get">;
+export type BarUpdate = components["schemas"]["BarUpdateInput"];
 
 export const ownerQueryKeys = {
   me: ["me"] as const,
   myBars: ["me", "bars"] as const,
   myApplications: ["me", "owner-applications"] as const,
   application: (applicationId: string) => ["owner-applications", applicationId] as const,
+  bar: (barId: string) => ["bars", barId] as const,
 };
 
 /** The account rarely changes during a visit; screens reuse it instead of asking again on every mount. */
@@ -93,6 +96,35 @@ export function useCancelApplication() {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ownerQueryKeys.myApplications, refetchType: "all" }),
         error ? queryClient.invalidateQueries({ queryKey: ownerQueryKeys.application(applicationId) }) : null,
+      ]);
+    },
+  });
+}
+
+/** GET /api/bars/{barId}: the bar and its management state, for its owner's screens (spec 3.6). */
+export function useBar(barId: string) {
+  const { api } = useSession();
+  return useQuery({
+    queryKey: ownerQueryKeys.bar(barId),
+    queryFn: async ({ signal }) => unwrap(await api.GET("/api/bars/{barId}", { params: { path: { barId } }, signal })),
+  });
+}
+
+/**
+ * PATCH /api/bars/{barId} (spec 3.7). The answer is the bar as the server now has it: it is shown at once,
+ * and the bar and the owner's bar list are read again, since both show it.
+ */
+export function useUpdateBar(barId: string) {
+  const { api } = useSession();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (body: BarUpdate) =>
+      unwrap(await api.PATCH("/api/bars/{barId}", { params: { path: { barId } }, body })),
+    onSuccess: async (bar) => {
+      queryClient.setQueryData(ownerQueryKeys.bar(barId), bar);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ownerQueryKeys.bar(barId), refetchType: "all" }),
+        queryClient.invalidateQueries({ queryKey: ownerQueryKeys.myBars, refetchType: "all" }),
       ]);
     },
   });
