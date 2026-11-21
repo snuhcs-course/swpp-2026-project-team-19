@@ -5,8 +5,8 @@ describe("hidden applications", () => {
   afterEach(() => vi.restoreAllMocks());
 
   it("keeps the hidden IDs per account", () => {
-    hideApplication("user-a", "app-1");
-    hideApplication("user-a", "app-2");
+    const first = hideApplication("user-a", "app-1", new Set());
+    hideApplication("user-a", "app-2", first);
 
     expect([...loadHiddenApplications("user-a")]).toEqual(["app-1", "app-2"]);
     expect(loadHiddenApplications("user-b").size).toBe(0);
@@ -26,6 +26,10 @@ describe("hidden applications", () => {
       throw new Error("blocked");
     });
 
-    expect([...hideApplication("user-a", "app-1")]).toEqual(["app-1"]);
+    const first = hideApplication("user-a", "app-1", new Set());
+    const second = hideApplication("user-a", "app-2", first);
+
+    // The first card stays hidden: the set builds on what the screen hides, not on storage.
+    expect([...second].sort()).toEqual(["app-1", "app-2"]);
   });
 });

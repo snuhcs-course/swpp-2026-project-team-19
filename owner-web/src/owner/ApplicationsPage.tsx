@@ -44,7 +44,7 @@ export function ApplicationsPage() {
   }
 
   function dismiss() {
-    if (dismissId) setHidden(hideApplication(userId, dismissId));
+    if (dismissId) setHidden((current) => hideApplication(userId, dismissId, current));
     setDismissId(null);
   }
 

@@ -10,17 +10,23 @@ import { applicationBadge, applicationBarName, applicationDateText } from "./app
 import { StatusBadge } from "./ApplicationsPage";
 import { CancelApplicationSheet } from "./CancelApplicationSheet";
 import { OwnerScreen } from "./OwnerScreen";
-import { useOwnerApplication, type OwnerApplicationDetail } from "./queries";
+import { useMe, useOwnerApplication, type OwnerApplicationDetail } from "./queries";
 import styles from "./owner.module.css";
 
 /**
  * /owner/applications/:applicationId: what the owner sent, read-only (spec 3.11.4), as the app's
  * "신청한 내용" (android/.../ui/owner/OwnerOnboardingScreen.kt `RegPage.VIEW_APPLICATION`). Photos are
- * shown as counts, as in the app.
+ * shown as counts, as in the app, and only while the application is pending: canceling or rejecting deletes
+ * them and approval moves the cover to the bar (spec 3.11.5, 3.11.8, 3.11.17), so afterwards the response
+ * has none and a count would wrongly say none were sent.
+ *
+ * Cancel is offered only to the applicant (3.11.5). An operator may read anyone's application (3.11.4), but
+ * cancelling it would only answer 403.
  */
 export function ApplicationDetailPage() {
   const { applicationId = "" } = useParams();
   const application = useOwnerApplication(applicationId);
+  const userId = useMe().data?.userId;
   const [cancelId, setCancelId] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -35,6 +41,7 @@ export function ApplicationDetailPage() {
           {(data) => (
             <ApplicationDetails
               application={data}
+              canCancel={data.status === "pending" && data.applicant.userId === userId}
               notice={notice}
               onCancel={() => {
                 setNotice(null);
@@ -51,10 +58,12 @@ export function ApplicationDetailPage() {
 
 function ApplicationDetails({
   application,
+  canCancel,
   notice,
   onCancel,
 }: {
   application: OwnerApplicationDetail;
+  canCancel: boolean;
   notice: string | null;
   onCancel: () => void;
 }) {
@@ -88,19 +97,21 @@ function ApplicationDetails({
         <SummaryRow label="이름" value={applicationBarName(application)} />
         {newBar ? (
           <>
-            <SummaryRow label="대표 사진" value={count(application.coverPhoto ? 1 : 0)} />
+            {pending ? <SummaryRow label="대표 사진" value={count(application.coverPhoto ? 1 : 0)} /> : null}
             <SummaryRow label="주소" value={application.proposedBar?.address ?? ""} />
             <SummaryRow label="매장 전화" value={formatOwnerPhone(application.proposedBar?.phone ?? "")} />
           </>
         ) : null}
       </Section>
-      <Section title="메뉴판">
-        <SummaryRow label="메뉴판 사진" value={count(application.menuPhotos.length)} />
-      </Section>
+      {pending ? (
+        <Section title="메뉴판">
+          <SummaryRow label="메뉴판 사진" value={count(application.menuPhotos.length)} />
+        </Section>
+      ) : null}
       <Section title="연락처">
         <SummaryRow label="연락받을 번호" value={formatOwnerPhone(application.contactPhone)} />
       </Section>
-      {pending ? (
+      {canCancel ? (
         <Button variant="secondary" onClick={onCancel}>
           신청 취소
         </Button>

@@ -71,7 +71,8 @@ export function useOwnerApplication(applicationId: string) {
  * user's), on 409 the application (its status changed meanwhile, e.g. approved, or canceled by a first
  * request whose answer was lost).
  *
- * A draft on this browser for the same application is removed: its photos can no longer be sent
+ * A draft on this browser for the same application is removed (unless the request failed for another reason,
+ * which a retry may fix): its photos can no longer be sent
  * (android/.../data/owner/LiveOwnerScreenRepository.kt `cancelOwnerApplicationLive` drops its staged cover).
  */
 export function useCancelApplication() {
@@ -85,8 +86,10 @@ export function useCancelApplication() {
       queryClient.setQueryData(ownerQueryKeys.application(application.applicationId), application);
     },
     onSettled: async (_data, error, applicationId) => {
-      const stale = !error || (error instanceof ApiError && error.code === "INVALID_APPLICATION_STATE");
-      if (userId && stale && loadDraft(userId)?.applicationId === applicationId) clearDraft(userId);
+      // Canceled now, no longer pending (409), or gone (404): no photo can be sent to it any more.
+      const code = error instanceof ApiError ? error.code : null;
+      const ended = !error || code === "INVALID_APPLICATION_STATE" || code === "OWNER_APPLICATION_NOT_FOUND";
+      if (userId && ended && loadDraft(userId)?.applicationId === applicationId) clearDraft(userId);
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ownerQueryKeys.myApplications, refetchType: "all" }),
         error ? queryClient.invalidateQueries({ queryKey: ownerQueryKeys.application(applicationId) }) : null,

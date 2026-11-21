@@ -19,9 +19,12 @@ export function loadHiddenApplications(userId: string | undefined): ReadonlySet<
   }
 }
 
-/** Adds `applicationId` and returns the new set; the set still changes for this visit when storage fails. */
-export function hideApplication(userId: string, applicationId: string): ReadonlySet<string> {
-  const next = new Set(loadHiddenApplications(userId));
+/**
+ * Adds `applicationId` to `current` (what the screen hides now) and returns the new set. It builds on
+ * `current`, not on storage, so earlier cards stay hidden for this visit when storage fails.
+ */
+export function hideApplication(userId: string, applicationId: string, current: ReadonlySet<string>): ReadonlySet<string> {
+  const next = new Set([...loadHiddenApplications(userId), ...current]);
   next.add(applicationId);
   try {
     localStorage.setItem(keyFor(userId), JSON.stringify([...next]));

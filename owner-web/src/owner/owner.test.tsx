@@ -253,8 +253,9 @@ describe("cancel (spec 3.11.5)", () => {
     expect(loadDraft(ME.userId)?.applicationId).toBe("dddddddd-dddd-4ddd-8ddd-ddddddddddd1");
   });
 
-  it("reloads the list when the application is gone (404)", async () => {
+  it("reloads the list when the application is gone (404), and drops this browser's draft for it", async () => {
     pendingApi();
+    saveSentDraft(APPLICATION_ID);
     let listCalls = 0;
     server.use(
       http.get("/api/me/owner-applications", () => {
@@ -270,6 +271,7 @@ describe("cancel (spec 3.11.5)", () => {
     expect(await screen.findByText(CANCEL_NOT_FOUND_NOTICE)).toBeInTheDocument();
     expect(await screen.findByText("아직 신청한 매장이 없어요")).toBeInTheDocument();
     expect(listCalls).toBe(2);
+    expect(loadDraft(ME.userId)).toBeNull();
   });
 
   it("shows the new status when the application was approved meanwhile (409)", async () => {
@@ -292,6 +294,7 @@ describe("cancel (spec 3.11.5)", () => {
 
   it("keeps the sheet open with the message when the server fails, and cancels on the next try", async () => {
     const api = pendingApi();
+    saveSentDraft(APPLICATION_ID);
     let failures = 1;
     const calls = cancelApi(() => {
       if (failures-- > 0) return HttpResponse.json(errorBody("INTERNAL_ERROR"), { status: 500 });
@@ -305,6 +308,8 @@ describe("cancel (spec 3.11.5)", () => {
 
     expect(await within(sheet).findByText("서버에서 문제가 생겼어요. 잠시 후 다시 시도해 주세요.")).toBeInTheDocument();
     expect(screen.getByRole("dialog")).toBeInTheDocument();
+    // A retry may still succeed, so the draft is kept until then.
+    expect(loadDraft(ME.userId)?.applicationId).toBe(APPLICATION_ID);
 
     await user().click(within(sheet).getByRole("button", { name: "취소하기" }));
 
@@ -527,6 +532,45 @@ describe("application details (/applications/:id, spec 3.11.4)", () => {
     expect(await screen.findByText(CANCELED_NOTICE)).toBeInTheDocument();
     expect(screen.getByText("취소됨")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "신청 취소" })).not.toBeInTheDocument();
+    // Cancel deleted the photos (spec 3.11.5): no count claims none were sent.
+    expect(screen.queryByText("대표 사진")).not.toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "메뉴판" })).not.toBeInTheDocument();
+  });
+
+  it.each(["rejected", "approved", "canceled"] as const)("shows no photo count once the application is %s", async (status) => {
+    useOwnerApi();
+    server.use(
+      http.get("/api/owner-applications/:id", () =>
+        HttpResponse.json(ownerApplication({ applicationId: APPLICATION_ID, status, coverPhoto: null, menuPhotos: [] })),
+      ),
+    );
+    renderOwnerWeb(`/applications/${APPLICATION_ID}`);
+
+    const barInfo = await screen.findByRole("region", { name: "매장 정보" });
+    expect(barInfo).toHaveTextContent("주소서울특별시 관악구 관악로 1 2층");
+    expect(barInfo).not.toHaveTextContent("대표 사진");
+    expect(screen.queryByRole("region", { name: "메뉴판" })).not.toBeInTheDocument();
+    expect(screen.queryByText("없음")).not.toBeInTheDocument();
+  });
+
+  it("offers no cancel on someone else's application an operator opens", async () => {
+    // Spec 3.11.4 lets an operator read any application; only its applicant may cancel it (3.11.5).
+    useOwnerApi();
+    server.use(
+      http.get("/api/owner-applications/:id", () =>
+        HttpResponse.json(
+          ownerApplication({
+            applicationId: APPLICATION_ID,
+            applicant: { userId: "44444444-4444-4444-8444-444444444444", email: "other@example.com", displayName: "다른 사장" },
+          }),
+        ),
+      ),
+    );
+    renderOwnerWeb(`/applications/${APPLICATION_ID}`);
+
+    expect(await screen.findByRole("region", { name: "사업자 정보" })).toBeInTheDocument();
+    expect(screen.getByText("검토 중")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "신청 취소" })).not.toBeInTheDocument();
   });
 
   it("does not show someone else's application, and offers no retry (404)", async () => {
@@ -629,6 +673,20 @@ describe("my bars (/bars, spec 3.11.9)", () => {
     await user().click(await screen.findByRole("button", { name: "다시 시도" }));
 
     await card("관악 위스키 바");
+  });
+
+  it("keeps a sent draft when another bar is started while the applications are unknown", async () => {
+    // The draft may be the only link to photos still to send to a pending application.
+    useOwnerApi({ bars: [bar(BAR_ID, "관악 위스키 바")] });
+    server.use(http.get("/api/me/owner-applications", () => HttpResponse.json(errorBody("SERVICE_UNAVAILABLE"), { status: 503 })));
+    saveSentDraft(APPLICATION_ID, { uploaded: { cover: true, menus: false } });
+    const { router } = renderOwnerWeb("/bars");
+
+    await card("관악 위스키 바");
+    await user().click(screen.getByRole("button", { name: "다른 매장 등록하기" }));
+
+    await waitFor(() => expect(router.state.location.pathname).toBe("/owner/apply/review"));
+    expect(loadDraft(ME.userId)?.applicationId).toBe(APPLICATION_ID);
   });
 
   it("shows the bars even when the applications fail to load", async () => {
