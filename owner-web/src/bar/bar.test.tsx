@@ -357,6 +357,110 @@ describe("bar info editor (/bars/:barId/info, spec 3.7)", () => {
     expect(api.patches).toEqual([{ description: "싱글몰트 위주의 조용한 바!" }]);
   });
 
+  it("keeps the unsaved form when reading the bar again fails, and retries on request", async () => {
+    const api = barServer();
+    const { queryClient } = await openForm();
+    await user().type(screen.getByLabelText("한 줄 소개"), " 쓰는 중");
+
+    let failures = 1;
+    server.use(
+      http.get("/api/bars/:barId", () =>
+        failures-- > 0 ? HttpResponse.json(errorBody("SERVICE_UNAVAILABLE"), { status: 503 }) : HttpResponse.json(api.current()),
+      ),
+    );
+    await queryClient.invalidateQueries({ queryKey: ["bars", BAR_ID] });
+
+    expect(await screen.findByText(/최신 정보를 불러오지 못했어요/)).toBeInTheDocument();
+    expect(screen.getByLabelText("한 줄 소개")).toHaveValue("싱글몰트 위주의 조용한 바 쓰는 중");
+
+    await user().click(screen.getByRole("button", { name: "다시 시도" }));
+
+    await waitFor(() => expect(screen.queryByText(/최신 정보를 불러오지 못했어요/)).not.toBeInTheDocument());
+    expect(screen.getByLabelText("한 줄 소개")).toHaveValue("싱글몰트 위주의 조용한 바 쓰는 중");
+  });
+
+  it("keeps the unsaved form when reading the bar list again fails", async () => {
+    barServer();
+    const { queryClient } = await openForm();
+    await user().type(screen.getByLabelText("한 줄 소개"), " 쓰는 중");
+
+    server.use(http.get("/api/me/bars", () => HttpResponse.json(errorBody("SERVICE_UNAVAILABLE"), { status: 503 })));
+    await queryClient.invalidateQueries({ queryKey: ["me", "bars"] });
+
+    expect(await screen.findByText(/최신 정보를 불러오지 못했어요/)).toBeInTheDocument();
+    expect(screen.getByLabelText("한 줄 소개")).toHaveValue("싱글몰트 위주의 조용한 바 쓰는 중");
+  });
+
+  it("stays while saving instead of offering to discard what is being saved", async () => {
+    let answer = () => {};
+    const api = barServer({}, async () => {
+      await new Promise<void>((resolve) => (answer = resolve));
+      return undefined;
+    });
+    const { router } = await openForm();
+
+    await user().type(screen.getByLabelText("한 줄 소개"), "!");
+    await user().click(save());
+    await waitFor(() => expect(api.patches).toHaveLength(1));
+
+    await user().click(screen.getByRole("button", { name: "뒤로" }));
+    await router.navigate(-1);
+
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(router.state.location.pathname).toBe(`/owner/bars/${BAR_ID}/info`);
+
+    answer();
+
+    await title("관악 위스키 바");
+    expect(api.current().description).toBe("싱글몰트 위주의 조용한 바!");
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("stays on the form, still asking before leaving, when the save fails", async () => {
+    barServer({}, () => HttpResponse.json(errorBody("INTERNAL_ERROR"), { status: 500 }));
+    await openForm();
+
+    await user().type(screen.getByLabelText("한 줄 소개"), "!");
+    await user().click(save());
+    await screen.findByText("서버에서 문제가 생겼어요. 잠시 후 다시 시도해 주세요.");
+    await user().click(screen.getByRole("button", { name: "뒤로" }));
+
+    expect(await screen.findByRole("dialog", { name: "변경을 취소할까요?" })).toBeInTheDocument();
+  });
+
+  it("does not add a tag on the Enter that ends an IME composition", async () => {
+    barServer();
+    await openForm();
+    const search = screen.getByLabelText("태그 검색");
+
+    await user().type(search, "루프탑");
+    fireEvent.keyDown(search, { key: "Enter", isComposing: true });
+    fireEvent.keyDown(search, { key: "Enter", keyCode: 229 });
+
+    expect(screen.queryByRole("button", { name: "루프탑 빼기" })).not.toBeInTheDocument();
+    expect(search).toHaveValue("루프탑");
+
+    // The next Enter, after the composition ended, adds it.
+    fireEvent.keyDown(search, { key: "Enter" });
+
+    expect(await screen.findByRole("button", { name: "루프탑 빼기" })).toBeInTheDocument();
+    expect(search).toHaveValue("");
+  });
+
+  it("shows the screen's frame while loading and when the bar cannot be read", async () => {
+    barServer();
+    server.use(http.get("/api/bars/:barId", () => HttpResponse.json(errorBody("FORBIDDEN"), { status: 403 })));
+    const { router } = renderOwnerWeb(`/bars/${BAR_ID}/info`);
+
+    expect(await screen.findByText("이 화면을 볼 권한이 없어요.")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: "매장 정보 관리" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "로그아웃" })).toBeInTheDocument();
+
+    await user().click(screen.getByRole("button", { name: "뒤로" }));
+
+    await waitFor(() => expect(router.state.location.pathname).toBe(`/owner/bars/${BAR_ID}`));
+  });
+
   it("shows the server's field errors under their fields (422)", async () => {
     const api = barServer({}, () =>
       HttpResponse.json(

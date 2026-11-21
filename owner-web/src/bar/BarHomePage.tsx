@@ -51,16 +51,18 @@ function PlaceholderCard({ title, wide = false }: { title: string; wide?: boolea
  */
 export function BarQuery<T>({
   query,
+  keepDataOnRefetchError = false,
   children,
 }: {
   query: Parameters<typeof QueryView<T>>[0]["query"];
+  keepDataOnRefetchError?: boolean;
   children: (data: T) => React.ReactNode;
 }) {
   if (query.error instanceof ApiError && query.error.code === "BAR_NOT_FOUND") {
     return <ErrorState message="매장을 찾을 수 없어요." action={<ButtonLink to="/bars">내 매장 목록으로</ButtonLink>} />;
   }
   return (
-    <QueryView query={query} loadingMessage="매장 정보를 불러오고 있어요.">
+    <QueryView query={query} loadingMessage="매장 정보를 불러오고 있어요." keepDataOnRefetchError={keepDataOnRefetchError}>
       {children}
     </QueryView>
   );

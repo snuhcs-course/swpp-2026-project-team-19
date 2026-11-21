@@ -38,8 +38,13 @@ import styles from "./bar.module.css";
  */
 export function BarInfoPage({ bar }: { bar: OwnedBar }) {
   const detail = useBar(bar.barId);
+  // The frame (back, sign-out) is there in every state, so a failed load still has a way out.
   return (
-    <BarQuery query={detail}>{(data) => <BarInfoForm bar={data} />}</BarQuery>
+    <OwnerScreen title="매장 정보 관리" backTo={`/bars/${bar.barId}`}>
+      <BarQuery query={detail} keepDataOnRefetchError>
+        {(data) => <BarInfoForm bar={data} />}
+      </BarQuery>
+    </OwnerScreen>
   );
 }
 
@@ -62,7 +67,7 @@ function BarInfoForm({ bar }: { bar: BarDetail }) {
   const [serverErrors, setServerErrors] = useState<Partial<Record<BarInfoField, string>>>({});
   const [error, setError] = useState<string | null>(null);
   const dirty = hasEdits(opened, form);
-  const guard = useLeaveGuard(dirty);
+  const guard = useLeaveGuard(dirty, update.isPending);
 
   const inputErrors = barInfoErrors(form, formFromBar(opened));
   const fieldError = (field: BarInfoField) => inputErrors[field] ?? serverErrors[field];
@@ -133,7 +138,7 @@ function BarInfoForm({ bar }: { bar: BarDetail }) {
   }
 
   return (
-    <OwnerScreen title="매장 정보 관리" backTo={`/bars/${bar.barId}`}>
+    <>
       <form
         onSubmit={(event) => {
           event.preventDefault();
@@ -208,8 +213,10 @@ function BarInfoForm({ bar }: { bar: BarDetail }) {
               placeholder="태그 검색 또는 새 태그 입력"
               onChange={(event) => setQuery([...event.currentTarget.value].slice(0, MAX_TAG_LENGTH).join(""))}
               onKeyDown={(event) => {
-                // Enter adds the typed tag instead of saving the form.
-                if (event.key !== "Enter") return;
+                // Enter adds the typed tag instead of saving the form. An Enter that ends an IME composition
+                // (Korean, Japanese) only confirms the syllable: adding then would take a partial word and
+                // leave the last syllable behind in the cleared field.
+                if (event.key !== "Enter" || event.nativeEvent.isComposing || event.keyCode === 229) return;
                 event.preventDefault();
                 if (creatable) pickTag(query);
               }}
@@ -264,6 +271,6 @@ function BarInfoForm({ bar }: { bar: BarDetail }) {
           <Button onClick={guard.leave}>변경 취소</Button>
         </div>
       </BottomSheet>
-    </OwnerScreen>
+    </>
   );
 }
