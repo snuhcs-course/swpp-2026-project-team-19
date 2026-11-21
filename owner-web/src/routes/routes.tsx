@@ -4,7 +4,9 @@ import { ApplicationLayout, ApplicationResume, ApplicationStep } from "../applic
 import { ApplicationDetailPage } from "../owner/ApplicationDetailPage";
 import { ApplicationsPage } from "../owner/ApplicationsPage";
 import { BarsPage } from "../owner/BarsPage";
-import { BarHomePage, EntryPage, LoginPage, NotFoundPage } from "./pages";
+import { BarHomePage } from "../bar/BarHomePage";
+import { BarInfoPage } from "../bar/BarInfoPage";
+import { EntryPage, LoginPage, NotFoundPage } from "./pages";
 
 /** The app is served at /owner/ (backend/app/owner_web); every path here is inside that basename. */
 export const OWNER_BASENAME = "/owner";
@@ -27,6 +29,7 @@ export const ownerRoutes: RouteObject[] = [
       { path: "applications/:applicationId", element: <ApplicationDetailPage /> },
       { path: "bars", element: <BarsPage /> },
       { path: "bars/:barId", element: <RequireOwnedBar>{(bar) => <BarHomePage bar={bar} />}</RequireOwnedBar> },
+      { path: "bars/:barId/info", element: <RequireOwnedBar>{(bar) => <BarInfoPage bar={bar} />}</RequireOwnedBar> },
     ],
   },
   { path: "*", element: <NotFoundPage /> },

@@ -7,7 +7,7 @@ import { hasPhotosToSend, loadDraft } from "../application/draft";
 import { ownerEntry } from "../owner/entry";
 import { loadHiddenApplications } from "../owner/hiddenApplications";
 import { OwnerScreen } from "../owner/OwnerScreen";
-import { useMe, useMyApplications, useMyBars, type OwnedBar } from "../owner/queries";
+import { useMe, useMyApplications, useMyBars } from "../owner/queries";
 import { Button, ButtonLink } from "../ui/Button";
 import { EmptyState, ErrorState, LoadingState } from "../ui/states";
 import styles from "./pages.module.css";
@@ -90,15 +90,6 @@ export function EntryPage() {
     case "apply":
       return <Navigate to="/apply" replace />;
   }
-}
-
-// Placeholder: the bar management screens come in I5-P5 and on.
-export function BarHomePage({ bar }: { bar: OwnedBar }) {
-  return (
-    <OwnerScreen title={bar.name} backTo="/bars">
-      <EmptyState title="준비 중이에요" description="매장 관리 기능을 곧 웹에서도 쓸 수 있어요." />
-    </OwnerScreen>
-  );
 }
 
 export function NotFoundPage() {

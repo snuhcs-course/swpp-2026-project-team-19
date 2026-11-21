@@ -1,0 +1,147 @@
+.screen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bm-space-md);
+}
+
+/* The form's fieldset only groups the fields to lock them while saving; it draws nothing. */
+.fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+/* OwnerManagementHomeScreen.kt: the quick cards, two side by side. */
+.cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--bm-space-xs);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--bm-space-xs);
+  min-height: 130px;
+  box-sizing: border-box;
+  padding: var(--bm-space-sm);
+  border-radius: var(--bm-radius-medium);
+  background: var(--bm-color-surface);
+  color: var(--bm-color-text-primary);
+  text-decoration: none;
+}
+
+.card:focus-visible {
+  outline: 2px solid var(--bm-color-primary);
+  outline-offset: 2px;
+}
+
+.wide {
+  grid-column: 1 / -1;
+  min-height: 0;
+}
+
+.unavailable {
+  opacity: 0.6;
+}
+
+.cardTitle {
+  margin: 0;
+  font-size: var(--bm-type-card-title);
+  line-height: var(--bm-type-card-title-line-height);
+  font-weight: 700;
+}
+
+.cardText {
+  margin: 0;
+  color: var(--bm-color-text-secondary);
+  font-size: var(--bm-type-label);
+  line-height: var(--bm-type-label-line-height);
+}
+
+.cardFooter {
+  align-self: flex-end;
+  color: var(--bm-color-primary);
+  font-size: var(--bm-type-label);
+  font-weight: 600;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bm-space-sm);
+  padding-top: var(--bm-space-md);
+  border-top: 1px solid var(--bm-color-divider);
+}
+
+.sectionHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: var(--bm-type-card-title);
+  line-height: var(--bm-type-card-title-line-height);
+  font-weight: 700;
+}
+
+.hint {
+  margin: 0;
+  color: var(--bm-color-text-muted);
+  font-size: var(--bm-type-caption);
+  line-height: var(--bm-type-caption-line-height);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--bm-space-xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chip {
+  min-height: var(--bm-min-touch-target);
+  padding: 0 var(--bm-space-sm);
+  border: 1px solid var(--bm-color-outline-variant);
+  border-radius: var(--bm-radius-chip);
+  background: var(--bm-color-surface-elevated);
+  color: var(--bm-color-text-primary);
+  font: inherit;
+  font-size: var(--bm-type-label);
+  cursor: pointer;
+}
+
+.chipSelected {
+  border-color: var(--bm-color-primary);
+  background: var(--bm-color-primary-container);
+  color: var(--bm-color-on-primary-container);
+}
+
+.error {
+  margin: 0;
+  color: var(--bm-color-error);
+  font-size: var(--bm-type-label);
+  line-height: var(--bm-type-label-line-height);
+}
+
+.sheetText {
+  margin: 0;
+  color: var(--bm-color-text-secondary);
+  font-size: var(--bm-type-label);
+  line-height: var(--bm-type-label-line-height);
+}
+
+.actions {
+  display: flex;
+  gap: var(--bm-space-xs);
+}
+
+.actions > * {
+  flex: 1;
+}

@@ -59,3 +59,21 @@
     animation-duration: 2.7s;
   }
 }
+
+.refetchError {
+  display: flex;
+  align-items: center;
+  gap: var(--bm-space-xs);
+  margin-bottom: var(--bm-space-md);
+  padding: var(--bm-space-xs) var(--bm-space-sm);
+  border-radius: var(--bm-radius-medium);
+  background: var(--bm-color-error-container);
+  color: var(--bm-color-on-error-container);
+}
+
+.refetchMessage {
+  flex: 1;
+  margin: 0;
+  font-size: var(--bm-type-label);
+  line-height: var(--bm-type-label-line-height);
+}

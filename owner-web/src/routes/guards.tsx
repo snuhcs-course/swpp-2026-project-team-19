@@ -42,7 +42,9 @@ export function RequireOwnedBar({ children }: { children: (bar: OwnedBar) => Rea
   const { barId } = useParams();
   const bars = useMyBars();
   return (
-    <QueryView query={bars} loadingMessage="매장 정보를 불러오고 있어요.">
+    // A failed refetch keeps the bar's screens (and any unsaved input) as they were; a successful one that
+    // no longer lists the bar closes them.
+    <QueryView query={bars} loadingMessage="매장 정보를 불러오고 있어요." keepDataOnRefetchError>
       {(data) => {
         const bar = data.items.find((item) => item.barId === barId);
         if (!bar) return <NoAccess />;

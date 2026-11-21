@@ -47,3 +47,10 @@
 .error {
   color: var(--bm-color-error);
 }
+
+.textarea {
+  min-height: calc(var(--bm-min-touch-target) * 2);
+  padding: var(--bm-space-sm);
+  resize: vertical;
+  line-height: var(--bm-type-body-line-height);
+}
