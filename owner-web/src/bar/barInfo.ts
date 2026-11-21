@@ -1,4 +1,5 @@
 import type { components } from "../api/schema";
+import { draftFromHours, hoursInput, sameHours, weeklyHoursError, type DayDraft } from "./weeklyHours";
 
 /**
  * Editing a bar's description, phone, default pour and tags (spec 3.7), ported from the Android app:
@@ -7,6 +8,7 @@ import type { components } from "../api/schema";
  * - android/.../data/owner/LiveOwnerScreenRepository.kt `persistBar`: only changed fields are sent.
  *
  * Name and address are shown but not edited here: changing them will go through an operator review later.
+ * The regular hours (spec 3.15.1) are in the same form and the same PATCH, as in the app (src/bar/weeklyHours.ts).
  */
 export type BarDetail = components["schemas"]["BarDetail"];
 export type BarUpdate = components["schemas"]["BarUpdateInput"];
@@ -18,9 +20,11 @@ export interface BarInfoForm {
   /** Digits only; empty for none. */
   pourMl: string;
   tags: string[];
+  /** The weekdays set; one left out has no information. */
+  hours: DayDraft[];
 }
 
-export type BarInfoField = "description" | "phone" | "defaultPourMl" | "tags";
+export type BarInfoField = "description" | "phone" | "defaultPourMl" | "tags" | "weeklyHours";
 
 export const MAX_DESCRIPTION = 100;
 export const MAX_PHONE = 30;
@@ -30,12 +34,13 @@ export const MAX_TAG_LENGTH = 24;
 /** Characters as the server counts them (Python), so an emoji is one, not two UTF-16 units. */
 export const characterCount = (value: string): number => [...value].length;
 
-export function formFromBar(bar: Pick<BarDetail, "description" | "phone" | "defaultPourMl" | "tags">): BarInfoForm {
+export function formFromBar(bar: Pick<BarDetail, "description" | "phone" | "defaultPourMl" | "tags" | "weeklyHours">): BarInfoForm {
   return {
     description: bar.description ?? "",
     phone: bar.phone ?? "",
     pourMl: bar.defaultPourMl?.toString() ?? "",
     tags: [...bar.tags],
+    hours: draftFromHours(bar.weeklyHours),
   };
 }
 
@@ -61,6 +66,8 @@ export function barInfoErrors(form: BarInfoForm, loaded: BarInfoForm): Partial<R
     const pour = Number(form.pourMl);
     if (!/^\d+$/.test(form.pourMl) || pour < 1 || pour > 999) errors.defaultPourMl = "기본 잔 용량은 1~999ml 사이로 입력해 주세요.";
   }
+  const hours = weeklyHoursError(form.hours);
+  if (hours) errors.weeklyHours = hours;
   return errors;
 }
 
@@ -73,7 +80,8 @@ export function hasEdits(bar: BarDetail, form: BarInfoForm): boolean {
     form.description !== loaded.description ||
     form.phone !== loaded.phone ||
     form.pourMl !== loaded.pourMl ||
-    !sameTags(form.tags, loaded.tags)
+    !sameTags(form.tags, loaded.tags) ||
+    !sameHours(form.hours, loaded.hours)
   );
 }
 
@@ -91,6 +99,8 @@ export function barUpdate(bar: BarDetail, form: BarInfoForm): BarUpdate {
   const pour = form.pourMl === "" ? null : Number(form.pourMl);
   if (pour !== bar.defaultPourMl) body.defaultPourMl = pour;
   if (!sameTags(form.tags, bar.tags)) body.tags = [...form.tags];
+  // The whole list, since the server replaces it (spec 3.7); only when what would be sent changed.
+  if (!sameHours(form.hours, draftFromHours(bar.weeklyHours))) body.weeklyHours = hoursInput(form.hours);
   return body;
 }
 
@@ -147,5 +157,15 @@ export const availableTags = (ownBarTags: readonly string[]): string[] => [...SU
 export function fieldOfPath(path: string): BarInfoField | null {
   if (path === "description" || path === "phone" || path === "defaultPourMl") return path;
   if (path === "tags" || path.startsWith("tags[")) return "tags";
+  if (path === "weeklyHours" || path.startsWith("weeklyHours[")) return "weeklyHours";
   return null;
+}
+
+/**
+ * The weekday a `weeklyHours[i]...` error is about: `i` is the place in the list that was sent, which is in
+ * weekday order (`hoursInput`). Null for an error about the whole list.
+ */
+export function dayOfHoursPath(path: string, sent: readonly { dayOfWeek: number }[]): number | null {
+  const match = /^weeklyHours\[(\d+)\]/.exec(path);
+  return match ? (sent[Number(match[1])]?.dayOfWeek ?? null) : null;
 }
