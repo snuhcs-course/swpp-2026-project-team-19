@@ -6,6 +6,8 @@ import { ApplicationsPage } from "../owner/ApplicationsPage";
 import { BarsPage } from "../owner/BarsPage";
 import { BarHomePage } from "../bar/BarHomePage";
 import { BarInfoPage } from "../bar/BarInfoPage";
+import { BarPhotosPage } from "../bar/BarPhotosPage";
+import { BarStatusPage } from "../bar/BarStatusPage";
 import { EntryPage, LoginPage, NotFoundPage } from "./pages";
 
 /** The app is served at /owner/ (backend/app/owner_web); every path here is inside that basename. */
@@ -30,6 +32,8 @@ export const ownerRoutes: RouteObject[] = [
       { path: "bars", element: <BarsPage /> },
       { path: "bars/:barId", element: <RequireOwnedBar>{(bar) => <BarHomePage bar={bar} />}</RequireOwnedBar> },
       { path: "bars/:barId/info", element: <RequireOwnedBar>{(bar) => <BarInfoPage bar={bar} />}</RequireOwnedBar> },
+      { path: "bars/:barId/photos", element: <RequireOwnedBar>{(bar) => <BarPhotosPage bar={bar} />}</RequireOwnedBar> },
+      { path: "bars/:barId/status", element: <RequireOwnedBar>{(bar) => <BarStatusPage bar={bar} />}</RequireOwnedBar> },
     ],
   },
   { path: "*", element: <NotFoundPage /> },

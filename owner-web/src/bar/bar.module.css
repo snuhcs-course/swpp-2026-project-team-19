@@ -145,3 +145,259 @@
 .actions > * {
   flex: 1;
 }
+
+/* The status card holds a link and the × to end the closure, side by side. */
+.statusCard {
+  position: relative;
+}
+
+.cardLink {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--bm-space-xxs);
+  color: inherit;
+  text-decoration: none;
+}
+
+.cardLink:focus-visible {
+  outline: 2px solid var(--bm-color-primary);
+  outline-offset: 2px;
+}
+
+.statusTitle {
+  padding-right: var(--bm-min-touch-target);
+  white-space: pre-line;
+}
+
+.cancelException {
+  position: absolute;
+  top: var(--bm-space-xxs);
+  right: var(--bm-space-xxs);
+  min-width: var(--bm-min-touch-target);
+  min-height: var(--bm-min-touch-target);
+  border: none;
+  background: transparent;
+  color: var(--bm-color-error);
+  font-size: var(--bm-type-section-title);
+  cursor: pointer;
+}
+
+/* OwnerOperatingQuickScreen: the three kinds, one per row. */
+.choices {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bm-space-sm);
+}
+
+.choice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 60px;
+  padding: 0 var(--bm-space-sm);
+  border: 1px solid transparent;
+  border-radius: var(--bm-radius-medium);
+  background: var(--bm-color-surface);
+  color: var(--bm-color-text-primary);
+  font: inherit;
+  font-size: var(--bm-type-card-title);
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+.choiceSelected {
+  border-color: var(--bm-color-primary);
+  background: var(--bm-color-primary-container);
+}
+
+.textLink {
+  min-height: var(--bm-min-touch-target);
+  display: inline-flex;
+  align-items: center;
+  color: var(--bm-color-primary);
+  font-size: var(--bm-type-label);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.photoStrip {
+  display: flex;
+  gap: var(--bm-space-xs);
+  margin: 0;
+  padding: 0;
+  overflow-x: auto;
+  list-style: none;
+}
+
+.stripItem img {
+  display: block;
+  width: 120px;
+  height: 90px;
+  border: 1px solid var(--bm-color-outline-variant);
+  border-radius: var(--bm-radius-medium);
+  object-fit: cover;
+  background: var(--bm-color-surface-elevated);
+}
+
+/* OwnerInfoHtmlV4Screen.kt: one row per weekday. */
+.hoursList {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hoursRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--bm-space-xs);
+  min-height: var(--bm-min-touch-target);
+  padding: var(--bm-space-xxs) 0;
+  border-bottom: 1px solid var(--bm-color-divider);
+}
+
+.dayName {
+  width: 1.5em;
+  font-weight: 700;
+}
+
+.check {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--bm-space-xxs);
+  min-height: var(--bm-min-touch-target);
+  font-size: var(--bm-type-label);
+}
+
+.times {
+  display: inline-flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--bm-space-xxs);
+}
+
+.times select {
+  width: auto;
+}
+
+.nextDay {
+  color: var(--bm-color-primary);
+  font-size: var(--bm-type-caption);
+  font-weight: 700;
+}
+
+.dayError {
+  flex-basis: 100%;
+}
+
+/* OwnerPhotoHtmlV4Screen.kt: two columns of tiles. */
+.photoGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--bm-space-sm);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.photoTile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bm-space-xs);
+  padding: var(--bm-space-xs);
+  border: 1px solid var(--bm-color-outline-variant);
+  border-radius: var(--bm-radius-medium);
+  background: var(--bm-color-surface);
+}
+
+.photoButton {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: none;
+  border-radius: var(--bm-radius-small);
+  overflow: hidden;
+  background: var(--bm-color-surface-elevated);
+  cursor: pointer;
+}
+
+.photoButton img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: contain;
+}
+
+.coverBadge {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  padding: var(--bm-space-xxs);
+  background: var(--bm-color-surface);
+  color: var(--bm-color-text-primary);
+  font-size: var(--bm-type-caption);
+}
+
+.photoMenu {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--bm-color-primary);
+  border-radius: var(--bm-radius-small);
+  background: var(--bm-color-canvas);
+}
+
+.danger {
+  color: var(--bm-color-error);
+}
+
+.addPhoto {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  min-height: var(--bm-min-touch-target);
+  padding: 0 var(--bm-space-sm);
+  border: 1px solid var(--bm-color-outline-variant);
+  border-radius: var(--bm-radius-medium);
+  background: var(--bm-color-surface-elevated);
+  font-size: var(--bm-type-label);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.addPhoto:focus-within {
+  outline: 2px solid var(--bm-color-primary);
+  outline-offset: 2px;
+}
+
+.addPhotoOff {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.fileInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.timePair {
+  display: inline-flex;
+}
+
+.timeLists {
+  display: inline-flex;
+  gap: var(--bm-space-xxs);
+}
+
+.timeLists select {
+  width: auto;
+}

@@ -11,7 +11,8 @@ export type BusinessCheckResult = components["schemas"]["BusinessCheckResponse"]
 export type BarNameItem = components["schemas"]["BarNamesResponse"]["items"][number];
 type ApplicationInput = components["schemas"]["ExistingBarApplicationInput"] | components["schemas"]["NewBarApplicationInput"];
 
-function imageForm(field: string, images: readonly PreparedImage[]): FormData {
+/** A multipart body of JPEG images under `field` (the typed client passes FormData through). */
+export function imageForm(field: string, images: readonly PreparedImage[]): FormData {
   const form = new FormData();
   for (const image of images) form.append(field, new File([image.blob], image.fileName, { type: "image/jpeg" }));
   return form;
