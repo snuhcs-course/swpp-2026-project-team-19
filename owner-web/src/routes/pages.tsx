@@ -5,21 +5,12 @@ import { clearReturnPath, readReturnPath } from "../auth/returnPath";
 import { useSession } from "../auth/SessionProvider";
 import { hasPhotosToSend, loadDraft } from "../application/draft";
 import { ownerEntry } from "../owner/entry";
+import { loadHiddenApplications } from "../owner/hiddenApplications";
+import { OwnerScreen } from "../owner/OwnerScreen";
 import { useMe, useMyApplications, useMyBars, type OwnedBar } from "../owner/queries";
-import { AppShell } from "../ui/AppShell";
 import { Button, ButtonLink } from "../ui/Button";
 import { EmptyState, ErrorState, LoadingState } from "../ui/states";
 import styles from "./pages.module.css";
-
-/** A signed-in screen in the app frame, with the account from GET /api/me. */
-function OwnerScreen({ title, backTo, children }: { title: string; backTo?: string; children: React.ReactNode }) {
-  const me = useMe();
-  return (
-    <AppShell title={title} backTo={backTo} account={me.data?.email ?? me.data?.displayName}>
-      {children}
-    </AppShell>
-  );
-}
 
 export function LoginPage() {
   const { status, configured, notice, signIn } = useSession();
@@ -84,7 +75,7 @@ export function EntryPage() {
       </OwnerScreen>
     );
   }
-  switch (ownerEntry(bars.data?.items, applications.data?.items)) {
+  switch (ownerEntry(bars.data?.items, applications.data?.items, loadHiddenApplications(me.data?.userId))) {
     case "loading":
       return <LoadingState message="매장 상태를 확인하고 있어요." />;
     case "bars":
@@ -101,23 +92,7 @@ export function EntryPage() {
   }
 }
 
-function ComingSoon({ title, description }: { title: string; description: string }) {
-  return (
-    <OwnerScreen title={title}>
-      <EmptyState title="준비 중이에요" description={description} />
-    </OwnerScreen>
-  );
-}
-
-// Placeholders: the screens themselves come in later tasks (P11, P16, P22 and on).
-export function ApplicationStatusPage() {
-  return <ComingSoon title="등록 신청 상태" description="신청 상태를 곧 웹에서도 확인할 수 있어요." />;
-}
-
-export function BarsPage() {
-  return <ComingSoon title="내 매장" description="관리하는 매장 목록을 곧 웹에서도 볼 수 있어요." />;
-}
-
+// Placeholder: the bar management screens come in I5-P5 and on.
 export function BarHomePage({ bar }: { bar: OwnedBar }) {
   return (
     <OwnerScreen title={bar.name} backTo="/bars">

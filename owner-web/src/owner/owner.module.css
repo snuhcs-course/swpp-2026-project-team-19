@@ -1,0 +1,187 @@
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bm-space-sm);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.screen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bm-space-md);
+}
+
+/* OwnerRegistrationDashboard.kt: a surface card, 16 padding, 4 between lines. */
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bm-space-xxs);
+  padding: var(--bm-card-padding);
+  border-radius: var(--bm-radius-card);
+  background: var(--bm-color-surface);
+}
+
+.cardHead {
+  display: flex;
+  align-items: center;
+  gap: var(--bm-space-xs);
+}
+
+.cardTitle {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: var(--bm-type-body);
+  line-height: var(--bm-type-body-line-height);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.cardText {
+  margin: 0;
+  color: var(--bm-color-text-secondary);
+  font-size: var(--bm-type-label);
+  line-height: var(--bm-type-label-line-height);
+  overflow-wrap: anywhere;
+}
+
+.badge {
+  flex: none;
+  padding: 2px var(--bm-space-xs);
+  border-radius: var(--bm-radius-chip);
+  font-size: var(--bm-type-caption);
+  line-height: var(--bm-type-caption-line-height);
+  font-weight: 600;
+}
+
+.pending {
+  background: var(--bm-color-primary-container);
+  color: var(--bm-color-on-primary-container);
+}
+
+.approved {
+  background: var(--bm-color-success-container);
+  color: var(--bm-color-success);
+}
+
+.rejected {
+  background: var(--bm-color-error-container);
+  color: var(--bm-color-on-error-container);
+}
+
+.actions {
+  display: flex;
+  gap: var(--bm-space-xs);
+  margin-top: var(--bm-space-xs);
+}
+
+.actions > * {
+  flex: 1;
+}
+
+/* The three review stages of a pending application. */
+.stages {
+  display: flex;
+  gap: var(--bm-space-xs);
+  margin: var(--bm-space-sm) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stage {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--bm-space-xs);
+  color: var(--bm-color-text-secondary);
+  font-size: var(--bm-type-caption);
+  line-height: var(--bm-type-caption-line-height);
+}
+
+.stage::before {
+  content: "";
+  height: 3px;
+  background: var(--bm-color-outline-variant);
+}
+
+.stageDone::before,
+.stageCurrent::before {
+  background: var(--bm-color-primary);
+}
+
+.stageDone {
+  color: var(--bm-color-text-primary);
+}
+
+.stageCurrent {
+  color: var(--bm-color-primary);
+  font-weight: 600;
+}
+
+.reason {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bm-space-xxs);
+  margin-top: var(--bm-space-xs);
+  padding: var(--bm-space-sm);
+  border-radius: var(--bm-radius-medium);
+  background: var(--bm-color-canvas);
+}
+
+.reasonLabel {
+  margin: 0;
+  color: var(--bm-color-text-secondary);
+  font-size: var(--bm-type-caption);
+  line-height: var(--bm-type-caption-line-height);
+}
+
+.reasonText {
+  margin: 0;
+  font-size: var(--bm-type-label);
+  line-height: var(--bm-type-label-line-height);
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.notice {
+  margin: 0;
+  padding: var(--bm-space-sm) var(--bm-space-md);
+  border-radius: var(--bm-radius-medium);
+  background: var(--bm-color-surface-elevated);
+  font-size: var(--bm-type-label);
+  line-height: var(--bm-type-label-line-height);
+}
+
+.error {
+  margin: 0;
+  color: var(--bm-color-error);
+  font-size: var(--bm-type-label);
+  line-height: var(--bm-type-label-line-height);
+}
+
+.sheetText {
+  margin: 0;
+  color: var(--bm-color-text-secondary);
+  font-size: var(--bm-type-label);
+  line-height: var(--bm-type-label-line-height);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+}
+
+.sectionTitle {
+  margin: 0 0 var(--bm-space-xxs);
+  font-size: var(--bm-type-card-title);
+  line-height: var(--bm-type-card-title-line-height);
+}
+
+.question {
+  margin: 0;
+  font-family: var(--bm-font-serif);
+  font-size: var(--bm-type-screen-title);
+  line-height: var(--bm-type-screen-title-line-height);
+}
