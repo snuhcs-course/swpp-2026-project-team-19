@@ -9,12 +9,41 @@ export const ME: Me = {
   userType: "customer",
 } as Me;
 
-export function bar(barId: string, name: string): MyBars["items"][number] {
-  return { barId, name } as MyBars["items"][number];
+export function bar(barId: string, name: string, extra: Partial<MyBars["items"][number]> = {}): MyBars["items"][number] {
+  return { barId, name, address: "서울특별시 관악구 관악로 1", currentMenu: null, ...extra } as MyBars["items"][number];
 }
 
 export function application(status: MyApplications["items"][number]["status"]): MyApplications["items"][number] {
   return { applicationId: crypto.randomUUID(), status } as MyApplications["items"][number];
+}
+
+type Application = MyApplications["items"][number];
+
+/** A whole application as the API returns it to its applicant (spec 3.11.1): a pending new_bar by default. */
+export function ownerApplication(overrides: Partial<Application> = {}): Application {
+  return {
+    applicationId: crypto.randomUUID(),
+    applicationType: "new_bar",
+    status: "pending",
+    applicant: { userId: ME.userId, email: ME.email, displayName: ME.displayName },
+    bar: null,
+    proposedBar: { name: "몰트 앤 무드", address: "서울특별시 관악구 관악로 1 2층", phone: "025551234" },
+    businessRegistrationNumber: "1234567891",
+    representativeName: "김민준",
+    openingDate: "2019-05-14",
+    businessStatus: null,
+    businessVerification: null,
+    warnings: null,
+    contactPhone: "01012345678",
+    applicantNote: null,
+    menuPhotos: [],
+    coverPhoto: null,
+    rejectionReason: null,
+    reviewedAt: null,
+    createdAt: "2026-11-20T03:00:00Z",
+    updatedAt: "2026-11-20T03:00:00Z",
+    ...overrides,
+  };
 }
 
 export function errorBody(code: string, message = "오류") {
