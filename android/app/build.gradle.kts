@@ -116,6 +116,9 @@ android {
     testOptions {
         unitTests.isIncludeAndroidResources = true
         unitTests.all {
+            // Robolectric resolves SDK jars separately from Gradle repositories.
+            // Use the canonical Central endpoint; repo1 returned HTTP 429 in CI.
+            it.systemProperty("robolectric.dependency.repo.url", "https://repo.maven.apache.org/maven2")
             val screenshots = providers.gradleProperty("bmUxScreenshots").orNull == "true"
             if (!screenshots) {
                 it.filter.excludeTestsMatching("com.zerotoone.bottlemap.ux.UxV18ScreenshotTest")
