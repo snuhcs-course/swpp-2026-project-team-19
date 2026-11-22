@@ -162,6 +162,7 @@ fun WelcomeScreen(
         }
     }
 }
+}
 
 @Composable
 private fun WelcomeCheck(label: String, checked: Boolean, onChecked: (Boolean) -> Unit, tag: String, narrow: Boolean) {
