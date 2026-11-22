@@ -118,7 +118,7 @@ fun WelcomeScreen(
                     Image(painterResource(R.drawable.bottlemap_welcome_pin), "위스키 잔을 담은 지도 핀",
                         Modifier.size(width = 79.dp, height = 97.dp).testTag("welcome-pin"),
                         contentScale = ContentScale.Fit, alignment = Alignment.BottomStart)
-                    Text("Find the bottle first, then the bar.",
+                    Text("Find the bottle first,\nthen the bar.",
                         style = uxText(28f, 700, UxColor.text, 1.27f, serif = true, letterSpacing = (-0.9).sp),
                         modifier = Modifier.fillMaxWidth().testTag("welcome-headline"))
                 }
