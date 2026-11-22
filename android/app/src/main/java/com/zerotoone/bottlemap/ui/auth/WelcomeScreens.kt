@@ -105,9 +105,10 @@ fun WelcomeScreen(
         if (ageChecked && !busy) { onAgeConfirmed(); action() }
     }
     BoxWithConstraints(Modifier.fillMaxSize().background(UxColor.bg).testTag("welcome-screen")) {
+        val viewportHeight = maxHeight
         val narrow = maxWidth < 350.dp
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-        Column(Modifier.fillMaxWidth().heightIn(min = maxHeight)
+        Column(Modifier.fillMaxWidth().heightIn(min = viewportHeight)
             .padding(start = 20.dp, end = 20.dp, top = 22.dp, bottom = 18.dp),
             verticalArrangement = Arrangement.SpaceBetween) {
             Image(painterResource(R.drawable.bottlemap_welcome_pin), "위스키 잔을 담은 지도 핀",
