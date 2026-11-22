@@ -1,5 +1,6 @@
 package com.zerotoone.bottlemap.ui.owner
 
+import com.zerotoone.bottlemap.ui.common.userMessage
 import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
@@ -309,7 +310,7 @@ fun OwnerOnboardingScreen(
                 throw cancelled
             } catch(e: Exception) {
                 go(RegPage.BIZCHECK)
-                error=e.message ?: "사업자등록증을 읽지 못했어요. 직접 입력해 주세요."
+                error=e.userMessage("사업자등록증을 읽지 못했어요. 직접 입력해 주세요.")
             }
         } else if(screen==RegPage.VERIFYING){
             // The actual NTS verification happens on POST /api/owner-applications.
@@ -364,7 +365,7 @@ fun OwnerOnboardingScreen(
                 viewModel.searchExistingBarCandidatesLive(draft.proposedBarName)
             }.onFailure {
                 if(it is CancellationException) throw it
-                error=it.message ?: "기존 매장을 검색하지 못했어요."
+                error=it.userMessage("기존 매장을 검색하지 못했어요.")
             }
         }
     }
@@ -485,12 +486,12 @@ fun OwnerOnboardingScreen(
                                     verify=VerifyFixture.UNAVAILABLE
                                     go(RegPage.VERIFIED)
                                 }
-                                else -> error=e.message ?: "사업자 정보를 확인하지 못했어요."
+                                else -> error=e.userMessage("사업자 정보를 확인하지 못했어요.")
                             }
                         } catch(cancelled: CancellationException) {
                             throw cancelled
                         } catch(e: Exception) {
-                            error=e.message ?: "사업자 정보를 확인하지 못했어요."
+                            error=e.userMessage("사업자 정보를 확인하지 못했어요.")
                         } finally { busy=false }
                     }
                 }
@@ -554,7 +555,7 @@ fun OwnerOnboardingScreen(
                                 }
                                 "RATE_LIMITED" ->
                                     error="오늘 사업자 정보 확인 횟수를 모두 사용했어요. 내일 다시 신청해 주세요."
-                                else -> error=e.message ?: "신청을 접수하지 못했어요."
+                                else -> error=e.userMessage("신청을 접수하지 못했어요.")
                             }
                         } finally { busy=false }
                     }
@@ -580,7 +581,7 @@ fun OwnerOnboardingScreen(
                         } catch(cancelled: CancellationException) {
                             throw cancelled
                         } catch(e: Exception) {
-                            error=e.message ?: "신청을 취소하지 못했어요."
+                            error=e.userMessage("신청을 취소하지 못했어요.")
                         } finally {busy=false}
                     }
                 }
@@ -593,7 +594,7 @@ fun OwnerOnboardingScreen(
         onConfirm={
             dismissId?.let { id ->
                 runCatching {viewModel.dismissRejectedForFixture(id)}
-                    .onSuccess {dismissId=null}.onFailure {error=it.message}
+                    .onSuccess {dismissId=null}.onFailure {error=it.userMessage()}
             }
         }
     )
@@ -1162,3 +1163,4 @@ private fun persistSelectedUri(context:Context,uri:Uri){
         Text("사진 미리보기 불가",style=MaterialTheme.typography.labelSmall)
     }
 }
+

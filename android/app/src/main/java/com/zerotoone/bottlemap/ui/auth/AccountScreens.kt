@@ -1,6 +1,7 @@
 
 package com.zerotoone.bottlemap.ui.auth
 
+import com.zerotoone.bottlemap.ui.common.userMessage
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -97,7 +98,7 @@ fun AccountScreen(
         } catch(cancelled: CancellationException) {
             throw cancelled
         } catch(error: Exception) {
-            value=OwnerAreaLoad.Error(error.message ?: "매장 상태를 확인하지 못했어요.")
+            value=OwnerAreaLoad.Error(error.userMessage("매장 상태를 확인하지 못했어요."))
         }
     }
     val area=(ownerStatus as? OwnerAreaLoad.Ready)
@@ -285,3 +286,4 @@ internal fun AccountHeader(title:String,onBack:()->Unit,backEnabled:Boolean=true
             fontWeight=FontWeight.Bold)
     }
 }
+

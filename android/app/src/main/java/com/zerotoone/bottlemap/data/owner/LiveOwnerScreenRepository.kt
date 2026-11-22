@@ -1,5 +1,6 @@
 package com.zerotoone.bottlemap.data.owner
 
+import com.zerotoone.bottlemap.ui.common.userMessage
 import android.content.Context
 import android.net.Uri
 import android.os.SystemClock
@@ -562,7 +563,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                 throw cancelled
             } catch (error: Exception) {
                 if(requested == generation.get())
-                    local.serverError(error.message ?: "매장 정보를 가져오지 못했어요.")
+                    local.serverError(error.userMessage("매장 정보를 가져오지 못했어요."))
             }
         }
     }
@@ -591,7 +592,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                     throw cancelled
                 } catch (error: Exception) {
                     runCatching { refresh() }
-                    local.serverError(error.message ?: "저장하지 못했어요. 다시 시도해 주세요.")
+                    local.serverError(error.userMessage("저장하지 못했어요. 다시 시도해 주세요."))
                     return@withLock
                 }
                 refreshAfterWrite()
@@ -1131,7 +1132,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
             imageCount = maxOf(old?.imageCount ?: 0,dto.progress?.totalImages ?: 0,
                 priceCheckedImages.size),
             completedImages = dto.progress?.completedImages ?: old?.completedImages ?: 0,
-            failureReason = dto.failure?.message,
+            failureReason = dto.failure?.let { "메뉴판을 읽지 못했어요. 사진을 확인하고 다시 올려 주세요." },
         )
         publishSnapshot(before.copy(
             imports = before.imports.filterNot { it.menuImportId == importId } + job,
@@ -1436,3 +1437,4 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
     override fun preview(barId: String, nowEpochMs: Long): MockPreview? =
         local.preview(barId, nowEpochMs)
 }
+

@@ -1,5 +1,6 @@
 package com.zerotoone.bottlemap.ui.owner
 
+import com.zerotoone.bottlemap.ui.common.userMessage
 import android.net.Uri
 import androidx.core.content.FileProvider
 import java.io.File
@@ -435,7 +436,7 @@ internal fun OwnerMenuPhotoSelectionScreen(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                error = e.message ?: "사진을 읽을 수 없어요. 다시 선택해 주세요."
+                error = e.userMessage("사진을 읽을 수 없어요. 다시 선택해 주세요.")
             } finally {
                 cleanupRequested.set(true)
                 withContext(NonCancellable + Dispatchers.IO) {
@@ -672,7 +673,7 @@ internal fun OwnerMenuPhotoSelectionScreen(
                                 error = null
                                 networkNotice = System.nanoTime()
                             } else {
-                                error = e.message ?: "사진을 제출하지 못했어요."
+                                error = e.userMessage("사진을 제출하지 못했어요.")
                             }
                         } finally { busy = false }
                     }
@@ -759,12 +760,12 @@ internal fun OwnerMenuPhotoJobScreen(
                 } catch (cancelled: CancellationException) {
                     throw cancelled
                 } catch (e: Exception) {
-                    error=e.message ?: "메뉴판 분석 상태를 불러오지 못했어요."
+                    error=e.userMessage("메뉴판 분석 상태를 불러오지 못했어요.")
                 }
             } else {
                 delay(900)
                 runCatching { viewModel.finishPhotoImport(job.menuImportId, fixture) }
-                    .onFailure { error = it.message }
+                    .onFailure { error = it.userMessage() }
             }
         }
     }
@@ -872,3 +873,4 @@ internal fun OwnerMenuPhotoJobScreen(
         }
     }
 }
+

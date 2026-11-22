@@ -1,5 +1,6 @@
 package com.zerotoone.bottlemap.ui.owner
 
+import com.zerotoone.bottlemap.ui.common.userMessage
 import com.zerotoone.bottlemap.data.owner.isBottleServingLabel
 
 import androidx.activity.compose.BackHandler
@@ -521,7 +522,7 @@ internal fun OwnerManualMenuScreen(
                 viewModel.saveManualMenuItem(stagedItem, stagedProduct, brand)
                 screen = "list"; selectedId = null; editId = null; error = null
             }
-        } catch (e: Exception) { error = e.message ?: "저장하지 못했어요." }
+        } catch (e: Exception) { error = e.userMessage("저장하지 못했어요.") }
     }
 
     if(cancelPhotoConfirm && activeJob!=null) {
@@ -614,7 +615,7 @@ internal fun OwnerManualMenuScreen(
                         } catch (cancelled: CancellationException) {
                             throw cancelled
                         } catch (e: Exception) {
-                            error = e.message ?: "서버 변경에 실패했어요."
+                            error = e.userMessage("서버 변경에 실패했어요.")
                         } finally { saving = false }
                     }
                 }
@@ -1103,7 +1104,7 @@ internal fun OwnerManualMenuScreen(
                                 beforePromoOptions = null
                                 calendarTarget = null
                                 screen = "item"; error = null
-                            } catch (e: Exception) { error = e.message }
+                            } catch (e: Exception) { error = e.userMessage() }
                         }, modifier = Modifier.testTag("manual-menu-promo-apply"))
                         if (d.sale.isNotEmpty()) ManualButton("할인 제거", {
                             changeOption(saleOption) {
@@ -1208,3 +1209,4 @@ private fun OwnerManualMenuRow(
         selected = selected, onSelect = onSelect, onEdit = onEdit, onStock = onStock
     )
 }
+

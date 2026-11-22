@@ -1,5 +1,6 @@
 package com.zerotoone.bottlemap.ui.owner
 
+import com.zerotoone.bottlemap.ui.common.userMessage
 import androidx.compose.foundation.border
 import androidx.compose.foundation.background
 import androidx.compose.foundation.BorderStroke
@@ -257,7 +258,7 @@ fun OwnerManagementHomeScreen(
                                                                     } catch(cancelled: CancellationException) {
                                                                         throw cancelled
                                                                     } catch(e: Exception) {
-                                                                        error=e.message ?: "임시 영업 상태를 해제하지 못했어요."
+                                                                        error=e.userMessage("임시 영업 상태를 해제하지 못했어요.")
                                                                     } finally { changingException=false }
                                                                 }
                                                             },
@@ -339,7 +340,7 @@ fun OwnerManagementHomeScreen(
                                                 } catch(cancelled: CancellationException) {
                                                     throw cancelled
                                                 } catch(e: Exception) {
-                                                    error=e.message ?: "메뉴 확인 정보를 저장하지 못했어요."
+                                                    error=e.userMessage("메뉴 확인 정보를 저장하지 못했어요.")
                                                 } finally { confirmingMenu=false }
                                             }
                                         },
@@ -623,12 +624,12 @@ fun OwnerOperatingQuickScreen(
                                         } catch(cancelled: CancellationException) {
                                             throw cancelled
                                         } catch(e: Exception) {
-                                            error=e.message ?: "일정을 저장하지 못했어요."
+                                            error=e.userMessage("일정을 저장하지 못했어요.")
                                         } finally { applying=false }
                                     }
                                 }
                             } catch (e: Exception) {
-                                error = e.message ?: "일정을 저장하지 못했어요."
+                                error = e.userMessage("일정을 저장하지 못했어요.")
                             }
                         }
                     )
@@ -649,3 +650,4 @@ fun OwnerMenuQuickEntryScreen(
     onNotice: (String) -> Unit = {},
 ) = OwnerManualMenuScreen(state, viewModel, onBack, onNewPhoto, onExistingJob,
     onNotice = onNotice)
+
