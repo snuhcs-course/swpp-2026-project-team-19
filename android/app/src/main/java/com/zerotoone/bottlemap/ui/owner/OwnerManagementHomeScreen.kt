@@ -1,6 +1,8 @@
 package com.zerotoone.bottlemap.ui.owner
 
-import com.zerotoone.bottlemap.ui.common.userMessage
+import com.zerotoone.bottlemap.ui.common.requireUserInput
+
+import com.zerotoone.bottlemap.ui.common.actionErrorMessage
 import androidx.compose.foundation.border
 import androidx.compose.foundation.background
 import androidx.compose.foundation.BorderStroke
@@ -258,7 +260,7 @@ fun OwnerManagementHomeScreen(
                                                                     } catch(cancelled: CancellationException) {
                                                                         throw cancelled
                                                                     } catch(e: Exception) {
-                                                                        error=e.userMessage("임시 영업 상태를 해제하지 못했어요.")
+                                                                        error=e.actionErrorMessage("임시 영업 상태를 해제하지 못했어요.")
                                                                     } finally { changingException=false }
                                                                 }
                                                             },
@@ -340,7 +342,7 @@ fun OwnerManagementHomeScreen(
                                                 } catch(cancelled: CancellationException) {
                                                     throw cancelled
                                                 } catch(e: Exception) {
-                                                    error=e.userMessage("메뉴 확인 정보를 저장하지 못했어요.")
+                                                    error=e.actionErrorMessage("메뉴 확인 정보를 저장하지 못했어요.")
                                                 } finally { confirmingMenu=false }
                                             }
                                         },
@@ -596,12 +598,12 @@ fun OwnerOperatingQuickScreen(
                                     "hours" -> MockExceptionKind.CUSTOM_HOURS
                                     else -> MockExceptionKind.VACATION
                                 }
-                                require(choice != "range" || validQuickVacationAtApply(startDay, endDay, applyDay)) {
+                                requireUserInput(choice != "range" || validQuickVacationAtApply(startDay, endDay, applyDay)) {
                                     "시작일과 종료일을 다시 확인해 주세요."
                                 }
                                 val openMinutes = startHour * 60 + startMinute
                                 val closeMinutes = endHour * 60 + endMinute
-                                require(choice != "hours" || openMinutes != closeMinutes) {
+                                requireUserInput(choice != "hours" || openMinutes != closeMinutes) {
                                     "영업 시작과 종료 시각이 같을 수 없어요."
                                 }
                                 val exception=MockOperatingException(
@@ -624,12 +626,12 @@ fun OwnerOperatingQuickScreen(
                                         } catch(cancelled: CancellationException) {
                                             throw cancelled
                                         } catch(e: Exception) {
-                                            error=e.userMessage("일정을 저장하지 못했어요.")
+                                            error=e.actionErrorMessage("일정을 저장하지 못했어요.")
                                         } finally { applying=false }
                                     }
                                 }
                             } catch (e: Exception) {
-                                error = e.userMessage("일정을 저장하지 못했어요.")
+                                error = e.actionErrorMessage("일정을 저장하지 못했어요.")
                             }
                         }
                     )

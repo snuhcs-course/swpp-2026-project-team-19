@@ -1,6 +1,6 @@
 package com.zerotoone.bottlemap.ui.owner
 
-import com.zerotoone.bottlemap.ui.common.userMessage
+import com.zerotoone.bottlemap.ui.common.actionErrorMessage
 import com.zerotoone.bottlemap.ui.common.OwnerBottomConfirmSheet
 
 import androidx.compose.foundation.background
@@ -398,7 +398,7 @@ fun OwnerInfoHtmlV4Screen(
                             } catch(cancelled: CancellationException) {
                                 throw cancelled
                             } catch(e: Exception) {
-                                error=e.userMessage("저장에 실패했습니다. 다시 시도해 주세요.")
+                                error=e.actionErrorMessage("저장에 실패했습니다. 다시 시도해 주세요.")
                             } finally { saving=false }
                         }
                     }

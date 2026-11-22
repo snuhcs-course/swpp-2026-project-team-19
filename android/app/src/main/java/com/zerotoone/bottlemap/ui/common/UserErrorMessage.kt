@@ -18,13 +18,14 @@ import java.net.UnknownHostException
 fun Throwable.userMessage(fallback: String = "처리하지 못했어요. 잠시 후 다시 시도해 주세요."): String {
     if (this is CancellationException) throw this
     return when (this) {
+        is UserInputException -> notice
         is ReviewAlreadyAppliedException -> "이미 게시된 메뉴판이에요. 메뉴 관리에서 확인해 주세요."
         is ReviewVersionConflictException -> "검수 내용이 바뀌었어요. 다시 불러와 확인해 주세요."
         is ReviewDraftConflictException -> "최신 검수 내용을 다시 불러와 확인해 주세요."
         is ReviewDraftTooLargeLocalException -> "검수 내용이 너무 많아 기기에 보관했어요. 입력 내용을 줄여 주세요."
         is ReviewDraftLocalEditingException -> "수정 내용을 기기에 보관했어요. 연결을 확인한 뒤 다시 시도해 주세요."
         is BottleMapApiException -> when {
-            code == "NETWORK_ERROR" -> "인터넷 연결을 확인한 뒤 다시 시도해 주세요."
+            code == "NETWORK_ERROR" -> ActionErrorNotices.NETWORK_MESSAGE
             httpStatus == 401 -> "로그인이 만료됐어요. 다시 로그인해 주세요."
             httpStatus == 403 -> "이 작업을 할 권한이 없어요. 계정과 매장 권한을 확인해 주세요."
             code == "REVIEW_OUTDATED" || code == "REVIEW_DRAFT_OUTDATED" || httpStatus == 409 ->
@@ -38,7 +39,7 @@ fun Throwable.userMessage(fallback: String = "처리하지 못했어요. 잠시 
                 "입력한 내용을 확인한 뒤 다시 시도해 주세요."
             else -> fallback
         }
-        is ConnectException, is SocketTimeoutException, is UnknownHostException -> "인터넷 연결을 확인한 뒤 다시 시도해 주세요."
+        is ConnectException, is SocketTimeoutException, is UnknownHostException -> ActionErrorNotices.NETWORK_MESSAGE
         else -> fallback
     }
 }

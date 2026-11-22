@@ -1,6 +1,6 @@
 package com.zerotoone.bottlemap.ui.owner
 
-import com.zerotoone.bottlemap.ui.common.userMessage
+import com.zerotoone.bottlemap.ui.common.actionErrorMessage
 import com.zerotoone.bottlemap.ui.common.OwnerBottomConfirmSheet
 
 import android.content.Intent
@@ -276,7 +276,7 @@ fun OwnerBarInfoEditorScreen(
                             } catch(cancelled: CancellationException) {
                                 throw cancelled
                             } catch(e: Exception) {
-                                error=e.userMessage("저장하지 못했어요. 다시 시도해 주세요.")
+                                error=e.actionErrorMessage("저장하지 못했어요. 다시 시도해 주세요.")
                             } finally { saving=false }
                         }
                     }
@@ -418,7 +418,7 @@ fun OwnerBarPhotoEditorScreen(
                             } catch(cancelled: CancellationException) {
                                 throw cancelled
                             } catch(e: Exception) {
-                                error=e.userMessage("사진을 저장하지 못했어요.")
+                                error=e.actionErrorMessage("사진을 저장하지 못했어요.")
                             } finally { saving=false }
                         }
                     }
@@ -498,7 +498,7 @@ fun OwnerBarTagsEditorScreen(
                             } catch(cancelled: CancellationException) {
                                 throw cancelled
                             } catch(e: Exception) {
-                                error=e.userMessage("태그를 저장하지 못했어요.")
+                                error=e.actionErrorMessage("태그를 저장하지 못했어요.")
                             } finally { saving=false }
                         }
                     }
@@ -682,7 +682,7 @@ fun OwnerBarHoursEditorScreen(
                             } catch(cancelled: CancellationException) {
                                 throw cancelled
                             } catch(e: Exception) {
-                                error=e.userMessage("영업시간을 저장하지 못했어요.")
+                                error=e.actionErrorMessage("영업시간을 저장하지 못했어요.")
                             } finally { saving=false }
                         }
                     }

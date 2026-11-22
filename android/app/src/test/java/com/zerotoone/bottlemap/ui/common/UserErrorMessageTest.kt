@@ -9,7 +9,7 @@ import org.junit.Test
 class UserErrorMessageTest {
     @Test fun networkNeverEchoesBackendTextOrSecrets() {
         val error = BottleMapApiException(code = "NETWORK_ERROR", message = "Cannot reach backend token=secret")
-        assertEquals("인터넷 연결을 확인한 뒤 다시 시도해 주세요.", error.userMessage())
+        assertEquals("인터넷 연결을 확인하고 다시 시도해 주세요.", error.userMessage())
     }
     @Test fun koreanServerTextIsNotTrustedEither() {
         val error = BottleMapApiException(code = "UNKNOWN", message = "내부 개인정보 원문", httpStatus = 500)
@@ -35,6 +35,11 @@ class UserErrorMessageTest {
         val cancelled = CancellationException("The coroutine was cancelled")
         try { cancelled.userMessage(); fail("Cancellation swallowed") }
         catch (caught: CancellationException) { assertSame(cancelled, caught) }
+    }
+    @Test fun onlyTypedLocalValidationPreservesAppOwnedInstructions() {
+        val copy = "용량을 입력하거나 Bottle 판매를 선택해 주세요."
+        assertEquals(copy, UserInputException(copy).userMessage())
+        assertEquals("다시 시도해 주세요.", IllegalArgumentException(copy).userMessage("다시 시도해 주세요."))
     }
     @Test fun sizeAndLimitErrorsHaveActionsWithoutEchoingValues() {
         assertTrue(BottleMapApiException(code="LIMIT", httpStatus=429,message="raw").userMessage().contains("횟수"))
