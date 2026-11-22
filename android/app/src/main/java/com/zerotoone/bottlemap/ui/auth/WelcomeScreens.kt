@@ -118,7 +118,7 @@ fun WelcomeScreen(
             // Keep the actions compact and anchored near the bottom; only the
             // space between the pin and this group expands on tall screens.
             Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
-                Text("Find the bottle first,\\nthen the bar.",
+                Text("Find the bottle first,\nthen the bar.",
                     style = uxText(28f, 700, UxColor.text, 1.27f, serif = true, letterSpacing = (-0.9).sp),
                     modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp).testTag("welcome-headline"))
                 UxMainButton("Google로 계속", { enter(onGoogle) }, Modifier.testTag("welcome-google"), ageChecked && !busy)
