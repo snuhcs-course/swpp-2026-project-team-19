@@ -368,6 +368,26 @@ describe("the home menu card (OwnerManagementHomeScreen.kt)", () => {
   });
 });
 
+describe("the home menu card while its menu is loading or failed", () => {
+  it("says the count is loading, then that it could not be read", async () => {
+    let answer: (() => void) | null = null;
+    menuServer([glenfiddich]);
+    server.use(
+      http.get("/api/bars/:barId/menu", async () => {
+        await new Promise<void>((resolve) => (answer = resolve));
+        return HttpResponse.json(errorBody("INTERNAL_ERROR"), { status: 500 });
+      }),
+    );
+    renderOwnerWeb(`/bars/${BAR_ID}`);
+
+    const card = await screen.findByRole("link", { name: /메뉴 관리/ });
+    expect(card).toHaveTextContent("게시된 메뉴 불러오는 중, 최근 갱신 11.01");
+    await waitFor(() => expect(answer).not.toBeNull());
+    answer!();
+    await waitFor(() => expect(card).toHaveTextContent("메뉴 개수를 불러오지 못했어요, 최근 갱신 11.01"));
+  });
+});
+
 describe("adding an item (spec 3.14.3, OwnerManualCatalogMatch.kt)", () => {
   it("links a proposed catalog product only after 맞아요, and sends its productId", async () => {
     const api = menuServer([unlinked], { products: [catalog({})] });
@@ -402,6 +422,32 @@ describe("adding an item (spec 3.14.3, OwnerManualCatalogMatch.kt)", () => {
       },
     ]);
     expect(await screen.findByRole("link", { name: "Lagavulin 16 Year Old 수정" })).toBeInTheDocument();
+  });
+
+  it("keeps a confirmed product when the name is changed and a later search no longer finds it", async () => {
+    // Codex review on #199: the link is kept on its own, not looked up again in the latest results.
+    const api = menuServer([], { products: [catalog({})] });
+    const searched: string[] = [];
+    server.use(
+      http.get("/api/catalog/products", ({ request }) => {
+        const query = new URL(request.url).searchParams.get("query") ?? "";
+        searched.push(query);
+        return HttpResponse.json({ items: ["라가불린 16년", "Lagavulin 16 Year Old"].includes(query) ? [catalog({})] : [] });
+      }),
+    );
+    const { router } = await openAdd();
+    await user().type(screen.getByLabelText("메뉴 이름"), "라가불린 16년");
+    await user().click(within(await screen.findByRole("group", { name: "상품 확인" })).getByRole("button", { name: "맞아요" }));
+
+    await user().clear(screen.getByLabelText("메뉴 이름"));
+    await user().type(screen.getByLabelText("메뉴 이름"), "라가불린 16 시그니처");
+    await waitFor(() => expect(searched).toContain("라가불린 16 시그니처"));
+    await fillOption(1, "30", "22000");
+    await save();
+
+    await atMenuList(router);
+    expect(api.writes()[0]?.body).toMatchObject({ displayName: "라가불린 16 시그니처", productId: LAGA_ID });
+    expect(api.writes()[0]?.body).not.toHaveProperty("kind");
   });
 
   it("asks to answer the proposal first, and adds without a product after 아니에요", async () => {
@@ -766,6 +812,43 @@ describe("editing an item (spec 3.14.4, 3.14.5)", () => {
 
     await atMenuList(router);
     expect(api.writes().map((call) => call.path)).toEqual([`/api/bars/${BAR_ID}/menu/items/local-item?menuVersion=4`, `/api/bars/${BAR_ID}/menu/items/local-item?menuVersion=4`]);
+  });
+
+  it("counts a resent edit as done when its new name moved the item to another product (spec 3.14.1)", async () => {
+    // Codex review on #199: relinking moves the line to another barMenuItemId, keeping its position.
+    let lose = true;
+    const api = menuServer([glenfiddich, unlinked], {
+      answer: ({ method, body }) => {
+        if (method !== "PUT" || !lose) return undefined;
+        lose = false;
+        // The server renames and relinks the line, and the answer is lost on the way back.
+        api.changeElsewhere([
+          {
+            ...unlinked,
+            barMenuItemId: "relinked",
+            productId: LAGA_ID,
+            productName: "Lagavulin 16 Year Old",
+            displayName: body?.displayName as string,
+            options: unlinked.options.map((saved) => ({ ...saved, menuEntryOptionId: "relinked-0" })),
+          },
+          glenfiddich,
+        ].map((entry, index) => ({ ...entry, sortOrder: index + 1 })));
+        return HttpResponse.error();
+      },
+    });
+    // The edited item is first on the menu.
+    api.changeElsewhere([{ ...unlinked, sortOrder: 1 }, { ...glenfiddich, sortOrder: 2 }]);
+    const { router } = await openEdit("local-item");
+
+    await user().clear(screen.getByLabelText("메뉴 이름"));
+    await user().type(screen.getByLabelText("메뉴 이름"), "라가불린 16년");
+    await save("저장하기");
+    expect(await screen.findByText("서버에 연결하지 못했어요. 네트워크를 확인해 주세요.")).toBeInTheDocument();
+    await save("저장하기");
+
+    await atMenuList(router);
+    expect(api.writes().map((call) => call.path)).toEqual([`/api/bars/${BAR_ID}/menu/items/local-item`, `/api/bars/${BAR_ID}/menu/items/local-item`]);
+    expect(screen.queryByText("이미 메뉴판에서 빠진 메뉴예요.")).not.toBeInTheDocument();
   });
 
   it("goes back to the list when the item is gone (404 MENU_ITEM_NOT_FOUND)", async () => {

@@ -11,7 +11,7 @@ import type { MenuItem } from "./menuRules";
 /** One change to the menu (spec 3.14.3 to 3.14.6). */
 export type MenuWrite =
   | { kind: "add"; body: { displayName: string; options: MenuOptionInput[] } & AddIdentity }
-  | { kind: "edit"; barMenuItemId: string; body: { displayName: string; options: MenuOptionInput[] } }
+  | { kind: "edit"; barMenuItemId: string; sortOrder: number; body: { displayName: string; options: MenuOptionInput[] } }
   | { kind: "delete"; barMenuItemId: string }
   | { kind: "reset" };
 
@@ -46,8 +46,11 @@ const sameContent = (item: MenuItem | undefined, body: { displayName: string; op
  * Whether `menu` already holds the change (spec 3.14.1 "재시도": a resent request whose first try succeeded
  * gets MENU_OUTDATED). An add is the item of its product, or the last item for one without a product
  * (3.14.3); an edit is the item with the name and options sent; a delete has no such item; a reset, no items.
- * An edit whose new name linked the item to another product moves it to another `barMenuItemId` (3.14.4):
- * that is not recognized, and the owner saves again.
+ *
+ * An edit whose new name linked the item to another product moves its line to another `barMenuItemId`
+ * (3.14.4), keeping its name, position and options (3.14.1 "연결 바꾸기"): with the old ID gone, the item at the
+ * same position is looked at. A line merged into another item already on the menu takes that item's name and
+ * options, so it is not recognized, and the owner saves again.
  */
 export function appliedIn(menu: BarMenu, write: MenuWrite): boolean {
   switch (write.kind) {
@@ -59,7 +62,8 @@ export function appliedIn(menu: BarMenu, write: MenuWrite): boolean {
     }
     case "edit":
       return sameContent(
-        menu.items.find((entry) => entry.barMenuItemId === write.barMenuItemId),
+        menu.items.find((entry) => entry.barMenuItemId === write.barMenuItemId) ??
+          menu.items.find((entry) => entry.sortOrder === write.sortOrder),
         write.body,
       );
     case "delete":

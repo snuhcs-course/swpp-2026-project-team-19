@@ -109,12 +109,17 @@ function StatusCard({ bar }: { bar: BarDetail }) {
 
 /**
  * The menu card (OwnerManagementHomeScreen.kt): how many items the published menu has (spec 3.9) and when it
- * was last updated, the later of its publish and its confirmation (3.6 `currentMenu`). Confirming the menu is
- * I5-P8.
+ * was last updated, the later of its publish and its confirmation (3.6 `currentMenu`). While the count loads or
+ * after it failed, the card says so. Confirming the menu is I5-P8.
  */
 function MenuCard({ bar }: { bar: BarDetail }) {
   const menu = useBarMenu(bar.barId);
-  const count = menu.data ? `게시된 메뉴 ${menu.data.items.length}개, ` : "";
+  // The card is one link, so a failed count is said here and retried on the menu screen it opens.
+  const count = menu.data
+    ? `게시된 메뉴 ${menu.data.items.length}개, `
+    : menu.isError
+      ? "메뉴 개수를 불러오지 못했어요, "
+      : "게시된 메뉴 불러오는 중, ";
   return (
     <Link to={`/bars/${bar.barId}/menu`} className={[styles.card, styles.wide].join(" ")}>
       <h2 className={styles.cardTitle}>메뉴 관리</h2>

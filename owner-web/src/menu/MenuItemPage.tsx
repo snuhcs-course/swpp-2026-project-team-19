@@ -147,7 +147,10 @@ function ItemForm({ menu, editing, locked }: { menu: BarMenu; editing: MenuItem 
   const [name, setName] = useState(start.name);
   const [category, setCategory] = useState<MenuCategory>(start.category);
   const [options, setOptions] = useState<DraftOption[]>(start.options);
-  const [linkedId, setLinkedId] = useState<string | null>(null);
+  // The product confirmed with "맞아요". Kept on its own, as the app keeps every product it has looked up:
+  // a later search for a changed name may not return it, and the link must not be lost then.
+  const [linked, setLinked] = useState<MenuProduct | null>(null);
+  const linkedId = linked?.productId ?? null;
   const [rejectedId, setRejectedId] = useState<string | null>(null);
   const [confirmedBrandId, setConfirmedBrandId] = useState<string | null>(null);
   // The menu version the edit is made on (spec 3.14.1); after MENU_OUTDATED, the one read again.
@@ -175,7 +178,7 @@ function ItemForm({ menu, editing, locked }: { menu: BarMenu; editing: MenuItem 
   // The shared catalog is whisky only (PR #164); the menu's own items are offered too.
   const searched = (products.data ?? []).map(catalogProduct).filter((product) => product.category === "whisky");
   const menuProducts = menu.items.map(menuProductOf).filter((product) => !product.catalogMatched || product.category === "whisky");
-  const candidates = unique([...searched, ...menuProducts], (product) => product.productId);
+  const candidates = unique([...searched, ...(linked ? [linked] : []), ...menuProducts], (product) => product.productId);
   const brands = unique<MenuBrand>(
     [
       ...menuBrandsOf(menu.items),
@@ -244,7 +247,7 @@ function ItemForm({ menu, editing, locked }: { menu: BarMenu; editing: MenuItem 
         setChecking(false);
       }
     }
-    const change = request.kind === "add" ? ({ kind: "add", body: request.body } as const) : ({ kind: "edit", barMenuItemId: request.barMenuItemId, body: request.body } as const);
+    const change = request.kind === "add" ? ({ kind: "add", body: request.body } as const) : ({ kind: "edit", barMenuItemId: request.barMenuItemId, sortOrder: editing?.sortOrder ?? 0, body: request.body } as const);
     try {
       const done = await write.send(change, version);
       if (done) leave();
@@ -363,7 +366,7 @@ function ItemForm({ menu, editing, locked }: { menu: BarMenu; editing: MenuItem 
                   <div className={barStyles.actions}>
                     <Button
                       onClick={() => {
-                        setLinkedId(suggested.productId);
+                        setLinked(suggested);
                         setConfirmedBrandId(suggested.brandId);
                         setName(suggested.displayName);
                         clearProblems();
@@ -393,7 +396,7 @@ function ItemForm({ menu, editing, locked }: { menu: BarMenu; editing: MenuItem 
                 value={category}
                 onChange={(event) => {
                   setCategory(event.currentTarget.value as MenuCategory);
-                  setLinkedId(null);
+                  setLinked(null);
                   setRejectedId(null);
                   clearProblems();
                 }}
