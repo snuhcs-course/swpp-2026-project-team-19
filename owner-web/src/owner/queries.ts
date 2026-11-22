@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ApiError } from "../api/errors";
 import { imageForm } from "../application/api";
 import { clearDraft, loadDraft } from "../application/draft";
@@ -27,6 +27,10 @@ export const ownerQueryKeys = {
   myApplications: ["me", "owner-applications"] as const,
   application: (applicationId: string) => ["owner-applications", applicationId] as const,
   bar: (barId: string) => ["bars", barId] as const,
+  // Not under ["bars", barId]: reading the bar again does not read its menu again.
+  menu: (barId: string) => ["bar-menu", barId] as const,
+  catalogProducts: (query: string) => ["catalog", "products", query] as const,
+  catalogBrands: (query: string) => ["catalog", "brands", query] as const,
 };
 
 /** The account rarely changes during a visit; screens reuse it instead of asking again on every mount. */
@@ -199,4 +203,43 @@ export function useBarPhotoActions(barId: string) {
     show,
     refresh: () => refreshBar(queryClient, barId),
   };
+}
+
+export type BarMenu = components["schemas"]["BarMenuResponse"];
+
+/** GET /api/bars/{barId}/menu: the bar's current published menu (spec 3.9); its owner gets sold-out items too. */
+export function useBarMenu(barId: string) {
+  const { api } = useSession();
+  return useQuery({
+    queryKey: ownerQueryKeys.menu(barId),
+    queryFn: async ({ signal }) => unwrap(await api.GET("/api/bars/{barId}/menu", { params: { path: { barId } }, signal })),
+  });
+}
+
+export type CatalogProduct = components["schemas"]["CatalogProductItem"];
+export type CatalogBrand = components["schemas"]["CatalogBrandItem"];
+
+/** GET /api/catalog/products (spec 7): products and aliases matching `query`, inactive ones too. */
+export function useCatalogProducts(query: string, enabled: boolean) {
+  const { api } = useSession();
+  return useQuery({
+    queryKey: ownerQueryKeys.catalogProducts(query),
+    queryFn: async ({ signal }) => unwrap(await api.GET("/api/catalog/products", { params: { query: { query } }, signal })).items,
+    enabled,
+    retry: false,
+    // While the next name is searched, the last results stay, so a proposal does not blink out while typing.
+    placeholderData: keepPreviousData,
+  });
+}
+
+/** GET /api/catalog/brands (spec 6): brands whose name or alias matches `query`. */
+export function useCatalogBrands(query: string, enabled: boolean) {
+  const { api } = useSession();
+  return useQuery({
+    queryKey: ownerQueryKeys.catalogBrands(query),
+    queryFn: async ({ signal }) => unwrap(await api.GET("/api/catalog/brands", { params: { query: { query } }, signal })).items,
+    enabled,
+    retry: false,
+    placeholderData: keepPreviousData,
+  });
 }

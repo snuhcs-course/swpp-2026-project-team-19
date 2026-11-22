@@ -71,8 +71,8 @@ describe("bar home (/bars/:barId, spec 3.6)", () => {
     // The app's fixed line, with commas instead of middle dots.
     expect(info).toHaveTextContent("사진, 소개, 영업시간");
     expect(screen.getByRole("region", { name: "영업 상태" })).toHaveTextContent("영업 상태 변경");
-    // The menu card holds its place until its tasks.
-    expect(screen.getByRole("region", { name: "메뉴 관리" })).toHaveTextContent("웹에서는 준비 중이에요.");
+    // OwnerManagementHomeScreen.kt: the menu's item count and last update, with a comma for the middle dot.
+    expect(await screen.findByRole("link", { name: /메뉴 관리/ })).toHaveTextContent("게시된 메뉴 0개, 최근 갱신 없음");
 
     await user().click(info);
 
