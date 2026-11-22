@@ -10,7 +10,7 @@ fun menuWriteErrorText(error: Throwable): String {
         return error.userMessage(fallback)
     if (error.fieldErrors.any {
             it.code.uppercase() in setOf("EXTRA_FORBIDDEN", "UNION_TAG_INVALID", "LITERAL_ERROR")
-        }) return "현재 앱에서 메뉴를 저장할 수 없어요. 앱을 업데이트한 뒤 다시 시도해 주세요."
+        }) return "현재 서비스와 앱의 메뉴 저장 방식이 맞지 않아요. 잠시 후 다시 시도하거나 문의해 주세요."
     val field = error.fieldErrors.first()
     if (field.path in setOf("menuVersion", "reviewVersion"))
         return "메뉴 정보가 변경됐어요. 최신 내용을 불러온 뒤 다시 시도해 주세요."

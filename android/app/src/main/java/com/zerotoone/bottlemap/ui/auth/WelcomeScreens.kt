@@ -29,6 +29,20 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import com.zerotoone.bottlemap.ui.common.BmLineIcon
+import com.zerotoone.bottlemap.ui.common.BmLineIconId
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -52,25 +66,29 @@ import com.zerotoone.bottlemap.ui.common.uxText
 interface FirstLaunchStore {
     fun isDone(): Boolean
     fun markDone()
+    fun isAgeConfirmed(): Boolean = false
+    fun confirmAge() {}
 }
 
 class SharedPrefsFirstLaunchStore(context: Context) : FirstLaunchStore {
     private val prefs = context.applicationContext.getSharedPreferences("bottlemap-first-launch", Context.MODE_PRIVATE)
-    override fun isDone() = prefs.getBoolean(KEY_DONE, false)
-    override fun markDone() = prefs.edit { putBoolean(KEY_DONE, true) }
+    override fun isDone() = prefs.getBoolean(KEY_DONE, false) && isAgeConfirmed()
+    override fun isAgeConfirmed() = prefs.getBoolean("age-18-confirmed", false)
+    override fun confirmAge() = prefs.edit { putBoolean("age-18-confirmed", true) }
+    override fun markDone() {
+        check(isAgeConfirmed()) { "Age self-confirmation is required before entry" }
+        prefs.edit { putBoolean(KEY_DONE, true) }
+    }
 
     /** Debug builds only: show the welcome again for UX review. */
-    fun reset() = prefs.edit { remove(KEY_DONE) }
+    fun reset() = prefs.edit { remove(KEY_DONE); remove("age-18-confirmed") }
 
     private companion object {
         const val KEY_DONE = "welcome-done"
     }
 }
 
-/** First-launch welcome. Exact v20 `.welcome` geometry at a 390dp reference width.
- * The pin is the isolated transparent artwork embedded in the supplied v20 HTML.
- * Login remains a one-tap Credential Manager action owned by the caller.
- */
+/** Approved Welcome HTML: original pin, headline, actions, owner link, aligned checks, policy. */
 @Composable
 fun WelcomeScreen(
     onBrowseAsGuest: () -> Unit,
@@ -78,64 +96,73 @@ fun WelcomeScreen(
     onOwner: () -> Unit,
     busy: Boolean = false,
     inlineError: String? = null,
+    onAgeConfirmed: () -> Unit = {},
+    onNotice: (String) -> Unit = {},
 ) {
+    val context = LocalContext.current
+    val privacy = remember(context) { UserPrivacySettings.get(context) }
+    val usageEnabled by privacy.usageEnabled.collectAsState()
+    var ageChecked by rememberSaveable { mutableStateOf(false) }
+    fun enter(action: () -> Unit) {
+        if (ageChecked && !busy) { onAgeConfirmed(); action() }
+    }
     BoxWithConstraints(Modifier.fillMaxSize().background(UxColor.bg).testTag("welcome-screen")) {
-        // CSS: .welcome { height:100%; min-height:630px; padding:0 20px }
-        val contentHeight = maxOf(maxHeight, 630.dp)
-        // Double the previous artwork size (now 50% of original), preserve
-        // aspect ratio and x-center at one-quarter screen width.
-        // The bottom of the pin meets the top of the "Find the bottle" headline.
-        val pinHeight = minOf(194.dp, contentHeight * 0.33f) / 2
-        val pinWidth = 158.dp / 2
-        val pinCenterX = maxWidth / 4
-        val pinTop = contentHeight / 2 - pinHeight
-        Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-            Box(Modifier.fillMaxWidth().height(contentHeight)) {
-                // Keep the image center at one-quarter screen width; its bottom
-                // meets the headline's top, including on taller screens.
-                Image(
-                    painter = painterResource(R.drawable.bottlemap_welcome_pin),
-                    contentDescription = "위스키 잔이 담긴 지도 핀",
-                    modifier = Modifier.offset(x = pinCenterX - pinWidth / 2, y = pinTop)
-                        .size(width = pinWidth, height = pinHeight)
-                        .testTag("welcome-pin"),
-                    contentScale = ContentScale.Fit,
-                    alignment = Alignment.BottomStart,
-                )
-                Text(
-                    "Find the bottle first,\nthen the bar.",
-                    style = uxText(30f, 700, UxColor.text, 1.27f, serif = true,
-                        letterSpacing = (-0.9).sp),
-                    textAlign = TextAlign.Start,
-                    modifier = Modifier.offset(x = 20.dp, y = contentHeight / 2)
-                        .widthIn(max = 350.dp).testTag("welcome-headline"),
-                )
-                Column(
-                    Modifier.align(Alignment.BottomCenter).fillMaxWidth()
-                        .padding(start = 20.dp, end = 20.dp, bottom = 23.dp),
-                ) {
-                    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        UxMainButton("Google로 계속", onGoogle,
-                            Modifier.testTag("welcome-google"), enabled = !busy)
-                        UxSecondaryButton("로그인 없이 둘러보기", onBrowseAsGuest,
-                            Modifier.testTag("welcome-guest"), enabled = !busy)
-                        if (inlineError != null) InlineAlert(inlineError)
-                    }
-                    Row(
-                        Modifier.fillMaxWidth().padding(top = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterHorizontally),
-                    ) {
-                        Text("사장님이신가요?", style = uxText(12f, 400, UxColor.muted))
-                        Box(Modifier.heightIn(min = 48.dp)
-                            .quietClick(enabled = !busy, onClick = onOwner)
-                            .testTag("welcome-owner"), contentAlignment = Alignment.Center) {
-                            Text("매장 등록하기", style = uxText(12f, 700, UxColor.gold))
-                        }
-                    }
+        val narrow = maxWidth < 350.dp
+        Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())
+            .padding(start = 20.dp, end = 20.dp, top = 22.dp, bottom = 18.dp)) {
+            Image(painterResource(R.drawable.bottlemap_welcome_pin), "위스키 잔을 담은 지도 핀",
+                Modifier.size(width = 158.dp, height = 194.dp).testTag("welcome-pin"),
+                contentScale = ContentScale.Fit, alignment = Alignment.BottomStart)
+            Spacer(Modifier.height(14.dp))
+            Text("Find the bottle first,\nthen the bar.",
+                style = uxText(28f, 700, UxColor.text, 1.27f, serif = true, letterSpacing = (-0.9).sp),
+                modifier = Modifier.fillMaxWidth().testTag("welcome-headline"))
+            Spacer(Modifier.height(24.dp))
+            Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
+                UxMainButton("Google로 계속", { enter(onGoogle) }, Modifier.testTag("welcome-google"), ageChecked && !busy)
+                UxSecondaryButton("로그인 없이 둘러보기", { enter(onBrowseAsGuest) }, Modifier.testTag("welcome-guest"), ageChecked && !busy)
+                if (inlineError != null) InlineAlert(inlineError)
+            }
+            Row(Modifier.fillMaxWidth().padding(top = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterHorizontally)) {
+                Text("사장님이신가요?", style = uxText(12f, 400, UxColor.muted))
+                Box(Modifier.heightIn(min = 48.dp).quietClick(ageChecked && !busy) { enter(onOwner) }
+                    .testTag("welcome-owner"), contentAlignment = Alignment.Center) {
+                    Text("매장 등록하기", style = uxText(12f, 700, UxColor.gold))
                 }
             }
+            Row(Modifier.fillMaxWidth().padding(top = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(if(narrow) 10.dp else 16.dp, Alignment.CenterHorizontally),
+                verticalAlignment = Alignment.CenterVertically) {
+                WelcomeCheck("만 18세 이상인가요?", ageChecked, { ageChecked = it },
+                    "welcome-age-confirmation", narrow)
+                WelcomeCheck("사용 기록 보내기", usageEnabled, privacy::setUsageEnabled,
+                    "welcome-usage-consent", narrow)
+            }
+            Text("사용 기록은 앱 개선에 사용해요.", style = uxText(11f, 400, UxColor.muted),
+                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp), textAlign = TextAlign.Center)
+            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                Text("개인정보처리방침", style = uxText(11f, 400, UxColor.sub),
+                    textDecoration = TextDecoration.Underline,
+                    modifier = Modifier.quietClick { openPrivacyPolicy(context, onNotice) }
+                        .padding(6.dp).testTag("welcome-privacy"))
+            }
         }
+    }
+}
+
+@Composable
+private fun WelcomeCheck(label: String, checked: Boolean, onChecked: (Boolean) -> Unit, tag: String, narrow: Boolean) {
+    Row(Modifier.heightIn(min = 44.dp).toggleable(checked, role = Role.Checkbox, onValueChange = onChecked)
+        .testTag(tag), verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(if(narrow) 6.dp else 7.dp)) {
+        Box(Modifier.size(18.dp).background(if(checked) UxColor.gold else UxColor.surface, RoundedCornerShape(3.dp))
+            .border(1.dp, if(checked) UxColor.gold else UxColor.outline, RoundedCornerShape(3.dp)),
+            contentAlignment = Alignment.Center) {
+            if(checked) BmLineIcon(BmLineIconId.CHECK,14.dp,UxColor.goldOn)
+        }
+        Text(label, style = uxText(if(narrow) 11f else 12f, 500, UxColor.text))
     }
 }
 

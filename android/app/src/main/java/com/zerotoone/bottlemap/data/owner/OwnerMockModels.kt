@@ -57,7 +57,8 @@ data class MockRegistrationDraft(
     val representativeName: String = "",
     val openingDateIso: String = "",
     val contactPhone: String = "",
-    val storePhone: String = "", // local-only public shop phone
+    val storePhone: String = "", // Public phone proposed during this application only.
+    val storePhoneMatchesContact: Boolean = false, // Explicit copy/link choice, never inferred from equal digits.
     val certificatePhoto: MockPhoto? = null, // Mock-only stored reference to registration certificate
     val applicantGallery: List<MockPhoto> = emptyList(),
     val initialMenuPhotos: List<MockPhoto> = emptyList(),

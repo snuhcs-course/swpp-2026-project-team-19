@@ -88,9 +88,11 @@ fun BottleMapNavHost(resetWelcome: Boolean = false) {
     // Single Activity-scoped state shared by My Page, Login and restored sessions.
     val authViewModel: AuthViewModel = viewModel()
     val context = LocalContext.current
-    val firstLaunch = remember { SharedPrefsFirstLaunchStore(context) }
+    val firstLaunch = remember {
+        SharedPrefsFirstLaunchStore(context).also { if (BuildConfig.DEBUG && resetWelcome) it.reset() }
+    }
+    var ageConfirmed by remember { mutableStateOf(firstLaunch.isAgeConfirmed()) }
     val startDestination = remember {
-        if (BuildConfig.DEBUG && resetWelcome) firstLaunch.reset()
         if (firstLaunch.isDone()) variantStartDestination else TabRoutes.WELCOME
     }
     var toast by remember { mutableStateOf<Pair<Long, String>?>(null) }
@@ -110,7 +112,16 @@ fun BottleMapNavHost(resetWelcome: Boolean = false) {
     val destination = backStackEntry?.destination
     val imeVisible = WindowInsets.isImeVisible
 
+    LaunchedEffect(ageConfirmed) {
+        if (!ageConfirmed && navController.currentDestination?.route != TabRoutes.WELCOME) {
+            navController.navigate(TabRoutes.WELCOME) {
+                popUpTo(navController.graph.id) { inclusive = true }
+                launchSingleTop = true
+            }
+        }
+    }
     fun enterTabs(tab: MainTab) {
+        if (!ageConfirmed) return
         firstLaunch.markDone()
         navController.navigate(TabRoutes.SEARCH_GRAPH) {
             popUpTo(navController.graph.id) { inclusive = true }
@@ -167,6 +178,8 @@ fun BottleMapNavHost(resetWelcome: Boolean = false) {
                                 }
                             },
                             busy = state is AuthUiState.SigningIn,
+                            onAgeConfirmed = { firstLaunch.confirmAge(); ageConfirmed = true },
+                            onNotice = showToast,
                         )
                     }
                     composable(
@@ -289,6 +302,7 @@ private fun NavGraphBuilder.accountGraph(
                 },
                 onRetryAccount = authViewModel::retryAccountSync,
                 onOpenOwner = { navController.navigate(OwnerRoutes.GRAPH) },
+                onNotice = showToast,
             )
         }
         composable(Routes.CUSTOMER_LOGIN) {

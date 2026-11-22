@@ -49,6 +49,12 @@ class OwnerMockViewModel(
     }
 
     suspend fun submitRegistrationDraftLive() {
+        val draft = when(val loaded=state.value) {
+            is MockOwnerLoadState.Ready -> loaded.snapshot.registrationDraft
+            is MockOwnerLoadState.Empty -> loaded.snapshot.registrationDraft
+            else -> null
+        }
+        if (draft != null) registrationPhoneError(draft)?.let { throw com.zerotoone.bottlemap.ui.common.UserInputException(it) }
         when {
             registrationSubmissionFixture != null -> registrationSubmissionFixture.invoke()
             repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository ->

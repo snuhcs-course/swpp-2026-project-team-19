@@ -57,9 +57,9 @@ private enum class VerifyFixture { MATCHED, FAILED, UNAVAILABLE, LIMITED }
 private fun regStage(page: RegPage): Int = when(page) {
     RegPage.METHOD, RegPage.READING, RegPage.BN, RegPage.REP, RegPage.DATE,
     RegPage.BIZCHECK, RegPage.VERIFYING, RegPage.VERIFIED -> 1
-    RegPage.BARNAME, RegPage.BARPHOTO, RegPage.ADDRESS, RegPage.BARPHONE -> 2
+    RegPage.BARNAME, RegPage.BARPHOTO, RegPage.ADDRESS -> 2
     RegPage.MENUS -> 3
-    RegPage.CONTACT, RegPage.REVIEW -> 4
+    RegPage.CONTACT, RegPage.BARPHONE, RegPage.REVIEW -> 4
     else -> 0
 }
 /** Verification belongs to the exact inputs sent to the live business check. */
@@ -310,7 +310,7 @@ fun OwnerOnboardingScreen(
                 throw cancelled
             } catch(e: Exception) {
                 go(RegPage.BIZCHECK)
-                error=e.actionErrorMessage("사업자등록증을 읽지 못했어요. 직접 입력해 주세요.")
+                error=certificateOcrFailureMessage(e)
             }
         } else if(screen==RegPage.VERIFYING){
             // The actual NTS verification happens on POST /api/owner-applications.
@@ -434,7 +434,7 @@ fun OwnerOnboardingScreen(
         RegPage.BARPHONE->draft.storePhone.isNotBlank()&&validOwnerPhone(draft.storePhone)
         RegPage.MENUS->draft.initialMenuPhotos.isNotEmpty()
         RegPage.CONTACT->validContact
-        RegPage.REVIEW->validContact&&draft.initialMenuPhotos.isNotEmpty()&&
+        RegPage.REVIEW->registrationPhoneError(draft)==null&&draft.initialMenuPhotos.isNotEmpty()&&
             businessPrecheck==null&&verificationCurrent
         else->true
     }
@@ -518,10 +518,10 @@ fun OwnerOnboardingScreen(
             }
             RegPage.BARNAME->forward(RegPage.BARPHOTO)
             RegPage.BARPHOTO->forward(RegPage.ADDRESS)
-            RegPage.ADDRESS->forward(RegPage.BARPHONE)
-            RegPage.BARPHONE->forward(RegPage.MENUS)
+            RegPage.ADDRESS->forward(RegPage.MENUS)
             RegPage.MENUS->forward(RegPage.CONTACT)
-            RegPage.CONTACT->forward(RegPage.REVIEW)
+            RegPage.CONTACT->forward(RegPage.BARPHONE)
+            RegPage.BARPHONE->forward(RegPage.REVIEW)
             RegPage.REVIEW->{
                 if(!busy){
                     busy=true
@@ -930,21 +930,22 @@ fun OwnerOnboardingScreen(
                     }
                     RegPage.BARPHONE -> {
                         OwnerV4Question("매장 전화번호를\n알려주세요",
-                            "예약이나 문의 전화를 받을 가게 번호예요.")
+                            "손님의 예약·문의 전화를 받을 번호예요.")
                         Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,
-                            verticalAlignment=Alignment.CenterVertically){
+                            verticalAlignment=Alignment.CenterVertically) {
                             RegistrationVisibility(public=true)
-                            Text("가게 전화가 없어요",color=RegistrationV4.primary,fontSize=12.sp,
-                                fontWeight=FontWeight.SemiBold,
-                                modifier=Modifier.ownerQuietClick {
-                                    save(draft.copy(storePhone=""));forward(RegPage.MENUS)
-                                }.padding(8.dp))
+                            Box(Modifier.heightIn(min=44.dp)
+                                .ownerQuietClick(enabled=validContact) {
+                                    save(registrationUseContactPhone(draft))
+                                }.testTag("registration-use-contact-phone"),
+                                contentAlignment=Alignment.Center) {
+                                Text("연락용 번호와 같아요",color=RegistrationV4.primary,fontSize=12.sp,
+                                    fontWeight=FontWeight.SemiBold)
+                            }
                         }
                         RegistrationPhoneInput(draft.storePhone,{
-                            save(draft.copy(storePhone=it))
-                        },"02-000-0000",tag="registration-store-phone")
-                        Text("지역번호나 0507 안심번호도 넣을 수 있어요.",
-                            fontSize=12.sp,color=RegistrationV4.secondary)
+                            save(registrationStorePhoneChanged(draft,it))
+                        },"예: 02-123-4567",tag="registration-store-phone")
                     }
                     RegPage.MENUS -> {
                         OwnerV4Question("메뉴판 사진을\n올려 주세요",
@@ -1016,22 +1017,11 @@ fun OwnerOnboardingScreen(
                     }
                     RegPage.CONTACT -> {
                         OwnerV4Question("연락받을 번호를\n알려주세요",
-                            "승인 전에 운영팀이 확인 연락을 드릴 수 있어요.")
-                        Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,
-                            verticalAlignment=Alignment.CenterVertically){
-                            RegistrationVisibility(public=false)
-                            if (draft.storePhone.isNotBlank()) {
-                                Text("매장 번호와 같아요",color=RegistrationV4.primary,fontSize=12.sp,
-                                    fontWeight=FontWeight.SemiBold,
-                                    modifier=Modifier.ownerQuietClick(
-                                        enabled=canCopyShopPhone(draft.storePhone)) {
-                                        save(draft.copy(contactPhone=draft.storePhone))
-                                    }.padding(8.dp))
-                            }
-                        }
+                            "운영팀이 신청 확인을 위해 연락드려요.")
+                        RegistrationVisibility(public=false)
                         RegistrationPhoneInput(draft.contactPhone,{
-                            save(draft.copy(contactPhone=it))
-                        },"010-0000-0000",tag="registration-contact")
+                            save(registrationContactChanged(draft,it))
+                        },"예: 010-1234-5678",tag="registration-contact")
                     }
                     RegPage.REVIEW -> {
                         OwnerV4Question("이렇게\n신청할게요","한 번 더 확인하고 신청해 주세요.")
@@ -1050,8 +1040,7 @@ fun OwnerOnboardingScreen(
                                 address=if(draft.kind==MockApplicationKind.NEW_BAR)
                                     listOf(draft.proposedBarAddress,draft.proposedBarAddressDetail)
                                         .filter {it.isNotBlank()}.joinToString(" ") else null,
-                                phone=if(draft.kind==MockApplicationKind.NEW_BAR)
-                                    formatOwnerPhone(draft.storePhone) else null,
+                                phone=formatOwnerPhone(draft.storePhone),
                                 menuPhotoCount=draft.initialMenuPhotos.size,
                                 contact=formatOwnerPhone(draft.contactPhone)
                             ),
@@ -1093,8 +1082,7 @@ fun OwnerOnboardingScreen(
                                         application.registrationPhotos.count {it.kind==MockPhotoKind.BAR_GALLERY}
                                         else null,
                                     address=application.proposedBarAddress,
-                                    phone=if(application.kind==MockApplicationKind.NEW_BAR)
-                                        formatOwnerPhone(application.storePhone.orEmpty()) else null,
+                                    phone=application.storePhone?.takeIf { it.isNotBlank() }?.let(::formatOwnerPhone),
                                     menuPhotoCount=application.registrationPhotos.count {
                                         it.kind==MockPhotoKind.MENU_CAPTURE
                                     },

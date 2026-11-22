@@ -304,7 +304,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         businessNumberDigits = app.businessRegistrationNumber,
         openingDateIso = app.openingDate,
         contactPhone = app.contactPhone,
-        storePhone = app.proposedBar?.phone,
+        storePhone = app.proposedBar?.phone ?: com.zerotoone.bottlemap.ui.owner.existingBarPhoneFromNote(app.applicantNote),
         rejectionReason = app.rejectionReason,
         submittedAtEpochMs = timestamp(app.createdAt) ?: 0L,
         reviewedAtEpochMs = timestamp(app.reviewedAt),
@@ -926,6 +926,9 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
     suspend fun submitRegistrationDraftLive() {
         val draft = snapshot().registrationDraft
             ?: error("등록 신청 정보를 먼저 입력해 주세요.")
+        com.zerotoone.bottlemap.ui.owner.registrationPhoneError(draft)?.let {
+            throw com.zerotoone.bottlemap.ui.common.UserInputException(it)
+        }
         val body = mutableMapOf<String, Any?>(
             "applicationType" to if(draft.kind == MockApplicationKind.EXISTING_BAR)
                 "existing_bar" else "new_bar",
@@ -936,6 +939,9 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         )
         if(draft.kind == MockApplicationKind.EXISTING_BAR) {
             body["barId"] = requireNotNull(draft.existingBarId)
+            // Existing schema accepts applicantNote, not proposedBar.phone for an existing bar.
+            // The Android owner explicitly chose operator review/manual reflection of this proposal.
+            body["applicantNote"] = com.zerotoone.bottlemap.ui.owner.existingBarPublicPhoneNote(draft)
         } else {
             body["proposedBar"] = mapOf(
                 "name" to draft.proposedBarName,

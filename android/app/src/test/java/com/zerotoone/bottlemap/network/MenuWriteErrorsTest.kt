@@ -10,18 +10,18 @@ class MenuWriteErrorsTest {
 
     @Test fun oldServerSchemaExplainsRecoveryWithoutLeakingField() {
         val text=menuWriteErrorText(invalid("localItem", "EXTRA_FORBIDDEN"))
-        assertTrue(text.contains("업데이트")); assertFalse(text.contains("localItem"))
+        assertTrue(text.contains("서비스와 앱")); assertFalse(text.contains("업데이트")); assertFalse(text.contains("localItem"))
         assertFalse(text.contains("secret")); assertFalse(text.contains("API"))
     }
     @Test fun kindAndNestedSchemaFailuresDoNotExposeTechnicalNames() {
         for(path in listOf("kind", "body.kind")) {
             val text=menuWriteErrorText(invalid(path,"EXTRA_FORBIDDEN"))
-            assertTrue(text.contains("업데이트"));assertFalse(text.contains(path))
+            assertTrue(text.contains("서비스와 앱")); assertFalse(text.contains("업데이트"));assertFalse(text.contains(path))
         }
     }
     @Test fun photoReviewUnionMismatchUsesSameSafeRecovery() {
         val text=menuWriteErrorText(invalid("itemDecisions[0]", "UNION_TAG_INVALID"))
-        assertTrue(text.contains("업데이트"));assertFalse(text.contains("itemDecisions"))
+        assertTrue(text.contains("서비스와 앱")); assertFalse(text.contains("업데이트"));assertFalse(text.contains("itemDecisions"))
     }
     @Test fun optionPriceErrorIdentifiesRowAndActionInKorean() {
         assertEquals("2번 옵션 가격: 입력할 수 있는 숫자 범위를 확인해 주세요.",

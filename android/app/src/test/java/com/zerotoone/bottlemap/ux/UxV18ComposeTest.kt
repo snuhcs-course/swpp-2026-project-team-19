@@ -1,5 +1,6 @@
 package com.zerotoone.bottlemap.ux
 
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.assertIsNotSelected
@@ -64,6 +65,10 @@ class UxV18ComposeTest {
         val first = rule.onNodeWithTag("welcome-google").fetchSemanticsNode().boundsInRoot
         val second = rule.onNodeWithTag("welcome-guest").fetchSemanticsNode().boundsInRoot
         assertTrue("Google must be above guest in v20", first.bottom < second.top)
+        rule.onNodeWithTag("welcome-google").assertIsNotEnabled()
+        rule.onNodeWithTag("welcome-guest").assertIsNotEnabled()
+        rule.onNodeWithTag("welcome-owner").assertIsNotEnabled()
+        rule.onNodeWithTag("welcome-age-confirmation").performClick()
         rule.onNodeWithTag("welcome-google").performClick()
         rule.onNodeWithTag("welcome-guest").performClick()
         rule.onNodeWithTag("welcome-owner").performClick()

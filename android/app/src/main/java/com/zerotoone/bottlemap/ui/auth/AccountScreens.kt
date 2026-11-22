@@ -23,6 +23,8 @@ import android.os.SystemClock
 import android.util.Log
 import com.zerotoone.bottlemap.BuildConfig
 import androidx.compose.runtime.produceState
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.ui.semantics.Role
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -71,7 +73,11 @@ fun AccountScreen(
     onLogout: () -> Unit,
     onRetryAccount: () -> Unit,
     onOpenOwner: () -> Unit = {},
+    onNotice: (String) -> Unit = {},
 ) {
+    val context = LocalContext.current
+    val privacy = remember(context) { UserPrivacySettings.get(context) }
+    val usageEnabled by privacy.usageEnabled.collectAsState()
     // Owner access is based on the authenticated server account, never demo fixture data.
     val signedInUser=(state as? AuthUiState.SignedIn)?.user
     var ownerRetryNonce by remember(signedInUser?.userId) { mutableStateOf(0) }
@@ -125,7 +131,7 @@ fun AccountScreen(
     Column(Modifier.fillMaxSize().background(P18Bg).testTag("customer-my-page")) {
         AccountHeader("내 정보",onBack)
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())
-            .padding(start=20.dp,end=20.dp,top=16.dp,bottom=24.dp),
+            .padding(start=20.dp,end=20.dp,top=17.dp,bottom=30.dp),
             verticalArrangement=Arrangement.spacedBy(0.dp)) {
             val user=(state as? AuthUiState.SignedIn)?.user
             Row(Modifier.fillMaxWidth().heightIn(min=56.dp)
@@ -166,36 +172,46 @@ fun AccountScreen(
                 }
             }
             if(user!=null && hasArea) {
-                Row(Modifier.fillMaxWidth().padding(top=28.dp).heightIn(min=96.dp)
-                    .background(androidx.compose.ui.graphics.Color(0xFF2A2521),
-                        RoundedCornerShape(16.dp))
-                    .border(1.dp,androidx.compose.ui.graphics.Color(0xFF8C6C4A),
-                        RoundedCornerShape(16.dp))
+                Row(Modifier.fillMaxWidth().padding(top=16.dp).heightIn(min=72.dp)
+                    .background(P18Surface,RoundedCornerShape(13.dp))
+                    .border(1.dp,P18Line,RoundedCornerShape(13.dp))
                     .clickable(onClick={ if(retryOwnerLookup) ownerRetryNonce++ else onOpenOwner() })
-                    .testTag("customer-owner-entry")
-                    .padding(horizontal=16.dp,vertical=18.dp),
+                    .testTag("customer-owner-entry").padding(15.dp),
                     verticalAlignment=Alignment.CenterVertically,
                     horizontalArrangement=Arrangement.spacedBy(14.dp)) {
-                    Box(Modifier.size(40.dp)
-                        .background(androidx.compose.ui.graphics.Color(0xFF5C4329),
-                            RoundedCornerShape(10.dp)),contentAlignment=Alignment.Center) {
-                        BmIcon(BmIconId.MANAGE_BAR,null,Modifier.size(23.dp),tint=P18Gold)
+                    Column(Modifier.weight(1f),verticalArrangement=Arrangement.spacedBy(3.dp)) {
+                        Text("내 매장 관리",color=P18Text,fontSize=13.sp,fontWeight=FontWeight.Bold)
+                        Text(subtitle,color=P18Muted,fontSize=11.sp)
                     }
-                    Column(Modifier.weight(1f),verticalArrangement=Arrangement.spacedBy(4.dp)) {
-                        Text("내 매장 관리",color=P18Text,fontSize=17.sp,
-                            lineHeight=24.sp,fontWeight=FontWeight.Bold)
-                        Text(subtitle,color=P18Muted,fontSize=14.sp)
-                    }
-                    Text("›",color=P18Muted,fontSize=21.sp)
+                    Text("›",color=P18Muted,fontSize=18.sp)
                 }
             }
             Column(Modifier.fillMaxWidth().padding(top=28.dp)) {
                 AccountNavRow("공지사항"){infoDialog="공지사항"}
                 AccountNavRow("문의하기"){infoDialog="문의하기"}
+                AccountNavRow("개인정보처리방침") { openPrivacyPolicy(context, onNotice) }
                 if(user!=null) AccountNavRow("로그아웃",onLogout)
                 if(state is AuthUiState.SignInError) AccountNavRow(
                     "다시 로그인하기",if(state.canRetryProfile)onRetryAccount else onOpenLogin)
             }
+            Row(Modifier.fillMaxWidth().toggleable(usageEnabled, role=Role.Switch) { enabled ->
+                    privacy.setUsageEnabled(enabled)
+                    onNotice(if(enabled) "사용 기록 보내기를 켰어요." else "사용 기록 보내기를 껐어요.")
+                }.testTag("account-usage-consent").padding(vertical=16.dp),
+                verticalAlignment=Alignment.CenterVertically,
+                horizontalArrangement=Arrangement.spacedBy(12.dp)) {
+                Column(Modifier.weight(1f),verticalArrangement=Arrangement.spacedBy(5.dp)) {
+                    Text("사용 기록 보내기",fontSize=14.sp,fontWeight=FontWeight.SemiBold,color=P18Text)
+                    Text("앱 개선을 위한 오류·사용 기록이에요.",fontSize=11.sp,color=P18Muted)
+                }
+                Box(Modifier.size(width=44.dp,height=26.dp)
+                    .background(if(usageEnabled)P18Gold else P18Surface,RoundedCornerShape(99.dp))
+                    .border(1.dp,if(usageEnabled)P18Gold else P18Muted,RoundedCornerShape(99.dp))) {
+                    Box(Modifier.padding(start=if(usageEnabled)21.dp else 3.dp,top=3.dp)
+                        .size(18.dp).background(if(usageEnabled)Color(0xFF211A14) else P18Muted,CircleShape))
+                }
+            }
+            Box(Modifier.fillMaxWidth().height(1.dp).background(P18Line))
             if(!hasArea && (user==null || ownerStatus is OwnerAreaLoad.Ready)) {
                 Row(Modifier.fillMaxWidth().padding(top=32.dp),
                     horizontalArrangement=Arrangement.Center,
@@ -220,12 +236,12 @@ fun AccountScreen(
 
 @Composable
 private fun AccountNavRow(label:String,onClick:()->Unit) {
-    Row(Modifier.fillMaxWidth().height(56.dp).clickable(onClick=onClick)
+    Row(Modifier.fillMaxWidth().heightIn(min=58.dp).clickable(onClick=onClick)
         .testTag("customer-account-${label}")
         .padding(horizontal=0.dp),
         verticalAlignment=Alignment.CenterVertically,
         horizontalArrangement=Arrangement.SpaceBetween) {
-        Text(label,color=P18Text,fontSize=16.sp)
+        Text(label,color=P18Text,fontSize=14.sp,fontWeight=FontWeight.SemiBold)
         Text("›",color=P18Muted,fontSize=22.sp)
     }
     Box(Modifier.fillMaxWidth().height(1.dp)

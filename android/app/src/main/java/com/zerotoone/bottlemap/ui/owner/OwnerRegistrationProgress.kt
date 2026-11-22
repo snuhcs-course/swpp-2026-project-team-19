@@ -10,15 +10,21 @@ import java.util.UUID
 private val registrationCommon = listOf(
     "INTRO", "METHOD", "BN", "REP", "DATE", "BIZCHECK", "VERIFIED", "BARNAME"
 )
-private val registrationNewBar = listOf("BARPHOTO", "ADDRESS", "BARPHONE")
-private val registrationEnd = listOf("MENUS", "CONTACT", "REVIEW")
+private val registrationNewBar = listOf("BARPHOTO", "ADDRESS")
+private val registrationEnd = listOf("MENUS", "CONTACT", "BARPHONE", "REVIEW")
 
 internal fun registrationCheckpointable(page: String): Boolean =
     page in registrationCommon || page in registrationNewBar || page in registrationEnd
 
 internal fun registrationResumePage(draft: MockRegistrationDraft): String {
     val stored = draft.resumePageKey
-    if (stored != null && registrationCheckpointable(stored)) return stored
+    if (stored != null && registrationCheckpointable(stored)) {
+        // Older drafts collected BARPHONE before photos/contact, and existing-bar drafts skipped it.
+        if (stored in listOf("CONTACT", "BARPHONE", "REVIEW") && draft.initialMenuPhotos.isEmpty()) return "MENUS"
+        if (stored in listOf("BARPHONE", "REVIEW") && (draft.contactPhone.isBlank() || !validOwnerPhone(draft.contactPhone))) return "CONTACT"
+        if (stored == "REVIEW" && (draft.storePhone.isBlank() || !validOwnerPhone(draft.storePhone))) return "BARPHONE"
+        return stored
+    }
     // Migration for drafts saved before the checkpoint field existed.
     return when {
         draft.initialMenuPhotos.isNotEmpty() -> "MENUS"
@@ -37,7 +43,7 @@ internal fun registrationResumePage(draft: MockRegistrationDraft): String {
 }
 
 /**
- * Reconstruct back path on a new process. Resume from MENUS goes to BARPHONE for
+ * Reconstruct back path on a new process. Resume from MENUS goes to ADDRESS for
  * new bars and BARNAME for existing-bar claims, never immediately to My Page.
  */
 internal fun registrationHistoryFor(page: String, kind: MockApplicationKind): List<String> {
@@ -111,4 +117,31 @@ internal fun reapplicationDraftFromRejected(
         },
         resumePageKey="INTRO",
     )
+}
+
+/** Copy is a persistent explicit link; typing a separate public number always unlinks it. */
+internal fun registrationContactChanged(draft: MockRegistrationDraft, value: String): MockRegistrationDraft {
+    val digits = ownerPhoneDigits(value)
+    return draft.copy(contactPhone = digits,
+        storePhone = if (draft.storePhoneMatchesContact) digits else draft.storePhone)
+}
+internal fun registrationStorePhoneChanged(draft: MockRegistrationDraft, value: String): MockRegistrationDraft =
+    draft.copy(storePhone = ownerPhoneDigits(value), storePhoneMatchesContact = false)
+internal fun registrationUseContactPhone(draft: MockRegistrationDraft): MockRegistrationDraft =
+    draft.copy(storePhone = draft.contactPhone, storePhoneMatchesContact = true)
+
+internal const val EXISTING_PUBLIC_PHONE_NOTE = "고객 공개용 매장 전화번호(운영자 검토 후 반영): "
+internal fun existingBarPublicPhoneNote(draft: MockRegistrationDraft): String? =
+    if (draft.kind == MockApplicationKind.EXISTING_BAR)
+        EXISTING_PUBLIC_PHONE_NOTE + formatOwnerPhone(draft.storePhone) else null
+internal fun existingBarPhoneFromNote(note: String?): String? = note
+    ?.takeIf { it.startsWith(EXISTING_PUBLIC_PHONE_NOTE) }
+    ?.removePrefix(EXISTING_PUBLIC_PHONE_NOTE)?.trim()
+    ?.takeIf { it.isNotBlank() && validOwnerPhone(it) }
+    ?.let(::ownerPhoneDigits)
+
+internal fun registrationPhoneError(draft: MockRegistrationDraft): String? = when {
+    draft.contactPhone.isBlank() || !validOwnerPhone(draft.contactPhone) -> "연락받을 번호를 확인해 주세요."
+    draft.storePhone.isBlank() || !validOwnerPhone(draft.storePhone) -> "손님에게 공개할 매장 전화번호를 입력해 주세요."
+    else -> null
 }

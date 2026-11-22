@@ -28,6 +28,9 @@ android {
 
     defaultConfig {
         applicationId = "com.zerotoone.bottlemap"
+        buildConfigField("String", "PRIVACY_POLICY_URL", stringBuildConfigValue(
+            providers.gradleProperty("BOTTLEMAP_PRIVACY_POLICY_URL")
+                .orElse("https://bottlemap.o-r.kr/privacy").get()))
         minSdk = 26
         targetSdk = 36
         versionCode = 1

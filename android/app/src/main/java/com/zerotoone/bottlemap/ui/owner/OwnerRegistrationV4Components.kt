@@ -332,14 +332,16 @@ internal fun RegistrationInput(
     }
 }
 @Composable
-internal fun RegistrationRow(label:String,value:String,onEdit:(()->Unit)?=null) {
+internal fun RegistrationRow(label:String,value:String,onEdit:(()->Unit)?=null,hint:String?=null) {
     Row(Modifier.fillMaxWidth().heightIn(min=48.dp),
         verticalAlignment=Alignment.CenterVertically,
         horizontalArrangement=Arrangement.spacedBy(8.dp)) {
         Text(label,modifier=Modifier.width(92.dp),color=RegistrationV4.secondary,
             fontSize=14.sp,lineHeight=21.sp)
-        Text(value,modifier=Modifier.weight(1f),fontSize=15.sp,
-            color=RegistrationV4.text,lineHeight=22.sp,textAlign=TextAlign.End)
+        Column(Modifier.weight(1f),horizontalAlignment=Alignment.End) {
+            Text(value,fontSize=15.sp,color=RegistrationV4.text,lineHeight=22.sp,textAlign=TextAlign.End)
+            if(hint!=null) Text(hint,fontSize=11.sp,color=RegistrationV4.secondary,lineHeight=17.sp,textAlign=TextAlign.End)
+        }
         if(onEdit!=null) Box(Modifier.size(width=48.dp,height=48.dp)
             .ownerQuietClick(onClick=onEdit)
             .testTag("registration-review-edit"),contentAlignment=Alignment.Center) {
