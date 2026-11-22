@@ -792,7 +792,8 @@ private fun P18ResultSearchField(query: String, onQuery: (String) -> Unit, onSub
         Box(Modifier.weight(1f),contentAlignment=Alignment.CenterStart) {
             if(query.isEmpty()) Text("위스키 이름을 입력해 보세요",fontSize=14.sp,color=P18Muted)
             BasicTextField(query,{onQuery(it.take(100))},singleLine=true,
-                textStyle=TextStyle(color=P18Text,fontSize=14.sp),
+                textStyle=MaterialTheme.typography.bodyMedium.copy(color=P18Text,fontSize=14.sp),
+                cursorBrush=androidx.compose.ui.graphics.SolidColor(P18Gold),
                 modifier=Modifier.fillMaxWidth().padding(vertical=8.dp).focusRequester(focus)
                     .onFocusChanged {focused=it.isFocused}.testTag("customer-search-field"),
                 keyboardOptions=KeyboardOptions(imeAction=ImeAction.Search),

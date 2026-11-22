@@ -15,7 +15,7 @@ import org.robolectric.annotation.Config
 @Config(sdk=[35])
 class UserPrivacySettingsTest {
     @Test fun oldWelcomeCompletionDoesNotBypassNewSelfConfirmation() {
-        val context=RuntimeEnvironment.getApplication()
+        val context:Context=RuntimeEnvironment.getApplication()
         val prefs=context.getSharedPreferences("bottlemap-first-launch",Context.MODE_PRIVATE)
         prefs.edit().clear().putBoolean("welcome-done",true).commit()
         val store=SharedPrefsFirstLaunchStore(context)
@@ -26,7 +26,7 @@ class UserPrivacySettingsTest {
         store.reset();assertFalse(store.isDone())
     }
     @Test fun qualityRecordingIsOptionalAndStoredSeparatelyFromLogin() {
-        val context=RuntimeEnvironment.getApplication()
+        val context:Context=RuntimeEnvironment.getApplication()
         val settings=UserPrivacySettings.get(context)
         assertFalse(settings.usageEnabled.value)
         settings.setUsageEnabled(true)
@@ -36,7 +36,7 @@ class UserPrivacySettingsTest {
         assertFalse(settings.usageEnabled.value)
     }
     @Test fun policyOpensTheConfiguredPublicUrlWithoutAuthentication() {
-        val app=RuntimeEnvironment.getApplication()
+        val app:android.app.Application=RuntimeEnvironment.getApplication()
         openPrivacyPolicy(app)
         val intent=shadowOf(app).nextStartedActivity
         assertEquals(Intent.ACTION_VIEW,intent.action)
