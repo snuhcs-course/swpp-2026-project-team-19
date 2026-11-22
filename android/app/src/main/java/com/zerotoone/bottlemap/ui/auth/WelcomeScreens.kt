@@ -109,18 +109,19 @@ fun WelcomeScreen(
         val narrow = maxWidth < 350.dp
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
         Column(Modifier.fillMaxWidth().heightIn(min = viewportHeight)
-            .padding(start = 20.dp, end = 20.dp, top = 22.dp, bottom = 18.dp),
-            verticalArrangement = Arrangement.SpaceBetween) {
-            Image(painterResource(R.drawable.bottlemap_welcome_pin), "위스키 잔을 담은 지도 핀",
-                Modifier.size(width = 79.dp, height = 97.dp).testTag("welcome-pin"),
-                contentScale = ContentScale.Fit, alignment = Alignment.BottomStart)
-
-            // Keep the actions compact and anchored near the bottom; only the
-            // space between the pin and this group expands on tall screens.
-            Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
-                Text("Find the bottle first,\nthen the bar.",
-                    style = uxText(28f, 700, UxColor.text, 1.27f, serif = true, letterSpacing = (-0.9).sp),
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp).testTag("welcome-headline"))
+            .padding(start = 20.dp, end = 20.dp, top = 22.dp, bottom = 10.dp),
+            verticalArrangement = Arrangement.Bottom) {
+            // Keep the entire welcome composition low on the screen.
+            // The pin stays left-aligned and its bottom meets the headline top.
+            Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(0.dp)) {
+                    Image(painterResource(R.drawable.bottlemap_welcome_pin), "위스키 잔을 담은 지도 핀",
+                        Modifier.size(width = 79.dp, height = 97.dp).testTag("welcome-pin"),
+                        contentScale = ContentScale.Fit, alignment = Alignment.BottomStart)
+                    Text("Find the bottle first,\\nthen the bar.",
+                        style = uxText(28f, 700, UxColor.text, 1.27f, serif = true, letterSpacing = (-0.9).sp),
+                        modifier = Modifier.fillMaxWidth().testTag("welcome-headline"))
+                }
                 UxMainButton("Google로 계속", { enter(onGoogle) }, Modifier.testTag("welcome-google"), ageChecked && !busy)
                 UxSecondaryButton("로그인 없이 둘러보기", { enter(onBrowseAsGuest) }, Modifier.testTag("welcome-guest"), ageChecked && !busy)
                 if (inlineError != null) InlineAlert(inlineError)
@@ -151,7 +152,7 @@ fun WelcomeScreen(
                     }
                 }
 
-                Box(Modifier.fillMaxWidth().padding(top = 12.dp),
+                Box(Modifier.fillMaxWidth().padding(top = 5.dp),
                     contentAlignment = Alignment.Center) {
                     Text("개인정보처리방침", style = uxText(11f, 400, UxColor.sub),
                         textDecoration = TextDecoration.Underline,
