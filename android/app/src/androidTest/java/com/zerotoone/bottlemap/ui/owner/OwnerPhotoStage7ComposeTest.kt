@@ -1,6 +1,9 @@
 package com.zerotoone.bottlemap.ui.owner
 
 import androidx.activity.ComponentActivity
+import androidx.compose.material3.Text
+import androidx.compose.runtime.mutableStateOf
+import com.zerotoone.bottlemap.navigation.OwnerReviewEntryPending
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.test.assertIsNotEnabled
@@ -253,5 +256,33 @@ class OwnerPhotoStage7ComposeTest {
         }
     }
 
-}
+    @Test fun unavailableRestoredReviewStaysRetryableUntilOwnerIdentityLoads() {
+        val state = mutableStateOf<MockOwnerLoadState>(MockOwnerLoadState.NetworkUnavailable)
+        var retries = 0
+        var leaves = 0
+        compose.setContent { MaterialTheme {
+            if (!OwnerReviewEntryPending(state.value, {
+                    retries++
+                    state.value = MockOwnerLoadState.Loading
+                }, { leaves++ })) Text("확인된 매장 상태")
+        } }
+        compose.onNodeWithTag("review-load-error-screen").assertExists()
+        compose.onNodeWithText("확인된 매장 상태").assertDoesNotExist()
+        compose.onNodeWithTag("review-load-retry").performClick()
+        compose.runOnIdle { assertEquals(1, retries); assertEquals(0, leaves) }
+        compose.onNodeWithText("확인된 매장 상태").assertDoesNotExist()
+        compose.runOnIdle { state.value = MockOwnerLoadState.Empty() }
+        compose.onNodeWithText("확인된 매장 상태").assertExists()
+    }
 
+    @Test fun restoredReviewReadErrorOffersExistingLeaveActionWithoutAutomaticRedirect() {
+        var leaves = 0
+        compose.setContent { MaterialTheme {
+            OwnerReviewEntryPending(MockOwnerLoadState.Error("검수 조회 실패"), {}, { leaves++ })
+        } }
+        compose.runOnIdle { assertEquals(0, leaves) }
+        compose.onNodeWithText("검수 조회 실패").assertExists()
+        compose.onNodeWithTag("review-load-leave").performClick()
+        compose.runOnIdle { assertEquals(1, leaves) }
+    }
+}

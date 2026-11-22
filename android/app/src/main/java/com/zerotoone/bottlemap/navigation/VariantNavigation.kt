@@ -30,6 +30,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.zerotoone.bottlemap.data.owner.review.LivePhotoReviewRepository
+import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewLoadError
+import com.zerotoone.bottlemap.ui.common.ActionErrorNotices
 import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewScreen
 import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewViewModel
 import com.zerotoone.bottlemap.ui.owner.OwnerOnboardingScreen
@@ -292,11 +294,9 @@ internal fun NavGraphBuilder.registerVariantRoutes(
                                     onReauthenticate = onForceOwnerReauthentication,
                                 )
                             }
-                            mockState == MockOwnerLoadState.Loading -> {
-                                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                    CircularProgressIndicator()
-                                }
-                            }
+                            OwnerReviewEntryPending(mockState, data::retry) {
+                                navController.popBackStack()
+                            } -> Unit
                             else -> {
                                 // No pending import: there is nothing to retry.
                                 // Leave the dead-end instead of spinning forever.
@@ -392,4 +392,26 @@ private fun abortUnavailableOwnerEntry(
         if (started && viewModel.state.value == MockOwnerLoadState.NetworkUnavailable) onBack()
     }
     return !started || state == MockOwnerLoadState.NetworkUnavailable
+}
+
+/** Unknown read state is never evidence that the saved review/import is absent. */
+@Composable
+internal fun OwnerReviewEntryPending(
+    state: MockOwnerLoadState, onRetry: () -> Unit, onLeave: () -> Unit,
+): Boolean = when (state) {
+    MockOwnerLoadState.Loading -> {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+        true
+    }
+    MockOwnerLoadState.NetworkUnavailable -> {
+        PhotoReviewLoadError(ActionErrorNotices.NETWORK_MESSAGE, onRetry, onLeave)
+        true
+    }
+    is MockOwnerLoadState.Error -> {
+        PhotoReviewLoadError(state.message, onRetry, onLeave)
+        true
+    }
+    else -> false
 }

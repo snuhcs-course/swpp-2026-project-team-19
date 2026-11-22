@@ -28,6 +28,9 @@ fun Throwable.userMessage(fallback: String = "처리하지 못했어요. 잠시 
             code == "NETWORK_ERROR" -> ActionErrorNotices.NETWORK_MESSAGE
             code == "UNAUTHENTICATED" || httpStatus == 401 -> "로그인이 만료됐어요. 다시 로그인해 주세요."
             httpStatus == 403 -> "이 작업을 할 권한이 없어요. 계정과 매장 권한을 확인해 주세요."
+            code == "OWNER_APPLICATION_EXISTS" -> "이미 접수된 신청이 있어요. 신청 내역을 확인해 주세요."
+            code == "BAR_OWNER_EXISTS" -> "이미 사장님이 등록된 매장이에요. 다른 매장을 선택하거나 문의해 주세요."
+            code == "ACTIVE_IMPORT_EXISTS" -> "진행 중인 메뉴판 작업이 있어요. 기존 작업을 완료하거나 취소한 뒤 수정해 주세요."
             code == "REVIEW_OUTDATED" || code == "REVIEW_DRAFT_OUTDATED" || httpStatus == 409 ->
                 "정보가 변경됐어요. 최신 내용을 불러온 뒤 다시 시도해 주세요."
             code == "RATE_LIMITED" || httpStatus == 429 ->

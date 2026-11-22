@@ -32,6 +32,28 @@ class UserErrorMessageTest {
         assertEquals(expected, error.actionErrorMessage("저장에 실패했어요."))
         assertEquals(expected, com.zerotoone.bottlemap.network.menuWriteErrorText(error))
     }
+    @Test fun localAddressLocationFailurePreservesItsActionableInstruction() {
+        val old = com.zerotoone.bottlemap.data.owner.MockBar("bar", "매장", "이전 주소", latitude = 37.0, longitude = 127.0)
+        try {
+            com.zerotoone.bottlemap.data.owner.requireMovedBarCoordinates(old, old.copy(address = "새 주소"))
+            fail("Address edit without coordinates accepted")
+        } catch (error: IllegalArgumentException) {
+            assertEquals("주소 변경에는 새로운 지도 위치 확인이 필요해요. 현재 주소는 저장되지 않았어요.",
+                error.actionErrorMessage("일반 저장 실패"))
+        }
+    }
+    @Test fun nonReviewConflictsExplainSpecificRecoveryInsteadOfBlindRetry() {
+        val cases = mapOf(
+            "OWNER_APPLICATION_EXISTS" to "신청 내역",
+            "BAR_OWNER_EXISTS" to "다른 매장",
+            "ACTIVE_IMPORT_EXISTS" to "기존 작업",
+        )
+        for ((code, action) in cases) {
+            val message = BottleMapApiException(code = code, httpStatus = 409, message = "raw").userMessage()
+            assertTrue(message.contains(action))
+            assertFalse(message.contains("최신 내용을 불러온 뒤 다시 시도"))
+        }
+    }
     @Test fun unknownFailuresUseTaskSpecificCopy() {
         assertEquals("사진을 다시 선택해 주세요.", IllegalStateException("java.lang.Failure").userMessage("사진을 다시 선택해 주세요."))
         assertEquals("사진을 저장하지 못했어요.", IOException("ENOSPC /private/path").userMessage("사진을 저장하지 못했어요."))

@@ -537,6 +537,22 @@ fun OwnerOnboardingScreen(
                         } catch(e: Exception) {
                             val code=(e as? BottleMapApiException)?.code
                             when(code) {
+                                "OWNER_APPLICATION_EXISTS" -> {
+                                    val existingId = (e as? BottleMapApiException)?.details
+                                        ?.get("applicationId") as? String
+                                    if (existingId.isNullOrBlank()) {
+                                        error=e.actionErrorMessage()
+                                    } else try {
+                                        // Read only this account's applications before opening the server-provided ID.
+                                        viewModel.loadExistingOwnerApplicationLive(existingId)
+                                        activeApplicationId=existingId
+                                        go(RegPage.VIEW_APPLICATION)
+                                    } catch (cancelled: CancellationException) {
+                                        throw cancelled
+                                    } catch (loadError: Exception) {
+                                        error=loadError.actionErrorMessage("기존 신청을 불러오지 못했어요. 다시 확인해 주세요.")
+                                    }
+                                }
                                 "BUSINESS_VERIFICATION_FAILED" -> {
                                     // The server rejected exactly the three submitted
                                     // fields: show the pre-existing mismatch result
