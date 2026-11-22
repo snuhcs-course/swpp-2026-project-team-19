@@ -1,6 +1,8 @@
 package com.zerotoone.bottlemap.data.owner
 
 import com.zerotoone.bottlemap.ui.common.userMessage
+import com.zerotoone.bottlemap.ui.common.isNetworkFailure
+import com.zerotoone.bottlemap.ui.common.notifyNetworkError
 import android.content.Context
 import android.net.Uri
 import android.os.SystemClock
@@ -542,6 +544,9 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
 
     override fun retryLoad() {
         val cached = snapshot()
+        val cachedSubject = sessionSubject
+        val cachedWasLoaded = hasLoadedOwnerSnapshot
+        var verifiedSubject: String? = null
         lastReadySnapshot = cached
         val requested = generation.incrementAndGet()
         // Credentials can change while this singleton lives (including SDK 401
@@ -551,7 +556,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         local.serverLoading()
         scope.launch {
             try {
-                val verifiedSubject = AppAuth.gateway.currentAccessTokenOrNull()
+                verifiedSubject = AppAuth.gateway.currentAccessTokenOrNull()
                     ?.let(::sessionKey)
                 if (requested != generation.get()) return@launch
                 if (canRestoreVisibleOwnerCache(
@@ -562,24 +567,35 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (error: Exception) {
-                if(requested == generation.get())
-                    local.serverError(error.userMessage("매장 정보를 가져오지 못했어요."))
+                if(requested == generation.get()) {
+                    if (error.isNetworkFailure()) {
+                        when (val retained = ownerStateAfterNetworkLoadFailure(
+                            cached, cachedWasLoaded, cachedSubject, verifiedSubject)) {
+                            is MockOwnerLoadState.Ready -> publishSnapshot(retained.snapshot)
+                            is MockOwnerLoadState.Empty -> publishSnapshot(retained.snapshot)
+                            else -> local.serverNetworkUnavailable()
+                        }
+                        error.notifyNetworkError()
+                    } else local.serverError(error.userMessage("매장 정보를 가져오지 못했어요."))
+                }
             }
         }
     }
 
     /** A committed write is not a failed write just because the subsequent GET times out. */
-    private suspend fun refreshAfterWrite() {
-        try {
-            refresh()
-            lastRefreshWarning = null
-        } catch(cancelled: CancellationException) {
-            throw cancelled
-        } catch(error: Exception) {
-            lastRefreshWarning = "저장은 완료됐지만 목록을 새로고침하지 못했어요. 다시 불러와 주세요."
-            local.serverError(requireNotNull(lastRefreshWarning))
-        }
-    }
+    private suspend fun refreshAfterWrite(writeConfirmed: Boolean = true) = refreshOwnerAfterWrite(
+        writeConfirmed = writeConfirmed,
+        refresh = { refresh(); lastRefreshWarning = null },
+        onCommittedRefreshFailure = { error ->
+            if (error.notifyNetworkError()) {
+                // Keep the verified snapshot/editor. A failed GET must never replace it.
+                lastRefreshWarning = null
+            } else {
+                lastRefreshWarning = "저장은 완료됐지만 목록을 새로고침하지 못했어요. 다시 불러와 주세요."
+                local.serverError(requireNotNull(lastRefreshWarning))
+            }
+        },
+    )
 
     private fun write(op: suspend () -> Unit) {
         scope.launch {
@@ -592,7 +608,8 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                     throw cancelled
                 } catch (error: Exception) {
                     runCatching { refresh() }
-                    local.serverError(error.userMessage("저장하지 못했어요. 다시 시도해 주세요."))
+                    if (!error.notifyNetworkError())
+                        local.serverError(error.userMessage("저장하지 못했어요. 다시 시도해 주세요."))
                     return@withLock
                 }
                 refreshAfterWrite()
@@ -660,7 +677,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         )
     }
 
-    private suspend fun persistBar(old: MockBar, bar: MockBar) {
+    private suspend fun persistBar(old: MockBar, bar: MockBar): Boolean {
         val changes = mutableMapOf<String, Any?>()
         if(old.name != bar.name) changes["name"] = bar.name
         requireMovedBarCoordinates(old, bar)?.let { (latitude, longitude) ->
@@ -679,6 +696,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
             }
         if(changes.isNotEmpty()) remote.updateBar(bar.barId, changes)
         if(old.gallery != bar.gallery) syncGallery(bar.barId, old.gallery, bar.gallery)
+        return changes.isNotEmpty() || old.gallery != bar.gallery
     }
 
     override fun saveBar(bar: MockBar) {
@@ -689,7 +707,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
     }
 
     /** Used by save buttons: return only after the server commits and the UI refreshes. */
-    suspend fun saveBarLive(bar: MockBar) = confirmedWrite {
+    suspend fun saveBarLive(bar: MockBar) = confirmedWriteWithResult {
         val old = snapshot().bars.firstOrNull { it.barId == bar.barId }
             ?: error("매장 정보를 먼저 불러와 주세요.")
         persistBar(old,bar)
@@ -776,11 +794,14 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
 
     override fun saveMenuItem(item: MockBarMenuItem) = saveManualMenuItem(item, null, null)
 
-    private suspend fun confirmedWrite(operation: suspend () -> Unit) {
+    private suspend fun confirmedWrite(operation: suspend () -> Unit) =
+        confirmedWriteWithResult { operation(); true }
+
+    private suspend fun confirmedWriteWithResult(operation: suspend () -> Boolean) {
         writeMutex.withLock {
             // Every new mutation supersedes the detached GET after import cancellation.
             generation.incrementAndGet()
-            try {
+            val writeConfirmed = try {
                 operation()
             } catch(cancelled: CancellationException) {
                 throw cancelled
@@ -788,7 +809,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                 runCatching { refresh() }
                 throw error
             }
-            refreshAfterWrite()
+            refreshAfterWrite(writeConfirmed)
         }
     }
 

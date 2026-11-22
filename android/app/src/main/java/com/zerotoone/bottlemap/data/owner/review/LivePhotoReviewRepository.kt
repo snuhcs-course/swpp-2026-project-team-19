@@ -398,6 +398,8 @@ class LivePhotoReviewRepository(
             is MockOwnerLoadState.Ready -> current.snapshot
             is MockOwnerLoadState.Empty -> current.snapshot
             is MockOwnerLoadState.Error -> error(current.message)
+            MockOwnerLoadState.NetworkUnavailable -> throw com.zerotoone.bottlemap.network.BottleMapApiException(
+                code = "NETWORK_ERROR", message = "인터넷 연결을 확인하고 다시 시도해 주세요.")
             MockOwnerLoadState.Loading -> error("매장 정보를 불러오는 중이에요.")
         }
         val barId = snap.selectedBarId ?: snap.bars.firstOrNull()?.barId
@@ -1116,3 +1118,4 @@ class LivePhotoReviewRepository(
     private fun normalized(value: String): String =
         Normalizer.normalize(value.trim(), Normalizer.Form.NFKC).lowercase()
 }
+

@@ -671,6 +671,7 @@ fun OwnerOnboardingScreen(
                 TextButton(onClick=::showDashboard) { Text("내 매장 목록으로 돌아가기") }
             }
             when(val s=state){
+                MockOwnerLoadState.NetworkUnavailable -> Unit // Navigation aborts this failed entry.
                 MockOwnerLoadState.Loading -> OwnerLoading(
                     if(viewModel.usesProductionOwnerApi()) "매장 정보를 불러오는 중" else "Mock 저장소 불러오는 중")
                 is MockOwnerLoadState.Error -> {
@@ -1095,7 +1096,7 @@ fun OwnerOnboardingScreen(
                 error?.let{Text(it,color=MaterialTheme.colorScheme.error)}
             }
         }
-        if(cta!=null&&state !is MockOwnerLoadState.Error) {
+        if(cta!=null&&state !is MockOwnerLoadState.Error&&state!=MockOwnerLoadState.NetworkUnavailable) {
             Column(Modifier.fillMaxWidth()
                 .then(if(screen==RegPage.BN||screen==RegPage.DATE)Modifier
                     else Modifier.navigationBarsPadding())

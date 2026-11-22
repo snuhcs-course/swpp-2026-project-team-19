@@ -90,3 +90,28 @@ internal suspend fun <T> replaceOwnerGallerySafely(
     }
     reorder(now.map { mapped.getValue(it.photoId) })
 }
+
+
+/** Cache is visible only after the refresh verified the same authenticated account. */
+internal fun ownerStateAfterNetworkLoadFailure(
+    cached: MockOwnerSnapshot, hadLoadedSnapshot: Boolean,
+    cachedSubject: String?, verifiedSubject: String?,
+): MockOwnerLoadState = if (canRestoreVisibleOwnerCache(
+        hadLoadedSnapshot, cachedSubject, verifiedSubject)) cached.asLoadState()
+    else MockOwnerLoadState.NetworkUnavailable
+
+/** A no-op save has no acknowledged write: its failed read must reach the editor.
+ * A confirmed write remains committed when only the subsequent refresh fails.
+ */
+internal suspend fun refreshOwnerAfterWrite(
+    writeConfirmed: Boolean,
+    refresh: suspend () -> Unit,
+    onCommittedRefreshFailure: (Throwable) -> Unit,
+) {
+    try { refresh() }
+    catch (cancelled: kotlinx.coroutines.CancellationException) { throw cancelled }
+    catch (error: Exception) {
+        if (!writeConfirmed) throw error
+        onCommittedRefreshFailure(error)
+    }
+}

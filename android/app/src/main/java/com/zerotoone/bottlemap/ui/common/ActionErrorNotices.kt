@@ -9,7 +9,7 @@ import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 
-/** Action failures only: existing load/retry screens retain their own error handling. */
+/** Shared owner-network notice. Customer search and photo review retain their own handling. */
 object ActionErrorNotices {
     const val NETWORK_MESSAGE = "인터넷 연결을 확인하고 다시 시도해 주세요."
     private val _networkErrors = MutableSharedFlow<Unit>(
@@ -20,9 +20,16 @@ object ActionErrorNotices {
     internal fun reportNetworkError() { _networkErrors.tryEmit(Unit) }
 }
 
-private fun Throwable.isNetworkFailure(): Boolean =
+internal fun Throwable.isNetworkFailure(): Boolean =
     (this is BottleMapApiException && code == "NETWORK_ERROR") ||
         this is ConnectException || this is SocketTimeoutException || this is UnknownHostException
+
+/** Return true only when a network failure was consumed by the common toast. */
+internal fun Throwable.notifyNetworkError(): Boolean {
+    if (!isNetworkFailure()) return false
+    ActionErrorNotices.reportNetworkError()
+    return true
+}
 
 /** Null clears inline errors; the failed action's finally block releases its busy state.
  * No connectivity latch, automatic retry, navigation, or draft mutation is introduced.

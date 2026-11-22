@@ -132,6 +132,10 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
         current.value = MockOwnerLoadState.Loading
     }
 
+    internal fun serverNetworkUnavailable() = synchronized(lock) {
+        current.value = MockOwnerLoadState.NetworkUnavailable
+    }
+
     internal fun serverError(message: String) = synchronized(lock) {
         current.value = MockOwnerLoadState.Error(message)
     }
@@ -165,6 +169,7 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
         is MockOwnerLoadState.Ready -> value.snapshot
         is MockOwnerLoadState.Empty -> value.snapshot
         is MockOwnerLoadState.Error -> error("Mock 저장소 오류: ${value.message}. retryLoad 먼저 호출")
+        MockOwnerLoadState.NetworkUnavailable -> error("매장 정보를 먼저 불러와 주세요.")
         MockOwnerLoadState.Loading -> error("Mock 저장소 로딩 중")
     }
 
