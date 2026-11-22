@@ -22,6 +22,34 @@ val kakaoNativeAppKey = providers.gradleProperty("BOTTLEMAP_KAKAO_NATIVE_APP_KEY
     .orElse("")
     .get()
 
+/** Optional during configuration so debug builds and CI need no release secrets. */
+val releaseSigningValues = listOf(
+    "BOTTLEMAP_RELEASE_STORE_FILE",
+    "BOTTLEMAP_RELEASE_STORE_PASSWORD",
+    "BOTTLEMAP_RELEASE_KEY_ALIAS",
+    "BOTTLEMAP_RELEASE_KEY_PASSWORD",
+).associateWith { providers.gradleProperty(it).orNull }
+val releaseKeystoreFile = releaseSigningValues["BOTTLEMAP_RELEASE_STORE_FILE"]
+    ?.takeIf { it.isNotBlank() }?.let { file(it) }
+val validateReleaseSigning = tasks.register("validateReleaseSigning") {
+    group = "verification"
+    description = "Require local upload signing settings before a release build."
+    doLast {
+        val missing = releaseSigningValues.filterValues { it.isNullOrBlank() }.keys
+        check(missing.isEmpty()) {
+            "Missing release signing properties: " + missing.joinToString() +
+                ". Set them in your user Gradle properties."
+        }
+        check(releaseKeystoreFile?.isFile == true) {
+            "Release keystore file does not exist. Check BOTTLEMAP_RELEASE_STORE_FILE."
+        }
+    }
+}
+// Fail before a release artifact can silently be produced unsigned.
+tasks.matching { it.name == "preReleaseBuild" }.configureEach {
+    dependsOn(validateReleaseSigning)
+}
+
 android {
     namespace = "com.zerotoone.bottlemap"
     compileSdk = 37
@@ -42,6 +70,16 @@ android {
         buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", stringBuildConfigValue(googleWebClientId))
     }
 
+    // Values and the upload keystore stay outside Git.
+    signingConfigs {
+        create("release") {
+            storeFile = releaseKeystoreFile
+            storePassword = releaseSigningValues["BOTTLEMAP_RELEASE_STORE_PASSWORD"]
+            keyAlias = releaseSigningValues["BOTTLEMAP_RELEASE_KEY_ALIAS"]
+            keyPassword = releaseSigningValues["BOTTLEMAP_RELEASE_KEY_PASSWORD"]
+        }
+    }
+
     // One APK for customer and owner flows.
     buildTypes {
         debug {
@@ -55,6 +93,7 @@ android {
         }
         release {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("release")
             buildConfigField("String", "API_BASE_URL", "\"$releaseApiBaseUrl\"")
         }
     }
