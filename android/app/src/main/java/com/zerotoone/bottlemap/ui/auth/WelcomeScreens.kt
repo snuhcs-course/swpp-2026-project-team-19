@@ -51,8 +51,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.zerotoone.bottlemap.ui.common.BmLineIcon
-import com.zerotoone.bottlemap.ui.common.BmLineIconId
 import com.zerotoone.bottlemap.ui.common.UxColor
 import com.zerotoone.bottlemap.ui.common.UxMainButton
 import com.zerotoone.bottlemap.ui.common.UxSecondaryButton
