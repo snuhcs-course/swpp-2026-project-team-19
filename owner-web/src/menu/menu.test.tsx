@@ -851,3 +851,72 @@ describe("editing an item (spec 3.14.4, 3.14.5)", () => {
     expect(screen.getByRole("link", { name: "메뉴 목록으로" })).toBeInTheDocument();
   });
 });
+
+describe("owner-only access (spec 2.2)", () => {
+  const OTHER_BAR_ID = "33333333-3333-4333-8333-333333333333";
+
+  it.each([`/bars/${OTHER_BAR_ID}/menu`, `/bars/${OTHER_BAR_ID}/menu/new`, `/bars/${OTHER_BAR_ID}/menu/gf-item`])(
+    "blocks %s, a bar the user does not own, without asking for its menu",
+    async (path) => {
+      const api = menuServer([glenfiddich]);
+      const otherBar: string[] = [];
+      server.use(
+        http.all(`/api/bars/${OTHER_BAR_ID}/*`, ({ request }) => {
+          otherBar.push(`${request.method} ${new URL(request.url).pathname}`);
+          return HttpResponse.json(errorBody("FORBIDDEN"), { status: 403 });
+        }),
+      );
+      renderOwnerWeb(path);
+
+      expect(await screen.findByText("이 매장을 관리할 권한이 없어요.")).toBeInTheDocument();
+      expect(screen.getByRole("link", { name: "처음 화면으로" })).toBeInTheDocument();
+      expect(screen.queryByLabelText("메뉴 이름")).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "전체 메뉴 초기화" })).not.toBeInTheDocument();
+      expect(otherBar).toEqual([]);
+      expect(api.calls).toEqual([]);
+    },
+  );
+
+  it("closes the editor when the owner lost the bar while editing (403)", async () => {
+    let owned = true;
+    const api = menuServer([glenfiddich], {
+      answer: ({ method }) => {
+        if (method !== "PUT") return undefined;
+        owned = false;
+        return HttpResponse.json(errorBody("FORBIDDEN"), { status: 403 });
+      },
+    });
+    server.use(http.get("/api/me/bars", () => HttpResponse.json({ items: owned ? [bar(BAR_ID, "관악 위스키 바")] : [] })));
+    await openEdit("gf-item");
+
+    await user().type(screen.getByLabelText("메뉴 이름"), "!");
+    await save("저장하기");
+
+    // The bar list read again no longer has the bar, so the access check closes the editor.
+    expect(await screen.findByRole("link", { name: "처음 화면으로" })).toBeInTheDocument();
+    expect(screen.getByText("이 매장을 관리할 권한이 없어요.")).toBeInTheDocument();
+    expect(screen.queryByLabelText("메뉴 이름")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "다시 시도" })).not.toBeInTheDocument();
+    expect(api.writes()).toHaveLength(1);
+  });
+
+  it("closes the menu when the owner lost the bar before resetting it (403)", async () => {
+    let owned = true;
+    const api = menuServer([glenfiddich], {
+      answer: ({ method }) => {
+        if (method !== "POST reset") return undefined;
+        owned = false;
+        return HttpResponse.json(errorBody("FORBIDDEN"), { status: 403 });
+      },
+    });
+    server.use(http.get("/api/me/bars", () => HttpResponse.json({ items: owned ? [bar(BAR_ID, "관악 위스키 바")] : [] })));
+    await openMenu();
+
+    await user().click(screen.getByRole("button", { name: "전체 메뉴 초기화" }));
+    await user().click(within(screen.getByRole("dialog")).getByRole("button", { name: "초기화" }));
+
+    expect(await screen.findByRole("link", { name: "처음 화면으로" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "전체 메뉴 초기화" })).not.toBeInTheDocument();
+    expect(api.writes()).toHaveLength(1);
+  });
+});
