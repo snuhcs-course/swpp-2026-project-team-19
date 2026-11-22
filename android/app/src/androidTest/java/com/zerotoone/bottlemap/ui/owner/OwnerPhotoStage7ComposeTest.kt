@@ -12,6 +12,8 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.longClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.zerotoone.bottlemap.data.owner.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import com.zerotoone.bottlemap.ui.common.ActionErrorNotices
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -89,6 +91,57 @@ class OwnerPhotoStage7ComposeTest {
         compose.onNodeWithTag("stage7-failed-retry").assertDoesNotExist()
         compose.onNodeWithText("메뉴판을 읽지 못했어요").assertDoesNotExist()
         compose.onNodeWithTag("stage7-job-repository-retry").performClick()
+    }
+
+    @Test fun restoredJobWithUnavailableOwnerRequiresReloadBeforeOfferingNewUpload() {
+        val base = LocalOwnerMockRepository(InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
+        val loadState = MutableStateFlow<MockOwnerLoadState>(MockOwnerLoadState.NetworkUnavailable)
+        var retries = 0
+        val repository = object : OwnerMockRepository by base {
+            override val state = loadState
+            override fun retryLoad() {
+                retries++
+                state.value = base.state.value
+            }
+        }
+        val vm = OwnerMockViewModel(repository)
+        compose.setContent { MaterialTheme {
+            OwnerMenuPhotoJobScreen(vm.state.collectAsState().value, vm, {}, {})
+        } }
+        compose.onNodeWithText(ActionErrorNotices.NETWORK_MESSAGE).assertExists()
+        compose.onNodeWithText("메뉴판 작업을 불러오지 못했어요").assertExists()
+        compose.onNodeWithText("진행 중인 메뉴판 작업이 없어요").assertDoesNotExist()
+        compose.onNodeWithTag("stage7-job-new-photos").assertDoesNotExist()
+        compose.onNodeWithTag("stage7-job-repository-retry").performClick()
+        compose.runOnIdle { assertEquals(1, retries) }
+        // Only a successful reload may establish that no job exists.
+        compose.onNodeWithText("진행 중인 메뉴판 작업이 없어요").assertExists()
+        compose.onNodeWithTag("stage7-job-new-photos").assertExists()
+    }
+
+    @Test fun restoredPhotoPickerWithUnavailableOwnerCanReloadSelectedBar() {
+        val base = LocalOwnerMockRepository(InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
+        val loadState = MutableStateFlow<MockOwnerLoadState>(MockOwnerLoadState.NetworkUnavailable)
+        var retries = 0
+        val repository = object : OwnerMockRepository by base {
+            override val state = loadState
+            override fun retryLoad() {
+                retries++
+                state.value = base.state.value
+            }
+        }
+        val vm = OwnerMockViewModel(repository)
+        compose.setContent { MaterialTheme {
+            OwnerMenuPhotoSelectionScreen(vm.state.collectAsState().value, vm, {}, {})
+        } }
+        compose.onNodeWithText(ActionErrorNotices.NETWORK_MESSAGE).assertExists()
+        compose.onNodeWithText("사진을 추가할 매장을 선택해 주세요.").assertDoesNotExist()
+        compose.onNodeWithTag("stage7-photo-submit").assertIsNotEnabled()
+        compose.onNodeWithText("다시 시도").performClick()
+        compose.runOnIdle { assertEquals(1, retries) }
+        compose.onNodeWithText(ActionErrorNotices.NETWORK_MESSAGE).assertDoesNotExist()
+        compose.onNodeWithText("다시 시도").assertDoesNotExist()
+        compose.onNodeWithText("메뉴판 사진 선택").assertExists()
     }
 
     @Test fun readyStateWithoutAnyImportOffersFreshPhotoSelection() {
@@ -201,3 +254,4 @@ class OwnerPhotoStage7ComposeTest {
     }
 
 }
+

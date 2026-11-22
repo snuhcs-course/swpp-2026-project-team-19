@@ -24,6 +24,14 @@ class UserErrorMessageTest {
         assertTrue(conflict.userMessage().contains("최신"))
         assertEquals(409, conflict.httpStatus) // mapping must not mutate retry/classification data
     }
+    @Test fun missingOwnerTokenWithoutHttpResponseRequiresSignInAgain() {
+        val error = BottleMapApiException(code = "UNAUTHENTICATED", message = "raw token details")
+        assertNull(error.httpStatus)
+        val expected = "로그인이 만료됐어요. 다시 로그인해 주세요."
+        assertEquals(expected, error.userMessage("저장에 실패했어요."))
+        assertEquals(expected, error.actionErrorMessage("저장에 실패했어요."))
+        assertEquals(expected, com.zerotoone.bottlemap.network.menuWriteErrorText(error))
+    }
     @Test fun unknownFailuresUseTaskSpecificCopy() {
         assertEquals("사진을 다시 선택해 주세요.", IllegalStateException("java.lang.Failure").userMessage("사진을 다시 선택해 주세요."))
         assertEquals("사진을 저장하지 못했어요.", IOException("ENOSPC /private/path").userMessage("사진을 저장하지 못했어요."))

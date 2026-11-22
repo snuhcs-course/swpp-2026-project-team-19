@@ -26,7 +26,7 @@ fun Throwable.userMessage(fallback: String = "처리하지 못했어요. 잠시 
         is ReviewDraftLocalEditingException -> "수정 내용을 기기에 보관했어요. 연결을 확인한 뒤 다시 시도해 주세요."
         is BottleMapApiException -> when {
             code == "NETWORK_ERROR" -> ActionErrorNotices.NETWORK_MESSAGE
-            httpStatus == 401 -> "로그인이 만료됐어요. 다시 로그인해 주세요."
+            code == "UNAUTHENTICATED" || httpStatus == 401 -> "로그인이 만료됐어요. 다시 로그인해 주세요."
             httpStatus == 403 -> "이 작업을 할 권한이 없어요. 계정과 매장 권한을 확인해 주세요."
             code == "REVIEW_OUTDATED" || code == "REVIEW_DRAFT_OUTDATED" || httpStatus == 409 ->
                 "정보가 변경됐어요. 최신 내용을 불러온 뒤 다시 시도해 주세요."

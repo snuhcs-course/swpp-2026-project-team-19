@@ -1,6 +1,7 @@
 package com.zerotoone.bottlemap.ui.owner
 
 import com.zerotoone.bottlemap.ui.common.userMessage
+import com.zerotoone.bottlemap.ui.common.ActionErrorNotices
 import android.net.Uri
 import androidx.core.content.FileProvider
 import java.io.File
@@ -551,11 +552,12 @@ internal fun OwnerMenuPhotoSelectionScreen(
             if (bar == null) {
                 val loadingMessage = when (state) {
                     MockOwnerLoadState.Loading -> "매장 정보를 불러오고 있어요."
+                    MockOwnerLoadState.NetworkUnavailable -> ActionErrorNotices.NETWORK_MESSAGE
                     is MockOwnerLoadState.Error -> state.message
                     else -> "사진을 추가할 매장을 선택해 주세요."
                 }
                 Text(loadingMessage, color = V4Color.sub, fontSize = 12.sp)
-                if (state is MockOwnerLoadState.Error)
+                if (state is MockOwnerLoadState.Error || state == MockOwnerLoadState.NetworkUnavailable)
                     MenuPhotoSecondary("다시 시도", viewModel::retry)
             }
             Text("메뉴판 사진 선택",
@@ -705,9 +707,9 @@ internal fun OwnerMenuPhotoJobScreen(
     // A failed repository read is not an OCR extraction failure. Keep Stage 7's
     // existing layout, but do not manufacture a processing job while data loads.
     if(state is MockOwnerLoadState.Loading ||
-        state is MockOwnerLoadState.Error || job == null) {
+        state is MockOwnerLoadState.Error || state == MockOwnerLoadState.NetworkUnavailable || job == null) {
         val loading = state is MockOwnerLoadState.Loading
-        val failedToRead = state is MockOwnerLoadState.Error
+        val failedToRead = state is MockOwnerLoadState.Error || state == MockOwnerLoadState.NetworkUnavailable
         Column(Modifier.fillMaxSize().background(V4Color.background)
             .testTag("stage7-job-state")) {
             V4Toolbar(null, onHome)
@@ -723,6 +725,7 @@ internal fun OwnerMenuPhotoJobScreen(
                 Text(when(state) {
                     is MockOwnerLoadState.Error -> state.message
                     MockOwnerLoadState.Loading -> "저장된 메뉴판 작업을 확인하고 있어요."
+                    MockOwnerLoadState.NetworkUnavailable -> ActionErrorNotices.NETWORK_MESSAGE
                     else -> "새 메뉴판 사진을 선택하거나 매장 관리로 돌아가 주세요."
                 }, color = V4Color.sub, fontSize = 14.sp)
             }
