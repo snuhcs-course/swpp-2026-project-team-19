@@ -1,11 +1,12 @@
 package com.zerotoone.bottlemap.data.owner
 
 import com.zerotoone.bottlemap.network.OwnerApplicationDto
+import com.zerotoone.bottlemap.ui.common.requireUserInput
 
 /** Pure rules for the live Owner adapter; no network or Android framework dependency. */
 internal fun requireMovedBarCoordinates(old: MockBar, changed: MockBar): Pair<Double, Double>? {
     if (old.address == changed.address) return null
-    require(changed.latitude != null && changed.longitude != null &&
+    requireUserInput(changed.latitude != null && changed.longitude != null &&
         (changed.latitude != old.latitude || changed.longitude != old.longitude)) {
         "주소 변경에는 새로운 지도 위치 확인이 필요해요. 현재 주소는 저장되지 않았어요."
     }
@@ -89,4 +90,29 @@ internal suspend fun <T> replaceOwnerGallerySafely(
         if (now.none { it.photoId == photo.photoId }) delete(photo.photoId)
     }
     reorder(now.map { mapped.getValue(it.photoId) })
+}
+
+
+/** Cache is visible only after the refresh verified the same authenticated account. */
+internal fun ownerStateAfterNetworkLoadFailure(
+    cached: MockOwnerSnapshot, hadLoadedSnapshot: Boolean,
+    cachedSubject: String?, verifiedSubject: String?,
+): MockOwnerLoadState = if (canRestoreVisibleOwnerCache(
+        hadLoadedSnapshot, cachedSubject, verifiedSubject)) cached.asLoadState()
+    else MockOwnerLoadState.NetworkUnavailable
+
+/** A no-op save has no acknowledged write: its failed read must reach the editor.
+ * A confirmed write remains committed when only the subsequent refresh fails.
+ */
+internal suspend fun refreshOwnerAfterWrite(
+    writeConfirmed: Boolean,
+    refresh: suspend () -> Unit,
+    onCommittedRefreshFailure: (Throwable) -> Unit,
+) {
+    try { refresh() }
+    catch (cancelled: kotlinx.coroutines.CancellationException) { throw cancelled }
+    catch (error: Exception) {
+        if (!writeConfirmed) throw error
+        onCommittedRefreshFailure(error)
+    }
 }

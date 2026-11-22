@@ -201,36 +201,7 @@ fun PhotoReviewScreen(
                     CircularProgressIndicator(color = UxColor.gold)
                 }
             }
-            is PhotoReviewLoad.Error -> Column(Modifier.fillMaxSize()
-                .testTag("review-load-error-screen")) {
-                ReviewAppBar(vm::leave)
-                Box(Modifier.weight(1f).fillMaxWidth().padding(horizontal = 24.dp),
-                    contentAlignment = Alignment.Center) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        Box(Modifier.size(84.dp)
-                            .background(UxColor.elevated, RoundedCornerShape(50)),
-                            contentAlignment = Alignment.Center) {
-                            Text("!", style = uxText(44f, 700, UxColor.error),
-                                modifier = Modifier.testTag("review-load-error-symbol"))
-                        }
-                        Text("검수 정보를\n불러오지 못했어요",
-                            style = uxText(25f, 700, UxColor.text, serif = true),
-                            textAlign = TextAlign.Center)
-                        Text(current.message, style = uxText(13f, 450, UxColor.sub),
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.testTag("review-load-error-message"))
-                    }
-                }
-                Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp)
-                    .padding(bottom = 24.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    UxMainButton("다시 시도", vm::reload,
-                        Modifier.fillMaxWidth().testTag("review-load-retry"))
-                    UxSecondaryButton("메뉴 관리로 돌아가기", vm::leave,
-                        Modifier.fillMaxWidth().testTag("review-load-leave"))
-                }
-            }
+            is PhotoReviewLoad.Error -> PhotoReviewLoadError(current.message, vm::reload, vm::leave)
             is PhotoReviewLoad.Ready -> {
                 val s = current.review
                 val stats = PhotoReviewRules.stats(s)
@@ -759,6 +730,42 @@ private fun PublicationNote(title: String?, content: String, critical: Boolean) 
             Text(content, style = uxText(12f, 400,
                 if (critical) androidx.compose.ui.graphics.Color(0xFFFFD7D1)
                 else androidx.compose.ui.graphics.Color(0xFFF1D5B3), lineHeight = 1.7f))
+        }
+    }
+}
+
+
+/** The same retry UI is used while restoring the Owner/import identity after process death. */
+@Composable
+internal fun PhotoReviewLoadError(message: String, onRetry: () -> Unit, onLeave: () -> Unit) {
+    Column(Modifier.fillMaxSize().background(UxColor.bg)
+        .testTag("review-load-error-screen")) {
+        ReviewAppBar(onLeave)
+        Box(Modifier.weight(1f).fillMaxWidth().padding(horizontal = 24.dp),
+            contentAlignment = Alignment.Center) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                Box(Modifier.size(84.dp)
+                    .background(UxColor.elevated, RoundedCornerShape(50)),
+                    contentAlignment = Alignment.Center) {
+                    Text("!", style = uxText(44f, 700, UxColor.error),
+                        modifier = Modifier.testTag("review-load-error-symbol"))
+                }
+                Text("검수 정보를\n불러오지 못했어요",
+                    style = uxText(25f, 700, UxColor.text, serif = true),
+                    textAlign = TextAlign.Center)
+                Text(message, style = uxText(13f, 450, UxColor.sub),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.testTag("review-load-error-message"))
+            }
+        }
+        Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp)
+            .padding(bottom = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            UxMainButton("다시 시도", onRetry,
+                Modifier.fillMaxWidth().testTag("review-load-retry"))
+            UxSecondaryButton("메뉴 관리로 돌아가기", onLeave,
+                Modifier.fillMaxWidth().testTag("review-load-leave"))
         }
     }
 }

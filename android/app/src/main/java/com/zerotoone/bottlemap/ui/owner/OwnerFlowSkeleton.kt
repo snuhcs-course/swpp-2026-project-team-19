@@ -281,6 +281,7 @@ fun OwnerComponentGallery(onBack: () -> Unit) {
 @Composable
 private fun OwnerMockStateLine(state: MockOwnerLoadState, onRetry: (() -> Unit)? = null) {
     when (state) {
+        MockOwnerLoadState.NetworkUnavailable -> Unit
         MockOwnerLoadState.Loading -> OwnerLoading("로컬 Mock 상태 불러오는 중")
         is MockOwnerLoadState.Empty -> Text(
             "Mock 데이터: 매장 0개 · 메뉴 0개 (초기 상태)",
@@ -298,3 +299,4 @@ private fun OwnerMockStateLine(state: MockOwnerLoadState, onRetry: (() -> Unit)?
         }
     }
 }
+

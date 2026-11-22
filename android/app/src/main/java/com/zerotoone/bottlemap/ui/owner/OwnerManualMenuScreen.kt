@@ -1,5 +1,6 @@
 package com.zerotoone.bottlemap.ui.owner
 
+import com.zerotoone.bottlemap.ui.common.actionErrorMessage
 import com.zerotoone.bottlemap.data.owner.isBottleServingLabel
 
 import androidx.activity.compose.BackHandler
@@ -51,7 +52,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.zerotoone.bottlemap.network.menuWriteErrorText
+import com.zerotoone.bottlemap.ui.common.menuWriteActionErrorText
+import com.zerotoone.bottlemap.ui.common.requireUserInput
+import com.zerotoone.bottlemap.ui.common.UserInputException
 import com.zerotoone.bottlemap.data.owner.*
 import com.zerotoone.bottlemap.ui.common.BmIcon
 import com.zerotoone.bottlemap.ui.common.BmIconId
@@ -114,8 +117,8 @@ private fun fromSaved(o: MockMenuOption) = DraftOption(
 )
 private fun toOption(d: DraftOption, whisky: Boolean,
     original: MockMenuOption? = null, preserveOriginalServing: Boolean = true): MockMenuOption {
-    val price = d.price.toIntOrNull() ?: throw IllegalArgumentException("가격을 숫자로 입력해 주세요.")
-    require(price in 1..MAX_OWNER_MENU_PRICE_KRW || original?.priceKrw == price) {
+    val price = d.price.toIntOrNull() ?: throw UserInputException("가격을 숫자로 입력해 주세요.")
+    requireUserInput(price in 1..MAX_OWNER_MENU_PRICE_KRW || original?.priceKrw == price) {
         "가격은 1원 이상, 1억 원 미만이어야 해요."
     }
     val ml = if (whisky && !d.bottle) d.ml.toIntOrNull() else null
@@ -123,20 +126,20 @@ private fun toOption(d: DraftOption, whisky: Boolean,
         original.pourMl == null && d.ml.isBlank() &&
         original.label?.trim()?.lowercase() !in listOf("bottle", "병")
     if (whisky && !d.bottle && !unchangedLegacyNullPour)
-        require(ml != null && ml in 1..32767) {
+        requireUserInput(ml != null && ml in 1..32767) {
         "용량을 입력하거나 Bottle 판매를 선택해 주세요."
     }
     val discount = if (d.sale.isEmpty()) null else {
-        val salePrice = d.sale.toIntOrNull() ?: throw IllegalArgumentException("할인 가격 오류")
-        require(salePrice in 1..price &&
+        val salePrice = d.sale.toIntOrNull() ?: throw UserInputException("할인 가격을 숫자로 입력해 주세요.")
+        requireUserInput(salePrice in 1..price &&
             (salePrice <= MAX_OWNER_MENU_PRICE_KRW || original?.discount?.discountedPriceKrw == salePrice)) {
             "할인 가격은 1원 이상, 원래 가격 이하여야 해요."
         }
         val start = runCatching { LocalDate.parse(d.start) }.getOrNull()
-            ?: throw IllegalArgumentException("시작일은 YYYY-MM-DD 형식이에요.")
+            ?: throw UserInputException("시작일은 YYYY-MM-DD 형식이에요.")
         val end = runCatching { LocalDate.parse(d.end) }.getOrNull()
-            ?: throw IllegalArgumentException("종료일은 YYYY-MM-DD 형식이에요.")
-        require(!end.isBefore(start)) { "할인 종료일을 확인해 주세요." }
+            ?: throw UserInputException("종료일은 YYYY-MM-DD 형식이에요.")
+        requireUserInput(!end.isBefore(start)) { "할인 종료일을 확인해 주세요." }
         // Existing imported discounts may start/end mid-day. Preserve their exact
         // instants when only the menu name or price was edited.
         val originalStart = d.originalStartMs.toLongOrNull()
@@ -245,6 +248,7 @@ internal fun OwnerManualMenuScreen(
             viewModel.usesProductionOwnerApi()) {
             kotlinx.coroutines.delay(300)
             runCatching { viewModel.searchCatalogLive(itemName) }
+                .onFailure { it.actionErrorMessage() }
         }
     }
     var brandName by rememberSaveable(bar?.barId) { mutableStateOf("") }
@@ -259,6 +263,7 @@ internal fun OwnerManualMenuScreen(
             if(lookup.length>=2) {
                 kotlinx.coroutines.delay(300)
                 runCatching { viewModel.searchCatalogBrandsLive(lookup) }
+                    .onFailure { it.actionErrorMessage() }
             }
         }
     }
@@ -323,11 +328,11 @@ internal fun OwnerManualMenuScreen(
         if (bar == null || saving) return
         try {
             if(editId == null && category == "위스키") {
-                require(inactiveOwnerCatalogMatch(candidates, itemName) == null) {
+                requireUserInput(inactiveOwnerCatalogMatch(candidates, itemName) == null) {
                     "운영이 중지된 카탈로그 상품이에요. 운영자에게 문의해 주세요."
                 }
             }
-            require(!activePhotoImport) { "ACTIVE_IMPORT_EXISTS" }
+            requireUserInput(!activePhotoImport) { "사진으로 메뉴 등록 작업 중에는 메뉴를 수정할 수 없어요." }
             val name = itemName.trim()
             val old = items.firstOrNull { it.barMenuItemId == editId }
             val persisted = products.firstOrNull { it.productId == old?.productId }
@@ -340,14 +345,14 @@ internal fun OwnerManualMenuScreen(
                 it.productId == linkedId && it.displayName == name &&
                     manualEditorCategory(it) == category
             }
-            require(name.isNotEmpty() && (name.length <= 80 ||
+            requireUserInput(name.isNotEmpty() && (name.length <= 80 ||
                 (name.length <= 200 && (name == savedName || confirmedExistingName)))) {
                 "메뉴 이름을 확인해 주세요."
             }
             val sameCategory = linked?.let { manualEditorCategory(it) } == category
             // §3.14.4 has no kind/category field; silently allowing a category
             // change would leave the server item unchanged while the UI claims success.
-            require(old == null || sameCategory) {
+            requireUserInput(old == null || sameCategory) {
                 "종류를 바꾸려면 기존 메뉴를 삭제한 뒤 새 종류로 추가해 주세요."
             }
             val sharedLocal = linked?.takeIf { !it.catalogMatched }?.let { product ->
@@ -355,7 +360,7 @@ internal fun OwnerManualMenuScreen(
                     it.barId != bar.barId && it.productId == product.productId
                 }
             } == true
-            require(!sharedLocal || (sameCategory &&
+            requireUserInput(!sharedLocal || (sameCategory &&
                 alcoholKind.trim().takeIf { category == "기타 주류" && it.isNotEmpty() } ==
                     linked?.let(::manualEditorAlcoholKind)?.takeIf { it.isNotBlank() })) {
                 "다른 매장에서도 사용하는 상품의 종류는 변경할 수 없어요."
@@ -364,7 +369,7 @@ internal fun OwnerManualMenuScreen(
             val linkedCatalog = linked?.takeIf { it.catalogMatched }
             if (linkedCatalog != null && category == "기타 주류" &&
                 !viewModel.usesProductionOwnerApi()) {
-                require(alcoholKind.trim().takeIf { it.isNotBlank() } ==
+                requireUserInput(alcoholKind.trim().takeIf { it.isNotBlank() } ==
                     manualEditorAlcoholKind(linkedCatalog).trim().takeIf { it.isNotBlank() }) {
                     "카탈로그 상품의 주류 종류는 변경할 수 없어요."
                 }
@@ -373,7 +378,7 @@ internal fun OwnerManualMenuScreen(
                 !viewModel.usesProductionOwnerApi()) {
                 // Existing catalog/photo entries may have no Mock-only subtype.
                 // Do not require one unless the owner is adding or changing the type.
-                require((linked != null && sameCategory && linked.otherAlcoholKind.isNullOrBlank()) ||
+                requireUserInput((linked != null && sameCategory && linked.otherAlcoholKind.isNullOrBlank()) ||
                     (linkedCatalog != null && linkedCatalog.otherAlcoholKind.isNullOrBlank())) {
                     "주류 종류를 입력해 주세요."
                 }
@@ -393,11 +398,11 @@ internal fun OwnerManualMenuScreen(
                     alcoholKind.trim().ifEmpty { "otherAlcohol" }
                 category in MANUAL_MENU_CATEGORIES -> manualMenuCategoryCode(category)
                 else -> {
-                    require(sameCategory && persisted != null) { "지원하지 않는 종류로 변경할 수 없어요." }
+                    requireUserInput(sameCategory && persisted != null) { "지원하지 않는 종류로 변경할 수 없어요." }
                     persisted.category
                 }
             }
-            require(old == null || sameCategory || old.options.size <= 1) {
+            requireUserInput(old == null || sameCategory || old.options.size <= 1) {
                 "기존 용량 옵션을 삭제하지 않고 종류를 바꿀 수 없어요."
             }
             val editedOptions = (if (whisky) draftOptions else draftOptions.take(1))
@@ -414,18 +419,18 @@ internal fun OwnerManualMenuScreen(
                     } else parsed
                 }
             manualMenuOptionError(editedOptions, effectiveCategoryCode, old?.options.orEmpty())?.let {
-                throw IllegalArgumentException(it)
+                throw UserInputException(it)
             }
             val editableLimit = if (whisky) MANUAL_MENU_MAX_OPTIONS else 1
             val legacyTail = if (old != null && old.options.size > editableLimit) {
-                require(persisted?.let(::manualEditorCategory) == category) {
+                requireUserInput(persisted?.let(::manualEditorCategory) == category) {
                     "기존 추가 옵션을 보존하려면 원래 종류로 수정해 주세요."
                 }
                 old.options.drop(editableLimit)
             } else emptyList()
             val options = editedOptions + legacyTail
             if (old != null && persisted?.catalogMatched == true) {
-                require(manualEditorCategory(persisted) == category) {
+                requireUserInput(manualEditorCategory(persisted) == category) {
                     "제품 종류를 변경하려면 새 메뉴를 추가해 주세요."
                 }
             }
@@ -442,7 +447,7 @@ internal fun OwnerManualMenuScreen(
                             }
                         } == true
                 }
-                require(existingLocal == null) {
+                requireUserInput(existingLocal == null) {
                     "이미 등록한 상품이에요. 기존 메뉴에서 용량·가격을 수정해 주세요."
                 }
             }
@@ -471,7 +476,7 @@ internal fun OwnerManualMenuScreen(
                 }
             }
             val duplicate = existingBarProductMenu(items, bar.barId, p.productId)
-            require(duplicate == null || duplicate.barMenuItemId == editId) {
+            requireUserInput(duplicate == null || duplicate.barMenuItemId == editId) {
                 "이미 등록한 상품이에요. 기존 메뉴에서 용량·가격을 수정해 주세요."
             }
             val brand = brands.firstOrNull { it.brandId == p.brandId }
@@ -514,14 +519,14 @@ internal fun OwnerManualMenuScreen(
                     } catch(cancelled: CancellationException) {
                         throw cancelled
                     } catch(e: Exception) {
-                        error = menuWriteErrorText(e)
+                        error = menuWriteActionErrorText(e)
                     } finally { saving = false }
                 }
             } else {
                 viewModel.saveManualMenuItem(stagedItem, stagedProduct, brand)
                 screen = "list"; selectedId = null; editId = null; error = null
             }
-        } catch (e: Exception) { error = e.message ?: "저장하지 못했어요." }
+        } catch (e: Exception) { error = e.actionErrorMessage("저장하지 못했어요.") }
     }
 
     if(cancelPhotoConfirm && activeJob!=null) {
@@ -614,7 +619,7 @@ internal fun OwnerManualMenuScreen(
                         } catch (cancelled: CancellationException) {
                             throw cancelled
                         } catch (e: Exception) {
-                            error = e.message ?: "서버 변경에 실패했어요."
+                            error = e.actionErrorMessage("서버 변경에 실패했어요.")
                         } finally { saving = false }
                     }
                 }
@@ -1096,14 +1101,14 @@ internal fun OwnerManualMenuScreen(
                         ManualButton("할인 적용", {
                             try {
                                 val latest = decodedOptions(optionText)[saleOption]
-                                require(latest.sale.isNotBlank()) { "할인 가격을 입력해 주세요." }
+                                requireUserInput(latest.sale.isNotBlank()) { "할인 가격을 입력해 주세요." }
                                 toOption(latest, category == "위스키",
                                     items.firstOrNull { it.barMenuItemId == editId }?.options
                                         ?.firstOrNull { it.optionId == latest.id })
                                 beforePromoOptions = null
                                 calendarTarget = null
                                 screen = "item"; error = null
-                            } catch (e: Exception) { error = e.message }
+                            } catch (e: Exception) { error = e.actionErrorMessage() }
                         }, modifier = Modifier.testTag("manual-menu-promo-apply"))
                         if (d.sale.isNotEmpty()) ManualButton("할인 제거", {
                             changeOption(saleOption) {
@@ -1208,3 +1213,4 @@ private fun OwnerManualMenuRow(
         selected = selected, onSelect = onSelect, onEdit = onEdit, onStock = onStock
     )
 }
+

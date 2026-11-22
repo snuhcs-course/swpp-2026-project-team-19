@@ -2,6 +2,7 @@ package com.zerotoone.bottlemap.ui.owner
 
 import androidx.activity.ComponentActivity
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.ui.test.assertTextEquals
@@ -22,6 +23,8 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.click
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.zerotoone.bottlemap.data.owner.*
+import com.zerotoone.bottlemap.network.BottleMapApiException
+import com.zerotoone.bottlemap.ui.common.ActionErrorNotices
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -865,6 +868,50 @@ class OwnerManualMenuComposeTest {
         }
     }
 
+    @Test fun networkFailureStopsOnlyTheRequestAndAllowsImmediateRetry() {
+        val store = object : MockOwnerStateStore {
+            var saved = OwnerMockFixtures.registeredBar()
+            var offline = false
+            override fun read(): MockOwnerSnapshot? = saved
+            override fun write(snapshot: MockOwnerSnapshot) {
+                if (offline) throw BottleMapApiException(code = "NETWORK_ERROR", message = "raw socket trace")
+                saved = snapshot
+            }
+        }
+        val repo = LocalOwnerMockRepository(store)
+        repo.saveBrand(MockBrand("retry-brand", "재시도 브랜드"))
+        repo.saveCatalogProduct(MockCatalogProduct("retry-product", "retry-brand", "재시도 위스키"))
+        repo.saveMenuItem(MockBarMenuItem("retry-row", "fixture-bar", "retry-product",
+            listOf(MockMenuOption("retry-option", pourMl = 30, priceKrw = 14000))))
+        val vm = OwnerMockViewModel(repo)
+        var notices = 0
+        compose.setContent { MaterialTheme {
+            LaunchedEffect(Unit) { ActionErrorNotices.networkErrors.collect { notices++ } }
+            OwnerManualMenuScreen(vm.state.collectAsState().value, vm, {}, {}, {})
+        } }
+        compose.runOnIdle { store.offline = true }
+        compose.onNodeWithTag("manual-menu-row-retry-row").performClick()
+        compose.onNodeWithTag("manual-menu-row-stock").performClick()
+        compose.onNodeWithText("상태 변경").performClick()
+        compose.runOnIdle {
+            assertEquals(1, notices)
+            assertEquals(false, store.saved.menuItems.single().soldOut)
+        }
+        compose.onNodeWithText("raw socket trace").assertDoesNotExist()
+        compose.onNodeWithText(ActionErrorNotices.NETWORK_MESSAGE).assertDoesNotExist() // toast host owns copy
+        // Retry the same confirmation immediately, including while still offline.
+        compose.onNodeWithText("상태 변경").performClick()
+        compose.runOnIdle {
+            assertEquals(2, notices)
+            store.offline = false
+        }
+        compose.onNodeWithText("상태 변경").performClick()
+        compose.runOnIdle {
+            assertEquals(true, store.saved.menuItems.single().soldOut)
+            assertEquals(true, (vm.state.value as MockOwnerLoadState.Ready).snapshot.menuItems.single().soldOut)
+        }
+    }
+
     @Test fun failedStockAndResetWritesShowListErrorAndKeepPublishedMenu() {
         val store = object : MockOwnerStateStore {
             var saved = OwnerMockFixtures.registeredBar()
@@ -889,7 +936,8 @@ class OwnerManualMenuComposeTest {
         compose.onNodeWithTag("manual-menu-row-failure-row").performClick()
         compose.onNodeWithTag("manual-menu-row-stock").performClick()
         compose.onNodeWithText("상태 변경").performClick()
-        compose.onAllNodesWithText("테스트 저장 오류").onFirst().assertExists()
+        compose.onAllNodesWithText("서버 변경에 실패했어요.").onFirst().assertExists()
+        compose.onNodeWithText("테스트 저장 오류").assertDoesNotExist()
         compose.runOnIdle {
             assertEquals(false, store.saved.menuItems.single().soldOut)
             assertEquals(false, (vm.state.value as MockOwnerLoadState.Ready)
@@ -898,11 +946,12 @@ class OwnerManualMenuComposeTest {
         compose.onNodeWithText("취소").performClick()
         compose.onNodeWithTag("manual-menu-reset").performScrollTo().performClick()
         compose.onNodeWithText("초기화", substring = false).performClick()
-        compose.onAllNodesWithText("테스트 저장 오류").onFirst().assertExists()
+        compose.onAllNodesWithText("서버 변경에 실패했어요.").onFirst().assertExists()
+        compose.onNodeWithText("테스트 저장 오류").assertDoesNotExist()
         compose.runOnIdle { assertEquals(1, store.saved.menuItems.size) }
         compose.runOnIdle { store.rejectWrites = false }
         compose.onNodeWithText("초기화", substring = false).performClick()
-        compose.onNodeWithText("테스트 저장 오류").assertDoesNotExist()
+        compose.onNodeWithText("서버 변경에 실패했어요.").assertDoesNotExist()
         compose.runOnIdle { assertEquals(0, store.saved.menuItems.size) }
     }
 
@@ -1035,3 +1084,4 @@ class OwnerManualMenuComposeTest {
 
 
 }
+

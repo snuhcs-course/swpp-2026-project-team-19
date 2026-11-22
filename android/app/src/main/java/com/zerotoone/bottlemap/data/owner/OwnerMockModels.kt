@@ -241,6 +241,8 @@ data class MockPreview(
 }
 
 sealed interface MockOwnerLoadState {
+    /** Cold owner entry failed; abort entry rather than render an error page or infer no ownership. */
+    data object NetworkUnavailable : MockOwnerLoadState
     data object Loading : MockOwnerLoadState
     data class Ready(val snapshot: MockOwnerSnapshot) : MockOwnerLoadState
     data class Empty(val snapshot: MockOwnerSnapshot = MockOwnerSnapshot()) : MockOwnerLoadState
@@ -261,3 +263,4 @@ fun MockOwnerSnapshot.openSingleBarManager(): Boolean =
 fun MockOwnerSnapshot.hasPublishedInitialReview(barId: String): Boolean =
     imports.any { it.barId == barId && it.status == MockImportStatus.APPLIED } &&
         menuItems.any { it.barId == barId }
+

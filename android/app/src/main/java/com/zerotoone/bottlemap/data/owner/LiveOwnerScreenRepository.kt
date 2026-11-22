@@ -1,5 +1,8 @@
 package com.zerotoone.bottlemap.data.owner
 
+import com.zerotoone.bottlemap.ui.common.userMessage
+import com.zerotoone.bottlemap.ui.common.isNetworkFailure
+import com.zerotoone.bottlemap.ui.common.notifyNetworkError
 import android.content.Context
 import android.net.Uri
 import android.os.SystemClock
@@ -317,28 +320,33 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
     // the server's productId is nullable and may only reference the real catalog.
     private fun unlinkedUiId(itemId: String) = "unlinked:$itemId"
 
-    private fun menuRows(barId: String, menu: BarMenuResponseDto): List<MockBarMenuItem> =
-        menu.items.map { entry ->
-            MockBarMenuItem(
-                barMenuItemId = entry.barMenuItemId, barId = barId,
-                productId = entry.productId ?: unlinkedUiId(entry.barMenuItemId), soldOut = entry.soldOut,
-                displayNameOverride = entry.displayName,
-                options = entry.options.map { option ->
-                    MockMenuOption(
-                        optionId = option.menuEntryOptionId,
-                        label = option.optionLabel, pourMl = option.pourMl,
-                        priceKrw = option.priceKrw,
-                        discount = option.discount?.let { discount ->
-                            val start = timestamp(discount.startsAt)
-                            val end = timestamp(discount.endsAt)
-                            if(start != null && end != null)
-                                MockDiscount(discount.discountedPriceKrw, start, end)
-                            else null
-                        },
-                    )
-                },
-            )
-        }
+    private fun menuRows(barId: String, menu: BarMenuResponseDto) = ownerMenuRows(barId, menu)
+
+    private fun acceptBar(bar: OwnedBarDto) {
+        versionByBar[bar.barId] = bar.currentMenu?.menuVersion
+        publishSnapshot(ownerSnapshotAfterBarCommit(snapshot(), toBar(bar)))
+    }
+
+    private fun acceptMenu(barId: String, menu: BarMenuResponseDto) {
+        versionByBar[barId] = menu.menuVersion
+        publishSnapshot(ownerSnapshotAfterMenuCommit(snapshot(), barId, menu))
+    }
+
+    private fun acceptPhotos(barId: String, photos: com.zerotoone.bottlemap.network.OwnedPhotoListDto) {
+        val current = snapshot()
+        publishSnapshot(current.copy(bars = current.bars.map { bar ->
+            if (bar.barId == barId) bar.copy(gallery = photos.photos.map {
+                MockPhoto(it.photoId, it.imageUrl, MockPhotoKind.BAR_GALLERY)
+            }) else bar
+        }))
+    }
+
+    private fun acceptApplication(application: OwnerApplicationDto) {
+        val current = snapshot()
+        publishSnapshot(current.copy(applications = current.applications.filterNot {
+            it.applicationId == application.applicationId
+        } + toApplication(application)))
+    }
 
     private suspend fun refresh(expectedGeneration: Int? = null) {
         val refreshStarted = SystemClock.elapsedRealtime()
@@ -541,6 +549,9 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
 
     override fun retryLoad() {
         val cached = snapshot()
+        val cachedSubject = sessionSubject
+        val cachedWasLoaded = hasLoadedOwnerSnapshot
+        var verifiedSubject: String? = null
         lastReadySnapshot = cached
         val requested = generation.incrementAndGet()
         // Credentials can change while this singleton lives (including SDK 401
@@ -550,7 +561,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         local.serverLoading()
         scope.launch {
             try {
-                val verifiedSubject = AppAuth.gateway.currentAccessTokenOrNull()
+                verifiedSubject = AppAuth.gateway.currentAccessTokenOrNull()
                     ?.let(::sessionKey)
                 if (requested != generation.get()) return@launch
                 if (canRestoreVisibleOwnerCache(
@@ -561,24 +572,35 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (error: Exception) {
-                if(requested == generation.get())
-                    local.serverError(error.message ?: "매장 정보를 가져오지 못했어요.")
+                if(requested == generation.get()) {
+                    if (error.isNetworkFailure()) {
+                        when (val retained = ownerStateAfterNetworkLoadFailure(
+                            cached, cachedWasLoaded, cachedSubject, verifiedSubject)) {
+                            is MockOwnerLoadState.Ready -> publishSnapshot(retained.snapshot)
+                            is MockOwnerLoadState.Empty -> publishSnapshot(retained.snapshot)
+                            else -> local.serverNetworkUnavailable()
+                        }
+                        error.notifyNetworkError()
+                    } else local.serverError(error.userMessage("매장 정보를 가져오지 못했어요."))
+                }
             }
         }
     }
 
     /** A committed write is not a failed write just because the subsequent GET times out. */
-    private suspend fun refreshAfterWrite() {
-        try {
-            refresh()
-            lastRefreshWarning = null
-        } catch(cancelled: CancellationException) {
-            throw cancelled
-        } catch(error: Exception) {
-            lastRefreshWarning = "저장은 완료됐지만 목록을 새로고침하지 못했어요. 다시 불러와 주세요."
-            local.serverError(requireNotNull(lastRefreshWarning))
-        }
-    }
+    private suspend fun refreshAfterWrite(writeConfirmed: Boolean = true) = refreshOwnerAfterWrite(
+        writeConfirmed = writeConfirmed,
+        refresh = { refresh(); lastRefreshWarning = null },
+        onCommittedRefreshFailure = { error ->
+            if (error.notifyNetworkError()) {
+                // Keep the verified snapshot/editor. A failed GET must never replace it.
+                lastRefreshWarning = null
+            } else {
+                lastRefreshWarning = "저장은 완료됐지만 목록을 새로고침하지 못했어요. 다시 불러와 주세요."
+                local.serverError(requireNotNull(lastRefreshWarning))
+            }
+        },
+    )
 
     private fun write(op: suspend () -> Unit) {
         scope.launch {
@@ -591,7 +613,8 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                     throw cancelled
                 } catch (error: Exception) {
                     runCatching { refresh() }
-                    local.serverError(error.message ?: "저장하지 못했어요. 다시 시도해 주세요.")
+                    if (!error.notifyNetworkError())
+                        local.serverError(error.userMessage("저장하지 못했어요. 다시 시도해 주세요."))
                     return@withLock
                 }
                 refreshAfterWrite()
@@ -651,15 +674,16 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
             prepare = { prepareGalleryPhoto(it.uri) },
             upload = { prepared ->
                 val result = remote.addBarPhoto(barId, prepared)
+                acceptPhotos(barId, result)
                 result.photos.lastOrNull()?.photoId
                     ?: error("사진은 업로드됐지만 ID 확인에 실패했어요. 새로고침 후 확인해 주세요.")
             },
-            delete = { photoId -> remote.deleteBarPhoto(barId, photoId); Unit },
-            reorder = { ids -> remote.reorderBarPhotos(barId, ids); Unit },
+            delete = { photoId -> acceptPhotos(barId, remote.deleteBarPhoto(barId, photoId)) },
+            reorder = { ids -> acceptPhotos(barId, remote.reorderBarPhotos(barId, ids)) },
         )
     }
 
-    private suspend fun persistBar(old: MockBar, bar: MockBar) {
+    private suspend fun persistBar(old: MockBar, bar: MockBar): Boolean {
         val changes = mutableMapOf<String, Any?>()
         if(old.name != bar.name) changes["name"] = bar.name
         requireMovedBarCoordinates(old, bar)?.let { (latitude, longitude) ->
@@ -676,19 +700,19 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                 mapOf("dayOfWeek" to it.isoDayOfWeek, "closed" to it.closed,
                     "openTime" to time(it.openMinutes), "closeTime" to time(it.closeMinutes))
             }
-        if(changes.isNotEmpty()) remote.updateBar(bar.barId, changes)
+        if(changes.isNotEmpty()) acceptBar(remote.updateBar(bar.barId, changes))
         if(old.gallery != bar.gallery) syncGallery(bar.barId, old.gallery, bar.gallery)
+        return changes.isNotEmpty() || old.gallery != bar.gallery
     }
 
     override fun saveBar(bar: MockBar) {
         val old = snapshot().bars.firstOrNull { it.barId == bar.barId }
             ?: error("매장 정보를 먼저 불러와 주세요.")
-        local.saveBar(bar)
         write { persistBar(old,bar) }
     }
 
     /** Used by save buttons: return only after the server commits and the UI refreshes. */
-    suspend fun saveBarLive(bar: MockBar) = confirmedWrite {
+    suspend fun saveBarLive(bar: MockBar) = confirmedWriteWithResult {
         val old = snapshot().bars.firstOrNull { it.barId == bar.barId }
             ?: error("매장 정보를 먼저 불러와 주세요.")
         persistBar(old,bar)
@@ -730,9 +754,9 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
             require(requestedKind == originalKind) {
                 "종류 변경은 현재 서버에서 지원하지 않아요. 기존 메뉴를 삭제한 뒤 다시 추가해 주세요."
             }
-            remote.updateMenuItem(item.barId, item.barMenuItemId,
+            acceptMenu(item.barId, remote.updateMenuItem(item.barId, item.barMenuItemId,
                 mapOf("menuVersion" to version, "displayName" to display,
-                    "options" to optionBodies))
+                    "options" to optionBodies)))
         } else {
             val body = mutableMapOf<String, Any?>(
                 "menuVersion" to version, "displayName" to display,
@@ -742,7 +766,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
             // newProduct (not in before.products). Use catalogMatched to choose
             // productId vs kind, never the presence of the staging object.
             body.putAll(ownerAddMenuIdentity(item.productId, newProduct, previousProduct))
-            remote.addMenuItem(item.barId, body)
+            acceptMenu(item.barId, remote.addMenuItem(item.barId, body))
         }
     }
 
@@ -769,17 +793,19 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         item: MockBarMenuItem, newProduct: MockCatalogProduct?, newBrand: MockBrand?,
     ) {
         val before = snapshot()
-        local.saveManualMenuItem(item, newProduct, newBrand)
         write { sendManualItemToServer(item, newProduct, newBrand, before) }
     }
 
     override fun saveMenuItem(item: MockBarMenuItem) = saveManualMenuItem(item, null, null)
 
-    private suspend fun confirmedWrite(operation: suspend () -> Unit) {
+    private suspend fun confirmedWrite(operation: suspend () -> Unit) =
+        confirmedWriteWithResult { operation(); true }
+
+    private suspend fun confirmedWriteWithResult(operation: suspend () -> Boolean) {
         writeMutex.withLock {
             // Every new mutation supersedes the detached GET after import cancellation.
             generation.incrementAndGet()
-            try {
+            val writeConfirmed = try {
                 operation()
             } catch(cancelled: CancellationException) {
                 throw cancelled
@@ -787,29 +813,29 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                 runCatching { refresh() }
                 throw error
             }
-            refreshAfterWrite()
+            refreshAfterWrite(writeConfirmed)
         }
     }
 
     suspend fun setSoldOutLive(itemId: String, value: Boolean) = confirmedWrite {
         val item = snapshot().menuItems.firstOrNull { it.barMenuItemId == itemId }
             ?: error("메뉴가 없어요.")
-        remote.setSoldOut(item.barId, itemId, value)
+        acceptMenu(item.barId, remote.setSoldOut(item.barId, itemId, value))
     }
 
     suspend fun deleteMenuItemLive(itemId: String) = confirmedWrite {
         val item = snapshot().menuItems.firstOrNull { it.barMenuItemId == itemId }
             ?: error("메뉴가 없어요.")
-        remote.deleteMenuItem(item.barId, itemId,
-            versionByBar[item.barId] ?: error("메뉴 버전을 불러와 주세요."))
+        acceptMenu(item.barId, remote.deleteMenuItem(item.barId, itemId,
+            versionByBar[item.barId] ?: error("메뉴 버전을 불러와 주세요.")))
     }
 
     suspend fun clearMenuForBarLive(barId: String) = confirmedWrite {
-        remote.resetMenu(barId, versionByBar[barId])
+        acceptMenu(barId, remote.resetMenu(barId, versionByBar[barId]))
     }
 
     suspend fun confirmMenuInformationLive(barId: String) = confirmedWrite {
-        remote.confirmMenu(barId, versionByBar[barId])
+        acceptBar(remote.confirmMenu(barId, versionByBar[barId]))
     }
 
     suspend fun cancelPhotoImportLive(importId: String) {
@@ -853,35 +879,42 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
     override fun setSoldOut(barMenuItemId: String, value: Boolean) {
         val row = snapshot().menuItems.firstOrNull { it.barMenuItemId == barMenuItemId }
             ?: error("메뉴가 없어요.")
-        write { remote.setSoldOut(row.barId, barMenuItemId, value) }
+        write { acceptMenu(row.barId, remote.setSoldOut(row.barId, barMenuItemId, value)) }
     }
 
     override fun deleteMenuItem(barMenuItemId: String) {
         val row = snapshot().menuItems.firstOrNull { it.barMenuItemId == barMenuItemId }
             ?: error("메뉴가 없어요.")
         write {
-            remote.deleteMenuItem(row.barId, barMenuItemId,
-                versionByBar[row.barId] ?: error("메뉴 버전을 불러와 주세요."))
+            acceptMenu(row.barId, remote.deleteMenuItem(row.barId, barMenuItemId,
+                versionByBar[row.barId] ?: error("메뉴 버전을 불러와 주세요.")))
         }
     }
 
     override fun clearMenuForBar(barId: String) {
-        write { remote.resetMenu(barId, versionByBar[barId]) }
+        write { acceptMenu(barId, remote.resetMenu(barId, versionByBar[barId])) }
     }
 
     override fun confirmMenuInformation(barId: String, confirmedAtEpochMs: Long) {
-        write { remote.confirmMenu(barId, versionByBar[barId]) }
+        write { acceptBar(remote.confirmMenu(barId, versionByBar[barId])) }
     }
 
     /** Called asynchronously by the existing registration form; never show success before HTTP 201 + photo PUT. */
     suspend fun cancelOwnerApplicationLive(applicationId: String) {
         val subject = AppAuth.gateway.currentAccessTokenOrNull()?.let(::sessionKey)
         val application = remote.cancelOwnerApplication(applicationId)
+        acceptApplication(application)
         if(subject != null) withContext(Dispatchers.IO) {
             pendingCoverStore.remove(subject, applicationId,
                 application.businessRegistrationNumber)
         }
         refreshAfterWrite()
+    }
+
+    suspend fun loadExistingOwnerApplicationLive(applicationId: String) {
+        val existing = remote.getMyApplications().firstOrNull { it.applicationId == applicationId }
+            ?: error("기존 신청 내역을 확인하지 못했어요.")
+        acceptApplication(existing)
     }
 
     suspend fun verifyBusinessBeforeApplicationLive(
@@ -929,8 +962,10 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
         }
         // Never reuse a retry ID belonging to another bar or another draft.
         val cachedId = pendingApplicationId?.takeIf { it == existing?.applicationId }
-        val applicationId = cachedId ?: existing?.applicationId
-            ?: remote.submitOwnerApplication(body).applicationId
+        val application = if (cachedId != null || existing != null) requireNotNull(existing)
+            else remote.submitOwnerApplication(body)
+        acceptApplication(application)
+        val applicationId = application.applicationId
         pendingApplicationId = applicationId
         if(draft.kind == MockApplicationKind.NEW_BAR) {
             withContext(Dispatchers.IO) {
@@ -940,9 +975,9 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                 pendingCoverStore.read(ownerSubject,applicationId)
             } ?: error("선택한 대표 사진을 찾지 못했어요.")
             try {
-                remote.uploadApplicationCoverPhoto(applicationId,
+                acceptApplication(remote.uploadApplicationCoverPhoto(applicationId,
                     com.zerotoone.bottlemap.data.PreparedMenuImage(
-                        filename="owner-cover.jpg",mimeType="image/jpeg",bytes=bytes))
+                        filename="owner-cover.jpg",mimeType="image/jpeg",bytes=bytes)))
                 withContext(Dispatchers.IO) {
                     pendingCoverStore.remove(ownerSubject,applicationId,draft.businessNumberDigits)
                 }
@@ -957,7 +992,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
             val images = draft.initialMenuPhotos.map { photo ->
                 preparer.prepare(Uri.parse(photo.uri))
             }
-            remote.uploadApplicationMenuPhotos(applicationId, images)
+            acceptApplication(remote.uploadApplicationMenuPhotos(applicationId, images))
         }
         pendingApplicationId = null
         local.saveRegistrationDraft(null)
@@ -1131,7 +1166,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
             imageCount = maxOf(old?.imageCount ?: 0,dto.progress?.totalImages ?: 0,
                 priceCheckedImages.size),
             completedImages = dto.progress?.completedImages ?: old?.completedImages ?: 0,
-            failureReason = dto.failure?.message,
+            failureReason = dto.failure?.let { "메뉴판을 읽지 못했어요. 사진을 확인하고 다시 올려 주세요." },
         )
         publishSnapshot(before.copy(
             imports = before.imports.filterNot { it.menuImportId == importId } + job,
@@ -1359,16 +1394,16 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
     }
 
     suspend fun applyOperatingExceptionLive(barId: String, exception: MockOperatingException) =
-        confirmedWrite { remote.setOperatingException(barId, operatingExceptionBody(exception)) }
+        confirmedWrite { acceptBar(remote.setOperatingException(barId, operatingExceptionBody(exception))) }
 
     suspend fun cancelOperatingExceptionLive(barId: String) =
-        confirmedWrite { remote.removeOperatingException(barId) }
+        confirmedWrite { acceptBar(remote.removeOperatingException(barId)) }
 
     override fun applyOperatingException(barId: String, exception: MockOperatingException) {
-        write { remote.setOperatingException(barId, operatingExceptionBody(exception)) }
+        write { acceptBar(remote.setOperatingException(barId, operatingExceptionBody(exception))) }
     }
     override fun cancelOperatingException(barId: String, exceptionId: String) {
-        write { remote.removeOperatingException(barId) }
+        write { acceptBar(remote.removeOperatingException(barId)) }
     }
 
     override fun startPhotoImport(
@@ -1436,3 +1471,4 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
     override fun preview(barId: String, nowEpochMs: Long): MockPreview? =
         local.preview(barId, nowEpochMs)
 }
+

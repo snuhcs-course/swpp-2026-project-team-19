@@ -350,6 +350,42 @@ class OwnerRegistrationV4ComposeTest {
         compose.runOnIdle { org.junit.Assert.assertTrue(triggered.value) }
     }
 
+    @Test fun concurrentApplicationConflictOpensTheServerIdentifiedExistingApplication() {
+        val draft = MockRegistrationDraft(
+            businessNumberDigits="1234567891", representativeName="김민준", openingDateIso="2019-05-14",
+            proposedBarName="작성 중인 매장", proposedBarAddress="서울특별시 관악구 봉천로12길 8",
+            storePhone="025551234", contactPhone="01012345678", resumePageKey="REVIEW",
+            applicantGallery=listOf(MockPhoto("cover","content://mock/cover",MockPhotoKind.BAR_GALLERY)),
+            initialMenuPhotos=listOf(MockPhoto("menu","content://mock/menu",MockPhotoKind.MENU_CAPTURE)),
+        )
+        val existing = MockOwnerApplication("existing-application", MockApplicationKind.NEW_BAR,
+            MockApplicationStatus.PENDING, "서버가 지정한 신청", proposedBarAddress="기존 주소")
+        val base = LocalOwnerMockRepository(InMemoryMockOwnerStateStore(
+            MockOwnerSnapshot(registrationDraft=draft, applications=listOf(existing))))
+        var submits = 0
+        val repo = object : OwnerMockRepository by base {
+            override fun submitRegistrationDraftForFixture(): String {
+                submits++
+                throw com.zerotoone.bottlemap.network.BottleMapApiException(
+                    code="OWNER_APPLICATION_EXISTS", httpStatus=409, message="raw conflict",
+                    details=mapOf("applicationId" to existing.applicationId))
+            }
+        }
+        val vm = OwnerMockViewModel(repo)
+        compose.setContent { MaterialTheme {
+            OwnerOnboardingScreen(vm, onBack={}, onManagerPreview={}, startRegistration=true)
+        } }
+        compose.waitUntil(4000) {
+            compose.onAllNodesWithText("이렇게\n신청할게요").fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithText("신청하기").performClick()
+        compose.onNodeWithText("신청한 내용").assertExists()
+        compose.onNodeWithText("서버가 지정한 신청").assertExists()
+        compose.onNodeWithText("raw conflict").assertDoesNotExist()
+        compose.onNodeWithText("신청을 마쳤어요").assertDoesNotExist()
+        compose.runOnIdle { assertEquals(1, submits) }
+    }
+
     @Test fun completeReviewSubmitsMockPendingApplicationWithoutNtsNetworkCall() {
         val gallery=MockPhoto("cover","content://mock/cover",MockPhotoKind.BAR_GALLERY)
         val menu=MockPhoto("menu","content://mock/menu",MockPhotoKind.MENU_CAPTURE)
@@ -381,3 +417,4 @@ class OwnerRegistrationV4ComposeTest {
         }
     }
 }
+

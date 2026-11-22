@@ -1,5 +1,7 @@
 package com.zerotoone.bottlemap.navigation
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -28,6 +30,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.zerotoone.bottlemap.data.owner.review.LivePhotoReviewRepository
+import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewLoadError
+import com.zerotoone.bottlemap.ui.common.ActionErrorNotices
 import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewScreen
 import com.zerotoone.bottlemap.ui.owner.review.PhotoReviewViewModel
 import com.zerotoone.bottlemap.ui.owner.OwnerOnboardingScreen
@@ -101,12 +105,9 @@ internal fun NavGraphBuilder.registerVariantRoutes(
                 key = "owner-entry-$ownerId",
                 factory = OwnerMockViewModel.Factory(
                     OwnerRuntime.repository(LocalContext.current, ownerId)))
-            // LiveOwnerScreenRepository starts its first load on creation.
-            // Do not start a duplicate full Owner fetch while that load is in flight.
-            LaunchedEffect(ownerViewModel) {
-                if (ownerViewModel.state.value != MockOwnerLoadState.Loading)
-                    ownerViewModel.retry()
-            }
+            if (abortUnavailableOwnerEntry(ownerViewModel, retryOnEntry = true) {
+                    navController.popBackStack()
+                }) return@CompositionLocalProvider
             // Always show the owned-bar list. One or many bars use the same flow;
             // the user explicitly selects which bar to manage.
             OwnerOnboardingScreen(
@@ -127,10 +128,11 @@ internal fun NavGraphBuilder.registerVariantRoutes(
                 CompositionLocalProvider(
                     LocalRippleConfiguration provides null,
                 ) {
+            val data: OwnerMockViewModel = viewModel(key = "owner-add-bar-$ownerId",
+                factory = OwnerMockViewModel.Factory(OwnerRuntime.repository(LocalContext.current, ownerId)))
+            if (abortUnavailableOwnerEntry(data, retryOnEntry = true) { navController.popBackStack() }) return@CompositionLocalProvider
             OwnerOnboardingScreen(
-                viewModel = viewModel(key = "owner-add-bar-$ownerId",
-                    factory = OwnerMockViewModel.Factory(
-                        OwnerRuntime.repository(LocalContext.current, ownerId))),
+                viewModel = data,
                 onBack = { navController.popBackStack() },
                 onManagerPreview = { navController.navigate(OwnerPage.MGR_HOME.route) },
                 startRegistration = true,
@@ -150,6 +152,8 @@ internal fun NavGraphBuilder.registerVariantRoutes(
                     factory = OwnerMockViewModel.Factory(
                         OwnerRuntime.repository(LocalContext.current, ownerId)))
                 val mockState = data.state.collectAsStateWithLifecycle().value
+                if (page !in setOf(OwnerPage.MGR_PHOTO, OwnerPage.MGR_JOB, OwnerPage.MGR_REVIEW) &&
+                    abortUnavailableOwnerEntry(data) { navController.popBackStack() }) return@composable
                 // Owner-wide policy: no transient bright/ripple feedback on press.
                 // Stateful selected/checked indicators are intentionally preserved.
                 CompositionLocalProvider(
@@ -290,11 +294,9 @@ internal fun NavGraphBuilder.registerVariantRoutes(
                                     onReauthenticate = onForceOwnerReauthentication,
                                 )
                             }
-                            mockState == MockOwnerLoadState.Loading -> {
-                                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                    CircularProgressIndicator()
-                                }
-                            }
+                            OwnerReviewEntryPending(mockState, data::retry) {
+                                navController.popBackStack()
+                            } -> Unit
                             else -> {
                                 // No pending import: there is nothing to retry.
                                 // Leave the dead-end instead of spinning forever.
@@ -372,4 +374,44 @@ internal fun NavHostController.openOwnerManagerPreviewSafely(
     if (!cooldown.allow()) return false
     navigate(OwnerPage.MGR_PREVIEW.route) { launchSingleTop = true }
     return true
+}
+
+
+/** Abort only an unavailable cold entry. Cached owner screens keep their current content. */
+@Composable
+private fun abortUnavailableOwnerEntry(
+    viewModel: OwnerMockViewModel, retryOnEntry: Boolean = false, onBack: () -> Unit,
+): Boolean {
+    val state = viewModel.state.collectAsStateWithLifecycle().value
+    var started by remember(viewModel) { mutableStateOf(!retryOnEntry) }
+    LaunchedEffect(viewModel) {
+        if (retryOnEntry && viewModel.state.value != MockOwnerLoadState.Loading) viewModel.retry()
+        started = true
+    }
+    LaunchedEffect(started, state) {
+        if (started && viewModel.state.value == MockOwnerLoadState.NetworkUnavailable) onBack()
+    }
+    return !started || state == MockOwnerLoadState.NetworkUnavailable
+}
+
+/** Unknown read state is never evidence that the saved review/import is absent. */
+@Composable
+internal fun OwnerReviewEntryPending(
+    state: MockOwnerLoadState, onRetry: () -> Unit, onLeave: () -> Unit,
+): Boolean = when (state) {
+    MockOwnerLoadState.Loading -> {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+        true
+    }
+    MockOwnerLoadState.NetworkUnavailable -> {
+        PhotoReviewLoadError(ActionErrorNotices.NETWORK_MESSAGE, onRetry, onLeave)
+        true
+    }
+    is MockOwnerLoadState.Error -> {
+        PhotoReviewLoadError(state.message, onRetry, onLeave)
+        true
+    }
+    else -> false
 }

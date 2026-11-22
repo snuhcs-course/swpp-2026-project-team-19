@@ -57,6 +57,19 @@ class OwnerMockViewModel(
         }
     }
 
+    suspend fun loadExistingOwnerApplicationLive(applicationId: String) {
+        if (repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
+            repository.loadExistingOwnerApplicationLive(applicationId)
+        else {
+            val current = when (val load = state.value) {
+                is MockOwnerLoadState.Ready -> load.snapshot
+                is MockOwnerLoadState.Empty -> load.snapshot
+                else -> error("신청 내역을 먼저 불러와 주세요.")
+            }
+            require(current.applications.any { it.applicationId == applicationId })
+        }
+    }
+
     suspend fun readBusinessCertificateLive(uri: String):
         com.zerotoone.bottlemap.network.OwnerCertificateOcrDto? =
         if (repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
@@ -206,3 +219,4 @@ class OwnerMockViewModel(
         }
     }
 }
+

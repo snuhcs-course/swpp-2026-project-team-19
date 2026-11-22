@@ -1,5 +1,6 @@
 package com.zerotoone.bottlemap.ui.owner.review
 
+import com.zerotoone.bottlemap.ui.common.userMessage
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -279,7 +280,7 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (error: Exception) {
-                _draftProblem.value = error.message ?: "기기 검수 초안 저장에 실패했어요."
+                _draftProblem.value = error.userMessage("기기 검수 초안 저장에 실패했어요.")
                 _draftRetryable.value = false
                 toast(_draftProblem.value.orEmpty())
                 return@launch
@@ -319,16 +320,16 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                         // Transient disconnects are retried on Leave; permanent
                         // permission/size/state errors block publication.
                         if (error.httpStatus in setOf(401, 403, 409)) {
-                            _draftProblem.value = error.message
+                            _draftProblem.value = error.userMessage()
                             _draftRetryable.value = false
-                            toast(error.message)
+                            toast(error.userMessage())
                         } else {
                             // §5.9: failed server save must remain durable on
                             // device and be retried explicitly, not silently.
                             val recoverable = repository.hasPendingLocalDraft()
                             _draftRetryable.value = recoverable
                             _draftProblem.value = if (recoverable) localOnlyNotice
-                                else error.message
+                                else error.userMessage()
                             // A retryable saved-on-device draft must have a visible
                             // recovery path. Reuse the existing Error/Retry page;
                             // reloading restores the protected checkpoint and
@@ -341,13 +342,13 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                             else toast(_draftProblem.value.orEmpty())
                         }
                     } catch (error: IllegalStateException) {
-                        _draftProblem.value = error.message ?: "검수 초안 저장에 실패했어요."
+                        _draftProblem.value = error.userMessage("검수 초안 저장에 실패했어요.")
                         _draftRetryable.value = false
                         toast(_draftProblem.value.orEmpty())
                     } catch (error: Exception) {
                         _draftRetryable.value = repository.hasPendingLocalDraft()
                         _draftProblem.value = if (_draftRetryable.value) localOnlyNotice
-                            else error.message ?: "검수 초안 저장에 실패했어요."
+                            else error.userMessage("검수 초안 저장에 실패했어요.")
                         if (_draftRetryable.value)
                             _load.value = PhotoReviewLoad.Error(
                                 "검수 초안을 서버에 저장하지 못했어요. 다시 시도해 주세요.")
@@ -385,10 +386,10 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (error: ReviewDraftConflictException) {
-                toast(error.message.orEmpty())
+                toast(error.userMessage())
                 reload()
             } catch (error: Exception) {
-                _draftProblem.value = error.message ?: "기기 초안을 열 수 없어요."
+                _draftProblem.value = error.userMessage("기기 초안을 열 수 없어요.")
                 toast(_draftProblem.value.orEmpty())
             } finally {
                 _draftResolving.value = false
@@ -443,11 +444,10 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                 // Keep the local backup, refresh the remote draft and require
                 // a NEW affirmative choice against the new CAS version.
                 _draftConflictChoice.value = false
-                toast(error.message.orEmpty())
+                toast(error.userMessage())
                 reload()
             } catch (error: Exception) {
-                _draftProblem.value = error.message
-                    ?: "초안 선택에 실패했어요. 최신 서버 검수를 확인해 주세요."
+                _draftProblem.value = error.userMessage("초안 선택에 실패했어요. 최신 서버 검수를 확인해 주세요.")
                 toast(_draftProblem.value.orEmpty())
             } finally {
                 _draftResolving.value = false
@@ -487,7 +487,7 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                 throw cancelled
             } catch (error: Exception) {
                 leaving = false
-                _draftProblem.value = error.message ?: "기기 검수 초안 저장에 실패했어요."
+                _draftProblem.value = error.userMessage("기기 검수 초안 저장에 실패했어요.")
                 toast(_draftProblem.value.orEmpty())
                 false
             }
@@ -519,7 +519,7 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                     // the owner in the review screen when another CAS advanced.
                     // Never PUT or discard it; leave only with a durable backup.
                     _draftRetryable.value = false
-                    _draftProblem.value = error.message
+                    _draftProblem.value = error.userMessage()
                     repository.hasPendingLocalDraft()
                 } catch (error: Exception) {
                     // An offline/5xx server failure must never lock the owner
@@ -529,7 +529,7 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                     _draftRetryable.value = safeDeviceCopy &&
                         !repository.hasOversizedPendingDraft()
                     _draftProblem.value = if (safeDeviceCopy) localOnlyNotice
-                        else error.message ?: "검수 초안 저장에 실패했어요."
+                        else error.userMessage("검수 초안 저장에 실패했어요.")
                     safeDeviceCopy
                 }
             }
@@ -578,7 +578,7 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (error: Exception) {
-                toast(error.message ?: "기본 잔 용량을 저장하지 못했어요. 다시 시도해 주세요.")
+                toast(error.userMessage("기본 잔 용량을 저장하지 못했어요. 다시 시도해 주세요."))
             } finally {
                 _savingDefaultPour.value = false
             }
@@ -1166,3 +1166,4 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
         override fun <T : ViewModel> create(modelClass: Class<T>): T = PhotoReviewViewModel(repository) as T
     }
 }
+

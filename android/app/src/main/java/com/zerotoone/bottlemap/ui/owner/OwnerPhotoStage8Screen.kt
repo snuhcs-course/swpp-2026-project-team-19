@@ -1,5 +1,6 @@
 package com.zerotoone.bottlemap.ui.owner
 
+import com.zerotoone.bottlemap.ui.common.userMessage
 import com.zerotoone.bottlemap.ui.common.OwnerBottomConfirmSheet
 
 import androidx.compose.foundation.*
@@ -557,7 +558,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                     pendingNewDraftLineId = null
                     selectedForLineId = null
                     screen = "summary"
-                }.onFailure { error = it.message }
+                }.onFailure { error = it.userMessage() }
         },
     )
     Column(Modifier.fillMaxSize().background(V4Color.background)) {
@@ -636,7 +637,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 LaunchedEffect(bar?.barId,bar?.defaultPourMl) {
                     if(bar!=null && bar.defaultPourMl==null) {
                         runCatching {vm.saveBar(bar.copy(defaultPourMl=DEFAULT_OWNER_POUR_ML))}
-                            .onFailure {error=it.message}
+                            .onFailure {error=it.userMessage()}
                     }
                 }
                 St8Card {
@@ -761,7 +762,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                                     job.reviewVersion,MockReviewDecision(
                                         MockDecisionKind.SELECT_PRODUCT,productId=product.productId,
                                         correctedOptions=line.options))
-                            }.onSuccess {error=null;next()}.onFailure {error=it.message}
+                            }.onSuccess {error=null;next()}.onFailure {error=it.userMessage()}
                         }.padding(horizontal=13.dp,vertical=12.dp),
                         verticalAlignment=Alignment.CenterVertically,
                         horizontalArrangement=Arrangement.spacedBy(11.dp)) {
@@ -789,7 +790,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 ) {runCatching{vm.review(job.menuImportId,line.extractedItemId,
                         job.reviewVersion,MockReviewDecision(MockDecisionKind.EXCLUDE))}
                         .onSuccess{pendingNewDraftEncoded=null;error=null;next()}
-                        .onFailure{error=it.message}}
+                        .onFailure{error=it.userMessage()}}
                 val candidates=(listOfNotNull(line.suggestedProductId)+line.candidateProductIds)
                     .distinct().mapNotNull{id->s.products.firstOrNull{
                         it.productId==id && it.isActive}}
@@ -805,7 +806,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                                 job.reviewVersion,MockReviewDecision(MockDecisionKind.SELECT_PRODUCT,
                                     productId=product.productId,
                                     correctedOptions=line.decision?.correctedOptions ?: line.options))}
-                                .onSuccess{error=null;next()}.onFailure{error=it.message}
+                                .onSuccess{error=null;next()}.onFailure{error=it.userMessage()}
                         }
                         .padding(horizontal=15.dp,vertical=12.dp),
                         verticalAlignment=Alignment.CenterVertically,
@@ -848,7 +849,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                 ) {runCatching{vm.review(job.menuImportId,line.extractedItemId,
                         job.reviewVersion,MockReviewDecision(MockDecisionKind.EXCLUDE))}
                         .onSuccess{pendingNewDraftEncoded=null;error=null;next()}
-                        .onFailure{error=it.message}}
+                        .onFailure{error=it.userMessage()}}
                 val restoredDraft=pendingNewDraft.takeIf {
                     pendingNewDraftLineId==line.extractedItemId
                 }
@@ -983,7 +984,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                                         MockDecisionKind.CREATE_PRODUCT,
                                         correctedOptions=line.options,
                                         newProduct=draft))
-                            }.onSuccess {error=null;next()}.onFailure {error=it.message}
+                            }.onSuccess {error=null;next()}.onFailure {error=it.userMessage()}
                         }
                     }
                 }
@@ -1074,7 +1075,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                                 otherAlcoholKind=subtype.trim().ifBlank{null}))
                         runCatching{vm.review(job.menuImportId,line.extractedItemId,
                             job.reviewVersion,decision)}.onSuccess{error=null;next()}
-                            .onFailure{error=it.message}
+                            .onFailure{error=it.userMessage()}
                     }
                 }
                 }
@@ -1090,7 +1091,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                     "사진마다 가격이 달라요" else "가격을 못 읽었어요") {runCatching{vm.review(job.menuImportId,line.extractedItemId,
                         job.reviewVersion,MockReviewDecision(MockDecisionKind.EXCLUDE))}
                         .onSuccess{pendingNewDraftEncoded=null;error=null;next()}
-                        .onFailure{error=it.message}}
+                        .onFailure{error=it.userMessage()}}
                 St8Card {
                     Row(verticalAlignment=Alignment.CenterVertically,
                         horizontalArrangement=Arrangement.spacedBy(11.dp)) {
@@ -1139,7 +1140,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                         runCatching{vm.review(job.menuImportId,line.extractedItemId,
                             job.reviewVersion,d)}
                             .onSuccess{pendingNewDraftEncoded=null;error=null;next()}
-                            .onFailure{error=it.message}
+                            .onFailure{error=it.userMessage()}
                     }
                 }
 
@@ -1337,7 +1338,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                             St8Button("이번 검수에서 제외") {
                                 runCatching {vm.review(job.menuImportId,line.extractedItemId,
                                     job.reviewVersion,MockReviewDecision(MockDecisionKind.CONFIRM_NON_PRODUCT))}
-                                    .onSuccess {error=null;next()}.onFailure {error=it.message}
+                                    .onSuccess {error=null;next()}.onFailure {error=it.userMessage()}
                             }
                         } else if(ids.size==1) {
                             St8Button("맞아요") {
@@ -1347,7 +1348,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                                 } else runCatching {vm.review(job.menuImportId,line.extractedItemId,
                                     job.reviewVersion,MockReviewDecision(MockDecisionKind.SELECT_PRODUCT,
                                         productId=id,correctedOptions=line.options))}
-                                    .onSuccess{error=null;next()}.onFailure{error=it.message}
+                                    .onSuccess{error=null;next()}.onFailure{error=it.userMessage()}
                             }
                             St8Secondary("다른 메뉴예요") {
                                 catalogQuery="";visit("catalog")
@@ -1383,7 +1384,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                             } catch(cancelled: CancellationException) {
                                 throw cancelled
                             } catch(e: Exception) {
-                                error=e.message ?: "메뉴 게시에 실패했어요."
+                                error=e.userMessage("메뉴 게시에 실패했어요.")
                                 visit("publishFailed")
                             } finally { publishing=false }
                         }
@@ -1415,7 +1416,7 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
                             } catch(cancelled: CancellationException) {
                                 throw cancelled
                             } catch(e: Exception) {
-                                error=e.message ?: "메뉴 게시에 실패했어요."
+                                error=e.userMessage("메뉴 게시에 실패했어요.")
                                 visit("publishFailed")
                             } finally { publishing=false }
                         }
@@ -1516,3 +1517,4 @@ private fun reviewSnap(s: MockOwnerLoadState): MockOwnerSnapshot? = when(s) {
     }
 
 }
+

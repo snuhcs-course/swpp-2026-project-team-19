@@ -24,6 +24,7 @@ import com.zerotoone.bottlemap.ui.auth.SignInOutcome
 import com.zerotoone.bottlemap.ui.auth.WelcomeScreen
 import com.zerotoone.bottlemap.ui.auth.rememberGoogleSignInFlow
 import com.zerotoone.bottlemap.ui.common.UxToast
+import com.zerotoone.bottlemap.ui.common.ActionErrorNotices
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraphBuilder
@@ -94,6 +95,11 @@ fun BottleMapNavHost(resetWelcome: Boolean = false) {
     }
     var toast by remember { mutableStateOf<Pair<Long, String>?>(null) }
     val showToast: (String) -> Unit = { toast = System.nanoTime() to it }
+    LaunchedEffect(Unit) {
+        ActionErrorNotices.networkErrors.collect {
+            showToast(ActionErrorNotices.NETWORK_MESSAGE)
+        }
+    }
     LaunchedEffect(toast) {
         if (toast != null) {
             kotlinx.coroutines.delay(2500)
@@ -478,3 +484,4 @@ private fun NavGraphBuilder.customerGraph(
         }
     }
 }
+

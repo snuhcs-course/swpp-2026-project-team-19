@@ -286,7 +286,8 @@ class PhotoReviewViewModelTest {
         assertTrue(PhotoReviewRules.stats(vm.state).noDefault)
         vm.saveDefaultPour("45")
         assertTrue(PhotoReviewRules.stats(vm.state).noDefault)
-        assertTrue(PhotoReviewEvent.Toast("서버 저장 실패") in events)
+        assertTrue(PhotoReviewEvent.Toast("기본 잔 용량을 저장하지 못했어요. 다시 시도해 주세요.") in events)
+        assertFalse(PhotoReviewEvent.Toast("서버 저장 실패") in events)
     }
 
     @Test fun typingKeepsTheCardInPlaceUntilTheFieldIsLeft() = runTest(dispatcher) {
@@ -611,7 +612,7 @@ class PhotoReviewViewModelTest {
         assertEquals(2, writes)
         assertEquals(0, casCalls)
         assertTrue(vm.draftConflictChoice.value)
-        assertTrue(vm.draftProblem.value.orEmpty().contains("저장 공간"))
+        assertEquals("초안 선택에 실패했어요. 최신 서버 검수를 확인해 주세요.", vm.draftProblem.value)
     }
 
     @Test fun pendingConflictBlocksSavesUntilOwnerExplicitlyChoosesServer() = runTest(dispatcher) {
@@ -1016,7 +1017,8 @@ class PhotoReviewViewModelTest {
             vm.leave()
             assertEquals(0, serverCalls)
             assertFalse(PhotoReviewEvent.Leave in events)
-            assertTrue(PhotoReviewEvent.Toast("device full") in events)
+            assertTrue(PhotoReviewEvent.Toast("기기 검수 초안 저장에 실패했어요.") in events)
+            assertFalse(PhotoReviewEvent.Toast("device full") in events)
         }
 
     @Test fun leaveWaitsForLastDraftEvenWhenAnEarlierSaveIsSlow() = runTest(dispatcher) {
@@ -1054,7 +1056,8 @@ class PhotoReviewViewModelTest {
         val events = vm.collectEvents(backgroundScope)
         vm.leave()
         assertFalse(PhotoReviewEvent.Leave in events)
-        assertTrue(PhotoReviewEvent.Toast("out of space") in events)
+        assertTrue(PhotoReviewEvent.Toast("검수 초안 저장에 실패했어요.") in events)
+        assertFalse(PhotoReviewEvent.Toast("out of space") in events)
     }
 
 
@@ -1121,7 +1124,7 @@ class PhotoReviewViewModelTest {
         vm.confirmPublish()
         val result = vm.publishOutcome.value as PublishOutcome.Failed
         assertEquals(PublishFailure.VALIDATION, result.reason)
-        assertTrue(result.detail!!.contains("입력값을 확인해 주세요."))
+        assertEquals("입력한 내용을 확인한 뒤 다시 시도해 주세요.", result.detail)
     }
 
     @Test fun queuedDraftWritesCannotSaveOldReviewUnderReloadedVersion() = runTest(dispatcher) {
@@ -1457,3 +1460,4 @@ class PhotoReviewViewModelTest {
         }
 
 }
+

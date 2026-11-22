@@ -1,5 +1,6 @@
 package com.zerotoone.bottlemap.ui.owner
 
+import com.zerotoone.bottlemap.ui.common.actionErrorMessage
 import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
@@ -309,7 +310,7 @@ fun OwnerOnboardingScreen(
                 throw cancelled
             } catch(e: Exception) {
                 go(RegPage.BIZCHECK)
-                error=e.message ?: "사업자등록증을 읽지 못했어요. 직접 입력해 주세요."
+                error=e.actionErrorMessage("사업자등록증을 읽지 못했어요. 직접 입력해 주세요.")
             }
         } else if(screen==RegPage.VERIFYING){
             // The actual NTS verification happens on POST /api/owner-applications.
@@ -364,7 +365,7 @@ fun OwnerOnboardingScreen(
                 viewModel.searchExistingBarCandidatesLive(draft.proposedBarName)
             }.onFailure {
                 if(it is CancellationException) throw it
-                error=it.message ?: "기존 매장을 검색하지 못했어요."
+                error=it.actionErrorMessage("기존 매장을 검색하지 못했어요.")
             }
         }
     }
@@ -485,12 +486,12 @@ fun OwnerOnboardingScreen(
                                     verify=VerifyFixture.UNAVAILABLE
                                     go(RegPage.VERIFIED)
                                 }
-                                else -> error=e.message ?: "사업자 정보를 확인하지 못했어요."
+                                else -> error=e.actionErrorMessage("사업자 정보를 확인하지 못했어요.")
                             }
                         } catch(cancelled: CancellationException) {
                             throw cancelled
                         } catch(e: Exception) {
-                            error=e.message ?: "사업자 정보를 확인하지 못했어요."
+                            error=e.actionErrorMessage("사업자 정보를 확인하지 못했어요.")
                         } finally { busy=false }
                     }
                 }
@@ -536,6 +537,22 @@ fun OwnerOnboardingScreen(
                         } catch(e: Exception) {
                             val code=(e as? BottleMapApiException)?.code
                             when(code) {
+                                "OWNER_APPLICATION_EXISTS" -> {
+                                    val existingId = (e as? BottleMapApiException)?.details
+                                        ?.get("applicationId") as? String
+                                    if (existingId.isNullOrBlank()) {
+                                        error=e.actionErrorMessage()
+                                    } else try {
+                                        // Read only this account's applications before opening the server-provided ID.
+                                        viewModel.loadExistingOwnerApplicationLive(existingId)
+                                        activeApplicationId=existingId
+                                        go(RegPage.VIEW_APPLICATION)
+                                    } catch (cancelled: CancellationException) {
+                                        throw cancelled
+                                    } catch (loadError: Exception) {
+                                        error=loadError.actionErrorMessage("기존 신청을 불러오지 못했어요. 다시 확인해 주세요.")
+                                    }
+                                }
                                 "BUSINESS_VERIFICATION_FAILED" -> {
                                     // The server rejected exactly the three submitted
                                     // fields: show the pre-existing mismatch result
@@ -554,7 +571,7 @@ fun OwnerOnboardingScreen(
                                 }
                                 "RATE_LIMITED" ->
                                     error="오늘 사업자 정보 확인 횟수를 모두 사용했어요. 내일 다시 신청해 주세요."
-                                else -> error=e.message ?: "신청을 접수하지 못했어요."
+                                else -> error=e.actionErrorMessage("신청을 접수하지 못했어요.")
                             }
                         } finally { busy=false }
                     }
@@ -580,7 +597,7 @@ fun OwnerOnboardingScreen(
                         } catch(cancelled: CancellationException) {
                             throw cancelled
                         } catch(e: Exception) {
-                            error=e.message ?: "신청을 취소하지 못했어요."
+                            error=e.actionErrorMessage("신청을 취소하지 못했어요.")
                         } finally {busy=false}
                     }
                 }
@@ -593,7 +610,7 @@ fun OwnerOnboardingScreen(
         onConfirm={
             dismissId?.let { id ->
                 runCatching {viewModel.dismissRejectedForFixture(id)}
-                    .onSuccess {dismissId=null}.onFailure {error=it.message}
+                    .onSuccess {dismissId=null}.onFailure {error=it.actionErrorMessage()}
             }
         }
     )
@@ -670,6 +687,7 @@ fun OwnerOnboardingScreen(
                 TextButton(onClick=::showDashboard) { Text("내 매장 목록으로 돌아가기") }
             }
             when(val s=state){
+                MockOwnerLoadState.NetworkUnavailable -> Unit // Navigation aborts this failed entry.
                 MockOwnerLoadState.Loading -> OwnerLoading(
                     if(viewModel.usesProductionOwnerApi()) "매장 정보를 불러오는 중" else "Mock 저장소 불러오는 중")
                 is MockOwnerLoadState.Error -> {
@@ -1094,7 +1112,7 @@ fun OwnerOnboardingScreen(
                 error?.let{Text(it,color=MaterialTheme.colorScheme.error)}
             }
         }
-        if(cta!=null&&state !is MockOwnerLoadState.Error) {
+        if(cta!=null&&state !is MockOwnerLoadState.Error&&state!=MockOwnerLoadState.NetworkUnavailable) {
             Column(Modifier.fillMaxWidth()
                 .then(if(screen==RegPage.BN||screen==RegPage.DATE)Modifier
                     else Modifier.navigationBarsPadding())
@@ -1162,3 +1180,4 @@ private fun persistSelectedUri(context:Context,uri:Uri){
         Text("사진 미리보기 불가",style=MaterialTheme.typography.labelSmall)
     }
 }
+

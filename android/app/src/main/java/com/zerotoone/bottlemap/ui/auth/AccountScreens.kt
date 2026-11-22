@@ -1,6 +1,8 @@
 
 package com.zerotoone.bottlemap.ui.auth
 
+import com.zerotoone.bottlemap.ui.common.userMessage
+import com.zerotoone.bottlemap.ui.common.notifyNetworkError
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -56,6 +58,7 @@ import com.zerotoone.bottlemap.ui.customer.P18Action
  */
 private sealed interface OwnerAreaLoad {
     data object Loading : OwnerAreaLoad
+    data object NetworkUnavailable : OwnerAreaLoad
     data class Ready(val hasBars: Boolean, val hasApplication: Boolean) : OwnerAreaLoad
     data class Error(val message: String) : OwnerAreaLoad
 }
@@ -72,6 +75,9 @@ fun AccountScreen(
     // Owner access is based on the authenticated server account, never demo fixture data.
     val signedInUser=(state as? AuthUiState.SignedIn)?.user
     var ownerRetryNonce by remember(signedInUser?.userId) { mutableStateOf(0) }
+    var lastKnownOwnerArea by remember(signedInUser?.userId) {
+        mutableStateOf<OwnerAreaLoad.Ready?>(null)
+    }
     val ownerStatus by produceState<OwnerAreaLoad>(
         initialValue=OwnerAreaLoad.Loading,
         key1=signedInUser?.userId, key2=ownerRetryNonce,
@@ -90,18 +96,22 @@ fun AccountScreen(
             }
             if (BuildConfig.DEBUG) Log.d("BottleMapPerf",
                 "account_owner_read_ms=${SystemClock.elapsedRealtime() - startedAt}")
-            value=OwnerAreaLoad.Ready(
+            val loaded=OwnerAreaLoad.Ready(
                 bars.isNotEmpty(), applications.any {
                     it.status=="pending" || it.status=="rejected"
                 })
+            lastKnownOwnerArea=loaded
+            value=loaded
         } catch(cancelled: CancellationException) {
             throw cancelled
         } catch(error: Exception) {
-            value=OwnerAreaLoad.Error(error.message ?: "매장 상태를 확인하지 못했어요.")
+            value=if (error.notifyNetworkError()) lastKnownOwnerArea ?: OwnerAreaLoad.NetworkUnavailable
+                else OwnerAreaLoad.Error(error.userMessage("매장 상태를 확인하지 못했어요."))
         }
     }
     val area=(ownerStatus as? OwnerAreaLoad.Ready)
-    val hasArea=area?.let { it.hasBars || it.hasApplication } == true
+    val retryOwnerLookup=ownerStatus == OwnerAreaLoad.NetworkUnavailable
+    val hasArea=area?.let { it.hasBars || it.hasApplication } == true || retryOwnerLookup
     val subtitle=when {
         area?.hasBars==true -> "매장을 관리해 주세요"
         area?.hasApplication==true -> "매장 등록 신청 상태를 확인하세요"
@@ -161,7 +171,8 @@ fun AccountScreen(
                         RoundedCornerShape(16.dp))
                     .border(1.dp,androidx.compose.ui.graphics.Color(0xFF8C6C4A),
                         RoundedCornerShape(16.dp))
-                    .clickable(onClick=onOpenOwner).testTag("customer-owner-entry")
+                    .clickable(onClick={ if(retryOwnerLookup) ownerRetryNonce++ else onOpenOwner() })
+                    .testTag("customer-owner-entry")
                     .padding(horizontal=16.dp,vertical=18.dp),
                     verticalAlignment=Alignment.CenterVertically,
                     horizontalArrangement=Arrangement.spacedBy(14.dp)) {
@@ -285,3 +296,4 @@ internal fun AccountHeader(title:String,onBack:()->Unit,backEnabled:Boolean=true
             fontWeight=FontWeight.Bold)
     }
 }
+

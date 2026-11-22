@@ -1,5 +1,17 @@
 package com.zerotoone.bottlemap.ui.owner
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.test.assertTextEquals
+import androidx.compose.ui.test.performTextReplacement
+import com.zerotoone.bottlemap.data.owner.MockOwnerSnapshot
+import com.zerotoone.bottlemap.data.owner.MockOwnerStateStore
+import com.zerotoone.bottlemap.network.BottleMapApiException
+import com.zerotoone.bottlemap.ui.common.ActionErrorNotices
+import com.zerotoone.bottlemap.ui.common.UxToast
 import android.graphics.Bitmap
 import android.graphics.Color as AndroidColor
 import androidx.exifinterface.media.ExifInterface
@@ -42,6 +54,61 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class OwnerBarEditorComposeTest {
     @get:Rule val compose = createAndroidComposeRule<ComponentActivity>()
+
+    @Test fun unchangedBarSaveNetworkFailureKeepsEditorAndAllowsImmediateRetry() =
+        checkBarNetworkFailure(changed = false)
+
+    @Test fun changedBarSaveNetworkFailureKeepsInputAndAllowsImmediateRetry() =
+        checkBarNetworkFailure(changed = true)
+
+    private fun checkBarNetworkFailure(changed: Boolean) {
+        val store = object : MockOwnerStateStore {
+            var saved = OwnerMockFixtures.registeredBar()
+            var offline = false
+            override fun read(): MockOwnerSnapshot? = saved
+            override fun write(snapshot: MockOwnerSnapshot) {
+                if (offline) throw BottleMapApiException(code = "NETWORK_ERROR", message = "raw socket trace")
+                saved = snapshot
+            }
+        }
+        val vm = OwnerMockViewModel(LocalOwnerMockRepository(store))
+        var backs = 0
+        var notices = 0
+        val expectedName = if (changed) "입력 보존 매장" else store.saved.bars.first().name
+        compose.setContent { MaterialTheme {
+            var toast by remember { mutableStateOf<String?>(null) }
+            LaunchedEffect(Unit) {
+                ActionErrorNotices.networkErrors.collect {
+                    notices++
+                    toast = ActionErrorNotices.NETWORK_MESSAGE
+                }
+            }
+            Box {
+                OwnerInfoHtmlV4Screen(vm.state.collectAsState().value, vm, { backs++ }, {})
+                toast?.let { UxToast(it) }
+            }
+        } }
+        if (changed) compose.onNodeWithTag("owner-info-name").performTextReplacement(expectedName)
+        compose.runOnIdle { store.offline = true }
+        repeat(2) { attempt ->
+            compose.onNodeWithTag("owner-info-save").performScrollTo().assertIsEnabled().performClick()
+            compose.onNodeWithTag("ux-toast").assertIsDisplayed()
+            compose.onNodeWithText(ActionErrorNotices.NETWORK_MESSAGE).assertIsDisplayed()
+            compose.onNodeWithText("raw socket trace").assertDoesNotExist()
+            compose.onNodeWithText("다시 시도").assertDoesNotExist()
+            compose.onNodeWithTag("owner-info-name").assertTextEquals(expectedName)
+            compose.runOnIdle {
+                assertEquals(attempt + 1, notices)
+                assertEquals(0, backs)
+            }
+        }
+        compose.runOnIdle { store.offline = false }
+        compose.onNodeWithTag("owner-info-save").performScrollTo().performClick()
+        compose.runOnIdle {
+            assertEquals(1, backs)
+            assertEquals(expectedName, store.saved.bars.first().name)
+        }
+    }
 
     @Test fun editingNameChangesOnlyAfterExplicitSave() {
         val repository = LocalOwnerMockRepository(InMemoryMockOwnerStateStore(OwnerMockFixtures.registeredBar()))
@@ -331,3 +398,4 @@ class OwnerBarEditorComposeTest {
         compose.onNodeWithTag("owner-photo-done").assertExists()
     }
 }
+

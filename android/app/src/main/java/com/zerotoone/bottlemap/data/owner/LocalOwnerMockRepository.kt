@@ -1,5 +1,6 @@
 package com.zerotoone.bottlemap.data.owner
 
+import com.zerotoone.bottlemap.ui.common.userMessage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -114,7 +115,7 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
         current.value = try {
             (store.read() ?: MockOwnerSnapshot()).asLoadState()
         } catch (e: Exception) {
-            MockOwnerLoadState.Error(e.message ?: "Mock 저장소를 읽지 못했습니다.")
+            MockOwnerLoadState.Error(e.userMessage("저장된 매장 정보를 읽지 못했어요. 다시 시도해 주세요."))
         }
     }
 
@@ -129,6 +130,10 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
 
     internal fun serverLoading() = synchronized(lock) {
         current.value = MockOwnerLoadState.Loading
+    }
+
+    internal fun serverNetworkUnavailable() = synchronized(lock) {
+        current.value = MockOwnerLoadState.NetworkUnavailable
     }
 
     internal fun serverError(message: String) = synchronized(lock) {
@@ -164,6 +169,7 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
         is MockOwnerLoadState.Ready -> value.snapshot
         is MockOwnerLoadState.Empty -> value.snapshot
         is MockOwnerLoadState.Error -> error("Mock 저장소 오류: ${value.message}. retryLoad 먼저 호출")
+        MockOwnerLoadState.NetworkUnavailable -> error("매장 정보를 먼저 불러와 주세요.")
         MockOwnerLoadState.Loading -> error("Mock 저장소 로딩 중")
     }
 
@@ -1008,3 +1014,4 @@ class LocalOwnerMockRepository(private val store: MockOwnerStateStore) : OwnerMo
         MockPreview(bar, visible, s.products.filter { p -> visible.any { it.productId == p.productId } }, nowEpochMs)
     }
 }
+

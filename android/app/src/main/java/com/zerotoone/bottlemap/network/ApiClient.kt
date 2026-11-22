@@ -76,7 +76,8 @@ object ApiClient {
             throw BottleMapApiException(
                 httpStatus = error.code(),
                 code = parsed?.code ?: "HTTP_" + error.code(),
-                message = parsed?.message ?: "Request failed (" + error.code() + ").",
+                // #189: retain structured codes/fields, never expose untrusted server prose.
+                message = "요청을 처리하지 못했어요. 입력 내용과 연결을 확인해 주세요.",
                 details = parsed?.details,
                 fieldErrors = parsed?.fieldErrors.orEmpty(),
                 cause = error,
@@ -84,9 +85,10 @@ object ApiClient {
         } catch (error: IOException) {
             throw BottleMapApiException(
                 code = "NETWORK_ERROR",
-                message = "Cannot reach the BottleMap backend. Check the server and network.",
+                message = "인터넷 연결을 확인한 뒤 다시 시도해 주세요.",
                 cause = error,
             )
         }
     }
 }
+
