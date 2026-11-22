@@ -467,6 +467,14 @@ internal fun CustomerP18Results(
     val choose=chosenId==null && !canSkip && choices.isNotEmpty() &&
         (choices.size>1 || original?.matchType!="alias_exact")
     val result=p18ResolvedResult(chosenId,initialProductId,canSkip,original,ready)
+    val selectedProductId = chosenId ?: initialProductId
+    val selectedProduct = result?.matchedProducts?.firstOrNull { it.productId == selectedProductId }
+        ?: choices.firstOrNull { it.productId == selectedProductId }
+        ?: result?.matchedProducts?.firstOrNull()
+    androidx.compose.runtime.SideEffect {
+        if(initialQuery.isNullOrBlank() && !queryEdited && selectedProduct!=null)
+            chooseQuery=selectedProduct.displayName
+    }
     val allowsPrice=result?.items?.any{it.options.isNotEmpty()}==true
     val availableSorts=p18AvailableSorts(userLocation!=null,allowsPrice)
     val sort=selectedSort?.takeIf{it in availableSorts}
@@ -585,10 +593,6 @@ internal fun CustomerP18Results(
                     row.copy(distanceMeters=p18DisplayDistance(row,userLocation))
                 }
                 val items=p18Sorted(distanceRows,sort,userLocation!=null,priceClock)
-                androidx.compose.runtime.SideEffect {
-                    if(initialQuery.isNullOrBlank() && !queryEdited && product!=null)
-                        chooseQuery=product.displayName
-                }
                 val barListState = androidx.compose.foundation.lazy.rememberLazyListState()
                 if(mapMode) {
                     val focusedBarId=selectedBarId ?: items.firstOrNull()?.barId

@@ -86,7 +86,7 @@ class OwnerUxConsistencyComposeTest {
         val source=object:CustomerDiscoverySource {
             override suspend fun popularProducts(limit:Int)=PopularProductsResponseDto()
             override suspend fun searchProduct(query:String?,productId:String?,source:String,latitude:Double?,longitude:Double?)=
-                SearchBarsResponseDto(query,"exact",listOf(MatchedProductDto("p","아드벡 10","아드벡",resultCount=20)),rows,false)
+                SearchBarsResponseDto(query,"product",listOf(MatchedProductDto("p","아드벡 10","아드벡",resultCount=20)),rows,false)
         }
         val vm=P18SearchViewModel(source)
         var submitted=""

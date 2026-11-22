@@ -14,8 +14,8 @@ class MenuWriteErrorsTest {
         assertFalse(text.contains("secret")); assertFalse(text.contains("API"))
     }
     @Test fun kindAndNestedSchemaFailuresDoNotExposeTechnicalNames() {
-        for(path in listOf("kind", "body.kind")) {
-            val text=menuWriteErrorText(invalid(path,"EXTRA_FORBIDDEN"))
+        for(path in listOf("kind", "body.kind")) for(code in listOf("EXTRA_FORBIDDEN", "UNION_TAG_INVALID", "LITERAL_ERROR")) {
+            val text=menuWriteErrorText(invalid(path,code))
             assertTrue(text.contains("서비스와 앱")); assertFalse(text.contains("업데이트"));assertFalse(text.contains(path))
         }
     }

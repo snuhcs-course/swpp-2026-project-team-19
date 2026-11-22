@@ -9,6 +9,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
@@ -412,7 +413,7 @@ class OwnerRegistrationV4ComposeTest {
             assertEquals(true,saved.storePhoneMatchesContact)
         }
         val edits=compose.onAllNodesWithTag("registration-review-edit")
-        edits[edits.fetchSemanticsNodes().size-1].performClick()
+        edits[edits.fetchSemanticsNodes().size-1].performScrollTo().performClick()
         compose.onNodeWithTag("registration-contact").performTextReplacement("07012345678")
         compose.onNodeWithText("다음").performClick()
         compose.onNodeWithText("이렇게\n신청할게요").assertExists()
