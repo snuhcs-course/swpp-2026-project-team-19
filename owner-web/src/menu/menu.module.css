@@ -1,0 +1,290 @@
+/* The menu screens (android/.../ui/owner/OwnerManualMenuScreen.kt, OwnerSharedMenuRow.kt). */
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--bm-space-sm);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--bm-type-section-title);
+  line-height: var(--bm-type-section-title-line-height);
+  font-weight: 700;
+}
+
+.addLink {
+  color: var(--bm-color-primary);
+  font-size: var(--bm-type-label);
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.addLink[aria-disabled="true"] {
+  color: var(--bm-color-text-muted);
+  pointer-events: none;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--bm-space-xs) var(--bm-space-sm);
+  color: var(--bm-color-text-secondary);
+  font-size: var(--bm-type-caption);
+  line-height: var(--bm-type-caption-line-height);
+}
+
+.updated {
+  color: var(--bm-color-primary);
+}
+
+.notice {
+  margin: 0;
+  padding: var(--bm-space-sm);
+  border-radius: var(--bm-radius-medium);
+  background: var(--bm-color-surface);
+  color: var(--bm-color-text-primary);
+  font-size: var(--bm-type-label);
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--bm-space-sm);
+  color: var(--bm-color-text-secondary);
+}
+
+.empty p {
+  margin: 0;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+}
+
+.groupHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: var(--bm-min-touch-target);
+  padding: 0 var(--bm-space-sm);
+  border: none;
+  border-radius: var(--bm-radius-small);
+  background: var(--bm-color-surface);
+  color: var(--bm-color-text-primary);
+  font: inherit;
+  font-size: var(--bm-type-label);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.brand {
+  margin: var(--bm-space-md) 0 var(--bm-space-xs);
+  padding-left: var(--bm-space-xxs);
+  color: var(--bm-color-primary);
+  font-size: var(--bm-type-label);
+  font-weight: 700;
+}
+
+.rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rows > li + li {
+  border-top: 1px solid var(--bm-color-divider);
+}
+
+/* A row: name and status, then the prices on the right; the whole row opens the editor. */
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--bm-space-sm);
+  width: 100%;
+  min-height: 66px;
+  box-sizing: border-box;
+  padding: var(--bm-space-xs) var(--bm-space-xxs);
+  border: none;
+  background: none;
+  color: var(--bm-color-text-primary);
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+}
+
+button.row,
+a.row {
+  cursor: pointer;
+}
+
+.row:focus-visible {
+  outline: 2px solid var(--bm-color-primary);
+  outline-offset: -2px;
+}
+
+.soldOut {
+  color: var(--bm-color-text-muted);
+}
+
+.name {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: var(--bm-space-xxs);
+  min-width: 0;
+  font-size: var(--bm-type-label);
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.status {
+  flex: none;
+  padding: 2px var(--bm-space-xxs);
+  border: 1px solid var(--bm-color-outline-variant);
+  border-radius: var(--bm-radius-small);
+  color: var(--bm-color-text-secondary);
+  font-size: var(--bm-type-caption);
+  font-weight: 400;
+}
+
+.prices {
+  display: grid;
+  grid-template-columns: auto auto auto;
+  align-items: center;
+  justify-items: end;
+  gap: 0 var(--bm-space-xxs);
+  margin: 0;
+  font-size: var(--bm-type-caption);
+  line-height: var(--bm-type-caption-line-height);
+}
+
+.priceLine {
+  display: contents;
+}
+
+.prices dt,
+.prices dd {
+  margin: 0;
+}
+
+.price {
+  color: var(--bm-color-text-secondary);
+}
+
+.badge {
+  padding: 1px var(--bm-space-xxs);
+  border: 1px solid var(--bm-color-primary);
+  border-radius: var(--bm-radius-small);
+  color: var(--bm-color-primary);
+  font-size: var(--bm-type-caption);
+}
+
+.reset {
+  min-height: var(--bm-secondary-button-min-height);
+  border: 1px solid var(--bm-color-error);
+  border-radius: var(--bm-radius-button);
+  background: var(--bm-color-error-container);
+  color: var(--bm-color-on-error-container);
+  font: inherit;
+  font-size: var(--bm-type-label);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.reset:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* The editor. */
+.proposal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bm-space-xs);
+  padding: var(--bm-space-sm);
+  border-radius: var(--bm-radius-medium);
+  background: var(--bm-color-surface);
+}
+
+.proposal p {
+  margin: 0;
+}
+
+.option {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bm-space-sm);
+  min-width: 0;
+  margin: 0;
+  padding: var(--bm-space-sm);
+  border: 1px solid var(--bm-color-outline-variant);
+  border-radius: var(--bm-radius-medium);
+  background: var(--bm-color-surface);
+}
+
+.optionHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--bm-space-xs);
+  padding: 0;
+  color: var(--bm-color-text-secondary);
+  font-size: var(--bm-type-caption);
+}
+
+.optionFields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--bm-space-xs);
+  align-items: end;
+}
+
+.bottleValue {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bm-space-xxs);
+  font-size: var(--bm-type-label);
+}
+
+.bottleValue span:last-child {
+  display: flex;
+  align-items: center;
+  min-height: var(--bm-search-field-min-height);
+  padding: 0 var(--bm-space-sm);
+  border: 1px solid var(--bm-color-outline-variant);
+  border-radius: var(--bm-radius-text-field);
+}
+
+.select {
+  min-height: var(--bm-search-field-min-height);
+  padding: 0 var(--bm-space-sm);
+  border: 1px solid var(--bm-color-outline-variant);
+  border-radius: var(--bm-radius-text-field);
+  background: var(--bm-color-surface-elevated);
+  color: var(--bm-color-text-primary);
+  font: inherit;
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: var(--bm-space-xs);
+  font-size: var(--bm-type-label);
+}
+
+.addOption {
+  min-height: 40px;
+  border: 1px solid var(--bm-color-outline-variant);
+  border-radius: var(--bm-radius-small);
+  background: var(--bm-color-surface-elevated);
+  color: var(--bm-color-text-primary);
+  font: inherit;
+  font-size: var(--bm-type-label);
+  cursor: pointer;
+}

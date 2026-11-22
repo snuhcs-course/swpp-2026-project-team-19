@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Link } from "react-router";
 import { ApiError } from "../api/errors";
 import { OwnerScreen } from "../owner/OwnerScreen";
-import { useBar, useCancelException, type BarDetail, type OwnedBar } from "../owner/queries";
+import { useBar, useBarMenu, useCancelException, type BarDetail, type OwnedBar } from "../owner/queries";
+import { lastMenuUpdate, menuDate } from "../menu/menuView";
 import { BottomSheet } from "../ui/BottomSheet";
 import { Button, ButtonLink } from "../ui/Button";
 import { ErrorState } from "../ui/states";
@@ -15,7 +16,7 @@ import styles from "./bar.module.css";
 /**
  * /owner/bars/:barId: the bar's management home (android/.../ui/owner/OwnerManagementHomeScreen.kt), from
  * GET /api/bars/{barId} (spec 3.6): the bar info editor, the operating status and its temporary closure, and
- * the menu card, which holds its place until its tasks (I5-P7, P8).
+ * the menu.
  */
 export function BarHomePage({ bar }: { bar: OwnedBar }) {
   const detail = useBar(bar.barId);
@@ -33,7 +34,7 @@ export function BarHomePage({ bar }: { bar: OwnedBar }) {
               </span>
             </Link>
             <StatusCard bar={data} />
-            <PlaceholderCard title="메뉴 관리" wide />
+            <MenuCard bar={data} />
           </div>
         )}
       </BarQuery>
@@ -106,12 +107,22 @@ function StatusCard({ bar }: { bar: BarDetail }) {
   );
 }
 
-function PlaceholderCard({ title, wide = false }: { title: string; wide?: boolean }) {
+/**
+ * The menu card (OwnerManagementHomeScreen.kt): how many items the published menu has (spec 3.9) and when it
+ * was last updated, the later of its publish and its confirmation (3.6 `currentMenu`). Confirming the menu is
+ * I5-P8.
+ */
+function MenuCard({ bar }: { bar: BarDetail }) {
+  const menu = useBarMenu(bar.barId);
+  const count = menu.data ? `게시된 메뉴 ${menu.data.items.length}개, ` : "";
   return (
-    <section className={[styles.card, styles.unavailable, wide ? styles.wide : ""].join(" ")} aria-label={title}>
-      <h2 className={styles.cardTitle}>{title}</h2>
-      <p className={styles.cardText}>웹에서는 준비 중이에요.</p>
-    </section>
+    <Link to={`/bars/${bar.barId}/menu`} className={[styles.card, styles.wide].join(" ")}>
+      <h2 className={styles.cardTitle}>메뉴 관리</h2>
+      {/* The app's "게시된 메뉴 N개 · 최근 갱신 MM.dd", with a comma for its middle dot. */}
+      <p className={styles.cardText}>
+        {count}최근 갱신 {menuDate(lastMenuUpdate(bar.currentMenu))}
+      </p>
+    </Link>
   );
 }
 
