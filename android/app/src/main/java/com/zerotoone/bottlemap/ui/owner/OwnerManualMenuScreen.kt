@@ -248,6 +248,7 @@ internal fun OwnerManualMenuScreen(
             viewModel.usesProductionOwnerApi()) {
             kotlinx.coroutines.delay(300)
             runCatching { viewModel.searchCatalogLive(itemName) }
+                .onFailure { it.actionErrorMessage() }
         }
     }
     var brandName by rememberSaveable(bar?.barId) { mutableStateOf("") }
@@ -262,6 +263,7 @@ internal fun OwnerManualMenuScreen(
             if(lookup.length>=2) {
                 kotlinx.coroutines.delay(300)
                 runCatching { viewModel.searchCatalogBrandsLive(lookup) }
+                    .onFailure { it.actionErrorMessage() }
             }
         }
     }
