@@ -120,9 +120,11 @@ class OwnerUxConsistencyComposeTest {
         val pin=compose.onNodeWithTag("welcome-pin").getUnclippedBoundsInRoot()
         val headline=compose.onNodeWithTag("welcome-headline").getUnclippedBoundsInRoot()
         assertEquals(20f,(pin.left-root.left).value,1f)
-        assertEquals(158f,(pin.right-pin.left).value,1f)
-        assertEquals(194f,(pin.bottom-pin.top).value,1f)
-        assertEquals(14f,(headline.top-pin.bottom).value,1.5f)
+        assertEquals(79f,(pin.right-pin.left).value,1f)
+        assertEquals(97f,(pin.bottom-pin.top).value,1f)
+        org.junit.Assert.assertTrue(headline.top >= pin.bottom)
+        val policy=compose.onNodeWithTag("welcome-privacy").getUnclippedBoundsInRoot()
+        assertEquals(18f,(root.bottom-policy.bottom).value,1.5f)
     }
 
     @Test fun approvedBarAlwaysOffersManagementEvenIfInitialReviewPending() {

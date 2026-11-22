@@ -106,7 +106,7 @@ internal fun NavGraphBuilder.registerVariantRoutes(
                 factory = OwnerMockViewModel.Factory(
                     OwnerRuntime.repository(LocalContext.current, ownerId)))
             if (abortUnavailableOwnerEntry(ownerViewModel, retryOnEntry = true) {
-                    navController.popBackStack()
+                    navController.abortOwnerEntrySafely()
                 }) return@CompositionLocalProvider
             // Always show the owned-bar list. One or many bars use the same flow;
             // the user explicitly selects which bar to manage.
@@ -414,4 +414,10 @@ internal fun OwnerReviewEntryPending(
         true
     }
     else -> false
+}
+
+/** A departing unavailable entry can recompose during pop animation. Never pop My Page. */
+internal fun NavHostController.abortOwnerEntrySafely(): Boolean {
+    if (currentDestination?.route != OwnerRoutes.ENTRY) return false
+    return popBackStack(OwnerRoutes.GRAPH, inclusive = true)
 }

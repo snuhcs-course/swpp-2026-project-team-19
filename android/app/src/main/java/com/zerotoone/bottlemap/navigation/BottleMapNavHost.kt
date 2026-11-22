@@ -301,7 +301,10 @@ private fun NavGraphBuilder.accountGraph(
                     showToast("로그아웃했어요.")
                 },
                 onRetryAccount = authViewModel::retryAccountSync,
-                onOpenOwner = { navController.navigate(OwnerRoutes.GRAPH) },
+                onOpenOwner = {
+                    if (navController.currentDestination?.route == Routes.CUSTOMER_ACCOUNT)
+                        navController.navigate(OwnerRoutes.GRAPH) { launchSingleTop = true }
+                },
                 onNotice = showToast,
             )
         }

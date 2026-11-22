@@ -172,18 +172,27 @@ fun AccountScreen(
                 }
             }
             if(user!=null && hasArea) {
-                Row(Modifier.fillMaxWidth().padding(top=16.dp).heightIn(min=72.dp)
-                    .background(P18Surface,RoundedCornerShape(13.dp))
-                    .border(1.dp,P18Line,RoundedCornerShape(13.dp))
+                Row(Modifier.fillMaxWidth().padding(top=28.dp).heightIn(min=96.dp)
+                    .background(androidx.compose.ui.graphics.Color(0xFF2A2521),
+                        RoundedCornerShape(16.dp))
+                    .border(1.dp,androidx.compose.ui.graphics.Color(0xFF8C6C4A),
+                        RoundedCornerShape(16.dp))
                     .clickable(onClick={ if(retryOwnerLookup) ownerRetryNonce++ else onOpenOwner() })
-                    .testTag("customer-owner-entry").padding(15.dp),
+                    .testTag("customer-owner-entry")
+                    .padding(horizontal=16.dp,vertical=18.dp),
                     verticalAlignment=Alignment.CenterVertically,
                     horizontalArrangement=Arrangement.spacedBy(14.dp)) {
-                    Column(Modifier.weight(1f),verticalArrangement=Arrangement.spacedBy(3.dp)) {
-                        Text("내 매장 관리",color=P18Text,fontSize=13.sp,fontWeight=FontWeight.Bold)
-                        Text(subtitle,color=P18Muted,fontSize=11.sp)
+                    Box(Modifier.size(40.dp)
+                        .background(androidx.compose.ui.graphics.Color(0xFF5C4329),
+                            RoundedCornerShape(10.dp)),contentAlignment=Alignment.Center) {
+                        BmIcon(BmIconId.MANAGE_BAR,null,Modifier.size(23.dp),tint=P18Gold)
                     }
-                    Text("›",color=P18Muted,fontSize=18.sp)
+                    Column(Modifier.weight(1f),verticalArrangement=Arrangement.spacedBy(4.dp)) {
+                        Text("내 매장 관리",color=P18Text,fontSize=17.sp,
+                            lineHeight=24.sp,fontWeight=FontWeight.Bold)
+                        Text(subtitle,color=P18Muted,fontSize=14.sp)
+                    }
+                    Text("›",color=P18Muted,fontSize=21.sp)
                 }
             }
             Column(Modifier.fillMaxWidth().padding(top=28.dp)) {

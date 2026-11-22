@@ -106,16 +106,16 @@ fun WelcomeScreen(
     }
     BoxWithConstraints(Modifier.fillMaxSize().background(UxColor.bg).testTag("welcome-screen")) {
         val narrow = maxWidth < 350.dp
-        Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())
-            .padding(start = 20.dp, end = 20.dp, top = 22.dp, bottom = 18.dp)) {
+        Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+        Column(Modifier.fillMaxWidth().heightIn(min = maxHeight)
+            .padding(start = 20.dp, end = 20.dp, top = 22.dp, bottom = 18.dp),
+            verticalArrangement = Arrangement.SpaceBetween) {
             Image(painterResource(R.drawable.bottlemap_welcome_pin), "위스키 잔을 담은 지도 핀",
-                Modifier.size(width = 158.dp, height = 194.dp).testTag("welcome-pin"),
+                Modifier.size(width = 79.dp, height = 97.dp).testTag("welcome-pin"),
                 contentScale = ContentScale.Fit, alignment = Alignment.BottomStart)
-            Spacer(Modifier.height(14.dp))
             Text("Find the bottle first,\nthen the bar.",
                 style = uxText(28f, 700, UxColor.text, 1.27f, serif = true, letterSpacing = (-0.9).sp),
                 modifier = Modifier.fillMaxWidth().testTag("welcome-headline"))
-            Spacer(Modifier.height(24.dp))
             Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
                 UxMainButton("Google로 계속", { enter(onGoogle) }, Modifier.testTag("welcome-google"), ageChecked && !busy)
                 UxSecondaryButton("로그인 없이 둘러보기", { enter(onBrowseAsGuest) }, Modifier.testTag("welcome-guest"), ageChecked && !busy)
@@ -146,6 +146,7 @@ fun WelcomeScreen(
                     modifier = Modifier.quietClick { openPrivacyPolicy(context, onNotice) }
                         .padding(6.dp).testTag("welcome-privacy"))
             }
+        }
         }
     }
 }

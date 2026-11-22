@@ -13,6 +13,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.navigation
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -30,6 +31,35 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class OwnerPreviewNavigationGuardTest {
     @get:Rule val compose = createAndroidComposeRule<ComponentActivity>()
+
+    @Test fun repeatedOfflineEntryAbortKeepsAccountSelected() {
+        lateinit var nav: NavHostController
+        compose.setContent {
+            nav = rememberNavController()
+            NavHost(navController = nav, startDestination = TabRoutes.SEARCH_GRAPH) {
+                navigation(startDestination = TabRoutes.SEARCH_HOME, route = TabRoutes.SEARCH_GRAPH) {
+                    composable(TabRoutes.SEARCH_HOME) { Text("SEARCH") }
+                }
+                navigation(startDestination = "test-account", route = TabRoutes.ACCOUNT_GRAPH) {
+                    composable("test-account") { Text("MY_PAGE") }
+                    navigation(startDestination = OwnerRoutes.ENTRY, route = OwnerRoutes.GRAPH) {
+                        composable(OwnerRoutes.ENTRY) { Text("OWNER_ENTRY") }
+                    }
+                }
+            }
+        }
+        compose.runOnIdle { nav.selectTab(MainTab.ACCOUNT) }
+        compose.onNodeWithText("MY_PAGE").assertIsDisplayed()
+        compose.runOnIdle { nav.navigate(OwnerRoutes.GRAPH) }
+        compose.onNodeWithText("OWNER_ENTRY").assertIsDisplayed()
+        compose.runOnIdle {
+            org.junit.Assert.assertTrue(nav.abortOwnerEntrySafely())
+            assertFalse(nav.abortOwnerEntrySafely())
+            assertEquals("test-account", nav.currentDestination?.route)
+            assertEquals(MainTab.ACCOUNT, selectedTab(nav.currentDestination))
+        }
+        compose.onNodeWithText("MY_PAGE").assertIsDisplayed()
+    }
 
     @Test fun staleManageClickCannotPopManagerOrSendUserBackToMyPage() {
         lateinit var nav: NavHostController
