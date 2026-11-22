@@ -44,8 +44,8 @@ const sameContent = (item: MenuItem | undefined, body: { displayName: string; op
 
 /**
  * Whether `menu` already holds the change (spec 3.14.1 "재시도": a resent request whose first try succeeded
- * gets MENU_OUTDATED). An add is the item of its product, or the last item for one without a product
- * (3.14.3); an edit is the item with the name and options sent; a delete has no such item; a reset, no items.
+ * gets MENU_OUTDATED). An add is the item of its product, or an item without a product of that name and
+ * kind (3.14.3); an edit is the item with the name and options sent; a delete has no such item; a reset, no items.
  *
  * An edit whose new name linked the item to another product moves its line to another `barMenuItemId`
  * (3.14.4), keeping its name, position and options (3.14.1 "연결 바꾸기"): with the old ID gone, the item at the
@@ -56,9 +56,10 @@ export function appliedIn(menu: BarMenu, write: MenuWrite): boolean {
   switch (write.kind) {
     case "add": {
       const body = write.body;
-      const item =
-        "productId" in body ? menu.items.find((entry) => entry.productId === body.productId) : menu.items.at(-1);
-      return sameContent(item, body) && ("productId" in body || (item?.productId === null && item.kind === body.kind));
+      if ("productId" in body) return sameContent(menu.items.find((entry) => entry.productId === body.productId), body);
+      // Not only the last row: another device may have added after it. No two items without a product share
+      // a name key (3.14.3), so the one found is the one added.
+      return menu.items.some((entry) => entry.productId === null && entry.kind === body.kind && sameContent(entry, body));
     }
     case "edit":
       return sameContent(

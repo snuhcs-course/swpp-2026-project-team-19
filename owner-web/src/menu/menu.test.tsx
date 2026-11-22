@@ -691,6 +691,31 @@ describe("adding an item (spec 3.14.3, OwnerManualCatalogMatch.kt)", () => {
     expect(await screen.findByRole("link", { name: "위스키 3 수정" })).toBeInTheDocument();
   });
 
+  it("counts a resent add as done when another device added an item after it (Codex review on #199)", async () => {
+    let lose = true;
+    const api = menuServer([glenfiddich], {
+      answer: ({ method }) => {
+        if (method !== "POST" || !lose) return undefined;
+        lose = false;
+        // The server adds the item and the answer is lost; then another device adds one after it.
+        api.changeElsewhere([glenfiddich, item({ barMenuItemId: "added-lost", displayName: "위스키 3", options: [option("lost-0", null, 30, 15000)] })]);
+        api.changeElsewhere([...api.menu().items, gintonic]);
+        return HttpResponse.error();
+      },
+    });
+    const { router } = await openAdd();
+    await user().type(screen.getByLabelText("메뉴 이름"), "위스키 3");
+    await fillOption(1, "30", "15000");
+    await save();
+    await screen.findByText("서버에 연결하지 못했어요. 네트워크를 확인해 주세요.");
+
+    await save();
+
+    await atMenuList(router);
+    expect(api.writes()).toHaveLength(2);
+    expect(api.menu().items.map((entry) => entry.displayName)).toEqual(["Glenfiddich 12", "위스키 3", "진토닉"]);
+  });
+
   it("asks again when a resent add had not been applied, and the menu changed meanwhile", async () => {
     let lose = true;
     const api = menuServer([glenfiddich], {
