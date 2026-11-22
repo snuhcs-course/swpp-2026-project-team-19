@@ -1,6 +1,20 @@
 
 package com.zerotoone.bottlemap.ui.customer
 
+import com.zerotoone.bottlemap.ui.common.BmLineIcon
+import com.zerotoone.bottlemap.ui.common.BmLineIconId
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.TextStyle
 import android.Manifest
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.DisposableEffect
@@ -346,7 +360,8 @@ internal fun CustomerP18Results(
         Manifest.permission.ACCESS_FINE_LOCATION)==PackageManager.PERMISSION_GRANTED ||
         ContextCompat.checkSelfPermission(context,
             Manifest.permission.ACCESS_COARSE_LOCATION)==PackageManager.PERMISSION_GRANTED
-    var chooseQuery by rememberSaveable(initialQuery) { mutableStateOf(initialQuery.orEmpty()) }
+    var chooseQuery by rememberSaveable(initialQuery,initialProductId) { mutableStateOf(initialQuery.orEmpty()) }
+    var queryEdited by rememberSaveable(initialQuery,initialProductId) { mutableStateOf(false) }
     var focusRequest by remember { mutableIntStateOf(0) }
     var locationFailed by rememberSaveable { mutableStateOf(false) }
     var exiting by remember { mutableStateOf(false) }
@@ -452,6 +467,14 @@ internal fun CustomerP18Results(
     val choose=chosenId==null && !canSkip && choices.isNotEmpty() &&
         (choices.size>1 || original?.matchType!="alias_exact")
     val result=p18ResolvedResult(chosenId,initialProductId,canSkip,original,ready)
+    val selectedProductId = chosenId ?: initialProductId
+    val selectedProduct = result?.matchedProducts?.firstOrNull { it.productId == selectedProductId }
+        ?: choices.firstOrNull { it.productId == selectedProductId }
+        ?: result?.matchedProducts?.firstOrNull()
+    androidx.compose.runtime.SideEffect {
+        if(initialQuery.isNullOrBlank() && !queryEdited && selectedProduct!=null)
+            chooseQuery=selectedProduct.displayName
+    }
     val allowsPrice=result?.items?.any{it.options.isNotEmpty()}==true
     val availableSorts=p18AvailableSorts(userLocation!=null,allowsPrice)
     val sort=selectedSort?.takeIf{it in availableSorts}
@@ -481,7 +504,8 @@ internal fun CustomerP18Results(
                 P18LoadingScene("위스키 찾는 중",::navigateBack,Modifier.weight(1f))
             }
             state is P18SearchState.Error -> {
-                P18SearchTopBar(::navigateBack, chooseQuery)
+                P18SearchTopBar(::navigateBack,chooseQuery,{queryEdited=true;chooseQuery=it},
+                    {if(chooseQuery.isNotBlank())onSearchAgain(chooseQuery.trim())},editable=true,resultStyle=true)
                 P18FailureBody("검색하지 못했어요",
                     "연결을 확인하고 다시 시도해 주세요.","다시 시도",
                     BmIconId.ERROR,::reload,primary=true,modifier=Modifier.weight(1f),topInset=120)
@@ -489,7 +513,8 @@ internal fun CustomerP18Results(
             (chosenId!=null || initialProductId!=null) &&
                 state is P18SearchState.Ready && ready?.matchType=="none" -> {
                 LaunchedEffect(ready) { onMissingProduct() }
-                P18SearchTopBar(::navigateBack,chooseQuery)
+                P18SearchTopBar(::navigateBack,chooseQuery,{queryEdited=true;chooseQuery=it},
+                    {if(chooseQuery.isNotBlank())onSearchAgain(chooseQuery.trim())},editable=true,resultStyle=true)
                 P18FailureBody("상품 정보를 찾을 수 없어요",
                     "현재 등록된 상품이 아닙니다.\\n다른 위스키를 선택해 주세요.",
                     "다른 위스키 보기",icon=BmIconId.EMPTY,
@@ -546,7 +571,8 @@ internal fun CustomerP18Results(
                 P18LoadingScene("위스키 찾는 중",::navigateBack,Modifier.weight(1f))
             }
             result!=null && result.items.isEmpty() -> {
-                P18SearchTopBar(::navigateBack,chooseQuery)
+                P18SearchTopBar(::navigateBack,chooseQuery,{queryEdited=true;chooseQuery=it},
+                    {if(chooseQuery.isNotBlank())onSearchAgain(chooseQuery.trim())},editable=true,resultStyle=true)
                 val productName = result.matchedProducts.firstOrNull()?.displayName
                     ?: choices.firstOrNull{it.productId==chosenId}?.displayName.orEmpty()
                 P18FailureBody("아직 파는 매장이 없어요",
@@ -567,6 +593,7 @@ internal fun CustomerP18Results(
                     row.copy(distanceMeters=p18DisplayDistance(row,userLocation))
                 }
                 val items=p18Sorted(distanceRows,sort,userLocation!=null,priceClock)
+                val barListState = androidx.compose.foundation.lazy.rememberLazyListState()
                 if(mapMode) {
                     val focusedBarId=selectedBarId ?: items.firstOrNull()?.barId
                     LaunchedEffect(focusedBarId) {
@@ -579,12 +606,8 @@ internal fun CustomerP18Results(
                             else selectedBarId=id},
                         onOpenBar={onOpenBar(it,product?.productId)},at=priceClock)
                 } else {
-                    Row(Modifier.fillMaxWidth().height(72.dp)
-                        .padding(start=8.dp,end=12.dp),verticalAlignment=Alignment.CenterVertically){
-                        P18Back(::navigateBack)
-                        Text(if(initialProductId!=null)"" else "‘${initialQuery.orEmpty()}’ 검색",
-                            color=P18Muted,fontSize=14.sp)
-                    }
+                    P18SearchTopBar(::navigateBack, chooseQuery, {queryEdited=true;chooseQuery=it},
+                        { if(chooseQuery.isNotBlank()) onSearchAgain(chooseQuery.trim()) }, editable=true, resultStyle=true)
                     Row(Modifier.fillMaxWidth().padding(start=20.dp,end=20.dp,top=4.dp),
                         horizontalArrangement=Arrangement.spacedBy(12.dp),
                         verticalAlignment=Alignment.CenterVertically) {
@@ -608,7 +631,7 @@ internal fun CustomerP18Results(
                         P18SortTrigger(sort.label,{showSort=true})
                         P18ModeButton("지도",{mapMode=true})
                     }
-                    LazyColumn(Modifier.fillMaxSize().padding(horizontal=20.dp)) {
+                    LazyColumn(Modifier.fillMaxSize().padding(horizontal=20.dp).testTag("customer-result-list"), state=barListState) {
                         items(items,key={it.barId+it.productId}) {row->
                             P18BarRow(row,userLocation!=null,
                                 onClick={onOpenBar(row.barId,product?.productId)},
@@ -740,7 +763,7 @@ private fun P18ResultsMap(
 @Composable
 private fun P18SearchTopBar(
     onBack:()->Unit, query:String="", onQuery:(String)->Unit={}, onSubmit:()->Unit={},
-    editable:Boolean=false, focusRequestToken:Int=0,
+    editable:Boolean=false, focusRequestToken:Int=0, resultStyle:Boolean=false,
 ) {
     Row(Modifier.fillMaxWidth().heightIn(min=72.dp)
         .padding(start=8.dp,end=20.dp,top=8.dp,bottom=8.dp),
@@ -748,8 +771,42 @@ private fun P18SearchTopBar(
         horizontalArrangement=Arrangement.spacedBy(4.dp)) {
         P18Back(onBack)
         if(query.isNotEmpty() || editable) {
-            P18SearchField(query,onQuery,onSubmit,
+            if(resultStyle) P18ResultSearchField(query,onQuery,onSubmit,Modifier.weight(1f))
+            else P18SearchField(query,onQuery,onSubmit,
                 modifier=Modifier.weight(1f),focusRequestToken=focusRequestToken)
+        }
+    }
+}
+
+/** Result-only HTML field: 48dp, 14sp, clear and submit on the right. Home/chooser stay unchanged. */
+@Composable
+private fun P18ResultSearchField(query: String, onQuery: (String) -> Unit, onSubmit: () -> Unit, modifier: Modifier) {
+    val focus = remember { FocusRequester() }
+    val keyboard = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
+    var focused by remember { mutableStateOf(false) }
+    fun submit() { keyboard?.hide(); focusManager.clearFocus(); onSubmit() }
+    Row(modifier.heightIn(min=48.dp).background(P18Surface,RoundedCornerShape(12.dp))
+        .border(1.dp,if(focused)P18Gold else P18Line,RoundedCornerShape(12.dp))
+        .padding(start=12.dp,end=4.dp),verticalAlignment=Alignment.CenterVertically) {
+        Box(Modifier.weight(1f),contentAlignment=Alignment.CenterStart) {
+            if(query.isEmpty()) Text("위스키 이름을 입력해 보세요",fontSize=14.sp,color=P18Muted)
+            BasicTextField(query,{onQuery(it.take(100))},singleLine=true,
+                textStyle=MaterialTheme.typography.bodyMedium.copy(color=P18Text,fontSize=14.sp),
+                cursorBrush=androidx.compose.ui.graphics.SolidColor(P18Gold),
+                modifier=Modifier.fillMaxWidth().padding(vertical=8.dp).focusRequester(focus)
+                    .onFocusChanged {focused=it.isFocused}.testTag("customer-search-field"),
+                keyboardOptions=KeyboardOptions(imeAction=ImeAction.Search),
+                keyboardActions=KeyboardActions(onSearch={submit()}))
+        }
+        Box(Modifier.size(width=38.dp,height=44.dp).clickable {
+                onQuery(""); focus.requestFocus(); keyboard?.show()
+            }.semantics {contentDescription="검색어 지우기"},contentAlignment=Alignment.Center) {
+            BmLineIcon(BmLineIconId.CLOSE,17.dp,P18Muted)
+        }
+        Box(Modifier.size(width=38.dp,height=44.dp).clickable {submit()}
+            .semantics {contentDescription="검색"},contentAlignment=Alignment.Center) {
+            BmIcon(BmIconId.SEARCH,null,Modifier.size(21.dp),tint=P18Muted)
         }
     }
 }

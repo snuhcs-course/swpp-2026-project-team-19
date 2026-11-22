@@ -22,12 +22,43 @@ val kakaoNativeAppKey = providers.gradleProperty("BOTTLEMAP_KAKAO_NATIVE_APP_KEY
     .orElse("")
     .get()
 
+/** Optional during configuration so debug builds and CI need no release secrets. */
+val releaseSigningValues = listOf(
+    "BOTTLEMAP_RELEASE_STORE_FILE",
+    "BOTTLEMAP_RELEASE_STORE_PASSWORD",
+    "BOTTLEMAP_RELEASE_KEY_ALIAS",
+    "BOTTLEMAP_RELEASE_KEY_PASSWORD",
+).associateWith { providers.gradleProperty(it).orNull }
+val releaseKeystoreFile = releaseSigningValues["BOTTLEMAP_RELEASE_STORE_FILE"]
+    ?.takeIf { it.isNotBlank() }?.let { file(it) }
+val validateReleaseSigning = tasks.register("validateReleaseSigning") {
+    group = "verification"
+    description = "Require local upload signing settings before a release build."
+    doLast {
+        val missing = releaseSigningValues.filterValues { it.isNullOrBlank() }.keys
+        check(missing.isEmpty()) {
+            "Missing release signing properties: " + missing.joinToString() +
+                ". Set them in your user Gradle properties."
+        }
+        check(releaseKeystoreFile?.isFile == true) {
+            "Release keystore file does not exist. Check BOTTLEMAP_RELEASE_STORE_FILE."
+        }
+    }
+}
+// Fail before a release artifact can silently be produced unsigned.
+tasks.matching { it.name == "preReleaseBuild" }.configureEach {
+    dependsOn(validateReleaseSigning)
+}
+
 android {
     namespace = "com.zerotoone.bottlemap"
     compileSdk = 37
 
     defaultConfig {
         applicationId = "com.zerotoone.bottlemap"
+        buildConfigField("String", "PRIVACY_POLICY_URL", stringBuildConfigValue(
+            providers.gradleProperty("BOTTLEMAP_PRIVACY_POLICY_URL")
+                .orElse("https://bottlemap.o-r.kr/privacy").get()))
         minSdk = 26
         targetSdk = 36
         versionCode = 1
@@ -37,6 +68,16 @@ android {
         buildConfigField("String", "SUPABASE_URL", stringBuildConfigValue(supabaseUrl))
         buildConfigField("String", "SUPABASE_PUBLISHABLE_KEY", stringBuildConfigValue(supabasePublishableKey))
         buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", stringBuildConfigValue(googleWebClientId))
+    }
+
+    // Values and the upload keystore stay outside Git.
+    signingConfigs {
+        create("release") {
+            storeFile = releaseKeystoreFile
+            storePassword = releaseSigningValues["BOTTLEMAP_RELEASE_STORE_PASSWORD"]
+            keyAlias = releaseSigningValues["BOTTLEMAP_RELEASE_KEY_ALIAS"]
+            keyPassword = releaseSigningValues["BOTTLEMAP_RELEASE_KEY_PASSWORD"]
+        }
     }
 
     // One APK for customer and owner flows.
@@ -52,6 +93,7 @@ android {
         }
         release {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("release")
             buildConfigField("String", "API_BASE_URL", "\"$releaseApiBaseUrl\"")
         }
     }
@@ -74,6 +116,9 @@ android {
     testOptions {
         unitTests.isIncludeAndroidResources = true
         unitTests.all {
+            // Robolectric resolves SDK jars separately from Gradle repositories.
+            // Use the canonical Central endpoint; repo1 returned HTTP 429 in CI.
+            it.systemProperty("robolectric.dependency.repo.url", "https://repo.maven.apache.org/maven2")
             val screenshots = providers.gradleProperty("bmUxScreenshots").orNull == "true"
             if (!screenshots) {
                 it.filter.excludeTestsMatching("com.zerotoone.bottlemap.ux.UxV18ScreenshotTest")

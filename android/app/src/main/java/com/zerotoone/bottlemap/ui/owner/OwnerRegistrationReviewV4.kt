@@ -69,12 +69,17 @@ internal fun RegistrationReviewDetails(
         if(values.representativePhotoCount!=null) {
             RegistrationRow("대표 사진","${values.representativePhotoCount}장",edit("barphoto"))
             RegistrationRow("주소",values.address.orEmpty(),edit("address"))
-            RegistrationRow("전화번호",values.phone?.ifBlank { "없음" } ?: "없음",edit("barphone"))
         }
+        if(!values.phone.isNullOrBlank()) RegistrationRow("전화번호",values.phone,edit("barphone"),hint="손님에게 보여요")
         // Menu and contact ARE rows, not another section/empty-label row. This
         // gives them the exact 48dp min height and vertical center of photo.
         RegistrationRow("메뉴판","${values.menuPhotoCount}장",edit("menus"))
-        RegistrationRow("연락처",values.contact,edit("contact"))
+    }
+    Column(verticalArrangement=Arrangement.spacedBy(4.dp),modifier=Modifier.fillMaxWidth()) {
+        Text("신청자",color=RegistrationV4.secondary,fontSize=14.sp)
+        RegistrationRow("연락처",values.contact,edit("contact"),hint=
+            if(!values.phone.isNullOrBlank() && ownerPhoneDigits(values.phone)==ownerPhoneDigits(values.contact))
+                "운영팀 연락 · 손님에게도 공개" else "운영팀 연락용")
     }
     Row(Modifier.fillMaxWidth().heightIn(min=56.dp)
         .background(RegistrationV4.surface,RoundedCornerShape(12.dp))
@@ -84,7 +89,8 @@ internal fun RegistrationReviewDetails(
         verticalAlignment=Alignment.CenterVertically) {
         RegistrationGlyph("info",color=RegistrationV4.primary,size=20.dp)
         androidx.compose.foundation.layout.Spacer(Modifier.padding(start=6.dp))
-        Text("운영팀 승인 전에는 매장과 메뉴가 손님에게 보이지 않아요.",
+        Text(if(values.representativePhotoCount==null) "기존 매장은 그대로 보여요. 신청 내용은 운영팀이 확인해요."
+            else "운영팀 승인 전에는 새 매장과 메뉴가 손님에게 보이지 않아요.",
             color=RegistrationV4.secondary,fontSize=14.sp,lineHeight=20.sp,
             textAlign=TextAlign.Center)
     }

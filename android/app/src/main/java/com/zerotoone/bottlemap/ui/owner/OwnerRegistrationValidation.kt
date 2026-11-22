@@ -1,5 +1,6 @@
 package com.zerotoone.bottlemap.ui.owner
 
+import com.zerotoone.bottlemap.ui.common.actionErrorMessage
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.TimeZone
@@ -70,3 +71,9 @@ internal fun ownerRegistrationPrecheckError(
         "개업일을 YYYY-MM-DD 형식으로 확인해 주세요."
     else -> null
 }
+
+internal fun certificateOcrFailureMessage(error: Throwable): String? =
+    if (error is com.zerotoone.bottlemap.network.BottleMapApiException &&
+        (error.code == "RATE_LIMITED" || error.httpStatus == 429))
+        "오늘은 사업자등록증 사진을 더 읽을 수 없어요. 아래에서 직접 입력해 주세요."
+    else error.actionErrorMessage("사업자등록증을 읽지 못했어요. 직접 입력해 주세요.")

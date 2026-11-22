@@ -47,8 +47,8 @@ class OwnerOnboardingValidationTest {
             initialMenuPhotos = listOf(menu), resumePageKey = "MENUS"
         )
         assertEquals("MENUS", registrationResumePage(draft))
-        assertEquals("BARPHONE", registrationHistoryFor("MENUS", draft.kind).last())
-        assertEquals("ADDRESS", registrationHistoryFor("BARPHONE", draft.kind).last())
+        assertEquals("ADDRESS", registrationHistoryFor("MENUS", draft.kind).last())
+        assertEquals("CONTACT", registrationHistoryFor("BARPHONE", draft.kind).last())
     }
 
     @Test fun migratedDraftWithPhotosDoesNotJumpToContact() {
@@ -107,7 +107,7 @@ class OwnerOnboardingValidationTest {
         val backHistory = registrationHistoryFor("BARNAME", newBar) + "BARNAME"
         assertEquals("BARNAME", backHistory.last()) // BARPHOTO Back does not jump to REVIEW.
         assertEquals("BARPHOTO", registrationHistoryFor("ADDRESS", newBar).last())
-        assertEquals("ADDRESS", registrationHistoryFor("BARPHONE", newBar).last())
+        assertEquals("CONTACT", registrationHistoryFor("BARPHONE", newBar).last())
     }
 
     @Test fun debugCandidatesReceiveDifferentIdsAcrossRegistrations() {

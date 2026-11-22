@@ -1,5 +1,18 @@
 package com.zerotoone.bottlemap.ui.owner
 
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.performScrollToNode
+import androidx.compose.ui.test.performTextReplacement
+import androidx.compose.ui.test.performImeAction
+import androidx.compose.ui.test.hasText
+import com.zerotoone.bottlemap.ui.auth.AccountScreen
+import com.zerotoone.bottlemap.ui.auth.AuthUiState
+import com.zerotoone.bottlemap.ui.auth.UserPrivacySettings
+import com.zerotoone.bottlemap.ui.customer.CustomerP18Results
+import com.zerotoone.bottlemap.ui.customer.P18SearchViewModel
+import com.zerotoone.bottlemap.data.CustomerDiscoverySource
+import com.zerotoone.bottlemap.network.*
 import androidx.activity.ComponentActivity
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.CompositionLocalProvider
@@ -10,6 +23,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -30,6 +44,64 @@ import org.junit.runner.RunWith
 class OwnerUxConsistencyComposeTest {
     @get:Rule val compose = createAndroidComposeRule<ComponentActivity>()
 
+    @Test fun welcomeRequiresAgeButNotOptionalUsageForEveryEntry() {
+        val settings=UserPrivacySettings.get(compose.activity)
+        val previous=settings.usageEnabled.value
+        try {
+            settings.setUsageEnabled(false)
+            val calls=mutableListOf<String>()
+            compose.setContent { MaterialTheme {
+                WelcomeScreen({calls+="guest"},{calls+="google"},{calls+="owner"})
+            } }
+            for(tag in listOf("welcome-google","welcome-guest","welcome-owner"))
+                compose.onNodeWithTag(tag).assertIsNotEnabled()
+            compose.onNodeWithTag("welcome-usage-consent").performClick()
+            compose.onNodeWithTag("welcome-google").assertIsNotEnabled()
+            compose.onNodeWithTag("welcome-usage-consent").performClick()
+            compose.onNodeWithTag("welcome-age-confirmation").performClick()
+            for(tag in listOf("welcome-google","welcome-guest","welcome-owner"))
+                compose.onNodeWithTag(tag).assertIsEnabled().performClick()
+            compose.runOnIdle {assertEquals(listOf("google","guest","owner"),calls);assertEquals(false,settings.usageEnabled.value)}
+            compose.onNodeWithTag("welcome-age-confirmation").performClick()
+            compose.onNodeWithTag("welcome-guest").assertIsNotEnabled()
+            compose.onNodeWithTag("welcome-privacy").assertExists()
+        } finally {settings.setUsageEnabled(previous)}
+    }
+
+    @Test fun guestAccountHasPolicyAndQualityControlInApprovedOrder() {
+        compose.setContent { MaterialTheme {
+            AccountScreen(AuthUiState.Guest,{},{},{},{})
+        } }
+        val titles=listOf("공지사항","문의하기","개인정보처리방침","사용 기록 보내기")
+        val tops=titles.map {compose.onNodeWithText(it).fetchSemanticsNode().boundsInRoot.top}
+        for(i in 1 until tops.size) org.junit.Assert.assertTrue(tops[i]>tops[i-1])
+        compose.onNodeWithText("로그아웃").assertDoesNotExist()
+        compose.onNodeWithTag("account-usage-consent").assertExists()
+    }
+
+    @Test fun selectedWhiskyResultsKeepEditableSearchAboveScrolledRows() {
+        val rows=(0..19).map {i->SearchResultDto("b$i","테스트 매장 $i","주소",37.0,127.0,
+            productId="p",productDisplayName="아드벡 10",menuDisplayName="아드벡 10",
+            options=listOf(SearchOptionDto(pourMl=30,priceKrw=10000+i,sortOrder=0)),menuUpdatedAt="2026-11-22T00:00:00Z")}
+        val source=object:CustomerDiscoverySource {
+            override suspend fun popularProducts(limit:Int)=PopularProductsResponseDto()
+            override suspend fun searchProduct(query:String?,productId:String?,source:String,latitude:Double?,longitude:Double?)=
+                SearchBarsResponseDto(query,"product",listOf(MatchedProductDto("p","아드벡 10","아드벡",resultCount=20)),rows,false)
+        }
+        val vm=P18SearchViewModel(source)
+        var submitted=""
+        compose.setContent { MaterialTheme {
+            CustomerP18Results(null,"p","popular",{},{_,_->},onSearchAgain={submitted=it},viewModel=vm)
+        } }
+        compose.waitUntil(5000) {compose.onAllNodesWithTag("customer-result-list").fetchSemanticsNodes().isNotEmpty()}
+        val top=compose.onNodeWithTag("customer-search-field").fetchSemanticsNode().boundsInRoot.top
+        compose.onNodeWithTag("customer-result-list").performScrollToNode(hasText("테스트 매장 19"))
+        assertEquals(top,compose.onNodeWithTag("customer-search-field").fetchSemanticsNode().boundsInRoot.top,1f)
+        compose.onNodeWithTag("customer-search-field").performTextReplacement("라가불린 16")
+        compose.onNodeWithTag("customer-search-field").performImeAction()
+        compose.runOnIdle {assertEquals("라가불린 16",submitted)}
+    }
+
     private fun jobState(status: MockImportStatus): OwnerMockViewModel {
         val original = OwnerMockFixtures.registeredBar()
         val barId = requireNotNull(original.selectedBarId)
@@ -42,19 +114,17 @@ class OwnerUxConsistencyComposeTest {
         ))
     }
 
-    @Test fun welcomePinIsHalfSizeQuarterScreenCenteredAndTouchesHeadlineTop() {
-        compose.setContent { MaterialTheme {
-            WelcomeScreen(onBrowseAsGuest = {}, onGoogle = {}, onOwner = {})
-        } }
-        val root = compose.onNodeWithTag("welcome-screen").getUnclippedBoundsInRoot()
-        val pin = compose.onNodeWithTag("welcome-pin").getUnclippedBoundsInRoot()
-        val headline = compose.onNodeWithTag("welcome-headline").getUnclippedBoundsInRoot()
-        val horizontalCenter = (pin.left + pin.right) / 2
-        val expectedCenter = root.left + (root.right - root.left) / 4
-        org.junit.Assert.assertTrue(
-            kotlin.math.abs((horizontalCenter - expectedCenter).value) <= 1.5f)
-        org.junit.Assert.assertTrue(kotlin.math.abs((pin.right - pin.left).value - 79f) <= 1f)
-        org.junit.Assert.assertTrue(kotlin.math.abs(pin.bottom.value - headline.top.value) <= 1.5f)
+    @Test fun welcomePinAndHeadlineMatchTheApprovedHtmlStack() {
+        compose.setContent { MaterialTheme { WelcomeScreen({}, {}, {}) } }
+        val root=compose.onNodeWithTag("welcome-screen").getUnclippedBoundsInRoot()
+        val pin=compose.onNodeWithTag("welcome-pin").getUnclippedBoundsInRoot()
+        val headline=compose.onNodeWithTag("welcome-headline").getUnclippedBoundsInRoot()
+        assertEquals(20f,(pin.left-root.left).value,1f)
+        assertEquals(79f,(pin.right-pin.left).value,1f)
+        assertEquals(97f,(pin.bottom-pin.top).value,1f)
+        org.junit.Assert.assertTrue(headline.top >= pin.bottom)
+        val policy=compose.onNodeWithTag("welcome-privacy").getUnclippedBoundsInRoot()
+        assertEquals(18f,(root.bottom-policy.bottom).value,1.5f)
     }
 
     @Test fun approvedBarAlwaysOffersManagementEvenIfInitialReviewPending() {

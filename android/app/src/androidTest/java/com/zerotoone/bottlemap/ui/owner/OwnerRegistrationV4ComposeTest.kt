@@ -1,5 +1,7 @@
 package com.zerotoone.bottlemap.ui.owner
 
+import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertTextEquals
 import androidx.activity.ComponentActivity
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -7,6 +9,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
@@ -384,6 +387,41 @@ class OwnerRegistrationV4ComposeTest {
         compose.onNodeWithText("raw conflict").assertDoesNotExist()
         compose.onNodeWithText("신청을 마쳤어요").assertDoesNotExist()
         compose.runOnIdle { assertEquals(1, submits) }
+    }
+
+    @Test fun contactThenPublicPhoneCopiesExplicitlyAndReviewEditsKeepTheLink() {
+        val draft=MockRegistrationDraft(
+            businessNumberDigits="1234567891",representativeName="김민준",openingDateIso="2019-05-14",
+            proposedBarName="테스트 매장",proposedBarAddress="서울특별시 관악구 봉천로12길 8",
+            applicantGallery=listOf(MockPhoto("cover","content://mock/cover",MockPhotoKind.BAR_GALLERY)),
+            initialMenuPhotos=listOf(MockPhoto("menu","content://mock/menu",MockPhotoKind.MENU_CAPTURE)),
+            resumePageKey="CONTACT")
+        val vm=show(MockOwnerSnapshot(registrationDraft=draft))
+        compose.waitUntil(4000) {compose.onAllNodesWithTag("registration-contact").fetchSemanticsNodes().isNotEmpty()}
+        compose.onNodeWithTag("registration-contact").performTextReplacement("025551234")
+        compose.onNodeWithText("다음").performClick()
+        compose.onNodeWithTag("registration-store-phone").assertExists()
+        compose.onNodeWithText("가게 전화가 없어요").assertDoesNotExist()
+        compose.onNodeWithText("다음").assertIsNotEnabled()
+        compose.onNodeWithTag("registration-use-contact-phone").performClick()
+        compose.onNodeWithTag("registration-store-phone").assertTextEquals("02-555-1234")
+        compose.onNodeWithText("다음").performClick()
+        compose.onNodeWithText("이렇게\n신청할게요").assertExists()
+        compose.runOnIdle {
+            val saved=(vm.state.value as MockOwnerLoadState.Ready).snapshot.registrationDraft!!
+            assertEquals("025551234",saved.storePhone)
+            assertEquals(true,saved.storePhoneMatchesContact)
+        }
+        val edits=compose.onAllNodesWithTag("registration-review-edit")
+        edits[edits.fetchSemanticsNodes().size-1].performScrollTo().performClick()
+        compose.onNodeWithTag("registration-contact").performTextReplacement("07012345678")
+        compose.onNodeWithText("다음").performClick()
+        compose.onNodeWithText("이렇게\n신청할게요").assertExists()
+        compose.runOnIdle {
+            val saved=(vm.state.value as MockOwnerLoadState.Ready).snapshot.registrationDraft!!
+            assertEquals("07012345678",saved.storePhone)
+            assertEquals("07012345678",saved.contactPhone)
+        }
     }
 
     @Test fun completeReviewSubmitsMockPendingApplicationWithoutNtsNetworkCall() {
