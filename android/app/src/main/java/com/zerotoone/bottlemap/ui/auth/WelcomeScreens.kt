@@ -114,40 +114,51 @@ fun WelcomeScreen(
             Image(painterResource(R.drawable.bottlemap_welcome_pin), "위스키 잔을 담은 지도 핀",
                 Modifier.size(width = 79.dp, height = 97.dp).testTag("welcome-pin"),
                 contentScale = ContentScale.Fit, alignment = Alignment.BottomStart)
-            Text("Find the bottle first,\nthen the bar.",
-                style = uxText(28f, 700, UxColor.text, 1.27f, serif = true, letterSpacing = (-0.9).sp),
-                modifier = Modifier.fillMaxWidth().testTag("welcome-headline"))
+
+            // Keep the actions compact and anchored near the bottom; only the
+            // space between the pin and this group expands on tall screens.
             Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
+                Text("Find the bottle first,\\nthen the bar.",
+                    style = uxText(28f, 700, UxColor.text, 1.27f, serif = true, letterSpacing = (-0.9).sp),
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp).testTag("welcome-headline"))
                 UxMainButton("Google로 계속", { enter(onGoogle) }, Modifier.testTag("welcome-google"), ageChecked && !busy)
                 UxSecondaryButton("로그인 없이 둘러보기", { enter(onBrowseAsGuest) }, Modifier.testTag("welcome-guest"), ageChecked && !busy)
                 if (inlineError != null) InlineAlert(inlineError)
-            }
-            Row(Modifier.fillMaxWidth().padding(top = 4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterHorizontally)) {
-                Text("사장님이신가요?", style = uxText(12f, 400, UxColor.muted))
-                Box(Modifier.heightIn(min = 48.dp).quietClick(ageChecked && !busy) { enter(onOwner) }
-                    .testTag("welcome-owner"), contentAlignment = Alignment.Center) {
-                    Text("매장 등록하기", style = uxText(12f, 700, UxColor.gold))
+
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterHorizontally)) {
+                    Text("사장님이신가요?", style = uxText(12f, 400, UxColor.muted))
+                    Box(Modifier.heightIn(min = 48.dp).quietClick(ageChecked && !busy) { enter(onOwner) }
+                        .testTag("welcome-owner"), contentAlignment = Alignment.Center) {
+                        Text("매장 등록하기", style = uxText(12f, 700, UxColor.gold))
+                    }
+                }
+
+                Row(Modifier.fillMaxWidth().padding(top = 3.dp),
+                    horizontalArrangement = Arrangement.spacedBy(if (narrow) 6.dp else 12.dp),
+                    verticalAlignment = Alignment.Top) {
+                    Box(Modifier.weight(1f)) {
+                        WelcomeCheck("만 18세 이상인가요?", ageChecked, { ageChecked = it },
+                            "welcome-age-confirmation", narrow)
+                    }
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(0.dp)) {
+                        WelcomeCheck("사용 기록 보내기", usageEnabled, privacy::setUsageEnabled,
+                            "welcome-usage-consent", narrow)
+                        Text("사용 기록은 앱 개선에 사용해요.",
+                            style = uxText(11f, 400, UxColor.muted),
+                            modifier = Modifier.padding(start = 25.dp),
+                            textAlign = TextAlign.Start)
+                    }
+                }
+
+                Box(Modifier.fillMaxWidth().padding(top = 12.dp),
+                    contentAlignment = Alignment.Center) {
+                    Text("개인정보처리방침", style = uxText(11f, 400, UxColor.sub),
+                        textDecoration = TextDecoration.Underline,
+                        modifier = Modifier.quietClick { openPrivacyPolicy(context, onNotice) }
+                            .padding(6.dp).testTag("welcome-privacy"))
                 }
             }
-            Row(Modifier.fillMaxWidth().padding(top = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(if(narrow) 10.dp else 16.dp, Alignment.CenterHorizontally),
-                verticalAlignment = Alignment.CenterVertically) {
-                WelcomeCheck("만 18세 이상인가요?", ageChecked, { ageChecked = it },
-                    "welcome-age-confirmation", narrow)
-                WelcomeCheck("사용 기록 보내기", usageEnabled, privacy::setUsageEnabled,
-                    "welcome-usage-consent", narrow)
-            }
-            Text("사용 기록은 앱 개선에 사용해요.", style = uxText(11f, 400, UxColor.muted),
-                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp), textAlign = TextAlign.Center)
-            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                Text("개인정보처리방침", style = uxText(11f, 400, UxColor.sub),
-                    textDecoration = TextDecoration.Underline,
-                    modifier = Modifier.quietClick { openPrivacyPolicy(context, onNotice) }
-                        .padding(6.dp).testTag("welcome-privacy"))
-            }
-        }
         }
     }
 }
