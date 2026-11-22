@@ -7,7 +7,7 @@ import {
   manualEditorCategory,
   manualProductProposal,
 } from "./catalogMatch";
-import { editDraftOf, EDIT_BLOCKED, freshExactMatch, prepareMenuSave, SaveRefused, toOption, type DraftOption, type SaveInput } from "./menuEditor";
+import { editDraftOf, EDIT_BLOCKED, freshExactMatch, prepareMenuSave, rebaseDraft, SaveRefused, toOption, type DraftOption, type SaveInput } from "./menuEditor";
 import { ownerAddMenuIdentity } from "./menuIdentity";
 import {
   MAX_OWNER_MENU_PRICE_KRW,
@@ -382,6 +382,46 @@ describe("saving an item (OwnerManualMenuScreen.kt save)", () => {
     expect(save([]).map((value) => value.discount)).toEqual([null, null, running]);
     // The server said the third ended too (the device clock is behind): it is left out as well.
     expect(save(["third"]).map((value) => value.discount)).toEqual([null, null, null]);
+  });
+
+  it("moves an edit onto the item as it is now, keeping what was typed (MENU_OUTDATED, Codex review on #199)", () => {
+    const running = { discountedPriceKrw: 14000, startsAt: "2026-11-01T00:00:00Z", endsAt: "2099-12-01T00:00:00Z" };
+    const opened = item({
+      productId: "p",
+      category: "whisky",
+      displayName: "Glenfiddich 12",
+      options: [menuOption("glass", "잔", 30, 17000), menuOption("bottle", "병", null, 160000), menuOption("half", "하프", 15, 9000)],
+    });
+    const start = editDraftOf(opened)!;
+    // The owner typed the glass and half prices; elsewhere the glass got a discount, the bottle a new price,
+    // the half was removed and the name changed.
+    const typed = { ...start, options: start.options.map((row) => (row.id === "glass" ? { ...row, price: "18000" } : row.id === "half" ? { ...row, price: "9500" } : row)) };
+    const fresh = editDraftOf({
+      ...opened,
+      displayName: "글렌피딕 12",
+      options: [{ ...menuOption("glass", "잔", 30, 17000), discount: running }, menuOption("bottle", "병", null, 165000)],
+    })!;
+
+    const rebased = rebaseDraft(start, typed, fresh);
+
+    expect(rebased.name).toBe("글렌피딕 12");
+    expect(rebased.options.map(({ id, ml, price, discount }) => ({ id: id.startsWith("local-") ? "local" : id, ml, price, discount }))).toEqual([
+      { id: "glass", ml: "30", price: "18000", discount: running },
+      { id: "bottle", ml: "", price: "165000", discount: null },
+      // Typed in, so kept as a new option.
+      { id: "local", ml: "15", price: "9500", discount: null },
+    ]);
+  });
+
+  it("keeps a typed name and takes options added or removed elsewhere when the rows were not typed in", () => {
+    const opened = item({ productId: "p", category: "whisky", displayName: "Glenfiddich 12", options: [menuOption("glass", "잔", 30, 17000), menuOption("bottle", "병", null, 160000)] });
+    const start = editDraftOf(opened)!;
+    const fresh = editDraftOf({ ...opened, options: [menuOption("glass", "잔", 30, 17000), menuOption("double", "더블", 60, 30000)] })!;
+
+    const rebased = rebaseDraft(start, { ...start, name: "글렌피딕" }, fresh);
+
+    expect(rebased.name).toBe("글렌피딕");
+    expect(rebased.options.map((row) => row.id)).toEqual(["glass", "double"]);
   });
 
   it("asks to confirm an exact active product before adding a whisky without one", () => {

@@ -32,7 +32,9 @@ import {
   freshOption,
   MAX_NAME_LENGTH,
   prepareMenuSave,
+  rebaseDraft,
   SaveRefused,
+  type Draft,
   type DraftOption,
   type SaveRequest,
 } from "./menuEditor";
@@ -134,15 +136,17 @@ function useDebounced<T>(value: T, ms: number): T {
   return debounced;
 }
 
-function ItemForm({ menu, editing, locked }: { menu: BarMenu; editing: MenuItem | undefined; locked: boolean }) {
+function ItemForm({ menu, editing: opened, locked }: { menu: BarMenu; editing: MenuItem | undefined; locked: boolean }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { api } = useSession();
   const write = useMenuWrite(menu.barId);
   const back = `/bars/${menu.barId}/menu`;
-  const [start] = useState(() => {
-    const draft = editing ? editDraftOf(editing) : null;
-    return draft ?? { name: "", category: "위스키" as MenuCategory, options: [freshOption()] };
+  // The item edited, as last read: after MENU_OUTDATED, as it is now.
+  const [editing, setEditing] = useState(opened);
+  const [start, setStart] = useState<Draft>(() => {
+    const draft = opened ? editDraftOf(opened) : null;
+    return draft ?? { name: "", category: "위스키", options: [freshOption()] };
   });
   const [name, setName] = useState(start.name);
   const [category, setCategory] = useState<MenuCategory>(start.category);
@@ -262,10 +266,27 @@ function ItemForm({ menu, editing, locked }: { menu: BarMenu; editing: MenuItem 
     switch (failure.code) {
       case "VALIDATION_FAILED":
         return showFieldErrors(failure, request);
-      case "MENU_OUTDATED":
-        // The menu was read again: keep what is typed, and save on the version now current.
-        setVersion(queryClient.getQueryData<BarMenu>(ownerQueryKeys.menu(menu.barId))?.menuVersion ?? version);
+      case "MENU_OUTDATED": {
+        // The menu was read again: save on the version now current, keeping what is typed. An edit moves onto
+        // the item as it is now, so that what changed elsewhere and was not typed here is not undone.
+        const fresh = queryClient.getQueryData<BarMenu>(ownerQueryKeys.menu(menu.barId));
+        if (!fresh) return setError(OUTDATED);
+        setVersion(fresh.menuVersion);
+        if (editing) {
+          const now = fresh.items.find((item) => item.barMenuItemId === editing.barMenuItemId);
+          if (!now) return leave({ notice: "이미 메뉴판에서 빠진 메뉴예요." });
+          const next = editDraftOf(now);
+          if (!next) return leave({ notice: EDIT_BLOCKED });
+          const rebased = rebaseDraft(start, { name, category, options }, next);
+          setEditing(now);
+          setStart(next);
+          setName(rebased.name);
+          setCategory(rebased.category);
+          setOptions(rebased.options);
+          setEndedDiscounts([]);
+        }
         return setError(OUTDATED);
+      }
       case "MENU_ITEM_NOT_FOUND":
         return leave({ notice: writeFailureMessage(failure) ?? undefined });
       case "MENU_ITEM_EXISTS": {

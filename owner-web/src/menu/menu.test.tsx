@@ -915,6 +915,78 @@ describe("editing an item (spec 3.14.4, 3.14.5)", () => {
     expect(screen.queryByText("이미 메뉴판에서 빠진 메뉴예요.")).not.toBeInTheDocument();
   });
 
+  it("saves again on the item as it is now, so a change elsewhere is not undone (409 MENU_OUTDATED, Codex review on #199)", async () => {
+    const running = { discountedPriceKrw: 14000, startsAt: "2026-11-01T00:00:00Z", endsAt: "2099-12-01T00:00:00Z" };
+    const api = menuServer([glenfiddich, unlinked]);
+    const { router } = await openEdit("gf-item");
+    // Another device puts a discount on the glass and a new price on the bottle.
+    api.changeElsewhere([{ ...glenfiddich, options: [option("gf-glass", "잔", 30, 17000, running), option("gf-bottle", "병", null, 165000)] }, unlinked]);
+    await user().clear(within(optionGroup(1)).getByLabelText("가격 (원)"));
+    await user().type(within(optionGroup(1)).getByLabelText("가격 (원)"), "18000");
+    await save("저장하기");
+
+    expect(await screen.findByText("메뉴가 다른 곳에서 바뀌었어요. 확인한 뒤 다시 저장해 주세요.")).toBeInTheDocument();
+    expect(optionGroup(1)).toHaveTextContent("할인 14,000원");
+    await save("저장하기");
+
+    await atMenuList(router);
+    expect(api.writes()[1]?.body).toEqual({
+      menuVersion: 5,
+      displayName: "Glenfiddich 12",
+      // The typed glass price, with the discount and the bottle price set elsewhere.
+      options: [
+        { optionLabel: "잔", pourMl: 30, priceKrw: 18000, discount: running },
+        { optionLabel: "병", pourMl: null, priceKrw: 165000, discount: null },
+      ],
+    });
+  });
+
+  it("sends back a hidden option as it is now after a change elsewhere (409 MENU_OUTDATED)", async () => {
+    const highball = item({ barMenuItemId: "highball", kind: "other", displayName: "하이볼", options: [option("hb-glass", "잔", null, 8000), option("hb-pitcher", "피처", null, 30000)] });
+    const api = menuServer([highball]);
+    const { router } = await openEdit("highball");
+    api.changeElsewhere([{ ...highball, options: [option("hb-glass", "잔", null, 8000), option("hb-pitcher", "피처", null, 32000)] }]);
+    await user().type(screen.getByLabelText("메뉴 이름"), " 2");
+    await save("저장하기");
+    await screen.findByText("메뉴가 다른 곳에서 바뀌었어요. 확인한 뒤 다시 저장해 주세요.");
+
+    await save("저장하기");
+
+    await atMenuList(router);
+    expect(api.writes()[1]?.body).toEqual({
+      menuVersion: 5,
+      displayName: "하이볼 2",
+      options: [
+        { optionLabel: "잔", pourMl: null, priceKrw: 8000, discount: null },
+        { optionLabel: "피처", pourMl: null, priceKrw: 32000, discount: null },
+      ],
+    });
+  });
+
+  it("goes back to the list when the item was removed elsewhere (409 MENU_OUTDATED)", async () => {
+    const api = menuServer([glenfiddich, unlinked]);
+    const { router } = await openEdit("local-item");
+    api.changeElsewhere([glenfiddich]);
+    await user().type(screen.getByLabelText("메뉴 이름"), " 2");
+    await save("저장하기");
+
+    await atMenuList(router);
+    expect(await screen.findByText("이미 메뉴판에서 빠진 메뉴예요.")).toBeInTheDocument();
+    expect(api.writes()).toHaveLength(1);
+  });
+
+  it("goes back to the list when the item got four options elsewhere (409 MENU_OUTDATED)", async () => {
+    const api = menuServer([glenfiddich, unlinked]);
+    const { router } = await openEdit("gf-item");
+    api.changeElsewhere([{ ...glenfiddich, options: [...glenfiddich.options, option("gf-half", "하프", 15, 9000), option("gf-double", "더블", 60, 32000)] }, unlinked]);
+    await user().type(screen.getByLabelText("메뉴 이름"), " 2");
+    await save("저장하기");
+
+    await atMenuList(router);
+    expect(await screen.findByText("이 메뉴는 가격 옵션이 4개 이상이어서 직접 수정할 수 없어요. 기존 메뉴는 유지됩니다.")).toBeInTheDocument();
+    expect(api.writes()).toHaveLength(1);
+  });
+
   it("goes back to the list when the item is gone (404 MENU_ITEM_NOT_FOUND)", async () => {
     menuServer([glenfiddich, unlinked], {
       answer: ({ method }) =>

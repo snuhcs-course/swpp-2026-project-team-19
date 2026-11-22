@@ -103,12 +103,46 @@ export const EDIT_BLOCKED = "이 메뉴는 가격 옵션이 4개 이상이어서
 export const ALREADY_ON_MENU = "이미 등록한 상품이에요. 기존 메뉴에서 용량, 가격을 수정해 주세요.";
 export const MAX_NAME_LENGTH = 80;
 
+/** What the editor holds: the name, the kind and the option rows. */
+export interface Draft {
+  name: string;
+  category: MenuCategory;
+  options: DraftOption[];
+}
+
 /** `edit(item)`: the kind and options an item opens with; null when it has more options than the editor takes. */
-export function editDraftOf(item: MenuItem): { name: string; category: MenuCategory; options: DraftOption[] } | null {
+export function editDraftOf(item: MenuItem): Draft | null {
   if (item.options.length > MANUAL_MENU_MAX_OPTIONS) return null;
   const category = manualEditorCategory(menuProductOf(item));
   const limit = category === "위스키" ? MANUAL_MENU_MAX_OPTIONS : 1;
   return { name: item.displayName, category, options: item.options.slice(0, limit).map(fromSaved) };
+}
+
+const sameTyping = (a: DraftOption, b: DraftOption) => a.bottle === b.bottle && a.ml === b.ml && a.price === b.price;
+
+/**
+ * After MENU_OUTDATED (spec 3.14.1), the edit is moved onto the item as it is now (`fresh`, its `editDraftOf`),
+ * so that saving again does not undo what changed elsewhere: what the owner changed since `start` stays as
+ * typed, and the rest takes the new values. A saved row keeps the option's discount as it is now, which this
+ * editor does not change (I5-P8). A row whose option was removed elsewhere goes too, unless the owner typed
+ * in it; then it stays as a new option. Options added elsewhere are added after the rows. Not in the app,
+ * which does not handle MENU_OUTDATED (Codex review on #199).
+ */
+export function rebaseDraft(start: Draft, current: Draft, fresh: Draft): Draft {
+  const before = new Map(start.options.map((option) => [option.id, option]));
+  const now = new Map(fresh.options.map((option) => [option.id, option]));
+  const rows = current.options.flatMap((row) => {
+    const opened = before.get(row.id);
+    if (!opened) return [row];
+    const saved = now.get(row.id);
+    if (saved) return [sameTyping(row, opened) ? saved : { ...row, discount: saved.discount }];
+    return sameTyping(row, opened) ? [] : [{ ...freshOption(), bottle: row.bottle, ml: row.ml, price: row.price }];
+  });
+  return {
+    name: current.name === start.name ? fresh.name : current.name,
+    category: current.category === start.category ? fresh.category : current.category,
+    options: [...rows, ...fresh.options.filter((option) => !before.has(option.id))],
+  };
 }
 
 export interface SaveInput {
