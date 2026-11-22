@@ -71,6 +71,25 @@ export function inactiveOwnerCatalogMatch(products: readonly MenuProduct[], menu
 }
 
 /**
+ * The inactive product that stops a name from being added: only when no active catalog product has that exact
+ * name or alias. The catalog search returns inactive rows beside active ones (spec 7.2: shown, not chosen), so
+ * an inactive duplicate must not hide the active product it duplicates. The app checks the inactive match alone
+ * (OwnerManualMenuScreen.kt); see data/android 수정 필요 사항.md item 12.
+ */
+export function blockingInactiveMatch(products: readonly MenuProduct[], menuName: string): MenuProduct | null {
+  const inactive = inactiveOwnerCatalogMatch(products, menuName);
+  if (!inactive) return null;
+  const normalized = normalizeOwnerCatalogName(menuName);
+  const active = products.some(
+    (product) =>
+      product.catalogMatched &&
+      product.isActive &&
+      (normalizeOwnerCatalogName(product.displayName) === normalized || normalizeOwnerCatalogName(product.matchedAlias ?? "") === normalized),
+  );
+  return active ? null : inactive;
+}
+
+/**
  * The one product to propose for a menu name: an exact name or alias, else a single product whose name holds
  * a name of 4 or more characters, else (with the brand known) the single product of that brand and age.
  */

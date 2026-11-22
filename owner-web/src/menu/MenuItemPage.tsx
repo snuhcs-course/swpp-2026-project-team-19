@@ -22,7 +22,7 @@ import { BottomSheet } from "../ui/BottomSheet";
 import { Button, ButtonLink } from "../ui/Button";
 import { ErrorState } from "../ui/states";
 import { TextField } from "../ui/TextField";
-import { inactiveOwnerCatalogMatch, manualBrandProposal, manualBrandSearchQuery, manualProductProposal } from "./catalogMatch";
+import { blockingInactiveMatch, manualBrandProposal, manualBrandSearchQuery, manualProductProposal } from "./catalogMatch";
 import {
   ALREADY_ON_MENU,
   confirmFirst,
@@ -161,6 +161,7 @@ function ItemForm({ menu, editing, locked }: { menu: BarMenu; editing: MenuItem 
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [checking, setChecking] = useState(false);
+  const [endedDiscounts, setEndedDiscounts] = useState<string[]>([]);
   const busy = write.pending || checking;
   const dirty = name !== start.name || category !== start.category || JSON.stringify(options) !== JSON.stringify(start.options);
   const guard = useLeaveGuard(dirty, busy);
@@ -189,7 +190,7 @@ function ItemForm({ menu, editing, locked }: { menu: BarMenu; editing: MenuItem 
   ).reverse();
   const matchedBrandId = confirmedBrandId ?? manualBrandProposal(brands, name, "", null)?.brandId ?? null;
   const suggested = proposing ? manualProductProposal(candidates, name, category, matchedBrandId, rejectedId) : null;
-  const inactive = proposing ? inactiveOwnerCatalogMatch(candidates, name) : null;
+  const inactive = proposing ? blockingInactiveMatch(candidates, name) : null;
   const linkedOnMenu = proposing && linkedId ? existingBarProductMenu(menu.items, linkedId) : undefined;
 
   function clearProblems() {
@@ -219,7 +220,7 @@ function ItemForm({ menu, editing, locked }: { menu: BarMenu; editing: MenuItem 
     clearProblems();
     let request: SaveRequest;
     try {
-      request = prepareMenuSave({ items: menu.items, editing, name, category, options, linkedId, rejectedId, candidates, now: Date.now() });
+      request = prepareMenuSave({ items: menu.items, editing, name, category, options, linkedId, rejectedId, candidates, now: Date.now(), endedDiscounts });
     } catch (failure) {
       if (failure instanceof SaveRefused) {
         setError(failure.message);
@@ -293,12 +294,17 @@ function ItemForm({ menu, editing, locked }: { menu: BarMenu; editing: MenuItem 
       else next.options ??= message;
     }
     // Spec 3.14.2: a discount that ended after the editor opened is left out the next time.
-    const ended = failure.fieldErrors.flatMap((item) => {
+    const endedFields = failure.fieldErrors.flatMap((item) => {
       const index = item.code === "DISCOUNT_ENDED" ? /^options\[(\d+)\]/.exec(item.path)?.[1] : undefined;
       return index === undefined ? [] : [Number(index)];
     });
-    if (ended.length) {
-      setOptions((current) => current.map((option, index) => (ended.includes(index) ? { ...option, discount: null } : option)));
+    if (endedFields.length) {
+      // An option shown drops it from its row; a saved option the editor does not show (the extra prices of a
+      // non-whisky item, sent back in their saved order after the shown one) is remembered by its ID.
+      const shown = endedFields.filter((index) => index < request.shown);
+      const hidden = endedFields.flatMap((index) => (index >= request.shown ? [editing?.options[index]?.menuEntryOptionId ?? ""] : [])).filter(Boolean);
+      setOptions((current) => current.map((option, index) => (shown.includes(index) ? { ...option, discount: null } : option)));
+      if (hidden.length) setEndedDiscounts((current) => [...current, ...hidden]);
       void queryClient.invalidateQueries({ queryKey: ownerQueryKeys.menu(menu.barId), refetchType: "all" });
     }
     setProblems(next);

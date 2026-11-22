@@ -1,5 +1,5 @@
 import type { components } from "../api/schema";
-import { inactiveOwnerCatalogMatch, manualEditorCategory, normalizeOwnerCatalogName } from "./catalogMatch";
+import { blockingInactiveMatch, manualEditorCategory, normalizeOwnerCatalogName } from "./catalogMatch";
 import { ownerAddMenuIdentity, type AddIdentity } from "./menuIdentity";
 import {
   MANUAL_MENU_MAX_OPTIONS,
@@ -124,6 +124,8 @@ export interface SaveInput {
   /** The products the proposals came from: catalog search results and the menu's own. */
   candidates: readonly MenuProduct[];
   now: number;
+  /** Saved options whose discount the server said has ended (422 DISCOUNT_ENDED), left out from now on. */
+  endedDiscounts?: readonly string[];
 }
 
 export type SaveRequest =
@@ -158,7 +160,7 @@ const toInput = (option: OptionValue): MenuOptionInput => ({
 export function prepareMenuSave(input: SaveInput): SaveRequest {
   const { items, editing, category, rejectedId, candidates, now } = input;
   const name = input.name.trim();
-  if (!editing && category === "위스키" && inactiveOwnerCatalogMatch(candidates, name)) {
+  if (!editing && category === "위스키" && blockingInactiveMatch(candidates, name)) {
     throw new SaveRefused("운영이 중지된 카탈로그 상품이에요. 운영자에게 문의해 주세요.");
   }
   const persisted = editing ? menuProductOf(editing) : null;
@@ -196,7 +198,12 @@ export function prepareMenuSave(input: SaveInput): SaveRequest {
   const optionError = manualMenuOptionError(edited, categoryCode, saved);
   if (optionError) throw new SaveRefused(optionError);
   const limit = whisky ? MANUAL_MENU_MAX_OPTIONS : 1;
-  const tail = editing && editing.options.length > limit ? saved.slice(limit) : [];
+  // The saved options the editor does not show go back as they are, but without a discount that has ended
+  // (spec 3.14.2), as for the options shown.
+  const ended = new Set(input.endedDiscounts ?? []);
+  const tail = (editing && editing.options.length > limit ? saved.slice(limit) : []).map((option) =>
+    option.discount && (Date.parse(option.discount.endsAt) <= now || ended.has(option.optionId)) ? { ...option, discount: null } : option,
+  );
   const options = [...edited, ...tail].map(toInput);
   if (editing) {
     return { kind: "edit", barMenuItemId: editing.barMenuItemId, body: { displayName: name, options }, shown: edited.length };

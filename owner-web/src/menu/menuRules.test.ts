@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  blockingInactiveMatch,
   inactiveOwnerCatalogMatch,
   manualBrandProposal,
   manualBrandSearchQuery,
@@ -175,6 +176,13 @@ describe("catalog proposals (OwnerManualCatalogMatchTest.kt)", () => {
     const beer = product({ productId: "beer-1", brandId: "brewery", displayName: "수제 맥주", category: "맥주" });
     expect(manualEditorCategory(beer)).toBe("기타 주류");
     expect(manualProductProposal([beer], "수제 맥주", "기타 주류", null, null)).toEqual(beer);
+  });
+
+  it("lets an active product through when an inactive duplicate has the same name (Codex review on #199)", () => {
+    const inactive = { ...twelve, productId: "old-12", isActive: false };
+    expect(blockingInactiveMatch([inactive], "Glenfiddich 12 Year Old")).toEqual(inactive);
+    expect(blockingInactiveMatch([inactive, twelve], "Glenfiddich 12 Year Old")).toBeNull();
+    expect(manualProductProposal([inactive, twelve], "Glenfiddich 12 Year Old", "위스키", null, null)).toEqual(twelve);
   });
 
   it("missingBrandConfirmationDoesNotInferEnglishProductId", () => {
@@ -356,6 +364,24 @@ describe("saving an item (OwnerManualMenuScreen.kt save)", () => {
     const ended = { ...running, endsAt: "2026-11-21T00:00:00Z" };
     expect(toOption({ ...glass, discount: running }, true, undefined, true, now).discount).toEqual(running);
     expect(toOption({ ...glass, discount: ended }, true, undefined, true, now).discount).toBeNull();
+  });
+
+  it("leaves out an ended discount on a saved option the editor does not show (Codex review on #199)", () => {
+    const now = Date.parse("2026-11-22T00:00:00Z");
+    const ended = { discountedPriceKrw: 3000, startsAt: "2026-11-01T00:00:00Z", endsAt: "2026-11-21T00:00:00Z" };
+    const running = { ...ended, endsAt: "2026-12-01T00:00:00Z" };
+    const cocktail = item({
+      barMenuItemId: "cocktail",
+      kind: "other",
+      displayName: "하이볼",
+      options: [menuOption("first", "잔", null, 8000), { ...menuOption("second", "피처", null, 30000), discount: ended }, { ...menuOption("third", "병", null, 9000), discount: running }],
+    });
+    const draft = editDraftOf(cocktail)!;
+    const save = (endedDiscounts: string[]) =>
+      prepareMenuSave({ ...base([cocktail]), now, editing: cocktail, name: "하이볼", category: draft.category, options: draft.options, endedDiscounts }).body.options;
+    expect(save([]).map((value) => value.discount)).toEqual([null, null, running]);
+    // The server said the third ended too (the device clock is behind): it is left out as well.
+    expect(save(["third"]).map((value) => value.discount)).toEqual([null, null, null]);
   });
 
   it("asks to confirm an exact active product before adding a whisky without one", () => {

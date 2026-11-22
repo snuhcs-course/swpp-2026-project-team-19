@@ -483,6 +483,20 @@ describe("adding an item (spec 3.14.3, OwnerManualCatalogMatch.kt)", () => {
     expect(api.writes()).toEqual([]);
   });
 
+  it("proposes the active product when an inactive duplicate has the same name (Codex review on #199)", async () => {
+    const api = menuServer([], { products: [catalog({ productId: "66666666-6666-4666-8666-666666666666", isActive: false }), catalog({})] });
+    const { router } = await openAdd();
+
+    await user().type(screen.getByLabelText("메뉴 이름"), "라가불린 16년");
+    await user().click(within(await screen.findByRole("group", { name: "상품 확인" })).getByRole("button", { name: "맞아요" }));
+    expect(screen.queryByText(/현재 비활성 상품이에요/)).not.toBeInTheDocument();
+    await fillOption(1, "30", "22000");
+    await save();
+
+    await atMenuList(router);
+    expect(api.writes()[0]?.body).toMatchObject({ productId: LAGA_ID });
+  });
+
   it("adds a non-whisky item with one price and kind other, without searching the catalog", async () => {
     const api = menuServer([]);
     const { router } = await openAdd();
@@ -772,6 +786,31 @@ describe("editing an item (spec 3.14.4, 3.14.5)", () => {
 
     await waitFor(() => expect(api.writes()).toHaveLength(2));
     expect(api.writes().map((call) => (call.body?.options as { discount: unknown }[])[0]?.discount)).toEqual([running, null]);
+  });
+
+  it("leaves out a hidden option's discount the server says has ended (Codex review on #199)", async () => {
+    // A non-whisky item imported with two prices: the editor shows the first and sends the second back.
+    const running = { discountedPriceKrw: 25000, startsAt: "2026-11-01T00:00:00Z", endsAt: "2099-12-01T00:00:00Z" };
+    const highball = item({ barMenuItemId: "highball", kind: "other", displayName: "하이볼", options: [option("hb-glass", "잔", null, 8000), option("hb-pitcher", "피처", null, 30000, running)] });
+    let ended = false;
+    const api = menuServer([highball], {
+      answer: ({ method }) => {
+        if (method !== "PUT" || ended) return undefined;
+        ended = true;
+        return HttpResponse.json(
+          { error: { code: "VALIDATION_FAILED", message: "끝남", details: null, fieldErrors: [{ path: "options[1].discount.endsAt", code: "DISCOUNT_ENDED", message: "끝남" }] } },
+          { status: 422 },
+        );
+      },
+    });
+    const { router } = await openEdit("highball");
+    await save("저장하기");
+    expect(await screen.findByText("할인 기간이 끝났어요. 다시 저장해 주세요.")).toBeInTheDocument();
+
+    await save("저장하기");
+
+    await atMenuList(router);
+    expect(api.writes().map((call) => (call.body?.options as { discount: unknown }[])[1]?.discount)).toEqual([running, null]);
   });
 
   it("deletes after asking (spec 3.14.5)", async () => {
