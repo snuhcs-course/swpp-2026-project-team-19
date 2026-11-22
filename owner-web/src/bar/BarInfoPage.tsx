@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useCallback, useRef, useState } from "react";
+import { Link, useNavigate } from "react-router";
 import { ApiError, errorMessage, fieldErrorMessages } from "../api/errors";
 import { SummaryRow } from "../application/parts";
 import { OwnerScreen } from "../owner/OwnerScreen";
@@ -18,6 +18,7 @@ import {
   barUpdate,
   canCreateTag,
   characterCount,
+  dayOfHoursPath,
   fieldOfPath,
   formFromBar,
   hasEdits,
@@ -27,14 +28,16 @@ import {
   type BarInfoForm,
 } from "./barInfo";
 import { BarQuery } from "./BarHomePage";
+import { HoursEditor } from "./HoursEditor";
 import { useLeaveGuard } from "./useLeaveGuard";
 import styles from "./bar.module.css";
 
 /**
- * /owner/bars/:barId/info: the bar's description, phone, default pour and tags
- * (android/.../ui/owner/OwnerInfoHtmlV4Screen.kt), saved together with PATCH /api/bars/{barId} (spec 3.7).
- * Photos and hours come in I5-P6. Name and address are shown only: changing them will need an operator's
- * review, for the app and the web alike.
+ * /owner/bars/:barId/info: the bar's description, phone, default pour, regular hours and tags
+ * (android/.../ui/owner/OwnerInfoHtmlV4Screen.kt), saved together with PATCH /api/bars/{barId} (spec 3.7,
+ * 3.15.1). The photos are shown here and edited on their own screen, where each change is saved at once
+ * (/bars/:barId/photos), as in the app. Name and address are shown only: changing them will need an
+ * operator's review, for the app and the web alike.
  */
 export function BarInfoPage({ bar }: { bar: OwnedBar }) {
   const detail = useBar(bar.barId);
@@ -48,8 +51,15 @@ export function BarInfoPage({ bar }: { bar: OwnedBar }) {
   );
 }
 
-/** Copy for codes the shared field copy (src/api/errors.ts) lacks: DUPLICATE_TAG (spec 3.7). */
-const FIELD_COPY: Record<string, string> = { DUPLICATE_TAG: "같은 태그가 이미 있어요." };
+/** Copy for codes the shared field copy (src/api/errors.ts) lacks: tags (spec 3.7) and hours (3.15.1). */
+const FIELD_COPY: Record<string, string> = {
+  DUPLICATE_TAG: "같은 태그가 이미 있어요.",
+  DUPLICATE_DAY: "같은 요일이 중복됐어요.",
+  INVALID_TIME: "5분 단위로 골라 주세요.",
+  SAME_OPEN_CLOSE: "시작과 종료 시간이 달라야 해요.",
+  TIME_ON_CLOSED_DAY: "휴무일에는 시간을 정할 수 없어요.",
+  MISSING: "시작과 종료 시간을 모두 골라 주세요.",
+};
 const TAGS_FULL = "태그는 최대 5개까지 등록할 수 있어요.";
 
 function BarInfoForm({ bar }: { bar: BarDetail }) {
@@ -65,6 +75,9 @@ function BarInfoForm({ bar }: { bar: BarDetail }) {
   const [query, setQuery] = useState("");
   const [tagError, setTagError] = useState<string | null>(null);
   const [serverErrors, setServerErrors] = useState<Partial<Record<BarInfoField, string>>>({});
+  const [dayErrors, setDayErrors] = useState<Partial<Record<number, string>>>({});
+  // The hours last sent: a `weeklyHours[i]` error points into this list.
+  const sentHours = useRef<{ dayOfWeek: number }[]>([]);
   const [error, setError] = useState<string | null>(null);
   const dirty = hasEdits(opened, form);
   const guard = useLeaveGuard(dirty, update.isPending);
@@ -81,6 +94,14 @@ function BarInfoForm({ bar }: { bar: BarDetail }) {
     setError(null);
     if (field) setServerErrors(({ [field]: _, ...rest }) => rest);
   }
+
+  // Stable, so the memoized hours section is not drawn again while other fields are typed in.
+  const changeHours = useCallback((hours: BarInfoForm["hours"]) => {
+    setForm((current) => ({ ...current, hours }));
+    setError(null);
+    setServerErrors(({ weeklyHours: _, ...rest }) => rest);
+    setDayErrors({});
+  }, []);
 
   function pickTag(tag: string) {
     const next = toggleTag(form.tags, tag);
@@ -107,6 +128,8 @@ function BarInfoForm({ bar }: { bar: BarDetail }) {
     if (Object.keys(body).length === 0) return done();
     setError(null);
     setServerErrors({});
+    setDayErrors({});
+    sentHours.current = body.weeklyHours ?? [];
     update.mutate(body, { onSuccess: done, onError: handleFailure });
   }
 
@@ -115,13 +138,20 @@ function BarInfoForm({ bar }: { bar: BarDetail }) {
     switch (failure.code) {
       case "VALIDATION_FAILED": {
         const byField: Partial<Record<BarInfoField, string>> = {};
+        const byDay: Partial<Record<number, string>> = {};
         const messages = fieldErrorMessages(failure);
         for (const item of failure.fieldErrors) {
           const field = fieldOfPath(item.path);
-          if (field && !byField[field]) byField[field] = FIELD_COPY[item.code] ?? messages[item.path];
+          const message = FIELD_COPY[item.code] ?? messages[item.path];
+          const day = field === "weeklyHours" ? dayOfHoursPath(item.path, sentHours.current) : null;
+          // An hours error goes under its weekday's row; one about the whole list under the section.
+          if (day !== null) byDay[day] ??= message;
+          else if (field && !byField[field]) byField[field] = message;
         }
         setServerErrors(byField);
-        return setError(Object.keys(byField).length ? "입력한 내용을 확인해 주세요." : errorMessage(failure));
+        setDayErrors(byDay);
+        const shown = Object.keys(byField).length + Object.keys(byDay).length;
+        return setError(shown ? "입력한 내용을 확인해 주세요." : errorMessage(failure));
       }
       case "FORBIDDEN":
         // No longer this bar's owner (spec 3.11.10): the bar list decides what the owner may still open.
@@ -148,6 +178,28 @@ function BarInfoForm({ bar }: { bar: BarDetail }) {
         {/* Locked while saving: an edit made then would not be in the request, and leaving after the save
             would drop it. */}
         <fieldset className={[styles.screen, styles.fieldset].join(" ")} disabled={update.isPending}>
+          <section className={styles.section} aria-labelledby="bar-photos-title">
+            <div className={styles.sectionHead}>
+              <h2 id="bar-photos-title" className={styles.sectionTitle}>
+                매장 사진
+              </h2>
+              <Link to={`/bars/${bar.barId}/photos`} className={styles.textLink}>
+                편집 ›
+              </Link>
+            </div>
+            {bar.photos.length === 0 ? (
+              <p className={styles.hint}>등록된 사진이 없습니다.</p>
+            ) : (
+              <ul className={styles.photoStrip} aria-label="매장 사진 목록">
+                {bar.photos.map((photo, index) => (
+                  <li key={photo.photoId} className={styles.stripItem}>
+                    <img src={photo.thumbnailUrl} alt={index === 0 ? "대표 사진" : `매장 사진 ${index + 1}`} loading="lazy" />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
           <section className={styles.section} aria-label="기본 정보">
             <SummaryRow label="매장명" value={bar.name} />
             <SummaryRow label="주소" value={bar.address} />
@@ -178,6 +230,13 @@ function BarInfoForm({ bar }: { bar: BarDetail }) {
             error={fieldError("phone")}
             // OwnerInfoHtmlV4Screen.kt: at most 30 characters.
             onChange={(event) => change({ phone: event.currentTarget.value.slice(0, 30) }, "phone")}
+          />
+
+          <HoursEditor
+            hours={form.hours}
+            onChange={changeHours}
+            error={fieldError("weeklyHours")}
+            dayErrors={dayErrors}
           />
 
           <section className={styles.section} aria-labelledby="bar-tags-title">
@@ -244,10 +303,6 @@ function BarInfoForm({ bar }: { bar: BarDetail }) {
                 {tagError ?? fieldError("tags")}
               </p>
             ) : null}
-          </section>
-
-          <section className={styles.section} aria-label="사진과 영업시간">
-            <p className={styles.hint}>매장 사진과 영업시간은 웹에서 준비 중이에요.</p>
           </section>
 
           {error ? (

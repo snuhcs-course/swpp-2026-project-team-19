@@ -5,6 +5,7 @@ import {
   barUpdate,
   canCreateTag,
   characterCount,
+  dayOfHoursPath,
   fieldOfPath,
   formFromBar,
   hasEdits,
@@ -14,7 +15,7 @@ import {
 } from "./barInfo";
 
 const BAR_ID = "22222222-2222-4222-8222-222222222222";
-const form = (change: Partial<BarInfoForm> = {}): BarInfoForm => ({ description: "", phone: "", pourMl: "", tags: [], ...change });
+const form = (change: Partial<BarInfoForm> = {}): BarInfoForm => ({ description: "", phone: "", pourMl: "", tags: [], hours: [], ...change });
 /** The errors of a form opened on a bar with nothing set, so every typed value counts as edited. */
 const errorsOf = (typed: BarInfoForm) => barInfoErrors(typed, form());
 
@@ -117,9 +118,29 @@ describe("bar info rules (web)", () => {
     expect(tagCandidates("single", [], ["Single", "single"])).toEqual(["Single"]);
   });
 
-  it("maps a server field path to its field", () => {
+  it("maps a server field path to its field, and an hours error to its weekday", () => {
     expect(fieldOfPath("tags[2]")).toBe("tags");
     expect(fieldOfPath("description")).toBe("description");
-    expect(fieldOfPath("weeklyHours[0].openTime")).toBeNull();
+    expect(fieldOfPath("weeklyHours[0].openTime")).toBe("weeklyHours");
+    expect(fieldOfPath("status")).toBeNull();
+    const sent = [{ dayOfWeek: 2 }, { dayOfWeek: 5 }];
+    expect(dayOfHoursPath("weeklyHours[1].closeTime", sent)).toBe(5);
+    expect(dayOfHoursPath("weeklyHours", sent)).toBeNull();
+  });
+
+  it("sends the regular hours only when what would be sent changed", () => {
+    const before = bar(BAR_ID, "바", { weeklyHours: [{ dayOfWeek: 1, closed: true, openTime: null, closeTime: null }] });
+    const loaded = formFromBar(before);
+    expect(barUpdate(before, loaded)).toEqual({});
+    // Marked off with times kept in the draft: still sends a day off, so nothing changed.
+    expect(barUpdate(before, { ...loaded, hours: [{ dayOfWeek: 1, closed: true, open: "18:00", close: "23:00" }] })).toEqual({});
+    expect(barUpdate(before, { ...loaded, hours: [{ dayOfWeek: 1, closed: false, open: "18:00", close: "02:00" }] })).toEqual({
+      weeklyHours: [{ dayOfWeek: 1, closed: false, openTime: "18:00", closeTime: "02:00" }],
+    });
+    expect(barUpdate(before, { ...loaded, hours: [] })).toEqual({ weeklyHours: [] });
+    expect(hasEdits(before, { ...loaded, hours: [] })).toBe(true);
+    expect(barInfoErrors({ ...loaded, hours: [{ dayOfWeek: 2, closed: false, open: "18:00", close: null }] }, loaded).weeklyHours).toBe(
+      "영업시간은 5분 단위이며 시작과 종료 시간이 달라야 해요.",
+    );
   });
 });

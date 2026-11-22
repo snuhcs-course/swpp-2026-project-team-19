@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ApiError } from "../api/errors";
+import { imageForm } from "../application/api";
 import { clearDraft, loadDraft } from "../application/draft";
+import type { PreparedImage } from "../images/prepare";
 import { unwrap } from "../api/client";
 import type { components, paths } from "../api/schema";
 import { useSession } from "../auth/SessionProvider";
@@ -128,4 +130,73 @@ export function useUpdateBar(barId: string) {
       ]);
     },
   });
+}
+
+export type OperatingExceptionInput =
+  | components["schemas"]["ClosedTodayInput"]
+  | components["schemas"]["CustomHoursInput"]
+  | components["schemas"]["VacationInput"];
+export type BarPhoto = BarDetail["photos"][number];
+
+/** After a change to the bar: the bar and the owner's bar list are read again, since both show it. */
+async function refreshBar(queryClient: ReturnType<typeof useQueryClient>, barId: string) {
+  await Promise.all([
+    queryClient.invalidateQueries({ queryKey: ownerQueryKeys.bar(barId), refetchType: "all" }),
+    queryClient.invalidateQueries({ queryKey: ownerQueryKeys.myBars, refetchType: "all" }),
+  ]);
+}
+
+/** PUT /api/bars/{barId}/operating-exception (spec 3.15.2): replaces the bar's temporary closure. */
+export function useApplyException(barId: string) {
+  const { api } = useSession();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (body: OperatingExceptionInput) =>
+      unwrap(await api.PUT("/api/bars/{barId}/operating-exception", { params: { path: { barId } }, body })),
+    onSuccess: async (bar) => {
+      queryClient.setQueryData(ownerQueryKeys.bar(barId), bar);
+      await refreshBar(queryClient, barId);
+    },
+  });
+}
+
+/** DELETE /api/bars/{barId}/operating-exception (spec 3.15.3): back to the regular hours; safe to resend. */
+export function useCancelException(barId: string) {
+  const { api } = useSession();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async () => unwrap(await api.DELETE("/api/bars/{barId}/operating-exception", { params: { path: { barId } } })),
+    onSuccess: async (bar) => {
+      queryClient.setQueryData(ownerQueryKeys.bar(barId), bar);
+      await refreshBar(queryClient, barId);
+    },
+  });
+}
+
+/**
+ * The bar photo calls (spec 3.16.2 to 3.16.4). Each answers the bar's photos in order, shown at once; the
+ * bar and the bar list are then read again.
+ */
+export function useBarPhotoActions(barId: string) {
+  const { api } = useSession();
+  const queryClient = useQueryClient();
+  async function show(photos: BarPhoto[]) {
+    queryClient.setQueryData<BarDetail>(ownerQueryKeys.bar(barId), (bar) => (bar ? { ...bar, photos } : bar));
+    await refreshBar(queryClient, barId);
+    return photos;
+  }
+  return {
+    add: async (image: PreparedImage) =>
+      show(
+        unwrap(await api.POST("/api/bars/{barId}/photos", { params: { path: { barId } }, body: imageForm("image", [image]) as never }))
+          .photos,
+      ),
+    remove: async (photoId: string) =>
+      show(unwrap(await api.DELETE("/api/bars/{barId}/photos/{photoId}", { params: { path: { barId, photoId } } })).photos),
+    reorder: async (photoIds: string[]) =>
+      show(unwrap(await api.PUT("/api/bars/{barId}/photos/order", { params: { path: { barId } }, body: { photoIds } })).photos),
+    /** Shows photos the server sent with an error (409 PHOTOS_OUTDATED `details.photos`). */
+    show,
+    refresh: () => refreshBar(queryClient, barId),
+  };
 }
