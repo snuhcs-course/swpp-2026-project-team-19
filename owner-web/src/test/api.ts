@@ -1,5 +1,5 @@
 import { http, HttpResponse } from "msw";
-import type { MyApplications, MyBars, Me } from "../owner/queries";
+import type { BarMenu, MyApplications, MyBars, Me } from "../owner/queries";
 import { server } from "./server";
 
 export const ME: Me = {
@@ -32,6 +32,28 @@ export function bar(barId: string, name: string, extra: Partial<MyBars["items"][
     updatedAt: "2026-11-01T03:00:00Z",
     ...extra,
   } as MyBars["items"][number];
+}
+
+/** The bar's published menu as GET /api/bars/{barId}/menu returns it (spec 3.9); none by default (3.9.1). */
+export function barMenu(source: MyBars["items"][number], extra: Partial<BarMenu> = {}): BarMenu {
+  return {
+    barId: source.barId,
+    name: source.name,
+    address: source.address,
+    latitude: source.latitude,
+    longitude: source.longitude,
+    phone: source.phone,
+    description: source.description,
+    tags: source.tags,
+    weeklyHours: source.weeklyHours,
+    operatingException: source.operatingException,
+    photos: source.photos,
+    menuBoardId: null,
+    menuVersion: null,
+    publishedAt: null,
+    items: [],
+    ...extra,
+  };
 }
 
 export function application(status: MyApplications["items"][number]["status"]): MyApplications["items"][number] {
@@ -81,6 +103,11 @@ export function useOwnerApi({ bars = [], applications = [] }: { bars?: MyBars["i
     http.get("/api/bars/:barId", ({ params }) => {
       const found = bars.find((item) => item.barId === params.barId);
       return found ? HttpResponse.json(found) : HttpResponse.json(errorBody("FORBIDDEN"), { status: 403 });
+    }),
+    // Spec 3.9 is public: any bar answers, here without a menu (3.9.1). Menu tests serve their own.
+    http.get("/api/bars/:barId/menu", ({ params }) => {
+      const barId = String(params.barId);
+      return HttpResponse.json(barMenu(bars.find((item) => item.barId === barId) ?? bar(barId, "매장")));
     }),
   );
 }
