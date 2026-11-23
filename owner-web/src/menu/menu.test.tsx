@@ -1549,9 +1549,9 @@ describe("confirming the menu on the home (spec 3.14.9, OwnerManagementHomeScree
     expect(region).toHaveTextContent("메뉴 확인 - 미확인");
   });
 
-  it("hides the button when the server has no items to confirm (409 NO_PUBLISHED_MENU)", async () => {
+  it("hides the button when the server has no items to confirm, and offers it again once the menu has some (409 NO_PUBLISHED_MENU)", async () => {
     const api = menuServer([glenfiddich]);
-    renderOwnerWeb(`/bars/${BAR_ID}`);
+    const { queryClient } = renderOwnerWeb(`/bars/${BAR_ID}`);
     const region = await card();
     await waitFor(() => expect(region).toHaveTextContent("게시된 메뉴 1개"));
     api.changeElsewhere([]);
@@ -1560,6 +1560,11 @@ describe("confirming the menu on the home (spec 3.14.9, OwnerManagementHomeScree
 
     expect(await within(region).findByRole("link", { name: "메뉴 등록하기" })).toBeInTheDocument();
     expect(within(region).queryByRole("button", { name: "지금도 맞아요" })).not.toBeInTheDocument();
+
+    // An item added elsewhere; the menu is read again, as on returning to the page (Codex review on #209).
+    api.changeElsewhere([glenfiddich]);
+    await act(() => queryClient.invalidateQueries({ queryKey: ["bar-menu", BAR_ID] }));
+    expect(await within(region).findByRole("button", { name: "지금도 맞아요" })).toBeInTheDocument();
   });
 
   it("sends one request while the answer is slow, and the same version again after a lost answer", async () => {

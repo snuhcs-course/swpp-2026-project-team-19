@@ -81,7 +81,8 @@ export function useConfirmMenu(barId: string) {
         return bar;
       } catch (failure) {
         if (failure instanceof ApiError && (failure.code === "MENU_OUTDATED" || failure.code === "NO_PUBLISHED_MENU")) {
-          void reload([ownerQueryKeys.menu(barId), ownerQueryKeys.bar(barId)]);
+          // Read before the failure is shown, so the card already shows the menu as it is.
+          await reload([ownerQueryKeys.menu(barId), ownerQueryKeys.bar(barId)]).catch(() => undefined);
         }
         throw failure;
       }

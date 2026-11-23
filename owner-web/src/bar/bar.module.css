@@ -423,7 +423,7 @@
 
 .gauge {
   height: 5px;
-  border-radius: 999px;
+  border-radius: var(--bm-radius-pill);
   background: var(--bm-color-surface-variant);
   overflow: hidden;
 }

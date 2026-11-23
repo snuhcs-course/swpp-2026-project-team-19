@@ -124,9 +124,9 @@ function MenuCard({ bar }: { bar: BarDetail }) {
   const confirm = useConfirmMenu(bar.barId);
   const fail = useBarFailure();
   const [error, setError] = useState<string | null>(null);
-  const [noMenu, setNoMenu] = useState(false);
   const items = menu.data?.items.length;
-  const published = items !== undefined && items > 0 && !noMenu;
+  // From the menu as last read, so a menu added again later (read on returning to the page) can be confirmed.
+  const published = items !== undefined && items > 0;
   const { days, percent } = published ? menuFreshness(bar.currentMenu, now) : { days: null, percent: 0 };
   // The card is one link, so a failed count is said here and retried on the menu screen it opens.
   const count = menu.data
@@ -141,7 +141,8 @@ function MenuCard({ bar }: { bar: BarDetail }) {
     try {
       await confirm.send(menu.data.menuVersion);
     } catch (failure) {
-      if (failure instanceof ApiError && failure.code === "NO_PUBLISHED_MENU") return setNoMenu(true);
+      // The menu read again has no items, so the button gives way to "메뉴 등록하기".
+      if (failure instanceof ApiError && failure.code === "NO_PUBLISHED_MENU") return;
       if (failure instanceof ApiError && failure.code === "MENU_OUTDATED") {
         return setError("메뉴가 바뀌었어요. 바뀐 메뉴를 확인한 뒤 다시 눌러 주세요.");
       }
