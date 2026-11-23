@@ -12,6 +12,7 @@ import { TextField } from "../ui/TextField";
 import { EDIT_BLOCKED } from "./menuEditor";
 import { manualMenuShortName, menuProductOf, type MenuItem } from "./menuRules";
 import { discountActive, displayPrice, groupMenu, menuDate, MENU_LOCKED, won } from "./menuView";
+import { useSoldOut } from "./menuStatus";
 import { useMenuWrite } from "./menuWrite";
 import { servingDisplayLabel } from "./servingIdentity";
 import styles from "./menu.module.css";
@@ -20,8 +21,10 @@ import barStyles from "../bar/bar.module.css";
 /**
  * /owner/bars/:barId/menu: the bar's published menu (spec 3.9) as android/.../ui/owner/OwnerManualMenuScreen.kt
  * lists it: by kind and, for whisky, by brand, with a search of the menu's own items. An item opens its editor;
- * "+ 직접 추가" adds one; "전체 메뉴 초기화" empties the menu (3.14.6) after asking. While a menu photo import is
- * unfinished (3.6 `activeMenuImport`), nothing can be changed (3.14.7). Adding from menu photos is I5-P9.
+ * "+ 직접 추가" adds one; "전체 메뉴 초기화" empties the menu (3.14.6) after asking. Each item's "품절" or "재개"
+ * marks it sold out or back on sale (3.14.8) after asking. While a menu photo import is unfinished (3.6
+ * `activeMenuImport`), nothing else can be changed (3.14.7); sold-out stays open, as the spec says (the app
+ * blocks it, data/android 수정 필요 사항.md). Adding from menu photos is I5-P9.
  */
 export function MenuPage({ bar }: { bar: OwnedBar }) {
   const detail = useBar(bar.barId);
@@ -49,6 +52,9 @@ function MenuBoard({ menu, locked }: { menu: BarMenu; locked: boolean }) {
   const [notice, setNotice] = useState<string | null>((location.state as MenuNotice | null)?.notice ?? null);
   const [resetting, setResetting] = useState(false);
   const [resetError, setResetError] = useState<string | null>(null);
+  const soldOut = useSoldOut(menu.barId);
+  const [stockItem, setStockItem] = useState<MenuItem | null>(null);
+  const [stockError, setStockError] = useState<string | null>(null);
   const fail = useBarFailure();
   const { visible, groups } = groupMenu(menu.items, query);
   const searching = query.trim() !== "";
@@ -61,6 +67,22 @@ function MenuBoard({ menu, locked }: { menu: BarMenu; locked: boolean }) {
       if (done) setResetting(false);
     } catch (failure) {
       setResetError(writeFailureMessage(failure) ?? fail(failure));
+    }
+  }
+
+  async function changeStock(item: MenuItem) {
+    setStockError(null);
+    try {
+      const done = await soldOut.send(item.barMenuItemId, !item.soldOut);
+      if (done) setStockItem(null);
+    } catch (failure) {
+      if (failure instanceof ApiError && failure.code === "MENU_ITEM_NOT_FOUND") {
+        // The menu is read again, so the list shows it gone.
+        setStockItem(null);
+        setNotice(writeFailureMessage(failure));
+        return;
+      }
+      setStockError(fail(failure));
     }
   }
 
@@ -121,8 +143,18 @@ function MenuBoard({ menu, locked }: { menu: BarMenu; locked: boolean }) {
                     {group.category === "위스키" ? <h3 className={styles.brand}>{brand.brand}</h3> : null}
                     <ul className={styles.rows}>
                       {brand.items.map((item) => (
-                        <li key={item.barMenuItemId}>
+                        <li key={item.barMenuItemId} className={styles.line}>
                           <MenuRow item={item} now={now} to={`${base}/${item.barMenuItemId}`} locked={locked} onBlocked={setNotice} />
+                          {/* OwnerSharedMenuRow.kt's row action "품절" or "재개". */}
+                          <button
+                            type="button"
+                            className={styles.stock}
+                            aria-label={`${item.displayName} ${item.soldOut ? "판매 재개" : "품절 처리"}`}
+                            disabled={soldOut.pending}
+                            onClick={() => (setStockError(null), setStockItem(item))}
+                          >
+                            {item.soldOut ? "재개" : "품절"}
+                          </button>
                         </li>
                       ))}
                     </ul>
@@ -136,6 +168,24 @@ function MenuBoard({ menu, locked }: { menu: BarMenu; locked: boolean }) {
       <button type="button" className={styles.reset} disabled={locked} onClick={() => (setResetError(null), setResetting(true))}>
         전체 메뉴 초기화
       </button>
+
+      {/* OwnerManualMenuScreen.kt's sold-out sheet. */}
+      <BottomSheet open={stockItem !== null} title={stockItem?.soldOut ? "판매를 재개할까요?" : "품절 처리할까요?"} onClose={() => !soldOut.pending && setStockItem(null)}>
+        <p className={barStyles.sheetText}>품절 메뉴는 고객에게 숨겨지며 판매 재개 시 다시 공개됩니다.</p>
+        {stockError ? (
+          <p className={barStyles.error} role="alert">
+            {stockError}
+          </p>
+        ) : null}
+        <div className={barStyles.actions}>
+          <Button variant="secondary" disabled={soldOut.pending} onClick={() => setStockItem(null)}>
+            취소
+          </Button>
+          <Button busy={soldOut.pending} onClick={() => stockItem && void changeStock(stockItem)}>
+            상태 변경
+          </Button>
+        </div>
+      </BottomSheet>
 
       <BottomSheet open={resetting} title="전체 메뉴를 초기화할까요?" onClose={() => !write.pending && setResetting(false)}>
         {/* OwnerManualMenuScreen.kt, with a comma for its middle dot. */}
