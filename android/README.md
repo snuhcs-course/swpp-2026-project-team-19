@@ -113,3 +113,34 @@ Follow-up I4-A3 operator-check resolution, I4-A4 advanced rematching/merge,
 and I4-A5 server review drafts remain Backend/AI-owned where applicable.
 Local review draft persistence already lives on-device and must not be
 misrepresented as a server draft.
+
+## Local signed Release AAB (ONE store)
+
+The CI-compatible signing configuration from PR #203 is already on main.
+Do not replace it with the older local signing commits. Debug builds require
+no release signing properties; release builds validate them before building.
+
+Keep your upload keystore outside this repository and put these properties in
+`%USERPROFILE%\.gradle\gradle.properties` (example values only):
+
+```properties
+BOTTLEMAP_RELEASE_STORE_FILE=C:/Users/YOUR_USER/.bottlemap/bottlemap-upload.jks
+BOTTLEMAP_RELEASE_STORE_PASSWORD=REPLACE_LOCALLY
+BOTTLEMAP_RELEASE_KEY_ALIAS=bottlemap-upload
+BOTTLEMAP_RELEASE_KEY_PASSWORD=REPLACE_LOCALLY
+```
+
+Never commit that user properties file or pass passwords on the command line.
+Preserve the upload key and its secure backup for future store updates.
+From the repository root, build against the deployed API:
+
+```powershell
+.\gradlew.bat :app:bundleRelease "-PBOTTLEMAP_API_BASE_URL=https://bottlemap.o-r.kr/"
+jarsigner -verify android/app/build/outputs/bundle/release/app-release.aab
+```
+
+Output: `android/app/build/outputs/bundle/release/app-release.aab` (ignored by Git).
+Verify the signer matches your upload certificate before store submission.
+Signing alone does not validate store readiness: check versionCode/versionName,
+production authentication/map settings and store requirements separately.
+See [Android agent guidance](AGENTS.md) for the development workflow.
