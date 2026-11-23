@@ -7,6 +7,11 @@
   gap: var(--bm-space-sm);
 }
 
+.headActions {
+  display: flex;
+  gap: var(--bm-space-xs);
+}
+
 .title {
   margin: 0;
   font-size: var(--bm-type-section-title);
@@ -99,6 +104,38 @@
 
 .rows > li + li {
   border-top: 1px solid var(--bm-color-divider);
+}
+
+/* A line of the list: the row, which opens the editor, and its sold-out action beside it. */
+.line {
+  display: flex;
+  align-items: center;
+  gap: var(--bm-space-xs);
+}
+
+.line > :first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.stock {
+  flex: none;
+  min-width: var(--bm-min-touch-target);
+  min-height: var(--bm-min-touch-target);
+  padding: 0 var(--bm-space-xs);
+  border: 1px solid var(--bm-color-outline-variant);
+  border-radius: var(--bm-radius-small);
+  background: var(--bm-color-surface);
+  color: var(--bm-color-text-primary);
+  font: inherit;
+  font-size: var(--bm-type-caption);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.stock:disabled {
+  color: var(--bm-color-text-muted);
+  cursor: default;
 }
 
 /* A row: name and status, then the prices on the right; the whole row opens the editor. */

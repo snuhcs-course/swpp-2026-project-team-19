@@ -401,3 +401,36 @@
 .timeLists select {
   width: auto;
 }
+
+/* The home menu card's confirmation line and its 30-day gauge (OwnerManagementHomeScreen.kt). */
+.confirmRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--bm-space-xs);
+}
+
+.age {
+  color: var(--bm-color-primary);
+}
+
+.inlineLink {
+  color: var(--bm-color-primary);
+  font-size: var(--bm-type-label);
+  font-weight: 600;
+}
+
+.gauge {
+  height: 5px;
+  border-radius: var(--bm-radius-pill);
+  background: var(--bm-color-surface-variant);
+  overflow: hidden;
+}
+
+.gauge > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--bm-color-primary);
+}

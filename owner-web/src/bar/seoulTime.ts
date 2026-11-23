@@ -59,3 +59,14 @@ export const timeOf = (minutes: number): string =>
 
 /** "MM.dd" of a date (the app's `ownerDate`). */
 export const monthDay = (date: string): string => `${date.slice(5, 7)}.${date.slice(8, 10)}`;
+
+const SEOUL_OFFSET_MS = 9 * 60 * 60 * 1000;
+
+/**
+ * The instant Seoul's day `date` starts, as UTC RFC 3339 without fractions ("2026-11-23T15:00:00Z"), as the
+ * app's `atStartOfDay(ownerManualZone).toInstant()` sends it. Seoul keeps +09:00 all year.
+ */
+export const seoulStartOf = (date: string): string => new Date(epochDay(date) * 86_400_000 - SEOUL_OFFSET_MS).toISOString().replace(".000Z", "Z");
+
+/** Whether `at` falls exactly on midnight in Seoul. */
+export const isSeoulMidnight = (at: number): boolean => (((at + SEOUL_OFFSET_MS) % 86_400_000) + 86_400_000) % 86_400_000 === 0;

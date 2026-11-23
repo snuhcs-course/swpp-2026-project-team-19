@@ -5,6 +5,7 @@ import { unwrap } from "../api/client";
 import { ApiError, errorMessage, fieldErrorMessages } from "../api/errors";
 import { useSession } from "../auth/SessionProvider";
 import { BarQuery } from "../bar/BarHomePage";
+import { seoulClock } from "../bar/seoulTime";
 import { useBarFailure } from "../bar/failures";
 import { useLeaveGuard } from "../bar/useLeaveGuard";
 import { OwnerScreen } from "../owner/OwnerScreen";
@@ -26,15 +27,21 @@ import { blockingInactiveMatch, manualBrandProposal, manualBrandSearchQuery, man
 import {
   ALREADY_ON_MENU,
   confirmFirst,
+  DISCOUNT_NOT_LOWER,
+  discountOf,
   EDIT_BLOCKED,
   editDraftOf,
   freshExactMatch,
   freshOption,
   MAX_NAME_LENGTH,
+  NO_DISCOUNT,
   prepareMenuSave,
   rebaseDraft,
   SaveRefused,
+  savedOption,
+  toOption,
   type Draft,
+  type DraftDiscount,
   type DraftOption,
   type SaveRequest,
 } from "./menuEditor";
@@ -63,7 +70,8 @@ import barStyles from "../bar/bar.module.css";
  * - An added whisky is linked to a catalog product only when the owner confirms the proposal with "맞아요"
  *   (OwnerManualCatalogMatch.kt); otherwise it is added without a product (`kind`), for an operator to link.
  * - An edit changes the name and options only: the request cannot choose a product (3.14.4).
- * - Discounts are not edited here (I5-P8): an edit sends them back as they came, so they are kept.
+ * - "할인" opens the discount sheet (the app's "할인 설정"): an option's discount is set, changed or removed there
+ *   and saved with the item. Other options' discounts go back as they came, so they are kept (3.14.2).
  */
 export function MenuItemPage({ bar }: { bar: OwnedBar }) {
   const { barMenuItemId } = useParams();
@@ -102,9 +110,9 @@ const FIELD_COPY: Record<string, string> = {
   TOO_LONG: "가격 옵션은 1~3개여야 해요.",
   PRODUCT_INACTIVE: "운영이 중지된 카탈로그 상품이에요. 운영자에게 문의해 주세요.",
   PRODUCT_NOT_FOUND: "선택한 상품을 찾지 못했어요. 다시 확인해 주세요.",
-  DISCOUNT_NOT_LOWER: "할인 가격은 가격보다 낮아야 해요.",
+  DISCOUNT_NOT_LOWER,
   DISCOUNT_ENDED: "할인 기간이 끝났어요. 다시 저장해 주세요.",
-  END_BEFORE_START: "할인 가격과 기간을 확인해 주세요.",
+  END_BEFORE_START: "할인 종료일을 확인해 주세요.",
 };
 const CHECK_INPUT = "입력한 내용을 확인해 주세요.";
 const OUTDATED = "메뉴가 다른 곳에서 바뀌었어요. 확인한 뒤 다시 저장해 주세요.";
@@ -166,6 +174,7 @@ function ItemForm({ menu, editing: opened, locked }: { menu: BarMenu; editing: M
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [checking, setChecking] = useState(false);
   const [endedDiscounts, setEndedDiscounts] = useState<string[]>([]);
+  const [discounting, setDiscounting] = useState(false);
   const busy = write.pending || checking;
   const dirty = name !== start.name || category !== start.category || JSON.stringify(options) !== JSON.stringify(start.options);
   const guard = useLeaveGuard(dirty, busy);
@@ -207,6 +216,20 @@ function ItemForm({ menu, editing: opened, locked }: { menu: BarMenu; editing: M
     setOptions((current) => current.map((option, at) => (at === index ? { ...option, ...change } : option)));
     setProblems(({ byOption: { [index]: _, ...rest }, ...others }) => ({ ...others, options: undefined, byOption: rest }));
     setError(null);
+  }
+
+  /** The app's "할인 적용" check: the row as it would be sent, or the message why it cannot be. */
+  function checkDiscount(index: number, discount: DraftDiscount): string | null {
+    const row = options[index];
+    if (!row) return null;
+    if (!discount.sale) return "할인 가격을 입력해 주세요.";
+    const original = editing?.options.map(savedOption).find((option) => option.optionId === row.id);
+    try {
+      toOption({ ...row, ...discount }, whisky, original, true, Date.now());
+      return null;
+    } catch (failure) {
+      return failure instanceof Error ? failure.message : CHECK_INPUT;
+    }
   }
 
   function openItem(itemId: string) {
@@ -324,7 +347,7 @@ function ItemForm({ menu, editing: opened, locked }: { menu: BarMenu; editing: M
       // non-whisky item, sent back in their saved order after the shown one) is remembered by its ID.
       const shown = endedFields.filter((index) => index < request.shown);
       const hidden = endedFields.flatMap((index) => (index >= request.shown ? [editing?.options[index]?.menuEntryOptionId ?? ""] : [])).filter(Boolean);
-      setOptions((current) => current.map((option, index) => (shown.includes(index) ? { ...option, discount: null } : option)));
+      setOptions((current) => current.map((option, index) => (shown.includes(index) ? { ...option, ...NO_DISCOUNT } : option)));
       if (hidden.length) setEndedDiscounts((current) => [...current, ...hidden]);
       void queryClient.invalidateQueries({ queryKey: ownerQueryKeys.menu(menu.barId), refetchType: "all" });
     }
@@ -361,14 +384,19 @@ function ItemForm({ menu, editing: opened, locked }: { menu: BarMenu; editing: M
               {MENU_LOCKED}
             </p>
           ) : null}
-          {editing ? (
-            <div className={styles.head}>
-              <span />
-              <Button variant="secondary" onClick={() => (setDeleteError(null), setDeleting(true))}>
-                삭제
+          <div className={styles.head}>
+            <span />
+            <span className={styles.headActions}>
+              <Button variant="secondary" onClick={() => setDiscounting(true)}>
+                할인
               </Button>
-            </div>
-          ) : null}
+              {editing ? (
+                <Button variant="secondary" onClick={() => (setDeleteError(null), setDeleting(true))}>
+                  삭제
+                </Button>
+              ) : null}
+            </span>
+          </div>
           <TextField
             label="메뉴 이름"
             value={name}
@@ -455,7 +483,7 @@ function ItemForm({ menu, editing: opened, locked }: { menu: BarMenu; editing: M
                     <span>
                       {index + 1}번 옵션
                       {/* OwnerManualMenuScreen.kt "할인 · N원", with a space for its middle dot. */}
-                      {option.discount ? <span className={styles.badge}> 할인 {option.discount.discountedPriceKrw.toLocaleString("ko-KR")}원</span> : null}
+                      {option.sale ? <span className={styles.badge}> 할인 {Number(option.sale).toLocaleString("ko-KR")}원</span> : null}
                     </span>
                   </legend>
                 ) : (
@@ -541,6 +569,19 @@ function ItemForm({ menu, editing: opened, locked }: { menu: BarMenu; editing: M
         </fieldset>
       </form>
 
+      {discounting ? (
+        <DiscountSheet
+          rows={whisky ? options : options.slice(0, 1)}
+          whisky={whisky}
+          check={checkDiscount}
+          onApply={(index, discount) => {
+            changeOption(index, discount);
+            setDiscounting(false);
+          }}
+          onClose={() => setDiscounting(false)}
+        />
+      ) : null}
+
       <BottomSheet open={deleting} title="메뉴를 삭제할까요?" onClose={() => !write.pending && setDeleting(false)}>
         <p className={barStyles.sheetText}>삭제하면 고객 메뉴에서도 바로 사라집니다.</p>
         {deleteError ? (
@@ -580,4 +621,94 @@ function unique<T>(items: readonly T[], key: (item: T) => string): T[] {
     seen.add(id);
     return true;
   });
+}
+
+/**
+ * OwnerManualMenuScreen.kt "할인 설정": the option (whisky only; anything else has one price), the discounted
+ * price, and the first and last days in Seoul, from today on as the app's calendar allows. "할인 적용" puts it
+ * on the row after the app's check, "할인 제거" takes it off; either is saved with the item. Another option, or
+ * closing, drops what was typed and not applied.
+ */
+function DiscountSheet({
+  rows,
+  whisky,
+  check,
+  onApply,
+  onClose,
+}: {
+  rows: readonly DraftOption[];
+  whisky: boolean;
+  check: (index: number, discount: DraftDiscount) => string | null;
+  onApply: (index: number, discount: DraftDiscount) => void;
+  onClose: () => void;
+}) {
+  const [index, setIndex] = useState(0);
+  const [draft, setDraft] = useState<DraftDiscount>(() => (rows[0] ? discountOf(rows[0]) : { ...NO_DISCOUNT }));
+  const [error, setError] = useState<string | null>(null);
+  const today = seoulClock().date;
+  const row = rows[index];
+  const change = (next: Partial<DraftDiscount>) => (setDraft((current) => ({ ...current, ...next })), setError(null));
+
+  function apply() {
+    const problem = check(index, draft);
+    if (problem) return setError(problem);
+    onApply(index, draft);
+  }
+
+  return (
+    <BottomSheet open title="할인 설정" onClose={onClose}>
+      <p className={barStyles.sheetText}>할인 기간과 가격을 설정해 주세요.</p>
+      {whisky ? (
+        <label className={styles.bottleValue}>
+          <span>적용 용량</span>
+          <select
+            className={styles.select}
+            value={index}
+            onChange={(event) => {
+              const next = Number(event.currentTarget.value);
+              setIndex(next);
+              setDraft(rows[next] ? discountOf(rows[next]) : { ...NO_DISCOUNT });
+              setError(null);
+            }}
+          >
+            {rows.map((option, at) => (
+              // The app's "30ml · 17000원", with a comma for its middle dot.
+              <option key={option.id} value={at}>
+                {option.bottle ? "Bottle" : `${option.ml}ml`}, {option.price}원
+              </option>
+            ))}
+          </select>
+        </label>
+      ) : null}
+      <TextField label="할인 가격 (원)" value={draft.sale} inputMode="numeric" onChange={(event) => change({ sale: ownerPriceInput(draft.sale, event.currentTarget.value) })} />
+      <TextField
+        label="시작일"
+        type="date"
+        value={draft.start}
+        min={draft.start && draft.start < today ? draft.start : today}
+        onChange={(event) => {
+          const start = event.currentTarget.value;
+          // As the app's calendar (`updateQuickVacationDates`): an end before the new start is cleared.
+          change({ start, ...(draft.end && start && draft.end < start ? { end: "" } : {}) });
+        }}
+      />
+      <TextField label="종료일" type="date" value={draft.end} min={draft.start && draft.start > today ? draft.start : today} onChange={(event) => change({ end: event.currentTarget.value })} />
+      {error ? (
+        <p className={barStyles.error} role="alert">
+          {error}
+        </p>
+      ) : null}
+      <div className={barStyles.actions}>
+        <Button variant="secondary" onClick={onClose}>
+          취소
+        </Button>
+        {row?.sale ? (
+          <Button variant="secondary" onClick={() => onApply(index, { ...NO_DISCOUNT })}>
+            할인 제거
+          </Button>
+        ) : null}
+        <Button onClick={apply}>할인 적용</Button>
+      </div>
+    </BottomSheet>
+  );
 }

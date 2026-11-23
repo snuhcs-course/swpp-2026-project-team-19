@@ -3,7 +3,8 @@ import { Link } from "react-router";
 import { ApiError } from "../api/errors";
 import { OwnerScreen } from "../owner/OwnerScreen";
 import { useBar, useBarMenu, useCancelException, type BarDetail, type OwnedBar } from "../owner/queries";
-import { lastMenuUpdate, menuDate } from "../menu/menuView";
+import { useConfirmMenu } from "../menu/menuStatus";
+import { lastMenuUpdate, menuDate, menuFreshness } from "../menu/menuView";
 import { BottomSheet } from "../ui/BottomSheet";
 import { Button, ButtonLink } from "../ui/Button";
 import { ErrorState } from "../ui/states";
@@ -110,24 +111,83 @@ function StatusCard({ bar }: { bar: BarDetail }) {
 /**
  * The menu card (OwnerManagementHomeScreen.kt): how many items the published menu has (spec 3.9) and when it
  * was last updated, the later of its publish and its confirmation (3.6 `currentMenu`). While the count loads or
- * after it failed, the card says so. Confirming the menu is I5-P8.
+ * after it failed, the card says so.
+ *
+ * Below it, as in the app: days since that update ("메뉴 확인 N일 경과"), "지금도 맞아요" to confirm the menu is
+ * still right (3.14.9), and a gauge full at 30 days. The confirmation goes with the `menuVersion` of the menu
+ * counted here. A menu without items cannot be confirmed: the button gives way to a link to add one. The line
+ * and the gauge wait for the menu: while it loads or after it failed, whether there is one is not known.
  */
 function MenuCard({ bar }: { bar: BarDetail }) {
   const menu = useBarMenu(bar.barId);
+  const now = useNow();
+  const confirm = useConfirmMenu(bar.barId);
+  const fail = useBarFailure();
+  const [error, setError] = useState<string | null>(null);
+  const items = menu.data?.items.length;
+  // From the menu as last read, so a menu added again later (read on returning to the page) can be confirmed.
+  const published = items !== undefined && items > 0;
+  const { days, percent } = published ? menuFreshness(bar.currentMenu, now) : { days: null, percent: 0 };
   // The card is one link, so a failed count is said here and retried on the menu screen it opens.
   const count = menu.data
     ? `게시된 메뉴 ${menu.data.items.length}개, `
     : menu.isError
       ? "메뉴 개수를 불러오지 못했어요, "
       : "게시된 메뉴 불러오는 중, ";
+
+  async function confirmMenu() {
+    if (!menu.data) return;
+    setError(null);
+    try {
+      await confirm.send(menu.data.menuVersion);
+    } catch (failure) {
+      // The menu read again has no items, so the button gives way to "메뉴 등록하기".
+      if (failure instanceof ApiError && failure.code === "NO_PUBLISHED_MENU") return;
+      if (failure instanceof ApiError && failure.code === "MENU_OUTDATED") {
+        return setError("메뉴가 바뀌었어요. 바뀐 메뉴를 확인한 뒤 다시 눌러 주세요.");
+      }
+      setError(fail(failure));
+    }
+  }
+
   return (
-    <Link to={`/bars/${bar.barId}/menu`} className={[styles.card, styles.wide].join(" ")}>
-      <h2 className={styles.cardTitle}>메뉴 관리</h2>
-      {/* The app's "게시된 메뉴 N개 · 최근 갱신 MM.dd", with a comma for its middle dot. */}
-      <p className={styles.cardText}>
-        {count}최근 갱신 {menuDate(lastMenuUpdate(bar.currentMenu))}
-      </p>
-    </Link>
+    <section className={[styles.card, styles.wide].join(" ")} aria-label="메뉴 관리">
+      <Link to={`/bars/${bar.barId}/menu`} className={styles.cardLink}>
+        <h2 className={styles.cardTitle}>메뉴 관리</h2>
+        {/* The app's "게시된 메뉴 N개 · 최근 갱신 MM.dd", with a comma for its middle dot. */}
+        <p className={styles.cardText}>
+          {count}최근 갱신 {menuDate(lastMenuUpdate(bar.currentMenu))}
+        </p>
+      </Link>
+      {/* Whether there is a menu to confirm is known only once it is read; until then the line above says so. */}
+      {menu.data ? (
+        <>
+          <div className={styles.confirmRow}>
+            <p className={styles.cardText}>
+              메뉴 확인 <strong className={styles.age}>{days ?? "-"}</strong>
+              {days === null ? " 미확인" : "일 경과"}
+            </p>
+            {published ? (
+              <Button variant="secondary" busy={confirm.pending} onClick={() => void confirmMenu()}>
+                지금도 맞아요
+              </Button>
+            ) : (
+              <Link to={`/bars/${bar.barId}/menu`} className={styles.inlineLink}>
+                메뉴 등록하기
+              </Link>
+            )}
+          </div>
+          <div className={styles.gauge} role="progressbar" aria-label="메뉴 확인 경과" aria-valuemin={0} aria-valuemax={100} aria-valuenow={percent}>
+            <span style={{ width: `${percent}%` }} />
+          </div>
+        </>
+      ) : null}
+      {error ? (
+        <p className={styles.error} role="alert">
+          {error}
+        </p>
+      ) : null}
+    </section>
   );
 }
 

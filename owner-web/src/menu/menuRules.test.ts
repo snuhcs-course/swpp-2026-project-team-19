@@ -7,7 +7,22 @@ import {
   manualEditorCategory,
   manualProductProposal,
 } from "./catalogMatch";
-import { editDraftOf, EDIT_BLOCKED, freshExactMatch, prepareMenuSave, rebaseDraft, SaveRefused, toOption, type DraftOption, type SaveInput } from "./menuEditor";
+import {
+  discountOf,
+  draftDiscount,
+  editDraftOf,
+  EDIT_BLOCKED,
+  freshExactMatch,
+  fromSaved,
+  localDiscountEndDay,
+  NO_DISCOUNT,
+  prepareMenuSave,
+  rebaseDraft,
+  SaveRefused,
+  toOption,
+  type DraftOption,
+  type SaveInput,
+} from "./menuEditor";
 import { ownerAddMenuIdentity } from "./menuIdentity";
 import {
   MAX_OWNER_MENU_PRICE_KRW,
@@ -22,6 +37,7 @@ import {
   type MenuProduct,
   type OptionValue,
 } from "./menuRules";
+import { discountActive, displayPrice, menuDate, menuFreshness } from "./menuView";
 import { canonicalServingLabel, isBottleServingLabel, servingIdentityKey } from "./servingIdentity";
 
 const product = (overrides: Partial<MenuProduct>): MenuProduct => ({
@@ -321,7 +337,9 @@ function base(items: MenuItem[]): SaveInput {
 }
 
 describe("saving an item (OwnerManualMenuScreen.kt save)", () => {
-  const glass: DraftOption = { id: "local-1", bottle: false, ml: "30", price: "17000", discount: null };
+  const glass: DraftOption = { id: "local-1", bottle: false, ml: "30", price: "17000", ...NO_DISCOUNT };
+  /** The glass with a saved discount, as the editor opens it. */
+  const discounted = (discount: MenuItem["options"][number]["discount"]): DraftOption => ({ ...glass, ...discountOf(fromSaved({ ...menuOption("x", null, 30, 17000), discount })) });
   const canonical = product({ productId: "44444444-4444-4444-8444-444444444444", brandId: "brand-gf", displayName: "Glenfiddich 12" });
 
   it("adds a confirmed catalog product by its productId, and another whisky by kind", () => {
@@ -362,8 +380,8 @@ describe("saving an item (OwnerManualMenuScreen.kt save)", () => {
     const now = Date.parse("2026-11-22T00:00:00Z");
     const running = { discountedPriceKrw: 14000, startsAt: "2026-11-01T00:00:00Z", endsAt: "2026-12-01T00:00:00Z" };
     const ended = { ...running, endsAt: "2026-11-21T00:00:00Z" };
-    expect(toOption({ ...glass, discount: running }, true, undefined, true, now).discount).toEqual(running);
-    expect(toOption({ ...glass, discount: ended }, true, undefined, true, now).discount).toBeNull();
+    expect(toOption(discounted(running), true, undefined, true, now).discount).toEqual(running);
+    expect(toOption(discounted(ended), true, undefined, true, now).discount).toBeNull();
   });
 
   it("leaves out an ended discount on a saved option the editor does not show (Codex review on #199)", () => {
@@ -405,11 +423,57 @@ describe("saving an item (OwnerManualMenuScreen.kt save)", () => {
     const rebased = rebaseDraft(start, typed, fresh);
 
     expect(rebased.name).toBe("글렌피딕 12");
-    expect(rebased.options.map(({ id, ml, price, discount }) => ({ id: id.startsWith("local-") ? "local" : id, ml, price, discount }))).toEqual([
-      { id: "glass", ml: "30", price: "18000", discount: running },
-      { id: "bottle", ml: "", price: "165000", discount: null },
+    expect(rebased.options.map(({ id, ml, price, sale, originalEndsAt }) => ({ id: id.startsWith("local-") ? "local" : id, ml, price, sale, originalEndsAt }))).toEqual([
+      { id: "glass", ml: "30", price: "18000", sale: "14000", originalEndsAt: running.endsAt },
+      { id: "bottle", ml: "", price: "165000", sale: "", originalEndsAt: "" },
       // Typed in, so kept as a new option.
-      { id: "local", ml: "15", price: "9500", discount: null },
+      { id: "local", ml: "15", price: "9500", sale: "", originalEndsAt: "" },
+    ]);
+  });
+
+  it("keeps a discount the owner applied while the price changed elsewhere, and the reverse (MENU_OUTDATED)", () => {
+    const running = { discountedPriceKrw: 14000, startsAt: "2026-11-01T00:00:00Z", endsAt: "2099-12-01T00:00:00Z" };
+    const opened = item({ productId: "p", category: "whisky", displayName: "Glenfiddich 12", options: [menuOption("glass", "잔", 30, 17000), { ...menuOption("bottle", "병", null, 160000), discount: running }] });
+    const start = editDraftOf(opened)!;
+    // The owner put a discount on the glass and typed the bottle's price.
+    const typed = {
+      ...start,
+      options: start.options.map((row) => (row.id === "glass" ? { ...row, sale: "15000", start: "2099-12-01", end: "2099-12-31" } : { ...row, price: "170000" })),
+    };
+    // Elsewhere: the glass's price and the bottle's discount changed.
+    const fresh = editDraftOf({ ...opened, options: [menuOption("glass", "잔", 30, 18000), { ...menuOption("bottle", "병", null, 160000), discount: { ...running, discountedPriceKrw: 120000 } }] })!;
+
+    const rebased = rebaseDraft(start, typed, fresh);
+
+    expect(rebased.options.map(({ price, sale, start: from }) => ({ price, sale, from }))).toEqual([
+      { price: "18000", sale: "15000", from: "2099-12-01" },
+      { price: "170000", sale: "120000", from: "2026-11-01" },
+    ]);
+  });
+
+  it("finds the rows by their serving when an edit elsewhere gave the options new IDs (Codex review on #209)", () => {
+    const running = { discountedPriceKrw: 14000, startsAt: "2026-11-01T00:00:00Z", endsAt: "2099-12-01T00:00:00Z" };
+    const opened = item({
+      productId: "p",
+      category: "whisky",
+      displayName: "Glenfiddich 12",
+      options: [menuOption("glass", "잔", 30, 17000), menuOption("bottle", "병", null, 160000), menuOption("half", "하프", 15, 9000)],
+    });
+    const start = editDraftOf(opened)!;
+    // The owner typed the glass price and removed the half.
+    const typed = { ...start, options: start.options.filter((row) => row.id !== "half").map((row) => (row.id === "glass" ? { ...row, price: "18000" } : row)) };
+    // Elsewhere the item was edited: every option has a new ID; the glass got a discount, the bottle a new price.
+    const fresh = editDraftOf({
+      ...opened,
+      options: [{ ...menuOption("glass-2", "잔", 30, 17000), discount: running }, menuOption("bottle-2", "병", null, 165000), menuOption("half-2", "하프", 15, 9000)],
+    })!;
+
+    const rebased = rebaseDraft(start, typed, fresh);
+
+    // No serving twice, and the half the owner removed stays removed.
+    expect(rebased.options.map(({ id, price, sale }) => ({ id, price, sale }))).toEqual([
+      { id: "glass-2", price: "18000", sale: "14000" },
+      { id: "bottle-2", price: "165000", sale: "" },
     ]);
   });
 
@@ -429,5 +493,102 @@ describe("saving an item (OwnerManualMenuScreen.kt save)", () => {
     expect(freshExactMatch([exact], "라가불린 16년", "위스키", null)).toBe(exact);
     expect(freshExactMatch([exact], "라가불린 16년", "위스키", "p")).toBeNull();
     expect(freshExactMatch([{ ...exact, isActive: false }], "라가불린 16년", "위스키", null)).toBeNull();
+  });
+});
+
+describe("discount display (OwnerMenuDiscountPresentationTest.kt)", () => {
+  it("discountBelongsToItsOptionAndRespectsHalfOpenPeriod", () => {
+    const at = (ms: number) => new Date(ms).toISOString();
+    const discount = { ...menuOption("pour30", null, 30, 10000), discount: { discountedPriceKrw: 5000, startsAt: at(100), endsAt: at(200) } };
+    const regular = menuOption("bottle", "Bottle", null, 120000);
+    // The same active time interval gates both the badge and the price.
+    expect(discountActive(discount, 99)).toBe(false);
+    expect(discountActive(discount, 100)).toBe(true);
+    expect(discountActive(discount, 199)).toBe(true);
+    expect(discountActive(discount, 200)).toBe(false);
+    expect(discountActive(regular, 150)).toBe(false);
+    expect(displayPrice(discount, 99)).toBe(10000);
+    expect(displayPrice(discount, 150)).toBe(5000);
+    expect(displayPrice(discount, 200)).toBe(10000);
+    expect(displayPrice(regular, 150)).toBe(120000);
+  });
+});
+
+describe("entering a discount (OwnerManualMenuScreen.kt toOption)", () => {
+  const row: DraftOption = { id: "glass", bottle: false, ml: "30", price: "17000", ...NO_DISCOUNT };
+
+  it("runs from the first day's midnight in Seoul until the midnight after the last day, sent as UTC", () => {
+    expect(draftDiscount({ ...row, sale: "14000", start: "2026-11-23", end: "2026-11-30" }, 17000, undefined)).toEqual({
+      discountedPriceKrw: 14000,
+      startsAt: "2026-11-22T15:00:00Z",
+      endsAt: "2026-11-30T15:00:00Z",
+    });
+    expect(draftDiscount(row, 17000, undefined)).toBeNull();
+  });
+
+  it("keeps a saved discount's own instants while its days are unchanged (localDiscountEndDay)", () => {
+    // Imported mid-day: starts 12:30 and ends 15:00 in Seoul.
+    const saved = { discountedPriceKrw: 14000, startsAt: "2026-11-01T03:30:00Z", endsAt: "2026-12-01T06:00:00Z" };
+    const opened = fromSaved({ ...menuOption("glass", null, 30, 17000), discount: saved });
+    expect([opened.sale, opened.start, opened.end]).toEqual(["14000", "2026-11-01", "2026-12-01"]);
+    expect(draftDiscount({ ...opened, sale: "13000" }, 17000, undefined)).toEqual({ ...saved, discountedPriceKrw: 13000 });
+    // Another day: both ends from the days.
+    expect(draftDiscount({ ...opened, end: "2026-12-02" }, 17000, undefined)).toEqual({ discountedPriceKrw: 14000, startsAt: "2026-10-31T15:00:00Z", endsAt: "2026-12-02T15:00:00Z" });
+    // Ending at midnight in Seoul ends the day before.
+    expect(localDiscountEndDay("2026-11-30T15:00:00Z")).toBe("2026-11-30");
+    expect(localDiscountEndDay("2026-11-30T16:00:00Z")).toBe("2026-12-01");
+  });
+
+  it("refuses a discounted price not lower than the price, as spec 3.14.2 does (the app allows the same price)", () => {
+    const typed = { ...row, start: "2026-11-23", end: "2026-11-30" };
+    expect(() => draftDiscount({ ...typed, sale: "17000" }, 17000, undefined)).toThrow("할인 가격은 1원 이상, 원래 가격보다 낮아야 해요.");
+    expect(() => draftDiscount({ ...typed, sale: "0" }, 17000, undefined)).toThrow("할인 가격은 1원 이상, 원래 가격보다 낮아야 해요.");
+    expect(() => draftDiscount({ ...typed, sale: "1만" }, 17000, undefined)).toThrow("할인 가격을 숫자로 입력해 주세요.");
+    const at = { discountedPriceKrw: 17000, startsAt: "2026-11-01T00:00:00Z", endsAt: "2026-12-01T00:00:00Z" };
+    expect(manualMenuOptionError([{ optionId: "glass", label: null, pourMl: 30, priceKrw: 17000, discount: at }], "whisky")).toBe("할인 가격과 기간을 확인해 주세요.");
+  });
+
+  it("asks for both days, the last not before the first", () => {
+    expect(() => draftDiscount({ ...row, sale: "14000", start: "", end: "2026-11-30" }, 17000, undefined)).toThrow("시작일은 YYYY-MM-DD 형식이에요.");
+    expect(() => draftDiscount({ ...row, sale: "14000", start: "2026-11-23", end: "" }, 17000, undefined)).toThrow("종료일은 YYYY-MM-DD 형식이에요.");
+    expect(() => draftDiscount({ ...row, sale: "14000", start: "2026-11-23", end: "2026-11-22" }, 17000, undefined)).toThrow("할인 종료일을 확인해 주세요.");
+    // One day is a whole day.
+    expect(draftDiscount({ ...row, sale: "14000", start: "2026-11-23", end: "2026-11-23" }, 17000, undefined)?.endsAt).toBe("2026-11-23T15:00:00Z");
+  });
+
+  it("originalImportedHighDiscountIsNotSubjectToNewEightDigitEntryCap (OwnerManualMenuRulesTest.kt)", () => {
+    const high = { discountedPriceKrw: 120_000_000, startsAt: "2026-11-01T00:00:00Z", endsAt: "2026-12-01T00:00:00Z" };
+    const original = { optionId: "imported-high", label: null, pourMl: 30, priceKrw: 150_000_000, discount: high };
+    expect(manualMenuOptionError([original], "whisky", [original])).toBeNull();
+    expect(manualMenuOptionError([{ ...original, discount: { ...high, discountedPriceKrw: 121_000_000 } }], "whisky", [original])).toBe("할인 가격은 1억 원 미만이어야 해요.");
+  });
+});
+
+describe("menu freshness on the home (OwnerManagementHomeStateTest.kt)", () => {
+  const day = "2026-10-31";
+  const seoul = (date: string, hour = 0) => Date.parse(`${date}T${String(hour).padStart(2, "0")}:00:00+09:00`);
+  const iso = (ms: number) => new Date(ms).toISOString();
+  const currentMenu = (publishedAt: number, confirmedAt: number | null) => ({
+    menuBoardId: "board",
+    menuVersion: 4,
+    publishedAt: iso(publishedAt),
+    confirmedAt: confirmedAt === null ? null : iso(confirmedAt),
+  });
+
+  it("menuFreshnessUsesLatestOfPublishedAndVerifiedButKeepsThemIndependent", () => {
+    expect(menuFreshness(null, seoul(day, 20))).toEqual({ days: null, percent: 0 });
+    const postedAt = seoul("2026-10-11");
+    const checkedAt = seoul("2026-10-28");
+    expect(menuFreshness(currentMenu(postedAt, checkedAt), seoul(day, 20))).toEqual({ days: 3, percent: 10 });
+    expect(menuDate(iso(postedAt))).toBe("10.11");
+    expect(menuDate(iso(checkedAt))).toBe("10.28");
+  });
+
+  it("menuAgeGaugeStartsEmptyAndFillsFromLeftToRightByDay30", () => {
+    const confirmed = currentMenu(seoul("2026-10-01"), seoul(day));
+    expect(menuFreshness(confirmed, seoul(day, 20)).percent).toBe(0);
+    expect(menuFreshness(confirmed, seoul("2026-11-15")).percent).toBe(50);
+    expect(menuFreshness(confirmed, seoul("2026-11-30")).percent).toBe(100);
+    expect(menuFreshness(confirmed, seoul("2026-12-15")).percent).toBe(100);
   });
 });

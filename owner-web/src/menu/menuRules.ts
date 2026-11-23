@@ -224,7 +224,8 @@ export function manualMenuOptionError(options: readonly OptionValue[], category:
       (option) =>
         option.discount !== null &&
         (option.discount.discountedPriceKrw <= 0 ||
-          option.discount.discountedPriceKrw > option.priceKrw ||
+          // The app allows a discounted price equal to the price; spec 3.14.2 does not (DISCOUNT_NOT_LOWER).
+          option.discount.discountedPriceKrw >= option.priceKrw ||
           Date.parse(option.discount.startsAt) >= Date.parse(option.discount.endsAt)),
     )
   ) {

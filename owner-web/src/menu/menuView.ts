@@ -1,4 +1,4 @@
-import { monthDay, seoulClock } from "../bar/seoulTime";
+import { epochDay, monthDay, seoulClock } from "../bar/seoulTime";
 import type { BarDetail } from "../owner/queries";
 import { MANUAL_MENU_CATEGORIES, manualMenuMatches, menuProductOf, ownerV4Category, type MenuItem, type MenuOption } from "./menuRules";
 
@@ -29,6 +29,17 @@ export function lastMenuUpdate(currentMenu: BarDetail["currentMenu"]): string | 
   if (!currentMenu) return null;
   const { publishedAt, confirmedAt } = currentMenu;
   return confirmedAt && Date.parse(confirmedAt) > Date.parse(publishedAt) ? confirmedAt : publishedAt;
+}
+
+/**
+ * OwnerManagementHomeState.kt `ownerMenuFreshness`: whole Seoul days since the last update (`lastMenuUpdate`),
+ * and the gauge, full at 30 days. No update yet: no days and an empty gauge.
+ */
+export function menuFreshness(currentMenu: BarDetail["currentMenu"], now: number): { days: number | null; percent: number } {
+  const last = lastMenuUpdate(currentMenu);
+  if (!last) return { days: null, percent: 0 };
+  const days = Math.max(0, epochDay(seoulClock(now).date) - epochDay(seoulClock(Date.parse(last)).date));
+  return { days, percent: Math.floor((Math.min(days, 30) * 100) / 30) };
 }
 
 export interface MenuGroup {
