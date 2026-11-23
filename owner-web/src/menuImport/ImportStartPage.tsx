@@ -34,7 +34,8 @@ export function ImportStartPage({ bar }: { bar: OwnedBar }) {
   const detail = useBar(bar.barId);
   return (
     <OwnerScreen title="메뉴판 사진 선택" backTo={`/bars/${bar.barId}/menu`}>
-      <BarQuery query={detail}>
+      {/* A failed refetch keeps the picker, so the photos picked are not lost. */}
+      <BarQuery query={detail} keepDataOnRefetchError>
         {(data) =>
           data.activeMenuImport ? (
             <div className={styles.screen}>

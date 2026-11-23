@@ -59,21 +59,33 @@ export function ReviewScreen(props: ReviewProps) {
   );
 }
 
+/** The saved prices of the bar's item without a product of a name (none when two items share it). */
+function savedUnlinkedPrices(menu: BarMenu) {
+  return (name: string) => {
+    try {
+      return existingUnlinkedOptions(menu, name).map(savedCandidate);
+    } catch {
+      return [];
+    }
+  };
+}
+
 /** The cards the review starts with: the server draft, or this device's unsent copy when it builds on it. */
 function initialReview(review: ImportReview, menu: BarMenu, bar: BarDetail, device: DeviceDraft | null): { state: ReviewState; resume: boolean; conflict: DeviceDraft | null } {
   const fresh = mapReview(review, menu, bar.defaultPourMl);
+  const prices = savedUnlinkedPrices(menu);
   const server = review.reviewDraft;
-  const fromServer = server ? restoreDraft(fresh, review, server) : fresh;
+  const fromServer = server ? restoreDraft(fresh, review, server, prices) : fresh;
   if (!device) return { state: fromServer, resume: false, conflict: null };
   if (device.reviewVersion !== review.reviewVersion) {
     // The review was built again (9.4): this device's decisions apply where their lines are still in it. With a
     // server draft as well, the owner chooses, so the edit the server never got is not dropped unseen.
     return server
       ? { state: fromServer, resume: false, conflict: device }
-      : { state: restoreDraft(fresh, review, { reviewVersion: device.reviewVersion, content: device.content }), resume: true, conflict: null };
+      : { state: restoreDraft(fresh, review, { reviewVersion: device.reviewVersion, content: device.content }, prices), resume: true, conflict: null };
   }
   if (device.baseDraftVersion === (server?.draftVersion ?? 0)) {
-    return { state: restoreDraft(fresh, review, { reviewVersion: device.reviewVersion, content: device.content }), resume: true, conflict: null };
+    return { state: restoreDraft(fresh, review, { reviewVersion: device.reviewVersion, content: device.content }, prices), resume: true, conflict: null };
   }
   return { state: fromServer, resume: false, conflict: device };
 }
@@ -254,7 +266,7 @@ function ReviewBody({ review, menu, bar, onNotice, userId, restart }: ReviewProp
       const current = await actions.peek(review.menuImportId);
       if (current.status === "applied") {
         draft.discard();
-        await actions.refreshBar();
+        await actions.refreshApplied();
         return setPublish({ kind: "done", applied: null });
       }
       if (current.status === "ready_for_review" && current.reviewVersion === review.reviewVersion) {
@@ -438,7 +450,7 @@ function ReviewBody({ review, menu, bar, onNotice, userId, restart }: ReviewProp
           <Button
             onClick={() => {
               if (deviceConflict) {
-                const restored = restoreDraft(mapReview(review, menu, bar.defaultPourMl), review, { reviewVersion: deviceConflict.reviewVersion, content: deviceConflict.content });
+                const restored = restoreDraft(mapReview(review, menu, bar.defaultPourMl), review, { reviewVersion: deviceConflict.reviewVersion, content: deviceConflict.content }, savedUnlinkedPrices(menu));
                 setDeviceConflict(null);
                 setState(restored);
                 draft.schedule(restored);

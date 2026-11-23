@@ -583,6 +583,20 @@ describe("the review draft (ServerReviewDraftCodec.kt)", () => {
     expect(restored.cards).toHaveLength(2);
   });
 
+  it("splits a merged group when the draft decided on one of its lines alone (Codex review on #210)", () => {
+    const a = line({ options: [lineOption("a-30", null, 30, 15000)] });
+    const b = line({ extractedItemId: "line-2", itemOrder: 2, options: [lineOption("b-60", null, 60, 26000)] });
+    const merged = review([a, b]);
+    const fresh = mapReview(merged, menu([]), 30);
+    expect(fresh.cards[1]!.mergedInto).toBe("line-1");
+    const restored = restoreDraft(fresh, merged, { reviewVersion: 3, content: { itemDecisions: [{ extractedItemId: "line-2", action: "reject" }] } });
+    expect(restored.cards.map((c) => [c.id, c.mergedInto, c.excluded, c.options.map((o) => o.sourceOptionId)])).toEqual([
+      ["line-1", null, false, ["a-30"]],
+      ["line-2", null, true, ["b-60"]],
+    ]);
+    expect((reviewBody(merged, restored, menu([])).itemDecisions[0] as { options: unknown[] }).options).toHaveLength(1);
+  });
+
   // ServerReviewDraftCodec.kt restoreStandard: an explicit [] means every serving was removed (Codex review on #210)
   it("keeps a line whose draft removed every serving without servings, asking for one", () => {
     const fresh = mapReview(data, menu(), 30);

@@ -1,4 +1,4 @@
-import { act, configure, fireEvent, screen, waitFor, within } from "@testing-library/react";
+import { act, cleanup, configure, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -100,7 +100,7 @@ function importServer({
   const owned = () => bar(BAR_ID, "관악 위스키 바", { defaultPourMl: pour, activeMenuImport: job && ["uploaded", "processing", "ready_for_review"].includes(job.status) ? { menuImportId: IMPORT_ID, status: job.status as "processing" } : null });
   let menu: BarMenu = barMenu(owned(), { menuBoardId: "board", menuVersion: 4, publishedAt: "2026-11-01T03:00:00Z", items });
   const calls: Call[] = [];
-  const reads = { job: 0 };
+  const reads = { job: 0, menu: 0 };
   let added = 0;
   useOwnerApi({ bars: [owned()] });
   const record = async (call: Call) => {
@@ -149,7 +149,10 @@ function importServer({
       pour = body.defaultPourMl;
       return HttpResponse.json(owned());
     }),
-    http.get("/api/bars/:barId/menu", () => HttpResponse.json(menu)),
+    http.get("/api/bars/:barId/menu", () => {
+      reads.menu++;
+      return HttpResponse.json(menu);
+    }),
     http.get("/api/bars/:barId/menu-imports", () =>
       HttpResponse.json({
         items: job ? [{ menuImportId: IMPORT_ID, mode: "partial_update", status: job.status, imageCount: 2, reviewVersion: job.reviewVersion, ownerNote: null, createdAt: "2026-11-23T00:00:00Z", completedAt: null }] : latest ? [{ menuImportId: IMPORT_ID, mode: "partial_update", status: latest.status, imageCount: 2, reviewVersion: 1, ownerNote: null, createdAt: "2026-11-20T00:00:00Z", completedAt: null }] : [],
@@ -251,6 +254,9 @@ function importServer({
     get job() {
       return job;
     },
+    setMenu: (next: BarMenu["items"]) => {
+      menu = { ...menu, menuVersion: (menu.menuVersion ?? 0) + 1, items: next };
+    },
     setJob: (update: Partial<Job>) => {
       job = job ? { ...job, ...update } : fresh(update);
     },
@@ -278,8 +284,12 @@ beforeEach(() => {
   URL.revokeObjectURL = vi.fn();
   localStorage.clear();
 });
-afterEach(() => {
+afterEach(async () => {
   vi.useRealTimers();
+  // Leaving the review sends a draft still waiting (useDraftSync.ts); it must reach this test's server, before the
+  // shared cleanup resets the handlers, rather than the next test's.
+  cleanup();
+  await new Promise((resolve) => setTimeout(resolve, 50));
 });
 
 describe("uploading menu photos (spec 4, OwnerMenuPhotoSelectionScreen.kt)", () => {
@@ -411,6 +421,18 @@ describe("uploading menu photos (spec 4, OwnerMenuPhotoSelectionScreen.kt)", () 
     slow.release();
     await screen.findByText("사진 1장 중 0장을 읽었어요");
     expect(api.callsTo("POST", `/api/bars/${BAR_ID}/menu-imports`)).toHaveLength(1);
+  });
+
+  it("keeps the picked photos when reading the bar again fails (Codex review on #210)", async () => {
+    importServer({ job: null });
+    const { queryClient } = renderOwnerWeb(`/bars/${BAR_ID}/menu/import`);
+    await pickPhotos([photoFile("a.jpg"), photoFile("b.jpg")]);
+    await screen.findByRole("listitem", { name: "메뉴판 사진 2" });
+    server.use(http.get("/api/bars/:barId", () => HttpResponse.json(errorBody("INTERNAL_ERROR"), { status: 500 })));
+    await act(() => queryClient.invalidateQueries({ queryKey: ["bars", BAR_ID] }));
+    expect(await screen.findByText(/최신 정보를 불러오지 못했어요/)).toBeInTheDocument();
+    expect(screen.getByRole("listitem", { name: "메뉴판 사진 2" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "사진 2장 올리기" })).toBeEnabled();
   });
 
   it("points to the unfinished import instead of a new upload", async () => {
@@ -942,6 +964,41 @@ describe("reviewing and publishing (spec 5.4, 5.9, 8, PhotoReviewScreen.kt)", ()
     await user().click(within(unknown).getByRole("button", { name: "게시 상태 확인" }));
     expect(await screen.findByRole("heading", { level: 2, name: "메뉴를 게시했어요." })).toBeInTheDocument();
     expect(api.callsTo("POST", `/api/menu-imports/${IMPORT_ID}/review-and-apply`)).toHaveLength(1);
+  });
+
+  it("reads the menu again once a publish whose answer was lost is confirmed (Codex review on #210)", async () => {
+    const api = importServer({
+      job: { status: "ready_for_review" },
+      answer: (call) => {
+        if (!call.path.endsWith("/review-and-apply")) return undefined;
+        // Applied on the server; the answer never arrives.
+        api.setJob({ status: "applied" });
+        api.setMenu([...startingMenu(), menuItem({ barMenuItemId: "added-x", displayName: "새 위스키 21년", sortOrder: 4, options: [savedOption("x", null, 30, 40000)] })]);
+        return networkFailure();
+      },
+    });
+    renderOwnerWeb(JOB_PATH);
+    await title("메뉴 검수");
+    await resolveReview();
+    await user().click(screen.getByRole("button", { name: "게시하기" }));
+    await user().click(within(await screen.findByRole("dialog")).getByRole("button", { name: "게시하기" }));
+    const reads = api.reads.menu;
+    await user().click(within(await screen.findByRole("dialog", { name: "게시 결과를 확인하지 못했어요" })).getByRole("button", { name: "게시 상태 확인" }));
+    expect(await screen.findByRole("heading", { level: 2, name: "메뉴를 게시했어요." })).toBeInTheDocument();
+    await waitFor(() => expect(api.reads.menu).toBeGreaterThan(reads));
+  });
+
+  it("sends a draft once after typing stops, not on every key (Codex review on #210)", async () => {
+    const api = importServer({ job: { status: "ready_for_review" } });
+    renderOwnerWeb(JOB_PATH);
+    await title("메뉴 검수");
+    const price = within(await card("레몬 사워")).getByLabelText("가격 (원)");
+    // Each key leaves a valid price, so the card stays where it is while typing.
+    await user().type(price, "55");
+    await waitFor(() => expect(api.job!.draftVersion).toBeGreaterThan(0));
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    expect(api.callsTo("PUT", `/api/menu-imports/${IMPORT_ID}/review-draft`)).toHaveLength(1);
+    expect(JSON.stringify(api.job!.draft!.content)).toContain("1200055");
   });
 
   it("goes back to the review when the import was not published", async () => {

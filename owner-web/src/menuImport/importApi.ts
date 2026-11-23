@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import type { components } from "../api/schema";
 import { unwrap } from "../api/client";
 import { useSession } from "../auth/SessionProvider";
@@ -77,8 +77,13 @@ export function useImportActions(barId: string) {
     [barId, queryClient],
   );
 
-  return {
+  // The same functions on every render, so screens can depend on them (the review's draft queue does).
+  return useMemo(() => ({
     refreshBar,
+
+    /** After a publish, answered or confirmed later: the bar, the bar list, the latest import and the menu (3.9). */
+    refreshApplied: () =>
+      Promise.all([refreshBar(), queryClient.invalidateQueries({ queryKey: ownerQueryKeys.menu(barId), refetchType: "all" })]),
 
     /** POST /api/bars/{barId}/menu-imports (spec 4.1): the photos in order, as a partial update (the app's only mode). */
     upload: async (photos: readonly ImportPhoto[], idempotencyKey: string) => {
@@ -110,10 +115,7 @@ export function useImportActions(barId: string) {
     /** POST /api/menu-imports/{menuImportId}/review-and-apply (spec 8); then the menu, the bar and the import are read again. */
     apply: async (menuImportId: string, body: ReviewAndApply) => {
       const applied = unwrap(await api.POST("/api/menu-imports/{menuImportId}/review-and-apply", { params: { path: { menuImportId } }, body }));
-      await Promise.all([
-        refreshBar(),
-        queryClient.invalidateQueries({ queryKey: ownerQueryKeys.menu(barId), refetchType: "all" }),
-      ]);
+      await Promise.all([refreshBar(), queryClient.invalidateQueries({ queryKey: ownerQueryKeys.menu(barId), refetchType: "all" })]);
       return applied;
     },
 
@@ -135,5 +137,5 @@ export function useImportActions(barId: string) {
 
     /** GET /api/catalog/products (spec 7), inactive products too. */
     searchCatalog: async (query: string) => unwrap(await api.GET("/api/catalog/products", { params: { query: { query } } })).items,
-  };
+  }), [api, barId, queryClient, refreshBar]);
 }

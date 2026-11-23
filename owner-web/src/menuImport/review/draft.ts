@@ -1,6 +1,6 @@
 import { isBottleServingLabel } from "../../menu/servingIdentity";
-import { validPrice, validVolume, type ReviewCard, type ReviewOption, type ReviewState } from "./model";
-import type { ImportReview } from "./mapping";
+import { validPrice, validVolume, type PriceCandidate, type ReviewCard, type ReviewOption, type ReviewState } from "./model";
+import { splitMerged, type ImportReview } from "./mapping";
 import { applyDefaultPour, confirmNew, markLinked, priceCandidatesForServing, reclassify, servingKey, validMenuName } from "./rules";
 
 /**
@@ -79,7 +79,12 @@ function webCards(content: Record<string, unknown>): SavedCard[] | null {
  * built again, 9.4) each line's decision is applied when its line and options are still in the review, and
  * proposed-change decisions are dropped (5.4).
  */
-export function restoreDraft(fresh: ReviewState, review: ImportReview, draft: { reviewVersion: number; content: Record<string, unknown> }): ReviewState {
+export function restoreDraft(
+  fresh: ReviewState,
+  review: ImportReview,
+  draft: { reviewVersion: number; content: Record<string, unknown> },
+  unlinkedPrices: (name: string) => PriceCandidate[] = () => [],
+): ReviewState {
   const saved = webCards(draft.content);
   const freshById = new Map(fresh.cards.map((card) => [card.id, card]));
   if (
@@ -121,12 +126,18 @@ export function restoreDraft(fresh: ReviewState, review: ImportReview, draft: { 
     review.images.flatMap((image) => image.items.map((line) => [line.extractedItemId, new Set(line.options.map((o) => o.extractedOptionId))] as const)),
   );
   const byId = new Map(decisions.filter((d) => typeof d.extractedItemId === "string").map((d) => [d.extractedItemId as string, d]));
+  // A line this review merged into another card but the draft decided on its own (another client did not merge it):
+  // the group is split first, so that decision applies to that line alone (the app refuses such a draft).
+  let split = fresh;
+  for (const master of new Set(fresh.cards.filter((card) => card.mergedInto !== null && byId.has(card.id)).map((card) => card.mergedInto as string))) {
+    split = splitMerged(split, master, unlinkedPrices);
+  }
   return {
-    ...fresh,
-    cards: fresh.cards.map((card) => {
+    ...split,
+    cards: split.cards.map((card) => {
       const decision = byId.get(card.id);
       if (!decision || card.mergedInto !== null) return card;
-      return applyStandardDecision(card, decision, lineOptions.get(card.id) ?? new Set(), fresh);
+      return applyStandardDecision(card, decision, lineOptions.get(card.id) ?? new Set(), split);
     }),
   };
 }

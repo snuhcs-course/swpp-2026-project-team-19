@@ -163,13 +163,16 @@ export function useDraftSync({ menuImportId, reviewVersion, userId, baseDraftVer
     clearDeviceDraft(userId, menuImportId);
   }, [menuImportId, userId]);
 
+  // Only when the screen is left (not on every render): what is waiting is sent; the device copy stays until the
+  // server has it.
+  const drainOnLeave = useRef(drain);
+  drainOnLeave.current = drain;
   useEffect(
     () => () => {
-      // Leaving the screen sends what is waiting; the device copy stays until the server has it.
       if (timer.current) clearTimeout(timer.current);
-      if (dirty.current) void drain();
+      if (dirty.current) void drainOnLeave.current();
     },
-    [drain],
+    [],
   );
 
   /** Whether leaving now loses the latest edit: neither the server nor this device has it. */
