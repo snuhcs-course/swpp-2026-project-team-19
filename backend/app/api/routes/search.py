@@ -10,6 +10,7 @@ from app.db.session import get_session
 from app.schemas.errors import error_responses
 from app.models import SearchSource
 from app.schemas.search import (
+    AllBarsResponse,
     BarNamesResponse,
     MapBarsResponse,
     NearbyBarsResponse,
@@ -17,7 +18,7 @@ from app.schemas.search import (
     SearchBarsResponse,
 )
 from app.services.bar_name_search import DEFAULT_LIMIT, MAX_LIMIT, search_bar_names
-from app.services.map_bars import MAX_SPAN_DEGREES, find_map_bars
+from app.services.map_bars import MAX_SPAN_DEGREES, find_all_bars, find_map_bars
 from app.services.nearby_bars import DEFAULT_RADIUS_METERS, MAX_RADIUS_METERS, find_nearby_bars
 from app.services.popular_products import DEFAULT_LIMIT as POPULAR_DEFAULT_LIMIT
 from app.services.popular_products import MAX_LIMIT as POPULAR_MAX_LIMIT
@@ -245,3 +246,28 @@ def read_map_bars(
     base_url: str = Depends(get_base_url),
 ) -> MapBarsResponse:
     return find_map_bars(session, south, west, north, east, base_url=base_url)
+
+
+@router.get(
+    "/all-bars",
+    response_model=AllBarsResponse,
+    summary="Every active bar, for the app to compute nearby bars, distance and map area on the device",
+    description=(
+        "Public; the Authorization header is not read, so every caller gets the same result. It takes no "
+        "location, so the customer's location never reaches the server: the app computes nearby bars, "
+        "distance order and the map area itself. The location parameters of `/api/search/nearby-bars`, "
+        "`/api/search/map-bars` and `/api/search/bars` stay for installed builds.\n\n"
+        "- Active bars only, with or without a published menu.\n"
+        "- The items are those of `/api/search/map-bars`: the same fields and values for the same bar.\n"
+        "- All of them, with no paging or truncation, sorted by `name`, then `barId`.\n"
+        "- It takes no query parameters; unknown ones are ignored.\n"
+        "- No active bar is `200` with `items: []`."
+    ),
+    # No parameters, so no 422; only the 500 any route can answer.
+    responses={500: error_responses()[500]},
+)
+def read_all_bars(
+    session: Session = Depends(get_session),
+    base_url: str = Depends(get_base_url),
+) -> AllBarsResponse:
+    return find_all_bars(session, base_url=base_url)

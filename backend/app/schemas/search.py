@@ -101,6 +101,13 @@ class MapBarsResponse(BaseModel):
     )
 
 
+class AllBarsResponse(BaseModel):
+    items: list[MapBarItem] = Field(
+        description="Every active bar, by name, then barId; the same items as GET /api/search/map-bars. "
+        "Never truncated."
+    )
+
+
 class NearbyBarItem(BaseModel):
     barId: UUID
     name: str
