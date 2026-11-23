@@ -650,6 +650,32 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/search/all-bars": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Every active bar, for the app to compute nearby bars, distance and map area on the device
+         * @description Public; the Authorization header is not read, so every caller gets the same result. It takes no location, so the customer's location never reaches the server: the app computes nearby bars, distance order and the map area itself. The location parameters of `/api/search/nearby-bars`, `/api/search/map-bars` and `/api/search/bars` stay for installed builds.
+         *
+         *     - Active bars only, with or without a published menu.
+         *     - The items are those of `/api/search/map-bars`: the same fields and values for the same bar.
+         *     - All of them, with no paging or truncation, sorted by `name`, then `barId`.
+         *     - It takes no query parameters; unknown ones are ignored.
+         *     - No active bar is `200` with `items: []`.
+         */
+        get: operations["read_all_bars_api_search_all_bars_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/menu-imports/{menuImportId}": {
         parameters: {
             query?: never;
@@ -1161,6 +1187,14 @@ export interface components {
              * @enum {string}
              */
             status: "uploaded" | "processing" | "ready_for_review";
+        };
+        /** AllBarsResponse */
+        AllBarsResponse: {
+            /**
+             * Items
+             * @description Every active bar, by name, then barId; the same items as GET /api/search/map-bars. Never truncated.
+             */
+            items: components["schemas"]["MapBarItem"][];
         };
         /** Applicant */
         Applicant: {
@@ -6142,6 +6176,35 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description `INTERNAL_ERROR`: an unexpected server error. Retry later; the response has no details. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    read_all_bars_api_search_all_bars_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AllBarsResponse"];
                 };
             };
             /** @description `INTERNAL_ERROR`: an unexpected server error. Retry later; the response has no details. */
