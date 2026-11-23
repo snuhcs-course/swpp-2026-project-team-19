@@ -139,7 +139,7 @@ fun WelcomeScreen(
                     horizontalArrangement = Arrangement.spacedBy(if (narrow) 6.dp else 12.dp),
                     verticalAlignment = Alignment.Top) {
                     Box(Modifier.weight(1f)) {
-                        WelcomeCheck("만 18세 이상인가요?", ageChecked, { ageChecked = it },
+                        WelcomeCheck("만 19세 이상인가요?", ageChecked, { ageChecked = it },
                             "welcome-age-confirmation", narrow)
                     }
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(0.dp)) {
