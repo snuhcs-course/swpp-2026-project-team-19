@@ -40,3 +40,15 @@ review/*.html
 /.coverage
 /ai-coverage.json
 /ai-junit.xml
+
+# Android release signing secrets and local configuration
+*.jks
+*.keystore
+*.p12
+*.pfx
+keystore.properties
+signing.properties
+# Generated Android distribution artifacts
+*.aab
+*.apk
+/.kotlin/
