@@ -6,14 +6,20 @@ agree on the bar's name, address, coordinates (3.9.4) and menu update time (`pub
 (3.11.11) has no time but must agree on the rest, since the map moves to its coordinates. A menu
 import that is not applied yet changes none of them (3.9.2); applying one moves the time in all of
 them at once.
+
+The owner's own changes that are not menu content, sold-out (3.14.8) and the confirmation (3.14.9), and a
+discount set by editing an item (3.14.4), must reach every view the same way: the owner's menu, the
+customer's (signed out or a customer account) and search show one stored state, the same whether the
+owner wrote it from the app or the owner web (both send the same requests).
 """
 
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, time, timedelta, timezone
+from zoneinfo import ZoneInfo
 
 import pytest
 
-from app.models import BarStatus, ImportStatus
-from tests.factories import make_bar, make_brand, make_product, publish_menu
+from app.models import BarStatus, ImportStatus, UserType
+from tests.factories import make_bar, make_brand, make_owner, make_product, make_user, publish_menu
 from tests.review_support import make_glenfiddich, upload_sample_review, valid_body
 
 # Not UTC and with microseconds, so the APIs must also agree on the string format.
@@ -138,3 +144,138 @@ def test_a_deactivated_bar_leaves_every_view(client, db_session):
     menu = client.get(f"/api/bars/{bar.id}/menu")
     assert (menu.status_code, menu.json()["error"]["code"]) == (404, "BAR_NOT_FOUND")
     assert listings(client, bar) == {"search": [], "nearby": [], "map": [], "names": []}
+
+
+# ---- the owner's discount, sold-out and confirmation (3.14.4, 3.14.8, 3.14.9) ----
+
+OWNER_SUBJECT = "owner-subject"
+SEOUL = ZoneInfo("Asia/Seoul")
+
+
+@pytest.fixture
+def owned(db_session, glenfiddich):
+    """A bar selling the 12 (a glass and a bottle) and the 15 since EARLIER, at menu version 4."""
+    bar = make_bar(db_session, "Seorosang")
+    publish_menu(
+        db_session,
+        bar,
+        [
+            (glenfiddich[12], "글렌피딕 12년", [("잔", 30, 17000), ("병", None, 160000)]),
+            (glenfiddich[15], "글렌피딕 15년", [("잔", 30, 21000)]),
+        ],
+        published_at=EARLIER,
+        version=4,
+    )
+    db_session.commit()
+    return bar
+
+
+@pytest.fixture
+def owner(db_session, supabase, owned):
+    reviewer = make_user(db_session, "reviewer-subject", user_type=UserType.OPERATOR)
+    make_owner(db_session, make_user(db_session, OWNER_SUBJECT), owned, reviewer)
+    db_session.commit()
+    return {"Authorization": f"Bearer {supabase.token(sub=OWNER_SUBJECT)}"}
+
+
+@pytest.fixture
+def customer(supabase):
+    # A Google account without a users row is a customer (AGENTS.md "API conventions").
+    return {"Authorization": f"Bearer {supabase.token(sub='customer-subject')}"}
+
+
+def ok(response) -> dict:
+    assert response.status_code == 200, response.text
+    return response.json()
+
+
+def seoul_day_start(days_from_today: int) -> str:
+    """A Seoul day's midnight as UTC, as the app and the owner web send a discount's days."""
+    day = datetime.now(SEOUL).date() + timedelta(days=days_from_today)
+    return datetime.combine(day, time(0), SEOUL).astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def search_rows(client, bar) -> list[dict]:
+    location = {"lat": float(bar.latitude), "lng": float(bar.longitude)}
+    rows = ok(client.get("/api/search/bars", params={"query": "글렌피딕", **location}))["items"]
+    return [row for row in rows if row["barId"] == str(bar.id)]
+
+
+def customer_option(option: dict) -> dict:
+    return {key: option[key] for key in ("optionLabel", "pourMl", "priceKrw", "discount", "sortOrder")}
+
+
+def test_an_owners_discount_sold_out_and_confirmation_reach_every_view_alike(client, owned, owner, customer):
+    items = {item["displayName"]: item for item in ok(client.get(f"/api/bars/{owned.id}/menu", headers=owner))["items"]}
+    discount = {"discountedPriceKrw": 14000, "startsAt": seoul_day_start(0), "endsAt": seoul_day_start(8)}
+    # The edit as the app and the owner web send it: every option, the other one's discount as it came.
+    edited = ok(
+        client.put(
+            f"/api/bars/{owned.id}/menu/items/{items['글렌피딕 12년']['barMenuItemId']}",
+            json={
+                "menuVersion": 4,
+                "displayName": "글렌피딕 12년",
+                "options": [
+                    {"optionLabel": "잔", "pourMl": 30, "priceKrw": 17000, "discount": discount},
+                    {"optionLabel": "병", "pourMl": None, "priceKrw": 160000, "discount": None},
+                ],
+            },
+            headers=owner,
+        )
+    )
+    published = (edited["menuVersion"], edited["publishedAt"])
+    assert published[0] == 5
+
+    marked = ok(
+        client.put(
+            f"/api/bars/{owned.id}/menu/items/{items['글렌피딕 15년']['barMenuItemId']}/sold-out",
+            json={"soldOut": True},
+            headers=owner,
+        )
+    )
+    confirmed = ok(client.post(f"/api/bars/{owned.id}/menu/confirm", json={"menuVersion": 5}, headers=owner))
+
+    # Sold-out and the confirmation are not menu content: neither moves the version or the published time.
+    assert (marked["menuVersion"], marked["publishedAt"]) == published
+    current = confirmed["currentMenu"]
+    assert (current["menuVersion"], current["publishedAt"]) == published
+    assert current["confirmedAt"] > current["publishedAt"]
+
+    # The owner's menu: the sold-out 15 in its place, the discount as sent.
+    owners = ok(client.get(f"/api/bars/{owned.id}/menu", headers=owner))
+    assert owners == marked
+    assert [(i["displayName"], i["soldOut"]) for i in owners["items"]] == [("글렌피딕 12년", False), ("글렌피딕 15년", True)]
+    twelve = owners["items"][0]
+    assert [o["discount"] for o in twelve["options"]] == [discount, None]
+
+    # Customers, signed out or signed in: the same menu without the sold-out item.
+    signed_out = ok(client.get(f"/api/bars/{owned.id}/menu"))
+    signed_in = ok(client.get(f"/api/bars/{owned.id}/menu", headers=customer))
+    assert signed_out == signed_in
+    assert signed_out == owners | {"items": [twelve]}
+
+    # Search: the same options and discount, the published time, and no sold-out item.
+    rows = search_rows(client, owned)
+    assert [row["menuDisplayName"] for row in rows] == ["글렌피딕 12년"]
+    assert rows[0]["options"] == [customer_option(option) for option in twelve["options"]]
+    assert rows[0]["menuUpdatedAt"] == published[1]
+
+    # The owner's bar and bar list carry the same summary, with the confirmation.
+    assert ok(client.get(f"/api/bars/{owned.id}", headers=owner))["currentMenu"] == current
+    [mine] = ok(client.get("/api/me/bars", headers=owner))["items"]
+    assert mine["currentMenu"] == current
+
+
+def test_an_item_back_on_sale_returns_to_every_view(client, owned, owner, customer):
+    items = {item["displayName"]: item for item in ok(client.get(f"/api/bars/{owned.id}/menu", headers=owner))["items"]}
+    fifteen = f"/api/bars/{owned.id}/menu/items/{items['글렌피딕 15년']['barMenuItemId']}/sold-out"
+    ok(client.put(fifteen, json={"soldOut": True}, headers=owner))
+    assert [row["menuDisplayName"] for row in search_rows(client, owned)] == ["글렌피딕 12년"]
+
+    back = ok(client.put(fifteen, json={"soldOut": False}, headers=owner))
+
+    assert (back["menuVersion"], back["publishedAt"]) == (4, EARLIER_TEXT)
+    owners = ok(client.get(f"/api/bars/{owned.id}/menu", headers=owner))
+    for view in (ok(client.get(f"/api/bars/{owned.id}/menu")), ok(client.get(f"/api/bars/{owned.id}/menu", headers=customer))):
+        assert view == owners
+    assert sorted(row["menuDisplayName"] for row in search_rows(client, owned)) == ["글렌피딕 12년", "글렌피딕 15년"]
