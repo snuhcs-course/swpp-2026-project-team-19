@@ -36,9 +36,19 @@ interface ReviewProps {
  */
 export function ReviewScreen(props: ReviewProps) {
   const me = useMe();
-  const [generation, setGeneration] = useState(0);
+  // A restart opens the review from the response just read, before the screen's query passes it down.
+  const [restarted, setRestarted] = useState<{ generation: number; review: ImportReview | null }>({ generation: 0, review: null });
   if (!me.data) return <LoadingState message="검수 정보를 불러오고 있어요." />;
-  return <ReviewBody key={generation} {...props} userId={me.data.userId} restart={() => setGeneration((n) => n + 1)} />;
+  const review = restarted.review?.reviewVersion === props.review.reviewVersion ? restarted.review : props.review;
+  return (
+    <ReviewBody
+      key={restarted.generation}
+      {...props}
+      review={review}
+      userId={me.data.userId}
+      restart={(fresh) => setRestarted(({ generation }) => ({ generation: generation + 1, review: fresh }))}
+    />
+  );
 }
 
 /** The cards the review starts with: the server draft, or this device's unsent copy when it builds on it. */
@@ -79,7 +89,7 @@ const PUBLISH_FIELD_COPY: Record<string, string> = {
   DUPLICATE_OPTION_VALUES: "같은 용량의 옵션은 하나만 남겨 주세요.",
 };
 
-function ReviewBody({ review, menu, bar, onNotice, userId, restart }: ReviewProps & { userId: string; restart: () => void }) {
+function ReviewBody({ review, menu, bar, onNotice, userId, restart }: ReviewProps & { userId: string; restart: (fresh: ImportReview | null) => void }) {
   const navigate = useNavigate();
   const actions = useImportActions(bar.barId);
   const fail = useBarFailure();
@@ -225,7 +235,7 @@ function ReviewBody({ review, menu, bar, onNotice, userId, restart }: ReviewProp
   async function checkPublished() {
     setPublish({ kind: "unknown", checking: true });
     try {
-      const current = await actions.readNow(review.menuImportId);
+      const current = await actions.peek(review.menuImportId);
       if (current.status === "applied") {
         draft.discard();
         await actions.refreshBar();
@@ -235,7 +245,9 @@ function ReviewBody({ review, menu, bar, onNotice, userId, restart }: ReviewProp
         setPublish(null);
         return setMessage("게시되지 않았어요. 검수 내용을 확인한 뒤 다시 게시해 주세요.");
       }
+      // Canceled meanwhile, or built again: the status screen shows it.
       setPublish(null);
+      reread();
     } catch {
       setPublish({ kind: "unknown", checking: false });
     }
@@ -394,7 +406,10 @@ function ReviewBody({ review, menu, bar, onNotice, userId, restart }: ReviewProp
               // The other draft wins: this device's copy is dropped and the review opens again from the server.
               draft.discard();
               setDeviceConflict(null);
-              void actions.readNow(review.menuImportId).finally(restart);
+              void actions
+                .readNow(review.menuImportId)
+                .then((fresh) => restart(fresh.status === "ready_for_review" ? fresh : null))
+                .catch(() => restart(null));
             }}
           >
             다른 곳 내용으로 이어 하기

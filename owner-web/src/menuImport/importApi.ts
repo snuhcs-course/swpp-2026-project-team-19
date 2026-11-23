@@ -27,8 +27,12 @@ export const MAX_POLLS = 180;
 
 export const isActiveStatus = (status: ImportStatus): boolean => status === "uploaded" || status === "processing" || status === "ready_for_review";
 
-/** GET /api/menu-imports/{menuImportId} (spec 5.1): the import's state, and its review once ready (5.4). */
-export function useMenuImport(menuImportId: string, poll: boolean) {
+/**
+ * GET /api/menu-imports/{menuImportId} (spec 5.1): the import's state, and its review once ready (5.4). While it
+ * is processing it is read again every 2 seconds until `MAX_POLLS` reads after `firstRead` (the read count when
+ * the screen opened or the owner retried).
+ */
+export function useMenuImport(menuImportId: string, firstRead: number) {
   const { api } = useSession();
   return useQuery({
     queryKey: importQueryKeys.menuImport(menuImportId),
@@ -36,7 +40,8 @@ export function useMenuImport(menuImportId: string, poll: boolean) {
       unwrap(await api.GET("/api/menu-imports/{menuImportId}", { params: { path: { menuImportId } }, signal })) as ImportStatusResponse,
     refetchInterval: (query) => {
       const status = query.state.data?.status;
-      return poll && (status === "uploaded" || status === "processing") ? POLL_INTERVAL_MS : false;
+      const reads = query.state.dataUpdateCount - firstRead;
+      return (status === "uploaded" || status === "processing") && reads < MAX_POLLS ? POLL_INTERVAL_MS : false;
     },
     // A review keeps the owner's input in the screen; reading it again on focus is not needed.
     refetchOnWindowFocus: false,
@@ -120,6 +125,13 @@ export function useImportActions(barId: string) {
           unwrap(await api.GET("/api/menu-imports/{menuImportId}", { params: { path: { menuImportId } } })) as ImportStatusResponse,
         staleTime: 0,
       }),
+
+    /**
+     * The import as the server has it now, without replacing the screen's copy: after an unknown publish answer
+     * the review shows its own result instead of the status screen.
+     */
+    peek: async (menuImportId: string) =>
+      unwrap(await api.GET("/api/menu-imports/{menuImportId}", { params: { path: { menuImportId } } })) as ImportStatusResponse,
 
     /** GET /api/catalog/products (spec 7), inactive products too. */
     searchCatalog: async (query: string) => unwrap(await api.GET("/api/catalog/products", { params: { query: { query } } })).items,

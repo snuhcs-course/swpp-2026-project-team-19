@@ -36,7 +36,9 @@ export function createAuthFetch(
   /** Sends the request with the current session's token; returns the response and the session it used. */
   async function send(request: Request): Promise<{ response: Response; session: CurrentSession | null }> {
     const session = await gateway.currentSession();
-    const headers = new Headers(request.headers);
+    // Copied entry by entry: jsdom's Headers constructor drops a request's own headers (such as Idempotency-Key)
+    // when the request has a body; browsers copy them either way.
+    const headers = new Headers([...request.headers.entries()]);
     if (session) headers.set("Authorization", `Bearer ${session.accessToken}`);
     else headers.delete("Authorization");
     try {

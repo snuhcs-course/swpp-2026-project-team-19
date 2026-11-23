@@ -91,6 +91,8 @@ export function useDraftSync({ menuImportId, reviewVersion, userId, baseDraftVer
   /** Sends until the latest cards are on the server, or a failure stops it. */
   const drain = useCallback((): Promise<void> => {
     running.current ??= (async () => {
+      // Starts after `running` holds this run, so its `finally` never clears it before it is set.
+      await Promise.resolve();
       try {
         while (dirty.current && (statusRef.current === "idle" || statusRef.current === "saved" || statusRef.current === "saving")) await sendOnce();
       } finally {

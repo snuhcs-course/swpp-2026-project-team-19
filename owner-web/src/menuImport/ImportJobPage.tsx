@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { useLocation, useParams } from "react-router";
 import { ApiError } from "../api/errors";
@@ -8,7 +9,7 @@ import { ErrorState, LoadingState } from "../ui/states";
 import { QueryView } from "../ui/QueryView";
 import { importPath } from "./ImportEntry";
 import { ImportSteps } from "./ImportStartPage";
-import { MAX_POLLS, useImportActions, useMenuImport, type ImportStatusResponse } from "./importApi";
+import { importQueryKeys, MAX_POLLS, useImportActions, useMenuImport, type ImportStatusResponse } from "./importApi";
 import styles from "./menuImport.module.css";
 
 // The review is the largest screen; it loads only when an import is ready for it.
@@ -28,16 +29,16 @@ export function ImportJobPage({ bar }: { bar: OwnedBar }) {
   const { menuImportId = "" } = useParams();
   const location = useLocation();
   const [notice, setNotice] = useState<string | null>((location.state as ImportNotice | null)?.notice ?? null);
-  const [polls, setPolls] = useState(0);
-  const query = useMenuImport(menuImportId, polls < MAX_POLLS);
+  const queryClient = useQueryClient();
+  const readCount = () => queryClient.getQueryState(importQueryKeys.menuImport(menuImportId))?.dataUpdateCount ?? 0;
+  // Reads before this screen opened (a cached import) do not count toward its 180.
+  const [firstRead, setFirstRead] = useState(readCount);
+  const query = useMenuImport(menuImportId, firstRead);
   const actions = useImportActions(bar.barId);
   const status = query.data?.status;
   const processing = status === "uploaded" || status === "processing";
-
-  // Each answer while processing counts toward the 180 reads.
-  useEffect(() => {
-    if (processing) setPolls((count) => count + 1);
-  }, [query.dataUpdatedAt, processing]);
+  // Read on each answer (dataUpdatedAt changes with it), so the count is current.
+  const polls = query.dataUpdatedAt > 0 ? readCount() - firstRead : 0;
   // When the import leaves processing, the bar's `activeMenuImport` (the menu lock) and the import row change.
   const lastStatus = useRef(status);
   useEffect(() => {
@@ -67,7 +68,7 @@ export function ImportJobPage({ bar }: { bar: OwnedBar }) {
               slow={processing && polls >= MAX_POLLS}
               readFailed={query.isError}
               retry={() => {
-                setPolls(0);
+                setFirstRead(readCount());
                 void query.refetch();
               }}
               onNotice={setNotice}
