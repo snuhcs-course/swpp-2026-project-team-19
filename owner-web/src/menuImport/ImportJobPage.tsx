@@ -1,15 +1,15 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { useLocation, useParams } from "react-router";
-import { ApiError } from "../api/errors";
+import { ApiError, errorMessage } from "../api/errors";
 import { OwnerScreen } from "../owner/OwnerScreen";
 import { useBar, useBarMenu, type OwnedBar } from "../owner/queries";
-import { ButtonLink } from "../ui/Button";
+import { Button, ButtonLink } from "../ui/Button";
 import { ErrorState, LoadingState } from "../ui/states";
 import { QueryView } from "../ui/QueryView";
 import { importPath } from "./ImportEntry";
 import { ImportSteps } from "./ImportStartPage";
-import { importQueryKeys, MAX_POLLS, useImportActions, useMenuImport, type ImportStatusResponse } from "./importApi";
+import { importQueryKeys, MAX_POLLS, readsOf, useImportActions, useMenuImport, type ImportStatusResponse } from "./importApi";
 import styles from "./menuImport.module.css";
 
 // The review is the largest screen; it loads only when an import is ready for it.
@@ -30,7 +30,7 @@ export function ImportJobPage({ bar }: { bar: OwnedBar }) {
   const location = useLocation();
   const [notice, setNotice] = useState<string | null>((location.state as ImportNotice | null)?.notice ?? null);
   const queryClient = useQueryClient();
-  const readCount = () => queryClient.getQueryState(importQueryKeys.menuImport(menuImportId))?.dataUpdateCount ?? 0;
+  const readCount = () => readsOf(queryClient.getQueryState(importQueryKeys.menuImport(menuImportId)));
   // Reads before this screen opened (a cached import) do not count toward its 180.
   const [firstRead] = useState(readCount);
   const query = useMenuImport(menuImportId, firstRead);
@@ -38,7 +38,7 @@ export function ImportJobPage({ bar }: { bar: OwnedBar }) {
   const status = query.data?.status;
   const processing = status === "uploaded" || status === "processing";
   // Read on each answer (dataUpdatedAt changes with it), so the count is current.
-  const polls = query.dataUpdatedAt > 0 ? readCount() - firstRead : 0;
+  const polls = query.dataUpdatedAt > 0 || query.errorUpdatedAt > 0 ? readCount() - firstRead : 0;
   // When the import leaves processing, the bar's `activeMenuImport` (the menu lock) and the import row change.
   const lastStatus = useRef(status);
   useEffect(() => {
@@ -170,21 +170,34 @@ function ImportState({
 function ReviewLoader({ bar, review, onNotice }: { bar: OwnedBar; review: Extract<ImportStatusResponse, { status: "ready_for_review" }>; onNotice: (message: string | null) => void }) {
   const menu = useBarMenu(bar.barId);
   const detail = useBar(bar.barId);
-  if (menu.isError || detail.isError) {
-    return (
-      <ErrorState
-        message="검수 정보를 불러오지 못했어요. 다시 시도해 주세요."
-        onRetry={() => {
-          if (menu.isError) void menu.refetch();
-          if (detail.isError) void detail.refetch();
-        }}
-        retrying={menu.isFetching || detail.isFetching}
-      />
+  const failure = menu.error ?? detail.error;
+  const forbidden = failure instanceof ApiError && failure.code === "FORBIDDEN";
+  const retry = () => {
+    if (menu.isError) void menu.refetch();
+    if (detail.isError) void detail.refetch();
+  };
+  if (!menu.data || !detail.data) {
+    if (!failure) return <LoadingState message="검수 정보를 불러오고 있어요." />;
+    // Never read yet: there is no review to show. A 403 offers no retry (3.1.5).
+    return forbidden ? (
+      <ErrorState message={errorMessage(failure)} />
+    ) : (
+      <ErrorState message="검수 정보를 불러오지 못했어요. 다시 시도해 주세요." onRetry={retry} retrying={menu.isFetching || detail.isFetching} />
     );
   }
-  if (!menu.data || !detail.data) return <LoadingState message="검수 정보를 불러오고 있어요." />;
   return (
     <Suspense fallback={<LoadingState message="검수 화면을 여는 중이에요." />}>
+      {/* A failed read again keeps the review and its input on screen, with the menu and bar last read. */}
+      {failure ? (
+        <div className={styles.row} role="alert">
+          <p className={styles.error}>최신 정보를 불러오지 못했어요. {errorMessage(failure)}</p>
+          {forbidden ? null : (
+            <Button variant="text" busy={menu.isFetching || detail.isFetching} onClick={retry}>
+              다시 시도
+            </Button>
+          )}
+        </div>
+      ) : null}
       {/* A review built again (a new reviewVersion, 9.4) starts over from its draft. */}
       <ReviewScreen key={review.reviewVersion} review={review} menu={menu.data} bar={detail.data} onNotice={onNotice} />
     </Suspense>

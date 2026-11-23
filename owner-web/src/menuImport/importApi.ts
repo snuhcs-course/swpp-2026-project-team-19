@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useMemo } from "react";
 import type { components } from "../api/schema";
 import { unwrap } from "../api/client";
+import { ApiError } from "../api/errors";
 import { useSession } from "../auth/SessionProvider";
 import { ownerQueryKeys } from "../owner/queries";
 import type { ImportPhoto } from "./photoRules";
@@ -27,6 +28,10 @@ export const MAX_POLLS = 180;
 
 export const isActiveStatus = (status: ImportStatus): boolean => status === "uploaded" || status === "processing" || status === "ready_for_review";
 
+/** Every read of an import so far, answered or failed. */
+export const readsOf = (state: { dataUpdateCount: number; errorUpdateCount: number } | undefined): number =>
+  (state?.dataUpdateCount ?? 0) + (state?.errorUpdateCount ?? 0);
+
 /**
  * GET /api/menu-imports/{menuImportId} (spec 5.1): the import's state, and its review once ready (5.4). While it
  * is processing it is read again every 2 seconds until `MAX_POLLS` reads after `firstRead` (the read count when
@@ -40,8 +45,10 @@ export function useMenuImport(menuImportId: string, firstRead: number) {
       unwrap(await api.GET("/api/menu-imports/{menuImportId}", { params: { path: { menuImportId } }, signal })) as ImportStatusResponse,
     refetchInterval: (query) => {
       const status = query.state.data?.status;
-      const reads = query.state.dataUpdateCount - firstRead;
-      return (status === "uploaded" || status === "processing") && reads < MAX_POLLS ? POLL_INTERVAL_MS : false;
+      // Failed reads count too, so an outage stops after 180 like answers do; 403 stops at once (no retry, 3.1.5).
+      const reads = readsOf(query.state) - firstRead;
+      const forbidden = query.state.error instanceof ApiError && query.state.error.code === "FORBIDDEN";
+      return (status === "uploaded" || status === "processing") && reads < MAX_POLLS && !forbidden ? POLL_INTERVAL_MS : false;
     },
     // A review keeps the owner's input in the screen; reading it again on focus is not needed.
     refetchOnWindowFocus: false,

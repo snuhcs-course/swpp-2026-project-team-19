@@ -471,6 +471,35 @@ describe("the import's state (spec 5, OwnerMenuPhotoJobScreen.kt)", () => {
     expect(reads).toBe(180);
   });
 
+  it("counts failed reads toward the 180, so an outage stops too (Codex review on #210)", async () => {
+    vi.useFakeTimers({ toFake: ["setInterval", "clearInterval"] });
+    let failing = false;
+    const api = importServer({
+      job: { status: "processing" },
+      answer: (call) => (call.method === "GET" && call.path.startsWith("/api/menu-imports/") && failing ? HttpResponse.json(errorBody("INTERNAL_ERROR"), { status: 500 }) : undefined),
+    });
+    renderOwnerWeb(JOB_PATH);
+    await screen.findByText("사진 2장 중 0장을 읽었어요");
+    failing = true;
+    for (let i = 0; i < 200; i++) await act(() => vi.advanceTimersByTimeAsync(2000));
+    expect(api.callsTo("GET", `/api/menu-imports/${IMPORT_ID}`)).toHaveLength(180);
+    expect(screen.getByText("분석 시간이 길어지고 있어요. 나갔다가 다시 확인해 주세요.")).toBeInTheDocument();
+  });
+
+  it("stops reading at once when a read is forbidden (Codex review on #210)", async () => {
+    vi.useFakeTimers({ toFake: ["setInterval", "clearInterval"] });
+    let forbidden = false;
+    const api = importServer({
+      job: { status: "processing" },
+      answer: (call) => (call.method === "GET" && call.path.startsWith("/api/menu-imports/") && forbidden ? HttpResponse.json(errorBody("FORBIDDEN"), { status: 403 }) : undefined),
+    });
+    renderOwnerWeb(JOB_PATH);
+    await screen.findByText("사진 2장 중 0장을 읽었어요");
+    forbidden = true;
+    for (let i = 0; i < 5; i++) await act(() => vi.advanceTimersByTimeAsync(2000));
+    expect(api.callsTo("GET", `/api/menu-imports/${IMPORT_ID}`)).toHaveLength(2);
+  });
+
   it("shows the server's failure message and offers a new upload (5.3)", async () => {
     importServer({ job: { status: "failed", progress: { totalImages: 2, completedImages: 1, failedImages: 1 }, failure: { code: "IMAGE_EXTRACTION_FAILED", message: "일부 메뉴 이미지를 처리하지 못했습니다." } } });
     renderOwnerWeb(JOB_PATH);
@@ -999,6 +1028,30 @@ describe("reviewing and publishing (spec 5.4, 5.9, 8, PhotoReviewScreen.kt)", ()
     await new Promise((resolve) => setTimeout(resolve, 1500));
     expect(api.callsTo("PUT", `/api/menu-imports/${IMPORT_ID}/review-draft`)).toHaveLength(1);
     expect(JSON.stringify(api.job!.draft!.content)).toContain("1200055");
+  });
+
+  it("keeps the review and its input when reading the menu again fails (Codex review on #210)", async () => {
+    importServer({ job: { status: "ready_for_review" } });
+    const { queryClient } = renderOwnerWeb(JOB_PATH);
+    await title("메뉴 검수");
+    await user().click(within(await card("새 위스키 21년")).getByRole("button", { name: "이 이름으로 등록" }));
+    let menuFails = true;
+    server.use(http.get("/api/bars/:barId/menu", () => (menuFails ? HttpResponse.json(errorBody("INTERNAL_ERROR"), { status: 500 }) : undefined)));
+    await act(() => queryClient.invalidateQueries({ queryKey: ["bar-menu", BAR_ID] }));
+    expect(await screen.findByText(/최신 정보를 불러오지 못했어요/)).toBeInTheDocument();
+    expect(within(await card("새 위스키 21년")).queryByRole("button", { name: "이 이름으로 등록" })).not.toBeInTheDocument();
+    menuFails = false;
+    await user().click(screen.getByRole("button", { name: "다시 시도" }));
+    await waitFor(() => expect(screen.queryByText(/최신 정보를 불러오지 못했어요/)).not.toBeInTheDocument());
+    expect(within(await card("새 위스키 21년")).queryByRole("button", { name: "이 이름으로 등록" })).not.toBeInTheDocument();
+  });
+
+  it("offers no retry when the menu the review needs is forbidden (Codex review on #210)", async () => {
+    importServer({ job: { status: "ready_for_review" } });
+    server.use(http.get("/api/bars/:barId/menu", () => HttpResponse.json(errorBody("FORBIDDEN"), { status: 403 })));
+    renderOwnerWeb(JOB_PATH);
+    expect(await screen.findByText("이 화면을 볼 권한이 없어요.")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "다시 시도" })).not.toBeInTheDocument();
   });
 
   it("goes back to the review when the import was not published", async () => {
