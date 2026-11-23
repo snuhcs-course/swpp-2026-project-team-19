@@ -395,7 +395,7 @@ describe("the home menu card (OwnerManagementHomeScreen.kt)", () => {
 });
 
 describe("the home menu card while its menu is loading or failed", () => {
-  it("says the count is loading, then that it could not be read", async () => {
+  it("says the count is loading, then that it could not be read, without the confirmation line meanwhile", async () => {
     let answer: (() => void) | null = null;
     menuServer([glenfiddich]);
     server.use(
@@ -407,10 +407,17 @@ describe("the home menu card while its menu is loading or failed", () => {
     renderOwnerWeb(`/bars/${BAR_ID}`);
 
     const card = await screen.findByRole("link", { name: /메뉴 관리/ });
+    const region = screen.getByRole("region", { name: "메뉴 관리" });
     expect(card).toHaveTextContent("게시된 메뉴 불러오는 중, 최근 갱신 11.01");
+    // Whether the menu has items is not known yet: no confirmation line, button or gauge.
+    expect(region).not.toHaveTextContent("메뉴 확인");
+    expect(within(region).queryByRole("button", { name: "지금도 맞아요" })).not.toBeInTheDocument();
+    expect(within(region).queryByRole("link", { name: "메뉴 등록하기" })).not.toBeInTheDocument();
+    expect(within(region).queryByRole("progressbar")).not.toBeInTheDocument();
     await waitFor(() => expect(answer).not.toBeNull());
     answer!();
     await waitFor(() => expect(card).toHaveTextContent("메뉴 개수를 불러오지 못했어요, 최근 갱신 11.01"));
+    expect(region).not.toHaveTextContent("메뉴 확인");
   });
 });
 

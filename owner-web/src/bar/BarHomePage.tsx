@@ -115,7 +115,8 @@ function StatusCard({ bar }: { bar: BarDetail }) {
  *
  * Below it, as in the app: days since that update ("메뉴 확인 N일 경과"), "지금도 맞아요" to confirm the menu is
  * still right (3.14.9), and a gauge full at 30 days. The confirmation goes with the `menuVersion` of the menu
- * counted here. A menu without items cannot be confirmed: the button gives way to a link to add one.
+ * counted here. A menu without items cannot be confirmed: the button gives way to a link to add one. The line
+ * and the gauge wait for the menu: while it loads or after it failed, whether there is one is not known.
  */
 function MenuCard({ bar }: { bar: BarDetail }) {
   const menu = useBarMenu(bar.barId);
@@ -157,24 +158,29 @@ function MenuCard({ bar }: { bar: BarDetail }) {
           {count}최근 갱신 {menuDate(lastMenuUpdate(bar.currentMenu))}
         </p>
       </Link>
-      <div className={styles.confirmRow}>
-        <p className={styles.cardText}>
-          메뉴 확인 <strong className={styles.age}>{days ?? "-"}</strong>
-          {days === null ? " 미확인" : "일 경과"}
-        </p>
-        {published ? (
-          <Button variant="secondary" busy={confirm.pending} onClick={() => void confirmMenu()}>
-            지금도 맞아요
-          </Button>
-        ) : menu.data ? (
-          <Link to={`/bars/${bar.barId}/menu`} className={styles.inlineLink}>
-            메뉴 등록하기
-          </Link>
-        ) : null}
-      </div>
-      <div className={styles.gauge} role="progressbar" aria-label="메뉴 확인 경과" aria-valuemin={0} aria-valuemax={100} aria-valuenow={percent}>
-        <span style={{ width: `${percent}%` }} />
-      </div>
+      {/* Whether there is a menu to confirm is known only once it is read; until then the line above says so. */}
+      {menu.data ? (
+        <>
+          <div className={styles.confirmRow}>
+            <p className={styles.cardText}>
+              메뉴 확인 <strong className={styles.age}>{days ?? "-"}</strong>
+              {days === null ? " 미확인" : "일 경과"}
+            </p>
+            {published ? (
+              <Button variant="secondary" busy={confirm.pending} onClick={() => void confirmMenu()}>
+                지금도 맞아요
+              </Button>
+            ) : (
+              <Link to={`/bars/${bar.barId}/menu`} className={styles.inlineLink}>
+                메뉴 등록하기
+              </Link>
+            )}
+          </div>
+          <div className={styles.gauge} role="progressbar" aria-label="메뉴 확인 경과" aria-valuemin={0} aria-valuemax={100} aria-valuenow={percent}>
+            <span style={{ width: `${percent}%` }} />
+          </div>
+        </>
+      ) : null}
       {error ? (
         <p className={styles.error} role="alert">
           {error}
