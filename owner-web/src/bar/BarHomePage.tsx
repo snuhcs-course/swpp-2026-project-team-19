@@ -4,6 +4,7 @@ import { ApiError } from "../api/errors";
 import { OwnerScreen } from "../owner/OwnerScreen";
 import { useBar, useBarMenu, useCancelException, type BarDetail, type OwnedBar } from "../owner/queries";
 import { useConfirmMenu } from "../menu/menuStatus";
+import { HomeImportRow } from "../menuImport/ImportEntry";
 import { lastMenuUpdate, menuDate, menuFreshness } from "../menu/menuView";
 import { BottomSheet } from "../ui/BottomSheet";
 import { Button, ButtonLink } from "../ui/Button";
@@ -187,6 +188,8 @@ function MenuCard({ bar }: { bar: BarDetail }) {
           {error}
         </p>
       ) : null}
+      {/* OwnerManagementHomeScreen.kt: an unfinished or failed menu photo import, to continue it. */}
+      <HomeImportRow bar={bar} />
     </section>
   );
 }

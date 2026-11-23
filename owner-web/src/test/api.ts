@@ -104,6 +104,8 @@ export function useOwnerApi({ bars = [], applications = [] }: { bars?: MyBars["i
       const found = bars.find((item) => item.barId === params.barId);
       return found ? HttpResponse.json(found) : HttpResponse.json(errorBody("FORBIDDEN"), { status: 403 });
     }),
+    // Spec 3.8: no menu imports. Menu import tests serve their own.
+    http.get("/api/bars/:barId/menu-imports", () => HttpResponse.json({ items: [], nextCursor: null })),
     // Spec 3.9 is public: any bar answers, here without a menu (3.9.1). Menu tests serve their own.
     http.get("/api/bars/:barId/menu", ({ params }) => {
       const barId = String(params.barId);
