@@ -10,6 +10,8 @@ import { BarPhotosPage } from "../bar/BarPhotosPage";
 import { BarStatusPage } from "../bar/BarStatusPage";
 import { MenuItemPage } from "../menu/MenuItemPage";
 import { MenuPage } from "../menu/MenuPage";
+import { ImportJobPage } from "../menuImport/ImportJobPage";
+import { ImportStartPage } from "../menuImport/ImportStartPage";
 import { EntryPage, LoginPage, NotFoundPage } from "./pages";
 
 /** The app is served at /owner/ (backend/app/owner_web); every path here is inside that basename. */
@@ -38,6 +40,8 @@ export const ownerRoutes: RouteObject[] = [
       { path: "bars/:barId/status", element: <RequireOwnedBar>{(bar) => <BarStatusPage bar={bar} />}</RequireOwnedBar> },
       { path: "bars/:barId/menu", element: <RequireOwnedBar>{(bar) => <MenuPage bar={bar} />}</RequireOwnedBar> },
       { path: "bars/:barId/menu/new", element: <RequireOwnedBar>{(bar) => <MenuItemPage bar={bar} />}</RequireOwnedBar> },
+      { path: "bars/:barId/menu/import", element: <RequireOwnedBar>{(bar) => <ImportStartPage bar={bar} />}</RequireOwnedBar> },
+      { path: "bars/:barId/menu/import/:menuImportId", element: <RequireOwnedBar>{(bar) => <ImportJobPage bar={bar} />}</RequireOwnedBar> },
       { path: "bars/:barId/menu/:barMenuItemId", element: <RequireOwnedBar>{(bar) => <MenuItemPage bar={bar} />}</RequireOwnedBar> },
     ],
   },

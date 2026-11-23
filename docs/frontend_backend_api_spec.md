@@ -3849,7 +3849,7 @@ MVP 업로드 제한:
 전체 최대 크기  60MB
 ```
 
-업주 신청의 메뉴판 사진(3.11.15)에도 같은 제한을 쓴다. 안드로이드 앱은 전체 크기가 넘으면 사진을 다시 압축해 올린다. 사진이 많을수록 AI 처리가 오래 걸린다(사진을 한 장씩 차례로 처리한다).
+업주 신청의 메뉴판 사진(3.11.15)에도 같은 제한을 쓴다. 안드로이드 앱과 업주 웹의 메뉴판 사진 등록 화면은 사진을 고를 때 이 제한을 검사해, 한 장이 10MB를 넘거나 전체가 60MB를 넘게 되는 사진은 줄여서 맞추지 않고 받지 않는다. 안드로이드 앱은 HEIC 사진을 JPEG로 바꾸고, EXIF 회전 정보가 있는 JPEG는 바로 세워 JPEG로 다시 저장한다. 그 밖의 사진과 업주 웹이 고른 사진은 그대로 올린다. 사진이 많을수록 AI 처리가 오래 걸린다(사진을 한 장씩 차례로 처리한다).
 
 파일 형식은 확장자가 아니라 파일 내용으로 판별하며, 선언한 MIME 형식과 다르면 거절한다(`415 UNSUPPORTED_IMAGE_TYPE`). AI 추출 모듈이 JPEG와 PNG만 모델에 보내므로 HEIC 같은 다른 형식은 받지 않는다. 안드로이드 앱은 다른 형식의 사진을 JPEG로 바꿔 올린다.
 
@@ -3875,7 +3875,7 @@ Retry-After: 3
 }
 ```
 
-프론트엔드는 `statusUrl`을 2~3초 간격으로 polling한다.
+안드로이드 앱과 업주 웹은 `pollAfterMs`와 관계없이 `statusUrl`을 2초 간격으로 다시 조회하고, 180번(약 6분) 조회해도 끝나지 않으면 조회를 멈추고 "분석 시간이 길어지고 있어요. 나갔다가 다시 확인해 주세요."를 보여 준다. 작업 화면을 다시 열면 조회를 다시 시작한다. `pollAfterMs`는 다른 클라이언트를 위한 권장 간격이다.
 
 ### 4.3 멱등성
 
@@ -3913,7 +3913,7 @@ ownerNote
 | `404` | `BAR_NOT_FOUND` | 업장이 없음, `barId`가 UUID 형식이 아님, 비활성 업장 | 업장 목록으로 이동 |
 | `409` | `IDEMPOTENCY_KEY_REUSED` | 같은 `Idempotency-Key`로 다른 내용을 보냄. `details.menuImportId`에 그 키로 만든 작업 ID | 새 키로 다시 요청 |
 | `409` | `ACTIVE_IMPORT_EXISTS` | 업장에 미완료 작업이 있음. `details.menuImportId`와 `details.status`에 그 작업의 ID와 상태 | 기존 작업으로 이동(`GET /api/menu-imports/{details.menuImportId}`). 새로 올리려면 기존 작업을 취소(5.7)한 뒤 다시 업로드 |
-| `413` | `UPLOAD_TOO_LARGE` | 사진 개수, 한 장 크기 또는 전체 크기 초과. `details.maxImages`, `details.maxImageBytes`, `details.maxTotalBytes`에 제한값 | 사진 수를 줄이거나 다시 압축 |
+| `413` | `UPLOAD_TOO_LARGE` | 사진 개수, 한 장 크기 또는 전체 크기 초과. `details.maxImages`, `details.maxImageBytes`, `details.maxTotalBytes`에 제한값 | 사진 수를 줄이거나 더 작은 사진으로 바꿈 |
 | `415` | `UNSUPPORTED_IMAGE_TYPE` | JPEG·PNG가 아니거나 선언한 형식과 내용이 다름. `details.imageOrder`에 해당 사진 순서 | 해당 사진을 JPEG로 바꿔 다시 업로드 |
 | `422` | `VALIDATION_FAILED` | `Idempotency-Key`, `mode`, `images` 누락(`MISSING`), 허용하지 않는 `mode`, `ownerNote` 1000자 초과 | `fieldErrors` 표시 |
 
@@ -3932,7 +3932,7 @@ operator와 작업 대상 업장의 현재 업주가 호출할 수 있다. 이 A
 
 | `status` | 응답 | 프론트엔드 처리 |
 |---|---|---|
-| `uploaded`, `processing` | 5.2 | `pollAfterMs` 뒤 다시 조회 |
+| `uploaded`, `processing` | 5.2 | 2초 뒤 다시 조회(4.2) |
 | `failed` | 5.3 | polling 중단, 새 업로드 안내 |
 | `ready_for_review` | 5.4 | polling 중단, 통합 검수 화면 |
 | `applied` | 5.5 | polling 중단, 반영 완료 화면 |
@@ -5534,7 +5534,7 @@ API가 보내는 오류는 예상하지 못한 서버 오류(`500 INTERNAL_ERROR
 ```text
 uploaded 또는 processing
 → 로딩 화면
-→ pollAfterMs 후 GET 재호출
+→ 2초 뒤 GET 재호출(4.2)
 → 오래 진행되지 않으면 취소(5.7) 후 새 업로드를 고를 수 있게 함
 
 ready_for_review

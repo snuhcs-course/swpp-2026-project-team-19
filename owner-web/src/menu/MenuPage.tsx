@@ -13,6 +13,7 @@ import { EDIT_BLOCKED } from "./menuEditor";
 import { manualMenuShortName, menuProductOf, type MenuItem } from "./menuRules";
 import { discountActive, displayPrice, groupMenu, menuDate, MENU_LOCKED, won } from "./menuView";
 import { useSoldOut } from "./menuStatus";
+import { MenuImportRow } from "../menuImport/ImportEntry";
 import { useMenuWrite } from "./menuWrite";
 import { servingDisplayLabel } from "./servingIdentity";
 import styles from "./menu.module.css";
@@ -24,7 +25,8 @@ import barStyles from "../bar/bar.module.css";
  * "+ 직접 추가" adds one; "전체 메뉴 초기화" empties the menu (3.14.6) after asking. Each item's "품절" or "재개"
  * marks it sold out or back on sale (3.14.8) after asking. While a menu photo import is unfinished (3.6
  * `activeMenuImport`), nothing else can be changed (3.14.7); sold-out stays open, as the spec says (the app
- * blocks it, data/android 수정 필요 사항.md). Adding from menu photos is I5-P9.
+ * blocks it, data/android 수정 필요 사항.md). "사진으로 메뉴 추가" opens the menu photo import (spec 4, 5), or the
+ * unfinished one, which can be canceled there (5.7).
  */
 export function MenuPage({ bar }: { bar: OwnedBar }) {
   const detail = useBar(bar.barId);
@@ -32,7 +34,7 @@ export function MenuPage({ bar }: { bar: OwnedBar }) {
   return (
     <OwnerScreen title="메뉴 관리" backTo={`/bars/${bar.barId}`}>
       <BarQuery query={menu} keepDataOnRefetchError>
-        {(data) => <MenuBoard menu={data} locked={(detail.data ?? bar).activeMenuImport !== null} />}
+        {(data) => <MenuBoard menu={data} bar={detail.data ?? bar} />}
       </BarQuery>
     </OwnerScreen>
   );
@@ -43,7 +45,8 @@ export interface MenuNotice {
   notice?: string;
 }
 
-function MenuBoard({ menu, locked }: { menu: BarMenu; locked: boolean }) {
+function MenuBoard({ menu, bar }: { menu: BarMenu; bar: Pick<OwnedBar, "barId" | "activeMenuImport"> }) {
+  const locked = bar.activeMenuImport !== null;
   const location = useLocation();
   const now = useNow();
   const write = useMenuWrite(menu.barId);
@@ -98,6 +101,7 @@ function MenuBoard({ menu, locked }: { menu: BarMenu; locked: boolean }) {
           {notice}
         </p>
       ) : null}
+      <MenuImportRow bar={bar} onNotice={setNotice} />
       <div className={styles.head}>
         <h2 className={styles.title}>현재 게시 메뉴</h2>
         <Link to={`${base}/new`} className={styles.addLink} aria-disabled={locked || undefined} tabIndex={locked ? -1 : undefined}>

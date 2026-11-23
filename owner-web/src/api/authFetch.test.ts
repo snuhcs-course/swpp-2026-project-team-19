@@ -27,6 +27,19 @@ describe("createAuthFetch (spec 3.1.5)", () => {
     expect(api.seen[0]?.authorization).toBe("Bearer t1");
   });
 
+  it("keeps the request's own headers, such as a menu upload's Idempotency-Key (spec 4.1), with a body too", async () => {
+    let seen: Headers | null = null;
+    const fetch = vi.fn(async (input: RequestInfo | URL) => {
+      seen = (input as Request).headers;
+      return new Response(null, { status: 202 });
+    });
+    const send = createAuthFetch(new FakeGateway({ token: "t1" }), vi.fn(), fetch as unknown as typeof globalThis.fetch);
+
+    await send(new Request(URL, { method: "POST", body: "photos", headers: { "Idempotency-Key": "key-1" } }));
+
+    expect([seen!.get("Idempotency-Key"), seen!.get("Authorization")]).toEqual(["key-1", "Bearer t1"]);
+  });
+
   it("sends no Authorization header without a session", async () => {
     const api = scriptedFetch(200);
     await createAuthFetch(new FakeGateway({ signedIn: false }), vi.fn(), api.fetch)(new Request(URL));

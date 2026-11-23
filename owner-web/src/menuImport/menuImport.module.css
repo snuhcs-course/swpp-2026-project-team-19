@@ -1,0 +1,396 @@
+/* Menu photo import screens (android/.../ui/owner/OwnerMenuPhotoStage7Screen.kt, ui/owner/review/). */
+
+.screen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bm-space-lg);
+  padding-bottom: var(--bm-space-xxl);
+}
+
+.steps {
+  display: flex;
+  gap: var(--bm-space-xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--bm-color-text-muted);
+  font-size: var(--bm-type-caption);
+}
+
+.steps li[aria-current="step"] {
+  color: var(--bm-color-primary);
+  font-weight: 700;
+}
+
+.steps li + li::before {
+  content: "›";
+  margin-right: var(--bm-space-xs);
+  color: var(--bm-color-text-muted);
+}
+
+.title {
+  margin: 0;
+  font-family: var(--bm-font-serif);
+  font-size: var(--bm-type-screen-title);
+  line-height: var(--bm-type-screen-title-line-height);
+}
+
+.text {
+  margin: 0;
+  color: var(--bm-color-text-secondary);
+  font-size: var(--bm-type-label);
+  line-height: var(--bm-type-label-line-height);
+}
+
+.strong {
+  margin: 0;
+  color: var(--bm-color-text-primary);
+  font-size: var(--bm-type-body);
+  font-weight: 700;
+}
+
+.error {
+  margin: 0;
+  color: var(--bm-color-error);
+  font-size: var(--bm-type-label);
+}
+
+.notice {
+  margin: 0;
+  padding: var(--bm-space-sm);
+  border-radius: var(--bm-radius-medium);
+  background: var(--bm-color-surface);
+  color: var(--bm-color-text-primary);
+  font-size: var(--bm-type-label);
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bm-space-sm);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--bm-space-xs);
+}
+
+.spread {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--bm-space-sm);
+}
+
+/* Photo picker */
+
+.photos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+  gap: var(--bm-space-sm);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.photo {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  border-radius: var(--bm-radius-small);
+  background: var(--bm-color-surface-variant);
+}
+
+.photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.order {
+  position: absolute;
+  bottom: var(--bm-space-xxs);
+  left: var(--bm-space-xxs);
+  padding: 0 var(--bm-space-xs);
+  border-radius: var(--bm-radius-pill);
+  background: var(--bm-color-canvas);
+  font-size: var(--bm-type-caption);
+}
+
+.photoTools {
+  position: absolute;
+  top: var(--bm-space-xxs);
+  right: var(--bm-space-xxs);
+  display: flex;
+  gap: var(--bm-space-xxs);
+}
+
+.photoTools button {
+  min-width: 28px;
+  min-height: 28px;
+  border: 0;
+  border-radius: var(--bm-radius-pill);
+  background: var(--bm-color-canvas);
+  color: var(--bm-color-text-primary);
+  font-size: var(--bm-type-label);
+  cursor: pointer;
+}
+
+.photoTools button:disabled {
+  color: var(--bm-color-text-muted);
+  cursor: default;
+}
+
+.addPhoto {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 3 / 4;
+  border: 1px solid var(--bm-color-outline-variant);
+  border-radius: var(--bm-radius-small);
+  background: var(--bm-color-surface);
+  color: var(--bm-color-text-secondary);
+  font-size: var(--bm-type-label);
+  cursor: pointer;
+}
+
+.addPhoto input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.addPhoto:focus-within {
+  outline: 2px solid var(--bm-color-primary);
+}
+
+.addPhotoOff {
+  color: var(--bm-color-text-muted);
+  cursor: default;
+}
+
+.guide {
+  margin: 0;
+  padding-left: var(--bm-space-lg);
+  color: var(--bm-color-text-secondary);
+  font-size: var(--bm-type-label);
+}
+
+/* Import row on the menu screen and the home */
+
+.entry {
+  display: flex;
+  align-items: center;
+  gap: var(--bm-space-sm);
+  padding: var(--bm-space-sm) var(--bm-space-md);
+  border-radius: var(--bm-radius-card);
+  background: var(--bm-color-surface);
+}
+
+.entryLink {
+  flex: 1;
+  min-width: 0;
+  color: var(--bm-color-text-primary);
+  font-size: var(--bm-type-label);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.entryLink small {
+  display: block;
+  color: var(--bm-color-text-secondary);
+  font-weight: 400;
+}
+
+.entryCancel {
+  min-height: 32px;
+  padding: 0 var(--bm-space-sm);
+  border: 1px solid var(--bm-color-error);
+  border-radius: var(--bm-radius-small);
+  background: transparent;
+  color: var(--bm-color-error);
+  font-size: var(--bm-type-caption);
+  cursor: pointer;
+}
+
+/* Processing */
+
+.progress {
+  height: 6px;
+  overflow: hidden;
+  border-radius: var(--bm-radius-pill);
+  background: var(--bm-color-surface-variant);
+}
+
+.progress span {
+  display: block;
+  height: 100%;
+  border-radius: var(--bm-radius-pill);
+  background: var(--bm-color-primary);
+}
+
+/* Review */
+
+.reviewHead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--bm-space-xs);
+  padding: var(--bm-space-sm) 0;
+  background: var(--bm-color-canvas);
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bm-space-sm);
+}
+
+.groupHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: var(--bm-min-touch-target);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--bm-color-text-primary);
+  font-size: var(--bm-type-section-title);
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bm-space-sm);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bm-space-sm);
+  padding: var(--bm-card-padding);
+  border-radius: var(--bm-radius-card);
+  background: var(--bm-color-surface);
+}
+
+.cardName {
+  margin: 0;
+  font-size: var(--bm-type-card-title);
+  line-height: var(--bm-type-card-title-line-height);
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.caption {
+  margin: 0;
+  color: var(--bm-color-text-muted);
+  font-size: var(--bm-type-caption);
+  overflow-wrap: anywhere;
+}
+
+.issues {
+  margin: 0;
+  padding-left: var(--bm-space-lg);
+  color: var(--bm-color-error);
+  font-size: var(--bm-type-caption);
+}
+
+.choices {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bm-space-xs);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.choices legend {
+  margin-bottom: var(--bm-space-xs);
+  font-size: var(--bm-type-label);
+  font-weight: 600;
+}
+
+.choice {
+  display: flex;
+  align-items: center;
+  gap: var(--bm-space-xs);
+  min-height: var(--bm-min-touch-target);
+  font-size: var(--bm-type-label);
+}
+
+.optionRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--bm-space-xs);
+  align-items: end;
+  padding-bottom: var(--bm-space-xs);
+  border-bottom: 1px solid var(--bm-color-divider);
+}
+
+.optionTools {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.linkButton {
+  min-height: var(--bm-min-touch-target);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--bm-color-primary);
+  font-size: var(--bm-type-label);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.linkButton:disabled {
+  color: var(--bm-color-text-muted);
+  cursor: default;
+}
+
+.footer {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  gap: var(--bm-space-sm);
+  padding: var(--bm-space-sm) 0;
+  background: var(--bm-color-canvas);
+}
+
+.footer > * {
+  flex: 1;
+}
+
+.source {
+  position: relative;
+  margin: 0;
+  /* The box's scrim reaches past it; it darkens only the photo. */
+  overflow: hidden;
+}
+
+.source img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.sourceBox {
+  position: absolute;
+  border: 2px solid var(--bm-color-primary);
+  border-radius: var(--bm-radius-small);
+  box-shadow: 0 0 0 9999px var(--bm-color-scrim);
+}
