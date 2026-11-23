@@ -138,7 +138,8 @@ function applyStandardDecision(card: ReviewCard, decision: Record<string, unknow
   if (typeof decision.correctedProductName === "string" && validMenuName(decision.correctedProductName)) {
     next = { ...next, name: decision.correctedProductName.trim() };
   }
-  if (Array.isArray(decision.options) && decision.options.length > 0) {
+  // An empty list is a decision too: every serving was removed, so the card asks for one again.
+  if (Array.isArray(decision.options)) {
     const options = decision.options as { extractedOptionId?: unknown; optionLabel?: unknown; pourMl?: unknown; priceKrw?: unknown }[];
     const known = options.every((o) => o.extractedOptionId === null || o.extractedOptionId === undefined || optionIds.has(o.extractedOptionId as string));
     if (known && options.every((o) => typeof o.priceKrw === "number")) {

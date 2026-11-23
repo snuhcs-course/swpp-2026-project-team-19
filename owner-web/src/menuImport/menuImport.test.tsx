@@ -824,6 +824,61 @@ describe("reviewing and publishing (spec 5.4, 5.9, 8, PhotoReviewScreen.kt)", ()
     await waitFor(() => expect(screen.queryByText(/서버 256KB 제한을 초과했어요/)).not.toBeInTheDocument());
   });
 
+  it("publishes a renamed whisky longer than a catalog search allows without searching (Codex review on #210)", async () => {
+    const api = importServer({ job: { status: "ready_for_review" } });
+    renderOwnerWeb(JOB_PATH);
+    await title("메뉴 검수");
+    const longName = `글렌피딕 12년 ${"한정판 ".repeat(25)}`.trim();
+    expect(longName.length).toBeGreaterThan(100);
+    const glen = await card("글렌피딕 12년");
+    await user().click(within(glen).getByRole("button", { name: "메뉴 이름 수정" }));
+    const field = within(glen).getByLabelText("메뉴 이름");
+    await user().clear(field);
+    fireEvent.change(field, { target: { value: longName } });
+    await user().click(within(glen).getByRole("button", { name: "저장" }));
+    // Spec 7.1 allows 100 characters: like the app, no product matches, so it goes without one, for the operator.
+    const renamed = await card(longName);
+    expect(within(renamed).getByText("상품 연결 없이 등록해요. 운영자가 확인한 뒤 연결해요.")).toBeInTheDocument();
+    expect(screen.queryByText("위스키 검색에 실패했어요. 연결을 유지하고 다시 시도해 주세요.")).not.toBeInTheDocument();
+    expect(api.callsTo("GET", "/api/catalog/products")).toHaveLength(0);
+    await user().click(within(renamed).getByRole("button", { name: "다른 위스키 검색" }));
+    expect(within(await card(longName)).getByLabelText("위스키 이름 검색")).toHaveAttribute("maxLength", "100");
+  });
+
+  it("does not claim the edit is kept when this device cannot keep it either, and stays (Codex review on #210)", async () => {
+    const setItem = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+      throw new Error("QuotaExceededError");
+    });
+    try {
+      importServer({ job: { status: "ready_for_review" }, answer: (call) => (call.method === "PUT" ? networkFailure() : undefined) });
+      renderOwnerWeb(JOB_PATH);
+      await title("메뉴 검수");
+      await user().click(within(await card("새 위스키 21년")).getByRole("button", { name: "이 이름으로 등록" }));
+      expect(await screen.findByText("서버에도, 이 기기에도 저장하지 못했어요. 화면을 나가면 입력이 사라져요. 서버 저장을 다시 시도해 주세요.")).toBeInTheDocument();
+      expect(screen.queryByText("이 기기에는 저장됐어요. 서버 저장을 다시 시도해 주세요.")).not.toBeInTheDocument();
+      await user().click(screen.getByRole("button", { name: "나중에 하기" }));
+      expect(await screen.findByText("검수 내용을 저장하지 못해 나갈 수 없어요. 서버 저장을 다시 시도해 주세요.")).toBeInTheDocument();
+      expect(screen.getByRole("heading", { level: 1, name: "메뉴 검수" })).toBeInTheDocument();
+    } finally {
+      setItem.mockRestore();
+    }
+  });
+
+  it("shows a photo URL read after keeping the other draft (Codex review on #210)", async () => {
+    const api = importServer({ job: { status: "ready_for_review", imageUrlExpiresAt: "2999-01-01T00:00:00Z" } });
+    renderOwnerWeb(JOB_PATH);
+    await title("메뉴 검수");
+    api.setJob({ draftVersion: 5, imageUrlExpiresAt: "2000-01-01T00:00:00Z", draft: { draftVersion: 5, reviewVersion: 1, savedAt: "2026-11-23T00:00:00Z", content: { itemDecisions: [] } } });
+    await user().click(within(await card("새 위스키 21년")).getByRole("button", { name: "이 이름으로 등록" }));
+    await user().click(within(await screen.findByRole("dialog")).getByRole("button", { name: "다른 곳 내용으로 이어 하기" }));
+    await card("레몬 사워");
+    // The response the review reopened from has an expired URL; opening the photo reads a new one.
+    api.setJob({ imageUrl: "https://signed.example/photo-1?v=2", imageUrlExpiresAt: "2999-01-01T00:00:00Z" });
+    await user().click(within(await card("레몬 사워")).getByRole("button", { name: /원본 사진 크게 보기/ }));
+    const sheet = await screen.findByRole("dialog", { name: "원본 사진" });
+    await waitFor(() => expect(within(sheet).getByRole("img")).toHaveAttribute("src", "https://signed.example/photo-1?v=2"));
+  });
+
   it("reads the review again when the menu changed meanwhile (409 REVIEW_OUTDATED), keeping the input", async () => {
     const api = importServer({
       job: { status: "ready_for_review" },

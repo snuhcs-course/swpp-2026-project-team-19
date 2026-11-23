@@ -30,6 +30,9 @@ import {
 } from "./rules";
 import styles from "../menuImport.module.css";
 
+/** Spec 7.1: a catalog search query is 1 to 100 characters. The app finds nothing for a longer one (`searchCatalogLive`). */
+export const CATALOG_QUERY_MAX = 100;
+
 export interface CardActions {
   change: (id: string, update: (card: ReviewCard) => ReviewCard) => void;
   split: (id: string) => void;
@@ -218,6 +221,7 @@ function SearchPanel({ card, state, actions }: { card: ReviewCard; state: Review
   async function search() {
     const text = query.trim();
     if (text === "") return actions.toast("검색할 위스키 이름을 입력해 주세요.");
+    if (text.length > CATALOG_QUERY_MAX) return setResults([]);
     setBusy(true);
     try {
       setResults(await actions.searchCatalog(text));
@@ -232,7 +236,7 @@ function SearchPanel({ card, state, actions }: { card: ReviewCard; state: Review
   return (
     <div className={styles.choices}>
       <div className={styles.row}>
-        <TextField label="위스키 이름 검색" type="search" value={query} onChange={(event) => setQuery(event.currentTarget.value)} />
+        <TextField label="위스키 이름 검색" type="search" value={query} maxLength={CATALOG_QUERY_MAX} onChange={(event) => setQuery(event.currentTarget.value)} />
         <Button variant="secondary" busy={busy} onClick={() => void search()}>
           검색
         </Button>
@@ -301,7 +305,9 @@ function NameEditor({ card, state, actions }: { card: ReviewCard; state: ReviewS
     }
     setBusy(true);
     try {
-      const matches = exactCatalogMatches(await actions.searchCatalog(proposed), proposed).map((p) => ({ productId: p.productId, name: p.displayName }));
+      // A name longer than a search allows matches no product (as in the app): it is published without one.
+      const found = proposed.length > CATALOG_QUERY_MAX ? [] : await actions.searchCatalog(proposed);
+      const matches = exactCatalogMatches(found, proposed).map((p) => ({ productId: p.productId, name: p.displayName }));
       const saved = matches.length === 1 ? [] : actions.unlinkedPrices(proposed);
       let outcome = "";
       change((c) => {

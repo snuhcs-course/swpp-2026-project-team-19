@@ -583,6 +583,14 @@ describe("the review draft (ServerReviewDraftCodec.kt)", () => {
     expect(restored.cards).toHaveLength(2);
   });
 
+  // ServerReviewDraftCodec.kt restoreStandard: an explicit [] means every serving was removed (Codex review on #210)
+  it("keeps a line whose draft removed every serving without servings, asking for one", () => {
+    const fresh = mapReview(data, menu(), 30);
+    const restored = restoreDraft(fresh, data, { reviewVersion: 2, content: { itemDecisions: [{ extractedItemId: "line-1", finalLineType: "product", options: [] }] } });
+    expect(restored.cards[0]!.options).toEqual([]);
+    expect(problems(restored.cards[0]!, restored)).toContain("price");
+  });
+
   it("excludes a line another client rejected", () => {
     const fresh = mapReview(data, menu(), 30);
     const restored = restoreDraft(fresh, data, { reviewVersion: 3, content: { itemDecisions: [{ extractedItemId: "line-2", action: "reject" }] } });

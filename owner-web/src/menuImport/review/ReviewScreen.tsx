@@ -37,16 +37,24 @@ interface ReviewProps {
 export function ReviewScreen(props: ReviewProps) {
   const me = useMe();
   // A restart opens the review from the response just read, before the screen's query passes it down.
-  const [restarted, setRestarted] = useState<{ generation: number; review: ImportReview | null }>({ generation: 0, review: null });
+  // It is used only until the query passes a response of its own; later reads (a new photo URL) then show.
+  const [restarted, setRestarted] = useState<{ generation: number; review: ImportReview | null; replaced: ImportReview | null }>({
+    generation: 0,
+    review: null,
+    replaced: null,
+  });
   if (!me.data) return <LoadingState message="검수 정보를 불러오고 있어요." />;
-  const review = restarted.review?.reviewVersion === props.review.reviewVersion ? restarted.review : props.review;
+  const review =
+    restarted.review !== null && props.review === restarted.replaced && restarted.review.reviewVersion === props.review.reviewVersion
+      ? restarted.review
+      : props.review;
   return (
     <ReviewBody
       key={restarted.generation}
       {...props}
       review={review}
       userId={me.data.userId}
-      restart={(fresh) => setRestarted(({ generation }) => ({ generation: generation + 1, review: fresh }))}
+      restart={(fresh) => setRestarted(({ generation }) => ({ generation: generation + 1, review: fresh, replaced: props.review }))}
     />
   );
 }
@@ -182,6 +190,11 @@ function ReviewBody({ review, menu, bar, onNotice, userId, restart }: ReviewProp
   async function leave() {
     setLeaving(true);
     await draft.flush();
+    // As the app does, the review is left only once the latest edit is on the server or this device.
+    if (draft.unsaved()) {
+      setLeaving(false);
+      return setMessage("검수 내용을 저장하지 못해 나갈 수 없어요. 서버 저장을 다시 시도해 주세요.");
+    }
     void navigate(`/bars/${bar.barId}/menu`);
   }
 
@@ -275,10 +288,15 @@ function ReviewBody({ review, menu, bar, onNotice, userId, restart }: ReviewProp
   }
 
   const preview = publicationPreview(state);
-  const draftNotice: Record<string, string | null> = {
-    device: "이 기기에는 저장됐어요. 서버 저장을 다시 시도해 주세요.",
-    tooLarge: "이 기기에는 저장됐어요. 서버 256KB 제한을 초과했어요. 입력 내용을 줄이면 서버에 저장할 수 있어요.",
-  };
+  const draftNotice: Record<string, string | null> = draft.deviceSaved
+    ? {
+        device: "이 기기에는 저장됐어요. 서버 저장을 다시 시도해 주세요.",
+        tooLarge: "이 기기에는 저장됐어요. 서버 256KB 제한을 초과했어요. 입력 내용을 줄이면 서버에 저장할 수 있어요.",
+      }
+    : {
+        device: "서버에도, 이 기기에도 저장하지 못했어요. 화면을 나가면 입력이 사라져요. 서버 저장을 다시 시도해 주세요.",
+        tooLarge: "서버 256KB 제한을 초과했고, 이 기기에도 저장하지 못했어요. 화면을 나가면 입력이 사라져요. 입력 내용을 줄여 주세요.",
+      };
   const busy = publish?.kind === "sending" || leaving;
 
   return (

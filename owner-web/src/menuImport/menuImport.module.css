@@ -378,6 +378,8 @@
 .source {
   position: relative;
   margin: 0;
+  /* The box's scrim reaches past it; it darkens only the photo. */
+  overflow: hidden;
 }
 
 .source img {

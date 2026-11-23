@@ -36,6 +36,9 @@ interface DraftSyncOptions {
  */
 export function useDraftSync({ menuImportId, reviewVersion, userId, baseDraftVersion, actions, onClosed, onFailure }: DraftSyncOptions) {
   const [status, setStatus] = useState<DraftStatus>("idle");
+  // Whether the latest edit is kept on this device; false when the browser refuses (private mode, a full quota).
+  const [deviceSaved, setDeviceSaved] = useState(true);
+  const deviceSavedRef = useRef(true);
   const base = useRef(baseDraftVersion);
   const latest = useRef<ReviewState | null>(null);
   const dirty = useRef(false);
@@ -52,7 +55,14 @@ export function useDraftSync({ menuImportId, reviewVersion, userId, baseDraftVer
   }, []);
 
   const keepOnDevice = useCallback(
-    (state: ReviewState) => writeDeviceDraft(userId, menuImportId, { reviewVersion, baseDraftVersion: base.current, content: encodeDraft(state) }),
+    (state: ReviewState) => {
+      const kept = writeDeviceDraft(userId, menuImportId, { reviewVersion, baseDraftVersion: base.current, content: encodeDraft(state) });
+      if (kept !== deviceSavedRef.current) {
+        deviceSavedRef.current = kept;
+        setDeviceSaved(kept);
+      }
+      return kept;
+    },
     [menuImportId, reviewVersion, userId],
   );
 
@@ -69,6 +79,9 @@ export function useDraftSync({ menuImportId, reviewVersion, userId, baseDraftVer
       base.current = saved.draftVersion;
       if (dirty.current && latest.current) keepOnDevice(latest.current);
       else clearDeviceDraft(userId, menuImportId);
+      // On the server now: nothing is lost even if the device could not keep a copy.
+      deviceSavedRef.current = true;
+      setDeviceSaved(true);
       update("saved");
     } catch (failure) {
       dirty.current = true;
@@ -159,5 +172,8 @@ export function useDraftSync({ menuImportId, reviewVersion, userId, baseDraftVer
     [drain],
   );
 
-  return { status, schedule, flush, retry, overwrite, discard };
+  /** Whether leaving now loses the latest edit: neither the server nor this device has it. */
+  const unsaved = () => dirty.current && !deviceSavedRef.current;
+
+  return { status, deviceSaved, unsaved, schedule, flush, retry, overwrite, discard };
 }
