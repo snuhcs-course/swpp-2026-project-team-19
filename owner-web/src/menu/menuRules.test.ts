@@ -451,6 +451,32 @@ describe("saving an item (OwnerManualMenuScreen.kt save)", () => {
     ]);
   });
 
+  it("finds the rows by their serving when an edit elsewhere gave the options new IDs (Codex review on #209)", () => {
+    const running = { discountedPriceKrw: 14000, startsAt: "2026-11-01T00:00:00Z", endsAt: "2099-12-01T00:00:00Z" };
+    const opened = item({
+      productId: "p",
+      category: "whisky",
+      displayName: "Glenfiddich 12",
+      options: [menuOption("glass", "잔", 30, 17000), menuOption("bottle", "병", null, 160000), menuOption("half", "하프", 15, 9000)],
+    });
+    const start = editDraftOf(opened)!;
+    // The owner typed the glass price and removed the half.
+    const typed = { ...start, options: start.options.filter((row) => row.id !== "half").map((row) => (row.id === "glass" ? { ...row, price: "18000" } : row)) };
+    // Elsewhere the item was edited: every option has a new ID; the glass got a discount, the bottle a new price.
+    const fresh = editDraftOf({
+      ...opened,
+      options: [{ ...menuOption("glass-2", "잔", 30, 17000), discount: running }, menuOption("bottle-2", "병", null, 165000), menuOption("half-2", "하프", 15, 9000)],
+    })!;
+
+    const rebased = rebaseDraft(start, typed, fresh);
+
+    // No serving twice, and the half the owner removed stays removed.
+    expect(rebased.options.map(({ id, price, sale }) => ({ id, price, sale }))).toEqual([
+      { id: "glass-2", price: "18000", sale: "14000" },
+      { id: "bottle-2", price: "165000", sale: "" },
+    ]);
+  });
+
   it("keeps a typed name and takes options added or removed elsewhere when the rows were not typed in", () => {
     const opened = item({ productId: "p", category: "whisky", displayName: "Glenfiddich 12", options: [menuOption("glass", "잔", 30, 17000), menuOption("bottle", "병", null, 160000)] });
     const start = editDraftOf(opened)!;

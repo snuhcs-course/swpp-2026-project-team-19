@@ -17,7 +17,7 @@ import {
   type MenuProduct,
   type OptionValue,
 } from "./menuRules";
-import { isBottleServingLabel } from "./servingIdentity";
+import { isBottleServingLabel, servingIdentityKey } from "./servingIdentity";
 
 /**
  * The menu item editor, ported from android/.../ui/owner/OwnerManualMenuScreen.kt (`DraftOption`, `fromSaved`,
@@ -182,24 +182,39 @@ export function editDraftOf(item: MenuItem): Draft | null {
 const sameServing = (a: DraftOption, b: DraftOption) => a.bottle === b.bottle && a.ml === b.ml && a.price === b.price;
 const sameDiscount = (a: DraftOption, b: DraftOption) => JSON.stringify(discountOf(a)) === JSON.stringify(discountOf(b));
 
+/** A row's serving as `servingIdentityKey` tells servings apart: a bottle, or the pour in ml. */
+const draftServingKey = (row: DraftOption) => servingIdentityKey(row.ml === "" ? null : Number(row.ml), row.bottle ? "Bottle" : null);
+
 /**
  * After MENU_OUTDATED (spec 3.14.1), the edit is moved onto the item as it is now (`fresh`, its `editDraftOf`),
  * so that saving again does not undo what changed elsewhere: what the owner changed since `start` stays as
  * typed, and the rest takes the new values. A row's serving and price, and its discount, are taken apart: the
- * owner's discount stays when only the price changed elsewhere, and the reverse. A row whose option was
- * removed elsewhere goes too, unless the owner typed in it; then it stays as a new option. Options added elsewhere are added after the rows. Not in the app,
- * which does not handle MENU_OUTDATED (Codex review on #199).
+ * owner's discount stays when only the price changed elsewhere, and the reverse.
+ *
+ * Each row opened is found in `fresh` by its option ID, or else by the serving it opened with: an edit
+ * elsewhere replaces every option of the item with new IDs (spec 3.14.4, backend `menu_edit.py`), while an
+ * edit of another item keeps them. A row found takes the option's new ID. A row not found was removed
+ * elsewhere and goes too, unless the owner typed in it; then it stays as a new option. Options added elsewhere
+ * come after the rows. Not in the app, which does not handle MENU_OUTDATED (Codex reviews on #199 and #209).
  */
 export function rebaseDraft(start: Draft, current: Draft, fresh: Draft): Draft {
+  const taken = new Set<string>();
+  const found = new Map<string, DraftOption>();
+  const claim = (row: DraftOption, match: (option: DraftOption) => boolean) => {
+    const option = fresh.options.find((candidate) => !taken.has(candidate.id) && match(candidate));
+    if (option) (taken.add(option.id), found.set(row.id, option));
+  };
+  // By ID first, so that an option kept elsewhere is never taken by another row's serving.
+  for (const row of start.options) claim(row, (option) => option.id === row.id);
+  for (const row of start.options) if (!found.has(row.id)) claim(row, (option) => draftServingKey(option) === draftServingKey(row));
   const before = new Map(start.options.map((option) => [option.id, option]));
-  const now = new Map(fresh.options.map((option) => [option.id, option]));
   const rows = current.options.flatMap((row) => {
     const opened = before.get(row.id);
     if (!opened) return [row];
-    const saved = now.get(row.id);
+    const saved = found.get(row.id);
     if (saved) {
       const serving = sameServing(row, opened) ? saved : row;
-      return [{ ...serving, ...discountOf(sameDiscount(row, opened) ? saved : row), id: row.id }];
+      return [{ ...serving, ...discountOf(sameDiscount(row, opened) ? saved : row), id: saved.id }];
     }
     if (sameServing(row, opened) && sameDiscount(row, opened)) return [];
     // Kept as a new option: its saved discount instants go with the saved option.
@@ -208,7 +223,8 @@ export function rebaseDraft(start: Draft, current: Draft, fresh: Draft): Draft {
   return {
     name: current.name === start.name ? fresh.name : current.name,
     category: current.category === start.category ? fresh.category : current.category,
-    options: [...rows, ...fresh.options.filter((option) => !before.has(option.id))],
+    // A row the owner removed takes its option along, found or not.
+    options: [...rows, ...fresh.options.filter((option) => !taken.has(option.id))],
   };
 }
 

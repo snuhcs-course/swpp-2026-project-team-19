@@ -90,6 +90,7 @@ function menuServer(items: MenuItem[], { answer, products = [], activeMenuImport
   const calls: Call[] = [];
   const reads = { menu: 0, bar: 0, myBars: 0 };
   let added = 0;
+  let edits = 0;
   useOwnerApi({ bars: [owned] });
   const outdated = (sent: unknown) =>
     sent !== menu.menuVersion
@@ -150,11 +151,13 @@ function menuServer(items: MenuItem[], { answer, products = [], activeMenuImport
       if (custom) return custom;
       const stale = outdated(body.menuVersion);
       if (stale) return stale;
+      // As the backend (menu_edit.py): the item's options are replaced, with new IDs.
+      edits++;
       return HttpResponse.json(
         changed(
           menu.items.map((entry) =>
             entry.barMenuItemId === params.itemId
-              ? { ...entry, displayName: body.displayName as string, options: (body.options as MenuItem["options"]).map((sent, index) => ({ ...option(`edited-${index}`, null, null, 0), ...sent, discount: sent.discount ?? null })) }
+              ? { ...entry, displayName: body.displayName as string, options: (body.options as MenuItem["options"]).map((sent, index) => ({ ...option(`edited-${edits}-${index}`, null, null, 0), ...sent, discount: sent.discount ?? null })) }
               : entry,
           ),
         ),
@@ -952,8 +955,9 @@ describe("editing an item (spec 3.14.4, 3.14.5)", () => {
     const running = { discountedPriceKrw: 14000, startsAt: "2026-11-01T00:00:00Z", endsAt: "2099-12-01T00:00:00Z" };
     const api = menuServer([glenfiddich, unlinked]);
     const { router } = await openEdit("gf-item");
-    // Another device puts a discount on the glass and a new price on the bottle.
-    api.changeElsewhere([{ ...glenfiddich, options: [option("gf-glass", "잔", 30, 17000, running), option("gf-bottle", "병", null, 165000)] }, unlinked]);
+    // Another device edits the item: a discount on the glass and a new price on the bottle. The edit replaces
+    // the options, with new IDs (backend menu_edit.py, Codex review on #209).
+    api.changeElsewhere([{ ...glenfiddich, options: [option("gf-glass-2", "잔", 30, 17000, running), option("gf-bottle-2", "병", null, 165000)] }, unlinked]);
     await user().clear(within(optionGroup(1)).getByLabelText("가격 (원)"));
     await user().type(within(optionGroup(1)).getByLabelText("가격 (원)"), "18000");
     await save("저장하기");
@@ -978,7 +982,7 @@ describe("editing an item (spec 3.14.4, 3.14.5)", () => {
     const highball = item({ barMenuItemId: "highball", kind: "other", displayName: "하이볼", options: [option("hb-glass", "잔", null, 8000), option("hb-pitcher", "피처", null, 30000)] });
     const api = menuServer([highball]);
     const { router } = await openEdit("highball");
-    api.changeElsewhere([{ ...highball, options: [option("hb-glass", "잔", null, 8000), option("hb-pitcher", "피처", null, 32000)] }]);
+    api.changeElsewhere([{ ...highball, options: [option("hb-glass-2", "잔", null, 8000), option("hb-pitcher-2", "피처", null, 32000)] }]);
     await user().type(screen.getByLabelText("메뉴 이름"), " 2");
     await save("저장하기");
     await screen.findByText("메뉴가 다른 곳에서 바뀌었어요. 확인한 뒤 다시 저장해 주세요.");
