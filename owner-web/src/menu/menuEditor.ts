@@ -1,4 +1,5 @@
 import type { components } from "../api/schema";
+import { addDays, isSeoulMidnight, seoulClock, seoulStartOf } from "../bar/seoulTime";
 import { blockingInactiveMatch, manualEditorCategory, normalizeOwnerCatalogName } from "./catalogMatch";
 import { ownerAddMenuIdentity, type AddIdentity } from "./menuIdentity";
 import {
@@ -21,34 +22,63 @@ import { isBottleServingLabel } from "./servingIdentity";
 /**
  * The menu item editor, ported from android/.../ui/owner/OwnerManualMenuScreen.kt (`DraftOption`, `fromSaved`,
  * `toOption`, `edit` and `save`), keeping only what the app does against the real API: an add sends a catalog
- * `productId` or a `kind` (spec 3.14.3), an edit sends the name and the options (3.14.4). Discounts are not
- * edited here (I5-P8): an edit sends each option's discount back as it came, so it is kept (3.14.2).
+ * `productId` or a `kind` (spec 3.14.3), an edit sends the name and the options (3.14.4). Each option carries
+ * its discount (3.14.2): set, changed or removed in the editor's discount sheet, and otherwise sent back as it
+ * came, so it is kept.
  */
 export type MenuOptionInput = components["schemas"]["MenuOptionInput"];
 
-/** One option row as typed. `id` is the saved option's `menuEntryOptionId`, or a local one for a new row. */
+/**
+ * One option row as typed. `id` is the saved option's `menuEntryOptionId`, or a local one for a new row. The
+ * discount is typed as in the app: a price and Seoul dates ("YYYY-MM-DD", the last day included), with the
+ * saved discount's own instants kept to send back while its days are unchanged. No discount: all "".
+ */
 export interface DraftOption {
   id: string;
   bottle: boolean;
   ml: string;
   price: string;
-  /** The saved discount, sent back unchanged. */
-  discount: Discount | null;
+  sale: string;
+  start: string;
+  end: string;
+  originalStartsAt: string;
+  originalEndsAt: string;
 }
+
+/** The discount part of a row, cleared by "할인 제거" or a discount that has ended. */
+export const NO_DISCOUNT = { sale: "", start: "", end: "", originalStartsAt: "", originalEndsAt: "" } as const;
+export type DraftDiscount = Pick<DraftOption, keyof typeof NO_DISCOUNT>;
+export const discountOf = ({ sale, start, end, originalStartsAt, originalEndsAt }: DraftOption): DraftDiscount => ({ sale, start, end, originalStartsAt, originalEndsAt });
 
 let localIds = 0;
 export function freshOption(): DraftOption {
   localIds += 1;
-  return { id: `local-serving-${localIds}`, bottle: false, ml: "", price: "", discount: null };
+  return { id: `local-serving-${localIds}`, bottle: false, ml: "", price: "", ...NO_DISCOUNT };
+}
+
+/** `localDiscountEndDay`: the last day of a discount ending at `endsAt`; one ending at midnight ends the day before. */
+export function localDiscountEndDay(endsAt: string): string {
+  const at = Date.parse(endsAt);
+  const day = seoulClock(at).date;
+  return isSeoulMidnight(at) ? addDays(day, -1) : day;
 }
 
 export function fromSaved(option: MenuOption): DraftOption {
+  const discount = option.discount;
   return {
     id: option.menuEntryOptionId,
     bottle: isBottleServingLabel(option.optionLabel),
     ml: option.pourMl?.toString() ?? "",
     price: String(option.priceKrw),
-    discount: option.discount,
+    ...(discount
+      ? {
+          sale: String(discount.discountedPriceKrw),
+          start: seoulClock(Date.parse(discount.startsAt)).date,
+          end: localDiscountEndDay(discount.endsAt),
+          originalStartsAt: discount.startsAt,
+          originalEndsAt: discount.endsAt,
+        }
+      : NO_DISCOUNT),
   };
 }
 
@@ -61,6 +91,36 @@ export const savedOption = (option: MenuOption): OptionValue => ({
 });
 
 const intOf = (text: string): number | null => (/^\d{1,9}$/.test(text) ? Number(text) : null);
+
+const DATE = /^\d{4}-\d{2}-\d{2}$/;
+
+/**
+ * `toOption`'s discount: a price from 1 won and lower than the option's price, from the start day's midnight
+ * in Seoul until the midnight after the end day. A saved discount whose days were not changed keeps its own
+ * instants (an imported one may start or end mid-day). The app lets the discounted price equal the price;
+ * spec 3.14.2 refuses it (`DISCOUNT_NOT_LOWER`), so it is refused here (data/android 수정 필요 사항.md).
+ */
+export function draftDiscount(draft: DraftOption, price: number, original: OptionValue | undefined): Discount | null {
+  if (draft.sale === "") return null;
+  const sale = intOf(draft.sale);
+  if (sale === null) throw new Error("할인 가격을 숫자로 입력해 주세요.");
+  if (!(sale >= 1 && sale < price && (sale <= MAX_OWNER_MENU_PRICE_KRW || original?.discount?.discountedPriceKrw === sale))) {
+    throw new Error(DISCOUNT_NOT_LOWER);
+  }
+  if (!DATE.test(draft.start)) throw new Error("시작일은 YYYY-MM-DD 형식이에요.");
+  if (!DATE.test(draft.end)) throw new Error("종료일은 YYYY-MM-DD 형식이에요.");
+  if (draft.end < draft.start) throw new Error("할인 종료일을 확인해 주세요.");
+  const unchangedDays =
+    draft.originalStartsAt !== "" &&
+    draft.originalEndsAt !== "" &&
+    draft.start === seoulClock(Date.parse(draft.originalStartsAt)).date &&
+    draft.end === localDiscountEndDay(draft.originalEndsAt);
+  return unchangedDays
+    ? { discountedPriceKrw: sale, startsAt: draft.originalStartsAt, endsAt: draft.originalEndsAt }
+    : { discountedPriceKrw: sale, startsAt: seoulStartOf(draft.start), endsAt: seoulStartOf(addDays(draft.end, 1)) };
+}
+
+export const DISCOUNT_NOT_LOWER = "할인 가격은 1원 이상, 원래 가격보다 낮아야 해요.";
 
 /**
  * `toOption`: a whisky option is a pour in ml or a bottle; anything else is a price alone. An unchanged saved
@@ -83,7 +143,8 @@ export function toOption(draft: DraftOption, whisky: boolean, original: OptionVa
   if (whisky && !draft.bottle && !unchangedLegacyNullPour && !(ml !== null && ml >= 1 && ml <= MAX_POUR_ML)) {
     throw new Error("용량을 입력하거나 Bottle 판매를 선택해 주세요.");
   }
-  const discount = draft.discount && Date.parse(draft.discount.endsAt) > now ? draft.discount : null;
+  const typed = draftDiscount(draft, price, original);
+  const discount = typed && Date.parse(typed.endsAt) > now ? typed : null;
   const keepOriginal =
     preserveOriginalServing &&
     original !== undefined &&
@@ -118,14 +179,15 @@ export function editDraftOf(item: MenuItem): Draft | null {
   return { name: item.displayName, category, options: item.options.slice(0, limit).map(fromSaved) };
 }
 
-const sameTyping = (a: DraftOption, b: DraftOption) => a.bottle === b.bottle && a.ml === b.ml && a.price === b.price;
+const sameServing = (a: DraftOption, b: DraftOption) => a.bottle === b.bottle && a.ml === b.ml && a.price === b.price;
+const sameDiscount = (a: DraftOption, b: DraftOption) => JSON.stringify(discountOf(a)) === JSON.stringify(discountOf(b));
 
 /**
  * After MENU_OUTDATED (spec 3.14.1), the edit is moved onto the item as it is now (`fresh`, its `editDraftOf`),
  * so that saving again does not undo what changed elsewhere: what the owner changed since `start` stays as
- * typed, and the rest takes the new values. A saved row keeps the option's discount as it is now, which this
- * editor does not change (I5-P8). A row whose option was removed elsewhere goes too, unless the owner typed
- * in it; then it stays as a new option. Options added elsewhere are added after the rows. Not in the app,
+ * typed, and the rest takes the new values. A row's serving and price, and its discount, are taken apart: the
+ * owner's discount stays when only the price changed elsewhere, and the reverse. A row whose option was
+ * removed elsewhere goes too, unless the owner typed in it; then it stays as a new option. Options added elsewhere are added after the rows. Not in the app,
  * which does not handle MENU_OUTDATED (Codex review on #199).
  */
 export function rebaseDraft(start: Draft, current: Draft, fresh: Draft): Draft {
@@ -135,8 +197,13 @@ export function rebaseDraft(start: Draft, current: Draft, fresh: Draft): Draft {
     const opened = before.get(row.id);
     if (!opened) return [row];
     const saved = now.get(row.id);
-    if (saved) return [sameTyping(row, opened) ? saved : { ...row, discount: saved.discount }];
-    return sameTyping(row, opened) ? [] : [{ ...freshOption(), bottle: row.bottle, ml: row.ml, price: row.price }];
+    if (saved) {
+      const serving = sameServing(row, opened) ? saved : row;
+      return [{ ...serving, ...discountOf(sameDiscount(row, opened) ? saved : row), id: row.id }];
+    }
+    if (sameServing(row, opened) && sameDiscount(row, opened)) return [];
+    // Kept as a new option: its saved discount instants go with the saved option.
+    return [{ ...freshOption(), bottle: row.bottle, ml: row.ml, price: row.price, ...(row.sale ? { ...discountOf(row), originalStartsAt: "", originalEndsAt: "" } : {}) }];
   });
   return {
     name: current.name === start.name ? fresh.name : current.name,

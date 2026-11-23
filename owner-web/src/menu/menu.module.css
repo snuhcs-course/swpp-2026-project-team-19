@@ -7,6 +7,11 @@
   gap: var(--bm-space-sm);
 }
 
+.headActions {
+  display: flex;
+  gap: var(--bm-space-xs);
+}
+
 .title {
   margin: 0;
   font-size: var(--bm-type-section-title);
