@@ -498,6 +498,40 @@ describe("the import's state (spec 5, OwnerMenuPhotoJobScreen.kt)", () => {
     expect(await screen.findByText("사진 2장 중 0장을 읽었어요")).toBeInTheDocument();
   });
 
+  it("offers no retry when a later read is forbidden, keeping the last state (Codex review on #210)", async () => {
+    vi.useFakeTimers({ toFake: ["setInterval", "clearInterval"] });
+    let forbidden = false;
+    importServer({
+      job: { status: "processing" },
+      answer: (call) => (call.method === "GET" && call.path.startsWith("/api/menu-imports/") && forbidden ? HttpResponse.json(errorBody("FORBIDDEN"), { status: 403 }) : undefined),
+    });
+    renderOwnerWeb(JOB_PATH);
+    await screen.findByText("사진 2장 중 0장을 읽었어요");
+    forbidden = true;
+    await act(() => vi.advanceTimersByTimeAsync(2000));
+    expect(await screen.findByRole("alert")).toHaveTextContent("최신 정보를 불러오지 못했어요. 이 화면을 볼 권한이 없어요.");
+    expect(screen.getByText("사진 2장 중 0장을 읽었어요")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "다시 시도" })).not.toBeInTheDocument();
+  });
+
+  it("offers one retry when a later read fails, keeping the last state", async () => {
+    vi.useFakeTimers({ toFake: ["setInterval", "clearInterval"] });
+    let failing = false;
+    importServer({
+      job: { status: "processing", next: ["processing", "processing"] },
+      answer: (call) => (call.method === "GET" && call.path.startsWith("/api/menu-imports/") && failing ? HttpResponse.json(errorBody("INTERNAL_ERROR"), { status: 500 }) : undefined),
+    });
+    renderOwnerWeb(JOB_PATH);
+    await screen.findByText("사진 2장 중 1장을 읽었어요");
+    failing = true;
+    await act(() => vi.advanceTimersByTimeAsync(2000));
+    expect(await screen.findByRole("alert")).toHaveTextContent("최신 정보를 불러오지 못했어요.");
+    expect(screen.getAllByRole("button", { name: "다시 시도" })).toHaveLength(1);
+    failing = false;
+    await user().click(screen.getByRole("button", { name: "다시 시도" }));
+    expect(await screen.findByText("사진 2장 중 2장을 읽었어요")).toBeInTheDocument();
+  });
+
   it("shows the same screen when the import's page is opened again (another tab, a reload)", async () => {
     importServer({ job: { status: "ready_for_review" } });
     const first = renderOwnerWeb(JOB_PATH);

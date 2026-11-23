@@ -4,7 +4,7 @@ import { useLocation, useParams } from "react-router";
 import { ApiError } from "../api/errors";
 import { OwnerScreen } from "../owner/OwnerScreen";
 import { useBar, useBarMenu, type OwnedBar } from "../owner/queries";
-import { Button, ButtonLink } from "../ui/Button";
+import { ButtonLink } from "../ui/Button";
 import { ErrorState, LoadingState } from "../ui/states";
 import { QueryView } from "../ui/QueryView";
 import { importPath } from "./ImportEntry";
@@ -32,7 +32,7 @@ export function ImportJobPage({ bar }: { bar: OwnedBar }) {
   const queryClient = useQueryClient();
   const readCount = () => queryClient.getQueryState(importQueryKeys.menuImport(menuImportId))?.dataUpdateCount ?? 0;
   // Reads before this screen opened (a cached import) do not count toward its 180.
-  const [firstRead, setFirstRead] = useState(readCount);
+  const [firstRead] = useState(readCount);
   const query = useMenuImport(menuImportId, firstRead);
   const actions = useImportActions(bar.barId);
   const status = query.data?.status;
@@ -66,11 +66,6 @@ export function ImportJobPage({ bar }: { bar: OwnedBar }) {
               bar={bar}
               data={data}
               slow={processing && polls >= MAX_POLLS}
-              readFailed={query.isError}
-              retry={() => {
-                setFirstRead(readCount());
-                void query.refetch();
-              }}
               onNotice={setNotice}
             />
           )}
@@ -84,15 +79,11 @@ function ImportState({
   bar,
   data,
   slow,
-  readFailed,
-  retry,
   onNotice,
 }: {
   bar: OwnedBar;
   data: ImportStatusResponse;
   slow: boolean;
-  readFailed: boolean;
-  retry: () => void;
   onNotice: (message: string | null) => void;
 }) {
   const menuPath = `/bars/${bar.barId}/menu`;
@@ -121,16 +112,6 @@ function ImportState({
             <span style={{ width: `${percent}%` }} />
           </div>
           {slow ? <p className={styles.notice}>분석 시간이 길어지고 있어요. 나갔다가 다시 확인해 주세요.</p> : null}
-          {readFailed ? (
-            <div className={styles.row}>
-              <p className={styles.error} role="alert">
-                메뉴판 분석 상태를 불러오지 못했어요.
-              </p>
-              <Button variant="secondary" onClick={retry}>
-                다시 시도
-              </Button>
-            </div>
-          ) : null}
           <div className={styles.actions}>{home}</div>
         </div>
       );
