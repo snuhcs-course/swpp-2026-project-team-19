@@ -1,7 +1,7 @@
-import { screen, waitFor, within } from "@testing-library/react";
+import { act, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { BarMenu, CatalogProduct } from "../owner/queries";
 import { bar, barMenu, errorBody, useOwnerApi } from "../test/api";
 import { renderOwnerWeb } from "../test/render";
@@ -72,8 +72,8 @@ type Answer = (call: Call) => Response | undefined | Promise<Response | undefine
 
 /**
  * The bar's menu on a server that keeps the edits of spec 3.14: each success raises `menuVersion`; a request
- * on another version answers 409 MENU_OUTDATED. `answer` may answer first; `apply` false makes it answer
- * without applying.
+ * on another version answers 409 MENU_OUTDATED. Sold-out (3.14.8) changes neither the version nor
+ * `publishedAt`; confirming (3.14.9) stamps `confirmedAt` on the bar. `answer` may answer first.
  */
 function menuServer(items: MenuItem[], { answer, products = [], activeMenuImport = null, version = 4 }: { answer?: Answer; products?: CatalogProduct[]; activeMenuImport?: { menuImportId: string; status: "processing" } | null; version?: number | null } = {}) {
   const owned = bar(BAR_ID, "관악 위스키 바", {
@@ -81,6 +81,12 @@ function menuServer(items: MenuItem[], { answer, products = [], activeMenuImport
     currentMenu: version === null ? null : { menuBoardId: "board", menuVersion: version, publishedAt: "2026-11-01T03:00:00Z", confirmedAt: null },
   });
   let menu: BarMenu = barMenu(owned, version === null ? {} : { menuBoardId: "board", menuVersion: version, publishedAt: "2026-11-01T03:00:00Z", items });
+  let confirmedAt: string | null = null;
+  // The bar's currentMenu (3.6) follows the menu.
+  const barNow = () => ({
+    ...owned,
+    currentMenu: menu.menuBoardId && menu.menuVersion !== null && menu.publishedAt ? { menuBoardId: menu.menuBoardId, menuVersion: menu.menuVersion, publishedAt: menu.publishedAt, confirmedAt } : null,
+  });
   const calls: Call[] = [];
   const reads = { menu: 0, bar: 0, myBars: 0 };
   let added = 0;
@@ -105,7 +111,7 @@ function menuServer(items: MenuItem[], { answer, products = [], activeMenuImport
     }),
     http.get("/api/bars/:barId", () => {
       reads.bar++;
-      return HttpResponse.json(owned);
+      return HttpResponse.json(barNow());
     }),
     http.get("/api/bars/:barId/menu", () => {
       reads.menu++;
@@ -160,6 +166,26 @@ function menuServer(items: MenuItem[], { answer, products = [], activeMenuImport
       const stale = outdated(Number(new URL(request.url).searchParams.get("menuVersion")));
       if (stale) return stale;
       return HttpResponse.json(changed(menu.items.filter((entry) => entry.barMenuItemId !== params.itemId)));
+    }),
+    http.put("/api/bars/:barId/menu/items/:itemId/sold-out", async ({ request, params }) => {
+      const body = (await request.json()) as Record<string, unknown>;
+      const custom = await record("PUT sold-out", request, body);
+      if (custom) return custom;
+      if (!menu.items.some((entry) => entry.barMenuItemId === params.itemId)) {
+        return HttpResponse.json(errorBody("MENU_ITEM_NOT_FOUND"), { status: 404 });
+      }
+      menu = { ...menu, items: menu.items.map((entry) => (entry.barMenuItemId === params.itemId ? { ...entry, soldOut: body.soldOut as boolean } : entry)) };
+      return HttpResponse.json(menu);
+    }),
+    http.post("/api/bars/:barId/menu/confirm", async ({ request }) => {
+      const body = (await request.json()) as Record<string, unknown>;
+      const custom = await record("POST confirm", request, body);
+      if (custom) return custom;
+      if (menu.menuBoardId === null || menu.items.length === 0) return HttpResponse.json(errorBody("NO_PUBLISHED_MENU"), { status: 409 });
+      const stale = outdated(body.menuVersion);
+      if (stale) return stale;
+      confirmedAt = new Date().toISOString();
+      return HttpResponse.json(barNow());
     }),
     http.post("/api/bars/:barId/menu/reset", async ({ request }) => {
       const body = (await request.json()) as Record<string, unknown>;
@@ -1137,5 +1163,444 @@ describe("owner-only access (spec 2.2)", () => {
     expect(await screen.findByRole("link", { name: "처음 화면으로" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "전체 메뉴 초기화" })).not.toBeInTheDocument();
     expect(api.writes()).toHaveLength(1);
+  });
+});
+
+describe("discounts (OwnerManualMenuScreen.kt 할인 설정, spec 3.14.2)", () => {
+  // Started in the past and ending mid-day, as an imported discount may.
+  const running = { discountedPriceKrw: 150000, startsAt: "2026-11-01T03:30:00Z", endsAt: "2099-12-01T06:00:00Z" };
+  const sheet = () => screen.getByRole("dialog", { name: "할인 설정" });
+  async function openDiscount() {
+    await user().click(screen.getByRole("button", { name: "할인" }));
+    return sheet();
+  }
+  /** A date field, set as the browser's date picker does. */
+  const setDate = (label: string, value: string) => fireEvent.change(within(sheet()).getByLabelText(label), { target: { value } });
+  async function typeDiscount(price: string, start: string, end: string) {
+    const field = within(sheet()).getByLabelText("할인 가격 (원)");
+    await user().clear(field);
+    await user().type(field, price);
+    setDate("시작일", start);
+    setDate("종료일", end);
+  }
+
+  it("sets a discount on one option and sends the other's as it came", async () => {
+    const api = menuServer([{ ...glenfiddich, options: [option("gf-glass", "잔", 30, 17000), option("gf-bottle", "병", null, 160000, running)] }]);
+    const { router } = await openEdit("gf-item");
+
+    await openDiscount();
+    expect(within(sheet()).getByLabelText("적용 용량")).toHaveDisplayValue("30ml, 17000원");
+    await typeDiscount("14000", "2099-12-01", "2099-12-31");
+    await user().click(within(sheet()).getByRole("button", { name: "할인 적용" }));
+    expect(screen.queryByRole("dialog", { name: "할인 설정" })).not.toBeInTheDocument();
+    expect(optionGroup(1)).toHaveTextContent("할인 14,000원");
+    expect(api.writes()).toEqual([]);
+    await save("저장하기");
+
+    await atMenuList(router);
+    expect(api.writes()[0]?.body).toEqual({
+      menuVersion: 4,
+      displayName: "Glenfiddich 12",
+      options: [
+        // The days in Seoul, from the first day's midnight to the midnight after the last.
+        { optionLabel: "잔", pourMl: 30, priceKrw: 17000, discount: { discountedPriceKrw: 14000, startsAt: "2099-11-30T15:00:00Z", endsAt: "2099-12-31T15:00:00Z" } },
+        { optionLabel: "병", pourMl: null, priceKrw: 160000, discount: running },
+      ],
+    });
+  });
+
+  it("changes a saved discount's price keeping its times, and removes another's", async () => {
+    const glassRunning = { discountedPriceKrw: 14000, startsAt: running.startsAt, endsAt: running.endsAt };
+    const api = menuServer([{ ...glenfiddich, options: [option("gf-glass", "잔", 30, 17000, glassRunning), option("gf-bottle", "병", null, 160000, running)] }]);
+    const { router } = await openEdit("gf-item");
+
+    await openDiscount();
+    // The saved discount's days, in Seoul.
+    expect(within(sheet()).getByLabelText("시작일")).toHaveValue("2026-11-01");
+    expect(within(sheet()).getByLabelText("종료일")).toHaveValue("2099-12-01");
+    await user().clear(within(sheet()).getByLabelText("할인 가격 (원)"));
+    await user().type(within(sheet()).getByLabelText("할인 가격 (원)"), "13000");
+    await user().click(within(sheet()).getByRole("button", { name: "할인 적용" }));
+    await openDiscount();
+    await user().selectOptions(within(sheet()).getByLabelText("적용 용량"), "Bottle, 160000원");
+    await user().click(within(sheet()).getByRole("button", { name: "할인 제거" }));
+    expect(optionGroup(2)).not.toHaveTextContent("할인");
+    await save("저장하기");
+
+    await atMenuList(router);
+    expect((api.writes()[0]?.body?.options as { discount: unknown }[]).map((sent) => sent.discount)).toEqual([{ ...glassRunning, discountedPriceKrw: 13000 }, null]);
+  });
+
+  it("checks the discount before applying it, with the app's messages", async () => {
+    const api = menuServer([glenfiddich]);
+    await openEdit("gf-item");
+
+    await openDiscount();
+    await user().click(within(sheet()).getByRole("button", { name: "할인 적용" }));
+    expect(within(sheet()).getByRole("alert")).toHaveTextContent("할인 가격을 입력해 주세요.");
+    // Spec 3.14.2: lower than the price (the app takes the same price).
+    await typeDiscount("17000", "2099-12-01", "2099-12-31");
+    await user().click(within(sheet()).getByRole("button", { name: "할인 적용" }));
+    expect(within(sheet()).getByRole("alert")).toHaveTextContent("할인 가격은 1원 이상, 원래 가격보다 낮아야 해요.");
+    await typeDiscount("14000", "", "2099-12-31");
+    await user().click(within(sheet()).getByRole("button", { name: "할인 적용" }));
+    expect(within(sheet()).getByRole("alert")).toHaveTextContent("시작일은 YYYY-MM-DD 형식이에요.");
+    // A start after the end clears the end, as the app's calendar does.
+    setDate("시작일", "2099-12-01");
+    setDate("종료일", "2099-12-10");
+    setDate("시작일", "2099-12-20");
+    expect(within(sheet()).getByLabelText("종료일")).toHaveValue("");
+
+    await user().click(within(sheet()).getByRole("button", { name: "취소" }));
+    expect(optionGroup(1)).not.toHaveTextContent("할인");
+    expect(api.writes()).toEqual([]);
+  });
+
+  it("shows the server's discount errors under their options (422 DISCOUNT_NOT_LOWER, END_BEFORE_START)", async () => {
+    menuServer([{ ...glenfiddich, options: [option("gf-glass", "잔", 30, 17000, { ...running, discountedPriceKrw: 14000 }), option("gf-bottle", "병", null, 160000, running)] }], {
+      answer: ({ method }) =>
+        method === "PUT"
+          ? HttpResponse.json(
+              {
+                error: {
+                  code: "VALIDATION_FAILED",
+                  message: "확인",
+                  details: null,
+                  fieldErrors: [
+                    { path: "options[0].discount.discountedPriceKrw", code: "DISCOUNT_NOT_LOWER", message: "낮아야" },
+                    { path: "options[1].discount.endsAt", code: "END_BEFORE_START", message: "종료" },
+                  ],
+                },
+              },
+              { status: 422 },
+            )
+          : undefined,
+    });
+    await openEdit("gf-item");
+    await save("저장하기");
+
+    expect(await within(optionGroup(1)).findByText("할인 가격은 1원 이상, 원래 가격보다 낮아야 해요.")).toBeInTheDocument();
+    expect(within(optionGroup(2)).getByText("할인 종료일을 확인해 주세요.")).toBeInTheDocument();
+  });
+
+  it("adds an item with a discount (spec 3.14.3, as the app's add screen)", async () => {
+    const api = menuServer([glenfiddich]);
+    const { router } = await openAdd();
+    await user().selectOptions(screen.getByLabelText("종류"), "칵테일");
+    await user().type(screen.getByLabelText("메뉴 이름"), "하이볼");
+    await user().type(screen.getByLabelText("판매 가격 (원)"), "9000");
+
+    await openDiscount();
+    // One price: no option to choose.
+    expect(within(sheet()).queryByLabelText("적용 용량")).not.toBeInTheDocument();
+    await typeDiscount("7000", "2099-12-01", "2099-12-01");
+    await user().click(within(sheet()).getByRole("button", { name: "할인 적용" }));
+    await save();
+
+    await atMenuList(router);
+    expect(api.writes()[0]?.body).toEqual({
+      menuVersion: 4,
+      displayName: "하이볼",
+      kind: "other",
+      options: [{ optionLabel: null, pourMl: null, priceKrw: 9000, discount: { discountedPriceKrw: 7000, startsAt: "2099-11-30T15:00:00Z", endsAt: "2099-12-01T15:00:00Z" } }],
+    });
+  });
+
+  it("asks before leaving with a discount applied but not saved", async () => {
+    menuServer([glenfiddich]);
+    await openEdit("gf-item");
+    await openDiscount();
+    await typeDiscount("14000", "2099-12-01", "2099-12-31");
+    await user().click(within(sheet()).getByRole("button", { name: "할인 적용" }));
+
+    await user().click(screen.getByRole("button", { name: "뒤로" }));
+
+    expect(await screen.findByRole("dialog", { name: "변경을 취소할까요?" })).toBeInTheDocument();
+  });
+});
+
+describe("discounts in the list (OwnerSharedMenuRow.kt, spec 3.9)", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("shows the discounted price only while the discount runs, computed again while the list stays open", async () => {
+    vi.useFakeTimers({ toFake: ["Date", "setInterval", "clearInterval"] });
+    vi.setSystemTime(Date.parse("2026-11-23T03:00:00Z"));
+    const soon = { discountedPriceKrw: 14000, startsAt: "2026-11-23T03:00:20Z", endsAt: "2026-11-23T03:01:10Z" };
+    menuServer([{ ...glenfiddich, options: [option("gf-glass", "잔", 30, 17000, soon)] }]);
+    await openMenu();
+    const row = screen.getByRole("link", { name: "Glenfiddich 12 수정" });
+    expect(row).toHaveTextContent("17,000원");
+    expect(row).not.toHaveTextContent("할인");
+
+    act(() => vi.advanceTimersByTime(30_000));
+    expect(row).toHaveTextContent("할인");
+    expect(row).toHaveTextContent("14,000원");
+
+    act(() => vi.advanceTimersByTime(60_000));
+    expect(row).toHaveTextContent("17,000원");
+    expect(row).not.toHaveTextContent("할인");
+  });
+});
+
+describe("sold out (spec 3.14.8, OwnerManualMenuScreen.kt)", () => {
+  const stockButton = (name: string) => screen.getByRole("button", { name });
+  const confirmStock = () => user().click(within(screen.getByRole("dialog")).getByRole("button", { name: "상태 변경" }));
+
+  it("marks an item sold out after asking, with soldOut alone, keeping the menu version", async () => {
+    const api = menuServer([glenfiddich, unlinked]);
+    await openMenu();
+
+    await user().click(stockButton("Glenfiddich 12 품절 처리"));
+    const sheet = screen.getByRole("dialog", { name: "품절 처리할까요?" });
+    expect(within(sheet).getByText("품절 메뉴는 고객에게 숨겨지며 판매 재개 시 다시 공개됩니다.")).toBeInTheDocument();
+    await user().click(within(sheet).getByRole("button", { name: "취소" }));
+    expect(api.writes()).toEqual([]);
+
+    await user().click(stockButton("Glenfiddich 12 품절 처리"));
+    await confirmStock();
+
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    expect(api.writes()).toEqual([{ method: "PUT sold-out", path: `/api/bars/${BAR_ID}/menu/items/gf-item/sold-out`, body: { soldOut: true } }]);
+    expect(await screen.findByRole("button", { name: "Glenfiddich 12 판매 재개" })).toHaveTextContent("재개");
+    expect(screen.getByRole("link", { name: "Glenfiddich 12 수정" })).toHaveTextContent("품절");
+    expect(api.menu().menuVersion).toBe(4);
+  });
+
+  it("puts a sold-out item back on sale after asking", async () => {
+    const api = menuServer([{ ...glenfiddich, soldOut: true }]);
+    await openMenu();
+
+    await user().click(stockButton("Glenfiddich 12 판매 재개"));
+    expect(screen.getByRole("dialog", { name: "판매를 재개할까요?" })).toBeInTheDocument();
+    await confirmStock();
+
+    expect(await screen.findByRole("button", { name: "Glenfiddich 12 품절 처리" })).toBeInTheDocument();
+    expect(api.writes().map((call) => call.body)).toEqual([{ soldOut: false }]);
+  });
+
+  it("is not held back by an unfinished menu photo import (the app blocks it)", async () => {
+    const api = menuServer([glenfiddich], { activeMenuImport: { menuImportId: "import", status: "processing" } });
+    await openMenu();
+    expect(screen.getByText("사진으로 메뉴 등록 작업 중에는 메뉴를 수정할 수 없어요.")).toBeInTheDocument();
+
+    await user().click(stockButton("Glenfiddich 12 품절 처리"));
+    await confirmStock();
+
+    await waitFor(() => expect(api.writes()).toHaveLength(1));
+    expect(await screen.findByRole("button", { name: "Glenfiddich 12 판매 재개" })).toBeInTheDocument();
+  });
+
+  it("reads the menu again when the item is gone (404 MENU_ITEM_NOT_FOUND)", async () => {
+    const api = menuServer([glenfiddich, unlinked]);
+    await openMenu();
+    api.changeElsewhere([unlinked]);
+
+    await user().click(stockButton("Glenfiddich 12 품절 처리"));
+    await confirmStock();
+
+    expect(await screen.findByText("이미 메뉴판에서 빠진 메뉴예요.")).toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByRole("link", { name: "Glenfiddich 12 수정" })).not.toBeInTheDocument());
+  });
+
+  it("sends one request while the answer is slow, with the sheet locked", async () => {
+    let answer: (() => void) | null = null;
+    const api = menuServer([glenfiddich], {
+      answer: async ({ method }) => {
+        if (method !== "PUT sold-out") return undefined;
+        await new Promise<void>((resolve) => (answer = resolve));
+        return undefined;
+      },
+    });
+    await openMenu();
+    await user().click(stockButton("Glenfiddich 12 품절 처리"));
+    await confirmStock();
+
+    await waitFor(() => expect(answer).not.toBeNull());
+    const sheet = screen.getByRole("dialog");
+    expect(within(sheet).getByRole("button", { name: "상태 변경" })).toBeDisabled();
+    expect(within(sheet).getByRole("button", { name: "취소" })).toBeDisabled();
+    answer!();
+
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    expect(api.writes()).toHaveLength(1);
+  });
+
+  it("sends the same request again after a lost answer", async () => {
+    let lose = true;
+    const api = menuServer([glenfiddich], {
+      answer: ({ method }) => {
+        if (method !== "PUT sold-out" || !lose) return undefined;
+        lose = false;
+        return HttpResponse.error();
+      },
+    });
+    await openMenu();
+    await user().click(stockButton("Glenfiddich 12 품절 처리"));
+    await confirmStock();
+    expect(await within(screen.getByRole("dialog")).findByText("서버에 연결하지 못했어요. 네트워크를 확인해 주세요.")).toBeInTheDocument();
+
+    await confirmStock();
+
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    expect(api.writes().map((call) => call.body)).toEqual([{ soldOut: true }, { soldOut: true }]);
+  });
+
+  it.each([
+    [403, "FORBIDDEN", "이 매장을 관리할 권한이 없어요."],
+    [422, "VALIDATION_FAILED", "오류"],
+    [500, "INTERNAL_ERROR", "서버에서 문제가 생겼어요. 잠시 후 다시 시도해 주세요."],
+  ])("shows %s %s in the sheet", async (status, code, message) => {
+    const api = menuServer([glenfiddich], { answer: ({ method }) => (method === "PUT sold-out" ? HttpResponse.json(errorBody(code), { status }) : undefined) });
+    await openMenu();
+    const before = api.reads.myBars;
+    await user().click(stockButton("Glenfiddich 12 품절 처리"));
+    await confirmStock();
+
+    expect(await within(screen.getByRole("dialog")).findByText(message)).toBeInTheDocument();
+    if (status === 403) await waitFor(() => expect(api.reads.myBars).toBeGreaterThan(before));
+  });
+
+  it("goes to the bar list when the bar is gone (404 BAR_NOT_FOUND)", async () => {
+    menuServer([glenfiddich], { answer: ({ method }) => (method === "PUT sold-out" ? HttpResponse.json(errorBody("BAR_NOT_FOUND"), { status: 404 }) : undefined) });
+    const { router } = await openMenu();
+    await user().click(stockButton("Glenfiddich 12 품절 처리"));
+    await confirmStock();
+
+    await waitFor(() => expect(router.state.location.pathname).toBe("/owner/bars"));
+  });
+});
+
+describe("confirming the menu on the home (spec 3.14.9, OwnerManagementHomeScreen.kt)", () => {
+  const card = () => screen.findByRole("region", { name: "메뉴 관리" });
+  const confirmButton = () => screen.findByRole("button", { name: "지금도 맞아요" });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  /** Ten days after the menu was published (11.01), at noon in Seoul. */
+  function tenDaysLater() {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(Date.parse("2026-11-11T12:00:00+09:00"));
+  }
+
+  it("confirms with the menu version shown; the date, the days and the gauge start again (Android managerMenuConfirmationPersistsWithoutChangingPublicationTimestamp)", async () => {
+    tenDaysLater();
+    const api = menuServer([glenfiddich]);
+    renderOwnerWeb(`/bars/${BAR_ID}`);
+    const region = await card();
+    await waitFor(() => expect(region).toHaveTextContent("게시된 메뉴 1개, 최근 갱신 11.01"));
+    expect(region).toHaveTextContent("메뉴 확인 10일 경과");
+    expect(within(region).getByRole("progressbar", { name: "메뉴 확인 경과" })).toHaveAttribute("aria-valuenow", "33");
+    const reads = { ...api.reads };
+
+    await user().click(await confirmButton());
+
+    await waitFor(() => expect(region).toHaveTextContent("최근 갱신 11.11"));
+    expect(region).toHaveTextContent("메뉴 확인 0일 경과");
+    expect(within(region).getByRole("progressbar")).toHaveAttribute("aria-valuenow", "0");
+    expect(api.writes()).toEqual([{ method: "POST confirm", path: `/api/bars/${BAR_ID}/menu/confirm`, body: { menuVersion: 4 } }]);
+    // The menu itself does not change.
+    expect([api.menu().menuVersion, api.menu().publishedAt]).toEqual([4, "2026-11-01T03:00:00Z"]);
+    await waitFor(() => expect(api.reads.myBars).toBeGreaterThan(reads.myBars));
+  });
+
+  it("shows the changed menu and asks again when it changed elsewhere (409 MENU_OUTDATED)", async () => {
+    const api = menuServer([glenfiddich]);
+    renderOwnerWeb(`/bars/${BAR_ID}`);
+    const region = await card();
+    await waitFor(() => expect(region).toHaveTextContent("게시된 메뉴 1개"));
+    api.changeElsewhere([glenfiddich, unlinked]);
+
+    await user().click(await confirmButton());
+
+    expect(await within(region).findByText("메뉴가 바뀌었어요. 바뀐 메뉴를 확인한 뒤 다시 눌러 주세요.")).toBeInTheDocument();
+    await waitFor(() => expect(region).toHaveTextContent("게시된 메뉴 2개"));
+    await user().click(await confirmButton());
+
+    await waitFor(() => expect(api.writes()).toHaveLength(2));
+    expect(api.writes().map((call) => call.body?.menuVersion)).toEqual([4, 5]);
+  });
+
+  it.each([
+    ["an emptied menu", 4],
+    ["a bar never given a menu", null],
+  ] as const)("offers adding a menu instead of the button for %s (Android zeroPublishedMenuCannotBeMarkedVerifiedOrReconfirmedAfterDeletion)", async (_, version) => {
+    menuServer([], { version });
+    renderOwnerWeb(`/bars/${BAR_ID}`);
+    const region = await card();
+
+    const link = await within(region).findByRole("link", { name: "메뉴 등록하기" });
+    expect(link).toHaveAttribute("href", `/owner/bars/${BAR_ID}/menu`);
+    expect(within(region).queryByRole("button", { name: "지금도 맞아요" })).not.toBeInTheDocument();
+    expect(region).toHaveTextContent("메뉴 확인 - 미확인");
+  });
+
+  it("hides the button when the server has no items to confirm (409 NO_PUBLISHED_MENU)", async () => {
+    const api = menuServer([glenfiddich]);
+    renderOwnerWeb(`/bars/${BAR_ID}`);
+    const region = await card();
+    await waitFor(() => expect(region).toHaveTextContent("게시된 메뉴 1개"));
+    api.changeElsewhere([]);
+
+    await user().click(await confirmButton());
+
+    expect(await within(region).findByRole("link", { name: "메뉴 등록하기" })).toBeInTheDocument();
+    expect(within(region).queryByRole("button", { name: "지금도 맞아요" })).not.toBeInTheDocument();
+  });
+
+  it("sends one request while the answer is slow, and the same version again after a lost answer", async () => {
+    let calls = 0;
+    let answer: (() => void) | null = null;
+    const api = menuServer([glenfiddich], {
+      answer: async ({ method }) => {
+        if (method !== "POST confirm") return undefined;
+        calls++;
+        if (calls === 1) {
+          await new Promise<void>((resolve) => (answer = resolve));
+          return HttpResponse.error();
+        }
+        return undefined;
+      },
+    });
+    renderOwnerWeb(`/bars/${BAR_ID}`);
+    const region = await card();
+    await waitFor(() => expect(region).toHaveTextContent("게시된 메뉴 1개"));
+
+    await user().click(await confirmButton());
+    await waitFor(() => expect(answer).not.toBeNull());
+    expect(within(region).getByRole("button", { name: "지금도 맞아요" })).toBeDisabled();
+    answer!();
+    expect(await within(region).findByText("서버에 연결하지 못했어요. 네트워크를 확인해 주세요.")).toBeInTheDocument();
+    await user().click(await confirmButton());
+
+    await waitFor(() => expect(api.writes()).toHaveLength(2));
+    expect(api.writes().map((call) => call.body)).toEqual([{ menuVersion: 4 }, { menuVersion: 4 }]);
+    await waitFor(() => expect(within(region).queryByRole("alert")).not.toBeInTheDocument());
+  });
+
+  it.each([
+    [403, "FORBIDDEN", "이 매장을 관리할 권한이 없어요."],
+    [500, "INTERNAL_ERROR", "서버에서 문제가 생겼어요. 잠시 후 다시 시도해 주세요."],
+  ])("shows %s %s under the card", async (status, code, message) => {
+    menuServer([glenfiddich], { answer: ({ method }) => (method === "POST confirm" ? HttpResponse.json(errorBody(code), { status }) : undefined) });
+    renderOwnerWeb(`/bars/${BAR_ID}`);
+    const region = await card();
+
+    await user().click(await confirmButton());
+
+    expect(await within(region).findByText(message)).toBeInTheDocument();
+  });
+
+  it("goes to the bar list when the bar is gone (404 BAR_NOT_FOUND)", async () => {
+    menuServer([glenfiddich], { answer: ({ method }) => (method === "POST confirm" ? HttpResponse.json(errorBody("BAR_NOT_FOUND"), { status: 404 }) : undefined) });
+    const { router } = renderOwnerWeb(`/bars/${BAR_ID}`);
+    await card();
+
+    await user().click(await confirmButton());
+
+    await waitFor(() => expect(router.state.location.pathname).toBe("/owner/bars"));
   });
 });
