@@ -108,10 +108,12 @@ export function useDraftSync({ menuImportId, reviewVersion, userId, baseDraftVer
       latest.current = state;
       dirty.current = true;
       keepOnDevice(state);
+      // A draft over 256 KB is measured again after each change; once small enough it is sent again.
+      if (statusRef.current === "tooLarge") update("idle");
       if (timer.current) clearTimeout(timer.current);
       timer.current = setTimeout(() => void drain(), SAVE_DELAY_MS);
     },
-    [drain, keepOnDevice],
+    [drain, keepOnDevice, update],
   );
 
   /** Sends what is waiting now (before leaving or publishing) and tells where the draft ended up. */

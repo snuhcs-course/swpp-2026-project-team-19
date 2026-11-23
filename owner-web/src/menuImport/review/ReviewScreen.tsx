@@ -58,8 +58,11 @@ function initialReview(review: ImportReview, menu: BarMenu, bar: BarDetail, devi
   const fromServer = server ? restoreDraft(fresh, review, server) : fresh;
   if (!device) return { state: fromServer, resume: false, conflict: null };
   if (device.reviewVersion !== review.reviewVersion) {
-    // The review was built again (9.4): this device's decisions apply where their lines are still in it.
-    return server ? { state: fromServer, resume: false, conflict: null } : { state: restoreDraft(fresh, review, { reviewVersion: device.reviewVersion, content: device.content }), resume: true, conflict: null };
+    // The review was built again (9.4): this device's decisions apply where their lines are still in it. With a
+    // server draft as well, the owner chooses, so the edit the server never got is not dropped unseen.
+    return server
+      ? { state: fromServer, resume: false, conflict: device }
+      : { state: restoreDraft(fresh, review, { reviewVersion: device.reviewVersion, content: device.content }), resume: true, conflict: null };
   }
   if (device.baseDraftVersion === (server?.draftVersion ?? 0)) {
     return { state: restoreDraft(fresh, review, { reviewVersion: device.reviewVersion, content: device.content }), resume: true, conflict: null };

@@ -783,6 +783,47 @@ describe("reviewing and publishing (spec 5.4, 5.9, 8, PhotoReviewScreen.kt)", ()
     expect(within(await card("새 위스키 21년")).getByRole("button", { name: "이 이름으로 등록" })).toBeInTheDocument();
   });
 
+  it("asks before dropping this device's unsent edit when the review was built again (Codex review on #210)", async () => {
+    // This device kept an edit of review version 1 the server never got; the review is now version 2 with an older draft.
+    localStorage.setItem(
+      `bottlemap-owner-review:${ME.userId}:${IMPORT_ID}`,
+      JSON.stringify({
+        reviewVersion: 1,
+        baseDraftVersion: 0,
+        content: {
+          itemDecisions: [{ extractedItemId: "l-new", action: "publish_without_product", kind: "whisky", finalLineType: "product", correctedProductName: "새 위스키 21년", options: [{ extractedOptionId: "o-new-30", optionLabel: null, pourMl: 30, priceKrw: 40000 }] }],
+          changeDecisions: [],
+          clientState: { webSchemaVersion: 1, cards: [], expandedItemIds: [] },
+        },
+      }),
+    );
+    const api = importServer({
+      job: { status: "ready_for_review", reviewVersion: 2, draftVersion: 3, draft: { draftVersion: 3, reviewVersion: 1, savedAt: "2026-11-23T00:00:00Z", content: { itemDecisions: [] } } },
+    });
+    renderOwnerWeb(JOB_PATH);
+    const sheet = await screen.findByRole("dialog", { name: "다른 곳에서 먼저 저장한 검수 내용이 있어요" });
+    await user().click(within(sheet).getByRole("button", { name: "이 기기 내용으로 덮어쓰기" }));
+    expect(within(await card("새 위스키 21년")).queryByRole("button", { name: "이 이름으로 등록" })).not.toBeInTheDocument();
+    await waitFor(() => expect(api.job!.draftVersion).toBe(4));
+    expect((api.callsTo("PUT", `/api/menu-imports/${IMPORT_ID}/review-draft`).at(-1)!.body as { draftVersion: number; reviewVersion: number })).toMatchObject({ draftVersion: 3, reviewVersion: 2 });
+  });
+
+  it("saves to the server again once a draft that was too large is changed (Codex review on #210)", async () => {
+    let tooLarge = true;
+    const api = importServer({
+      job: { status: "ready_for_review" },
+      answer: (call) => (call.method === "PUT" && tooLarge ? HttpResponse.json({ error: { code: "REVIEW_DRAFT_TOO_LARGE", message: "큼", details: { maxBytes: 262144 }, fieldErrors: [] } }, { status: 413 }) : undefined),
+    });
+    renderOwnerWeb(JOB_PATH);
+    await title("메뉴 검수");
+    await user().click(within(await card("새 위스키 21년")).getByRole("button", { name: "이 이름으로 등록" }));
+    expect(await screen.findByText(/서버 256KB 제한을 초과했어요/)).toBeInTheDocument();
+    tooLarge = false;
+    await user().click(within(await card("레몬 사워")).getByRole("button", { name: "게시 제외" }));
+    await waitFor(() => expect(api.job!.draftVersion).toBe(1));
+    await waitFor(() => expect(screen.queryByText(/서버 256KB 제한을 초과했어요/)).not.toBeInTheDocument());
+  });
+
   it("reads the review again when the menu changed meanwhile (409 REVIEW_OUTDATED), keeping the input", async () => {
     const api = importServer({
       job: { status: "ready_for_review" },
