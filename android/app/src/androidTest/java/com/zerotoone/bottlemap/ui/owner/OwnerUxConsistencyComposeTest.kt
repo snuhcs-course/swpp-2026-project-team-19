@@ -124,7 +124,8 @@ class OwnerUxConsistencyComposeTest {
         assertEquals(97f,(pin.bottom-pin.top).value,1f)
         org.junit.Assert.assertTrue(headline.top >= pin.bottom)
         val policy=compose.onNodeWithTag("welcome-privacy").getUnclippedBoundsInRoot()
-        assertEquals(18f,(root.bottom-policy.bottom).value,1.5f)
+        // WelcomeScreens.kt keeps the stack at the bottom with `bottom = 10.dp` padding, so the link sits 10dp up.
+        assertEquals(10f,(root.bottom-policy.bottom).value,1.5f)
     }
 
     @Test fun approvedBarAlwaysOffersManagementEvenIfInitialReviewPending() {
