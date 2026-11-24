@@ -50,6 +50,15 @@ tasks.matching { it.name == "preReleaseBuild" }.configureEach {
     dependsOn(validateReleaseSigning)
 }
 
+// The Android SDK jar Robolectric runs the unit tests on (`@Config(sdk = [35])`), resolved by Gradle. Robolectric
+// 4.17 looks for exactly this file name in `robolectric.dependency.dir`; change the version with Robolectric.
+val robolectricSdk: Configuration by configurations.creating { isTransitive = false }
+val robolectricSdkDir = layout.buildDirectory.dir("robolectric-sdk")
+val prepareRobolectricSdk by tasks.registering(Sync::class) {
+    from(robolectricSdk)
+    into(robolectricSdkDir)
+}
+
 android {
     namespace = "com.zerotoone.bottlemap"
     compileSdk = 37
@@ -116,9 +125,12 @@ android {
     testOptions {
         unitTests.isIncludeAndroidResources = true
         unitTests.all {
-            // Robolectric resolves SDK jars separately from Gradle repositories.
-            // Use the canonical Central endpoint; repo1 returned HTTP 429 in CI.
-            it.systemProperty("robolectric.dependency.repo.url", "https://repo.maven.apache.org/maven2")
+            // Robolectric would download its SDK jar from Maven Central itself, on every CI run (it is kept in
+            // ~/.m2, which CI does not cache), and Central refuses GitHub runners at times (HTTP 429). Gradle
+            // downloads it instead (with retries, into the Gradle cache CI keeps), and Robolectric runs offline.
+            it.dependsOn(prepareRobolectricSdk)
+            it.systemProperty("robolectric.offline", "true")
+            it.systemProperty("robolectric.dependency.dir", robolectricSdkDir.get().asFile.absolutePath)
             val screenshots = providers.gradleProperty("bmUxScreenshots").orNull == "true"
             if (!screenshots) {
                 it.filter.excludeTestsMatching("com.zerotoone.bottlemap.ux.UxV18ScreenshotTest")
@@ -161,6 +173,7 @@ dependencies {
     testImplementation(libs.junit4)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation("org.robolectric:robolectric:4.17")
+    robolectricSdk("org.robolectric:android-all-instrumented:15-robolectric-13954326-i7")
     testImplementation(platform(libs.androidx.compose.bom))
     testImplementation("androidx.compose.ui:ui-test-junit4")
     androidTestImplementation(platform(libs.androidx.compose.bom))
