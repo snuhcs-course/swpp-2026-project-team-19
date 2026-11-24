@@ -1,15 +1,17 @@
-"""Active bars inside the area shown on the customer's map (API spec, section 3.13).
+"""Active bars inside the area shown on the customer's map (API spec, section 3.13), and every
+active bar for the app to place on the device (section 3.19).
 
 Every bar inside the area, edges included, in one query and without truncation: the size limit on
 the area keeps the response small instead. Areas across the antimeridian are rejected; the service
-is in Korea.
+is in Korea. Both APIs build their items here, so the two responses cannot differ for the same bar.
 """
 
+from sqlalchemy import Select
 from sqlalchemy.orm import Session
 
 from app.core.errors import validation_failed
 from app.models import Bar
-from app.schemas.search import MapBarItem, MapBarsResponse
+from app.schemas.search import AllBarsResponse, MapBarItem, MapBarsResponse
 from app.services.bar_photo_links import cover_thumbnail_url
 from app.services.nearby_bars import active_bars_with_menu_time
 
@@ -42,17 +44,27 @@ def find_map_bars(
         .where(Bar.latitude.between(south, north), Bar.longitude.between(west, east))
         .order_by(Bar.id)
     )
-    return MapBarsResponse(
-        items=[
-            MapBarItem(
-                barId=bar_id,
-                name=name,
-                address=address,
-                latitude=float(latitude),
-                longitude=float(longitude),
-                coverThumbnailUrl=cover_thumbnail_url(cover_id, base_url),
-                menuUpdatedAt=published_at,
-            )
-            for bar_id, name, address, latitude, longitude, published_at, cover_id in session.execute(query)
-        ]
-    )
+    return MapBarsResponse(items=map_bar_items(session, query, base_url))
+
+
+def find_all_bars(session: Session, *, base_url: str) -> AllBarsResponse:
+    """Every active bar, by name, then id (spec 3.19). It takes no location: the app computes
+    distance, radius and map area on the device."""
+    query = active_bars_with_menu_time().order_by(Bar.name, Bar.id)
+    return AllBarsResponse(items=map_bar_items(session, query, base_url))
+
+
+def map_bar_items(session: Session, query: Select, base_url: str) -> list[MapBarItem]:
+    """The items of a query from `active_bars_with_menu_time`, in its order."""
+    return [
+        MapBarItem(
+            barId=bar_id,
+            name=name,
+            address=address,
+            latitude=float(latitude),
+            longitude=float(longitude),
+            coverThumbnailUrl=cover_thumbnail_url(cover_id, base_url),
+            menuUpdatedAt=published_at,
+        )
+        for bar_id, name, address, latitude, longitude, published_at, cover_id in session.execute(query)
+    ]

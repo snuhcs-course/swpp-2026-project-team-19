@@ -20,6 +20,8 @@ def schema():
         ("get", "/api/search/bar-names", {"422", "500"}),
         ("get", "/api/search/map-bars", {"422", "500"}),
         ("get", "/api/search/popular-products", {"422", "500"}),
+        # No parameters, so nothing to reject.
+        ("get", "/api/search/all-bars", {"500"}),
         ("patch", "/api/me", {"400", "401", "404", "422", "500", "503"}),
         ("get", "/api/bars/{barId}/menu", {"401", "404", "422", "500"}),
         ("get", "/api/bars", {"401", "403", "422", "500", "503"}),

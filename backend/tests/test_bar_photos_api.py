@@ -565,6 +565,7 @@ def two_bars_on_sale(db_session):
         pytest.param("/api/search/bar-names?query=Bar", id="3.11.11 bar names"),
         pytest.param("/api/search/nearby-bars?lat=37.478&lng=126.951", id="3.12 nearby"),
         pytest.param("/api/search/map-bars?south=37.47&west=126.94&north=37.49&east=126.96", id="3.13 map"),
+        pytest.param("/api/search/all-bars", id="3.19 all bars"),
     ],
 )
 def test_the_bar_lists_send_the_cover_thumbnail(client, operator, two_bars_on_sale, url):

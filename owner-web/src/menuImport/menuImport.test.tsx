@@ -483,7 +483,8 @@ describe("the import's state (spec 5, OwnerMenuPhotoJobScreen.kt)", () => {
     failing = true;
     for (let i = 0; i < 200; i++) await act(() => vi.advanceTimersByTimeAsync(2000));
     expect(api.callsTo("GET", `/api/menu-imports/${IMPORT_ID}`)).toHaveLength(180);
-    expect(screen.getByText("분석 시간이 길어지고 있어요. 나갔다가 다시 확인해 주세요.")).toBeInTheDocument();
+    // The 180th request is counted when it is sent; its failure may render a little later on a slow runner.
+    expect(await screen.findByText("분석 시간이 길어지고 있어요. 나갔다가 다시 확인해 주세요.")).toBeInTheDocument();
   });
 
   it("stops reading at once when a read is forbidden (Codex review on #210)", async () => {
