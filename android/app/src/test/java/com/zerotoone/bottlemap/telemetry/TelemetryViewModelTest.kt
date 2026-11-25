@@ -67,11 +67,25 @@ class TelemetryViewModelTest {
         assertEquals(listOf(TelemetryEvent.SearchCompleted(SearchKind.BAR_NAME,false),
             TelemetryEvent.SearchCompleted(SearchKind.BAR_NAME,true)),fake.events)
     }
+    @Test fun locationlessCarouselUsesMapAndLocatedCarouselUsesNearby() {
+        val journey = DiscoveryJourney()
+        val vm = P18ExploreViewModel(journey = journey)
+        vm.openingBar()
+        assertEquals(DetailSource.MAP, journey.detailOpened().source)
+        vm.setLocation(NearbyCoordinate(37.5, 127.0))
+        vm.openingBar()
+        assertEquals(DetailSource.NEARBY, journey.detailOpened().source)
+        vm.openingBar(nearby = false)
+        assertEquals(DetailSource.MAP, journey.detailOpened().source)
+        vm.clearLocation()
+        vm.openingBar()
+        assertEquals(DetailSource.MAP, journey.detailOpened().source)
+    }
     @Test fun nearbyPermissionChangesEmitOncePerActualState() {
         val fake=FakeTelemetry()
         val vm=P18ExploreViewModel(telemetry=fake)
-        vm.opened(false);vm.opened(false);vm.opened(true);vm.opened(true)
+        vm.opened(false);vm.opened(false);vm.opened(true);vm.opened(true);vm.opened(false)
         assertEquals(listOf(TelemetryEvent.NearbyOpened(Permission.DENIED),
-            TelemetryEvent.NearbyOpened(Permission.GRANTED)),fake.events)
+            TelemetryEvent.NearbyOpened(Permission.GRANTED), TelemetryEvent.NearbyOpened(Permission.DENIED)),fake.events)
     }
 }

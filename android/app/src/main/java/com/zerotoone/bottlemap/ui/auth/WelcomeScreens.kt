@@ -143,7 +143,7 @@ fun WelcomeScreen(
                             "welcome-age-confirmation", narrow)
                     }
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(0.dp)) {
-                        WelcomeCheck("사용 기록 보내기", usageEnabled, privacy::setUsageEnabled,
+                        WelcomeCheck("사용 기록 보내기", usageEnabled, { privacy.setUsageEnabled(it) },
                             "welcome-usage-consent", narrow)
                         Text("사용 기록은 앱 개선에 사용해요.",
                             style = uxText(11f, 400, UxColor.muted),

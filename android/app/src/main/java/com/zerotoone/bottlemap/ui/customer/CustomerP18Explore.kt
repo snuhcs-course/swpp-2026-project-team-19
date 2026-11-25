@@ -104,7 +104,7 @@ internal class P18ExploreViewModel(
             telemetry.log(TelemetryEvent.NearbyOpened(if (allowed) Permission.GRANTED else Permission.DENIED))
         }
     }
-    fun openingBar(nearby: Boolean) { journey.fromMap(nearby) }
+    fun openingBar(nearby: Boolean = location.value != null) { journey.fromMap(nearby) }
     fun load(viewport:MapViewport,force:Boolean=false) {
         val bounds=viewport.bounds
         if(!bounds.isSupportedByBackend()) {
@@ -272,6 +272,7 @@ internal fun CustomerP18Explore(
                     Manifest.permission.ACCESS_FINE_LOCATION)==PackageManager.PERMISSION_GRANTED ||
                     ContextCompat.checkSelfPermission(context,
                     Manifest.permission.ACCESS_COARSE_LOCATION)==PackageManager.PERMISSION_GRANTED
+                viewModel.opened(allowed)
                 if(!allowed)viewModel.clearLocation()
                 else if(viewModel.location.value==null)scope.launch {
                     runCatching{AndroidNearbyLocationSource(context).currentLocation()}
@@ -480,7 +481,7 @@ internal fun CustomerP18Explore(
                                     }
                                 }
                                 Box(Modifier.size(40.dp)
-                                    .clickable { viewModel.openingBar(nearby = true); onOpenBar(bar.barId) },
+                                    .clickable { viewModel.openingBar(); onOpenBar(bar.barId) },
                                     contentAlignment=Alignment.Center) {
                                     // White right-pointing arrow, replacing "보기".
                                     P18DetailCategoryChevron(open=false,color=Color.White,

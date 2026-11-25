@@ -71,6 +71,11 @@ class TelemetryTest {
         assertEquals(setOf("endpoint","http_status","code"), error.parameters.keys)
         assertEquals(409L, error.parameters["http_status"])
     }
+    @Test fun terminalExtractionErrorsRetainTheirContractCode() {
+        assertEquals(ErrorCode.IMAGE_EXTRACTION_FAILED, ErrorCode.from("IMAGE_EXTRACTION_FAILED"))
+        assertEquals(ErrorCode.PROCESSING_FAILED, ErrorCode.from("PROCESSING_FAILED"))
+        assertEquals(ErrorCode.UNKNOWN, ErrorCode.from("private server message"))
+    }
     @Test fun noopAcceptsEveryOperationWithoutConfiguration() {
         NoOpTelemetry.setEnabled(true)
         NoOpTelemetry.setScreen(ScreenRoute.ACCOUNT)

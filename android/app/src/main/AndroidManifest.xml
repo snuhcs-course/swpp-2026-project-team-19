@@ -29,9 +29,11 @@
         <meta-data android:name="google_analytics_adid_collection_enabled" android:value="false" />
         <meta-data android:name="google_analytics_default_allow_ad_personalization_signals" android:value="false" />
         <meta-data android:name="google_analytics_automatic_screen_reporting_enabled" android:value="false" />
-        <!-- Initialize after consent policy, never in a provider before Application.onCreate. -->
+        <!-- Removal-only merge marker: the class is intentionally absent in NoOp builds.
+             Never instantiate a provider before consent policy in Application.onCreate. -->
         <provider android:name="com.google.firebase.provider.FirebaseInitProvider"
-            android:authorities="${applicationId}.firebaseinitprovider" tools:node="remove" />
+            android:authorities="${applicationId}.firebaseinitprovider" tools:node="remove"
+            tools:ignore="MissingClass" />
         <activity
             android:name=".MainActivity"
             android:exported="true"

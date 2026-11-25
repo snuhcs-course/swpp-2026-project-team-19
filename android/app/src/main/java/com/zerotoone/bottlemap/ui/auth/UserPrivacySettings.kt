@@ -11,20 +11,20 @@ import kotlinx.coroutines.flow.asStateFlow
 /** Optional quality-recording consent, independent of login and age attestation.
  * Analytics and crash reporting observe this gate; the default is opt-out.
  */
-class UserPrivacySettings private constructor(context: Context) {
-    private val prefs = context.applicationContext.getSharedPreferences("bottlemap-privacy", Context.MODE_PRIVATE)
+class UserPrivacySettings internal constructor(private val prefs: android.content.SharedPreferences) {
     private val mutable = MutableStateFlow(prefs.getBoolean("usage-records", false))
     val usageEnabled: StateFlow<Boolean> = mutable.asStateFlow()
-    fun setUsageEnabled(enabled: Boolean) {
+    fun setUsageEnabled(enabled: Boolean): Boolean {
         // Persist withdrawal before any subsequent process can initialize collectors.
-        prefs.edit().putBoolean("usage-records", enabled).commit()
+        if (!prefs.edit().putBoolean("usage-records", enabled).commit()) return false
         com.zerotoone.bottlemap.telemetry.AppTelemetry.current.setEnabled(enabled)
         mutable.value = enabled
+        return true
     }
     companion object {
         @Volatile private var instance: UserPrivacySettings? = null
         fun get(context: Context): UserPrivacySettings = instance ?: synchronized(this) {
-            instance ?: UserPrivacySettings(context.applicationContext).also { instance = it }
+            instance ?: UserPrivacySettings(context.applicationContext.getSharedPreferences("bottlemap-privacy", Context.MODE_PRIVATE)).also { instance = it }
         }
     }
 }
