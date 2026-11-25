@@ -96,7 +96,17 @@ def get_menu_extractor() -> MenuExtractor:
             return GeminiMenuExtractor()
         except ExtractionConfigError as error:
             raise RuntimeError(f"{setting} is not configured: {error}") from error
-    raise RuntimeError(f"Unsupported MENU_EXTRACTOR: {kind!r} (supported: mock, gemini)")
+    if kind == "openrouter":
+        # I5-P19: CLOVA OCR lines + the photo through OpenRouter, then the Gemini API when OpenRouter
+        # fails. Imported here so the other extractors never load it; MENU_EXTRACTOR=gemini is unchanged.
+        from app.adapters.openrouter_extraction import OpenRouterMenuExtractor
+        from app.extraction import ExtractionConfigError
+
+        try:
+            return OpenRouterMenuExtractor()
+        except ExtractionConfigError as error:
+            raise RuntimeError(f"MENU_EXTRACTOR=openrouter is not configured: {error}") from error
+    raise RuntimeError(f"Unsupported MENU_EXTRACTOR: {kind!r} (supported: mock, gemini, openrouter)")
 
 
 @lru_cache(maxsize=1)

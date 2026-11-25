@@ -65,3 +65,26 @@ def test_deploy_script_finds_uv_without_a_login_shell():
 
     # Automatic deployment runs the script over SSH, where ~/.local/bin is not on PATH.
     assert script.index('export PATH="$HOME/.local/bin:$PATH"') < script.index("uv sync")
+
+
+def test_the_template_has_every_setting_the_openrouter_extractor_needs(monkeypatch, clean_caches):
+    from app.adapters.openrouter_extraction import OpenRouterMenuExtractor
+
+    values = production_env()
+    for key, value in values.items():
+        monkeypatch.setenv(key, value)
+    # The template keeps the old extractor and leaves the secrets empty; fill in only those.
+    assert values["MENU_EXTRACTOR"] == "mock"
+    for key in ("OPENROUTER_API_KEY", "GEMINI_API_KEY", "CLOVA_OCR_SECRET"):
+        assert values[key] == ""
+        monkeypatch.setenv(key, "test-secret")
+    monkeypatch.setenv("CLOVA_OCR_INVOKE_URL", "https://ocr.example.test/custom/v1/1/abc")
+    monkeypatch.setenv("MENU_EXTRACTOR", "openrouter")
+
+    extractor = deps.get_menu_extractor()
+
+    assert isinstance(extractor, OpenRouterMenuExtractor)
+    assert extractor.route.openrouter.model == "google/gemini-3.8-flash"
+    # Only a model that passed the fallback evaluation (ai/runs/2026-11-21_i5_row_pairing/report.md, section 11).
+    assert extractor.route.openrouter.fallback_models == ("anthropic/claude-sonnet-5.5",)
+    assert (extractor.route.direct.model, extractor.route.lite.model) == ("gemini-3.8-flash", "gemini-3.5-flash-lite")
