@@ -1,5 +1,6 @@
 package com.zerotoone.bottlemap.ui.customer
 
+import com.zerotoone.bottlemap.telemetry.*
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zerotoone.bottlemap.data.CustomerSearchSource
@@ -18,6 +19,8 @@ import kotlinx.coroutines.launch
 
 class SearchResultsViewModel(
     private val repository: CustomerSearchSource = Repositories.customer,
+    private val telemetry: Telemetry = AppTelemetry.current,
+    private val journey: DiscoveryJourney = AppDiscoveryJourney.current,
 ) : ViewModel() {
     private val _state = MutableStateFlow<CustomerSearchUiState>(CustomerSearchUiState.Loading)
     val state: StateFlow<CustomerSearchUiState> = _state.asStateFlow()
@@ -65,13 +68,20 @@ class SearchResultsViewModel(
 
     private fun load() {
         val query = currentQuery
+        val startedAt = System.nanoTime() / 1_000_000
         val version = ++requestVersion
         requestJob?.cancel()
         _state.value = CustomerSearchUiState.Loading
         requestJob = viewModelScope.launch {
             try {
                 val response = repository.searchBars(query)
-                if (version == requestVersion) _state.value = response.toUiState()
+                if (version == requestVersion) {
+                    _state.value = response.toUiState()
+                    telemetry.log(TelemetryEvent.SearchCompleted(
+                        if (response.matchType == "brand") SearchKind.BRAND else SearchKind.PRODUCT,
+                        response.items.isNotEmpty()))
+                    journey.searched(startedAt = startedAt)
+                }
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (error: Exception) {

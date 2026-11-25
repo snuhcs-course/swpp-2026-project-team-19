@@ -370,4 +370,25 @@ class AuthViewModelTest {
         assertEquals(1, fake.logouts)
     }
 
+    @Test fun telemetryReportsExplicitSignInExactlyOnceAndOmitsRestoredSessions() = runTest(dispatcher) {
+        val fake=FakeAuthGateway()
+        val events=com.zerotoone.bottlemap.telemetry.FakeTelemetry()
+        val vm=AuthViewModel(fake,events)
+        fake.events.value=AuthSessionEvent.Guest;advanceUntilIdle()
+        assertTrue(vm.beginGoogleSignIn(com.zerotoone.bottlemap.telemetry.SignInEntry.WELCOME))
+        assertFalse(vm.beginGoogleSignIn())
+        vm.googleCancelled();vm.googleCancelled()
+        assertTrue(vm.beginGoogleSignIn())
+        vm.googleFailed();vm.googleFailed()
+        assertTrue(vm.beginGoogleSignIn())
+        vm.acceptGoogleCredential("test-only","test-only");advanceUntilIdle()
+        assertEquals(listOf(
+            com.zerotoone.bottlemap.telemetry.TelemetryEvent.SignInResult(com.zerotoone.bottlemap.telemetry.SignInEntry.WELCOME,com.zerotoone.bottlemap.telemetry.SignInStatus.CANCEL),
+            com.zerotoone.bottlemap.telemetry.TelemetryEvent.SignInResult(com.zerotoone.bottlemap.telemetry.SignInEntry.ACCOUNT,com.zerotoone.bottlemap.telemetry.SignInStatus.ERROR),
+            com.zerotoone.bottlemap.telemetry.TelemetryEvent.SignInResult(com.zerotoone.bottlemap.telemetry.SignInEntry.ACCOUNT,com.zerotoone.bottlemap.telemetry.SignInStatus.SUCCESS),
+        ),events.events)
+        fake.events.value=AuthSessionEvent.Authenticated;advanceUntilIdle()
+        assertEquals(3,events.events.size)
+    }
+
 }

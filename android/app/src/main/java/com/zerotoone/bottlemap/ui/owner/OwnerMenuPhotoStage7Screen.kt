@@ -354,7 +354,10 @@ internal fun OwnerMenuPhotoSelectionScreen(
     val photos = entries.mapNotNull {
         val index = it.indexOf('|')
         if (index < 1) null else MockPhoto(
-            it.substring(0, index), it.substring(index + 1), MockPhotoKind.MENU_CAPTURE)
+            it.substring(0, index), it.substring(index + 1).substringBefore('|'), MockPhotoKind.MENU_CAPTURE,
+            com.zerotoone.bottlemap.telemetry.ImportSource.entries.firstOrNull { source ->
+                source.name == it.substringAfterLast('|')
+            } ?: com.zerotoone.bottlemap.telemetry.ImportSource.GALLERY)
     }
     val storedSnapshot=photoBar(state)
     // First recovered composition knows both SavedState picker entries and all
@@ -431,7 +434,7 @@ internal fun OwnerMenuPhotoSelectionScreen(
                     if(cleanupRequested.get())added.forEach(store::delete)
                     completed
                 }
-                entries = next.map { it.photoId + "|" + it.uri }
+                entries = next.map { it.photoId + "|" + it.uri + "|" + it.telemetrySource.name }
                 saved=true
                 error = null
             } catch (e: CancellationException) {

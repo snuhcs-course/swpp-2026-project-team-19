@@ -1,0 +1,3 @@
+# Firebase configuration is injected locally or from a CI secret.
+google-services.json
+app/build-firebase-verification.log

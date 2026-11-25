@@ -64,7 +64,7 @@ jobs:
       - name: Set up Gradle cache
         uses: gradle/actions/setup-gradle@v5
       - name: Run Android lint
-        run: ./gradlew :app:lintDebug --no-daemon
+        run: ./gradlew :app:lintDebug -PBOTTLEMAP_FIREBASE_ENABLED=false --no-daemon
       - name: Upload lint reports
         if: always()
         uses: actions/upload-artifact@v7
@@ -96,7 +96,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v5
       - name: Run JUnit 4 local tests and generate JaCoCo coverage
         id: unit_test
-        run: ./gradlew :app:createDebugUnitTestCoverageReport --no-daemon
+        run: ./gradlew :app:createDebugUnitTestCoverageReport -PBOTTLEMAP_FIREBASE_ENABLED=false --no-daemon
       - name: Validate JaCoCo report and publish coverage summary
         run: |
           python3 -m unittest discover -s android/ci -p 'test_*.py'
@@ -143,6 +143,10 @@ jobs:
         uses: gradle/actions/setup-gradle@v5
       # Empty BuildConfig credentials are supported for compilation; this job never connects
       # to production Backend, Google, Supabase, or Kakao services.
+      - name: Prepare optional Firebase configuration
+        env:
+          BOTTLEMAP_GOOGLE_SERVICES_JSON: ${{ secrets.BOTTLEMAP_GOOGLE_SERVICES_JSON }}
+        run: python3 android/ci/prepare_firebase.py
       - name: Build debug APK
         run: ./gradlew :app:assembleDebug --no-daemon
       - name: Verify unified APK contents
@@ -228,6 +232,10 @@ jobs:
           chmod 600 "$keystore"
           echo "ANDROID_USER_HOME=$android_user_home" >> "$GITHUB_ENV"
           echo "DEBUG_KEYSTORE=$keystore" >> "$GITHUB_ENV"
+      - name: Prepare optional Firebase configuration
+        env:
+          BOTTLEMAP_GOOGLE_SERVICES_JSON: ${{ secrets.BOTTLEMAP_GOOGLE_SERVICES_JSON }}
+        run: python3 android/ci/prepare_firebase.py
       - name: Build debug APK for the deployed server
         env:
           ORG_GRADLE_PROJECT_BOTTLEMAP_API_BASE_URL: ${{ env.BOTTLEMAP_API_BASE_URL }}

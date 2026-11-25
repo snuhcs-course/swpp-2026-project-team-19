@@ -1,6 +1,7 @@
 
 package com.zerotoone.bottlemap.ui.customer
 
+import com.zerotoone.bottlemap.telemetry.*
 import com.zerotoone.bottlemap.ui.common.BmLineIcon
 import com.zerotoone.bottlemap.ui.common.BmLineIconId
 import androidx.compose.foundation.text.BasicTextField
@@ -116,11 +117,16 @@ internal sealed interface P18SearchState {
 
 internal class P18SearchViewModel(
     private val repository:CustomerDiscoverySource=Repositories.customer,
+    private val telemetry: Telemetry = AppTelemetry.current,
+    private val journey: DiscoveryJourney = AppDiscoveryJourney.current,
+    private val clock: () -> Long = { System.nanoTime() / 1_000_000 },
 ) : ViewModel() {
     private val mutable = MutableStateFlow<P18SearchState>(P18SearchState.Loading)
     val state = mutable.asStateFlow()
     private var job: Job? = null
     private var version = 0L
+    private var measuredSearch: Pair<String?, String?>? = null
+    private var searchStartedAt = 0L
     private var lastKey: String? = null
     private var activeQuery:String? = null
     // Keep the full brand candidate list independently of selected-product responses.
@@ -155,6 +161,9 @@ internal class P18SearchViewModel(
         }
         val key = listOf(query, productId, source, location?.latitude, location?.longitude).joinToString("|")
         if (!force && key == lastKey) return
+        val measurementKey = query to productId
+        if (measuredSearch != measurementKey &&
+            !(query == null && productId != null && _suggestions.value != null)) searchStartedAt = clock()
         lastKey=key
         job?.cancel()
         val request = ++version
@@ -171,6 +180,17 @@ internal class P18SearchViewModel(
                         // to an unrelated product-id response as "unknown whisky".
                         _suggestions.value = result
                     }
+                    if (measuredSearch != measurementKey) {
+                        // Brand selection is a continuation, not a second search denominator.
+                        val brandFollowUp = query == null && productId != null && _suggestions.value != null
+                        if (!brandFollowUp && source != "popular") {
+                            telemetry.log(TelemetryEvent.SearchCompleted(
+                                if (result.matchType == "brand") SearchKind.BRAND else SearchKind.PRODUCT,
+                                result.items.isNotEmpty() || (result.matchType == "brand" && result.matchedProducts.any { it.resultCount > 0 })))
+                        }
+                        measuredSearch = measurementKey
+                        if (!brandFollowUp) journey.searched(source == "popular", searchStartedAt)
+                    }
                     mutable.value=P18SearchState.Ready(result)
                 }
             } catch (cancelled: CancellationException) {
@@ -186,6 +206,7 @@ internal class P18SearchViewModel(
             }
         }
     }
+    fun openingBar(source: String) { journey.searched(source == "popular", searchStartedAt) }
     fun retry() { lastKey=null }
 }
 
@@ -602,9 +623,9 @@ internal fun CustomerP18Results(
                     P18ResultsMap(result,items,product?.displayName.orEmpty(),
                         ::navigateBack, {mapMode=false},selectedBarId,userLocation,
                         knownTags[focusedBarId].orEmpty(),mapCamera,{mapCamera=it},
-                        onSelect={id->if(selectedBarId==id)onOpenBar(id,product?.productId)
+                        onSelect={id->if(selectedBarId==id) { viewModel.openingBar(source); onOpenBar(id,product?.productId) }
                             else selectedBarId=id},
-                        onOpenBar={onOpenBar(it,product?.productId)},at=priceClock)
+                        onOpenBar={viewModel.openingBar(source); onOpenBar(it,product?.productId)},at=priceClock)
                 } else {
                     P18SearchTopBar(::navigateBack, chooseQuery, {queryEdited=true;chooseQuery=it},
                         { if(chooseQuery.isNotBlank()) onSearchAgain(chooseQuery.trim()) }, editable=true, resultStyle=true)
@@ -634,7 +655,7 @@ internal fun CustomerP18Results(
                     LazyColumn(Modifier.fillMaxSize().padding(horizontal=20.dp).testTag("customer-result-list"), state=barListState) {
                         items(items,key={it.barId+it.productId}) {row->
                             P18BarRow(row,userLocation!=null,
-                                onClick={onOpenBar(row.barId,product?.productId)},
+                                onClick={viewModel.openingBar(source); onOpenBar(row.barId,product?.productId)},
                                 at=priceClock)
                             Box(Modifier.fillMaxWidth().height(1.dp).background(P18Line))
                         }

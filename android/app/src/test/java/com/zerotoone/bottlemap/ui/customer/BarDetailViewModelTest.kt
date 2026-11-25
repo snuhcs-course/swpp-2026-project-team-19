@@ -297,6 +297,24 @@ class BarDetailViewModelTest {
         assertEquals("new-bar", (vm.state.value as BarDetailUiState.Success).bar.barId)
     }
 
+    @Test fun telemetryReportsOnlyTheFirstAcknowledgedDetailAndRetryDoesNotInflateIt() = runTest(dispatcher) {
+        var failFirst=true
+        val source=FakeSource { id ->
+            if(failFirst) { failFirst=false;throw BottleMapApiException(code="NETWORK_ERROR",message="private") }
+            response(id)
+        }
+        val fake=com.zerotoone.bottlemap.telemetry.FakeTelemetry()
+        var now=0L
+        val journey=com.zerotoone.bottlemap.telemetry.DiscoveryJourney { now }
+        journey.searched();now=60_000
+        val vm=BarDetailViewModel(source,fake,journey)
+        vm.load("bar-1");advanceUntilIdle();assertTrue(fake.events.isEmpty())
+        vm.retry();advanceUntilIdle();vm.load("bar-1");vm.retry();advanceUntilIdle()
+        assertEquals(listOf(com.zerotoone.bottlemap.telemetry.TelemetryEvent.BarDetailOpened(
+            com.zerotoone.bottlemap.telemetry.DetailSource.SEARCH,
+            com.zerotoone.bottlemap.telemetry.SearchTime.FROM_60_TO_180)),fake.events)
+    }
+
     private class FakeSource(
         val respond: suspend (String) -> BarMenuResponseDto,
     ) : CustomerBarDetailSource {

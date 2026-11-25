@@ -1,6 +1,7 @@
 
 package com.zerotoone.bottlemap.ui.customer
 
+import com.zerotoone.bottlemap.telemetry.*
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -87,13 +88,23 @@ internal sealed interface P18ExploreState {
 }
 
 internal class P18ExploreViewModel(
-    private val source: com.zerotoone.bottlemap.data.MapBarsSource=BackendMapBarsRepository()
+    private val source: com.zerotoone.bottlemap.data.MapBarsSource=BackendMapBarsRepository(),
+    private val telemetry: Telemetry = AppTelemetry.current,
+    private val journey: DiscoveryJourney = AppDiscoveryJourney.current,
 ):ViewModel() {
     private val mutable=MutableStateFlow<P18ExploreState>(P18ExploreState.Initial)
     val state=mutable.asStateFlow()
     private var job:Job?=null
     private var lastBounds:MapBounds?=null
     private var seq=0L
+    private var measuredPermission: Boolean? = null
+    fun opened(allowed: Boolean) {
+        if (measuredPermission != allowed) {
+            measuredPermission = allowed
+            telemetry.log(TelemetryEvent.NearbyOpened(if (allowed) Permission.GRANTED else Permission.DENIED))
+        }
+    }
+    fun openingBar(nearby: Boolean) { journey.fromMap(nearby) }
     fun load(viewport:MapViewport,force:Boolean=false) {
         val bounds=viewport.bounds
         if(!bounds.isSupportedByBackend()) {
@@ -246,6 +257,7 @@ internal fun CustomerP18Explore(
             Manifest.permission.ACCESS_FINE_LOCATION)==PackageManager.PERMISSION_GRANTED ||
             ContextCompat.checkSelfPermission(context,
             Manifest.permission.ACCESS_COARSE_LOCATION)==PackageManager.PERMISSION_GRANTED
+        viewModel.opened(allowed)
         if(allowed && viewModel.location.value==null) {
             try {
                 viewModel.setLocation(AndroidNearbyLocationSource(context).currentLocation())
@@ -272,6 +284,7 @@ internal fun CustomerP18Explore(
     }
     val launcher=rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+        viewModel.opened(permissions.values.any{it})
         if(permissions.values.any{it})scope.launch {
             runCatching{AndroidNearbyLocationSource(context).currentLocation()}
                 .onSuccess{viewModel.setLocation(it);goToGwanak=false;recenterToken++}
@@ -394,7 +407,7 @@ internal fun CustomerP18Explore(
                         else LazyColumn(Modifier.fillMaxSize().padding(horizontal=20.dp)) {
                             items(ordered,key={it.barId}){bar->
                                 P18BrowseRow(bar,location,tags[bar.barId].orEmpty(),
-                                    onClick={onOpenBar(bar.barId)})
+                                    onClick={viewModel.openingBar(nearby = false); onOpenBar(bar.barId)})
                                 Box(Modifier.fillMaxWidth().height(1.dp).background(P18Line))
                             }
                         }
@@ -467,7 +480,7 @@ internal fun CustomerP18Explore(
                                     }
                                 }
                                 Box(Modifier.size(40.dp)
-                                    .clickable { onOpenBar(bar.barId) },
+                                    .clickable { viewModel.openingBar(nearby = true); onOpenBar(bar.barId) },
                                     contentAlignment=Alignment.Center) {
                                     // White right-pointing arrow, replacing "보기".
                                     P18DetailCategoryChevron(open=false,color=Color.White,

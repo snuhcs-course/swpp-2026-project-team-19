@@ -9,15 +9,16 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /** Optional quality-recording consent, independent of login and age attestation.
- * No analytics SDK or collection endpoint is installed by this UI change.
- * Future optional collectors must observe this gate; the default is opt-out.
+ * Analytics and crash reporting observe this gate; the default is opt-out.
  */
 class UserPrivacySettings private constructor(context: Context) {
     private val prefs = context.applicationContext.getSharedPreferences("bottlemap-privacy", Context.MODE_PRIVATE)
     private val mutable = MutableStateFlow(prefs.getBoolean("usage-records", false))
     val usageEnabled: StateFlow<Boolean> = mutable.asStateFlow()
     fun setUsageEnabled(enabled: Boolean) {
-        prefs.edit().putBoolean("usage-records", enabled).apply()
+        // Persist withdrawal before any subsequent process can initialize collectors.
+        prefs.edit().putBoolean("usage-records", enabled).commit()
+        com.zerotoone.bottlemap.telemetry.AppTelemetry.current.setEnabled(enabled)
         mutable.value = enabled
     }
     companion object {

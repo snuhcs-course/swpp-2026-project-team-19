@@ -290,7 +290,10 @@ internal class OwnerMenuPhotoStore(context: Context) {
                 created += stored
                 created.remove(temp)
                 total += length
-                MockPhoto(photoId, Uri.fromFile(stored).toString(), MockPhotoKind.MENU_CAPTURE)
+                MockPhoto(photoId, Uri.fromFile(stored).toString(), MockPhotoKind.MENU_CAPTURE,
+                    if (uri.authority == "${app.packageName}.owner.camera.provider")
+                        com.zerotoone.bottlemap.telemetry.ImportSource.CAMERA
+                    else com.zerotoone.bottlemap.telemetry.ImportSource.GALLERY)
             }
             require(validateMenuPhotoSizes((existing + additions).map(::size)) == null) {
                 validateMenuPhotoSizes((existing + additions).map(::size)).orEmpty()

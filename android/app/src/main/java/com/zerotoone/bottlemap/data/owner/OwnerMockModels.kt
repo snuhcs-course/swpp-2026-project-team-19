@@ -41,7 +41,8 @@ data class MockBar(
 )
 
 enum class MockPhotoKind { BAR_GALLERY, MENU_CAPTURE, REGISTRATION_ATTACHMENT }
-data class MockPhoto(val photoId: String, val uri: String, val kind: MockPhotoKind)
+data class MockPhoto(val photoId: String, val uri: String, val kind: MockPhotoKind,
+    val telemetrySource: com.zerotoone.bottlemap.telemetry.ImportSource = com.zerotoone.bottlemap.telemetry.ImportSource.GALLERY)
 
 /**
  * Local form draft only. These fields must never be sent to an unagreed API.
@@ -218,6 +219,7 @@ data class MockMenuImport(
     /** Number of images whose AI extraction has actually finished on the server. */
     val completedImages: Int = 0,
     val failureReason: String? = null,
+    val failureCode: com.zerotoone.bottlemap.telemetry.ErrorCode? = null,
     // Local Mock publication result: deduplicated actual new bar menu rows.
     val publishedAddedCount: Int? = null,
     // Actual number of distinct canonical products created during this Mock publish.
