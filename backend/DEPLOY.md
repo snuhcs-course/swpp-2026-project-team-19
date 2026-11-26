@@ -276,6 +276,14 @@ The seed upserts by id: rows in the seed overwrite changes made to the same rows
     - If the count cannot be read (the database is unreachable), photos start at stage 2 until it can, and the log says `Could not count today's photos read through OpenRouter`.
     - Evaluation runs with the same key are not counted: they are not extraction runs of the server.
     - When the credits do run out, OpenRouter answers 402 and photos go to stage 2, so the service keeps running.
+  - **Credits left:** the key has a credit limit the course set (checked on 2026-11-26: $100 in all, not refilled) and an expiry date (2026-12-20). On the server:
+
+    ```bash
+    cd ~/swpp-2026-project-team-19/backend
+    curl -s https://openrouter.ai/api/v1/key -H "Authorization: Bearer $(grep '^OPENROUTER_API_KEY=' .env | cut -d= -f2-)"       | python3 -m json.tool | grep -E '"(limit|limit_remaining|usage|usage_daily|expires_at)"'
+    ```
+
+    `limit_remaining` is what is left in USD, `usage_daily` what was spent today (UTC day; evaluation runs with the same key included). The command prints neither the key nor its label. `GET /api/v1/credits` does not work with this key (it needs a management key).
   - **Telling the server's calls from evaluation calls:** only by the request header `X-Title`, which the OpenRouter activity page shows: the server sends `bottlemap-menu-extraction`, the evaluation scripts `menu-extraction-eval`.
   - **Data collection:** the account's privacy settings cannot be seen or changed by the team. The only protection is in each request: `provider: {"data_collection": "deny"}`, which keeps the photo away from providers that may store inputs or train on them. The server always sends it.
   - **Which route read a photo:** `journalctl -u bottlemap-api | grep "extraction route stage="`. Each photo logs one line with the stage, model, provider, tokens, cost and latency. Stage 0 is logged at INFO and every other stage at WARNING; the service log shows WARNING and above, so photos read at stage 0 do not appear there (they are in `extraction_runs.raw_output`). Photos read by the lite model: `grep "extraction route stage=3"`. A failed OpenRouter call logs `extraction route stage=0 failed (...)`, and the third in a row adds `OpenRouter is paused for 600s`. The same is stored per photo in `extraction_runs.raw_output` (`route.stage`, `route.model`, `route.skipped`, `costUsd`, `latencyMs`, token counts). `extraction_runs.model_name` is written at upload and always holds the stage 0 model.
