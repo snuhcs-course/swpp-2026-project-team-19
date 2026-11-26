@@ -653,19 +653,19 @@ def test_matching_component_change_stops_check(setup, capsys, monkeypatch, chang
 
 def test_a_released_matching_file_is_not_checked_and_the_command_says_so(setup, capsys):
     # staged.py was released from the I3 freeze on 2026-11-13, the harness i3_match_eval.py on
-    # 2026-11-17 (I4-P46) and the catalog on 2026-11-21 (I5); their I3 hashes stay as the
-    # record
+    # 2026-11-17 (I4-P46), the catalog on 2026-11-21 and llm_layer.py on 2026-11-22 (I5); their I3
+    # hashes stay as the record
     assert p30.RELEASED_MATCHING == ("backend/app/matching/staged.py", "ai/eval/i3_match_eval.py",
-                                     "ai/catalog/catalog_v2_service.json")
+                                     "ai/catalog/catalog_v2_service.json", "backend/app/matching/llm_layer.py")
     assert set(p30.RELEASED_MATCHING) <= set(p30.FROZEN_MATCHING)
     with pytest.raises(p30.Stop, match="staged.py"):
         p30.check_raw_files(p30.REPO_ROOT, p30.FROZEN_MATCHING, "matching")
     code, gemini, _ = run(setup, "--check")
     assert code == 0 and gemini.requests == []
     printed = capsys.readouterr().out
-    assert "NOTE: not the I3 configuration: released from the freeze: backend/app/matching/staged.py, ai/eval/i3_match_eval.py, ai/catalog/catalog_v2_service.json" in printed
+    assert "NOTE: not the I3 configuration: released from the freeze: backend/app/matching/staged.py, ai/eval/i3_match_eval.py, ai/catalog/catalog_v2_service.json, backend/app/matching/llm_layer.py" in printed
     # the success line does not call the skipped file verified
-    assert "matching files (4.5) OK, except backend/app/matching/staged.py, ai/eval/i3_match_eval.py, ai/catalog/catalog_v2_service.json: released from the freeze, NOT checked" in printed
+    assert "matching files (4.5) OK, except backend/app/matching/staged.py, ai/eval/i3_match_eval.py, ai/catalog/catalog_v2_service.json, backend/app/matching/llm_layer.py: released from the freeze, NOT checked" in printed
     assert p30.released_matching(setup.out / "nowhere")[p30.RELEASED_MATCHING[0]]["sha256"] is None
 
 

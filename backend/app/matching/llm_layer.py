@@ -136,6 +136,8 @@ class LLMLayerConfig:
     llm: MatchingLLM
     max_calls: int
     use_m3b: bool = False
+    # Mark a line the LLM reads as not a whisky (ResolutionResult.kind_hint); see M3Engine.resolve.
+    flag_non_whisky: bool = False
 
 
 def load_prompt(path: Path) -> str:
@@ -384,11 +386,19 @@ class M3Engine:
     # --- one line ------------------------------------------------------------------
 
     def resolve(self, image_id: str, name: str, catalog: CatalogLookup, base: ResolutionResult,
-                use_m3b: bool = False) -> ResolutionResult:
-        """`base` is the S1+S2b+S3 result of a line it did not confirm; returned as is when the LLM adds nothing."""
+                use_m3b: bool = False, flag_non_whisky: bool = False) -> ResolutionResult:
+        """`base` is the S1+S2b+S3 result of a line it did not confirm; returned as is when the LLM adds nothing.
+
+        `flag_non_whisky`: a line answered kind "non_whisky" for which the rules found no candidate comes
+        back as `base` with kind_hint "non_whisky". Only then: a line with a rule candidate is left alone
+        (the catalog knows a product like it), and "unclear" or no answer is never a hint. The hint
+        changes neither the status nor the candidates.
+        """
         t = self.translation(image_id, name)
         self._no_confirm = {}
         if t is None or t["kind"] != "whisky":
+            if flag_non_whisky and t is not None and t["kind"] == "non_whisky" and not base.candidates:
+                return replace(base, kind_hint="non_whisky")
             return base
         kept, vetoed, found, english = self.m3a_candidates(name, t, catalog)
         stage = "M3a"

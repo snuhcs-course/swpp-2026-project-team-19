@@ -99,7 +99,8 @@ def apply_policy(base: ResolutionResult, ranking: Sequence[Ranked], *, min_simil
             )
             for rank, r in enumerate(picks, start=1)
         )
-        return ResolutionResult(status="ambiguous", candidates=candidates, proposed_product_id=candidates[0].product_id)
+        # replace, not a new result: a note on the line (kind_hint) stays
+        return replace(base, status="ambiguous", candidates=candidates, proposed_product_id=candidates[0].product_id)
     if any(c.evidence.get("confirmRecommended") for c in base.candidates):
         return base
     reordered = sorted(base.candidates, key=lambda c: _rerank_key(c, ranking))

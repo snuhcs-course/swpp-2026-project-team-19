@@ -90,3 +90,11 @@ def test_rule_matcher_results_fall_into_the_four_states(catalog, name, state):
     result = resolve_product_staged(ExtractedProduct(product_name=name), catalog, STAGES)
     assert review_state(result) is state, (result.status, result.candidates)
     assert (stored_status(result) == "exact_match") == (state is ReviewState.CONFIRMED)
+
+
+def test_the_not_a_whisky_note_does_not_change_the_review_state():
+    # kind_hint (I5) is a note for the reviewer: the state comes from the candidates as before
+    noted = ResolutionResult("unmatched", kind_hint="non_whisky")
+    assert (review_state(noted), stored_status(noted)) == (ReviewState.NO_CANDIDATE, "unmatched")
+    with_candidates = ResolutionResult("ambiguous", (candidate(method="embedding"),), A, kind_hint="non_whisky")
+    assert (review_state(with_candidates), stored_status(with_candidates)) == (ReviewState.CHOOSE_CANDIDATE, "ambiguous")

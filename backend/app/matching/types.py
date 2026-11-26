@@ -58,6 +58,10 @@ class ResolutionResult:
     proposed_product_id: UUID | None = None
     # For "multi": one exact_match result per product, in menu order (proposed_product_id is None).
     parts: tuple["ResolutionResult", ...] = ()
+    # "non_whisky": the LLM layer read the line as not a whisky and the rules had no candidate for it
+    # (llm_layer, off by default). A note for the reviewer only: status, candidates and the review
+    # state are as without it, and nothing stores or returns it yet.
+    kind_hint: Literal["non_whisky"] | None = None
 
 
 class CatalogLookup(Protocol):

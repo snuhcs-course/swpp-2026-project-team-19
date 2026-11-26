@@ -403,7 +403,8 @@ def _apply_llm_layer(
                 engine.translate(image, targets.get(image, set()))
             resolved = dict(results)
             for item_id, image, name in unconfirmed:
-                resolved[item_id] = engine.resolve(image, name, catalog, results[item_id], use_m3b=llm_layer.use_m3b)
+                resolved[item_id] = engine.resolve(image, name, catalog, results[item_id], use_m3b=llm_layer.use_m3b,
+                                                   flag_non_whisky=llm_layer.flag_non_whisky)
             stats = dict(engine.stats)
     except Exception:
         logger.exception("Menu import %s: the LLM matching layer failed; keeping the rule results", import_id)

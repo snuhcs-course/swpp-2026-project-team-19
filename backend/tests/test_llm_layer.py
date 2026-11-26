@@ -13,6 +13,7 @@ from pathlib import Path
 import pytest
 
 from app.matching.llm_layer import (
+    LLMLayerConfig,
     BASE_STAGES,
     CONTEXT_LINES,
     GENERIC_TOKENS,
@@ -204,6 +205,45 @@ def test_alias_of_other():
 def test_lines_that_are_not_whisky_are_skipped(kind):
     r, _, llm = caol("하이볼", tr(kind=kind), use_m3b=True)
     assert r is UNMATCHED and [k for k, *_ in llm.calls] == ["m3a"]
+
+
+# --- the "not a whisky" note (I5, flag_non_whisky) ----------------------------------------
+
+def flagged(name, translation, base=UNMATCHED, answer=True):
+    llm = FakeLLM(one_line(translation) if answer else (lambda payload: {"items": []}))
+    engine = M3Engine(llm, {"ph": [name]}, CAOL_META, max_calls=30)
+    engine.translate("ph", {name})
+    return engine.resolve("ph", name, caol_catalog(), base, flag_non_whisky=True)
+
+
+def test_flag_marks_a_non_whisky_line_without_rule_candidates_and_changes_nothing_else():
+    r = flagged("헤네시 VSOP", tr(kind="non_whisky", brand_en="Hennessy"))
+    assert r.kind_hint == "non_whisky"
+    assert (r.status, r.candidates, r.proposed_product_id) == ("unmatched", (), None)
+
+
+def test_flag_is_off_by_default():
+    assert LLMLayerConfig(llm=None, max_calls=1).flag_non_whisky is False
+    r, _, _ = caol("헤네시 VSOP", tr(kind="non_whisky"))
+    assert r is UNMATCHED and r.kind_hint is None
+
+
+def test_flag_leaves_a_line_with_a_rule_candidate_alone():
+    # the catalog offered a product for the line: the LLM's "not a whisky" is not shown
+    base = ResolutionResult(status="ambiguous", candidates=(Candidate(P_CAOL12, 1, 0.8, "alias", {"rule": "S2b"}),),
+                            proposed_product_id=P_CAOL12)
+    assert flagged("크래프트브로스 독수리 오형제 1호", tr(kind="non_whisky"), base=base) is base
+
+
+@pytest.mark.parametrize("translation, answer", [(tr(kind="unclear"), True), (tr(kind="non_whisky"), False)])
+def test_flag_ignores_unclear_lines_and_lines_without_an_answer(translation, answer):
+    assert flagged("위스키", translation, answer=answer) is UNMATCHED
+
+
+def test_flag_does_not_mark_a_whisky_line():
+    r = flagged("꿀일라 12", tr(brand_en="Caol Ila", age=12))
+    assert r.kind_hint is None and ids(r) == [P_CAOL12]
+    assert flagged("없는 위스키", tr(brand_en="Nowhere")).kind_hint is None  # whisky, no candidate found
 
 
 def test_combine_merge():

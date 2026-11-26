@@ -313,3 +313,10 @@ def test_apply_without_target_lines_does_not_touch_the_catalog():
     # No session is needed: nothing is searched (line 2 has no name).
     assert step.apply(None, {1: "x", 2: None}, results) == results
     assert step.provider.builds == []
+
+
+def test_the_not_a_whisky_note_stays_on_a_line_that_gets_embedding_candidates():
+    base = ResolutionResult(status="unmatched", kind_hint="non_whisky")
+    result = apply_policy(base, FULL, min_similarity=0.38, model_id="m")
+    assert result.status == "ambiguous" and len(result.candidates) == 5 and result.kind_hint == "non_whisky"
+    assert apply_policy(base, FULL, min_similarity=0.95, model_id="m") is base
