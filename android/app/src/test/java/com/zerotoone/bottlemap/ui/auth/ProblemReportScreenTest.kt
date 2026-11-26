@@ -70,12 +70,15 @@ class ProblemReportScreenTest {
     @Test fun browserFailureUsesOnlyExistingNoticeAndSameRowRetriesImmediately() {
         val notices = mutableListOf<String>()
         var attempts = 0
+        var browserAvailable = false
+        val opened = mutableListOf<Intent>()
         compose.setContent {
             val base = LocalContext.current
             val context = object : ContextWrapper(base) {
                 override fun startActivity(intent: Intent) {
                     attempts++
-                    throw ActivityNotFoundException()
+                    if (!browserAvailable) throw ActivityNotFoundException()
+                    opened += intent
                 }
             }
             CompositionLocalProvider(LocalContext provides context) {
@@ -88,6 +91,15 @@ class ProblemReportScreenTest {
             assertEquals(List(2) { "문제 신고 폼을 열지 못했어요. 브라우저를 확인해 주세요." }, notices)
         }
         compose.onNodeWithText("다시 시도").assertDoesNotExist()
+        compose.onNodeWithText("내 정보").assertIsDisplayed()
+        compose.runOnIdle { browserAvailable = true }
+        compose.onNodeWithText("문제 신고하기").performClick()
+        compose.runOnIdle {
+            assertEquals(3, attempts)
+            assertEquals(2, notices.size)
+            assertEquals(1, opened.size)
+            assertEquals(PROBLEM_REPORT_FORM, opened.single().data!!.toString().substringBefore('?'))
+        }
         compose.onNodeWithText("내 정보").assertIsDisplayed()
     }
 
