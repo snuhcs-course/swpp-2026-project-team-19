@@ -60,13 +60,10 @@ class CustomerP18SearchStabilityTest {
             p18AvailableSorts(hasLocation=false,allowPrice=false))
     }
 
-    @Test fun onlyGrantedValidCachedGpsCanBeSentToServerBeforeSearch() {
-        val valid=NearbyCoordinate(37.480,126.950)
-        assertEquals(valid,p18InitialSearchCoordinate(true,valid))
-        assertNull(p18InitialSearchCoordinate(false,valid))
-        assertNull(p18InitialSearchCoordinate(true,null))
-        assertNull(p18InitialSearchCoordinate(true,NearbyCoordinate(0.0,0.0)))
-        assertTrue(P18_FIRST_GPS_WAIT_MS in 500L..2_500L)
+    @Test fun missingOrInvalidGpsNeverProducesADisplayedDistance() {
+        assertNull(p18DisplayDistance(item,null))
+        assertNull(p18DisplayDistance(item,NearbyCoordinate(Double.NaN,126.95)))
+        assertNull(p18DisplayDistance(item.copy(latitude=91.0),NearbyCoordinate(37.48,126.95)))
     }
 
     @Test fun fiftyOneResultsRemainDistinctWhenSortedByGps() {

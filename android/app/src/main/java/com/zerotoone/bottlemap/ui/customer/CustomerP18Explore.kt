@@ -64,7 +64,7 @@ import com.zerotoone.bottlemap.data.MapBar
 import com.zerotoone.bottlemap.data.MapBounds
 import com.zerotoone.bottlemap.data.MapPlace
 import com.zerotoone.bottlemap.data.NearbyCoordinate
-import com.zerotoone.bottlemap.data.distanceMeters
+import com.zerotoone.bottlemap.data.roundedDistanceMeters
 import com.zerotoone.bottlemap.ui.common.BmIcon
 import com.zerotoone.bottlemap.ui.common.BmIconId
 import com.zerotoone.bottlemap.ui.theme.BottleMapPalette
@@ -170,7 +170,7 @@ internal fun p18VisibleBars(
 private fun p18BrowseOrdered(bars:List<MapBar>,sort:P18Sort,origin:NearbyCoordinate?)
     :List<MapBar> = when {
     sort==P18Sort.DISTANCE && origin!=null ->
-        bars.sortedBy{distanceMeters(origin,it.location)}
+        bars.sortedWith(compareBy<MapBar>{roundedDistanceMeters(origin,it.location)}.thenBy{it.barId})
     else -> bars.sortedWith(compareByDescending<MapBar>{
         runCatching{java.time.Instant.parse(it.menuUpdatedAt)}.getOrNull()
             ?:java.time.Instant.EPOCH
@@ -608,7 +608,7 @@ private fun P18BrowseRow(bar:MapBar,origin:NearbyCoordinate?,tags:List<String>,
                 Text(bar.name,color=P18Text,fontSize=16.sp,fontWeight=FontWeight.SemiBold,
                     maxLines=1,overflow=TextOverflow.Ellipsis)
                 origin?.let {Text(p18Distance(
-                    distanceMeters(it,bar.location).toInt()),
+                    roundedDistanceMeters(it,bar.location)),
                     fontSize=12.sp,color=P18Muted)}
             }
             Row(horizontalArrangement=Arrangement.spacedBy(6.dp)) {

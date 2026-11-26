@@ -6,6 +6,7 @@ enum class ApiEndpoint(val template: String) {
     API_BARS_ID_MENU("/api/bars/{id}/menu"),
     API_SEARCH_BAR_NAMES("/api/search/bar-names"),
     API_SEARCH_MAP_BARS("/api/search/map-bars"),
+    API_SEARCH_ALL_BARS("/api/search/all-bars"),
     API_SEARCH_NEARBY_BARS("/api/search/nearby-bars"),
     API_SEARCH_POPULAR_PRODUCTS("/api/search/popular-products"),
     API_SEARCH_BARS("/api/search/bars"),

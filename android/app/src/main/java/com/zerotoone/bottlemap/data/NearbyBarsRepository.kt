@@ -6,6 +6,7 @@ import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.sin
 import kotlin.math.sqrt
+import kotlin.math.round
 
 /** WGS84. No user coordinates are persisted, logged or sent to analytics. */
 data class NearbyCoordinate(val latitude: Double, val longitude: Double) {
@@ -54,19 +55,23 @@ data class MapBar(
 const val NEARBY_CAROUSEL_RADIUS_METERS = 1000
 const val MAX_NEARBY_API_RADIUS_METERS = 3000
 const val NEARBY_RADIUS_METERS = NEARBY_CAROUSEL_RADIUS_METERS.toDouble()
-private const val EARTH_RADIUS_METERS = 6_371_000.0
+private const val EARTH_RADIUS_METERS = 6_371_008.8
 
 /** Pure, deterministic Haversine distance; lat FIRST, lng SECOND. */
 fun distanceMeters(from: NearbyCoordinate, to: NearbyCoordinate): Double {
     require(from.isValid() && to.isValid()) { "Invalid WGS84 coordinates" }
     val fromLat = Math.toRadians(from.latitude)
     val toLat = Math.toRadians(to.latitude)
-    val deltaLat = Math.toRadians(to.latitude - from.latitude)
+    val deltaLat = toLat - fromLat
     val deltaLng = Math.toRadians(to.longitude - from.longitude)
     val a = sin(deltaLat / 2).pow(2) +
         cos(fromLat) * cos(toLat) * sin(deltaLng / 2).pow(2)
     return 2 * EARTH_RADIUS_METERS * asin(min(1.0, sqrt(a)))
 }
+
+/** Spec 3.19.4 / backend search._distance_meters: ties round to even. */
+fun roundedDistanceMeters(from: NearbyCoordinate, to: NearbyCoordinate): Int =
+    round(distanceMeters(from, to)).toInt()
 
 /**
  * Pure Haversine domain utility for deterministic distance boundary tests.
@@ -103,8 +108,8 @@ interface NearbyLocationSource {
 }
 
 /**
- * Production A9 source returns a COMPLETE server-filtered, server-sorted catalog.
- * Never re-filter raw distances on Android; server rounds to integer meters.
+ * Complete nearby projection. Production uses public bar coordinates and
+ * rounds to integer meters before filtering/sorting locally (spec 3.19.4).
  */
 interface NearbyBarsSource {
     suspend fun listNearbyBars(origin: NearbyCoordinate): List<NearbyBar>

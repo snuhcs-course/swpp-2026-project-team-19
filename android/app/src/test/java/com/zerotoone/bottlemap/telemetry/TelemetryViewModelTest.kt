@@ -26,7 +26,7 @@ class TelemetryViewModelTest {
         val fake = FakeTelemetry()
         val source = object: CustomerDiscoverySource {
             override suspend fun popularProducts(limit:Int):PopularProductsResponseDto = error("unused")
-            override suspend fun searchProduct(query:String?,productId:String?,source:String,latitude:Double?,longitude:Double?) =
+            override suspend fun searchProduct(query:String?,productId:String?,source:String) =
                 SearchBarsResponseDto(query, if(productId == null) "brand" else "product",
                     matchedProducts=listOf(MatchedProductDto("product","name","brand",resultCount=1)), truncated=false)
         }
@@ -34,7 +34,8 @@ class TelemetryViewModelTest {
         vm.load("private query",null,"input"); advanceUntilIdle()
         vm.load("private query",null,"input"); advanceUntilIdle()
         vm.load(null,"product","input"); advanceUntilIdle()
-        vm.load(null,"product","input",NearbyCoordinate(37.5,127.0),force=true); advanceUntilIdle()
+        vm.setLocation(NearbyCoordinate(37.5,127.0))
+        vm.load(null,"product","input",force=true); advanceUntilIdle()
         assertEquals(listOf(TelemetryEvent.SearchCompleted(SearchKind.BRAND,true)),fake.events)
     }
     @Test fun emptySearchHasFalseResultsButErrorAndCancelledResponsesAreNotCompleted() = runTest(dispatcher) {
@@ -42,7 +43,7 @@ class TelemetryViewModelTest {
         val pending = CompletableDeferred<SearchBarsResponseDto>()
         val source = object: CustomerDiscoverySource {
             override suspend fun popularProducts(limit:Int):PopularProductsResponseDto = error("unused")
-            override suspend fun searchProduct(query:String?,productId:String?,source:String,latitude:Double?,longitude:Double?):SearchBarsResponseDto {
+            override suspend fun searchProduct(query:String?,productId:String?,source:String):SearchBarsResponseDto {
                 if(query == "old") return withContext(NonCancellable) { pending.await() }
                 if(query == "failure") throw BottleMapApiException(code="NETWORK_ERROR",message="private")
                 return SearchBarsResponseDto(query,"none",truncated=false)

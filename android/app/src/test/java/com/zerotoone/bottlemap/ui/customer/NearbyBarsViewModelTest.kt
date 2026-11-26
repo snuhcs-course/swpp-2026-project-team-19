@@ -46,9 +46,9 @@ class NearbyBarsViewModelTest {
     @Test
     fun radiusIncludesInsideAndExactly1000mAndExcludesOutside() {
         val equator = NearbyCoordinate(0.0, 0.0)
-        val near = NearbyCoordinate(Math.toDegrees(999.0 / 6_371_000.0), 0.0)
-        val boundary = NearbyCoordinate(Math.toDegrees(1000.0 / 6_371_000.0), 0.0)
-        val far = NearbyCoordinate(Math.toDegrees(1001.0 / 6_371_000.0), 0.0)
+        val near = NearbyCoordinate(Math.toDegrees(999.0 / 6_371_008.8), 0.0)
+        val boundary = NearbyCoordinate(Math.toDegrees(1000.0 / 6_371_008.8), 0.0)
+        val far = NearbyCoordinate(Math.toDegrees(1001.0 / 6_371_008.8), 0.0)
         assertEquals(1000.0, distanceMeters(equator, boundary), 0.000001)
         val result = filterNearbyBars(
             equator,

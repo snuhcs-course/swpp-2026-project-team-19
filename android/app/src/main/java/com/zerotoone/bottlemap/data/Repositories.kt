@@ -2,5 +2,6 @@
 package com.zerotoone.bottlemap.data
 
 object Repositories {
+    val allBars: AllBarsRepository by lazy { AllBarsRepository() }
     val customer: CustomerRepository by lazy { CustomerRepository() }
 }
