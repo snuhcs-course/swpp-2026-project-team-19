@@ -117,7 +117,7 @@ main에는 적재 대상인 `catalog_v2_service.json`과 `bars_v2.json`만 있�
 
 - **새 상품 별칭:** 표준 영문명(`standard`), 그리고 그 상품으로 연결된 메뉴판 인쇄 표기(`menu:<바>`)입니다. 기존 v1 상품에도 그 바의 메뉴 표기를 별칭으로 넣었습니다. 확인된 표기는 모두 별칭으로 넣어 별칭 단계에서 최대한 걸러내는 것이 목표입니다(정답 검수에서 "추정"으로 연결한 줄 포함).
 - **표기 규칙:** `한글 / 영문` 줄은 부분마다 별칭 하나, 괄호 병기(`Ardbeg 10y (아드벡)`, `글렌모렌지(Glenmorangie) 12년 오리지널`)는 인쇄 그대로 한 별칭입니다. 오드비 행사 줄의 꼬리표 ` / 행사`는 별칭에 넣지 않았습니다. `unknown`·`non_whisky`·`both:` 줄은 별칭을 만들지 않습니다.
-- **제외:** `jack-daniels-apple`(Tennessee Apple, 위스키 리큐어)는 비위스키라 넣지 않았습니다(`excluded_non_whisky`).
+- **제외:** `jack-daniels-apple`(Tennessee Apple, 위스키 리큐어)는 비위스키라 넣지 않았습니다(`excluded_non_whisky`). → 2026-11-21 v2.4에서 상품으로 넣었습니다(15장).
 - **id:** v1과 같은 UUIDv5 네임스페이스 `6b1a1f4e-19b0-4c7a-9a7e-b0771e3a0019`. 재료는 `brand:<key>`, `balias:<브랜드 key>:<표기>`, `product:<key>`, `palias:<상품 key>:<표기>`, `bar:<key>`입니다.
 
 ## 9. 적재하지 않는 필드 (v2 추가)
@@ -204,3 +204,15 @@ main에는 적재 대상인 `catalog_v2_service.json`과 `bars_v2.json`만 있�
 - **줄 처리:** `unknown`·`non_whisky` 줄은 건너뜁니다. `both:` 줄(한 줄에 상품 두세 개, 예: `Wild Turkey 81 / 101`)은 각 상품에 그 줄의 옵션을 줍니다(I2 데모에는 없던 경우). 가격이 null인 줄은 옵션 없이 항목만 둡니다.
 - **보류 바를 넣는 법:** 카카오맵에서 주소·좌표를 확인해 `pending_bars`의 항목을 `bars`로 옮기고 생성기를 다시 돌리면 메뉴 파일이 `ai/catalog/`로 나옵니다(`pending_i3/`의 옛 파일은 지움).
 - **적재 순서:** 배포 후 Seed catalog `dry-run` → `apply` → `demo-menus-dry-run` → `demo-menus-apply`. `demo-menus-*`는 기존 데모 4곳(위스키복춘, 미라보, 수이, 오드비)의 메뉴판도 다시 덮어씁니다.
+
+## 15. v2.4 잭다니엘 테네시 애플 (2026-11-21, I5)
+
+플레이버드 위스키도 위스키로 제공하기로 해(박진우, 2026-11-21) `jack-daniels-apple`을 `excluded_non_whisky`에서 빼고 상품으로 넣었습니다. `catalog_v2_service.json`의 `version`은 `catalog_v2_4_service`입니다. 파일 이름은 그대로입니다.
+
+- **상품:** `Jack Daniel's Tennessee Apple` (브랜드 `jack_daniels`, edition `Tennessee Apple`, `sources` 미라보·오드비). 상품 529 → 530, 상품 별칭 4262 → 4271.
+- **별칭 9개:** 표준 영문명 1(`standard`), 메뉴판 표기 2(`menu:미라보` `잭다니엘(Jack Daniel) 애플`, `menu:오드비` `잭다니엘 애플`. 뒤의 것은 앞 표기의 괄호를 뺀 것과 같아 `template:paren-strip`도 출처로 적음), 통상 표기 6(`generated:claude-2026-11-21`: `Jack Daniel's Apple`, `잭 다니엘스 테네시 애플`, `잭다니엘 테네시 애플`, `잭 다니엘스 애플`, `잭다니엘스 애플`, `잭 대니얼스 테네시 애플`). 통상 표기 6개는 웹 검색 없이 Claude가 쓴 것이고 박진우 검수 전입니다.
+- **id:** 8장과 같은 규칙(`product:jack-daniels-apple`, `palias:jack-daniels-apple:<표기>`).
+- **검사:** `check_catalog_v2.py`(브랜치 `i2-catalog-v2`의 것)로 상품 간·브랜드 간 정규화 충돌 0, 무결성 OK.
+- **평가 스냅샷은 그대로입니다.** `catalog_v2_eval_5bars.json`, `catalog_v2_eval_5bars_drop_products.json`은 P47 때의 기록이라 고치지 않았습니다(`excluded_non_whisky`에 그대로 있음).
+- **데모 메뉴 seed는 그대로입니다.** `menu_seed_mirabeau_demo_v1.json`, `menu_seed_odbi_demo_v1.json`에는 이 줄이 없습니다(생성 당시 `non_whisky`·카탈로그에 없는 상품이라 건너뜀). 게시 메뉴에 넣으려면 `build_menu_seeds_demo.py`를 다시 돌려야 합니다.
+- **적재:** 운영 DB에는 아직 넣지 않았습니다(Seed catalog 워크플로).

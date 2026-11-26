@@ -65,7 +65,7 @@
   "샤토가호 / 아르마냑 가호 (오드비_01, 8줄)": "알마냑 → non_whisky (1층에서는 한정판 섹션이라 항목 유지)",
   "기네스·산미구엘·아사히·코로나 병 (오드비_09)": "섹션 제목 없음 → 1층 항목 유지(가이드라인: 이름으로 판단하지 않음), 2층 non_whisky. 1층에서 뺄지 검수 필요",
   "헤네시 VSOP (수이_05)": "Bottle selection 섹션이라 1층 유지, 2층 non_whisky",
-  "잭다니엘 애플": "카탈로그 v2에서 비위스키로 뺀 상품 → non_whisky"
+  "잭다니엘 애플": "2026-11-21 수정: 플레이버드 위스키도 위스키로 제공하기로 해 non_whisky → jack-daniels-apple (카탈로그 v2.4에 추가). 그전에는 카탈로그 v2에서 비위스키로 뺀 상품이라 non_whisky였음"
  },
  "new_products": {
   "bowmore-25": {
@@ -951,7 +951,7 @@
      "raw_name": "잭다니엘 애플",
      "unit": "glass",
      "pour_ml": 30,
-     "gold": "non_whisky"
+     "gold": "jack-daniels-apple"
     }
    ]
   },

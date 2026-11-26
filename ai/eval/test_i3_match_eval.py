@@ -123,7 +123,8 @@ def test_gold_for_writes_refs_the_catalog_lacks_as_new(be):
     assert h.gold_for(be, "new:glenfiddich-15", full.key_to_id, dev=False) == "new:glenfiddich-15"
     assert h.gold_for(be, "both:glenfiddich-12|new:glenfiddich-15", asis.key_to_id, dev=False) == \
         "both:glenfiddich-12|new:glenfiddich-15"
-    assert h.gold_for(be, "jack-daniels-apple", asis.key_to_id, dev=True) == "non_whisky"
+    # no dev exception for the flavoured whiskey since 2026-11-21: a product ref like any other
+    assert h.gold_for(be, "jack-daniels-apple", asis.key_to_id, dev=True) == "new:jack-daniels-apple"
     assert h.gold_for(be, "unknown", asis.key_to_id, dev=False) == "unknown"
 
 
@@ -321,10 +322,16 @@ def test_embedded_entries_keep_one_alias_per_normalized_value_like_the_database(
     assert len(ardbeg) <= 2  # the display name and at most one stored alias
 
 
+V2_4_ASIS_DIGEST = "b82cacac24493d0f"
+
+
 def test_the_i3_asis_catalogs_are_the_recorded_ones(be):
     seed = json.loads((h.REPO_ROOT / "ai" / "catalog" / "catalog_v2_service.json").read_text(encoding="utf-8"))
     digest = h.catalog_digest({bar: h.build_catalog(be, bar, "asis", seed) for bar in I3_BARS})
-    assert digest.startswith(I3_ASIS_DIGEST)
+    # catalog v2.4 (2026-11-21, I5: Jack Daniel's Tennessee Apple added) no longer gives the asis
+    # catalogs I3 and P46 ran with (I3_ASIS_DIGEST, catalog v2.3): numbers from here on are not theirs
+    assert not digest.startswith(I3_ASIS_DIGEST)
+    assert digest.startswith(V2_4_ASIS_DIGEST)
 
 
 def test_ops_is_the_catalog_with_the_additions_minus_own_menu_aliases(files, tmp_path):

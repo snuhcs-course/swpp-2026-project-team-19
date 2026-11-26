@@ -330,8 +330,6 @@ def gold_for(be: Backend, g: str | None, key_to_id: dict, dev: bool) -> str | No
     if g in (None, "unknown", "non_whisky"):
         return g
     refs = [r.removeprefix("new:") for r in be.gold_refs(g)]
-    if dev and refs == ["jack-daniels-apple"]:  # E8: a flavoured whiskey liqueur, out of scope
-        return "non_whisky"
     refs = [r if r in key_to_id else f"new:{r}" for r in refs]
     return ("both:" if g.startswith("both:") else "") + "|".join(refs)
 

@@ -9,7 +9,9 @@ import pytest
 import mixed_report as mr
 import regression as reg
 
-REPORT_DIR = reg.REPO_ROOT / "ai/runs/2026-11-13_p25"
+# The report after the 2026-11-21 gold fix (잭다니엘 애플: non_whisky -> jack-daniels-apple). The report
+# of ai/runs/2026-11-13_p25 is what I4 reported, made with the gold before the fix, and stays as it is.
+REPORT_DIR = reg.REPO_ROOT / "ai/runs/2026-11-21_i5_not_whisky"
 V1, V2 = mr.DEFAULT_RUNS
 
 
@@ -34,10 +36,11 @@ def test_expected_rows_are_the_labels_plus_the_non_whisky_lines(fixtures):
     rows = [r for fx in fixtures for r in mr.expected_rows(fx, mixed)]
     assert len(rows) == 472 + 70
     assert {c: sum(r["category"] == c for r in rows) for c in mr.CATEGORIES} == {
-        "whisky": 461, "cocktail": 33, "food": 5, "other": 43}
-    # 11 label rows are not whisky by the match gold: cognac, rum, a liqueur and four bottled beers
+        "whisky": 462, "cocktail": 33, "food": 5, "other": 42}
+    # 10 label rows are not whisky by the match gold: cognac, rum and four bottled beers
+    # (11 until 2026-11-21, when 잭다니엘 애플 became a whisky line)
     from_labels = [it["raw_name"] for fx in fixtures for it in fx["expected_items"] if it["gold"] == "non_whisky"]
-    assert len(from_labels) == 11 and "기네스 병" in from_labels and "헤네시 VSOP" in from_labels
+    assert len(from_labels) == 10 and "기네스 병" in from_labels and "헤네시 VSOP" in from_labels
 
 
 def test_mixed_lines_file_is_consistent_with_the_fixtures(fixtures):
@@ -142,13 +145,13 @@ def test_headline_numbers_of_the_recorded_runs(report):
         assert sum(r["counts"]["paired"] for r in run["per_run"].values()) == run["counts"]["paired"]
         assert sum(p["counts"]["paired"] for p in run["per_photo"].values()) == run["counts"]["paired"]
     # prompt v1 has no categories: a non-whisky line it returns is a whisky line to the server
-    assert (v1["counts"]["paired_non_whisky"], v1["counts"]["non_whisky_as_whisky"]) == (61, 61)
-    assert v1["rates"]["non_whisky_line_recall"] == 0.251
+    assert (v1["counts"]["paired_non_whisky"], v1["counts"]["non_whisky_as_whisky"]) == (58, 58)
+    assert v1["rates"]["non_whisky_line_recall"] == 0.2417
     # prompt v2 keeps the non-whisky lines; what is left are the lines inside whisky lists
-    assert (v2["counts"]["paired_non_whisky"], v2["counts"]["expected_non_whisky"]) == (234, 243)
-    assert v2["counts"]["non_whisky_as_whisky"] == 20 and v2["counts"]["wrong_kind"] == 0
+    assert (v2["counts"]["paired_non_whisky"], v2["counts"]["expected_non_whisky"]) == (231, 240)
+    assert v2["counts"]["non_whisky_as_whisky"] == 17 and v2["counts"]["wrong_kind"] == 0
     assert {e["line"] for e in v2["misclassified"]} == {
-        "헤네시vsop / Hennessy vsop", "레미마틴vsop / Remy Martin vsop", "잭다니엘 애플", "김과장 #2 (바베이도스 럼)",
+        "헤네시vsop / Hennessy vsop", "레미마틴vsop / Remy Martin vsop", "김과장 #2 (바베이도스 럼)",
         "헤네시 VSOP"}
     # the three set lines found in review are missing from every v2 record
     sets = [e for e in v2["missed"] if "세트" in e["line"]]
