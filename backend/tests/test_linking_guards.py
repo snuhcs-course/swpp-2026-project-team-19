@@ -1,12 +1,12 @@
-"""Guards on a confirmed match (I4-P18 unverified product, I4-P38 incomplete name) and the
-product draft read from a menu line (I4-P18)."""
+"""Guards on a confirmed match (I4-P18 unverified product, I4-P38 incomplete name, I5-P59 missing
+age) and the product draft read from a menu line (I4-P18)."""
 
 from uuid import UUID, uuid4
 
 import pytest
 
 from app.matching import ProductInfo
-from app.matching.linking_guards import apply_linking_guards, incomplete_name
+from app.matching.linking_guards import apply_linking_guards, has_age, incomplete_name, missing_age_guard_enabled
 from app.matching.memory_catalog import InMemoryCatalog
 from app.matching import product_draft
 from app.matching.product_draft import ProductDraft, draft_from_name, whole_spellings
@@ -123,6 +123,73 @@ def test_guards_leave_other_results_alone(catalog):
 
 def test_product_info_is_verified_unless_said_otherwise():
     assert ProductInfo(UUID(int=1), "x").verified is True
+
+
+# ---- missing age (I5-P59) ----
+
+ARDBEG, ANTHOLOGY, WEE_BEASTIE, UIGEADAIL = UUID(int=200), UUID(int=201), UUID(int=202), UUID(int=203)
+
+
+def ardbeg_catalog():
+    products = [
+        ProductInfo(ANTHOLOGY, "Ardbeg Anthology 14", 14, "Anthology", brand_id=ARDBEG),
+        ProductInfo(WEE_BEASTIE, "Ardbeg Wee Beastie 5", 5, "Wee Beastie", brand_id=ARDBEG),
+        ProductInfo(UIGEADAIL, "Ardbeg Uigeadail", None, "Uigeadail", brand_id=ARDBEG),
+    ]
+    aliases = [(p.product_id, p.display_name) for p in products] + [
+        (ANTHOLOGY, "Ardbeg Anthology"), (WEE_BEASTIE, "아드벡 위비스티"), (WEE_BEASTIE, "아드벡 위비스티 5년")]
+    return InMemoryCatalog(products, aliases, [(ARDBEG, "Ardbeg"), (ARDBEG, "아드벡")])
+
+
+def test_missing_age_is_off_by_default():
+    catalog = ardbeg_catalog()
+    before, after = resolve("Ardbeg Anthology", catalog)
+    assert before.status == "exact_match" and after is before
+
+
+@pytest.mark.parametrize("name, product", [("Ardbeg Anthology", ANTHOLOGY), ("아드벡 위비스티", WEE_BEASTIE)])
+def test_missing_age_takes_the_confirmation_from_a_line_without_an_age(name, product):
+    catalog = ardbeg_catalog()
+    before, after = resolve(name, catalog, missing_age=True)
+    assert before.status == "exact_match" and before.proposed_product_id == product
+    assert after.status == "ambiguous" and after.proposed_product_id == product
+    evidence = after.candidates[0].evidence
+    assert evidence["missingAge"] == catalog.get_product(product).age_years and evidence["confirmRecommended"] is True
+    assert review_state(after) is ReviewState.CONFIRM_RECOMMENDED and stored_status(after) == "ambiguous"
+
+
+def test_missing_age_keeps_a_line_with_an_age_and_a_product_without_one():
+    catalog = ardbeg_catalog()
+    for name in ("아드벡 위비스티 5년", "Ardbeg Wee Beastie 5", "Ardbeg Uigeadail"):
+        before, after = resolve(name, catalog, missing_age=True)
+        assert before.status == "exact_match" and after is before, name
+
+
+def test_missing_age_counts_the_extracted_age():
+    catalog = ardbeg_catalog()
+    before = resolve_product_staged(ExtractedProduct(product_name="Ardbeg Anthology"), catalog, STAGES)
+    assert apply_linking_guards("Ardbeg Anthology", before, catalog, missing_age=True, line_age=14) is before
+    assert apply_linking_guards("Ardbeg Anthology", before, catalog, missing_age=True).status == "ambiguous"
+
+
+@pytest.mark.parametrize("name, expected", [
+    ("Glenfiddich 12", True), ("글렌피딕 12년", True), ("Lagavulin 16Y", True), ("라프로익10", True),
+    ("발베니(Balvenie) 12", True), ("Kim Gwajang #4", True),
+    ("Ardbeg Anthology", False), ("Octomore 14.1", False), ("Classic Cut 2025", False), ("Ardbeg 700ml 46%", False),
+    ("Johnnie Walker Black 2잔 16,000원", False), ("", False),
+])
+def test_has_age_reads_a_one_or_two_digit_number(name, expected):
+    assert has_age(name) is expected
+
+
+def test_the_missing_age_setting(monkeypatch):
+    monkeypatch.delenv("MATCHING_MISSING_AGE_GUARD", raising=False)
+    assert missing_age_guard_enabled() is False
+    monkeypatch.setenv("MATCHING_MISSING_AGE_GUARD", "TRUE")
+    assert missing_age_guard_enabled() is True
+    monkeypatch.setenv("MATCHING_MISSING_AGE_GUARD", "yes")
+    with pytest.raises(RuntimeError, match="MATCHING_MISSING_AGE_GUARD"):
+        missing_age_guard_enabled()
 
 
 # ---- product draft (P18) ----

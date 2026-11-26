@@ -42,7 +42,7 @@ from app.matching import ExtractedProduct, ResolutionResult
 from app.matching.db_catalog import CatalogSnapshot, DbCatalog
 from app.matching.embedding import EmbeddingStep, get_embedding_step, summarize
 from app.matching.llm_layer import CONFIRMED, M3Engine
-from app.matching.linking_guards import apply_linking_guards
+from app.matching.linking_guards import apply_linking_guards, missing_age_guard_enabled
 from app.matching.product_draft import draft_from_name
 from app.matching.review_state import stored_status
 from app.matching.staged import resolve_product_staged
@@ -323,9 +323,12 @@ def _resolve_and_draft(session: Session, menu_import: MenuImport, llm_layer: Mat
     embedding = get_embedding_step()
     if embedding is not None:
         results = _apply_embedding(session, menu_import.id, items, results, embedding)
+    missing_age = missing_age_guard_enabled()
     for item in items:
-        # Last step: a confirmed match to an unchecked product becomes a recommendation (I4-P18).
-        result = apply_linking_guards(item.extracted_product_name, results[item.id], catalog)
+        # Last step: a confirmed match to an unchecked product becomes a recommendation (I4-P18), and with
+        # MATCHING_MISSING_AGE_GUARD=true one whose line has no age while the product has one (I5-P59).
+        result = apply_linking_guards(item.extracted_product_name, results[item.id], catalog,
+                                      missing_age=missing_age, line_age=item.extracted_age_years)
         # exact_match only for a line that needs no review (I4-P24, app.matching.review_state).
         # "multi" (one line naming two products) has no stored status: the line stays ambiguous
         # with both products as candidates (evidence "multiProduct"), and the reviewer decides.

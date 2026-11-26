@@ -96,3 +96,41 @@ def test_with_age_runs_the_harness(files, tmp_path):  # noqa: F811
                       "--labels", str(labels), "--no-gold-sha-check", "--json", str(tmp_path / "r.json")])
     names = {r["name"]: r for r in result["rules"]["rows"]}
     assert names["글렌피딕 12년"]["status"] == "exact_match"  # alias with the same age: still confirmed
+
+
+# ---------- 1b: --missing-age-guard ----------
+
+def guard_files(tmp_path):
+    import copy
+    from test_i3_match_eval import GOLD, SEED, alias
+    seed, gold = copy.deepcopy(SEED), copy.deepcopy(GOLD)
+    seed["products"][1]["aliases"].append(alias("글렌피딕 에이틴", "standard"))  # glenfiddich-18, no age on it
+    gold["photos"][1]["items"].append({"raw_name": "글렌피딕 에이틴", "unit": "glass", "pour_ml": None,
+                                       "gold": "glenfiddich-18"})
+    paths = {}
+    for name, data in (("gold", gold), ("catalog", seed), ("labels", {"photos": [
+            {"photo_id": p["photo_id"], "items": [{"raw_name": i["raw_name"], "unit": i["unit"], "price_krw": 1}
+                                                  for i in p["items"]]} for p in gold["photos"]]})):
+        paths[name] = tmp_path / f"{name}.json"
+        paths[name].write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+    return ["--set", "i3", "--catalog", "asis", "--catalog-file", str(paths["catalog"]), "--gold", str(paths["gold"]),
+            "--labels", str(paths["labels"]), "--no-gold-sha-check", "--server-steps"]
+
+
+def test_missing_age_guard_turns_a_confirmation_without_an_age_into_a_recommendation(tmp_path):
+    args = guard_files(tmp_path)
+    off = h.main([*args, "--json", str(tmp_path / "off.json")])
+    on = h.main([*args, "--missing-age-guard", "--json", str(tmp_path / "on.json")])
+    rows = lambda r: {x["name"]: x for x in r["server"]["rows"]}
+    assert rows(off)["글렌피딕 에이틴"]["status"] == "exact_match"
+    assert rows(on)["글렌피딕 에이틴"]["status"] == "ambiguous" and rows(on)["글렌피딕 에이틴"]["confirm_recommended"]
+    assert rows(on)["Glenfiddich 18"]["status"] == "exact_match"  # the age is on the line
+    assert on["server"]["missing_age_guard"] is True and off["server"]["missing_age_guard"] is False
+    assert on["server"]["changed"]["guard_missing_age"] == 1 and "guard_missing_age" not in off["server"]["changed"]
+    assert on["rules"]["rows"] == off["rules"]["rows"]  # the guard is a server step only
+
+
+def test_missing_age_guard_needs_the_server_steps(capsys):
+    with pytest.raises(SystemExit):
+        h.parse_args(["--set", "i3", "--catalog", "full", "--missing-age-guard", "--json", "x.json"])
+    assert "--missing-age-guard needs --server-steps" in capsys.readouterr().err

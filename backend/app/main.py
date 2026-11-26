@@ -17,6 +17,7 @@ from app.core.version import get_version
 from app.db.session import get_session_factory
 from app.schemas.errors import document_invalid_request
 from app.matching.embedding import get_embedding_step
+from app.matching.linking_guards import missing_age_guard_enabled
 from app.owner_web import mount_owner_web
 from app.privacy import mount_privacy
 from app.services.menu_import_processing import find_unfinished_imports, recover_imports
@@ -69,6 +70,8 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     get_embedding_step()
     # The same for SEARCH_SIMILAR_*; the search index is built by the first search that needs it.
     get_similar_products()
+    # An invalid MATCHING_MISSING_AGE_GUARD stops the server too (the guard is off unless true).
+    missing_age_guard_enabled()
     # Invalid Supabase auth settings (e.g. HS256 allowed) stop the server; an unset SUPABASE_URL does not.
     load_supabase_auth_settings()
     # Missing or invalid business number keys stop the server, instead of failing every owner application.

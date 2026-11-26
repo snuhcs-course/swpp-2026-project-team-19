@@ -682,11 +682,14 @@ def run_tools(args, layer, be, seed, new_products, photos, bars, bar_catalogs, t
 
 # ---- the rest of menu import (--server-steps) ---------------------------------------------
 
-def server_steps(photos: list[Photo], bar_catalogs: dict[str, BarCatalog], resolved: dict) -> tuple[dict, dict]:
+def server_steps(photos: list[Photo], bar_catalogs: dict[str, BarCatalog], resolved: dict,
+                 missing_age: bool = False) -> tuple[dict, dict]:
     """`resolved` through what menu import does after the matcher (_resolve_and_draft): the
     embedding candidate step, the linking guards and the stored status. Returns the results and
     what each step changed. The embedding index of a bar holds that bar's catalog texts
-    (display names and kept aliases), as the server indexes what the rule matcher matches."""
+    (display names and kept aliases), as the server indexes what the rule matcher matches.
+    missing_age: the missingAge guard (I5-P59, MATCHING_MISSING_AGE_GUARD=true in menu import); the
+    harness has no extracted age, so the line's age is read from its name only."""
     from dataclasses import replace
     try:
         embedding = importlib.import_module("app.matching.embedding")
@@ -712,14 +715,18 @@ def server_steps(photos: list[Photo], bar_catalogs: dict[str, BarCatalog], resol
                 after = embedding.apply_policy(before, rankings[name], min_similarity=floor, model_id=provider.model_id)
                 if after is not before:
                     counts["embedding_filled" if before.status == "unmatched" else "embedding_reordered"] += 1
-            guarded = guards.apply_linking_guards(name, after, bc.catalog)
+            guard_flag = {"missing_age": True} if missing_age else {}  # an older rules checkout has no guard
+            guarded = guards.apply_linking_guards(name, after, bc.catalog, **guard_flag)
             counts["guard_took_confirmation"] += guarded.status != after.status
+            if "missingAge" in (guarded.candidates[0].evidence if guarded.candidates else {}) and guarded is not after:
+                counts["guard_missing_age"] += 1
             status = review.stored_status(guarded)
             if status != guarded.status:
                 counts[f"stored_{guarded.status}_as_{status}"] += 1
                 guarded = replace(guarded, status=status)
             out[(photo.photo_id, name)] = guarded
-    return out, {"embedding_model": provider.model_id, "embedding_min_similarity": floor, "changed": dict(counts)}
+    return out, {"embedding_model": provider.model_id, "embedding_min_similarity": floor, "missing_age_guard": missing_age,
+                 "changed": dict(counts)}
 
 
 # ---- scoring ------------------------------------------------------------------------------
@@ -901,6 +908,9 @@ def parse_args(argv=None):
     ap.add_argument("--flag-non-whisky", action="store_true",
                     help="I5: the LLM layer marks a line it reads as not a whisky when the rules had no candidate "
                          "(kind_hint); the not_whisky numbers are written either way")
+    ap.add_argument("--missing-age-guard", action="store_true",
+                    help="I5-P59: with --server-steps, the missingAge linking guard (a confirmed line without an age "
+                         "whose product has one becomes a recommended candidate)")
     ap.add_argument("--server-steps", action="store_true",
                     help="also score the result after the embedding step, the linking guards and the stored status")
     ap.add_argument("--json", type=Path, required=True)
@@ -915,6 +925,8 @@ def parse_args(argv=None):
         ap.error("--extraction is for --set i3")
     if args.server_steps and args.llm and args.llm_mode == "tools":
         ap.error("--server-steps is for rules or rules + M3a")
+    if args.missing_age_guard and not args.server_steps:
+        ap.error("--missing-age-guard needs --server-steps (the guards run there)")
     return args
 
 
@@ -1057,7 +1069,7 @@ def main(argv=None) -> dict:
         }
 
     if args.server_steps:
-        served, steps = server_steps(photos, bar_catalogs, final)
+        served, steps = server_steps(photos, bar_catalogs, final, missing_age=args.missing_age_guard)
         served_rows = rows_for(served)
         result["server"] = {**summarize(served_rows, photos, missed_known), "rows": served_rows,
                             "after": "llm" if final is not base else "rules", "complete": final_complete, **steps}

@@ -117,3 +117,59 @@ python ai/eval/i3_match_eval.py --set dev --catalog service --server-steps --jso
 - 회귀 15장(`ai/regression/regression.py`): 통과, 바뀐 줄 없음.
 
 테스트: `ai/eval/test_i5_p59.py`(카탈로그 연수, "Glenmorangie 14" → Quinta Ruban 후보 1개, 비교 스크립트, 연수 넘기는 래퍼), `test_i3_match_eval.py`의 I3 asis digest 고정값(v2.4 `b82cacac…` → v2.5 `541fb3d4…`). AI 테스트 실패는 이전부터의 1개뿐. 새 스크립트 커버리지: `i5_p59_compare.py` 96%, `i5_p59_with_age.py` 88%(빠진 줄은 `if __name__ == "__main__"`), 합 95%.
+
+### 1b. 연수 없는 메뉴 줄의 확정 막기 (플래그, 기본 꺼짐)
+
+**구현.** 규칙(`staged.py`)이 아니라 확정을 뺏기만 하는 연결 가드(`backend/app/matching/linking_guards.py`)에 넣었다. 기존 가드(`unverifiedProduct`, `incompleteName`)와 같은 자리, 같은 결과(후보 1개 + 확인 권장)다.
+
+- 가드 `missingAge`: 확정(`exact_match`)된 상품에 연수가 있고, 줄 이름에 연수가 없고, 추출이 넘긴 연수(`line_age`)도 없으면 확정하지 않는다. 근거 `missingAge: <상품 연수>`, `confirmRecommended`.
+- "줄에 연수가 있다": 도수·용량·잔·가격을 뺀 이름에 다른 숫자에 붙지 않은 한두 자리 숫자가 있음(`12년`, `12Y`, `Glenfiddich 12`, `라프로익10`, `#4`도 연수로 침. `14.1`, `2025`, `700ml`는 아님). 함수 `has_age`.
+- 설정: 환경변수 `MATCHING_MISSING_AGE_GUARD`(기본 `false`). `true`/`false` 외의 값은 서버 시작 때 멈춘다(`app/main.py`). `backend/README.md` 표와 `backend/.env.example`에 적었다. 메뉴 등록(`menu_import_processing.py`)은 이 값과 `extracted_age_years`를 가드에 넘긴다.
+- 하네스: `--missing-age-guard`(`--server-steps` 필요). 하네스는 추출 연수가 없으므로 줄 이름으로만 판단한다.
+
+**측정** (서버 단계 뒤, 카탈로그 v2.5, 규칙만. 꺼짐은 1a 결과와 줄 단위로 같음을 확인. `step1/1b_*_diff.md`)
+
+| | 확정 수 (꺼짐 → 켜짐) | 사라진 맞는 확정 | 사라진 틀린 확정 | Top-1 | FM | 틀린 확인 권장 | hard/photo | confirm/choose/register/wrong |
+|---|---|---|---|---|---|---|---|---|
+| I3 full | 509 → 484 | 24 | 1 (Ardbeg Anthology) | 500 → 476 / 646 | 1 → 0 | 2 → 3 | 2.39 → 2.42 | 87/53/14/12 → 111/54/14/12 |
+| I3 ops | 520 → 495 | 24 | 1 (Ardbeg Anthology) | 511 → 487 / 646 | 1 → 0 | 2 → 3 | 1.97 → 2.00 | 90/54/8/3 → 114/55/8/3 |
+| dev service | 626 → 602 | 24 | 0 | 626 → 602 / 804 | 0 → 0 | 3 → 3 | 3.79 → 3.79 | 100/83/18/9 → 124/83/18/9 |
+
+- **"Ardbeg Anthology"(014_테일오브테일즈_07)는 막힌다.** 확정(정답 미상, overconfident) → 후보 1개(Ardbeg Anthology 14) + 확인 권장, 업주 부담 `choose`. I3의 FM 1이 0이 된다. 대신 그 후보가 "틀린 확인 권장"으로 하나 늘었다(정답이 미상이라 맞는 권장으로 세지 않음).
+- 사라진 맞는 확정 24줄은 모두 정답 상품이 후보 1개 + 확인 권장으로 남는다(`confirm`, 업주가 한 번 누름). 어려운 줄(choose/register/wrong)은 I3에서 Anthology 1줄만 늘고 dev는 그대로다.
+- 사라지는 맞는 확정의 절반 이상은 1a가 연수를 넣은 글렌모렌지 4종이다. 같은 가드를 v2.4 카탈로그(1a 전)로 돌리면 I3 full 500 → 484, dev 625 → 609(각 16줄)로, 1a가 각 8줄을 더한다.
+
+사라지는 맞는 확정 (I3는 full·ops가 같은 24줄):
+
+| 셋 | 줄 (사진) | 확정되던 상품 |
+|---|---|---|
+| I3 | Johnnie Walker Black Label (014_01), 조니워커 블랙 (015_02, 016_01, 019p2_04, 020_01), 조니워커 블랙 라벨 / Johnnie Walker Black Label (017_02) | Johnnie Walker Black Label |
+| I3 | 조니워커 그린 라벨 / Johnnie Walker Green Label (017_02), 조니워커 그린 (019p2_04) | Johnnie Walker Green Label |
+| I3 | Ardbeg WEE Beastie (014_07), 아드벡 위비스티 (021_01, 021_02) | Ardbeg Wee Beastie 5 |
+| I3 | Glenmorangie Original (014_08, 014_11), 글렌모렌지 오리지널 (015_01, 018_02), 글렌모렌지오리지널 (019p2_01) | Glenmorangie The Original |
+| I3 | Glenmorangie Lasanta (014_08), 글렌모렌지라산타 (019p2_01) | Glenmorangie Lasanta |
+| I3 | Glenmorangie Quinta Ruban (014_08), 글렌모렌지퀸타루반 (019p2_01) | Glenmorangie Quinta Ruban |
+| I3 | Glenmorangie The Nectar (014_08, 014_11), 글렌모렌지더넥타 (019p2_01), 글렌모렌지 더 넥타 (021_01) | Glenmorangie Nectar D'Or |
+| dev | 조니워커 블랙 (007_03), 조니워커 블랙 / Jonnie walker black (008_01), 조니워커(Johnnie Walker) 블랙 (011_01), 조니워커블랙 (009_05) | Johnnie Walker Black Label |
+| dev | 조니워커(Johnnie Walker) 블랙 셰리 (011_01) | Johnnie Walker Black Label Sherry Finish |
+| dev | 조니워커(Johnnie Walker) 그린 (011_01), JohnnieWalker Green (그린) (010_03) | Johnnie Walker Green Label |
+| dev | 베이커스(Baker's) 버번 (011_07) | Baker's 7 Bourbon |
+| dev | Balvenie American Oak (아메리칸 오크) (010_02) | The Balvenie 12 American Oak |
+| dev | Balvenie Single Barrel (싱글배럴) (010_02) | The Balvenie 12 Single Barrel |
+| dev | Glenmorangie Calvados Cask (깔바도스 캐스크) (010_03) | Glenmorangie 12 Calvados Cask Finish |
+| dev | 아드벡 위 비스티 (009_06) | Ardbeg Wee Beastie 5 |
+| dev | 글렌모렌지 오리지널 (007_01, 010_05, 009_08), 글랜모렌지 오리지날 / Glenmorangie OG (008_03) | Glenmorangie The Original |
+| dev | 글렌모렌지 라산타 (007_01, 009_08), Glenmorangie Lasanta (라산타) (010_03), 글랜모렌지 라산타 / Glenmorangie Lasanta (008_03) | Glenmorangie Lasanta |
+| dev | 글렌모렌지 넥타도르 (007_01), 글랜모렌지 넥타도르 / Glenmorangie Nectar D'or (008_03) | Glenmorangie Nectar D'Or |
+| dev | Glenmorangie Quinta Ruban (퀸타루반) (010_03), 글랜모렌지 퀸타루반 / Glenmorangie Quinta Ruban (008_03) | Glenmorangie Quinta Ruban |
+
+(사진 번호는 `014_01` = `014_테일오브테일즈_01`, `019p2` = `019_쏘댓page2` 식으로 줄였다. 원래 이름은 diff 파일에 있다.)
+
+**더 좁은 변형 (구현하지 않음, 제안만)**
+
+- 사라지는 맞는 확정은 "연수가 상품의 이름이 아니라 속성인 대표 병"(조니워커 블랙 12, 글렌모렌지 오리지널 12, 라산타 12 등)이 대부분이다. 메뉴는 이런 병에 연수를 잘 안 적는다.
+- (가) **상품 표시명에 연수가 들어 있을 때만**(`Ardbeg Anthology 14`, `Ardbeg Wee Beastie 5`, `Baker's 7 Bourbon`, `The Balvenie 12 American Oak`): 위 목록에서 손으로 세면 I3에서 맞는 확정 3줄(Wee Beastie)만 잃고 Anthology는 막는다. dev는 5줄(Baker's, Balvenie 2, Calvados, Wee Beastie). 카탈로그 표시명 관례에 기대는 규칙이라 표시명이 바뀌면 같이 바뀐다.
+- (나) **같은 브랜드·에디션에 연수가 다른 병이 있다고 알려진 시리즈만**(Anthology는 13·14·16 등 해마다 다른 연수): 카탈로그에 시리즈 표시를 따로 둬야 한다. 지금 카탈로그에는 Anthology가 14 하나뿐이라 데이터만으로는 고를 수 없다.
+- 어느 쪽이든 근거가 Anthology 한 줄이다. 숫자로 고를 만큼 사례가 없다.
+
+테스트: `backend/tests/test_linking_guards.py` 6개(기본 꺼짐, 연수 없는 줄 2종, 연수 있는 줄·연수 없는 상품은 그대로, 추출 연수, `has_age` 12가지, 설정값), `ai/eval/test_i5_p59.py` 2개(하네스 옵션, 옵션 조합 오류). 커버리지: `linking_guards.py` 100%(분기 포함). 백엔드 전체 1153 통과, 1940 건너뜀(DB 필요). `tests/test_pdf_*.py`, `test_run_uat_inputs.py` 3개 파일은 이 환경에 `pypdfium2`가 없어 수집되지 않아 뺐다(main의 PDF 기능, 이번 변경과 무관). AI 전체 390 중 389 통과(이전부터의 1개 실패).
