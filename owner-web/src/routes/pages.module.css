@@ -22,6 +22,11 @@
   color: var(--bm-color-text-secondary);
 }
 
+.loginPolicy {
+  margin: 0;
+  text-align: center;
+}
+
 .notice {
   margin: 0;
   padding: var(--bm-space-sm) var(--bm-space-md);

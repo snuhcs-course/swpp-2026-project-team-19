@@ -1,0 +1,21 @@
+.link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--bm-min-touch-target);
+  color: var(--bm-color-text-muted);
+  font-size: var(--bm-type-caption);
+  line-height: var(--bm-type-caption-line-height);
+  text-decoration: underline;
+}
+
+.link:focus-visible {
+  outline: 2px solid var(--bm-color-primary);
+  outline-offset: 2px;
+}
+
+.footer {
+  display: flex;
+  justify-content: center;
+  padding: 0 var(--bm-screen-horizontal) var(--bm-space-xl);
+  border-top: 1px solid var(--bm-color-divider);
+}

@@ -9,6 +9,7 @@ import { loadHiddenApplications } from "../owner/hiddenApplications";
 import { OwnerScreen } from "../owner/OwnerScreen";
 import { useMe, useMyApplications, useMyBars } from "../owner/queries";
 import { Button, ButtonLink } from "../ui/Button";
+import { PrivacyPolicyLink } from "../ui/PrivacyPolicyLink";
 import { EmptyState, ErrorState, LoadingState } from "../ui/states";
 import styles from "./pages.module.css";
 
@@ -39,6 +40,9 @@ export function LoginPage() {
       <Button disabled={!configured} onClick={() => void signIn(returnPath)}>
         Google로 로그인
       </Button>
+      <p className={styles.loginPolicy}>
+        <PrivacyPolicyLink />
+      </p>
     </main>
   );
 }
