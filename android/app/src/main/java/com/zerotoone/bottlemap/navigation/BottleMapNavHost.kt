@@ -110,6 +110,10 @@ fun BottleMapNavHost(resetWelcome: Boolean = false) {
     }
     val backStackEntry by navController.currentBackStackEntryAsState()
     val destination = backStackEntry?.destination
+    LaunchedEffect(destination?.route) {
+        com.zerotoone.bottlemap.telemetry.AppTelemetry.current.setScreen(
+            com.zerotoone.bottlemap.telemetry.ScreenRoute.fromTemplate(destination?.route))
+    }
     val imeVisible = WindowInsets.isImeVisible
 
     LaunchedEffect(ageConfirmed) {
@@ -149,7 +153,7 @@ fun BottleMapNavHost(resetWelcome: Boolean = false) {
                 ) {
                     composable(TabRoutes.WELCOME) {
                         var ownerIntent by remember { mutableStateOf(false) }
-                        val signIn = rememberGoogleSignInFlow(authViewModel) { outcome ->
+                        val signIn = rememberGoogleSignInFlow(authViewModel, com.zerotoone.bottlemap.telemetry.SignInEntry.WELCOME) { outcome ->
                             val origin = if (ownerIntent) LoginOrigin.OWNER else LoginOrigin.WELCOME
                             when (outcome) {
                                 SignInOutcome.SUCCESS -> {
@@ -189,7 +193,10 @@ fun BottleMapNavHost(resetWelcome: Boolean = false) {
                         val origin = LoginOrigin.entries.firstOrNull {
                             it.name.lowercase() == entry.arguments?.getString("origin")
                         } ?: LoginOrigin.ACCOUNT
-                        val signIn = rememberGoogleSignInFlow(authViewModel) { outcome ->
+                        val signIn = rememberGoogleSignInFlow(authViewModel,
+                            if (origin == LoginOrigin.WELCOME || origin == LoginOrigin.OWNER)
+                                com.zerotoone.bottlemap.telemetry.SignInEntry.WELCOME
+                            else com.zerotoone.bottlemap.telemetry.SignInEntry.ACCOUNT) { outcome ->
                             when (outcome) {
                                 SignInOutcome.SUCCESS -> {
                                     showToast("로그인했어요.")

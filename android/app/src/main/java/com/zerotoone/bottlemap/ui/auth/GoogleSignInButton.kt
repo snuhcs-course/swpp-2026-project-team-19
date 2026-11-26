@@ -1,5 +1,6 @@
 package com.zerotoone.bottlemap.ui.auth
 
+import com.zerotoone.bottlemap.telemetry.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
@@ -45,7 +46,7 @@ import kotlinx.coroutines.launch
  * Google token directly; AuthViewModel sends it to Supabase.
  */
 @Composable
-internal fun rememberGoogleSignInLauncher(viewModel: AuthViewModel): () -> Boolean {
+internal fun rememberGoogleSignInLauncher(viewModel: AuthViewModel, entry: SignInEntry = SignInEntry.ACCOUNT): () -> Boolean {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
@@ -58,7 +59,7 @@ internal fun rememberGoogleSignInLauncher(viewModel: AuthViewModel): () -> Boole
     }
 
     return launch@{
-        if (!viewModel.beginGoogleSignIn()) return@launch false
+        if (!viewModel.beginGoogleSignIn(entry)) return@launch false
         if (BuildConfig.GOOGLE_WEB_CLIENT_ID.isBlank()) {
             viewModel.googleFailed()
             return@launch true
@@ -127,8 +128,8 @@ internal fun signInOutcome(state: AuthUiState): SignInOutcome? = when (state) {
  * success without opening the picker.
  */
 @Composable
-internal fun rememberGoogleSignInFlow(viewModel: AuthViewModel, onOutcome: (SignInOutcome) -> Unit): () -> Unit {
-    val launch = rememberGoogleSignInLauncher(viewModel)
+internal fun rememberGoogleSignInFlow(viewModel: AuthViewModel, entry: SignInEntry = SignInEntry.ACCOUNT, onOutcome: (SignInOutcome) -> Unit): () -> Unit {
+    val launch = rememberGoogleSignInLauncher(viewModel, entry)
     val state by viewModel.state.collectAsStateWithLifecycle()
     val latestOutcome by rememberUpdatedState(onOutcome)
     var awaiting by rememberSaveable { mutableStateOf(false) }

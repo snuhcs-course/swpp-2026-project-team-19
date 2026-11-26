@@ -1,5 +1,6 @@
 package com.zerotoone.bottlemap.ui.auth
 
+import com.zerotoone.bottlemap.telemetry.*
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zerotoone.bottlemap.data.AppAuth
@@ -36,10 +37,19 @@ sealed interface AuthUiState {
  */
 class AuthViewModel(
     private val gateway: AuthGateway = AppAuth.gateway,
+    private val telemetry: Telemetry = AppTelemetry.current,
 ) : ViewModel() {
     private val _state = MutableStateFlow<AuthUiState>(AuthUiState.Initializing)
     val state: StateFlow<AuthUiState> = _state.asStateFlow()
 
+    private var signInEntry = SignInEntry.ACCOUNT
+    private var measuringSignIn = false
+    private fun signInResult(result: SignInStatus) {
+        if (measuringSignIn) {
+            measuringSignIn = false
+            telemetry.log(TelemetryEvent.SignInResult(signInEntry, result))
+        }
+    }
     private var generation = 0L
     private var signingIn = false
     private var awaitingGoogleCredential = false
@@ -98,11 +108,13 @@ class AuthViewModel(
     }
 
     /** Called once per user click before opening Credential Manager. */
-    fun beginGoogleSignIn(): Boolean {
+    fun beginGoogleSignIn(entry: SignInEntry = SignInEntry.ACCOUNT): Boolean {
         if (signingIn || logoutInProgress ||
             _state.value == AuthUiState.Initializing ||
             _state.value is AuthUiState.SignedIn
         ) return false
+        signInEntry = entry
+        measuringSignIn = true
         generation++
         suppressAuthenticatedEventsUntilSignIn = false
         signingIn = true
@@ -124,6 +136,7 @@ class AuthViewModel(
             } catch (_: Exception) {
                 if (operationGeneration == generation && !logoutInProgress) {
                     signingIn = false
+                    signInResult(SignInStatus.ERROR)
                     _state.value = AuthUiState.SignInError(
                         "로그인을 완료하지 못했습니다. 설정과 네트워크를 확인한 뒤 다시 시도해 주세요.",
                     )
@@ -136,6 +149,7 @@ class AuthViewModel(
 
     fun googleCancelled() {
         if (!signingIn || !awaitingGoogleCredential) return
+        signInResult(SignInStatus.CANCEL)
         generation++
         signingIn = false
         awaitingGoogleCredential = false
@@ -144,6 +158,7 @@ class AuthViewModel(
 
     fun googleFailed() {
         if (!signingIn || !awaitingGoogleCredential) return
+        signInResult(SignInStatus.ERROR)
         generation++
         signingIn = false
         awaitingGoogleCredential = false
@@ -173,6 +188,7 @@ class AuthViewModel(
         // Immediately invalidate in-flight profile/sign-in work and hide the
         // old identity; do not wait for an SDK event or remote sign-out.
         val operationGeneration = ++generation
+        signInResult(SignInStatus.CANCEL)
         logoutInProgress = true
         suppressAuthenticatedEventsUntilSignIn = true
         signingIn = false
@@ -215,11 +231,13 @@ class AuthViewModel(
             val user = gateway.fetchCurrentUser()
             if (operationGeneration == generation && !logoutInProgress) {
                 _state.value = AuthUiState.SignedIn(user)
+                signInResult(SignInStatus.SUCCESS)
             }
         } catch (cancelled: CancellationException) {
             throw cancelled
         } catch (error: BottleMapApiException) {
             if (operationGeneration != generation || logoutInProgress) return
+            signInResult(SignInStatus.ERROR)
             when (error.code) {
                 "UNAUTHENTICATED" -> {
                     // Confirmed invalid session, not a network/503 outage.
@@ -245,6 +263,7 @@ class AuthViewModel(
             }
         } catch (_: Exception) {
             if (operationGeneration == generation && !logoutInProgress) {
+                signInResult(SignInStatus.ERROR)
                 _state.value = AuthUiState.SignInError(
                     "계정 정보를 확인하지 못했습니다.",
                     canRetryProfile = true,

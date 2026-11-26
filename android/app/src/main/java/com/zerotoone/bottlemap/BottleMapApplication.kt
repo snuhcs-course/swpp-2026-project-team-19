@@ -7,6 +7,10 @@ import com.kakao.vectormap.KakaoMapSdk
 class BottleMapApplication : Application() {
     override fun onCreate() {
         super.onCreate()
+        val privacy = com.zerotoone.bottlemap.ui.auth.UserPrivacySettings.get(this)
+        com.zerotoone.bottlemap.telemetry.AppTelemetry.current =
+            com.zerotoone.bottlemap.telemetry.createPlatformTelemetry(this, privacy.usageEnabled.value)
+        com.zerotoone.bottlemap.telemetry.AppTelemetry.current.setEnabled(privacy.usageEnabled.value)
         // The native app key comes from the local Gradle property. Never commit it.
         // Kakao Developers must also register this package and signing key hash.
         if (BuildConfig.KAKAO_NATIVE_APP_KEY.isNotBlank()) {

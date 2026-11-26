@@ -204,7 +204,7 @@ fun AccountScreen(
                     "다시 로그인하기",if(state.canRetryProfile)onRetryAccount else onOpenLogin)
             }
             Row(Modifier.fillMaxWidth().toggleable(usageEnabled, role=Role.Switch) { enabled ->
-                    privacy.setUsageEnabled(enabled)
+                    if (!privacy.setUsageEnabled(enabled)) return@toggleable
                     onNotice(if(enabled) "사용 기록 보내기를 켰어요." else "사용 기록 보내기를 껐어요.")
                 }.testTag("account-usage-consent").padding(vertical=16.dp),
                 verticalAlignment=Alignment.CenterVertically,

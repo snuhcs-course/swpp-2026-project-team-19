@@ -1173,6 +1173,7 @@ class LiveOwnerScreenRepository(context: Context) : OwnerMockRepository {
                 priceCheckedImages.size),
             completedImages = dto.progress?.completedImages ?: old?.completedImages ?: 0,
             failureReason = dto.failure?.let { "메뉴판을 읽지 못했어요. 사진을 확인하고 다시 올려 주세요." },
+            failureCode = dto.failure?.let { com.zerotoone.bottlemap.telemetry.ErrorCode.from(it.code) },
         )
         publishSnapshot(before.copy(
             imports = before.imports.filterNot { it.menuImportId == importId } + job,

@@ -1,5 +1,6 @@
 package com.zerotoone.bottlemap.network
 
+import com.zerotoone.bottlemap.telemetry.*
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.zerotoone.bottlemap.BuildConfig
@@ -34,6 +35,12 @@ object ApiClient {
     }
 
     private val httpClient = OkHttpClient.Builder()
+        .addInterceptor { chain ->
+            try { chain.proceed(chain.request()) }
+            catch (error: IOException) {
+                throw EndpointIOException(ApiEndpoint.fromPath(chain.request().url.encodedPath), error)
+            }
+        }
         .connectTimeout(20, TimeUnit.SECONDS)
         .readTimeout(60, TimeUnit.SECONDS)
         .writeTimeout(60, TimeUnit.SECONDS)
@@ -73,6 +80,9 @@ object ApiClient {
                 ?.string()
                 ?.let { body -> runCatching { errorAdapter.fromJson(body) }.getOrNull() }
                 ?.error
+            AppTelemetry.current.log(TelemetryEvent.ApiError(
+                ApiEndpoint.fromPath(error.response()?.raw()?.request?.url?.encodedPath.orEmpty()),
+                HttpStatus.from(error.code()), ErrorCode.from(parsed?.code)))
             throw BottleMapApiException(
                 httpStatus = error.code(),
                 code = parsed?.code ?: "HTTP_" + error.code(),
@@ -83,6 +93,11 @@ object ApiClient {
                 cause = error,
             )
         } catch (error: IOException) {
+            if (kotlin.coroutines.coroutineContext[kotlinx.coroutines.Job]?.isActive != false) {
+                AppTelemetry.current.log(TelemetryEvent.ApiError(
+                    (error as? EndpointIOException)?.endpoint ?: ApiEndpoint.UNKNOWN,
+                    HttpStatus.NO_RESPONSE, ErrorCode.NETWORK_ERROR))
+            }
             throw BottleMapApiException(
                 code = "NETWORK_ERROR",
                 message = "인터넷 연결을 확인한 뒤 다시 시도해 주세요.",
@@ -92,3 +107,5 @@ object ApiClient {
     }
 }
 
+
+private class EndpointIOException(val endpoint: ApiEndpoint, cause: IOException) : IOException("Request failed", cause)

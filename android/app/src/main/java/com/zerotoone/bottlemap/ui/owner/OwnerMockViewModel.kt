@@ -1,5 +1,6 @@
 package com.zerotoone.bottlemap.ui.owner
 
+import com.zerotoone.bottlemap.telemetry.*
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.zerotoone.bottlemap.data.owner.MockBar
@@ -30,11 +31,36 @@ class OwnerMockViewModel(
     private val businessVerificationFixture:
         (suspend (String, String, String) -> String)? = null,
     private val registrationSubmissionFixture: (suspend () -> Unit)? = null,
+    private val telemetry: Telemetry = AppTelemetry.current,
 ) : ViewModel() {
     val state: StateFlow<MockOwnerLoadState> = repository.state
     fun retry() = repository.retryLoad()
     fun register(application: MockOwnerApplication) = repository.registerApplication(application)
-    fun saveRegistrationDraft(draft: MockRegistrationDraft?) = repository.saveRegistrationDraft(draft)
+    private var applicationType: ApplicationType? = null
+    private var applicationSubmitted = false
+    private val failedImports = mutableSetOf<String>()
+    private fun snapshot() = when (val loaded = state.value) {
+        is MockOwnerLoadState.Ready -> loaded.snapshot
+        is MockOwnerLoadState.Empty -> loaded.snapshot
+        else -> null
+    }
+    private fun startApplication(draft: MockRegistrationDraft) {
+        val type = if (draft.kind == com.zerotoone.bottlemap.data.owner.MockApplicationKind.EXISTING_BAR)
+            ApplicationType.CLAIM else ApplicationType.NEW
+        if (applicationType != type) {
+            applicationType = type
+            applicationSubmitted = false
+            telemetry.log(TelemetryEvent.OwnerApplicationStarted(type))
+        }
+    }
+    fun saveRegistrationDraft(draft: MockRegistrationDraft?) {
+        if (draft != null && snapshot()?.registrationDraft == null) {
+            applicationType = null; applicationSubmitted = false
+        }
+        repository.saveRegistrationDraft(draft)
+        if (draft == null) { applicationType = null; applicationSubmitted = false }
+        else if (draft.resumePageKey != null && draft.resumePageKey != "METHOD") startApplication(draft)
+    }
     /** Production registration stays suspend so UI waits for both submission and menu-photo upload. */
     suspend fun verifyBusinessBeforeApplicationLive(
         registrationNumber: String, representativeName: String, openingDate: String,
@@ -49,17 +75,26 @@ class OwnerMockViewModel(
     }
 
     suspend fun submitRegistrationDraftLive() {
-        val draft = when(val loaded=state.value) {
-            is MockOwnerLoadState.Ready -> loaded.snapshot.registrationDraft
-            is MockOwnerLoadState.Empty -> loaded.snapshot.registrationDraft
-            else -> null
-        }
-        if (draft != null) registrationPhoneError(draft)?.let { throw com.zerotoone.bottlemap.ui.common.UserInputException(it) }
-        when {
-            registrationSubmissionFixture != null -> registrationSubmissionFixture.invoke()
-            repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository ->
-                repository.submitRegistrationDraftLive()
-            else -> repository.submitRegistrationDraftForFixture()
+        val draft = snapshot()?.registrationDraft
+        if (draft != null) startApplication(draft)
+        try {
+            if (draft != null) registrationPhoneError(draft)?.let {
+                throw com.zerotoone.bottlemap.ui.common.UserInputException(it)
+            }
+            when {
+                registrationSubmissionFixture != null -> registrationSubmissionFixture.invoke()
+                repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository ->
+                    repository.submitRegistrationDraftLive()
+                else -> repository.submitRegistrationDraftForFixture()
+            }
+            if (!applicationSubmitted) {
+                telemetry.log(TelemetryEvent.OwnerApplicationSubmitted(applicationType ?: ApplicationType.NEW))
+                applicationSubmitted = true
+            }
+        } catch (cancelled: kotlinx.coroutines.CancellationException) { throw cancelled }
+        catch (error: Exception) {
+            telemetry.log(TelemetryEvent.OwnerApplicationFailed(ErrorCode.from(error)))
+            throw error
         }
     }
 
@@ -179,15 +214,31 @@ class OwnerMockViewModel(
         (repository as? com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
             ?.pendingCoverWarning
 
-    suspend fun submitPhotoImportLive(barId: String, photos: List<MockPhoto>): String =
-        if(repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
-            repository.submitPhotoImportLive(barId, photos)
-        else repository.queuePhotoImport(barId, photos)
+    suspend fun submitPhotoImportLive(barId: String, photos: List<MockPhoto>): String {
+        if (photos.isNotEmpty()) telemetry.log(TelemetryEvent.MenuImportStarted(
+            // Mixed selections are classified by the first selected photo.
+            photos.first().telemetrySource, PhotoCount.from(photos.size)))
+        return try {
+            if (repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
+                repository.submitPhotoImportLive(barId, photos)
+            else repository.queuePhotoImport(barId, photos)
+        } catch (cancelled: kotlinx.coroutines.CancellationException) { throw cancelled }
+        catch (error: Exception) {
+            telemetry.log(TelemetryEvent.MenuImportFailed(ImportStage.UPLOAD, ErrorCode.from(error)))
+            throw error
+        }
+    }
 
-    suspend fun pollPhotoImportLive(importId: String): MockImportStatus =
-        if(repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
+    suspend fun pollPhotoImportLive(importId: String): MockImportStatus {
+        val status = if (repository is com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)
             repository.pollPhotoImportLive(importId)
         else error("Local fixture must be supplied for Mock polling")
+        if (status == MockImportStatus.FAILED && failedImports.add(importId)) {
+            telemetry.log(TelemetryEvent.MenuImportFailed(ImportStage.EXTRACTION,
+                snapshot()?.imports?.firstOrNull { it.menuImportId == importId }?.failureCode ?: ErrorCode.UNKNOWN))
+        }
+        return status
+    }
 
     fun photoPublishWarning(): String? =
         (repository as? com.zerotoone.bottlemap.data.owner.LiveOwnerScreenRepository)

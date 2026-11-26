@@ -2,6 +2,21 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
+    id("com.google.gms.google-services") version "4.6.0" apply false
+    id("com.google.firebase.crashlytics") version "3.0.8" apply false
+}
+
+// No Firebase SDKs, plugin application or generated configuration in credential-free builds.
+val firebaseEnabled = file("google-services.json").isFile &&
+    providers.gradleProperty("BOTTLEMAP_FIREBASE_ENABLED").orNull != "false"
+val releaseChannel = providers.gradleProperty("BOTTLEMAP_RELEASE_CHANNEL").orElse("dev").get()
+require(releaseChannel in setOf("dev", "alpha", "beta", "release")) {
+    "BOTTLEMAP_RELEASE_CHANNEL must be dev, alpha, beta or release"
+}
+val debugTelemetryEnabled = providers.gradleProperty("BOTTLEMAP_TELEMETRY_DEBUG_ENABLED").orNull == "true"
+if (firebaseEnabled) {
+    apply(plugin = "com.google.gms.google-services")
+    apply(plugin = "com.google.firebase.crashlytics")
 }
 
 val configuredApiBaseUrl = providers.gradleProperty("BOTTLEMAP_API_BASE_URL")
@@ -60,10 +75,16 @@ val prepareRobolectricSdk by tasks.registering(Sync::class) {
 }
 
 android {
+    sourceSets.named("main") {
+        kotlin.directories += if (firebaseEnabled) "src/firebase/java" else "src/noFirebase/java"
+    }
     namespace = "com.zerotoone.bottlemap"
     compileSdk = 37
 
     defaultConfig {
+        buildConfigField("boolean", "FIREBASE_ENABLED", firebaseEnabled.toString())
+        buildConfigField("String", "RELEASE_CHANNEL", stringBuildConfigValue(releaseChannel))
+        manifestPlaceholders["analyticsDeactivated"] = "false"
         applicationId = "com.zerotoone.bottlemap"
         buildConfigField("String", "PRIVACY_POLICY_URL", stringBuildConfigValue(
             providers.gradleProperty("BOTTLEMAP_PRIVACY_POLICY_URL")
@@ -92,6 +113,10 @@ android {
     // One APK for customer and owner flows.
     buildTypes {
         debug {
+            buildConfigField("boolean", "TELEMETRY_BUILD_ALLOWED", debugTelemetryEnabled.toString())
+            // A persisted SDK opt-in from a previous APK cannot enable an ordinary debug build.
+            manifestPlaceholders["analyticsDeactivated"] = (!debugTelemetryEnabled).toString()
+
             // AGP's built-in JaCoCo collects local JVM coverage.
             enableUnitTestCoverage = true
             // Instrument Compose tests only when explicitly requested by the emulator CI.
@@ -101,6 +126,8 @@ android {
             buildConfigField("String", "API_BASE_URL", "\"$debugApiBaseUrl\"")
         }
         release {
+            buildConfigField("boolean", "TELEMETRY_BUILD_ALLOWED", "true")
+
             isMinifyEnabled = false
             signingConfig = signingConfigs.getByName("release")
             buildConfigField("String", "API_BASE_URL", "\"$releaseApiBaseUrl\"")
@@ -142,6 +169,12 @@ android {
 }
 
 dependencies {
+    if (firebaseEnabled) {
+        implementation(platform("com.google.firebase:firebase-bom:35.2.0"))
+        implementation("com.google.firebase:firebase-analytics")
+        implementation("com.google.firebase:firebase-crashlytics")
+    }
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)

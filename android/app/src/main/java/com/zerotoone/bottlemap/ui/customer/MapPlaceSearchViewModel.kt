@@ -1,5 +1,6 @@
 package com.zerotoone.bottlemap.ui.customer
 
+import com.zerotoone.bottlemap.telemetry.*
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -27,7 +28,10 @@ sealed interface MapPlaceSearchState {
     data class Error(val message: String) : MapPlaceSearchState
 }
 
-class MapPlaceSearchViewModel(private val source: MapPlaceSearchSource) : ViewModel() {
+class MapPlaceSearchViewModel(
+    private val source: MapPlaceSearchSource,
+    private val telemetry: Telemetry = AppTelemetry.current,
+) : ViewModel() {
     private val _state = MutableStateFlow<MapPlaceSearchState>(MapPlaceSearchState.Idle)
     val state: StateFlow<MapPlaceSearchState> = _state.asStateFlow()
 
@@ -61,6 +65,7 @@ class MapPlaceSearchViewModel(private val source: MapPlaceSearchSource) : ViewMo
                 val places = sanitizePlaces(source.search(query))
                 if (version == generation) {
                     _state.value = MapPlaceSearchState.Results(places)
+                    telemetry.log(TelemetryEvent.SearchCompleted(SearchKind.BAR_NAME, places.any { it.barId != null }))
                 }
             } catch (cancelled: CancellationException) {
                 throw cancelled

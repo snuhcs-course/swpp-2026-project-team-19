@@ -1,5 +1,6 @@
 package com.zerotoone.bottlemap.ui.owner.review
 
+import com.zerotoone.bottlemap.telemetry.*
 import com.zerotoone.bottlemap.ui.common.userMessage
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -93,7 +94,27 @@ sealed interface PhotoReviewEvent {
  * State and transitions of the one-page review (v18 flow 02). Every user action of the
  * prototype has one method here; the composables only call them.
  */
-class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : ViewModel() {
+class PhotoReviewViewModel(
+    private val repository: PhotoReviewRepository,
+    private val telemetry: Telemetry = AppTelemetry.current,
+    private val clock: () -> Long = { System.nanoTime() / 1_000_000 },
+) : ViewModel() {
+    private var reviewStartedAt: Long? = null
+    private var initialNeededCheck = CheckCount.ZERO
+    private var measuredPublication = false
+    private fun reviewOpened(state: PhotoReviewState) {
+        if (reviewStartedAt != null) return
+        reviewStartedAt = clock()
+        initialNeededCheck = CheckCount.from(PhotoReviewRules.stats(state).pending.size)
+        telemetry.log(TelemetryEvent.MenuReviewOpened)
+    }
+    private fun publicationConfirmed() {
+        if (measuredPublication) return
+        val started = reviewStartedAt ?: return
+        measuredPublication = true
+        telemetry.log(TelemetryEvent.MenuPublished(initialNeededCheck,
+            ReviewTime.fromMillis((clock() - started).coerceAtLeast(0))))
+    }
     private val _load = MutableStateFlow<PhotoReviewLoad>(PhotoReviewLoad.Loading)
     val load: StateFlow<PhotoReviewLoad> = _load.asStateFlow()
     private val _publishing = MutableStateFlow(false)
@@ -170,6 +191,7 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                                 if (_draftProblem.value == null) _draftProblem.value = notice
                             }
                             if (resumable) resumeServerSync = fresh
+                            reviewOpened(fresh)
                             PhotoReviewLoad.Ready(fresh)
                         }
                     } catch (applied: ReviewAlreadyAppliedException) {
@@ -621,11 +643,13 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                 }
                 _draftProblem.value = null
                 repository.publish(state)
+                publicationConfirmed()
                 _publishOutcome.value = PublishOutcome.Success(
                     summary, newWhisky, repository.publishedAddedCount())
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (_: ReviewDraftConflictException) {
+                telemetry.log(TelemetryEvent.MenuPublishFailed(ErrorCode.REVIEW_DRAFT_OUTDATED))
                 // A newer server draft won the CAS. Re-open the review against
                 // its latest acknowledged content; never display the generic
                 // PublishFailure.CONFLICT page for this draft-only condition.
@@ -634,6 +658,8 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
                 _publishing.value = false
                 reload()
             } catch (error: Exception) {
+                telemetry.log(TelemetryEvent.MenuPublishFailed(
+                    if (error is ReviewVersionConflictException) ErrorCode.REVIEW_OUTDATED else ErrorCode.from(error)))
                 val reason = classifyPublishFailure(error)
                 _publishOutcome.value = PublishOutcome.Failed(
                     summary, newWhisky, reason,
@@ -666,9 +692,11 @@ class PhotoReviewViewModel(private val repository: PhotoReviewRepository) : View
         viewModelScope.launch {
             try {
                 when (repository.checkPublishedStatus()) {
-                    true -> _publishOutcome.value =
-                        PublishOutcome.Success(result.summary, result.newWhisky,
+                    true -> {
+                        publicationConfirmed()
+                        _publishOutcome.value = PublishOutcome.Success(result.summary, result.newWhisky,
                             repository.publishedAddedCount())
+                    }
                     false -> if (retryWhenReady && result.reason == PublishFailure.NETWORK &&
                         review?.let { PhotoReviewRules.stats(it).canPublish } == true) {
                         _publishing.value = false

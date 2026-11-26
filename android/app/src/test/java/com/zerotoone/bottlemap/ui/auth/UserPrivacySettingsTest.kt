@@ -14,6 +14,19 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk=[35])
 class UserPrivacySettingsTest {
+    private var previous:com.zerotoone.bottlemap.telemetry.Telemetry=com.zerotoone.bottlemap.telemetry.NoOpTelemetry
+    @org.junit.Before fun isolateCollector() {
+        // Each Robolectric test owns a new Application and preference store;
+        // Application startup now reads consent before the test body does.
+        UserPrivacySettings::class.java.getDeclaredField("instance").apply {
+            isAccessible=true
+            set(null,null)
+        }
+        previous=com.zerotoone.bottlemap.telemetry.AppTelemetry.current
+        com.zerotoone.bottlemap.telemetry.AppTelemetry.current=com.zerotoone.bottlemap.telemetry.FakeTelemetry()
+    }
+    @org.junit.After fun restoreCollector() { com.zerotoone.bottlemap.telemetry.AppTelemetry.current=previous }
+
     @Test fun oldWelcomeCompletionDoesNotBypassNewSelfConfirmation() {
         val context:Context=RuntimeEnvironment.getApplication()
         val prefs=context.getSharedPreferences("bottlemap-first-launch",Context.MODE_PRIVATE)
@@ -35,6 +48,45 @@ class UserPrivacySettingsTest {
         settings.setUsageEnabled(false)
         assertFalse(settings.usageEnabled.value)
     }
+    @Test fun privacyToggleControlsBothCollectorsThroughOneGate() {
+        val context:Context=RuntimeEnvironment.getApplication()
+        val previous=com.zerotoone.bottlemap.telemetry.AppTelemetry.current
+        val fake=com.zerotoone.bottlemap.telemetry.FakeTelemetry()
+        com.zerotoone.bottlemap.telemetry.AppTelemetry.current=fake
+        try {
+            val settings=UserPrivacySettings.get(context)
+            settings.setUsageEnabled(true); settings.setUsageEnabled(false)
+            assertEquals(listOf(true,false),fake.enabledChanges)
+            assertFalse(settings.usageEnabled.value)
+        } finally { com.zerotoone.bottlemap.telemetry.AppTelemetry.current=previous }
+    }
+    @Test fun failedConsentWritesDoNotAcknowledgeEitherToggleOrChangeCollectors() {
+        val context: Context = RuntimeEnvironment.getApplication()
+        val prefs = context.getSharedPreferences("failing-consent", Context.MODE_PRIVATE)
+        val fake = com.zerotoone.bottlemap.telemetry.FakeTelemetry()
+        com.zerotoone.bottlemap.telemetry.AppTelemetry.current = fake
+        for (initial in listOf(false, true)) {
+            prefs.edit().putBoolean("usage-records", initial).commit()
+            val failing = object : android.content.SharedPreferences by prefs {
+                override fun edit(): android.content.SharedPreferences.Editor {
+                    val editor = prefs.edit()
+                    return object : android.content.SharedPreferences.Editor by editor {
+                        override fun putBoolean(key: String?, value: Boolean): android.content.SharedPreferences.Editor {
+                            editor.putBoolean(key, value)
+                            return this
+                        }
+                        override fun commit() = false
+                    }
+                }
+            }
+            val settings = UserPrivacySettings(failing)
+            assertFalse(settings.setUsageEnabled(!initial))
+            assertEquals(initial, settings.usageEnabled.value)
+            assertEquals(initial, prefs.getBoolean("usage-records", !initial))
+            assertTrue(fake.enabledChanges.isEmpty())
+        }
+    }
+
     @Test fun policyOpensTheConfiguredPublicUrlWithoutAuthentication() {
         val app:android.app.Application=RuntimeEnvironment.getApplication()
         openPrivacyPolicy(app)

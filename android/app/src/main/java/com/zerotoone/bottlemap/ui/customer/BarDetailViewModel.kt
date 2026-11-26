@@ -1,5 +1,6 @@
 package com.zerotoone.bottlemap.ui.customer
 
+import com.zerotoone.bottlemap.telemetry.*
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zerotoone.bottlemap.data.CustomerBarDetailSource
@@ -78,10 +79,13 @@ data class BarMenuOptionUiModel(
 
 class BarDetailViewModel(
     private val source: CustomerBarDetailSource = Repositories.customer,
+    private val telemetry: Telemetry = AppTelemetry.current,
+    private val journey: DiscoveryJourney = AppDiscoveryJourney.current,
 ) : ViewModel() {
     private val _state = MutableStateFlow<BarDetailUiState>(BarDetailUiState.Loading)
     val state: StateFlow<BarDetailUiState> = _state.asStateFlow()
 
+    private var detailMeasured = false
     private var currentBarId: String? = null
     private var requestJob: Job? = null
     private var requestVersion = 0L
@@ -90,6 +94,7 @@ class BarDetailViewModel(
         // Recomposition, rotation, and returning from the back stack must not refetch.
         if (currentBarId == barId) return
         currentBarId = barId
+        detailMeasured = false
         if (barId.isBlank()) {
             // Invalidate a prior in-flight request even if this route is malformed.
             requestVersion++
@@ -120,7 +125,10 @@ class BarDetailViewModel(
                 // Never render another bar's data beneath the selected route.
                 // This also guards against a malformed/stale backend response.
                 check(response.barId == barId) { "Bar ID mismatch in menu response." }
-                if (version == requestVersion) _state.value = response.toBarDetailUiState()
+                if (version == requestVersion) {
+                    _state.value = response.toBarDetailUiState()
+                    if (!detailMeasured) { detailMeasured = true; telemetry.log(journey.detailOpened()) }
+                }
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (error: Exception) {
