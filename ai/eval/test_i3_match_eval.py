@@ -380,3 +380,33 @@ def test_server_steps_are_not_for_the_tool_layer(capsys):
         h.parse_args(["--set", "i3", "--catalog", "asis", "--llm", "--llm-mode", "tools", "--cache", "c",
                       "--server-steps", "--json", "x.json"])
     assert "--server-steps is for rules or rules + M3a" in capsys.readouterr().err
+
+
+# ---------- the "not a whisky" note (I5) ----------
+
+def nw_row(kind, llm_kind, base_n=0, n=0, hint=None, target=True, burden="register"):
+    return {"photo_id": "p", "name": f"{kind}-{llm_kind}-{base_n}-{n}", "gold": kind, "kind": kind,
+            "llm_target": target, "llm_kind": llm_kind, "base_n_cand": base_n, "n_cand": n, "kind_hint": hint,
+            "status": "unmatched" if n == 0 else "ambiguous", "burden": burden, "cands": ""}
+
+
+def test_not_whisky_stats_count_the_note_and_the_three_variants_by_gold_class():
+    rows = [
+        nw_row("non_whisky", "non_whisky", hint="non_whisky"),               # cognac: flagged
+        nw_row("non_whisky", "non_whisky", n=1, hint="non_whisky", burden="wrong"),  # embedding added a candidate
+        nw_row("non_whisky", "whisky"),                                      # the LLM missed it
+        nw_row("known", "non_whisky", base_n=1, n=1, burden="confirm"),      # a whisky the rules had a candidate for
+        nw_row("absent", "non_whisky", hint="non_whisky"),                   # a whisky flagged by mistake
+        nw_row("unknown", "unclear"),
+        nw_row("known", None, target=False, n=1, burden="confirmed"),        # confirmed by the rules: never asked
+    ]
+    s = h.not_whisky_stats(rows)
+    assert s["llm_targets"] == {"non_whisky": 3, "whisky": 2, "unknown": 1, "unpaired": 0}
+    assert s["flagged"] == {"non_whisky": 2, "whisky": 1, "unknown": 0, "unpaired": 0}
+    assert s["variant_A"] == {"non_whisky": 2, "whisky": 2, "unknown": 0, "unpaired": 0}
+    assert s["variant_B"] == {"non_whisky": 2, "whisky": 1, "unknown": 0, "unpaired": 0}
+    assert s["variant_C"] == {"non_whisky": 1, "whisky": 1, "unknown": 0, "unpaired": 0}
+    assert s["flagged_by_burden"] == {"register": 2, "wrong": 1}
+    assert (s["no_candidate"], s["no_candidate_not_flagged"]) == (4, 2)
+    assert [x["name"] for x in s["said_not_flagged_lines"]] == ["known-non_whisky-1-1"]
+    assert [x["llm_kind"] for x in s["non_whisky_gold_not_said"]] == ["whisky"]

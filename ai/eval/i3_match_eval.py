@@ -732,6 +732,7 @@ def score_line(be: Backend, photo: Photo, name: str, graw: str, r, b, bc: BarCat
         return {"bar": photo.bar, "photo_id": photo.photo_id, "name": name, "gold": None, "kind": "unpaired",
                 "status": r.status, "outcome": None, "burden": None, "confirm_recommended": cr, "cr_source": None,
                 "rank1_gold": False, "n_cand": len(r.candidates), "base_status": b.status, "llm_target": target,
+                "base_n_cand": len(b.candidates), "kind_hint": getattr(r, "kind_hint", None),
                 "cands": " || ".join(bc.display.get(c.product_id, "?") for c in r.candidates[:4])}
     in_cat = lambda ref: ref in bc.key_to_id
     outcome = be.judge(g, r, bc.key_to_id, in_cat)
@@ -755,7 +756,8 @@ def score_line(be: Backend, photo: Photo, name: str, graw: str, r, b, bc: BarCat
            "rule": r.candidates[0].evidence.get("rule") if r.candidates else "",
            "cands": " || ".join(bc.display.get(c.product_id, "?") for c in r.candidates[:4]),
            "gold_display": " | ".join(bc.display[bc.key_to_id[x]] for x in refs_of(be, g) if x in bc.key_to_id),
-           "base_status": b.status, "llm_target": target}
+           "base_status": b.status, "llm_target": target,
+           "base_n_cand": len(b.candidates), "kind_hint": getattr(r, "kind_hint", None)}
     if r is not b and r.candidates and r.candidates[0].method == "llm":
         ev = r.candidates[0].evidence
         row["llm"] = {"english_name": ev.get("englishName"), "via": ev.get("via"),
@@ -791,6 +793,52 @@ def stats(rows: list[dict], photos: int) -> dict:
         "from_register": sum(1 for r in rows if r["base_status"] == "unmatched" and r["status"] != "unmatched"),
         "from_register_gold_in": sum(1 for r in rows if r["base_status"] == "unmatched"
                                      and r["status"] != "unmatched" and r["outcome"] == "ambiguous_ok"),
+    }
+
+
+GOLD_CLASS = {"non_whisky": "non_whisky", "known": "whisky", "absent": "whisky", "unknown": "unknown",
+              "unpaired": "unpaired"}
+
+
+def not_whisky_stats(rows: list[dict]) -> dict:
+    """The "not a whisky" note (I5), by gold class (whisky = a product in or out of the catalog).
+
+    flagged: lines with kind_hint (--flag-non-whisky: the LLM said non_whisky and the rules had no
+    candidate). The variants are counted from `llm_kind` whether or not the flag is on:
+      A  the LLM said non_whisky
+      B  A and no rule candidate (what the flag marks)
+      C  A and no candidate in this section's result (after the embedding step in "server")
+    The burden numbers are not changed by the note; `flagged_by_burden` says which of them carry it.
+    """
+    targets = [r for r in rows if r["llm_target"]]
+
+    def by_class(pick) -> dict:
+        c = Counter(GOLD_CLASS[r["kind"]] for r in targets if pick(r))
+        return {k: c[k] for k in ("non_whisky", "whisky", "unknown", "unpaired")}
+
+    def said(r) -> bool:
+        return r.get("llm_kind") == "non_whisky"
+
+    def line(r) -> dict:
+        return {"photo_id": r["photo_id"], "name": r["name"], "gold": r["gold"], "llm_kind": r.get("llm_kind"),
+                "status": r["status"], "cands": r["cands"]}
+
+    flagged = [r for r in targets if r["kind_hint"] == "non_whisky"]
+    return {
+        "llm_targets": by_class(lambda r: True),
+        "llm_kind": {str(k): by_class(lambda r, k=k: r.get("llm_kind") == k)
+                     for k in ("non_whisky", "whisky", "unclear", None)},
+        "flagged": by_class(lambda r: r["kind_hint"] == "non_whisky"),
+        "variant_A": by_class(said),
+        "variant_B": by_class(lambda r: said(r) and r["base_n_cand"] == 0),
+        "variant_C": by_class(lambda r: said(r) and r["n_cand"] == 0),
+        "flagged_by_burden": dict(Counter(str(r["burden"]) for r in flagged)),
+        "flagged_by_status": dict(Counter(r["status"] for r in flagged)),
+        "no_candidate": sum(r["status"] == "unmatched" for r in rows),
+        "no_candidate_not_flagged": sum(r["status"] == "unmatched" and r["kind_hint"] is None for r in rows),
+        "flagged_lines": [line(r) for r in flagged],
+        "said_not_flagged_lines": [line(r) for r in targets if said(r) and r["kind_hint"] is None],
+        "non_whisky_gold_not_said": [line(r) for r in targets if r["kind"] == "non_whisky" and not said(r)],
     }
 
 
@@ -850,6 +898,9 @@ def parse_args(argv=None):
     ap.add_argument("--tools-fallback", default="gemini-3.5-flash-lite", help="used after a quota error; '' for none")
     ap.add_argument("--tools-stub", action="store_true", help="TEST ONLY: a local stub instead of Gemini")
     ap.add_argument("--additions-file", type=Path, help=f"--catalog ops; default: <rules-repo>/{ADDITIONS_FILE}")
+    ap.add_argument("--flag-non-whisky", action="store_true",
+                    help="I5: the LLM layer marks a line it reads as not a whisky when the rules had no candidate "
+                         "(kind_hint); the not_whisky numbers are written either way")
     ap.add_argument("--server-steps", action="store_true",
                     help="also score the result after the embedding step, the linking guards and the stored status")
     ap.add_argument("--json", type=Path, required=True)
@@ -979,13 +1030,22 @@ def main(argv=None) -> dict:
         for photo in photos:
             for name, _ in photo.lines:
                 b = base[(photo.photo_id, name)]
+                flag = {"flag_non_whisky": True} if args.flag_non_whisky else {}  # an older rules checkout has no flag
                 resolved[(photo.photo_id, name)] = (b if b.status in CONFIRMED else engines[photo.bar].resolve(
-                    photo.photo_id, name, bar_catalogs[photo.bar].catalog, b, use_m3b=False))
-        llm_rows = rows_for(resolved)
+                    photo.photo_id, name, bar_catalogs[photo.bar].catalog, b, use_m3b=False, **flag))
+
+        def with_llm_kind(rows: list[dict]) -> list[dict]:
+            for row in rows:
+                t = engines[row["bar"]].translation(row["photo_id"], row["name"]) if row["llm_target"] else None
+                row["llm_kind"] = t["kind"] if t else None
+            return rows
+
+        llm_rows = with_llm_kind(rows_for(resolved))
         final, final_complete = resolved, stop is None and llm.counts["cache_miss"] == 0
         lat = [p["latency_ms"] for p in photo_runs if p.get("latency_ms") is not None]
         result["llm"] = {
             **summarize(llm_rows, photos, missed_known), "rows": llm_rows, "photo_runs": photo_runs,
+            "flag_non_whisky": args.flag_non_whisky, "not_whisky": not_whisky_stats(llm_rows),
             "complete": stop is None and llm.counts["cache_miss"] == 0,
             "stop_reason": stop, "cache": args.cache.as_posix(), "api_calls": llm.api_calls,
             "counts": dict(llm.counts),
@@ -998,8 +1058,11 @@ def main(argv=None) -> dict:
 
     if args.server_steps:
         served, steps = server_steps(photos, bar_catalogs, final)
-        result["server"] = {**summarize(rows_for(served), photos, missed_known), "rows": rows_for(served),
+        served_rows = rows_for(served)
+        result["server"] = {**summarize(served_rows, photos, missed_known), "rows": served_rows,
                             "after": "llm" if final is not base else "rules", "complete": final_complete, **steps}
+        if args.llm and args.llm_mode == "m3a":
+            result["server"]["not_whisky"] = not_whisky_stats(with_llm_kind(served_rows))
 
     args.json.parent.mkdir(parents=True, exist_ok=True)
     args.json.write_text(json.dumps(result, ensure_ascii=False, indent=1, default=str) + "\n", encoding="utf-8")
@@ -1026,6 +1089,14 @@ def print_summary(result: dict) -> None:
               f"  wrong CR {a['wrong_cr']}  accept-err {fmt(a['accept_err_rate'], 4)}"
               f"  hard/photo {fmt(a['hard_per_photo'], 2)}  CR rule {a['cr_rule']['correct']}/{a['cr_rule']['n']}"
               f"  CR LLM {a['cr_llm']['correct']}/{a['cr_llm']['n']}")
+    for matcher in ("llm", "server"):
+        nw = result.get(matcher, {}).get("not_whisky")
+        if nw:
+            f, a, t = nw["flagged"], nw["variant_A"], nw["llm_targets"]
+            print(f"  {matcher:6s} not-whisky note: flagged non-whisky {f['non_whisky']}/{t['non_whisky']}"
+                  f"  whisky {f['whisky']}/{t['whisky']}  unknown {f['unknown']}/{t['unknown']}"
+                  f"  (LLM said non_whisky: {a['non_whisky']}/{a['whisky']}/{a['unknown']})"
+                  f"  no candidate {nw['no_candidate']}, of them not flagged {nw['no_candidate_not_flagged']}")
     if "llm" in result:
         llm = result["llm"]
         print(f"  LLM complete={llm['complete']} api_calls={llm['api_calls']} counts={llm['counts']}"
