@@ -20,7 +20,15 @@
 
 ## 진우가 정할 것
 
-(4단계에서 채운다.)
+1. **1a를 이대로 둘지, 그리고 2단계를 돌릴지.** 위 3줄은 모두 정답 후보 1개로 남고(업주 한 번 누름) FM은 늘지 않는다. 대신 맞게 확정되는 줄도 생긴다(dev `글렌모렌지(Glenmorangie) 12년 오리지널`, I3 `글렌모렌지 12 라산타`). 고를 수 있는 것:
+   - (가) 이대로 두고 2단계를 돌린다(명령은 2단계 절, 새 Gemini 호출 약 30회 이하).
+   - (나) "더 넥타 16Y"를 위해 Nectar D'Or의 표시·에디션 이름을 지금 병 이름("The Nectar")에 맞추거나 "Nectar" 별칭 규칙을 본다. 카탈로그 수정이라 이번에 하지 않았다.
+   - (다) "라산타 15Y", "Glenmorangie 15yr"를 Lasanta로 적은 정답이 두 매장에 있다. 15년 라산타가 따로 있다면 카탈로그 상품 문제이고, 없다면 정답 문제다. 확인하지 않았다(본 셋에서 본 것).
+2. **1b 플래그(`MATCHING_MISSING_AGE_GUARD`)를 켤지.** 권고는 **끈 채로 두기**. 켜면 I3의 FM 1(Ardbeg Anthology)이 0이 되지만 맞는 확정이 I3 24줄, dev 24줄 사라진다(모두 정답 후보 1개 + 확인 권장, 어려운 줄은 I3 +1, dev 0). 좁은 변형(가: 상품 표시명에 연수가 있을 때만)이면 I3 3줄, dev 5줄만 잃는다(손으로 센 값, 구현 안 함). 1b절.
+3. **3단계(3.8 Flash 끝까지 추출) 실행 승인.** 1회 약 $0.92, 3회 약 $2.77, CLOVA 0회, Gemini 무료 키는 매칭에 1회 약 62회. P19가 main에 들어간 뒤 실행기를 하나 만들어야 한다. 3단계 절.
+4. **1c 해석 확인.** "확정은 하지 않는다"를 "새로 내는 후보는 확정하지 않는다"로 읽고 규칙은 고치지 않았다(대표 병의 S2b 확정은 그대로). 다르게 의도했다면 알려 줘. 1c절.
+
+호출 수: **Gemini 0회, OpenRouter 0회, CLOVA 0회.** push·PR 생성 없음. `feature/i5-p19-openrouter-extraction`은 읽기만 했다(`git show`, `git diff`).
 
 ## 0단계: 지금 상태 정리
 
@@ -204,3 +212,90 @@ python ai/eval/i3_match_eval.py --set dev --catalog service --server-steps --jso
 전후 비교: 규칙 코드를 바꾸지 않았으므로 1c 전후 결과는 1a 결과와 줄 단위로 같다.
 
 테스트: `backend/tests/test_resolve_staged.py` 6개(연수 상품 하나 → 후보 1개 4가지 표기, 둘 → 고르기, 대표 병은 확정·없는 연수는 후보 없음), `ai/eval/test_i5_p59.py` 2개(스캔). 커버리지: `i5_p59_age_only.py` 91%.
+
+## 2단계: P31 재평가 — 돌리지 않음
+
+1a에서 맞는 확정이 사라져(맨 위 표) 지시대로 넘어가지 않았다. **Gemini 호출 0회.** 1단계 커밋 상태에서 돌릴 명령은 준비해 두었다(진우가 1a를 그대로 둘지 정한 뒤). 11/21 4.2절과 같은 구성이다.
+
+```powershell
+$P = "ai/runs/2026-11-27_i5_p31"; $N = "ai/runs/2026-11-21_i5_not_whisky"; $Q = "ai/runs/2026-11-17_p46"
+# dev 5곳 (service), r1·r2. 11/21 캐시를 씨앗으로
+foreach ($r in 1,2) {
+  python ai/eval/i3_match_eval.py --set dev --catalog service --llm --cache "$P/cache_dev_r$r" `
+    --seed-cache "$N/cache_dev_r$r" --server-steps --flag-non-whisky --max-calls 60 --json "$P/match/dev_service_r$r.json"
+}
+# I3 33장 full·ops, 라벨 입력, r1~r3. P46 캐시를 씨앗으로
+foreach ($r in 1,2,3) { foreach ($c in "full","ops") {
+  python ai/eval/i3_match_eval.py --set i3 --catalog $c --llm --cache "$P/cache_${c}_label_r$r" `
+    --seed-cache "$Q/cache_${c}_label_r$r" --server-steps --flag-non-whisky --max-calls 60 --json "$P/match/i3_${c}_label_r$r.json"
+} }
+# 1b를 켠 경우: 같은 명령에 --missing-age-guard 를 더하고 --json 이름만 바꾼다 (캐시가 같아 새 호출 없음)
+```
+
+- 예상 새 호출: 1a로 LLM 대상 줄이 달라지는 사진만 새로 부른다. 1a에서 바뀐 줄이 있는 사진은 dev 1장(011_미라보_04), I3 4장(015_04, 016_03, 017_03, 018_02)이라 회차·구성마다 0~4회로 본다. 합계 약 30회 이하로 200회 상한에서 멀다(실제 수는 돌려야 안다).
+- `--seed-cache`가 받는 캐시 폴더 이름은 11/21·P46 실행의 것을 그대로 썼다. P46의 ops 캐시는 `cache_ops_label_r*`.
+
+## 3단계: 끝까지 추출부터 (준비만, 실행하지 않음)
+
+추출 모델이 3.8 Flash(OpenRouter, P19)로 바뀌었으므로 I3 33장의 추출 → 매칭을 다시 재야 한다.
+
+**확인한 것 (API 0회)**
+
+- 사진과 OCR 캐시: `python ai/eval/p46_extract.py --out <임시> --check` → "photos and OCR caches verified: 33". 33장 모두 `<data_dir>/ocr_cache/<stem>__table-off.json`이 있고, 서버가 보낼 이미지의 SHA-256과 캐시의 `sent_sha256`이 같다.
+- P19의 서버 경로 실행기(`ai/eval/i5_server_route_regression.py`, P19 브랜치에서 읽기만 함)도 같은 파일을 `ReplayOcr`로 재생한다. 그래서 **CLOVA 호출 0회**로 돌릴 수 있다.
+
+**실행 방법 (P19가 main에 들어간 뒤)**
+
+이 브랜치에는 OpenRouter 추출 코드(`backend/app/extraction/routed.py`)가 없다. P19가 들어가면:
+
+1. P19의 `i5_server_route_regression.py`를 I3 33장용으로 바꾼 실행기를 만든다(사진 목록 `ai/eval/i3_photo_sha256.json`, 기록을 P46 `hybrid_v2_i3`와 같은 `<stem>_r<k>.json` 형식으로 써서 `i3_match_eval.py --extraction`이 읽게). 프롬프트 v2.1, `google/gemini-3.8-flash`, reasoning medium, 폴백 없음, Gemini API 경로 닫음은 P19 실행과 같게.
+2. 추출(33장 × 회차), 채점(`python ai/eval/score.py --set i3 <out>`), 매칭은 P46 4절 명령 그대로:
+
+```powershell
+foreach ($r in 1,2,3) { foreach ($c in "full","ops") {
+  python ai/eval/i3_match_eval.py --set i3 --catalog $c --extraction "$P/hybrid_v2_1_38flash_i3" --run $r --llm `
+    --cache "$P/cache_${c}_e2e_r$r" --server-steps --flag-non-whisky --max-calls 60 --json "$P/match/i3_${c}_e2e_r$r.json"
+} }
+```
+
+**예상 호출과 비용**
+
+| | 1회 | 3회 |
+|---|---|---|
+| OpenRouter (3.8 Flash, 사진 1장당 약 $0.028: P19 서버 경로 17장 중앙값 $0.0281) | 33회, 약 **$0.92** | 99회, 약 **$2.77** |
+| OpenRouter 최악 (한 장에 2번 시도, 30k 입력 + 48k 출력, P19 실행기의 상한 계산) | 사진당 $0.405 | 상한을 실행기에 두고 돈다 |
+| CLOVA | 0회 | 0회 |
+| Gemini 무료 키 (M3a 매칭, 사진마다 새 입력이라 full·ops 각 약 31회) | 약 62회 | 약 186회 |
+
+- I3 사진은 회귀 17장보다 줄이 많은 메뉴가 있어 실제 비용은 조금 더 들 수 있다.
+- 3회를 돌리면 Gemini 무료 키가 약 186회라 하루 200회 상한에 가깝다. 2단계와 같은 날 돌리면 넘는다.
+
+**진우 승인 필요: 1회 약 $0.92, 3회 약 $2.77** (OpenRouter 남은 $92.36에서).
+
+## 4단계: 마무리
+
+### 최종 테스트 (1c 커밋 뒤)
+
+- `ai` 전체: 392개 중 391 통과, 1 실패(`test_reencoded_ocr_cache_without_provenance_stops`, 11/21부터. Windows 경로 구분자).
+- 백엔드 전체(`pypdfium2`가 없어 수집 안 되는 3개 파일 제외): 1159 통과, 1940 건너뜀(DB 필요), 실패 0.
+- 회귀 15장(`ai/regression/regression.py`): 통과.
+
+### 남은 것
+
+- **흔들리는 테스트**: `ai/eval/test_i3_match_eval.py::test_server_steps_add_candidates_and_never_confirm`가 0단계 첫 실행에서 한 번 실패하고 이후 6번은 통과했다. 원인 모름.
+- **하네스가 추출 연수를 넘기지 않는다.** 서버는 `extracted_age_years`를 매칭에 넘겨 별칭 확정에도 연수 불일치를 본다. 라벨 입력 평가는 이것을 못 본다(1a의 2줄). `i5_p59_with_age.py`는 줄 이름에서 읽은 연수로 대신한 측정용이다. e2e(추출 입력)에서는 추출 기록의 `age_years`를 넘기는 쪽이 서버와 같다.
+- **"14yr"의 `yr`을 연수 단위로 읽지 않는다**(`staged._AGE_WITH_UNIT`). 후보는 나오지만 확인 권장 표시가 안 붙는다. 규칙 수정이라 하지 않았다.
+- **The Original의 옛 연수 별칭**(`Glenmorangie 10`, `글렌모렌지10`, 템플릿 `... Aged 10 Years`, `글렌모렌지 오리지널 10년 숙성`)이 남아 있다. 이 별칭으로 찾은 줄은 추출이 10을 넘기면 확정되지 않는다. 지울지(옛 병을 다른 상품으로 둘지)는 정하지 않았다.
+- **Nectar D'Or 이름**: 메뉴는 "더 넥타"로 적는다. 1a에서 사라진 확정 1줄의 원인이다(진우가 정할 것 1-나).
+- **Lasanta 15**: 정답 2줄(018_청춘위스키 봉천_02, 017_리틀 갤러리_03)이 15년을 Lasanta로 적었다(진우가 정할 것 1-다). 본 셋에서 본 것.
+- 운영 DB 카탈로그 적재, 평가 스냅샷(`catalog_v2_eval_5bars*.json`)은 그대로.
+- 1b의 좁은 변형은 제안만 했다.
+- 1a·1b 절의 줄 목록은 I3(본 셋)을 보고 정리한 것이다. 이것을 보고 규칙·카탈로그·정답을 고치지 않았다.
+
+### AI 사용 내역
+
+- 맡긴 일(Claude Code, 진우 자는 동안): 0단계 커밋 나누기(hunk 단위)·rebase·테스트, 1a 카탈로그 수정과 전후 비교 스크립트(`i5_p59_compare.py`)·연수 넘기는 래퍼(`i5_p59_with_age.py`), 1b 가드 구현(백엔드·하네스·설정·문서)과 측정, 1c 스캔(`i5_p59_age_only.py`)과 테스트, 3단계 준비, 이 보고서와 PR 초안(`pr_draft.md`).
+- 검증한 것: 0단계 기대값 4개, 1b 꺼짐 결과 = 1a 결과(서버 줄 전체 일치), 1b를 v2.4로도 재서 1a 효과 분리, 1a 바뀐 줄의 원인을 규칙 근거(`rule`, evidence)로 확인, OCR 캐시 33장 `--check`, 새 코드 단위 테스트와 커버리지(새 스크립트 합 96%, `linking_guards.py` 100%).
+- 검증하지 못한 것: 서버 경로에서 `MATCHING_MISSING_AGE_GUARD=true`로 실제 메뉴 등록(DB 필요 테스트는 건너뜀), 백로그 원문(이 컴퓨터에 없음), 글렌모렌지 연수 값 자체(웹 검색 안 함).
+- 호출: Gemini 0, OpenRouter 0, CLOVA 0.
+- 시간: 시계 기준 02:11 ~ 02:50 무렵.
