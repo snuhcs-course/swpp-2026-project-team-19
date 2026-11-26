@@ -27,8 +27,8 @@ Team Console access was reported complete by the user. No work-time or completio
 
 | Requirement | Android implementation / remaining evidence |
 |---|---|
-| P17 configuration, no-config fallback, Crashlytics | Optional source/dependency selection, lazy SDK initialization, shell-protected debug crash hook; test crash in Console remains manual |
-| P35 typed events and tests | `telemetry/` sealed events and enums, production Firebase sink, NoOp sink and test Fake; manual DebugView evidence remains |
+| P17 configuration, no-config fallback, Crashlytics | Optional source/dependency selection, lazy SDK initialization, shell-protected debug crash hook; test crash PASS reported by the Galaxy S23 tester on 2026-11-26 |
+| P35 typed events and tests | `telemetry/` sealed events and enums, production Firebase sink, NoOp sink and test Fake; device events and final release_channel=dev PASS confirmed by the user on 2026-11-26; independent transport checks below |
 | Consent and opt-out | Existing persisted default-off choice controls both collectors, independently of login |
 | No ad ID, user ID, raw query/location/application/menu data | Manifest restrictions, enum-only event boundary, fixed endpoint/screen templates; actual device payload review remains |
 | Development/Alpha/Beta/Release | Validated Gradle property and explicit debug collection gate |
@@ -145,13 +145,13 @@ Executed locally:
 - Final Firebase verification Debug: `:app:testDebugUnitTest --tests "com.zerotoone.bottlemap.telemetry.*" --tests "com.zerotoone.bottlemap.ui.auth.UserPrivacySettingsTest" :app:assembleDebug :app:processReleaseMainManifest -PBOTTLEMAP_TELEMETRY_DEBUG_ENABLED=true -PBOTTLEMAP_RELEASE_CHANNEL=dev` passed. This follow-up includes the final ad-services permission removal and endpoint-specificity regression.
 - Firebase Alpha Release: `:app:compileReleaseKotlin :app:checkReleaseDuplicateClasses -x :app:validateReleaseSigning -PBOTTLEMAP_RELEASE_CHANNEL=alpha -PBOTTLEMAP_API_BASE_URL=https://bottlemap.o-r.kr/` passed. This verifies compilation/dependencies, not signing or store installation.
 - Python Android CI helper tests: 19 passed. Android workflow YAML parsed; `git diff --check` passed. One unified SDK-configured Debug APK was inspected for Analytics, Crashlytics, the debug crash hook and both customer/owner code.
-- Full no-SDK build/test/lint and final GitHub CI review are **pending before merge**, per the user's instruction. No new broad verification run is needed just to maintain the Draft PR.
+- No-SDK build/test/lint passed at ad261897 (759 tests, zero failures/errors/skips; recorded in PR #216). Latest-head full GitHub CI/human review remains a merge gate, per the user's instruction. No new broad verification run was needed for the focused SDK-order fix or final device diagnosis.
 
-GitHub CI status must be checked on the pushed PR; local results do not establish CI success. No Galaxy S23/DebugView/Crashlytics delivery evidence has been obtained by the agent. No signed release/ONE store upload is claimed. P17/P35 remain Started pending their actual device/Console DoD. Human review must cover Privacy, Auth/permissions (debug shell hook and sign-in/consent instrumentation), and Android CI. No backend, AI, owner web, API or schema is changed.
+GitHub CI status must be checked on the pushed PR; local results do not establish CI success. Device QA is now PASS by user report, including the final release_channel=dev Console check. The agent independently inspected current-device SDK upload evidence, as recorded below; this is distinct from Console observation. No signed release/ONE store upload is claimed. P17/P35 remain Started pending the separate review and final PR disposition gates. Human review must cover Privacy, Auth/permissions (debug shell hook and sign-in/consent instrumentation), and Android CI. No backend, AI, owner web, API or schema is changed.
 
 ## 2026-11-26 Galaxy S23 QA follow-up: release_channel
 
-The user reports a conditional pass on a Firebase-enabled Debug/dev build: customer/auth/owner/import/review events, consent controls, existing flows and Crashlytics passed. Cold start was 1,110 ms in one recorded COLD run (not a multi-run benchmark). The supplied screenshots independently show bar_detail_opened / owner_application_started delivery and a correctly registered user-scoped Release Channel dimension mapped to release_channel. They do not show release_channel among the selected event's user properties. Detailed events and Crashlytics remain user-reported evidence, rather than independently reviewed Console screenshots for every item.
+The initial user report was a conditional pass on a Firebase-enabled Debug/dev build: customer/auth/owner/import/review events, consent controls, existing flows and Crashlytics passed. Cold start was 1,110 ms in one recorded COLD run (not a multi-run benchmark). The supplied screenshots independently show bar_detail_opened / owner_application_started delivery and a correctly registered user-scoped Release Channel dimension mapped to release_channel. They do not show release_channel among the selected event's user properties. Detailed events and Crashlytics remain user-reported evidence, rather than independently reviewed Console screenshots for every item.
 
 **Root cause and fix:** FirebaseTelemetry previously assigned release_channel before enabling Analytics collection. This app deliberately defaults collection to false and disables/resets it on opt-out. The resolved Google measurement SDK (24.0.0) explicitly drops user-property writes in that state (its diagnostic is `User property not set since app measurement is disabled`). Consent is now applied first, then collection is enabled, then the build's release_channel is assigned. The shared SDK-call sequence has regressions using a fake that rejects disabled-state property writes, covering first opt-in, reset/re-enable and startup/channel replacement. Advertising remains denied and the existing consent/build gate is unchanged.
 
@@ -186,7 +186,36 @@ Galaxy S23 — release_channel focused retest
 Notes / new-event timestamp:
 ```
 
-When finished, disable DebugView routing with `adb shell setprop debug.firebase.analytics.app .none.`. The QA remains conditional until the user confirms the new property check. CI/human-review and ONE store distribution verification are separate gates; schedule completion/time fields are not changed by this report.
+When finished, disable DebugView routing with `adb shell setprop debug.firebase.analytics.app .none.`. The user subsequently confirmed release_channel=dev in Firebase Console; the device QA is now PASS (see final verification below). CI/human-review and ONE store distribution verification are separate gates; schedule completion/time fields are not changed by this report.
+
+## 2026-11-26 final device diagnosis and QA acceptance
+
+**Device QA result: PASS, user-confirmed.** The tester explicitly confirmed both Firebase Console event output and release_channel=dev after the earlier conditional report. The original customer/auth/owner/import/review/consent/regression and Crashlytics checks remain PASS by user report. The 1,110 ms cold start is still a single recorded run, not a statistical performance claim.
+
+Before that final Console confirmation, the agent inspected the currently USB-connected device without clearing application data, reinstalling, or changing collection consent:
+
+- Installed APK matched the local Debug APK; real Firebase Analytics/FirebaseTelemetry code was present. The Firebase app resource matched the ignored local configuration. No project API keys or app-instance values were printed or committed.
+- DebugView routing targeted the application package, stored optional consent was true, SDK measurement was enabled, and the installed manifest's permanent deactivation flag was false. Device and host clocks agreed.
+- The app was initially stopped. After the user opened it and generated search/detail activity, SDK initialization, fast Debug mode and the remote measurement-service connection were observed.
+- Fresh upload bundles attributed to this app contained search_completed / bar_detail_opened, the exact release_channel=dev property, debug flag _dbg=1 and an app-instance field. Matching upload requests received HTTP 204. Raw payloads and identifiers were not saved or published. HTTP 204 establishes transport acceptance, not by itself visibility in DebugView; the subsequent Console confirmation is the user's evidence for that final step.
+- No additional code change was justified after these transport checks. Console visibility was confirmed while the app remained open. Rebuilding or recreating Analytics definitions was not needed for that confirmation.
+- FA / FA-SVC verbosity was enabled temporarily for diagnosis, then restored to its previous values. The user's original DebugView routing and collection choice were preserved.
+
+Final recorded checklist:
+
+```text
+2026-11-26 Firebase device QA
+[x] Previously reported customer/auth/owner/import/review/consent/regression checks — user report.
+[x] Crashlytics test crash — user report.
+[x] release_channel=dev displayed in Firebase Console — explicit final user confirmation.
+[x] Fresh search/detail payloads include dev and _dbg=1; matched HTTP 204 uploads — agent runtime inspection.
+[x] Debug/consent/deactivation/configuration and clock checks — agent runtime inspection.
+[x] Temporary SDK diagnostic logging restored.
+[ ] Latest-head CI/human-review/final PR disposition — separate merge gate, not rerun here.
+[ ] ONE store distribution-build verification — separate release gate.
+```
+
+No merge, schedule completion, or work-time/completion-date update was performed as part of this QA acceptance.
 
 ## Changed-file purpose map
 
