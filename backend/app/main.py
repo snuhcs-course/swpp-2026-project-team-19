@@ -18,6 +18,7 @@ from app.db.session import get_session_factory
 from app.schemas.errors import document_invalid_request
 from app.matching.embedding import get_embedding_step
 from app.owner_web import mount_owner_web
+from app.privacy import mount_privacy
 from app.services.menu_import_processing import find_unfinished_imports, recover_imports
 from app.services.search_similar import get_similar_products
 
@@ -86,4 +87,5 @@ register_error_handlers(app)
 app.include_router(api_router)
 mount_admin(app)
 mount_owner_web(app)
+mount_privacy(app)
 document_invalid_request(app)

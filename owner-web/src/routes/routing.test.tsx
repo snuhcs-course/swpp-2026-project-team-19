@@ -38,6 +38,24 @@ describe("sign-in", () => {
     expect(sessionStorage.getItem("bottlemap-owner-web-return-path")).toBeNull();
   });
 
+  it("links the privacy policy from the sign-in screen", async () => {
+    renderOwnerWeb("/login", { gateway: new FakeGateway({ signedIn: false }) });
+
+    await heading("BottleMap 사장님");
+    const link = screen.getByRole("link", { name: "개인정보처리방침" });
+    expect(link).toHaveAttribute("href", "/privacy");
+    expect(link).toHaveAttribute("target", "_blank");
+  });
+
+  it("links the privacy policy from the footer of a signed-in screen", async () => {
+    useOwnerApi({ bars: [bar(BAR_ID, "관악 위스키 바")] });
+    renderOwnerWeb(`/bars/${BAR_ID}`);
+
+    await heading("관악 위스키 바");
+    expect(screen.getByRole("contentinfo")).toContainElement(screen.getByRole("link", { name: "개인정보처리방침" }));
+    expect(screen.getByRole("link", { name: "개인정보처리방침" })).toHaveAttribute("href", "/privacy");
+  });
+
   it("explains that sign-in is unavailable when the server has no Google settings", async () => {
     const gateway = new FakeGateway({ signedIn: false });
     gateway.configured = false;

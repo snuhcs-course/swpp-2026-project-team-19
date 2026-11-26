@@ -13,6 +13,8 @@ export default defineConfig({
     proxy: {
       "/api": apiTarget,
       "/owner/config.js": apiTarget,
+      // The privacy policy page the owner web links to (backend/app/privacy).
+      "/privacy": apiTarget,
     },
   },
   build: {

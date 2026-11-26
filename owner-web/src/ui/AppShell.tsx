@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { useNavigate } from "react-router";
 import { useSession } from "../auth/SessionProvider";
 import { Button } from "./Button";
+import { PrivacyFooter } from "./PrivacyPolicyLink";
 import styles from "./AppShell.module.css";
 
 interface AppShellProps {
@@ -41,6 +42,7 @@ export function AppShell({ title, backTo, onBack, account, children }: AppShellP
         </div>
       </header>
       <main className={styles.main}>{children}</main>
+      <PrivacyFooter />
     </div>
   );
 }
