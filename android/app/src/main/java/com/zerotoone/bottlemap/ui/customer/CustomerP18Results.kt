@@ -63,7 +63,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewModelScope
 import com.zerotoone.bottlemap.data.AndroidNearbyLocationSource
-import com.zerotoone.bottlemap.data.distanceMeters
+import com.zerotoone.bottlemap.data.roundedDistanceMeters
 import com.zerotoone.bottlemap.data.Repositories
 import com.zerotoone.bottlemap.data.MapBar
 import com.zerotoone.bottlemap.data.NearbyCoordinate
@@ -83,9 +83,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.withTimeoutOrNull
-import kotlin.math.roundToInt
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -98,15 +95,6 @@ internal fun p18QueryValidationCode(error:Exception):String? =
             it.path=="query" && it.code in setOf(
                 "MISSING","BLANK","STRING_TOO_LONG","NOT_SEARCHABLE")
         }?.code
-
-/** Only one location-aware query per selection. Never re-query on late GPS. */
-internal fun p18InitialSearchCoordinate(
-    permissionGranted: Boolean, cached: NearbyCoordinate?,
-): NearbyCoordinate? = cached?.takeIf {
-    permissionGranted && it.isValid() && (it.latitude != 0.0 || it.longitude != 0.0)
-}
-
-internal const val P18_FIRST_GPS_WAIT_MS = 1_250L
 
 internal sealed interface P18SearchState {
     data object Loading : P18SearchState
@@ -152,14 +140,14 @@ internal class P18SearchViewModel(
     fun setLocation(value: NearbyCoordinate) { if (value.isValid()) _location.value = value }
     fun clearLocation() { _location.value = null }
     fun load(query: String?, productId: String?, source: String,
-             location: NearbyCoordinate? = null, force: Boolean = false) {
+             force: Boolean = false) {
         // Never reuse candidates from a different search term. A product-id
         // follow-up intentionally preserves the original brand candidates.
         if(productId==null && !query.isNullOrBlank() && activeQuery!=query) {
             activeQuery=query
             _suggestions.value=null
         }
-        val key = listOf(query, productId, source, location?.latitude, location?.longitude).joinToString("|")
+        val key = listOf(query, productId, source).joinToString("|")
         if (!force && key == lastKey) return
         val measurementKey = query to productId
         if (measuredSearch != measurementKey &&
@@ -172,7 +160,6 @@ internal class P18SearchViewModel(
             try {
                 val result=repository.searchProduct(
                     query=query,productId=productId,source=source,
-                    latitude=location?.latitude,longitude=location?.longitude,
                 )
                 if (request==version) {
                     if (query != null && productId == null) {
@@ -258,7 +245,7 @@ internal fun p18AvailableSorts(hasLocation:Boolean,allowPrice:Boolean):List<P18S
 internal fun p18DisplayDistance(row:SearchResultDto,location:NearbyCoordinate?):Int? {
     if(location==null || !location.isValid())return null
     val target=NearbyCoordinate(row.latitude,row.longitude)
-    return if(target.isValid()) distanceMeters(location,target).roundToInt() else null
+    return if(target.isValid()) roundedDistanceMeters(location,target) else null
 }
 
 internal fun p18Sorted(
@@ -267,7 +254,8 @@ internal fun p18Sorted(
 ): List<SearchResultDto> = when(sort) {
     P18Sort.DISTANCE -> if(hasLocation)
         rows.sortedWith(compareBy<SearchResultDto> {it.distanceMeters ?: Int.MAX_VALUE}
-            .thenBy {it.barName}) else rows
+            .thenBy {it.barName}.thenBy {it.productDisplayName}
+            .thenBy {it.barId}.thenBy {it.productId}) else rows
     P18Sort.PRICE -> rows.sortedWith(compareBy<SearchResultDto> {
         p18Representative(it.options)?.let { option ->
             p18EffectivePrice(option.priceKrw,option.discount,at)
@@ -438,9 +426,7 @@ internal fun CustomerP18Results(
     }
     fun reload() {
         viewModel.load(if(chosenId==null)initialQuery else null,
-            chosenId ?: initialProductId,source,
-            location=p18InitialSearchCoordinate(
-                locationPermissionGranted,viewModel.location.value),force=true)
+            chosenId ?: initialProductId,source,force=true)
     }
     // BAR_NOT_FOUND on the detail destination explicitly invalidates the
     // retained results, but ordinary Back continues to preserve UI state.
@@ -464,21 +450,12 @@ internal fun CustomerP18Results(
             Manifest.permission.ACCESS_COARSE_LOCATION,
             Manifest.permission.ACCESS_FINE_LOCATION))
     }
-    // One request per selection. When permission already exists, briefly wait
-    // for the first coordinate so the server can rank *before* its result limit.
-    // Late GPS updates displayed distance only; never rerun the search/count.
+    // Search never receives or waits for GPS. A late foreground fix updates
+    // displayed distances locally without a second request/search count.
     LaunchedEffect(initialQuery,initialProductId,chosenId,source) {
-        val cached = p18InitialSearchCoordinate(
-            locationPermissionGranted,viewModel.location.value)
-        val forServer = cached ?: if(locationPermissionGranted)
-            withTimeoutOrNull(P18_FIRST_GPS_WAIT_MS) {
-                viewModel.location.first {
-                    p18InitialSearchCoordinate(true,it) != null
-                }
-            } else null
         viewModel.load(if(chosenId==null)initialQuery else null,
             chosenId ?: initialProductId,
-            source,location=forServer)
+            source)
     }
     val ready=(state as? P18SearchState.Ready)?.response
     val original=p18OriginalResponse(initialQuery,initialProductId,suggestions,ready)
@@ -607,9 +584,8 @@ internal fun CustomerP18Results(
                 val product=result.matchedProducts.firstOrNull { it.productId == selectedProductId }
                     ?: choices.firstOrNull { it.productId == selectedProductId }
                     ?: result.matchedProducts.firstOrNull() ?: choices.firstOrNull()
-                // API only includes distance when lat/lng were sent. Use the
-                // same haversine formula on published coordinates if GPS arrives
-                // later, without redoing the entire search or changing the sort.
+                // Spec 3.19.4: compute distances from published bar coordinates.
+                // A truncated response is sorted only within its returned rows.
                 val distanceRows=result.items.map{row->
                     row.copy(distanceMeters=p18DisplayDistance(row,userLocation))
                 }

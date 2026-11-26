@@ -1,6 +1,7 @@
 package com.zerotoone.bottlemap.data
 
 import com.zerotoone.bottlemap.network.ApiClient
+import com.zerotoone.bottlemap.network.BottleMapApi
 import com.zerotoone.bottlemap.network.BarMenuResponseDto
 import com.zerotoone.bottlemap.network.BottleMapApiException
 import com.zerotoone.bottlemap.network.SearchBarsResponseDto
@@ -23,21 +24,22 @@ interface CustomerDiscoverySource {
     suspend fun popularProducts(limit:Int = 10):PopularProductsResponseDto
     suspend fun searchProduct(
         query:String?,productId:String?,source:String,
-        latitude:Double?=null,longitude:Double?=null,
     ):SearchBarsResponseDto
 }
 
-class CustomerRepository : CustomerSearchSource, CustomerBarDetailSource, CustomerDiscoverySource {
+class CustomerRepository(
+    private val api: BottleMapApi = ApiClient.api,
+) : CustomerSearchSource, CustomerBarDetailSource, CustomerDiscoverySource {
     override suspend fun popularProducts(limit:Int):PopularProductsResponseDto =
-        ApiClient.call { ApiClient.api.popularProducts(limit=limit) }
+        ApiClient.call { api.popularProducts(limit=limit) }
 
     override suspend fun searchProduct(
-        query:String?,productId:String?,source:String,latitude:Double?,longitude:Double?,
+        query:String?,productId:String?,source:String,
     ):SearchBarsResponseDto = ApiClient.call {
-        ApiClient.api.searchProductP18(
+        api.searchProductP18(
             query=query?.takeIf(String::isNotBlank),
             productId=productId?.takeIf(String::isNotBlank),
-            latitude=latitude,longitude=longitude,source=source,
+            source=source,
             // Contract §3.10 allows up to 100. Cover 51+ rows while MVP has ~20.
             limit=100,
         )
@@ -48,17 +50,17 @@ class CustomerRepository : CustomerSearchSource, CustomerBarDetailSource, Custom
         val token = auth.currentAccessTokenOrNull()
         // Public guest request: no credentials. Signed-in request: optional JWT.
         if (token == null) return ApiClient.call {
-            ApiClient.api.getPublishedBarMenu(barId)
+            api.getPublishedBarMenu(barId)
         }
         return try {
-            ApiClient.call { ApiClient.api.getPublishedBarMenu(barId, "Bearer $token") }
+            ApiClient.call { api.getPublishedBarMenu(barId, "Bearer $token") }
         } catch (error: BottleMapApiException) {
             if (error.code != "UNAUTHENTICATED") throw error
             val newToken = auth.refreshAccessTokenAfter401(token)
             // If refresh fails, fall back to guest WITHOUT the stale token.
             try {
                 ApiClient.call {
-                    ApiClient.api.getPublishedBarMenu(
+                    api.getPublishedBarMenu(
                         barId,
                         newToken?.let { "Bearer $it" },
                     )
@@ -68,7 +70,7 @@ class CustomerRepository : CustomerSearchSource, CustomerBarDetailSource, Custom
                 // A second 401 is not retryable. Drop the stale signed-in
                 // session and show the same public bar as a Guest.
                 auth.logout()
-                ApiClient.call { ApiClient.api.getPublishedBarMenu(barId) }
+                ApiClient.call { api.getPublishedBarMenu(barId) }
             }
         }
     }
@@ -76,6 +78,6 @@ class CustomerRepository : CustomerSearchSource, CustomerBarDetailSource, Custom
     override suspend fun searchBars(query: String): SearchBarsResponseDto =
         ApiClient.call {
             // Public guest endpoint: do not attach owner/session credentials.
-            ApiClient.api.searchBars(query = query)
+            api.searchBars(query = query)
         }
 }

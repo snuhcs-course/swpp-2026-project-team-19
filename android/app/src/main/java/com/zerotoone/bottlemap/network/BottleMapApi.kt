@@ -31,21 +31,9 @@ interface BottleMapApi {
         @Query("limit") limit: Int = 20,
     ): BarNamesResponseDto
 
-    // I2 PR #54 / spec 3.13: exact visible map bounds, no distanceMeters.
-    @GET("api/search/map-bars")
-    suspend fun getMapBars(
-        @Query("south") south: Double,
-        @Query("west") west: Double,
-        @Query("north") north: Double,
-        @Query("east") east: Double,
-    ): MapBarsResponseDto
-
-    @GET("api/search/nearby-bars")
-    suspend fun getNearbyBars(
-        @Query("lat") latitude: Double,
-        @Query("lng") longitude: Double,
-        @Query("radiusMeters") radiusMeters: Int = 500,
-    ): NearbyBarsResponseDto
+    // Spec 3.19: public complete list; same item shape as 3.13, no queries.
+    @GET("api/search/all-bars")
+    suspend fun getAllBars(): MapBarsResponseDto
 
     // Confirmed API spec §3.17: public, guest-safe, search-count-ranked cards.
     @GET("api/search/popular-products")
@@ -56,8 +44,6 @@ interface BottleMapApi {
     suspend fun searchProductP18(
         @Query("query") query: String? = null,
         @Query("productId") productId: String? = null,
-        @Query("lat") latitude: Double? = null,
-        @Query("lng") longitude: Double? = null,
         @Query("source") source: String = "input",
         @Query("limit") limit: Int = 50,
     ): SearchBarsResponseDto

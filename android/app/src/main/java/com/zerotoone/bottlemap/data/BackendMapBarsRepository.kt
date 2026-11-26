@@ -1,7 +1,6 @@
-// Backend PR #54, API spec 3.13. The exact Kakao viewport replaces radius queries.
+// Spec 3.19: filter the public bar list by the exact Kakao viewport locally.
 package com.zerotoone.bottlemap.data
 
-import com.zerotoone.bottlemap.network.ApiClient
 import com.zerotoone.bottlemap.network.MapBarsResponseDto
 
 const val MAX_MAP_SPAN_DEGREES = 0.2
@@ -20,6 +19,8 @@ data class MapBounds(
         require(south <= north && west <= east) { "Invalid or antimeridian-crossing map bounds" }
     }
 
+    // Legacy name: retain the existing map zoom/TooWide UX guard. Spec 3.19
+    // no longer imposes a server bounds limit; the repository filters locally.
     fun isSupportedByBackend(): Boolean =
         north - south <= MAX_MAP_SPAN_DEGREES + MAP_SPAN_EPSILON &&
         east - west <= MAX_MAP_SPAN_DEGREES + MAP_SPAN_EPSILON
@@ -73,22 +74,18 @@ interface MapBarsSource {
     suspend fun listMapBars(bounds: MapBounds): List<MapBar>
 }
 
-class BackendMapBarsRepository : MapBarsSource {
+class BackendMapBarsRepository(
+    private val allBars: AllBarsRepository = Repositories.allBars,
+) : MapBarsSource {
     override suspend fun listMapBars(bounds: MapBounds): List<MapBar> {
-        require(bounds.isSupportedByBackend()) { "Map viewport exceeds API 0.2 degree limit" }
-        val response = ApiClient.call {
-            ApiClient.api.getMapBars(
-                south = bounds.south,
-                west = bounds.west,
-                north = bounds.north,
-                east = bounds.east,
-            )
-        }
-        return response.toMapBars()
+        return allBars.listBars().filter {
+            it.location.latitude in bounds.south..bounds.north &&
+                it.location.longitude in bounds.west..bounds.east
+        }.sortedBy { it.barId }
     }
 }
 
-/** Server includes edges and sorts by barId. Do not locally sort/re-filter. */
+/** Spec 3.13/3.19 share this DTO. Validate the whole list before caching it. */
 internal fun MapBarsResponseDto.toMapBars(): List<MapBar> {
     val ids = HashSet<String>()
     return items.mapNotNull { dto ->

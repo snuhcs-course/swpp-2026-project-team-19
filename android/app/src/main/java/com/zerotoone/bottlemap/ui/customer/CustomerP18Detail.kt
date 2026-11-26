@@ -272,8 +272,7 @@ internal fun CustomerP18BarDetail(
         aliasLookup = BarAliasLookupState(query = query, loading = true)
         try {
             val result = CustomerRepository().searchProduct(
-                query = query, productId = null, source = "input",
-                latitude = null, longitude = null)
+                query = query, productId = null, source = "input")
             val ids = result.matchedProducts.map { it.productId }.toSet() +
                 result.items.filter { it.barId == bar.barId }.map { it.productId }
             aliasLookup = BarAliasLookupState(query = query, productIds = ids)
