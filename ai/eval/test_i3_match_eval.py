@@ -323,15 +323,18 @@ def test_embedded_entries_keep_one_alias_per_normalized_value_like_the_database(
 
 
 V2_4_ASIS_DIGEST = "b82cacac24493d0f"
+V2_5_ASIS_DIGEST = "541fb3d457e8d5da"
 
 
 def test_the_i3_asis_catalogs_are_the_recorded_ones(be):
     seed = json.loads((h.REPO_ROOT / "ai" / "catalog" / "catalog_v2_service.json").read_text(encoding="utf-8"))
     digest = h.catalog_digest({bar: h.build_catalog(be, bar, "asis", seed) for bar in I3_BARS})
     # catalog v2.4 (2026-11-21, I5: Jack Daniel's Tennessee Apple added) no longer gives the asis
-    # catalogs I3 and P46 ran with (I3_ASIS_DIGEST, catalog v2.3): numbers from here on are not theirs
+    # catalogs I3 and P46 ran with (I3_ASIS_DIGEST, catalog v2.3): numbers from here on are not theirs.
+    # v2.5 (2026-11-27, I5-P59: Glenmorangie ages) is not v2.4 either (V2_4_ASIS_DIGEST, 11/21 runs)
     assert not digest.startswith(I3_ASIS_DIGEST)
-    assert digest.startswith(V2_4_ASIS_DIGEST)
+    assert not digest.startswith(V2_4_ASIS_DIGEST)
+    assert digest.startswith(V2_5_ASIS_DIGEST)
 
 
 def test_ops_is_the_catalog_with_the_additions_minus_own_menu_aliases(files, tmp_path):

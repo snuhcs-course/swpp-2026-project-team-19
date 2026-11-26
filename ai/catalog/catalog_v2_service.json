@@ -1,7 +1,7 @@
 {
-  "version": "catalog_v2_4_service",
-  "created": "2026-11-21",
-  "based_on": "catalog_v1_draft + eval/match_gold_v1_1.json new_products + menu names of the held-out bars (labels v1.1: 미라보, Beck, 포레스트) + POST_TEST_ALIASES (match_gold_test_draft.py) + eval/match_gold_final_v1.json new_products and menu names (수이, 오드비) + v2.2 (2026-10-28): menu spellings of 13 app-created duplicate products from the 10/7 위스키복춘 import attached to the real products; brand+age aliases of edition products that hid same-age siblings made non-searchable (matching still uses them); v2.3 (2026-10-28, I3-P17): generated Korean spellings (transliteration, edition-word and word-order variants) from each product's English name, brand, age and edition, kept after a second verification pass; v2.4 (2026-11-21, I5): Jack Daniel's Tennessee Apple (jack-daniels-apple) added as a product and removed from excluded_non_whisky: flavoured whiskeys are served as whisky (decision of Jinwoo Park, 2026-11-21)",
+  "version": "catalog_v2_5_service",
+  "created": "2026-11-27",
+  "based_on": "catalog_v1_draft + eval/match_gold_v1_1.json new_products + menu names of the held-out bars (labels v1.1: 미라보, Beck, 포레스트) + POST_TEST_ALIASES (match_gold_test_draft.py) + eval/match_gold_final_v1.json new_products and menu names (수이, 오드비) + v2.2 (2026-10-28): menu spellings of 13 app-created duplicate products from the 10/7 위스키복춘 import attached to the real products; brand+age aliases of edition products that hid same-age siblings made non-searchable (matching still uses them); v2.3 (2026-10-28, I3-P17): generated Korean spellings (transliteration, edition-word and word-order variants) from each product's English name, brand, age and edition, kept after a second verification pass; v2.4 (2026-11-21, I5): Jack Daniel's Tennessee Apple (jack-daniels-apple) added as a product and removed from excluded_non_whisky: flavoured whiskeys are served as whisky (decision of Jinwoo Park, 2026-11-21); v2.5 (2026-11-27, I5-P59): age_years of Glenmorangie The Original 10 -> 12, Quinta Ruban 14, Lasanta 12, Nectar D'Or 16 (the current bottlings; were empty), from the I4 AI backlog",
   "notes": [
     "ids are UUIDv5(namespace 6b1a1f4e-19b0-4c7a-9a7e-b0771e3a0019, '<kind>:<key>'): stable across rebuilds.",
     "normalized_alias is intentionally omitted: backend normalization function generates it.",
@@ -9579,7 +9579,7 @@
       "brand_key": "glenmorangie",
       "category": "whisky",
       "display_name": "Glenmorangie The Original",
-      "age_years": 10,
+      "age_years": 12,
       "edition_name": "The Original",
       "abv": null,
       "sources": [
@@ -9824,7 +9824,7 @@
       "brand_key": "glenmorangie",
       "category": "whisky",
       "display_name": "Glenmorangie Nectar D'Or",
-      "age_years": null,
+      "age_years": 16,
       "edition_name": "Nectar D'Or",
       "abv": null,
       "sources": [
@@ -9993,7 +9993,7 @@
       "brand_key": "glenmorangie",
       "category": "whisky",
       "display_name": "Glenmorangie Lasanta",
-      "age_years": null,
+      "age_years": 12,
       "edition_name": "Lasanta",
       "abv": null,
       "sources": [
@@ -10120,7 +10120,7 @@
       "brand_key": "glenmorangie",
       "category": "whisky",
       "display_name": "Glenmorangie Quinta Ruban",
-      "age_years": null,
+      "age_years": 14,
       "edition_name": "Quinta Ruban",
       "abv": null,
       "sources": [

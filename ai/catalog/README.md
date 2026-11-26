@@ -216,3 +216,18 @@ main에는 적재 대상인 `catalog_v2_service.json`과 `bars_v2.json`만 있�
 - **평가 스냅샷은 그대로입니다.** `catalog_v2_eval_5bars.json`, `catalog_v2_eval_5bars_drop_products.json`은 P47 때의 기록이라 고치지 않았습니다(`excluded_non_whisky`에 그대로 있음).
 - **데모 메뉴 seed는 그대로입니다.** `menu_seed_mirabeau_demo_v1.json`, `menu_seed_odbi_demo_v1.json`에는 이 줄이 없습니다(생성 당시 `non_whisky`·카탈로그에 없는 상품이라 건너뜀). 게시 메뉴에 넣으려면 `build_menu_seeds_demo.py`를 다시 돌려야 합니다.
 - **적재:** 운영 DB에는 아직 넣지 않았습니다(Seed catalog 워크플로).
+
+## 16. v2.5 글렌모렌지 연수 (2026-11-27, I5-P59)
+
+지금 팔리는 병의 연수로 `age_years`를 고쳤습니다. 값은 I4 AI 백로그(2026-11-13) 0절에 적힌 그대로입니다. `version`은 `catalog_v2_5_service`입니다.
+
+| 상품 | 전 | 후 |
+|---|---|---|
+| `glenmorangie-original` (The Original) | 10 | 12 |
+| `glenmorangie-quinta-ruban` | 없음 | 14 |
+| `glenmorangie-lasanta` | 없음 | 12 |
+| `glenmorangie-nectar-dor` | 없음 | 16 |
+
+- **별칭은 그대로입니다.** The Original에는 옛 연수 별칭(`Glenmorangie 10`, `글렌모렌지10`, 템플릿 `Glenmorangie The Original Aged 10 Years`, `글렌모렌지 오리지널 10년 숙성`)이 남아 있습니다. 메뉴에 옛 병이 남아 있을 수 있어 지우지 않았습니다.
+- **옛 연수로 적힌 메뉴 줄**("오리지날 10년", "라산타 15Y")은 추출이 연수를 넘기면 연수 불일치(`ageConflict`)로 확정되지 않고 후보로 남습니다. 측정은 `ai/runs/2026-11-27_i5_p31/report.md` 1a절.
+- 평가 스냅샷(`catalog_v2_eval_5bars*.json`)과 운영 DB는 고치지 않았습니다.
