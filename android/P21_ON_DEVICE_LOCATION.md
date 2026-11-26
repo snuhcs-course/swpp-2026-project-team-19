@@ -79,7 +79,43 @@ GET /api/search/bars?query=synthetic%20legacy&limit=50
 4 requests; no customer coordinates/bounds/body/Authorization.
 ```
 
-## Galaxy S23 QA — pending user execution
+## QA result — complete with approved automated substitutions (2026-11-26)
+
+The user reported the four functional Galaxy S23 checks below as passing.
+They explicitly requested automated validation in place of the two checks
+that were difficult to observe on the phone. Those two checks were rerun:
+
+```powershell
+.\gradlew.bat :app:testDebugUnitTest --tests '*OnDeviceSearchTest' --tests '*OnDeviceLocationNetworkTest' --tests '*AllBarsRepositoryTest'
+```
+
+Result: **13 passed, 0 failures, 0 errors, 0 skipped** (3 suites).
+
+```text
+Galaxy S23 / approved automated P21 QA results
+Branch: feature/i5-p21-on-device-location
+[x] Whisky search -> bar detail -> Back: passed, user-reported on Galaxy S23.
+[x] Location allowed: nearby bars, distance sort, map movement: passed, user-reported on Galaxy S23.
+[x] Location denied/revoked: search and map browsing remain usable: passed, user-reported on Galaxy S23.
+[x] Late GPS does not duplicate search: passed by approved automated substitution (OnDeviceSearchTest).
+[x] Customer coordinates/map bounds absent from requests: passed by approved automated substitution (OnDeviceLocationNetworkTest).
+[x] Relaunch: search, map and login: passed, user-reported on Galaxy S23.
+Result: 4 device checks passed + 2 automated substitutions passed; 0 failed.
+```
+
+The late-GPS test completes the first search before supplying location, then
+repeats the same selection and revokes location. The repository call count
+and search-completed event count remain one; an explicit forced refresh
+still makes a second request. The search effect is keyed only by query,
+product selection, and source, not GPS.
+
+The network test captures real serialized Retrofit requests on a loopback
+HTTP server across nearby/map screens, changed origins/viewports, and three
+search forms. It confirms one shared catalog fetch and no customer coordinate
+or bounds parameters, request body, or Authorization. This is not a physical
+phone capture and does not inspect Kakao SDK traffic.
+
+### Installation reference
 
 Preserve existing app data and run these commands in order:
 
@@ -93,22 +129,16 @@ git pull --ff-only
 If installation cannot see the phone, enable USB debugging and check that
 `adb devices -l` lists it as `device`. Do not clear app data for this check.
 
-Copy the block below, mark results, and return it in chat:
+### CI and review are separate from QA
 
-```text
-Galaxy S23 P21 QA
-Branch: feature/i5-p21-on-device-location
-[ ] Start as Guest: customer search opens; search a whisky, select a product, open its bar detail, and return successfully.
-[ ] Grant location: nearby/map pins and distances appear; nearest-first sorting works. Pan the map and verify pins match the visible region.
-[ ] Switch list/map, open a bar and go Back: selection and navigation still work; existing map zoom-limit behavior remains.
-[ ] Deny/revoke location: search and map browsing remain usable; distance sorting is unavailable, with no crash or stale location distance.
-[ ] Start a search before GPS is ready: results appear; GPS later supplies distances without a second search request.
-[ ] With Network Inspector or an authorized debug capture, inspect nearby/map/whisky-search requests: all-bars has no query; search has no lat/lng; no nearby-bars/map-bars request is made. Keep real coordinates/tokens out of shared logs.
-[ ] Switch nearby/map within 60 seconds: the bar catalog is reused. After 60 seconds and a new query, it refreshes; offline refresh shows the existing retry state and retry succeeds after reconnection.
-[ ] Background/relaunch: no crash; Guest/Google login, customer search, map, and bar detail still work.
-Result: pending
-```
+For implementation commit `4a4366ac`, Android CI and AI CI succeeded. Owner
+Compose UI CI failed in
+`OwnerRegistrationV4ComposeTest.manualBusinessFormKeepsDigitsAndTransitionsToNextStages`:
+the opening-date heading was not found. Neither that test nor the onboarding
+screen is changed by P21. The cause is unconfirmed; this is an unresolved CI
+finding, not a claim of a confirmed main-branch failure. See
+[the run](https://github.com/snuhcs-course/swpp-2026-project-team-19/actions/runs/45768883853).
 
-CI completion, device QA, a device network capture, and review are recorded
-separately. P21 stays Started until its remaining evidence and required review
-are complete. Actual work-time and end-date fields are owned by the user.
+P21 QA is complete under the user's accepted validation method. Human review
+and PR disposition remain; the schedule stays Started. Actual work-time and
+end-date fields are unchanged.
