@@ -134,3 +134,36 @@ def test_missing_age_guard_needs_the_server_steps(capsys):
     with pytest.raises(SystemExit):
         h.parse_args(["--set", "i3", "--catalog", "full", "--missing-age-guard", "--json", "x.json"])
     assert "--missing-age-guard needs --server-steps" in capsys.readouterr().err
+
+
+# ---------- 1c: i5_p59_age_only.py ----------
+
+def test_age_only_scan_reads_brand_and_age_lines_and_flags_a_missing_candidate(files, tmp_path, be):  # noqa: F811
+    import i5_p59_age_only as ao
+    gold, labels, cat = files
+    out = tmp_path / "r.json"
+    h.main(["--set", "i3", "--catalog", "asis", "--catalog-file", str(cat), "--gold", str(gold),
+            "--labels", str(labels), "--no-gold-sha-check", "--json", str(out)])
+    result = json.loads(out.read_text(encoding="utf-8"))
+    rows = {r["name"]: r for r in ao.scan(result, be, ao.catalogs_for(result, be, cat))}
+    # 글렌피딕 12년: brand + age only, one product of that age, confirmed (the brand's plain 12)
+    assert rows["글렌피딕 12년"]["same_age"] == ["Glenfiddich 12"] and not rows["글렌피딕 12년"]["one_product_not_offered"]
+    assert rows["글렌피딕 12년"]["confirmed_edition"] is False
+    # Glenfiddich 15 is not in the asis catalog: no product of that age, so not a 1c case
+    assert rows["Glenfiddich 15"]["same_age"] == [] and not rows["Glenfiddich 15"]["one_product_not_offered"]
+    assert "하우스 위스키" not in rows and "Signatory Vintage Macduff 13" not in rows  # not brand + age only
+    md_path = tmp_path / "a.md"
+    assert ao.main([str(out), "--catalog-file", str(cat), "--md", str(md_path)])["r.json"]
+    md = md_path.read_text(encoding="utf-8")
+    assert "브랜드 + 연수만 적힌 줄" in md and "그중 후보로 안 나온 줄 0" in md
+
+
+def test_age_only_scan_flags_the_one_product_left_out(be):  # noqa: F811
+    import i5_p59_age_only as ao
+    from test_i3_match_eval import SEED
+    bc = h.build_catalog(be, "바B", "asis", SEED)
+    result = {"rules": {"rows": [{"bar": "바B", "photo_id": "p", "name": "글렌피딕 18년", "gold": "glenfiddich-18",
+                                  "status": "unmatched", "outcome": "unmatched", "cands": ""}]}}
+    [row] = ao.scan(result, be, {"바B": bc})
+    assert row["age"] == 18 and row["same_age"] == ["Glenfiddich 18"] and row["one_product_not_offered"] is True
+    assert "**예**" in ao.to_md("x", [row])

@@ -832,3 +832,52 @@ def test_a_korean_generic_word_that_fits_in_english_is_kept(two_brands):
     result = staged("라프로익 10년 캐스크", two_brands, "S2b")
     assert not any(c.evidence.get("ignoredWords") for c in result.candidates)
     assert result.proposed_product_id != LAPHROAIG_10 or not result.candidates[0].evidence.get("confirmRecommended")
+
+
+# ---- brand + age only lines (I5-P59 1c) ----
+
+ALL_STAGES = {"S1", "S2", "S2b", "S3"}  # menu import
+GLENMORANGIE = _id(300)
+GM_ORIGINAL, GM_LASANTA, GM_QUINTA, GM_NECTAR, GM_18 = (_id(n) for n in range(301, 306))
+
+
+@pytest.fixture
+def glenmorangie():
+    # the ages of catalog v2.5 (2026-11-27)
+    products = [
+        ProductInfo(GM_ORIGINAL, "Glenmorangie The Original", 12, "The Original", brand_id=GLENMORANGIE),
+        ProductInfo(GM_LASANTA, "Glenmorangie Lasanta", 12, "Lasanta", brand_id=GLENMORANGIE),
+        ProductInfo(GM_QUINTA, "Glenmorangie Quinta Ruban", 14, "Quinta Ruban", brand_id=GLENMORANGIE),
+        ProductInfo(GM_NECTAR, "Glenmorangie Nectar D'Or", 16, "Nectar D'Or", brand_id=GLENMORANGIE),
+        ProductInfo(GM_18, "Glenmorangie 18", 18, brand_id=GLENMORANGIE),
+    ]
+    aliases = [(p.product_id, p.display_name) for p in products]
+    brands = [(GLENMORANGIE, "Glenmorangie"), (GLENMORANGIE, "글렌모렌지")]
+    return InMemoryCatalog(products, aliases, brands)
+
+
+@pytest.mark.parametrize("name, product, recommended", [
+    ("글렌모렌지 14년", GM_QUINTA, True),
+    ("Glenmorangie 16", GM_NECTAR, True),
+    # "yr" is read as the age 14 and the letter "r", which fits nothing: one candidate, not recommended
+    ("Glenmorangie 14yr", GM_QUINTA, False),
+    ("글랜모랜지 14년 / Glenmorangie 14yr", GM_QUINTA, False),
+])
+def test_brand_and_age_offer_the_one_product_of_that_age_without_confirming(glenmorangie, name, product, recommended):
+    result = resolve_product_staged(ExtractedProduct(product_name=name), glenmorangie, ALL_STAGES)
+    assert result.status == "ambiguous"
+    assert [c.product_id for c in result.candidates] == [product]
+    assert bool(result.candidates[0].evidence.get("confirmRecommended")) is recommended
+
+
+def test_brand_and_age_with_two_products_of_that_age_stay_a_choice(glenmorangie):
+    result = resolve_product_staged(ExtractedProduct(product_name="글렌모렌지 12년"), glenmorangie, ALL_STAGES)
+    assert result.status == "ambiguous"
+    assert {c.product_id for c in result.candidates} == {GM_ORIGINAL, GM_LASANTA}
+    assert not any(c.evidence.get("confirmRecommended") for c in result.candidates)
+
+
+def test_brand_and_age_confirm_the_plain_bottling_and_find_nothing_for_an_age_the_brand_lacks(glenmorangie):
+    plain = resolve_product_staged(ExtractedProduct(product_name="글렌모렌지 18년"), glenmorangie, ALL_STAGES)
+    assert plain.status == "exact_match" and plain.proposed_product_id == GM_18  # S2b default product, as before
+    assert resolve_product_staged(ExtractedProduct(product_name="Glenmorangie 15yr"), glenmorangie, ALL_STAGES).status == "unmatched"
