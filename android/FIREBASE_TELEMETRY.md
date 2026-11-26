@@ -34,7 +34,7 @@ Team Console access was reported complete by the user. No work-time or completio
 | Development/Alpha/Beta/Release | Validated Gradle property and explicit debug collection gate |
 | First-launch detailed notice | User explicitly chose to keep the current approved UI copy; the plan's longer sentence is not added |
 | Privacy-policy Firebase disclosure | Backend-owned; live page content could not be verified in this task. Haeul must confirm actual collection, regions and retention |
-| Report form event | `ReportProblemOpened` type exists; **no production emission** until P20 supplies the form and P25 implements the actual action. User confirmed P20 has not started |
+| Report form event | P25 emits `ReportProblemOpened` after the official Google Form browser launch is accepted; no event on launch failure or debounced taps. Form submission and Console delivery require the checks in `P25_REPORT_PROBLEM.md` |
 | PDF import source | Typed value is reserved as specified; current Android photo picker accepts images only. No PDF UI or unsupported API is added |
 | Not now | No Performance Monitoring, Remote Config, custom collection API, retention analysis, rage-click tracking, screen-frame metrics or saturation collector |
 
@@ -52,7 +52,7 @@ Team Console access was reported complete by the user. No work-time or completio
 | `owner_application_failed` | Submission/required-upload failure. DB aggregate remains authoritative if the POST committed before a later upload failed |
 | `nearby_opened` | Discovery entry/changed permission state. Repeated identical callbacks in the same ViewModel are deduplicated |
 | `sign_in_result` | Explicit sign-in attempt ends in success/cancel/error, with welcome/account origin. Restored sessions and duplicate callbacks do not add attempts |
-| `report_problem_opened` | Pending P20/P25; never emitted for the current preparation dialog |
+| `report_problem_opened` | P25: accepted external browser launch from the account's problem-report row; no parameters. This does not verify form rendering or submission |
 | `api_error` | `ApiClient.call`; fixed contract endpoint template, status enum, allowlisted code. Queries, UUIDs, server messages/bodies and exception prose are excluded. I/O failures retain the sanitized endpoint when available; coroutine cancellation is not an API failure |
 | Automatic Analytics / Crashlytics | `first_open`, sessions, exposure, device/app distribution and crash/ANR reports after consent. Delivery and automatic SDK contents require manual observation |
 
