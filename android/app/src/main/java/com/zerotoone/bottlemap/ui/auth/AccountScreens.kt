@@ -36,6 +36,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.createSavedStateHandle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -76,6 +78,7 @@ fun AccountScreen(
     onNotice: (String) -> Unit = {},
 ) {
     val context = LocalContext.current
+    val reportViewModel = viewModel { ProblemReportViewModel(createSavedStateHandle()) }
     val privacy = remember(context) { UserPrivacySettings.get(context) }
     val usageEnabled by privacy.usageEnabled.collectAsState()
     // Owner access is based on the authenticated server account, never demo fixture data.
@@ -197,7 +200,11 @@ fun AccountScreen(
             }
             Column(Modifier.fillMaxWidth().padding(top=28.dp)) {
                 AccountNavRow("공지사항"){infoDialog="공지사항"}
-                AccountNavRow("문의하기"){infoDialog="문의하기"}
+                AccountNavRow("문제 신고하기") {
+                    if (reportViewModel.open { launchProblemReport(context) } == ReportLaunchResult.FAILED) {
+                        onNotice("문제 신고 폼을 열지 못했어요. 브라우저를 확인해 주세요.")
+                    }
+                }
                 AccountNavRow("개인정보처리방침") { openPrivacyPolicy(context, onNotice) }
                 if(user!=null) AccountNavRow("로그아웃",onLogout)
                 if(state is AuthUiState.SignInError) AccountNavRow(

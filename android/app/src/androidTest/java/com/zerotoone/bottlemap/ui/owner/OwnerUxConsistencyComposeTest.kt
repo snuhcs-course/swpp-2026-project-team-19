@@ -72,7 +72,7 @@ class OwnerUxConsistencyComposeTest {
         compose.setContent { MaterialTheme {
             AccountScreen(AuthUiState.Guest,{},{},{},{})
         } }
-        val titles=listOf("공지사항","문의하기","개인정보처리방침","사용 기록 보내기")
+        val titles=listOf("공지사항","문제 신고하기","개인정보처리방침","사용 기록 보내기")
         val tops=titles.map {compose.onNodeWithText(it).fetchSemanticsNode().boundsInRoot.top}
         for(i in 1 until tops.size) org.junit.Assert.assertTrue(tops[i]>tops[i-1])
         compose.onNodeWithText("로그아웃").assertDoesNotExist()
