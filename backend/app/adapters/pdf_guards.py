@@ -35,7 +35,7 @@ failure "not_attempted" and `outcome.stopped` says why.
 import time
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass, replace
-from typing import Any, Literal
+from typing import Any, Literal, Protocol
 
 import httpx
 
@@ -44,6 +44,7 @@ from app.adapters.extraction import ExtractionError, ExtractionResult
 from app.adapters.hybrid_extraction import HybridMenuExtractor
 from app.adapters.pdf_extraction import PdfMenuExtractor
 from app.extraction.gemini import HardTimeout
+from app.extraction.openrouter import HardTimeout as OpenRouterHardTimeout
 from app.extraction.pdf import PdfPage
 
 Failure = Literal["model_timeout", "model_call_failed", "invalid_output", "page_failed", "not_attempted"]
@@ -142,18 +143,34 @@ def classify(error: ExtractionError) -> Failure:
     if any(isinstance(cause, extraction.InvalidModelOutputError) for cause in chain):
         return "invalid_output"
     if any(isinstance(cause, extraction.ModelCallError) for cause in chain):
-        timed_out = any(isinstance(cause, (HardTimeout, httpx.TimeoutException)) for cause in chain)
+        timed_out = any(isinstance(cause, (HardTimeout, OpenRouterHardTimeout, httpx.TimeoutException)) for cause in chain)
         return "model_timeout" if timed_out else "model_call_failed"
     return "page_failed"
 
 
 def _attempts(raw_output: dict[str, Any] | None) -> int:
-    value = (raw_output or {}).get("attempts")
-    return value if isinstance(value, int) and value > 0 else 0
+    """Model calls a page made. A page read through the route ladder (app.extraction.routed) records
+    the attempts of the route that answered in `attempts` and those of the routes that failed before
+    it in `route.skipped`; when every route failed (stage 4), `attempts` is already their sum."""
+    raw_output = raw_output or {}
+    value = raw_output.get("attempts")
+    total = value if isinstance(value, int) and value > 0 else 0
+    route = raw_output.get("route")
+    if isinstance(route, dict) and route.get("stage") != 4:
+        total += sum(skip["attempts"] for skip in route.get("skipped") or [] if isinstance(skip.get("attempts"), int))
+    return total
 
 
-def _for_page(extractor: PdfMenuExtractor, guards: PdfGuards, attempts: int, timeout_s: float) -> PdfMenuExtractor:
+class PageExtractor(Protocol):
+    """What extract_pdf_pages needs: PdfMenuExtractor, or RoutedPdfMenuExtractor (app.adapters.pdf_routed_extraction)."""
+
+    def extract_page(self, page: PdfPage) -> ExtractionResult: ...
+
+
+def _for_page(extractor: Any, guards: PdfGuards, attempts: int, timeout_s: float) -> PageExtractor:
     """The extractor with this page's limits. Nothing is read from the environment or opened here."""
+    if hasattr(extractor, "for_page"):  # the route ladder of MENU_EXTRACTOR=openrouter sets its own routes' limits
+        return extractor.for_page(attempts, timeout_s, guards.ocr_deadline_s)
     hybrid = extractor.hybrid
     settings = replace(hybrid.settings, max_attempts=attempts, request_timeout_s=timeout_s, wall_timeout_s=timeout_s)
     half = guards.ocr_deadline_s / 2
@@ -162,7 +179,7 @@ def _for_page(extractor: PdfMenuExtractor, guards: PdfGuards, attempts: int, tim
 
 
 def extract_pdf_pages(
-    extractor: PdfMenuExtractor,
+    extractor: PdfMenuExtractor | PageExtractor,
     pages: Iterable[PdfPage],
     guards: PdfGuards | None = None,
     *,

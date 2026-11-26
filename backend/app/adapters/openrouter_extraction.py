@@ -28,6 +28,8 @@ from app import extraction
 from app.adapters.extraction import ExtractionError, ExtractionResult, parse_extraction_response
 from app.adapters.gemini_extraction import GeminiMenuExtractor, _message
 from app.adapters.hybrid_extraction import in_menu_order
+from typing import Any
+
 from app.extraction.clova import ClovaOCRError, ClovaSettings, load_clova_settings
 from app.extraction.routed import (
     PROMPTS,
@@ -65,9 +67,16 @@ class OpenRouterMenuExtractor:
         self.fallback = GeminiMenuExtractor(self.route.lite)
 
     def extract(self, image: bytes, content_type: str, filename: str | None) -> ExtractionResult:
+        return self.extract_with(image, content_type, self.clova, None)
+
+    def extract_with(self, image: bytes, content_type: str, clova: ClovaSettings, ocr_client: Any) -> ExtractionResult:
+        """`extract` with the OCR step given: `ocr_client` answers the OCR call in CLOVA's format.
+        A PDF page with a text layer is read this way (app.adapters.pdf_routed_extraction), without
+        a CLOVA call; everything after the OCR step is the same as for a photo."""
+        filename = None
         try:
-            result = extract_menu_routed(image, content_type, self.clova, self.route, self.breaker,
-                                         budget=self.budget)
+            result = extract_menu_routed(image, content_type, clova, self.route, self.breaker,
+                                         budget=self.budget, ocr_client=ocr_client)
         except ClovaOCRError as error:
             logger.warning("openrouter extraction: CLOVA OCR failed, falling back to Gemini only: %s", error)
             fallback = self.fallback.extract(image, content_type, filename)

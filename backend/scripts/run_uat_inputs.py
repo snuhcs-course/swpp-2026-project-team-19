@@ -28,6 +28,14 @@ cannot be read, a failed page or a failed model call is that input's failure rea
 other inputs still run. The exit code is 1 when any input failed, and 2 when a key or setting is
 missing (nothing is sent then).
 
+With `--extractor openrouter` (I5-P19) the inputs go through MENU_EXTRACTOR=openrouter's code
+instead: a photo through `OpenRouterMenuExtractor.extract` and a PDF's pages through
+`RoutedPdfMenuExtractor`, so each page takes the route ladder (OpenRouter, then the Gemini API).
+Its settings are those of that extractor (OPENROUTER_API_KEY, OPENROUTER_EXTRACTION_MODEL,
+EXTRACTION_DIRECT_MODEL, ... see backend/README.md); a page's record then also has `route`,
+the tokens and `costUsd`. `--pdf-page-attempts 1` gives every PDF page one attempt and the PDF
+no retries, which bounds what a run can cost.
+
 Nothing is sent for a real bar's photo that is not in the data directory; those photos are not
 in the repository. Keys are read from the environment and are never printed or written.
 """
@@ -51,8 +59,10 @@ if str(BACKEND_ROOT) not in sys.path:  # run as a script: python scripts/run_uat
 
 from app.adapters.extraction import ExtractionError, ExtractionResult  # noqa: E402
 from app.adapters.hybrid_extraction import HybridMenuExtractor  # noqa: E402
+from app.adapters.openrouter_extraction import OpenRouterMenuExtractor  # noqa: E402
 from app.adapters.pdf_extraction import PdfMenuExtractor  # noqa: E402
 from app.adapters.pdf_guards import PdfGuards, classify, extract_pdf_pages  # noqa: E402
+from app.adapters.pdf_routed_extraction import RoutedPdfMenuExtractor, pdf_extractor_for  # noqa: E402
 from app.core.normalize import normalize  # noqa: E402
 from app.extraction import ExtractionConfigError  # noqa: E402
 from app.extraction.pdf import PdfError  # noqa: E402
@@ -118,6 +128,16 @@ def _latency(raw_output: dict[str, Any] | None) -> dict[str, int | None]:
             "ocrMs": None if ocr.get("provider") == TEXT_LAYER_PROVIDER else ocr.get("latencyMs")}
 
 
+def _route(raw_output: dict[str, Any] | None) -> dict[str, Any]:
+    """Which route read a page and what it cost, for a page read through the route ladder
+    (app.extraction.routed); nothing for the hybrid extractor, whose records have no route."""
+    raw = raw_output or {}
+    if not isinstance(raw.get("route"), dict):
+        return {}
+    return {"route": raw["route"], "inputTokens": raw.get("inputTokens"), "outputTokens": raw.get("outputTokens"),
+            "thoughtTokens": raw.get("thoughtTokens"), "costUsd": raw.get("costUsd")}
+
+
 def _sum(values: list[int | None]) -> int | None:
     known = [value for value in values if value is not None]
     return sum(known) if known else None
@@ -135,7 +155,7 @@ def run_photo(data: bytes, mime_type: str, hybrid: HybridMenuExtractor) -> dict[
             "ocrFallback": (raw.get("hybridFallback") or {}).get("reason")}
 
 
-def run_pdf(data: bytes, extractor: PdfMenuExtractor, guards: PdfGuards) -> dict[str, Any]:
+def run_pdf(data: bytes, extractor: PdfMenuExtractor | RoutedPdfMenuExtractor, guards: PdfGuards) -> dict[str, Any]:
     try:
         pages = extractor.pages(data)
     except PdfError as error:
@@ -151,7 +171,7 @@ def run_pdf(data: bytes, extractor: PdfMenuExtractor, guards: PdfGuards) -> dict
             "page": page.page, "kind": kinds[page.page].kind, "textLayer": kinds[page.page].text_layer,
             "items": len(page.result.items) if page.result is not None else 0,
             "failure": None if page.ok else {"code": page.failure, "message": page.message},
-            "attempts": page.attempts, **_latency(page.raw_output),
+            "attempts": page.attempts, **_latency(page.raw_output), **_route(page.raw_output),
         })
     failed = [page for page in report if page["failure"] is not None]
     failure = None
@@ -188,7 +208,7 @@ def run_input(
     elif entry["kind"] == "photo":
         body = run_photo(path.read_bytes(), MIME_TYPES[path.suffix.lower()], hybrid)
     else:
-        body = run_pdf(path.read_bytes(), PdfMenuExtractor(hybrid), guards)
+        body = run_pdf(path.read_bytes(), pdf_extractor_for(hybrid), guards)
     record.update(body)
     record["wallMs"] = round((clock() - started) * 1000)
     record["expected"] = found_expected(expected_rows(entry), record["items"])
@@ -310,6 +330,14 @@ def server_hybrid(attempts: int = PHOTO_ATTEMPTS) -> HybridMenuExtractor:
     return HybridMenuExtractor(replace(hybrid.settings, max_attempts=attempts), hybrid.clova, prompt=hybrid.prompt)
 
 
+def server_openrouter(attempts: int = PHOTO_ATTEMPTS) -> OpenRouterMenuExtractor:
+    """MENU_EXTRACTOR=openrouter's extractor from the environment, with fewer OpenRouter attempts for a
+    photo. It has no daily paid budget: this is a test run, not the server."""
+    extractor = OpenRouterMenuExtractor()
+    route = replace(extractor.route, openrouter=replace(extractor.route.openrouter, max_attempts=attempts))
+    return OpenRouterMenuExtractor(route, extractor.clova)
+
+
 def main(argv: list[str] | None = None, *, hybrid_factory: Callable[[], HybridMenuExtractor] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--out", type=Path, required=True, help="directory for the records and the report")
@@ -318,6 +346,11 @@ def main(argv: list[str] | None = None, *, hybrid_factory: Callable[[], HybridMe
     parser.add_argument("--only", action="append", help="run only this input id (can be given more than once)")
     parser.add_argument("--attempts", type=int, default=PHOTO_ATTEMPTS, help="model attempts for a photo")
     parser.add_argument("--force", action="store_true", help="run inputs that already have a good result again")
+    parser.add_argument("--extractor", choices=("hybrid", "openrouter"), default="hybrid",
+                        help="hybrid: the Gemini API extractor (default, as in I4-P30); openrouter: the route ladder")
+    parser.add_argument("--pdf-page-attempts", type=int,
+                        help="model attempts for one PDF page (default: the PDF limits' own, 3); 1 also takes the "
+                             "PDF's retries away")
     args = parser.parse_args(argv)
 
     inputs = load_manifest()
@@ -326,9 +359,14 @@ def main(argv: list[str] | None = None, *, hybrid_factory: Callable[[], HybridMe
         if unknown:
             parser.error(f"unknown input id: {', '.join(unknown)}")
         inputs = [entry for entry in inputs if entry["id"] in args.only]
-    factory = hybrid_factory or (lambda: server_hybrid(args.attempts))
+    server = server_openrouter if args.extractor == "openrouter" else server_hybrid
+    factory = hybrid_factory or (lambda: server(args.attempts))
+    guards = PdfGuards()
+    if args.pdf_page_attempts is not None:
+        guards = PdfGuards(page_attempts=args.pdf_page_attempts,
+                           document_retries=0 if args.pdf_page_attempts == 1 else guards.document_retries)
     try:
-        records = run_all(inputs, args.out, args.data_dir, factory, PdfGuards(), force=args.force)
+        records = run_all(inputs, args.out, args.data_dir, factory, guards, force=args.force)
     except ExtractionConfigError as error:  # a key or setting is missing: nothing was sent
         print(f"settings: {error}", file=sys.stderr)
         return 2
