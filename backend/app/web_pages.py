@@ -1,7 +1,9 @@
-"""What the web pages served by the API share: the operator dashboard (/admin) and the owner web (/owner).
+"""What the web pages served by the API share: the operator dashboard (/admin), the owner web (/owner) and
+the privacy policy (/privacy), which has a stricter policy of its own.
 
-Both pages sign in with Supabase Google login in the browser and call the spec APIs with the access
+/admin and /owner sign in with Supabase Google login in the browser and call the spec APIs with the access
 token, like the Android app. They add no API: each page's `config.js` only hands it the public settings.
+/privacy has no sign-in and no `config.js`.
 """
 
 import json
@@ -45,8 +47,21 @@ def content_security_policy() -> str:
     )
 
 
-def add_page_headers(response: Response, cache_control: str = NO_CACHE) -> Response:
-    response.headers["Content-Security-Policy"] = content_security_policy()
+def privacy_content_security_policy() -> str:
+    """The privacy policy page (/privacy): its own stylesheet and links, and nothing else. No script runs."""
+    return "; ".join(
+        [
+            "default-src 'none'",
+            "style-src 'self'",
+            "frame-ancestors 'none'",
+            "base-uri 'none'",
+            "form-action 'none'",
+        ]
+    )
+
+
+def add_page_headers(response: Response, cache_control: str = NO_CACHE, policy: str | None = None) -> Response:
+    response.headers["Content-Security-Policy"] = policy or content_security_policy()
     # Signed photo URLs and the OAuth callback must not leak through the Referer header.
     response.headers["Referrer-Policy"] = "no-referrer"
     response.headers["X-Content-Type-Options"] = "nosniff"
