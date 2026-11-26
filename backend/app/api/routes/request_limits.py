@@ -23,15 +23,16 @@ router = APIRouter(prefix="/api", tags=["request limits"])
 @router.post(
     "/request-limits/reset",
     response_model=RequestLimitResetResponse,
-    summary="Reset today's NTS check and certificate OCR counts",
+    summary="Reset today's NTS check, certificate OCR and menu photo counts",
     description=(
         "Operator only. Clears today's counts of the daily limits (at most "
         f"{BUSINESS_VERIFICATION_DAILY_LIMIT} NTS checks and {BUSINESS_CERTIFICATE_OCR_DAILY_LIMIT} certificate OCR "
-        "calls per user) without restarting the server, so the user can call again at once.\n\n"
-        "- No body or `{}` clears every user's counts of both kinds.\n"
+        "calls per user, and the daily menu photo limit of spec 4.1) without restarting the server, so the "
+        "user can call again at once.\n\n"
+        "- No body or `{}` clears every user's counts of every kind.\n"
         "- `userId` clears only that user's counts. Counts are kept by token `sub`, so the user is looked up in "
         "`users`; a caller without a `users` row is cleared only by a reset of every user.\n"
-        "- `kind` clears only `business_verification` or `business_certificate_ocr`.\n"
+        "- `kind` clears only `business_verification`, `business_certificate_ocr` or `menu_import_photos`.\n"
         "- Checks in order: operator, body fields, the user."
     ),
     responses=error_responses(

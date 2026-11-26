@@ -19,6 +19,7 @@ from app.schemas.errors import document_invalid_request
 from app.matching.embedding import get_embedding_step
 from app.owner_web import mount_owner_web
 from app.services.menu_import_processing import find_unfinished_imports, recover_imports
+from app.services.request_limits import menu_photo_daily_limit
 from app.services.search_similar import get_similar_products
 
 logger = logging.getLogger(__name__)
@@ -59,6 +60,8 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     # the first upload. The local defaults need nothing.
     get_menu_extractor()
     get_image_storage()
+    # An invalid MENU_PHOTO_DAILY_LIMIT stops the server instead of failing the first upload.
+    menu_photo_daily_limit()
     # An invalid MATCHING_LLM_MAX_CALLS or MATCHING_LLM_MODE stops the server; a missing key only logs a warning.
     get_matching_llm_layer()
     # Invalid EMBEDDING_* settings stop the server, even while the step is off. The index is built on first use.

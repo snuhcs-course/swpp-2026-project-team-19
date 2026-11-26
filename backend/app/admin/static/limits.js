@@ -1,13 +1,14 @@
-// Operator reset of the daily NTS check and certificate OCR counts (API spec 3.11.19): the
+// Operator reset of the daily NTS check, certificate OCR and menu photo counts (API spec 3.11.19): the
 // "요청 수 초기화" tab of the dashboard. Uses the helpers of app.js ($, api, showMessage).
 // Data from the API is always put on the page as text (textContent), never as HTML.
 "use strict";
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const LIMIT_KIND_LABELS = {
-  "": "국세청 진위확인과 OCR",
+  "": "국세청 진위확인, OCR, 메뉴 사진",
   business_verification: "국세청 진위확인",
   business_certificate_ocr: "사업자등록증 OCR",
+  menu_import_photos: "메뉴 사진 등록",
 };
 
 // `session` drops a response that arrives after sign-out (clearLimits), like the other tabs.

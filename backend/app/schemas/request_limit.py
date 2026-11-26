@@ -3,7 +3,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
-RequestLimitKind = Literal["business_verification", "business_certificate_ocr"]
+RequestLimitKind = Literal["business_verification", "business_certificate_ocr", "menu_import_photos"]
 
 
 class RequestLimitResetInput(BaseModel):
@@ -14,7 +14,10 @@ class RequestLimitResetInput(BaseModel):
     )
     kind: RequestLimitKind | None = Field(
         default=None,
-        description="`business_verification` (NTS checks) or `business_certificate_ocr`; both if null",
+        description=(
+            "`business_verification` (NTS checks), `business_certificate_ocr` or `menu_import_photos` "
+            "(menu photos uploaded, spec 4.1); every kind if null"
+        ),
     )
 
 
