@@ -149,6 +149,45 @@ Executed locally:
 
 GitHub CI status must be checked on the pushed PR; local results do not establish CI success. No Galaxy S23/DebugView/Crashlytics delivery evidence has been obtained by the agent. No signed release/ONE store upload is claimed. P17/P35 remain Started pending their actual device/Console DoD. Human review must cover Privacy, Auth/permissions (debug shell hook and sign-in/consent instrumentation), and Android CI. No backend, AI, owner web, API or schema is changed.
 
+## 2026-11-26 Galaxy S23 QA follow-up: release_channel
+
+The user reports a conditional pass on a Firebase-enabled Debug/dev build: customer/auth/owner/import/review events, consent controls, existing flows and Crashlytics passed. Cold start was 1,110 ms in one recorded COLD run (not a multi-run benchmark). The supplied screenshots independently show bar_detail_opened / owner_application_started delivery and a correctly registered user-scoped Release Channel dimension mapped to release_channel. They do not show release_channel among the selected event's user properties. Detailed events and Crashlytics remain user-reported evidence, rather than independently reviewed Console screenshots for every item.
+
+**Root cause and fix:** FirebaseTelemetry previously assigned release_channel before enabling Analytics collection. This app deliberately defaults collection to false and disables/resets it on opt-out. The resolved Google measurement SDK (24.0.0) explicitly drops user-property writes in that state (its diagnostic is `User property not set since app measurement is disabled`). Consent is now applied first, then collection is enabled, then the build's release_channel is assigned. The shared SDK-call sequence has regressions using a fake that rejects disabled-state property writes, covering first opt-in, reset/re-enable and startup/channel replacement. Advertising remains denied and the existing consent/build gate is unchanged.
+
+Local focused validation: `:app:testDebugUnitTest --tests "com.zerotoone.bottlemap.telemetry.AnalyticsCollectionTest" --tests "com.zerotoone.bottlemap.telemetry.TelemetryTest" -PBOTTLEMAP_TELEMETRY_DEBUG_ENABLED=true -PBOTTLEMAP_RELEASE_CHANNEL=dev` passed: 10 tests, zero failures/errors/skips. This compiles the Firebase-enabled Debug code and checks the regression; it does not establish delivery to the S23 Console session. Full CI review remains a merge gate.
+
+This is not a requirement to install a Release build: the Gradle channel and build type are independent, and dev is intentional for a team verification Debug APK. Keep the existing Console dimension; do not rename it or change its user scope. Custom-dimension registration enables reporting of a property; it does not assign the value on the device. DebugView is for live SDK validation. The reported `.none.` device setting separately disables DebugView routing; it does not explain away the SDK call-order defect or clear a previously stored user property.
+
+[Firebase DebugView documentation](https://firebase.google.com/docs/analytics/debugview) and [Android user properties](https://firebase.google.com/docs/analytics/android/user-properties).
+
+After fetching the fix, use the existing branch and preserve app data:
+
+```powershell
+git fetch origin
+git switch feature/i5-p17-p35-firebase-telemetry
+git pull --ff-only
+.\gradlew.bat :app:installDebug "-PBOTTLEMAP_API_BASE_URL=https://bottlemap.o-r.kr/" "-PBOTTLEMAP_RELEASE_CHANNEL=dev" "-PBOTTLEMAP_TELEMETRY_DEBUG_ENABLED=true"
+
+adb shell setprop debug.firebase.analytics.app com.zerotoone.bottlemap
+adb shell getprop debug.firebase.analytics.app
+adb shell am force-stop com.zerotoone.bottlemap
+adb shell am start -n com.zerotoone.bottlemap/.MainActivity
+```
+
+The getprop output must be com.zerotoone.bottlemap, not .none. With usage records enabled, create a new search/detail event. In DebugView select the S23 and inspect that **new** event's User properties tab and Current User Properties panel for release_channel = dev. Do not inspect a historical event from before the fix. Then turn usage records off/on, create another new event, and confirm dev again. Reopen with consent still on and confirm it remains dev. No app-data reset, new dimension, forced crash or repeat of the full QA suite is required for this focused retest.
+
+```text
+Galaxy S23 — release_channel focused retest
+[ ] DebugView getprop is com.zerotoone.bottlemap.
+[ ] New event after launch with usage consent enabled contains release_channel = dev.
+[ ] New event after opt-out/reset and opt-in again contains release_channel = dev.
+[ ] New event after app restart still contains release_channel = dev.
+Notes / new-event timestamp:
+```
+
+When finished, disable DebugView routing with `adb shell setprop debug.firebase.analytics.app .none.`. The QA remains conditional until the user confirms the new property check. CI/human-review and ONE store distribution verification are separate gates; schedule completion/time fields are not changed by this report.
+
 ## Changed-file purpose map
 
 | File | Purpose |
@@ -194,3 +233,5 @@ GitHub CI status must be checked on the pushed PR; local results do not establis
 | `android/app/src/test/java/com/zerotoone/bottlemap/ui/customer/BarDetailViewModelTest.kt` | Verify failed/retried/repeated detail loading does not inflate successful opens. |
 | `android/ci/prepare_firebase.py` | Validate and materialize optional injected configuration without logging sensitive values. |
 | `android/ci/test_prepare_firebase.py` | Test absent/valid/invalid/wrong-package config handling and safe failure text. |
+| `android/app/src/main/java/com/zerotoone/bottlemap/telemetry/AnalyticsCollection.kt` | Order consent, collection activation and channel assignment so SDK writes are retained. |
+| `android/app/src/test/java/com/zerotoone/bottlemap/telemetry/AnalyticsCollectionTest.kt` | Reproduce disabled-property rejection and guard first opt-in, reset/re-enable and channel replacement. |

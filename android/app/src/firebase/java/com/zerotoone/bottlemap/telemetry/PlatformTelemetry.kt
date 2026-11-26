@@ -31,14 +31,20 @@ internal class FirebaseTelemetry(private val context: Context, private val initi
             analytics?.resetAnalyticsData()
             crashlytics?.deleteUnsentReports()
         } else {
-            analytics?.setConsent(mapOf(
-                FirebaseAnalytics.ConsentType.AD_STORAGE to FirebaseAnalytics.ConsentStatus.DENIED,
-                FirebaseAnalytics.ConsentType.AD_USER_DATA to FirebaseAnalytics.ConsentStatus.DENIED,
-                FirebaseAnalytics.ConsentType.AD_PERSONALIZATION to FirebaseAnalytics.ConsentStatus.DENIED,
-                FirebaseAnalytics.ConsentType.ANALYTICS_STORAGE to FirebaseAnalytics.ConsentStatus.GRANTED,
-            ))
-            analytics?.setUserProperty("release_channel", BuildConfig.RELEASE_CHANNEL)
-            analytics?.setAnalyticsCollectionEnabled(true)
+            analytics?.let { collector ->
+                enableConsentedAnalytics(
+                    grantConsent = {
+                        collector.setConsent(mapOf(
+                            FirebaseAnalytics.ConsentType.AD_STORAGE to FirebaseAnalytics.ConsentStatus.DENIED,
+                            FirebaseAnalytics.ConsentType.AD_USER_DATA to FirebaseAnalytics.ConsentStatus.DENIED,
+                            FirebaseAnalytics.ConsentType.AD_PERSONALIZATION to FirebaseAnalytics.ConsentStatus.DENIED,
+                            FirebaseAnalytics.ConsentType.ANALYTICS_STORAGE to FirebaseAnalytics.ConsentStatus.GRANTED,
+                        ))
+                    },
+                    enableCollection = { collector.setAnalyticsCollectionEnabled(true) },
+                    setReleaseChannel = { collector.setUserProperty("release_channel", BuildConfig.RELEASE_CHANNEL) },
+                )
+            }
         }
         this.enabled = enabled
     }
