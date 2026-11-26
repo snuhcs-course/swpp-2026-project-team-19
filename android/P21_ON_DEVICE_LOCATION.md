@@ -60,7 +60,7 @@ Added tests cover independent server-formula distance fixtures (including the
 500 m rounding boundary, antimeridian and pole), inclusive viewport edges,
 metadata preservation, cache sharing/concurrency/TTL/empty/failure/cancellation,
 late GPS/permission revocation, complete distance tie ordering, and actual
-Retrofit HTTP requests to a local MockWebServer.
+Retrofit HTTP requests to a loopback JDK HTTP server (no added dependencies).
 
 `OnDeviceLocationNetworkTest` writes a synthetic-only capture to
 `android/app/build/reports/p21-network.log`. It checks one catalog request
@@ -68,6 +68,16 @@ across nearby/map screens and changed locations, plus query, product ID, and
 legacy search requests. Every request must omit location/bounds parameters,
 body, and Authorization. The generated log is ignored with build outputs.
 This is automated local HTTP evidence, not a Galaxy S23 network capture.
+
+Captured requests from the local test (synthetic data only):
+
+```text
+GET /api/search/all-bars
+GET /api/search/bars?query=synthetic%20whisky&source=input&limit=100
+GET /api/search/bars?productId=00000000-0000-4000-8000-000000000021&source=popular&limit=100
+GET /api/search/bars?query=synthetic%20legacy&limit=50
+4 requests; no customer coordinates/bounds/body/Authorization.
+```
 
 ## Galaxy S23 QA — pending user execution
 

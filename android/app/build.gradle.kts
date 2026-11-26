@@ -204,7 +204,6 @@ dependencies {
     implementation(libs.moshi.kotlin)
 
     testImplementation(libs.junit4)
-    testImplementation("com.squareup.okhttp3:mockwebserver:${libs.versions.okhttp.get()}")
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation("org.robolectric:robolectric:4.17")
     robolectricSdk("org.robolectric:android-all-instrumented:15-robolectric-13954326-i7")

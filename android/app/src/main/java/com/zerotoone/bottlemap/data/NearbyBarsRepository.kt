@@ -69,7 +69,7 @@ fun distanceMeters(from: NearbyCoordinate, to: NearbyCoordinate): Double {
     return 2 * EARTH_RADIUS_METERS * asin(min(1.0, sqrt(a)))
 }
 
-/** Spec 3.19.4 / backend search._distance_meters: ties round to even. */
+/** Spec 3.19.4 / backend search.distance_meters: ties round to even. */
 fun roundedDistanceMeters(from: NearbyCoordinate, to: NearbyCoordinate): Int =
     round(distanceMeters(from, to)).toInt()
 
