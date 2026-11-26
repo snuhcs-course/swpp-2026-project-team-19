@@ -6,7 +6,8 @@ One photo is read by the first route that answers:
 |-------|----------------------------------------------------------------|-----------------------------------------|
 | 0     | OpenRouter, the primary model (OpenRouter picks the provider)   | always tried first                      |
 | 1     | OpenRouter, a fallback model (`models` in the same request)     | every provider of the primary failed    |
-| 2     | Gemini API, the direct model (EXTRACTION_DIRECT_MODEL)          | the OpenRouter call failed or is paused |
+| 2     | Gemini API, the direct model (EXTRACTION_DIRECT_MODEL)          | the OpenRouter call failed, is paused,  |
+|       |                                                                | or today's paid photos are used up      |
 | 3     | Gemini API, the lite model (EXTRACTION_MODEL)                   | the stage 2 call failed (e.g. 429)      |
 | 4     | none: AllRoutesFailedError, the photo is marked failed          | every call failed                       |
 
@@ -19,6 +20,11 @@ The circuit breaker keeps a dead OpenRouter from costing every photo its retries
 `breaker_failures` failed OpenRouter calls in a row, stages 0 and 1 are skipped for
 `breaker_cooldown_s` seconds; then one call is tried again, and its failure pauses them again. The
 state lives in the process (the API runs as one process).
+
+The daily paid limit (`budget`, app.services.paid_photo_budget) is the server's own spending
+brake: the team's one OpenRouter key has no limit of its own. Once `daily_paid_limit` photos have
+been sent to OpenRouter in a KST day, the rest of the day's photos start at stage 2. Nothing is
+refused; the skipped stage is recorded with the reason `daily_paid_limit`.
 
 An answer that arrived but is not valid output (cut at `max_tokens` twice, not the schema) fails
 the photo as it does for the other extractors; it is not sent to the next route, because the
@@ -41,7 +47,7 @@ from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 from functools import cache
 from pathlib import Path
-from typing import Any
+from typing import Any, Protocol
 
 from google import genai
 from pydantic import ValidationError
@@ -78,6 +84,17 @@ class RouteSettings:
     prompt: str = DEFAULT_PROMPT
     breaker_failures: int = 3
     breaker_cooldown_s: float = 600
+    daily_paid_limit: int = 300
+
+
+class PaidBudget(Protocol):
+    """Today's places for photos read through OpenRouter (app.services.paid_photo_budget.DailyPaidBudget)."""
+
+    limit: int
+
+    def try_reserve(self) -> bool: ...
+
+    def refund(self) -> None: ...
 
 
 def load_route_settings() -> RouteSettings:
@@ -97,6 +114,7 @@ def load_route_settings() -> RouteSettings:
         prompt=prompt,
         breaker_failures=_positive("OPENROUTER_BREAKER_FAILURES", RouteSettings.breaker_failures, int),
         breaker_cooldown_s=_positive("OPENROUTER_BREAKER_COOLDOWN_S", RouteSettings.breaker_cooldown_s, float),
+        daily_paid_limit=_positive("OPENROUTER_DAILY_PHOTO_LIMIT", RouteSettings.daily_paid_limit, int),
     )
 
 
@@ -141,12 +159,15 @@ def extract_menu_routed(
     route: RouteSettings,
     breaker: CircuitBreaker,
     *,
+    budget: PaidBudget | None = None,
     http_client: Any = None,
     gemini_client: Any = None,
     ocr_client: Any = None,
 ) -> dict[str, Any]:
     """OCR + the first route that answers, for one photo. Returns {"items", "meta"} like
     extract_menu_hybrid_v2; `meta["route"]` is {"stage", "path", "model", "provider", "skipped"}.
+
+    `budget` is the server-wide daily limit on photos sent to OpenRouter; without it there is none.
 
     Raises ClovaOCRError when OCR fails, InvalidModelOutputError when a route answered with
     something that is not valid output, and AllRoutesFailedError when no route answered.
@@ -166,10 +187,18 @@ def extract_menu_routed(
     }
     skipped: list[dict[str, Any]] = []
 
-    if breaker.allows():
+    if not breaker.allows():
+        skipped.append({"stage": 0, "reason": "circuit_open"})
+    elif budget is not None and not budget.try_reserve():
+        skipped.append({"stage": 0, "reason": "daily_paid_limit", "limit": budget.limit})
+        logger.warning("extraction route stage=0 skipped: daily_paid_limit (today's %d photos through OpenRouter "
+                       "are used up, or could not be counted); starting at stage 2", budget.limit)
+    else:
         try:
             call = _call_openrouter(route.openrouter, prompt, ocr, http_client)
         except ModelCallError as error:
+            if budget is not None:
+                budget.refund()  # OpenRouter did not answer: the photo was not read through it
             paused = breaker.record_failure()
             skipped.append(_skip(0, error))
             logger.warning("extraction route stage=0 failed (%s: %.200s)%s", type(error).__name__, error,
@@ -177,8 +206,6 @@ def extract_menu_routed(
         else:
             breaker.record_success()
             return _finish(meta, call, skipped, ocr["table"])
-    else:
-        skipped.append({"stage": 0, "reason": "circuit_open"})
 
     for stage, settings in ((2, route.direct), (3, route.lite)):
         try:

@@ -14,6 +14,10 @@ call that answered. The run's `model_name` column is written when the photo is u
 any route is known, so it holds the primary model; the model that read the photo is
 `raw_output["model"]`.
 
+`budget` is the server-wide daily limit on photos read through OpenRouter (the team's one key has
+no spending limit of its own); over it, photos start at the Gemini API and
+`raw_output["route"]["skipped"]` says `daily_paid_limit`.
+
 When the OCR step fails, the photo goes through the Gemini-only extractor (lite model), as it does
 for HybridMenuExtractor, and `raw_output["hybridFallback"]` records why.
 """
@@ -29,6 +33,7 @@ from app.extraction.routed import (
     PROMPTS,
     AllRoutesFailedError,
     CircuitBreaker,
+    PaidBudget,
     RouteSettings,
     extract_menu_routed,
     load_route_settings,
@@ -45,11 +50,13 @@ class OpenRouterMenuExtractor:
     provider = "naver-clova+openrouter"
 
     def __init__(self, route: RouteSettings | None = None, clova: ClovaSettings | None = None,
-                 breaker: CircuitBreaker | None = None) -> None:
+                 breaker: CircuitBreaker | None = None, budget: PaidBudget | None = None) -> None:
         # Raise extraction.ExtractionConfigError when a variable is missing or invalid.
         self.route = route or load_route_settings()
         self.clova = clova or load_clova_settings()
         self.breaker = breaker or CircuitBreaker(self.route.breaker_failures, self.route.breaker_cooldown_s)
+        # None: no daily limit (tests and evaluation scripts). The server always passes one (app.api.deps).
+        self.budget = budget
         self.model_name = self.route.openrouter.model
         self.pipeline_version = (
             f"bottlemap-menu-hybrid-prompt{PROMPTS[self.route.prompt][0]}"
@@ -59,7 +66,8 @@ class OpenRouterMenuExtractor:
 
     def extract(self, image: bytes, content_type: str, filename: str | None) -> ExtractionResult:
         try:
-            result = extract_menu_routed(image, content_type, self.clova, self.route, self.breaker)
+            result = extract_menu_routed(image, content_type, self.clova, self.route, self.breaker,
+                                         budget=self.budget)
         except ClovaOCRError as error:
             logger.warning("openrouter extraction: CLOVA OCR failed, falling back to Gemini only: %s", error)
             fallback = self.fallback.extract(image, content_type, filename)

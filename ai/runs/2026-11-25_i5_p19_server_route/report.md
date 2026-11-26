@@ -114,7 +114,7 @@
 
 **진우**
 - **(2026-11-26 고침)** OpenRouter 키는 과목에서 발급해 준 하나뿐이다. 키를 더 만들 수 없고 대시보드에서 키 한도를 걸 수도 없다. 실험과 서버가 같은 키, 같은 크레딧을 쓴다.
-  - 그래서 지출 상한은 서버가 직접 지킨다. 서버 전체 하루 한도(OpenRouter 경로로 읽은 사진 수)로 대신한다. 후속 작업에서 구현한다(`../_outgoing/i5_p19_followup_handoff.md` B).
+  - 그래서 지출 상한은 서버가 직접 지킨다. 서버 전체 하루 한도(OpenRouter 경로로 읽은 사진 수, `OPENROUTER_DAILY_PHOTO_LIMIT`)로 대신한다. 구현과 결과는 `ai/runs/2026-11-26_i5_p19_followup/report.md`에 있다.
   - 평가용 호출과 서버 호출은 요청 헤더 `X-Title`로만 구분된다(서버 `bottlemap-menu-extraction`, 평가 스크립트 `menu-extraction-eval`).
   - 계정의 데이터 수집 설정은 볼 수 없다. 요청마다 넣는 `provider.data_collection: "deny"`가 유일한 장치다.
   - 같은 키를 서버 `.env`에 등록한다(배포 워크플로는 키를 보내지 않는다).

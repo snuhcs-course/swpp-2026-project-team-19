@@ -100,10 +100,17 @@ def get_menu_extractor() -> MenuExtractor:
         # I5-P19: CLOVA OCR lines + the photo through OpenRouter, then the Gemini API when OpenRouter
         # fails. Imported here so the other extractors never load it; MENU_EXTRACTOR=gemini is unchanged.
         from app.adapters.openrouter_extraction import OpenRouterMenuExtractor
+        from app.db.session import get_session_factory
         from app.extraction import ExtractionConfigError
+        from app.extraction.routed import load_route_settings
+        from app.services.paid_photo_budget import DailyPaidBudget, stored_count_loader
 
         try:
-            return OpenRouterMenuExtractor()
+            route = load_route_settings()
+            # The server-wide daily limit on photos read through OpenRouter, counted from the stored
+            # extraction runs so that a restart keeps it. The database is first read on the first photo.
+            budget = DailyPaidBudget(route.daily_paid_limit, stored_count_loader(get_session_factory()))
+            return OpenRouterMenuExtractor(route, budget=budget)
         except ExtractionConfigError as error:
             raise RuntimeError(f"MENU_EXTRACTOR=openrouter is not configured: {error}") from error
     raise RuntimeError(f"Unsupported MENU_EXTRACTOR: {kind!r} (supported: mock, gemini, openrouter)")
