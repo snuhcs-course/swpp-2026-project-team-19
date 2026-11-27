@@ -20,7 +20,7 @@ def test_the_page_is_public_and_shows_its_effective_date_and_history(client, pat
     assert response.status_code == 200
     assert response.headers["content-type"].startswith("text/html")
     assert '<html lang="ko">' in response.text
-    assert '시행일: <time datetime="2026-11-26">' in response.text
+    assert '시행일: <time datetime="2026-11-27">' in response.text
     assert '<h3 id="history">변경 이력</h3>' in response.text
     assert '<link rel="stylesheet" href="/privacy/style.css">' in response.text
     # Nothing on the page runs: the policy below would block it anyway.
