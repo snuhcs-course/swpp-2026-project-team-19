@@ -198,3 +198,50 @@ def test_age_only_scan_flags_the_one_product_left_out(be):  # noqa: F811
     [row] = ao.scan(result, be, {"바B": bc})
     assert row["age"] == 18 and row["same_age"] == ["Glenfiddich 18"] and row["one_product_not_offered"] is True
     assert "**예**" in ao.to_md("x", [row])
+
+
+# ---------- review fixes (PR #222) ----------
+
+def test_age_only_scan_counts_the_products_that_take_an_older_age(be):  # noqa: F811
+    import i5_p59_age_only as ao
+    seed = json.loads((h.REPO_ROOT / "ai" / "catalog" / "catalog_v2_service.json").read_text(encoding="utf-8"))
+    bc = h.build_catalog(be, "바B", "service", seed)
+    result = {"rules": {"rows": [{"bar": "바B", "photo_id": "p", "name": "글렌모렌지 12", "gold": "glenmorangie-original",
+                                  "status": "ambiguous", "outcome": "ambiguous_ok",
+                                  "cands": "Glenmorangie 12 Calvados Cask Finish || Glenmorangie Lasanta"}]}}
+    [row] = ao.scan(result, be, {"바B": bc})
+    # Lasanta (15) and Quinta Ruban (14) take 12 as an older age, as the brand + age step reads them
+    assert row["same_age"] == ["Glenmorangie 12 Calvados Cask Finish", "Glenmorangie Lasanta",
+                               "Glenmorangie Quinta Ruban", "Glenmorangie The Original"]
+    assert row["one_product_not_offered"] is False
+    # rules code before accepted ages: the product's age only
+    assert ao.fits_age(SimpleNamespace(age_years=12), 12) and not ao.fits_age(SimpleNamespace(age_years=15), 12)
+
+
+def test_compare_escapes_pipes_in_table_cells():
+    gold = {"gold": "both:x|y"}
+    before = {"server": section([{**row("p", "a", cands="A || B"), **gold}])}
+    after = {"server": section([{**row("p", "a", status="ambiguous", outcome="ambiguous_ok", burden="choose",
+                                       cands="A || B"), **gold}])}
+    md = cmp.to_md(cmp.compare(before, after, ["server"]), "t")
+    [line] = [x for x in md.splitlines() if x.startswith("| p |")]
+    assert r"both:x\|y" in line and r"A \|\| B" in line
+    assert line.replace(r"\|", "").count("|") == 6  # five cells
+
+
+def test_kind_table_takes_the_rules_only_server_row_only_where_the_llm_kept_the_rule_result():
+    import i5_kind_table as kt
+    base = {"bar": "b", "photo_id": "p", "gold": "g", "kind": "known", "llm_target": True, "rank1_gold": False}
+    rules = [{**base, "name": "kept", "status": "unmatched", "n_cand": 0, "cands": ""},
+             {**base, "name": "changed", "status": "unmatched", "n_cand": 0, "cands": ""}]
+    llm = [dict(rules[0]), {**rules[1], "status": "ambiguous", "n_cand": 1, "cands": "X"}]
+    served = [{**rules[0], "status": "ambiguous", "n_cand": 2, "cands": "E1 || E2"},
+              {**rules[1], "status": "ambiguous", "n_cand": 2, "cands": "E3 || E4"}]
+    result = {"set": "dev", "catalog": "service", "input": "label", "lines": 2,
+              "rules": {"rows": rules}, "llm": {"rows": llm, "photo_runs": [], "cache": "none"}}
+    kept, changed = kt.joined_rows(result, {"server": {"rows": served}})
+    assert (kept["served_status"], kept["served_n"], kept["served_cands"]) == ("ambiguous", 2, "E1 || E2")
+    assert (changed["served_status"], changed["served_n"], changed["served_cands"]) == (None, None, "")
+    md = kt.md_report("x", result, [kept, changed])
+    assert "**changed** | gold `g` | llm `missing` | rule: unmatched 0; after embedding: not known" in md
+    assert "after embedding: ambiguous 2 [E1 || E2]" in md

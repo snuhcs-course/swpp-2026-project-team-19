@@ -12,6 +12,6 @@
 | 사진 | 줄 | 정답 | 전 | 후 |
 |---|---|---|---|---|
 | 018_청춘위스키 봉천_01 | 브룩라디 더 클래식 | bruichladdich-classic-laddie | ambiguous / ambiguous_ok / confirm CR: Bruichladdich The Classic Laddie Scottish Barley | exact_match / correct / confirmed: Bruichladdich The Classic Laddie Scottish Barley |
-| 018_청춘위스키 봉천_01 | 브룩라디 포트샬롯 | port-charlotte-10 | ambiguous / ambiguous_ok / choose: Port Charlotte 10 || Port Charlotte Islay Barley 2014 || Port Charlotte PMC:01 | ambiguous / ambiguous_ok / choose: Port Charlotte 10 || Bruichladdich 18 |
+| 018_청춘위스키 봉천_01 | 브룩라디 포트샬롯 | port-charlotte-10 | ambiguous / ambiguous_ok / choose: Port Charlotte 10 \|\| Port Charlotte Islay Barley 2014 \|\| Port Charlotte PMC:01 | ambiguous / ambiguous_ok / choose: Port Charlotte 10 \|\| Bruichladdich 18 |
 | 018_청춘위스키 봉천_02 | 글렌모렌지 더 넥타 16Y | glenmorangie-nectar-dor | ambiguous / ambiguous_ok / confirm CR: Glenmorangie The Nectar | exact_match / correct / confirmed: Glenmorangie The Nectar |
 

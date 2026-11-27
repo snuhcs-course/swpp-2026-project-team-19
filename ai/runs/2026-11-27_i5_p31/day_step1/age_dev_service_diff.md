@@ -24,5 +24,5 @@
 
 | 사진 | 줄 | 정답 | 전 | 후 |
 |---|---|---|---|---|
-| 011_미라보_04 | 글렌모렌지(Glenmorangie) 15년 라산타 | glenmorangie-lasanta | ambiguous / ambiguous_ok / choose: Glenmorangie The Original || Glenmorangie 18 || Glenmorangie Lasanta || Glenmora | exact_match / correct / confirmed: Glenmorangie Lasanta |
+| 011_미라보_04 | 글렌모렌지(Glenmorangie) 15년 라산타 | glenmorangie-lasanta | ambiguous / ambiguous_ok / choose: Glenmorangie The Original \|\| Glenmorangie 18 \|\| Glenmorangie Lasanta \|\| Glenmora | exact_match / correct / confirmed: Glenmorangie Lasanta |
 

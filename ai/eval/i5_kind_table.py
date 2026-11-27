@@ -57,7 +57,8 @@ def load_kinds(result: dict) -> dict[tuple[str, str], str]:
 
 def joined_rows(result: dict, served_from: dict | None = None) -> list[dict]:
     """`served_from`: a rules-only --server-steps result of the same lines, for a run without a
-    server section. Right for the lines the LLM layer leaves as the rule result."""
+    server section. It stands for the served result only on lines the LLM layer left as the rule
+    result (same status and candidates); on a line the LLM changed, the served fields are None."""
     kinds = load_kinds(result)
     rule_rows = result["rules"]["rows"]
     llm_rows = result["llm"]["rows"]
@@ -71,6 +72,8 @@ def joined_rows(result: dict, served_from: dict | None = None) -> list[dict]:
         rule = rule_rows[i]
         assert (rule["photo_id"], rule["name"]) == (row["photo_id"], row["name"])
         served = served_rows[i] if served_rows else None
+        if served is not None and served_from is not None and not _unchanged(row, rule):
+            served = None  # the rules-only server row is not what menu import serves after this LLM answer
         out.append({
             "bar": row["bar"], "photo_id": row["photo_id"], "name": row["name"], "gold": row["gold"],
             "gold_kind": row["kind"], "gold_class": GOLD_CLASS[row["kind"]],
@@ -84,6 +87,11 @@ def joined_rows(result: dict, served_from: dict | None = None) -> list[dict]:
             "rule_rank1_gold": rule.get("rank1_gold"),
         })
     return out
+
+
+def _unchanged(llm_row: dict, rule_row: dict) -> bool:
+    """The LLM layer returned the rule result for the line."""
+    return all(llm_row.get(k) == rule_row.get(k) for k in ("status", "n_cand", "cands"))
 
 
 def table(rows: list[dict], flagged) -> dict[str, Counter]:
@@ -113,7 +121,7 @@ def md_report(label: str, result: dict, rows: list[dict]) -> str:
         if n:
             lines.append(f"| {c} | {n} | " + " | ".join(str(conf[c][k]) for k in KINDS) + " |")
     lines.append("")
-    has_served = rows and rows[0]["served_n"] is not None
+    has_served = any(r["served_n"] is not None for r in rows)
     lines += ["| variant | non-whisky flagged | whisky flagged (wrong) | unknown flagged |", "|---|---|---|---|"]
     for name, fn in VARIANTS.items():
         if name.startswith("C") and not has_served:
@@ -132,7 +140,8 @@ def md_report(label: str, result: dict, rows: list[dict]) -> str:
         for r in picked:
             served = (f"; after embedding: {r['served_status']} {r['served_n']}"
                       + (f" [{r['served_cands']}]" if r["served_cands"] else "")
-                      + (" (gold rank 1)" if r["served_rank1_gold"] else "")) if has_served else ""
+                      + (" (gold rank 1)" if r["served_rank1_gold"] else "")) if r["served_n"] is not None else (
+                "; after embedding: not known (the LLM changed the rule result)" if has_served else "")
             lines.append(f"- `{r['photo_id']}` **{r['name']}** | gold `{r['gold']}`"
                          + (f" ({r['gold_display']})" if r["gold_display"] else "")
                          + f" | llm `{r['llm_kind']}` | rule: {r['rule_status']} {r['rule_n']}"

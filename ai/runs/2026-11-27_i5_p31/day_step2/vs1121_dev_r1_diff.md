@@ -12,6 +12,6 @@
 | 사진 | 줄 | 정답 | 전 | 후 |
 |---|---|---|---|---|
 | 011_미라보_04 | 글렌모렌지(Glenmorangie) 12년 오리지널 | glenmorangie-original | ambiguous / ambiguous_bad / wrong: Glenmorangie 12 Calvados Cask Finish | exact_match / correct / confirmed: Glenmorangie The Original |
-| 011_미라보_04 | 글렌모렌지(Glenmorangie) 15년 라산타 | glenmorangie-lasanta | ambiguous / ambiguous_ok / choose: Glenmorangie The Original || Glenmorangie 18 || Glenmorangie Lasanta || Glenmora | exact_match / correct / confirmed: Glenmorangie Lasanta |
-| 011_미라보_04 | 글렌모렌지(Glenmorangie) 16년 더 넥타 | glenmorangie-nectar-dor | ambiguous / ambiguous_ok / choose: Glenmorangie The Original || Glenmorangie 18 || Glenmorangie Nectar D'Or || Glen | ambiguous / ambiguous_ok / confirm CR: Glenmorangie Nectar D'Or |
+| 011_미라보_04 | 글렌모렌지(Glenmorangie) 15년 라산타 | glenmorangie-lasanta | ambiguous / ambiguous_ok / choose: Glenmorangie The Original \|\| Glenmorangie 18 \|\| Glenmorangie Lasanta \|\| Glenmora | exact_match / correct / confirmed: Glenmorangie Lasanta |
+| 011_미라보_04 | 글렌모렌지(Glenmorangie) 16년 더 넥타 | glenmorangie-nectar-dor | ambiguous / ambiguous_ok / choose: Glenmorangie The Original \|\| Glenmorangie 18 \|\| Glenmorangie Nectar D'Or \|\| Glen | ambiguous / ambiguous_ok / confirm CR: Glenmorangie Nectar D'Or |
 

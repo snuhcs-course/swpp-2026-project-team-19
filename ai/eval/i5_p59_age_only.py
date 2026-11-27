@@ -40,6 +40,11 @@ def age_only_readings(name: str, catalog, staged, guards) -> list[tuple[list, in
     return out
 
 
+def fits_age(product, age: int) -> bool:
+    fits = getattr(product, "fits_age", None)
+    return fits(age) if fits is not None else product.age_years == age
+
+
 def scan(result: dict, be, bar_catalogs: dict) -> list[dict]:
     staged = sys.modules["app.matching.staged"]
     guards = importlib.import_module("app.matching.linking_guards")
@@ -51,7 +56,9 @@ def scan(result: dict, be, bar_catalogs: dict) -> list[dict]:
             continue
         brand_ids, age = readings[0]
         products = [bc.catalog.get_product(pid) for b in brand_ids for pid in bc.catalog.get_brand_product_ids(b)]
-        same = sorted((p for p in products if p.age_years == age), key=lambda p: p.display_name)
+        # The products that take that age, accepted older ages included (ProductInfo.fits_age, catalog
+        # v2.6), as the brand + age step reads them; rules code before it compares age_years only.
+        same = sorted((p for p in products if fits_age(p, age)), key=lambda p: p.display_name)
         same_age = [p.display_name for p in same]
         first = row["cands"].split(" || ")[0] if row["cands"] else ""
         # 1c: the one product of that age is offered first. A confirmation stays as it is: an alias or the

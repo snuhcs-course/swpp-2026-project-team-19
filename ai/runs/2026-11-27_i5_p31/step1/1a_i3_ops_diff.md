@@ -12,7 +12,7 @@
 | 사진 | 줄 | 정답 | 전 | 후 |
 |---|---|---|---|---|
 | 015_연림 서울대입구역점_04 | 글렌모렌지 12 라산타 | glenmorangie-lasanta | ambiguous / ambiguous_bad / wrong: Glenmorangie 12 Calvados Cask Finish | exact_match / correct / confirmed: Glenmorangie Lasanta |
-| 016_연림 봉천역점_03 | 글렌모렌지 12 | glenmorangie-original | ambiguous / ambiguous_bad / wrong CR: Glenmorangie 12 Calvados Cask Finish | ambiguous / ambiguous_ok / choose: Glenmorangie 12 Calvados Cask Finish || Glenmorangie Lasanta || Glenmorangie The |
+| 016_연림 봉천역점_03 | 글렌모렌지 12 | glenmorangie-original | ambiguous / ambiguous_bad / wrong CR: Glenmorangie 12 Calvados Cask Finish | ambiguous / ambiguous_ok / choose: Glenmorangie 12 Calvados Cask Finish \|\| Glenmorangie Lasanta \|\| Glenmorangie The |
 | 017_리틀 갤러리_03 | 글랜모랜지 14년 / Glenmorangie 14yr | glenmorangie-quinta-ruban | unmatched / unmatched / register:  | ambiguous / ambiguous_ok / confirm: Glenmorangie Quinta Ruban |
 | 017_리틀 갤러리_03 | 글렌모렌지 16년 / Glenmorangie 16yr | glenmorangie-nectar-dor | unmatched / unmatched / register:  | ambiguous / ambiguous_ok / confirm: Glenmorangie Nectar D'Or |
 | 018_청춘위스키 봉천_02 | 글렌모렌지 더 넥타 16Y | glenmorangie-nectar-dor | exact_match / correct / confirmed: Glenmorangie Nectar D'Or | ambiguous / ambiguous_ok / confirm CR: Glenmorangie Nectar D'Or |
@@ -29,8 +29,8 @@
 | 사진 | 줄 | 정답 | 전 | 후 |
 |---|---|---|---|---|
 | 015_연림 서울대입구역점_04 | 글렌모렌지 12 라산타 | glenmorangie-lasanta | ambiguous / ambiguous_bad / wrong: Glenmorangie 12 Calvados Cask Finish | exact_match / correct / confirmed: Glenmorangie Lasanta |
-| 016_연림 봉천역점_03 | 글렌모렌지 12 | glenmorangie-original | ambiguous / ambiguous_bad / wrong CR: Glenmorangie 12 Calvados Cask Finish | ambiguous / ambiguous_ok / choose: Glenmorangie The Original || Glenmorangie 12 Calvados Cask Finish || Glenmorangi |
-| 017_리틀 갤러리_03 | 글랜모랜지 14년 / Glenmorangie 14yr | glenmorangie-quinta-ruban | ambiguous / ambiguous_bad / wrong: Glenmorangie The Original || Glenmorangie 18 || Glenmorangie Lasanta || Glenmora | ambiguous / ambiguous_ok / confirm: Glenmorangie Quinta Ruban |
-| 017_리틀 갤러리_03 | 글렌모렌지 16년 / Glenmorangie 16yr | glenmorangie-nectar-dor | ambiguous / ambiguous_ok / choose: Glenmorangie The Original || Glenmorangie 18 || Glenmorangie Nectar D'Or || Glen | ambiguous / ambiguous_ok / confirm: Glenmorangie Nectar D'Or |
+| 016_연림 봉천역점_03 | 글렌모렌지 12 | glenmorangie-original | ambiguous / ambiguous_bad / wrong CR: Glenmorangie 12 Calvados Cask Finish | ambiguous / ambiguous_ok / choose: Glenmorangie The Original \|\| Glenmorangie 12 Calvados Cask Finish \|\| Glenmorangi |
+| 017_리틀 갤러리_03 | 글랜모랜지 14년 / Glenmorangie 14yr | glenmorangie-quinta-ruban | ambiguous / ambiguous_bad / wrong: Glenmorangie The Original \|\| Glenmorangie 18 \|\| Glenmorangie Lasanta \|\| Glenmora | ambiguous / ambiguous_ok / confirm: Glenmorangie Quinta Ruban |
+| 017_리틀 갤러리_03 | 글렌모렌지 16년 / Glenmorangie 16yr | glenmorangie-nectar-dor | ambiguous / ambiguous_ok / choose: Glenmorangie The Original \|\| Glenmorangie 18 \|\| Glenmorangie Nectar D'Or \|\| Glen | ambiguous / ambiguous_ok / confirm: Glenmorangie Nectar D'Or |
 | 018_청춘위스키 봉천_02 | 글렌모렌지 더 넥타 16Y | glenmorangie-nectar-dor | exact_match / correct / confirmed: Glenmorangie Nectar D'Or | ambiguous / ambiguous_ok / confirm CR: Glenmorangie Nectar D'Or |
 

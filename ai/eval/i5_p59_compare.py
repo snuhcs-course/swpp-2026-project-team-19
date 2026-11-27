@@ -55,6 +55,11 @@ def compare(before: dict, after: dict, sections: list[str]) -> dict:
     return out
 
 
+def cell(value) -> str:
+    """A Markdown table cell: `|` in a value (gold "both:a|b", candidates "A || B") would start a new column."""
+    return str(value).replace("|", r"\|")
+
+
 def to_md(result: dict, title: str) -> str:
     lines = [f"# {title}", ""]
     for sec, r in result.items():
@@ -70,7 +75,8 @@ def to_md(result: dict, title: str) -> str:
             lines += ["| 사진 | 줄 | 정답 | 전 | 후 |", "|---|---|---|---|---|"]
             for c in r["changed"]:
                 fmt = lambda s: f"{s['status']} / {s['outcome']} / {s['burden']}{' CR' if s['confirm_recommended'] else ''}: {s['cands'][:80]}"
-                lines.append(f"| {c['photo_id']} | {c['name']} | {c['gold']} | {fmt(c['before'])} | {fmt(c['after'])} |")
+                lines.append("| " + " | ".join(cell(v) for v in (c["photo_id"], c["name"], c["gold"], fmt(c["before"]),
+                                                                   fmt(c["after"]))) + " |")
             lines.append("")
     return "\n".join(lines) + "\n"
 

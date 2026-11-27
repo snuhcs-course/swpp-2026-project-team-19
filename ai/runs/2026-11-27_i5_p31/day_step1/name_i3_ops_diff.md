@@ -11,7 +11,7 @@
 
 | 사진 | 줄 | 정답 | 전 | 후 |
 |---|---|---|---|---|
-| 016_연림 봉천역점_03 | 글렌모렌지 12 | glenmorangie-original | ambiguous / ambiguous_ok / choose: Glenmorangie 12 Calvados Cask Finish || Glenmorangie Lasanta || Glenmorangie The | ambiguous / ambiguous_ok / choose: Glenmorangie 12 Calvados Cask Finish || Glenmorangie Lasanta || Glenmorangie Qui |
+| 016_연림 봉천역점_03 | 글렌모렌지 12 | glenmorangie-original | ambiguous / ambiguous_ok / choose: Glenmorangie 12 Calvados Cask Finish \|\| Glenmorangie Lasanta \|\| Glenmorangie The | ambiguous / ambiguous_ok / choose: Glenmorangie 12 Calvados Cask Finish \|\| Glenmorangie Lasanta \|\| Glenmorangie Qui |
 | 017_리틀 갤러리_03 | 글렌모렌지 15년 / Glenmorangie 15yr | glenmorangie-lasanta | unmatched / unmatched / register:  | ambiguous / ambiguous_ok / confirm: Glenmorangie Lasanta |
 
 ## server (675줄, 바뀐 줄 2)
@@ -25,6 +25,6 @@
 
 | 사진 | 줄 | 정답 | 전 | 후 |
 |---|---|---|---|---|
-| 016_연림 봉천역점_03 | 글렌모렌지 12 | glenmorangie-original | ambiguous / ambiguous_ok / choose: Glenmorangie The Original || Glenmorangie 12 Calvados Cask Finish || Glenmorangi | ambiguous / ambiguous_ok / choose: Glenmorangie The Original || Glenmorangie 12 Calvados Cask Finish || Glenmorangi |
-| 017_리틀 갤러리_03 | 글렌모렌지 15년 / Glenmorangie 15yr | glenmorangie-lasanta | ambiguous / ambiguous_ok / choose: Glenmorangie The Original || Glenmorangie 18 || Glenmorangie Lasanta || Glenmora | ambiguous / ambiguous_ok / confirm: Glenmorangie Lasanta |
+| 016_연림 봉천역점_03 | 글렌모렌지 12 | glenmorangie-original | ambiguous / ambiguous_ok / choose: Glenmorangie The Original \|\| Glenmorangie 12 Calvados Cask Finish \|\| Glenmorangi | ambiguous / ambiguous_ok / choose: Glenmorangie The Original \|\| Glenmorangie 12 Calvados Cask Finish \|\| Glenmorangi |
+| 017_리틀 갤러리_03 | 글렌모렌지 15년 / Glenmorangie 15yr | glenmorangie-lasanta | ambiguous / ambiguous_ok / choose: Glenmorangie The Original \|\| Glenmorangie 18 \|\| Glenmorangie Lasanta \|\| Glenmora | ambiguous / ambiguous_ok / confirm: Glenmorangie Lasanta |
 

@@ -31,7 +31,7 @@
 | 007_위스키복춘_01 | 글렌모렌지 넥타도르 | glenmorangie-nectar-dor | exact_match / correct / confirmed: Glenmorangie Nectar D'Or | exact_match / correct / confirmed: Glenmorangie The Nectar |
 | 008_서로상_03 | 글랜모렌지 넥타도르 / Glenmorangie Nectar D'or | glenmorangie-nectar-dor | exact_match / correct / confirmed: Glenmorangie Nectar D'Or | exact_match / correct / confirmed: Glenmorangie The Nectar |
 | 011_미라보_04 | 글렌모렌지(Glenmorangie) 16년 더 넥타 | glenmorangie-nectar-dor | ambiguous / ambiguous_ok / confirm CR: Glenmorangie Nectar D'Or | ambiguous / ambiguous_ok / confirm CR: Glenmorangie The Nectar |
-| 010_수이_03 | Glenmorangie Org (글렌모렌지) | glenmorangie-original | ambiguous / ambiguous_ok / choose: Glenmorangie The Original || Glenmorangie 18 || Glenmorangie Signet || Glenmoran | ambiguous / ambiguous_ok / choose: Glenmorangie The Original || Glenmorangie 18 || Glenmorangie Signet || Glenmoran |
+| 010_수이_03 | Glenmorangie Org (글렌모렌지) | glenmorangie-original | ambiguous / ambiguous_ok / choose: Glenmorangie The Original \|\| Glenmorangie 18 \|\| Glenmorangie Signet \|\| Glenmoran | ambiguous / ambiguous_ok / choose: Glenmorangie The Original \|\| Glenmorangie 18 \|\| Glenmorangie Signet \|\| Glenmoran |
 | 010_수이_03 | Glenmorangie The Nectar (더 넥타) | glenmorangie-nectar-dor | ambiguous / ambiguous_ok / confirm CR: Glenmorangie Nectar D'Or | ambiguous / ambiguous_ok / confirm CR: Glenmorangie The Nectar |
 | 009_오드비_08 | 글렌모렌지 더 넥타 | glenmorangie-nectar-dor | ambiguous / ambiguous_ok / confirm CR: Glenmorangie Nectar D'Or | ambiguous / ambiguous_ok / confirm CR: Glenmorangie The Nectar |
 
