@@ -1,4 +1,5 @@
 import type { components } from "../api/schema";
+import { formatOwnerPhone } from "../application/rules";
 import { draftFromHours, hoursInput, sameHours, weeklyHoursError, type DayDraft } from "./weeklyHours";
 
 /**
@@ -30,6 +31,21 @@ export const MAX_DESCRIPTION = 100;
 export const MAX_PHONE = 30;
 export const MAX_TAGS = 5;
 export const MAX_TAG_LENGTH = 24;
+
+/**
+ * The phone customers see now (spec 3.6 `customerPhone`), said under the phone field. It is the saved state,
+ * not the form: an unsaved phone changes nothing yet. The app has no such line yet; this is the wording for it.
+ */
+export function customerPhoneHint(bar: Pick<BarDetail, "customerPhone" | "customerPhoneSource">): string {
+  switch (bar.customerPhoneSource) {
+    case "owner_contact":
+      return `매장 번호가 없어서 손님에게는 사장님 연락처(${formatOwnerPhone(bar.customerPhone ?? "")})가 보여요. 매장 번호를 입력하면 매장 번호가 대신 보여요.`;
+    case "bar":
+      return "손님에게 이 번호가 보여요.";
+    default:
+      return "손님에게 보이는 번호가 없어요.";
+  }
+}
 
 /** Characters as the server counts them (Python), so an emoji is one, not two UTF-16 units. */
 export const characterCount = (value: string): number => [...value].length;

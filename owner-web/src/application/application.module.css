@@ -368,3 +368,11 @@
     animation-duration: 2.7s;
   }
 }
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: var(--bm-space-xs);
+  min-height: var(--bm-min-touch-target);
+  font-size: var(--bm-type-label);
+}

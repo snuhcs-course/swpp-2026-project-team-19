@@ -23,6 +23,11 @@ export interface ApplicationDraft {
   addressDetail: string;
   storePhone: string;
   contactPhone: string;
+  /**
+   * Consent to show `contactPhone` to customers while the bar has no phone (`contactPhonePublic`, spec 3.11.2).
+   * Off until the owner ticks it; a draft saved before this field existed loads with it off.
+   */
+  contactPhonePublic: boolean;
   /** The last business check (spec 3.11.16) and the three values it was for (businessVerificationKey). */
   verification: Verification | null;
   /** Set once POST /api/owner-applications succeeded: photo uploads that failed are retried for it. */
@@ -64,6 +69,7 @@ export function emptyDraft(): ApplicationDraft {
     addressDetail: "",
     storePhone: "",
     contactPhone: "",
+    contactPhonePublic: false,
     verification: null,
     applicationId: null,
     uploaded: { cover: false, menus: false },

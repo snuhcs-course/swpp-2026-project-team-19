@@ -99,6 +99,8 @@ export function managesApprovedBar(application: Pick<OwnerApplication, "bar">, b
  *   display only, never a file to upload again.
  * - The business check and the application ID start empty, so the new application is checked and sent anew.
  * - The server keeps one address line (the form joins address and detail), so it all goes in `address`.
+ * - The consent to show the contact phone to customers (`contactPhonePublic`) starts off: it is asked again
+ *   for the new application rather than carried over.
  */
 export function reapplicationDraft(application: OwnerApplication): ApplicationDraft {
   if (application.status !== "rejected") throw new Error("Only a rejected application can be sent again");
