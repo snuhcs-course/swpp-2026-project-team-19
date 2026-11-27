@@ -358,7 +358,7 @@ export interface paths {
          * Mark a menu item sold out, or back on sale
          * @description Operator or the bar's owner. Accepted while the bar has an unfinished import, since neither changes the menu's content: `menuVersion` does not go up and `publishedAt` stays.
          *
-         *     - The whole item goes sold out, not single options. Customers no longer see it in the bar menu or in search; operators and the owner get it in place with `soldOut: true`.
+         *     - The whole item goes sold out, not single options. Customers no longer see it in the bar menu; operators and the owner get it in place with `soldOut: true`. Customer search leaves it out unless it is called with `includeSoldOut=true`, which lists it with `soldOut: true` after the selling bars.
          *     - It sets a value, so sending the same request again gives the same result (`200`).
          *     - It stays while the item is on the menu, through edits and review publishes, and clears when the item leaves the menu.
          *     - The response is the menu as in `GET /api/bars/{barId}/menu`, sold-out items included.
