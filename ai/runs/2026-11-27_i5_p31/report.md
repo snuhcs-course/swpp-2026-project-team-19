@@ -46,7 +46,7 @@
 | `c70bad06` | 카탈로그 v2.4(잭다니엘 애플), 오드비 정답 1줄, 하네스의 dev 예외 삭제, 회귀 fixture·baseline, 고정값 테스트(`test_review_states`, `test_mixed_report`, `test_i3_match_eval`의 digest·`gold_for`), P30 동결 해제 목록에 카탈로그, 정답 수정 후 `mixed_report.*` |
 | `8fffff10` | `kind_hint`(`types.py`), `flag_non_whisky`(`llm_layer.py`), 임베딩 단계에서 유지(`embedding.py`), `menu_import_processing.py` 호출부, 백엔드 테스트 3개 파일, P30 동결 해제 목록에 `llm_layer.py` |
 | `1854938d` | 하네스 `--flag-non-whisky`와 `not_whisky` 지표, 그 테스트, `ai/eval/i5_kind_table.py` |
-| `73bac2a6` | 11/21 보고서, `kind_*.md`, dev M3a 캐시(`cache_dev_r1`, `cache_dev_r2`, 각 26개), `ai_usage_log.md` |
+| `491d4057` (옛 `73bac2a6`) | 11/21 보고서, `kind_*.md`, `ai_usage_log.md`. dev M3a 캐시(`cache_dev_r1`, `cache_dev_r2`, 각 26개)도 넣었으나 히스토리 정리(맨 끝 절)에서 걷어냈다(디스크에만 있음) |
 
 - 한 파일에 두 작업이 섞인 `i3_match_eval.py`, `test_i3_match_eval.py`, `p30_extract.py`, `test_p30_extract.py`는 hunk 단위로 나눴다. `p30_extract.py`의 해제 목록은 ①에서 카탈로그만, ②에서 `llm_layer.py`를 더한 상태로 들어간다.
 - 추적 안 되는 `ai/eval/i5_*.py` 7개 중 이 작업 것은 `i5_kind_table.py` 하나다(11/21 보고서와 사용 기록 기준). 나머지 6개(`i5_model_ladder`, `i5_price_from_lines`, `i5_regression_compare`, `i5_row_align`, `i5_row_pairing`, `i5_title_fix_check`)는 행 맞추기 작업(`2026-11-21_i5_row_pairing`) 것이라 그대로 두었다. 그중 `i5_model_ladder.py`, `i5_row_pairing.py`는 P19 브랜치에도 같은 이름으로 있다.
@@ -330,7 +330,7 @@ foreach ($r in 1,2,3) { foreach ($c in "full","ops") {
 
 **처음 잰 결과는 틀렸다.** 하네스가 `ProductInfo`를 직접 만들어 받아 주는 연수가 비어 있었다(I3 "글렌모렌지 12 라산타"가 틀린 후보로 바뀌어 Top-1 500 → 499로 나옴). 원인이 하네스 쪽임을 확인하고 하네스가 표를 채우게 고친 뒤 다시 쟀다. 아래가 고친 뒤 결과다. 규칙·정답·카탈로그는 결과를 보고 고치지 않았다.
 
-**전후 비교 (v2.5 → v2.6, 규칙만 + 서버 단계, API 0회).** 기준(v2.5)은 1단계 커밋 전 HEAD(`d0b692d6`)에서 다시 쟀고 밤 결과(`step1/1b_off_*`, `age_1a_*`)와 줄 단위로 같았다. 줄별 표는 `day_step1/{name,age}_*_diff.md`.
+**전후 비교 (v2.5 → v2.6, 규칙만 + 서버 단계, API 0회).** 기준(v2.5)은 1단계 커밋 전 HEAD(`a20b6fec`, 옛 `d0b692d6`)에서 다시 쟀고 밤 결과(`step1/1b_off_*`, `age_1a_*`)와 줄 단위로 같았다. 줄별 표는 `day_step1/{name,age}_*_diff.md`.
 
 | | 바뀐 줄 | Top-1 | FM | 틀린 확인 권장 | hard/photo (규칙 / 서버 뒤) | confirm/choose/register/wrong (서버 뒤) |
 |---|---|---|---|---|---|---|
@@ -367,7 +367,7 @@ foreach ($r in 1,2,3) { foreach ($c in "full","ops") {
 - 결과: 백엔드 1184 통과, 1941 건너뜀(DB 필요), 실패 0(`pypdfium2`가 없어 수집 안 되는 3개 파일 제외, 밤과 같음). `ai` 전체 394개 중 393 통과, 1 실패는 11/21부터의 `test_reencoded_ocr_cache_without_provenance_stops`(Windows 경로 구분자).
 - 커버리지(분기 포함): `accepted_ages.py`, `types.py`, `pick_check.py`, `linking_guards.py`, `llm_layer.py` 100%. `resolve.py` 94.9%, `staged.py` 97.9%, `memory_catalog.py` 96.1%이고 빠진 줄은 이번에 바꾼 줄이 아니다. `db_catalog.py`는 DB 테스트가 건너뛰어 23.6%(밤과 같음).
 
-커밋: `34fca19e`.
+커밋: `2eb17f37` (옛 `34fca19e`).
 
 ### 낮 2단계: 매칭 재평가 (Gemini 무료 키 14회)
 
@@ -486,3 +486,39 @@ foreach ($r in 1,2,3) { foreach ($c in "full","ops") {
 **테스트.** `backend/tests/test_resolve_staged.py`에 5개: 관사가 에디션 이름의 일부로 맞음 3가지("더 넥타 16Y", "더 넥타", "더 오리지널 12년"), 관사 없는 상품을 가리키는 줄은 전처럼 일반어로 빠짐("더 시그넷" → Signet 권장, `ignoredWords: ["더"]`), 관사만 있는 줄은 아무것도 고르지 않음. 백엔드 1189 통과, 1941 건너뜀, 실패 0. `ai` 394 중 393(이전부터의 1개). 회귀 15장 통과. 문서: `docs/menu_ai_matching_flow.md`에 관사 규칙(I4 일반 단어 문단 뒤)과 받아 주는 연수(10.1장) 두 문단.
 
 **호출:** Gemini 18회(낮 합계 32회), OpenRouter 0, CLOVA 0.
+
+## 히스토리 정리 (2026-11-27 낮, push 없음)
+
+`origin/main..HEAD`의 각 커밋에서 `ai/runs` 아래 `.md`가 아닌 실행 기록을 걷어냈다(OpenRouter 브랜치와 같은 방식). 디스크의 파일은 지우지 않았다.
+
+- **정리 전 상태:** 브랜치 `backup/i5-m3a-before-rewrite`(= 옛 `fa402fc9`). push하지 않는다.
+- **걷어낸 것:** M3a 응답 캐시 308개(`2026-11-21_i5_not_whisky/cache_dev_r1·r2`, `2026-11-27_i5_p31/cache_{dev_r1,dev_r2,full_label_r1~r3,ops_label_r1~r3}`). 모두 이 브랜치에서 새로 더한 파일이라, main에 있던 파일을 되돌린 것은 없다.
+- **남긴 것:** `ai/runs/2026-11-21_i5_not_whisky/mixed_report.json`. 실행 기록이 아니라 `ai/regression/test_mixed_report.py`가 비교하는 기대 결과다(진우 결정 (A)).
+- **방법:** 임시 브랜치에서 `git filter-branch --index-filter`(위 캐시 폴더만 `git rm --cached`), 빈 커밋 정리 없음. 그 뒤 체크아웃된 브랜치를 `git reset --mixed`로 옮겨 작업 폴더를 건드리지 않았다. 커밋 순서, 메시지, 작성자·커미터와 날짜는 그대로다(옛·새 로그를 비교해 같음을 확인). 메시지에 "dev M3a caches"(`491d4057`), "keeps the M3a caches"(`42576ffe`)라고 적힌 것도 지시대로 그대로 두었다.
+- **`.gitignore`:** `/ai/runs/2026-11-21_i5_not_whisky/**/*.{json,jsonl,log,txt}`, 같은 형태의 `2026-11-27_i5_p31`, 예외 `!/ai/runs/2026-11-21_i5_not_whisky/mixed_report.json`(커밋 `fc569125`).
+
+| 옛 해시 | 새 해시 | 커밋 |
+|---|---|---|
+| `c70bad06` | `c70bad06` (같음) | I5: Add Jack Daniel's Tennessee Apple to catalog v2.4 and score it as a whisky |
+| `8fffff10` | `8fffff10` (같음) | I5: Let the LLM layer note a line it reads as not a whisky (flag off by default) |
+| `1854938d` | `1854938d` (같음) | I5: Measure the not-whisky note in the matching harness (--flag-non-whisky) |
+| `73bac2a6` | `491d4057` | I5: Record the not-whisky work (report, kind tables, dev M3a caches, AI usage) |
+| `79da3c30` | `95d7af06` | I5-P59: Set the current Glenmorangie ages in catalog v2.5 |
+| `6b2700c8` | `fcd3cb78` | I5-P59: Add the missingAge linking guard for confirmed lines without an age (off by default) |
+| `f92b7c3f` | `bf4a5895` | I5-P59: Pin how brand + age only lines are matched, and scan them |
+| `d0b692d6` | `a20b6fec` | I5-P59: Report the night run (steps 0-4), the PR draft and the AI usage |
+| `34fca19e` | `2eb17f37` | I5-P59: Accept the older Glenmorangie ages and set Lasanta to 15 (catalog v2.6) |
+| `47b2b727` | `42576ffe` | I5-P31: Re-run the matching evaluation on catalog v2.6, report the day run and the PR draft |
+| `8ad7c2e5` | `855979b9` | I5-P59: Name Glenmorangie Nectar D'Or after its current bottle, The Nectar (catalog v2.7) |
+| `fa402fc9` | `a296fb95` | I5-P59: Let an article of the edition name fit the product ("더 넥타" -> The Nectar) |
+| (새) | `fc569125` | I5: Keep the run records of the matching runs on the runner's PC |
+
+앞의 세 커밋은 캐시가 없어 트리와 부모가 같으므로 해시가 그대로다.
+
+**확인.**
+
+- 히스토리(`origin/main..HEAD`)에서 `ai/runs` 아래 `.md`가 아닌 파일: `mixed_report.json` 1개(예외로 남긴 것)뿐.
+- 최종 트리 vs `backup/i5-m3a-before-rewrite`: 다른 것은 캐시 308개(없음)와 `.gitignore`뿐.
+- 깨끗한 checkout(`git worktree`, 실행 기록 없음)에서 테스트: 백엔드 1189 통과, 1941 건너뜀, 실패 0. `ai` 392 통과, 1 건너뜀(CLOVA 키 없음, 그 worktree에 `.env`가 없어서), 1 실패(11/21부터의 `test_reencoded_ocr_cache_without_provenance_stops`). 걷어낸 캐시를 읽는 테스트는 없다.
+- 남은 추적 안 되는 파일 중 이 두 폴더의 것은 `step1/1c_age_only_before.md` 하나다(밤 실행에서 커밋하지 않은 것, 그대로 둠).
+- `pr_draft.md`는 `.github/pull_request_template.md`의 절(Task and why, What changed, Contract and scope, Verification, Notes for reviewers, After merge)로 다시 썼고, 매칭 규칙 문서(`docs/menu_ai_matching_flow.md`)를 고친 것을 적었다.
