@@ -467,7 +467,6 @@ def test_query_of_exactly_100_characters_after_trimming_is_accepted(client, db_s
         ({"query": "", "productId": PRODUCT_ID}, "productId", "EXACTLY_ONE_REQUIRED"),
         ({"productId": "not-a-uuid"}, "productId", "UUID_PARSING"),
         ({"query": "x", "source": "home"}, "source", "LITERAL_ERROR"),
-        ({"query": "x", "includeSoldOut": "abc"}, "includeSoldOut", "BOOL_PARSING"),
         ({"productId": PRODUCT_ID, "lat": 37.5}, "lng", "LAT_LNG_REQUIRED_TOGETHER"),
         ({"query": "   "}, "query", "BLANK"),
         ({"query": "가" * 101}, "query", "STRING_TOO_LONG"),
@@ -478,6 +477,7 @@ def test_query_of_exactly_100_characters_after_trimming_is_accepted(client, db_s
         ({"query": "x", "lat": 0, "lng": -181}, "lng", "GREATER_THAN_EQUAL"),
         ({"query": "x", "limit": 0}, "limit", "GREATER_THAN_EQUAL"),
         ({"query": "x", "limit": 101}, "limit", "LESS_THAN_EQUAL"),
+        ({"query": "x", "includeSoldOut": "abc"}, "includeSoldOut", "BOOL_PARSING"),
     ],
 )
 def test_invalid_input_returns_validation_failed(client, params, path, code):
