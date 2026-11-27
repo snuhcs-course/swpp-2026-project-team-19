@@ -1102,6 +1102,7 @@ GET /api/search/bars?query=%EA%B8%80%EB%A0%8C%ED%94%BC%EB%94%95&lat=37.478&lng=1
 | `lng` | 아니오 | 없음 | 고객 위치 경도. -180~180. `lat`과 함께 보내야 한다. 이전 빌드 호환용이며 새 앱은 보내지 않는다 |
 | `limit` | 아니오 | `50` | 반환할 결과 행(`items`)의 최대 개수. 1~100 |
 | `source` | 아니오 | `input` | 검색을 시작한 곳. `input`(검색창에 직접 입력), `recent`(최근 검색을 다시 누름), `popular`(요즘 많이 찾는 위스키 카드를 누름, 3.17). 검색 집계(3.10.6)에만 쓰며 결과에는 영향이 없다 |
+| `includeSoldOut` | 아니오 | `false` | `true`이면 품절 항목(3.14.8)의 행도 `soldOut = true`로 표시해 판매 중인 행 뒤에 반환한다(3.10.2). `false`이거나 보내지 않으면 품절 항목은 빠진다. 이미 설치된 이전 빌드는 보내지 않으므로 응답이 바뀌지 않는다. `true` 또는 `false` |
 
 고객 위치는 거리 계산에만 사용하며 서버에 저장하지 않는다. 서버 접근 로그에서도 `lat`, `lng`를 지우고 나머지 query(검색어 등)만 남긴다. 인기 위스키 순위를 위한 검색 집계(3.10.6)에도 위치는 남기지 않는다.
 
@@ -1174,14 +1175,15 @@ GET /api/search/bars?query=%EA%B8%80%EB%A0%8C%ED%94%BC%EB%94%95&lat=37.478&lng=1
 | 상품에 연결되지 않은 메뉴 항목 | 연결을 기다리는 위스키와 위스키가 아닌 메뉴(3.9의 `productId = null`). 업장 메뉴(3.9)에는 보이지만 상품이 없어 검색어와 일치할 수 없다. 운영자가 위스키 항목을 상품에 연결하면 그때부터 검색된다. 인기 위스키(3.17)의 `barCount`에도 세지 않는다 |
 | 비활성 상품 | `products.is_active = false`인 상품은 어느 단계에서도 일치하지 않는다 |
 | 검색 제외 별칭 | `is_searchable = false`인 상품 별칭으로는 `alias_exact`와 `partial`에서 일치하지 않고, `similar`에서도 비교하지 않는다 |
-| 품절 항목 | `soldOut`인 항목(3.14.8). 이 API는 공개 API라 호출자와 관계없이 빠지며, 판매 중으로 되돌리면 바로 다시 검색된다 |
+| 품절 항목 | `soldOut`인 항목(3.14.8). 기본(`includeSoldOut`을 보내지 않거나 `false`)으로는 호출자와 관계없이 빠진다. `includeSoldOut = true`이면 빼지 않고 `soldOut = true`로 표시해 판매 중인 행 뒤에 둔다. 판매 중으로 되돌리면 바로 다시 판매 중인 행(`soldOut = false`)으로 검색된다. 품절 행도 위 포함 조건(현재 메뉴판, 활성 업장)을 모두 만족해야 하며, 이 표의 다른 제외 대상은 `includeSoldOut`과 관계없이 빠진다 |
 
 정렬 기준:
 
 ```text
 items
-  정확 일치 상품의 행 먼저, 그다음 나머지 (brand 단계에서만 차이가 난다)
-  각 묶음 안에서
+  판매 중인 행 먼저, 품절 행(soldOut = true)은 그 뒤 (includeSoldOut = true일 때만 차이가 난다)
+  각 묶음 안에서 정확 일치 상품의 행 먼저, 그다음 나머지 (brand 단계에서만 차이가 난다)
+  그 안에서
     lat·lng가 있으면  distanceMeters 오름차순
     lat·lng가 없으면  menuUpdatedAt 내림차순
     동점이면          barName → productDisplayName → barId → productId 오름차순
@@ -1199,9 +1201,9 @@ options
 
 개수 제한:
 
-- MVP의 업장 수가 약 20곳이므로 cursor 페이지네이션은 두지 않는다. `items`는 정렬한 뒤 앞에서부터 `limit`개까지만 반환하고, 잘렸으면 `truncated = true`다.
+- MVP의 업장 수가 약 20곳이므로 cursor 페이지네이션은 두지 않는다. `items`는 정렬한 뒤 앞에서부터 `limit`개까지만 반환하고, 잘렸으면 `truncated = true`다. `includeSoldOut = true`이면 판매 중인 행과 품절 행을 합친 목록에 적용하므로, 판매 중인 행이 품절 행 때문에 잘리지 않는다.
 - `matchedProducts`는 `limit`의 영향을 받지 않는다. `partial`은 최대 10개, `similar`는 최대 5개, `brand`는 해당 브랜드의 활성 상품 전체다.
-- `matchedProducts[].resultCount`는 `limit`을 적용하기 전의 행 수다. 따라서 `truncated = true`이면 `resultCount`의 합이 `items` 개수보다 크다.
+- `matchedProducts[].resultCount`는 `limit`을 적용하기 전의 판매 중인 행 수다. 품절 행은 `includeSoldOut`과 관계없이 세지 않는다(인기 위스키의 `barCount`, 3.17.2와 같다). 따라서 품절 행이 없을 때 `truncated = true`이면 `resultCount`의 합이 `items` 개수보다 크다.
 
 #### 3.10.3 응답
 
@@ -1300,7 +1302,7 @@ options
 | `matchedProducts[].brandName` | 문자열 | 아니오 | 브랜드 대표명(`brands.canonical_name`) |
 | `matchedProducts[].ageYears` | 정수 | 예 | 숙성 연수. 표기가 없는 상품은 `null` |
 | `matchedProducts[].editionName` | 문자열 | 예 | 에디션명. 없으면 `null` |
-| `matchedProducts[].resultCount` | 정수 | 아니오 | `limit` 적용 전 이 상품의 결과 행 수. 판매 업장이 없으면 `0` |
+| `matchedProducts[].resultCount` | 정수 | 아니오 | `limit` 적용 전 이 상품의 판매 중인 결과 행 수. 품절 행(`soldOut = true`)은 세지 않는다. 판매 업장이 없으면 `0` |
 | `items` | 배열 | 아니오 | 결과 행. 없으면 `[]` |
 | `items[].barId` | UUID 문자열 | 아니오 | |
 | `items[].barName` | 문자열 | 아니오 | |
@@ -1318,6 +1320,7 @@ options
 | `items[].options[].discount` | 객체 | 예 | 기간 할인. 3.9의 `options[].discount`와 같으며, 할인 중인지는 프론트엔드가 계산한다. 없거나 끝났으면 `null` |
 | `items[].options[].sortOrder` | 정수 | 아니오 | 옵션 표시 순서 |
 | `items[].menuUpdatedAt` | RFC 3339 문자열 | 아니오 | 업장 현재 메뉴판의 `menu_boards.published_at` |
+| `items[].soldOut` | 불리언 | 아니오 | 이 업장 메뉴판에 있지만 품절인 항목(3.14.8)이면 `true`. 항상 보낸다. `includeSoldOut = true`일 때만 `true`가 올 수 있고, 아니면 항상 `false`다. 품절 행의 업장, 상품, 가격, 옵션 값은 판매 중인 행과 같은 형식이다 |
 | `truncated` | 불리언 | 아니오 | `limit`보다 많은 행이 일치했으면 `true` |
 
 #### 3.10.4 결과가 0건일 때
@@ -1328,6 +1331,8 @@ options
 matchType = none, matchedProducts = []  → 인식할 수 없는 상품명. 다른 이름으로 검색하도록 안내
 matchedProducts ≠ [] 이고 items = []    → 상품은 확인했지만 현재 판매하는 업장 없음. matchedProducts의 상품명을 함께 표시
 ```
+
+`includeSoldOut = true`이면 판매하는 업장이 없고 품절 업장만 있는 상품도 `items`에 품절 행이 온다. 이때 `items`는 비어 있지 않지만 모든 행이 `soldOut = true`이고 `resultCount`의 합은 `0`이다. 프론트엔드는 품절 행을 품절로 표시해 보여 준다.
 
 `matchType = similar`이면 `matchedProducts`와 `items`는 다른 단계와 같은 형식이고 위 구분도 그대로 쓴다. 다만 상품은 고객이 입력한 이름과 정확히 일치한 것이 아니라 이름이 가장 비슷한 상품이다. 프론트엔드는 결과 위에 "비슷한 메뉴를 보여 드려요" 같은 안내를 보여 줄 수 있다(필수 아님). 안내 없이 다른 결과처럼 보여 줘도 계약 위반은 아니다. `items = []`이면 "상품은 확인했지만"이 아니라 비슷한 상품도 판매하는 업장이 없다는 뜻이다.
 
@@ -1358,8 +1363,9 @@ matchedProducts ≠ [] 이고 items = []    → 상품은 확인했지만 현재
 | `lat`, `lng`, `limit`이 범위를 벗어남 | 해당 파라미터 | `GREATER_THAN_EQUAL`, `LESS_THAN_EQUAL` | 앱 버그. 일반 오류와 재시도 |
 | `lat`, `lng`, `limit`이 숫자가 아님 | 해당 파라미터 | `FLOAT_PARSING`(`lat`, `lng`), `INT_PARSING`(`limit`) | 앱 버그. 일반 오류와 재시도 |
 | `source`가 `input`, `recent`, `popular`가 아님 | `source` | `LITERAL_ERROR` | 앱 버그. 일반 오류와 재시도 |
+| `includeSoldOut`이 불리언이 아님 (예: `abc`) | `includeSoldOut` | `BOOL_PARSING` | 앱 버그. 일반 오류와 재시도 |
 
-- 범위, 숫자 형식, UUID 형식, 허용 값 오류는 한 응답의 `fieldErrors`에 여러 개 올 수 있다. 이 검사를 모두 통과한 뒤에 `EXACTLY_ONE_REQUIRED`, `BLANK`, `STRING_TOO_LONG`, `LAT_LNG_REQUIRED_TOGETHER`, `NOT_SEARCHABLE`을 이 순서로 검사하며, 이 단계에서는 처음 걸린 오류 하나만 반환한다.
+- 범위, 숫자 형식, UUID 형식, 불리언 형식, 허용 값 오류는 한 응답의 `fieldErrors`에 여러 개 올 수 있다. 이 검사를 모두 통과한 뒤에 `EXACTLY_ONE_REQUIRED`, `BLANK`, `STRING_TOO_LONG`, `LAT_LNG_REQUIRED_TOGETHER`, `NOT_SEARCHABLE`을 이 순서로 검사하며, 이 단계에서는 처음 걸린 오류 하나만 반환한다.
 - 프론트엔드는 요청 전에 검색어의 앞뒤 공백을 지우고, 빈 검색어면 API를 호출하지 않는다. 검색 입력 칸은 100자로 제한한다. 그래도 서버가 `query` 오류를 반환하면 위 표대로 `code`를 기준으로 문구를 보여 준다.
 - 위치 권한이 없거나 위치를 얻지 못하면 `lat`과 `lng`를 둘 다 빼고 요청한다. 결과는 `menuUpdatedAt` 순으로 정렬되고 `distanceMeters`는 `null`이다.
 - 네트워크 오류와 `5xx`(`500 INTERNAL_ERROR`, `503`, 프록시의 `502`·`504` 포함)는 오류 상태와 재시도 버튼을 보여 준다(9.6).
@@ -2928,7 +2934,7 @@ Content-Type: application/json
   - **메뉴판 버전**: `menuVersion`을 받지 않고 올리지도 않는다. `publishedAt`도 바뀌지 않는다. 품절은 재고 상태이지 판매 정보(상품과 가격)를 바꾸거나 확인한 것이 아니고, `publishedAt`은 고객 검색의 `menuUpdatedAt`으로도 쓰이기 때문이다. 따라서 업주 화면의 "최근 갱신"(3.6의 `publishedAt`과 `confirmedAt` 중 늦은 시각)도 품절 변경으로는 바뀌지 않는다.
 - 값을 정하는 요청이므로 같은 요청을 다시 보내도 결과가 같다. 이미 그 값이어도 `200 OK`다.
 - 품절은 항목이 현재 메뉴판에 있는 동안 유지된다. 검수 반영(8)이나 항목 수정(3.14.4)으로 옵션이 바뀌어도 그대로다. 항목이 메뉴판에서 빠지면(검수의 `remove`, 3.14.5 삭제, 3.14.6 초기화) 품절이 풀리므로, 같은 상품을 다시 추가하면 판매 중으로 시작한다.
-- 품절 항목은 손님에게 보이지 않는다. 비로그인 사용자와 customer의 3.9 응답과 고객 검색(3.10)에서 빠지고, operator와 해당 업장의 업주의 3.9 응답에만 `soldOut = true`로 나온다. 판매 중으로 되돌리면 바로 다시 보인다.
+- 품절 항목은 손님의 업장 메뉴에 보이지 않는다. 비로그인 사용자와 customer의 3.9 응답에서 빠지고, operator와 해당 업장의 업주의 3.9 응답에만 `soldOut = true`로 나온다. 고객 검색(3.10)에서는 기본으로 빠지고, `includeSoldOut = true`로 검색하면 `soldOut = true`로 판매 중인 행 뒤에 나온다. 인기 위스키의 `barCount`(3.17.2)에는 세지 않는다. 판매 중으로 되돌리면 바로 다시 보인다.
 - `barMenuItemId`가 이 업장의 현재 메뉴판에 없거나 UUID 형식이 아니면 `404 MENU_ITEM_NOT_FOUND`다.
 - 서버는 업장 행을 잠근 뒤(3.14.1) 항목이 현재 메뉴판에 있는지 확인하고 품절 값을 쓴다. 그래서 같은 항목을 내리는 검수 반영이나 삭제와 동시에 와도, 메뉴판에서 빠진 항목에 품절이 남지 않는다.
 
@@ -3572,7 +3578,7 @@ GET /api/search/popular-products?limit=10
 4. **대체 기준**: 3의 상품이 `limit`보다 적으면, 아직 넣지 않은 후보를 `barCount` 내림차순, `displayName` 오름차순, `productId` 오름차순으로 채운다. 검색 수가 적은 서비스 초기에도 카드가 비지 않게 하기 위해서다.
 5. 앞에서부터 `limit`개를 반환한다.
 
-`barCount`는 고객 검색(3.10.2)에 그 상품의 결과로 나오는 업장 수와 같다. 활성 업장이고, 그 상품이 업장의 현재 메뉴판에 있고, 품절(3.14.8)이 아닌 업장만 센다. 그래서 카드를 눌러 3.10을 `productId`로 검색하면 "바 N곳"과 같은 수의 업장이 나온다. 다만 3.10은 `limit`까지만 반환하므로 `barCount`가 `limit`보다 크면 결과가 잘리고 `truncated = true`다. 이 API의 응답을 받은 뒤 품절이나 메뉴판이 바뀌어도 달라질 수 있다.
+`barCount`는 고객 검색(3.10.2)에 그 상품의 결과로 나오는 업장 수와 같다. 활성 업장이고, 그 상품이 업장의 현재 메뉴판에 있고, 품절(3.14.8)이 아닌 업장만 센다. 그래서 카드를 눌러 3.10을 `productId`로 검색하면 "바 N곳"과 같은 수의 판매 중인 업장이 나오고, 그 상품의 `resultCount`도 같다. `includeSoldOut = true`로 검색하면 품절 업장이 그 뒤에 더 나오지만 `barCount`와 `resultCount`에는 세지 않는다. 다만 3.10은 `limit`까지만 반환하므로 `barCount`가 `limit`보다 크면 결과가 잘리고 `truncated = true`다. 이 API의 응답을 받은 뒤 품절이나 메뉴판이 바뀌어도 달라질 수 있다.
 
 홈 화면의 카드를 눌러 한 검색(3.17.1)도 다른 검색과 똑같이 집계되고 순위에 들어간다. 카드를 고른 것도 그 상품에 대한 관심으로 본다.
 
@@ -3910,6 +3916,7 @@ Query 파라미터는 없다. 모르는 파라미터는 다른 공개 API처럼 
 - **검색 결과 거리순** (3.10의 `lat`, `lng` 대신): 3.10 응답의 `items[].latitude`, `longitude`로 위와 같이 거리를 계산하고 거리 오름차순으로 정렬한다. 같으면 `barName` → `productDisplayName` → `barId` → `productId` 순(3.10.2와 같다). 다음 두 가지는 서버의 거리순과 다를 수 있다.
   - `lat`, `lng` 없이 검색하면 서버는 `menuUpdatedAt` 최신순으로 정렬한 뒤 `limit`개에서 자른다. `truncated = true`이면 받은 행 안에서만 거리순이다. 필요하면 `limit`을 최대(`100`)로 보낸다.
   - 서버는 `brand` 단계에서 정확 일치 상품의 행을 먼저 두는데(3.10.2), 어느 상품이 그 묶음인지는 응답에 없다. 기기는 묶음 없이 거리순으로 정렬한다.
+- **검색 결과의 품절 행**: `includeSoldOut = true`로 받은 결과는 기기에서 거리순으로 정렬할 때도 서버(3.10.2)처럼 품절 행(`soldOut = true`)을 모두 판매 중인 행 뒤에 둔다. 각 묶음 안에서 위의 거리순을 쓴다.
 - 위치 권한이 없거나 위치를 얻지 못하면 거리를 계산하지 않는다. 주변 업장은 보여 주지 않고, 검색 결과는 서버가 준 순서 그대로 쓴다.
 
 #### 3.19.5 오류와 프론트엔드 처리
