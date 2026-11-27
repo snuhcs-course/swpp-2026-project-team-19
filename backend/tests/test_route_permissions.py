@@ -10,7 +10,7 @@ flows are covered by each route's own tests.
 """
 
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any
 from uuid import UUID
@@ -54,6 +54,8 @@ class ManagerRoute:
     request: dict[str, Any]
     missing: tuple[int, str]  # what any signed-in caller gets for a missing id
     allowed: tuple[int, str | None]  # what a manager gets on the `target` bar and its uploaded import
+    # What some managers (keys of MANAGERS) get instead, when it differs.
+    allowed_for: dict[str, tuple[int, str | None]] = field(default_factory=dict)
 
     @property
     def id(self) -> str:
@@ -88,8 +90,6 @@ OPERATOR_ONLY = [
     ),
     # Records no reviewer, so a temporary-login operator needs no users row.
     Route("post", "/api/owner-applications/{applicationId}/verify-business", {}, (404, "OWNER_APPLICATION_NOT_FOUND")),
-    # Records who revoked the ownership, so a temporary-login operator needs a users row first.
-    Route("delete", "/api/bars/{barId}/owner", {}, (404, "BAR_NOT_FOUND"), (404, "USER_NOT_FOUND")),
     Route("get", "/api/menu-item-checks", {}, (200, None)),
     Route("post", "/api/menu-item-checks/{checkId}/resolve", {"json": {"resolution": "keep"}}, (404, "MENU_ITEM_CHECK_NOT_FOUND")),
     # Called with a missing user, so the shared limiter is left alone.
@@ -98,6 +98,16 @@ OPERATOR_ONLY = [
 BAR_MANAGER = [
     ManagerRoute("get", "/api/bars/{barId}", {}, (404, "BAR_NOT_FOUND"), (200, None)),
     ManagerRoute("patch", "/api/bars/{barId}", {"json": {}}, (404, "BAR_NOT_FOUND"), (200, None)),
+    # The target bar's owner ends their own ownership. An operator finds no owner on the target bar, and a
+    # temporary-login operator needs a users row first, as who revoked the ownership is recorded.
+    ManagerRoute(
+        "delete",
+        "/api/bars/{barId}/owner",
+        {},
+        (404, "BAR_NOT_FOUND"),
+        (204, None),
+        {"Supabase operator": (404, "BAR_OWNER_NOT_FOUND"), "temporary operator": (404, "USER_NOT_FOUND")},
+    ),
     ManagerRoute("get", "/api/bars/{barId}/menu-imports", {}, (404, "BAR_NOT_FOUND"), (200, None)),
     # The target bar has an unfinished import, so a manager's upload stops there.
     ManagerRoute(
@@ -393,13 +403,13 @@ def test_only_a_manager_may_manage_the_bar(client, token_for, supabase, db_sessi
     assert outcome(call(client, route.method, url, route.request, token)) == (403, "FORBIDDEN")
 
 
-@pytest.mark.parametrize("caller", MANAGERS.values(), ids=MANAGERS.keys())
+@pytest.mark.parametrize("caller", MANAGERS.keys())
 @pytest.mark.parametrize("route", BAR_MANAGER, ids=lambda route: route.id)
 def test_a_manager_may_manage_the_bar(client, token_for, supabase, db_session, target, route, caller):
-    token = caller(token_for, supabase, db_session, target)
+    token = MANAGERS[caller](token_for, supabase, db_session, target)
     url = route.url(target.bar_id, target.menu_import_id)
 
-    assert outcome(call(client, route.method, url, route.request, token)) == route.allowed
+    assert outcome(call(client, route.method, url, route.request, token)) == route.allowed_for.get(caller, route.allowed)
 
 
 def test_every_api_route_is_classified():

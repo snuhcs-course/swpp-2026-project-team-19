@@ -16,7 +16,6 @@ from app.core.security import Principal
 from app.models import Bar, BarOwner, BarStatus, MenuBoard, MenuImport, User
 from app.schemas.bar import ActiveMenuImport, BarDetail, BarOwnerSummary, BarPhotoResponse, BarUpdateInput, CurrentMenu
 from app.schemas.bar_hours import OperatingException, WeeklyHours
-from app.services.bar_access import forbidden
 from app.services.bar_hours import (
     operating_exceptions_by_bar,
     replace_weekly_hours,
@@ -48,11 +47,9 @@ def get_bar_detail(session: Session, bar: Bar, *, base_url: str) -> BarDetail:
     return bar_details(session, [bar], base_url=base_url)[0]
 
 
-def update_bar(session: Session, bar: Bar, patch: BarUpdateInput, *, operator: bool, base_url: str) -> BarDetail:
-    """Change the fields that were sent (3.7). Only an operator may change `status`."""
+def update_bar(session: Session, bar: Bar, patch: BarUpdateInput, *, base_url: str) -> BarDetail:
+    """Change the fields that were sent (3.7). An operator and the owner may both change `status`."""
     sent = patch.model_fields_set
-    if "status" in sent and not operator:
-        raise forbidden()
     errors = []
     if ("latitude" in sent) != ("longitude" in sent):
         missing = "longitude" if "latitude" in sent else "latitude"

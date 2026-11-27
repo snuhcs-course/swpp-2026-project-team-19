@@ -193,7 +193,9 @@ class BarOwnerApplication(Base):
 
 
 class BarOwner(Base):
-    """An approved owner of a bar. The row with revoked_at null is the bar's current owner."""
+    """An approved owner of a bar. The row with revoked_at null is the bar's current owner.
+
+    revoked_by_user_id is who ended the ownership: an operator, or the owner themselves (API spec 3.11.10)."""
 
     __tablename__ = "bar_owners"
     __table_args__ = (

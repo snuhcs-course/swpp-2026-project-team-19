@@ -24,7 +24,7 @@ from app.schemas.menu_edit import (
     SoldOutRequest,
 )
 from app.schemas.menu_import import MenuImportListResponse
-from app.services.bar_access import can_manage_bar, is_operator
+from app.services.bar_access import can_manage_bar
 from app.services.bar_admin import BarStatusFilter, ImportStatusFilter, list_bars, list_menu_imports
 from app.services.bar_detail import get_bar_detail, update_bar
 from app.services.bar_menu import get_bar_menu
@@ -187,7 +187,7 @@ def read_bar(
 @router.patch(
     "/{barId}",
     response_model=BarDetail,
-    summary="Edit a bar, or deactivate it",
+    summary="Edit a bar, or deactivate or reactivate it",
     description=(
         "Operator or the bar's owner. Send only the fields to change; the response is the bar as in "
         "`GET /api/bars/{barId}`. An empty body changes nothing.\n\n"
@@ -205,8 +205,9 @@ def read_bar(
         "`dayOfWeek` (1 = Monday); `closed: true` is a day off and takes no times, otherwise `openTime` and "
         "`closeTime` are Seoul local `HH:MM` in 5-minute steps, different, and a close earlier than the open "
         "ends the next day. A change moves `updatedAt`.\n"
-        "- `status` (`active` or `inactive`) only by operators; an owner who sends it gets `403`. "
-        "An inactive bar leaves customer search and takes no new upload.\n"
+        "- `status`: `active` or `inactive`, by an operator or the owner, applied at once. An inactive bar "
+        "leaves customer search and the customer bar detail and takes no new upload; its owner still manages "
+        "it and may set it `active` again.\n"
         "- The temporary closure is changed with `PUT /api/bars/{barId}/operating-exception`; sending "
         "`operatingException` here is `EXTRA_FORBIDDEN`."
     ),
@@ -214,7 +215,7 @@ def read_bar(
         (401, "`UNAUTHENTICATED`: missing, invalid or expired token."),
         (
             403,
-            "`FORBIDDEN`: the caller is neither an operator nor the bar's current owner, or an owner sent `status`.",
+            "`FORBIDDEN`: the caller is neither an operator nor the bar's current owner.",
         ),
         AUTH_UNAVAILABLE,
         (404, "`BAR_NOT_FOUND`: no such bar or a malformed id."),
@@ -230,47 +231,48 @@ def read_bar(
 )
 def edit_bar(
     body: BarUpdateInput,
-    # Declared before the bar so the token is checked first; FastAPI runs it once for both.
-    principal: Principal = Depends(get_current_user),
     session: Session = Depends(get_session),
     bar: Bar = Depends(require_bar_manager),
     base_url: str = Depends(get_base_url),
 ) -> BarDetail:
-    return update_bar(session, bar, body, operator=is_operator(session, principal), base_url=base_url)
+    return update_bar(session, bar, body, base_url=base_url)
 
 
 @router.delete(
     "/{barId}/owner",
     status_code=204,
     response_class=Response,
-    summary="Remove the bar's owner",
+    summary="Remove the bar's owner, or end your own management of the bar",
     description=(
-        "Operator only; inactive bars too. Ends the current owner's ownership of the bar: from their next "
-        "request they no longer manage it. The record is kept with when and by whom it was revoked, the "
-        "approved application stays approved, and the former owner may apply again. The bar's unfinished "
-        "menu import, if any, stays for an operator or the next owner.\n\n"
-        "- Done under the bar row lock, like menu changes and approvals: a request of the former owner that "
-        "takes the lock afterwards gets `403`.\n"
-        "- Checks in order: operator, the caller's users row (the revoker is recorded), the bar, its current "
-        "owner. Sending it again after a success is `BAR_OWNER_NOT_FOUND`."
+        "Operator or the bar's current owner; inactive bars too. Ends the current ownership of the bar at once, "
+        "with no approval step: from their next request the former owner no longer manages it. The record is "
+        "kept with when and by whom (the operator, or the owner themselves) it was revoked, the approved "
+        "application stays approved, and the former owner may apply again. The bar's `status` is not changed, "
+        "and its unfinished menu import, if any, stays for an operator or the next owner.\n\n"
+        "- Done under the bar row lock, like menu changes and approvals: the caller is checked again after "
+        "taking the lock, so a request of the former owner that takes the lock afterwards gets `403`.\n"
+        "- Checks in order: the bar, the caller (operator or current owner), the same again under the bar row "
+        "lock, the caller's users row (the revoker is recorded), the bar's current owner.\n"
+        "- Sent again after a success, an owner's request is `403` (they are no longer the owner; check "
+        "`GET /api/me/bars`) and an operator's is `BAR_OWNER_NOT_FOUND`."
     ),
     responses=error_responses(
-        *_OPERATOR_ERRORS,
+        *_MANAGER_ERRORS,
         (
             404,
-            "`USER_NOT_FOUND`: the operator has no users row (only a temporary-login operator can lack one; "
-            "call `GET /api/me` and retry). `BAR_NOT_FOUND`: no such bar or a malformed id. "
-            "`BAR_OWNER_NOT_FOUND`: the bar has no current owner.",
+            "`BAR_NOT_FOUND`: no such bar or a malformed id. `USER_NOT_FOUND`: the operator has no users row "
+            "(only a temporary-login operator can lack one; call `GET /api/me` and retry). "
+            "`BAR_OWNER_NOT_FOUND`: the bar has no current owner (an operator's request).",
         ),
     ),
 )
 def remove_bar_owner(
-    bar_id: BarId,
-    operator: Principal = Depends(require_operator),
+    principal: Principal = Depends(get_current_user),
     session: Session = Depends(get_session),
+    bar: Bar = Depends(require_bar_manager),
     clock: Callable[[], datetime] = Depends(get_clock),
 ) -> Response:
-    remove_owner(session, operator, bar_id, now=clock())
+    remove_owner(session, principal, bar.id, now=clock())
     return Response(status_code=204)
 
 
