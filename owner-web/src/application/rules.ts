@@ -144,3 +144,14 @@ export function exactNameMatches<T extends BarNameCandidate>(candidates: readonl
 export function partitionBarCandidates<T extends BarNameCandidate>(candidates: readonly T[]): [T[], T[]] {
   return [candidates.filter((candidate) => !candidate.hasOwner), candidates.filter((candidate) => candidate.hasOwner)];
 }
+
+/**
+ * The consent asked with the contact phone (spec 3.11.2 `contactPhonePublic`). The app has no such item yet
+ * (android/.../ui/owner/OwnerOnboardingScreen.kt contact step); this wording is the one the app is to use.
+ */
+export const CONTACT_PHONE_PUBLIC_LABEL = "매장 번호가 없으면 이 번호를 손님에게 보여 줘요";
+
+/** The consent as the review step and the application detail show it. */
+export function contactPhonePublicText(consented: boolean): string {
+  return consented ? "매장 번호가 없을 때 보여요" : "보여 주지 않아요";
+}

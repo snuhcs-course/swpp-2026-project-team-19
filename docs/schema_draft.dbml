@@ -227,6 +227,7 @@ Table bar_owner_applications {
   business_status business_status [note: 'From the latest NTS check; null unless the result is matched']
   business_checked_at timestamptz [not null, note: 'When the stored result was obtained; a failed operator recheck changes nothing']
   contact_phone varchar(30) [not null]
+  contact_phone_public boolean [not null, default: false, note: 'Consent, given only when applying, to show contact_phone to customers while the bar has no phone. False for applications made before the consent existed']
   applicant_note varchar(500)
   cover_photo_storage_key varchar(500) [note: 'new_bar only, optional: the re-encoded cover photo, owner-applications/<applicationId>/cover/<uuid>.jpg']
   cover_photo_thumbnail_storage_key varchar(500) [note: 'Its 480 px thumbnail; set exactly when cover_photo_storage_key is']

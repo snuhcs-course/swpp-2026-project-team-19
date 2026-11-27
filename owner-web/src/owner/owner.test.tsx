@@ -488,9 +488,23 @@ describe("application details (/applications/:id, spec 3.11.4)", () => {
     expect(barInfo).toHaveTextContent("매장 전화02-555-1234");
     expect(screen.getByRole("region", { name: "메뉴판" })).toHaveTextContent("메뉴판 사진2장");
     expect(screen.getByRole("region", { name: "연락처" })).toHaveTextContent("010-1234-5678");
+    expect(screen.getByRole("region", { name: "연락처" })).toHaveTextContent("손님에게 공개보여 주지 않아요");
     // Counts only, as in the app.
     expect(screen.queryByRole("img")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /수정/ })).not.toBeInTheDocument();
+  });
+
+  it("shows that the applicant agreed to show the contact phone to customers", async () => {
+    useOwnerApi();
+    server.use(
+      http.get("/api/owner-applications/:id", () =>
+        HttpResponse.json(ownerApplication({ applicationId: APPLICATION_ID, contactPhonePublic: true })),
+      ),
+    );
+    renderOwnerWeb(`/applications/${APPLICATION_ID}`);
+
+    await title("신청한 내용");
+    expect(await screen.findByRole("region", { name: "연락처" })).toHaveTextContent("손님에게 공개매장 번호가 없을 때 보여요");
   });
 
   it("shows only the bar name of an existing-bar claim", async () => {

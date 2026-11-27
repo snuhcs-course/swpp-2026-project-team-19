@@ -26,6 +26,7 @@ from app.services.bar_hours import (
     weekly_hours_errors,
 )
 from app.services.bar_photo_links import photos_by_bar
+from app.services.customer_phone import CustomerPhone, customer_phones
 from app.services.menu_import_upload import UNFINISHED_STATUSES
 
 
@@ -118,6 +119,7 @@ def bar_details(session: Session, bars: Sequence[Bar], *, base_url: str) -> list
     hours = weekly_hours_by_bar(session, bar_ids)
     exceptions = operating_exceptions_by_bar(session, bar_ids, seoul_today())
     photos = photos_by_bar(session, bar_ids, base_url)
+    phones = customer_phones(session, bars)
     return [
         _detail(
             bar,
@@ -127,6 +129,7 @@ def bar_details(session: Session, bars: Sequence[Bar], *, base_url: str) -> list
             unfinished.get(bar.id),
             boards.get(bar.id),
             owners.get(bar.id),
+            phones[bar.id],
         )
         for bar in bars
     ]
@@ -140,6 +143,7 @@ def _detail(
     menu_import: MenuImport | None,
     board: MenuBoard | None,
     owner: tuple[BarOwner, User] | None,
+    customer_phone: CustomerPhone,
 ) -> BarDetail:
     return BarDetail(
         barId=bar.id,
@@ -180,6 +184,8 @@ def _detail(
             if owner is not None
             else None
         ),
+        customerPhone=customer_phone[0],
+        customerPhoneSource=customer_phone[1],
         createdAt=bar.created_at,
         updatedAt=bar.updated_at,
     )

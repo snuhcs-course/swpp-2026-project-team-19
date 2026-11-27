@@ -10,6 +10,7 @@ from uuid import UUID, uuid4
 
 from sqlalchemy import (
     CHAR,
+    Boolean,
     CheckConstraint,
     Date,
     DateTime,
@@ -148,6 +149,10 @@ class BarOwnerApplication(Base):
     # When the stored result was obtained; a failed operator recheck changes neither (spec 3.11.13).
     business_checked_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     contact_phone: Mapped[str] = mapped_column(String(30), nullable=False)
+    # Consent, given only when applying, to show contact_phone to customers while the bar has no phone (spec 3.9).
+    contact_phone_public: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default=text("false")
+    )
     applicant_note: Mapped[str | None] = mapped_column(String(500), nullable=True)
     # The re-encoded cover photo of a new_bar application and its thumbnail (spec 3.11.17).
     cover_photo_storage_key: Mapped[str | None] = mapped_column(String(500), nullable=True)

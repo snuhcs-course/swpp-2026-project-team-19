@@ -113,6 +113,7 @@ export function menu(items: MenuItem[] = [menuItem({ barMenuItemId: "row-1", pro
     latitude: 37.5,
     longitude: 127,
     phone: null,
+    phoneSource: null,
     description: null,
     tags: [],
     weeklyHours: [],

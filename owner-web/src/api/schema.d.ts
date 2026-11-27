@@ -137,7 +137,8 @@ export interface paths {
          *     - A bar without a published menu returns `200` with `menuBoardId: null` and `items: []`. A menu whose items were all taken down, or are all sold out for a customer, keeps `menuBoardId` and `publishedAt`, with `items: []`.
          *     - `menuVersion` goes up with every review publish and manual edit; manual edits send it back.
          *     - `options[].discount` comes only while the discount has not ended (one that has not started yet comes too); `priceKrw` is always the list price. The app shows the discounted price while `startsAt <= now < endsAt`.
-         *     - `phone`, `optionLabel`, `pourMl` and `discount` are null when missing. Coordinates are WGS84 and never null.
+         *     - `phone` is the bar's phone or, when it has none, the current owner's contact phone if they agreed to show it when applying (`phoneSource`); null when neither.
+         *     - `optionLabel`, `pourMl` and `discount` are null when missing. Coordinates are WGS84 and never null.
          *     - Items and their options are sorted by `sortOrder`.
          */
         get: operations["read_bar_menu_api_bars__barId__menu_get"];
@@ -1326,6 +1327,16 @@ export interface components {
             /** @description The current owner; null when none */
             owner: components["schemas"]["BarOwnerSummary"] | null;
             /**
+             * Customerphone
+             * @description The phone customers see now (`phone` of GET /api/bars/{barId}/menu): `phone`, or the owner's contact phone with their consent when `phone` is null. Not editable; `phone` is what PATCH changes
+             */
+            customerPhone: string | null;
+            /**
+             * Customerphonesource
+             * @description Where the phone customers see comes from: `bar` is the bar's own phone, `owner_contact` the current owner's contact phone, shown only with their consent while the bar has no phone. null when there is none
+             */
+            customerPhoneSource: ("bar" | "owner_contact") | null;
+            /**
              * Createdat
              * Format: date-time
              */
@@ -1434,8 +1445,16 @@ export interface components {
              * @description WGS84 longitude in decimal degrees; never null
              */
             longitude: number;
-            /** Phone */
+            /**
+             * Phone
+             * @description The bar's phone, or, when it has none, its owner's contact phone if they agreed to show it (`phoneSource`). null when neither
+             */
             phone: string | null;
+            /**
+             * Phonesource
+             * @description Where the phone customers see comes from: `bar` is the bar's own phone, `owner_contact` the current owner's contact phone, shown only with their consent while the bar has no phone. null when there is none
+             */
+            phoneSource: ("bar" | "owner_contact") | null;
             /**
              * Description
              * @description One-line introduction; may contain line breaks. Show it as plain text, not HTML. null when none
@@ -2373,6 +2392,12 @@ export interface components {
              */
             contactPhone: string;
             /**
+             * Contactphonepublic
+             * @description Consent to show `contactPhone` to customers while the bar has no phone (spec 3.9). Given only here and not changed later
+             * @default false
+             */
+            contactPhonePublic: boolean;
+            /**
              * Applicantnote
              * @description Blank is stored as null
              */
@@ -3042,6 +3067,12 @@ export interface components {
              */
             contactPhone: string;
             /**
+             * Contactphonepublic
+             * @description Consent to show `contactPhone` to customers while the bar has no phone (spec 3.9). Given only here and not changed later
+             * @default false
+             */
+            contactPhonePublic: boolean;
+            /**
              * Applicantnote
              * @description Blank is stored as null
              */
@@ -3233,6 +3264,11 @@ export interface components {
             warnings: (components["schemas"]["BusinessNumberUnreadableWarning"] | components["schemas"]["BusinessNumberSharedWarning"])[] | null;
             /** Contactphone */
             contactPhone: string;
+            /**
+             * Contactphonepublic
+             * @description Whether the applicant agreed to show `contactPhone` to customers while the bar has no phone
+             */
+            contactPhonePublic: boolean;
             /** Applicantnote */
             applicantNote: string | null;
             /**

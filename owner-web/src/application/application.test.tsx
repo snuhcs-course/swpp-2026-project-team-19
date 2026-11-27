@@ -420,6 +420,8 @@ describe("submission (spec 3.11.2, 3.11.17, 3.11.15)", () => {
           representativeName: "김사장",
           openingDate: "2020-03-02",
           contactPhone: "01012345678",
+          // Not ticked: no consent to show the contact phone to customers (spec 3.11.2).
+          contactPhonePublic: false,
         },
       },
       { method: "PUT", path: `cover:${APPLICATION_ID}`, files: ["img-cover.jpg"] },
@@ -446,7 +448,45 @@ describe("submission (spec 3.11.2, 3.11.17, 3.11.15)", () => {
       representativeName: "김사장",
       openingDate: "2020-03-02",
       contactPhone: "01012345678",
+      contactPhonePublic: false,
     });
+  });
+
+  it("asks the consent to show the contact phone, off by default, and sends it when ticked", async () => {
+    const calls = submissionApi();
+    seed("menus", { kind: "existing_bar", existingBar: { barId: BAR_ID, name: "관악 위스키 바", address: "관악로 1" }, proposedBarName: "관악 위스키 바" });
+    const u = user();
+    renderOwnerWeb("/apply/menus");
+    await u.upload(await screen.findByLabelText("메뉴판 사진 추가"), photo("menu-1.jpg"));
+    await u.click(next());
+
+    await heading("연락받을 번호를\n알려주세요");
+    const consent = screen.getByRole("checkbox", { name: "매장 번호가 없으면 이 번호를 손님에게 보여 줘요" });
+    expect(consent).not.toBeChecked();
+    expect(screen.getByText("운영팀만 봐요")).toBeInTheDocument();
+    await u.click(consent);
+    expect(consent).toBeChecked();
+    expect(screen.getByText("손님에게 보여요")).toBeInTheDocument();
+    expect(loadDraft(ME.userId)?.contactPhonePublic).toBe(true);
+    await u.click(next());
+
+    await heading("이렇게\n신청할게요");
+    const contact = screen.getByRole("region", { name: "연락처" });
+    expect(within(contact).getByText("손님에게 공개")).toBeInTheDocument();
+    expect(within(contact).getByText("매장 번호가 없을 때 보여요")).toBeInTheDocument();
+    await u.click(next("신청하기"));
+
+    await heading("신청을 마쳤어요");
+    expect(calls[0]?.body).toMatchObject({ contactPhone: "01012345678", contactPhonePublic: true });
+  });
+
+  it("shows on the review step that the contact phone stays with the operators without consent", async () => {
+    seed("menus", { kind: "existing_bar", existingBar: { barId: BAR_ID, name: "관악 위스키 바", address: "관악로 1" }, proposedBarName: "관악 위스키 바" });
+    const u = user();
+    renderOwnerWeb("/apply/menus");
+    await pickPhotosAndReview(u, { cover: false });
+
+    expect(within(screen.getByRole("region", { name: "연락처" })).getByText("보여 주지 않아요")).toBeInTheDocument();
   });
 
   it("shows the new application's status after the done screen, not a new form", async () => {

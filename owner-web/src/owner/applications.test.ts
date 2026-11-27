@@ -45,6 +45,8 @@ describe("reapplicationDraft (OwnerRegistrationProgress.kt reapplicationDraftFro
     expect(draft.openingDate).toBe("2019-05-14");
     expect(draft.contactPhone).toBe("01012345678");
     expect(draft.storePhone).toBe("025551234");
+    // The consent to show the contact phone is asked again, not carried over.
+    expect(reapplicationDraft(rejected({ contactPhonePublic: true })).contactPhonePublic).toBe(false);
     // The source application is not changed.
     expect(input.status).toBe("rejected");
   });

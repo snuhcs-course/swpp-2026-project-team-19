@@ -23,6 +23,13 @@ describe("application draft storage", () => {
     expect(loadDraft("user-a")?.step).toBe("intro");
   });
 
+  it("loads a draft saved before the contact phone consent existed with the consent off", () => {
+    const { contactPhonePublic: _, ...older } = { ...emptyDraft(), step: "contact" as const, contactPhone: "01012345678" };
+    localStorage.setItem("bottlemap-owner-web-application-draft:user-a", JSON.stringify(older));
+
+    expect(loadDraft("user-a")).toMatchObject({ step: "contact", contactPhone: "01012345678", contactPhonePublic: false });
+  });
+
   it("ignores a broken or older draft", () => {
     localStorage.setItem("bottlemap-owner-web-application-draft:user-a", "{not json");
     expect(loadDraft("user-a")).toBeNull();

@@ -15,16 +15,29 @@ const save = () => screen.getByRole("button", { name: "저장하기" });
 
 /**
  * The owner's one bar on a server that keeps PATCH /api/bars/{barId} (spec 3.7): only the fields sent
- * change, trimmed, and a blank description or phone becomes null, as the backend does.
+ * change, trimmed, and a blank description or phone becomes null, as the backend does. The phone customers
+ * see (3.6 `customerPhone`) follows as the backend computes it: the bar's phone, else the owner's contact
+ * phone when `initial` gives one as `owner_contact`.
  */
 function barServer(initial: Partial<BarDetail> = {}, answer?: (body: Record<string, unknown>) => Response | undefined | Promise<Response | undefined>) {
-  let current = bar(BAR_ID, "관악 위스키 바", {
-    description: "싱글몰트 위주의 조용한 바",
-    phone: "02-555-1234",
-    defaultPourMl: 30,
-    tags: ["싱글몰트"],
-    ...initial,
-  });
+  const ownerContact = initial.customerPhoneSource === "owner_contact" ? (initial.customerPhone ?? null) : null;
+  const seen = (detail: BarDetail): BarDetail => {
+    const [customerPhone, customerPhoneSource] = detail.phone
+      ? [detail.phone, "bar" as const]
+      : ownerContact
+        ? [ownerContact, "owner_contact" as const]
+        : [null, null];
+    return { ...detail, customerPhone, customerPhoneSource };
+  };
+  let current = seen(
+    bar(BAR_ID, "관악 위스키 바", {
+      description: "싱글몰트 위주의 조용한 바",
+      phone: "02-555-1234",
+      defaultPourMl: 30,
+      tags: ["싱글몰트"],
+      ...initial,
+    }),
+  );
   const patches: Record<string, unknown>[] = [];
   const reads = { bar: 0, myBars: 0 };
   useOwnerApi();
@@ -47,7 +60,7 @@ function barServer(initial: Partial<BarDetail> = {}, answer?: (body: Record<stri
       for (const [key, value] of Object.entries(body)) {
         (next as Record<string, unknown>)[key] = Array.isArray(value) ? value.map((tag: string) => tag.trim()) : clean(value);
       }
-      current = { ...next, updatedAt: "2026-11-22T03:00:00Z" };
+      current = seen({ ...next, updatedAt: "2026-11-22T03:00:00Z" });
       return HttpResponse.json(current);
     }),
   );
@@ -178,6 +191,42 @@ describe("bar info editor (/bars/:barId/info, spec 3.7)", () => {
     // The editor opens with what the server saved (trimmed), not what was typed.
     await user().click(screen.getByRole("link", { name: /매장 정보 관리/ }));
     expect(await screen.findByLabelText("한 줄 소개")).toHaveValue("위스키 300종");
+  });
+
+  it("says that customers see the bar's phone", async () => {
+    barServer();
+    await openForm();
+
+    expect(screen.getByLabelText("전화번호")).toHaveAccessibleDescription("손님에게 이 번호가 보여요.");
+  });
+
+  it("says which contact phone customers see while the bar has none, without putting it in the field", async () => {
+    // Spec 3.6 customerPhone: the owner agreed to show their contact phone when applying (3.11.2).
+    const api = barServer({ phone: null, customerPhone: "01012345678", customerPhoneSource: "owner_contact" });
+    await openForm();
+
+    const phone = screen.getByLabelText("전화번호");
+    expect(phone).toHaveValue("");
+    expect(phone).toHaveAccessibleDescription(
+      "매장 번호가 없어서 손님에게는 사장님 연락처(010-1234-5678)가 보여요. 매장 번호를 입력하면 매장 번호가 대신 보여요.",
+    );
+
+    // A bar phone the owner enters comes first (spec 3.9).
+    await user().type(phone, "02-777-8888");
+    await user().click(save());
+
+    await title("관악 위스키 바");
+    expect(api.patches).toEqual([{ phone: "02-777-8888" }]);
+    expect(api.current().customerPhoneSource).toBe("bar");
+    await user().click(screen.getByRole("link", { name: /매장 정보 관리/ }));
+    expect(await screen.findByLabelText("전화번호")).toHaveAccessibleDescription("손님에게 이 번호가 보여요.");
+  });
+
+  it("says that customers see no phone without a bar phone or consent", async () => {
+    barServer({ phone: null });
+    await openForm();
+
+    expect(screen.getByLabelText("전화번호")).toHaveAccessibleDescription("손님에게 보이는 번호가 없어요.");
   });
 
   it("removes the phone, description and pour when cleared", async () => {

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useParams } from "react-router";
 import { ApiError } from "../api/errors";
 import { SummaryRow } from "../application/parts";
-import { formatBusinessNumber, formatOwnerPhone } from "../application/rules";
+import { contactPhonePublicText, formatBusinessNumber, formatOwnerPhone } from "../application/rules";
 import { Button, ButtonLink } from "../ui/Button";
 import { ErrorState } from "../ui/states";
 import { QueryView } from "../ui/QueryView";
@@ -110,6 +110,7 @@ function ApplicationDetails({
       ) : null}
       <Section title="연락처">
         <SummaryRow label="연락받을 번호" value={formatOwnerPhone(application.contactPhone)} />
+        <SummaryRow label="손님에게 공개" value={contactPhonePublicText(application.contactPhonePublic)} />
       </Section>
       {canCancel ? (
         <Button variant="secondary" onClick={onCancel}>

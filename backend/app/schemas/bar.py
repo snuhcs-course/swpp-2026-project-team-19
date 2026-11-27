@@ -8,6 +8,11 @@ from app.schemas.bar_hours import OperatingException, WeeklyHours, WeeklyHoursIn
 from app.schemas.common import Latitude, Longitude, UtcDateTime
 
 MAX_TAGS = 5
+PhoneSource = Literal["bar", "owner_contact"]
+PHONE_SOURCE_DESCRIPTION = (
+    "Where the phone customers see comes from: `bar` is the bar's own phone, `owner_contact` the current owner's "
+    "contact phone, shown only with their consent while the bar has no phone. null when there is none"
+)
 Tag = Annotated[str, Field(min_length=1, max_length=24), AfterValidator(single_line)]
 
 
@@ -104,6 +109,11 @@ class BarDetail(BarSummary):
     )
     currentMenu: CurrentMenu | None = Field(description="The published menu; null when none has been published")
     owner: BarOwnerSummary | None = Field(description="The current owner; null when none")
+    customerPhone: str | None = Field(
+        description="The phone customers see now (`phone` of GET /api/bars/{barId}/menu): `phone`, or the owner's "
+        "contact phone with their consent when `phone` is null. Not editable; `phone` is what PATCH changes"
+    )
+    customerPhoneSource: PhoneSource | None = Field(description=PHONE_SOURCE_DESCRIPTION)
     createdAt: UtcDateTime
     updatedAt: UtcDateTime
 

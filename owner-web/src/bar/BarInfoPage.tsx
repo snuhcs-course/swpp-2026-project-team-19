@@ -18,6 +18,7 @@ import {
   barUpdate,
   canCreateTag,
   characterCount,
+  customerPhoneHint,
   dayOfHoursPath,
   fieldOfPath,
   formFromBar,
@@ -227,6 +228,7 @@ function BarInfoForm({ bar }: { bar: BarDetail }) {
             label="전화번호"
             value={form.phone}
             type="tel"
+            hint={customerPhoneHint(bar)}
             error={fieldError("phone")}
             // OwnerInfoHtmlV4Screen.kt: at most 30 characters.
             onChange={(event) => change({ phone: event.currentTarget.value.slice(0, 30) }, "phone")}

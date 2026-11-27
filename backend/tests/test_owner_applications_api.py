@@ -154,6 +154,7 @@ def test_applies_for_an_existing_bar(client, db_session, auth, applicant, verifi
         "businessVerification": None,
         "warnings": None,
         "contactPhone": "010-1234-5678",
+        "contactPhonePublic": False,
         "applicantNote": "대표 본인입니다",
         "menuPhotos": [],
         "coverPhoto": None,

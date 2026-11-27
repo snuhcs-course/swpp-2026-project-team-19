@@ -318,7 +318,7 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 | `address` | `varchar(500)`, NOT NULL | `서울특별시 관악구 관악로 1 2층` | 도로명 주소와 층·호수 등 상세 위치를 하나의 표시용 주소로 저장한다. |
 | `latitude` | `decimal(9,6)`, NOT NULL, CHECK -90~90 | `37.478321` | WGS84 위도다. 지도 표시와 고객 위치와의 직선 거리 계산에 사용한다. |
 | `longitude` | `decimal(9,6)`, NOT NULL, CHECK -180~180 | `126.951234` | WGS84 경도다. 지도 표시와 고객 위치와의 직선 거리 계산에 사용한다. |
-| `phone` | `varchar(30)`, nullable | `02-1234-5678` | 업장 상세 정보로 제공할 수 있다. |
+| `phone` | `varchar(30)`, nullable | `02-1234-5678` | 업장 상세 정보로 제공할 수 있다. 고객에게는 항상 이 번호가 먼저 보이고, 없을 때만 공개에 동의한 업주 연락처(`bar_owner_applications.contact_phone_public`)가 보인다. |
 | `description` | `varchar(100)`, nullable | `싱글몰트 위주의 조용한 바` | 업장 한 줄 소개다. 업주나 운영자가 업장 수정(API 명세 3.7)으로 정하고, 앞뒤 공백을 지운 값을 저장하며 공백뿐이면 null이다. 줄바꿈을 허용하고 이스케이프 없이 받은 그대로 저장한다. 업장을 만들 때(생성, 신청 승인)는 받지 않아 null이다. 고객 업장 상세(API 명세 3.9)에 나온다. |
 | `default_pour_ml` | `smallint`, nullable, CHECK 1~999 | `30` | 업주가 정한 매장 기본 잔 용량이다. 메뉴 직접 편집과 검수 화면이 잔 옵션의 용량 입력 칸을 미리 채우는 데만 쓴다. 백엔드가 게시 메뉴에 자동으로 적용하지 않으며, 바꿔도 이미 게시된 옵션은 바뀌지 않는다. |
 | `tags` | `varchar(24)[]`, NOT NULL, 기본 `{}` | `{싱글몰트,조용한 분위기}` | 매장 태그를 표시 순서대로 저장한다. 최대 5개이고, 태그마다 앞뒤 공백을 지운 1~24자이며 줄바꿈과 제어 문자가 없고, 대소문자를 무시해도 서로 다르다. 업주나 운영자가 업장 수정(API 명세 3.7)으로 목록 전체를 바꾼다. 자유 입력이며 검색에는 쓰지 않는다. 검색에 쓰게 되면 별도 테이블이나 GIN 인덱스를 검토한다. |
@@ -348,7 +348,8 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 | `business_verification_result` | `business_verification_result`, NOT NULL | `matched` | 마지막 국세청 진위확인 결과다. 운영자가 승인 전에 판단 근거로 본다. |
 | `business_status` | `business_status`, nullable | `active` | 마지막 확인에서 국세청이 알려 준 사업자 상태다. 결과가 `matched`가 아니면 `null`이다. 신청자에게도 보여 준다. |
 | `business_checked_at` | `timestamptz`, NOT NULL | `2026-10-14T03:00:00Z` | 저장된 검증 결과를 얻은 시각이다. 신청할 때 `unavailable`이 되었으면 그 시도 시각이다. 운영자의 다시 검증이 실패하면 결과와 함께 바뀌지 않는다. |
-| `contact_phone` | `varchar(30)`, NOT NULL | `010-1234-5678` | 운영자가 확인을 위해 연락할 번호다. 업장 전화번호와 다를 수 있다. |
+| `contact_phone` | `varchar(30)`, NOT NULL | `010-1234-5678` | 운영자가 확인을 위해 연락할 번호다. 업장 전화번호와 다를 수 있다. `contact_phone_public`이 `true`이면 고객에게도 보일 수 있다. |
+| `contact_phone_public` | `boolean`, NOT NULL, 기본 `false` | `false` | 업장 전화번호(`bars.phone`)가 없을 때 `contact_phone`을 고객에게 보여 주는 데 신청자가 동의했는지다. 신청할 때만 정하고 바꾸지 않는다. 이 신청으로 만든 현재 업주 관계(`bar_owners`, `revoked_at`이 `null`)가 있을 때만 쓰므로, 승인되지 않았거나 업주가 해제되면 보이지 않는다(API 명세 3.9). 동의 항목이 생기기 전의 신청은 `false`다. |
 | `applicant_note` | `varchar(500)`, nullable | `대표 본인입니다` | 신청자가 남긴 메모다. |
 | `cover_photo_storage_key` | `varchar(500)`, nullable | `owner-applications/cccc.../cover/abcd....jpg` | `new_bar` 신청의 매장 대표 사진이다. 매장 사진(5.8)처럼 다시 인코딩한 JPEG의 위치다. 운영자가 실제 매장인지 확인할 때 보고, 승인되면 새 업장의 첫 `bar_photos` 행이 같은 파일을 가리킨다. |
 | `cover_photo_thumbnail_storage_key` | `varchar(500)`, nullable | `owner-applications/cccc.../cover/abcd...-thumb.jpg` | 대표 사진의 긴 변 480px 썸네일 위치다. |

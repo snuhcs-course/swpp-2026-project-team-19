@@ -76,6 +76,8 @@ def test_lists_my_bars_with_their_management_state(client, db_session, supabase)
             "displayName": "김사장",
             "ownerSince": rfc3339(owner.created_at),
         },
+        "customerPhone": "02-000-0000",
+        "customerPhoneSource": "bar",
         "createdAt": rfc3339(busy.created_at),
         "updatedAt": rfc3339(busy.updated_at),
     }

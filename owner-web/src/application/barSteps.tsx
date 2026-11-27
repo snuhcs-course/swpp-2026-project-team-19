@@ -18,6 +18,8 @@ import {
   businessVerificationIsCurrent,
   businessVerificationKey,
   canCopyShopPhone,
+  CONTACT_PHONE_PUBLIC_LABEL,
+  contactPhonePublicText,
   exactNameMatches,
   formatBusinessNumber,
   formatOwnerPhone,
@@ -350,7 +352,7 @@ export function ContactStep() {
       action={{ label: "다음", enabled: draft.contactPhone !== "" && validOwnerPhone(draft.contactPhone), onClick: () => forward("review") }}
     >
       <Question title={"연락받을 번호를\n알려주세요"} subtitle="승인 전에 운영팀이 확인 연락을 드릴 수 있어요." />
-      <Visibility isPublic={false} />
+      <Visibility isPublic={draft.contactPhonePublic} />
       {draft.storePhone ? (
         <button
           type="button"
@@ -367,6 +369,16 @@ export function ContactStep() {
         onDigits={(digits) => update({ contactPhone: digits })}
         error={draft.contactPhone.length >= 9 && !validOwnerPhone(draft.contactPhone) ? "번호를 다시 확인해 주세요." : undefined}
       />
+      {/* Spec 3.11.2 `contactPhonePublic`: off by default, asked only here. */}
+      <label className={styles.check}>
+        <input
+          type="checkbox"
+          checked={draft.contactPhonePublic}
+          onChange={(event) => update({ contactPhonePublic: event.currentTarget.checked })}
+        />
+        {CONTACT_PHONE_PUBLIC_LABEL}
+      </label>
+      <Hint>매장 번호를 등록하면 손님에게는 매장 번호가 보여요. 신청한 뒤에는 바꿀 수 없어요.</Hint>
     </StepFrame>
   );
 }
@@ -514,6 +526,7 @@ export function ReviewStep() {
       </ReviewSection>
       <ReviewSection title="연락처" onEdit={editText("contact")}>
         <SummaryRow label="연락받을 번호" value={formatOwnerPhone(draft.contactPhone)} />
+        <SummaryRow label="손님에게 공개" value={contactPhonePublicText(draft.contactPhonePublic)} />
       </ReviewSection>
       {!menusReady || !coverReady ? <Hint>새로고침하면 고른 사진이 지워져요. 사진을 다시 골라 주세요.</Hint> : null}
       <Hint>운영팀 승인 전에는 매장과 메뉴가 손님에게 보이지 않아요.</Hint>

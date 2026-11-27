@@ -115,6 +115,7 @@ def submit_application(
         business_status=business_status,
         business_checked_at=checked_at,
         contact_phone=request.contactPhone,
+        contact_phone_public=request.contactPhonePublic,
         applicant_note=request.applicantNote,
     )
     if not isinstance(request, ExistingBarApplicationInput):
@@ -484,6 +485,7 @@ def _response(
         ),
         warnings=warnings,
         contactPhone=application.contact_phone,
+        contactPhonePublic=application.contact_phone_public,
         applicantNote=application.applicant_note,
         menuPhotos=photos,
         coverPhoto=_cover_photo(application, links),

@@ -54,6 +54,7 @@ export function applicationInput(draft: ApplicationDraft): ApplicationInput {
     representativeName: draft.representativeName.trim(),
     openingDate: draft.openingDate,
     contactPhone: phoneDigits(draft.contactPhone),
+    contactPhonePublic: draft.contactPhonePublic,
   };
   if (draft.kind === "existing_bar" && draft.existingBar) {
     return { applicationType: "existing_bar", barId: draft.existingBar.barId, ...business };
