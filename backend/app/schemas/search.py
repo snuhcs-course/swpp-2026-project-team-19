@@ -15,7 +15,8 @@ class MatchedProductResponse(BaseModel):
     ageYears: int | None
     editionName: str | None
     resultCount: int = Field(
-        description="Result rows for this product before `limit` is applied; 0 when no bar sells it now"
+        description="Selling result rows for this product before `limit` is applied, sold-out rows not "
+        "counted; 0 when no bar sells it now"
     )
 
 
@@ -44,6 +45,10 @@ class SearchResultItem(BaseModel):
     menuDisplayName: str = Field(description="Name as written on this bar's menu")
     options: list[SearchOptionResponse] = Field(description="All price and pour-size choices for this item")
     menuUpdatedAt: UtcDateTime = Field(description="When this bar's current menu was published")
+    soldOut: bool = Field(
+        description="True when the bar has this item on its menu but sold out; only with includeSoldOut=true. "
+        "Sold-out rows come after every selling row"
+    )
 
 
 class SearchBarsResponse(BaseModel):
@@ -58,8 +63,9 @@ class SearchBarsResponse(BaseModel):
         "Empty means the name was not recognized."
     )
     items: list[SearchResultItem] = Field(
-        description="One row per bar x product. Empty with non-empty matchedProducts means the product "
-        "was recognized but no active bar currently sells it."
+        description="One row per bar x product, selling rows first, then sold-out rows (includeSoldOut only). "
+        "Empty with non-empty matchedProducts means the product was recognized but no active bar currently "
+        "sells it (nor has it sold out, with includeSoldOut)."
     )
     truncated: bool = Field(description="True when more rows matched than `limit`")
 

@@ -1,4 +1,5 @@
-"""Customer product search: bars that currently sell the products a query or a productId resolves to (API spec, section 3.10)."""
+"""Customer product search: bars that currently sell the products a query or a productId resolves to,
+and with includeSoldOut the bars that have them but sold out (API spec, section 3.10)."""
 
 import math
 from collections import Counter
@@ -70,30 +71,37 @@ def validate_search_input(
     return trimmed
 
 
-def on_sale(statement: Select) -> Select:
-    """`statement` over the menu board entries customers can find (spec 3.10.2): on an active bar's
-    current board and not sold out. Search rows and the popular whiskies' barCount (3.17.2) both
-    use it, so a card's "바 N곳" is the number of bars its search shows."""
+def on_current_board(statement: Select) -> Select:
+    """`statement` over the menu board entries on an active bar's current board, sold out or not."""
     return (
         statement.select_from(MenuBoardEntry)
         .join(MenuBoard, MenuBoard.id == MenuBoardEntry.menu_board_id)
         .join(BarMenuItem, BarMenuItem.id == MenuBoardEntry.bar_menu_item_id)
         .join(Bar, Bar.id == MenuBoard.bar_id)
-        .where(
-            BarMenuItem.bar_id == MenuBoard.bar_id,
-            # Sold-out items are hidden from every caller of these public APIs.
-            BarMenuItem.sold_out_at.is_(None),
-            Bar.status == BarStatus.ACTIVE,
-        )
+        .where(BarMenuItem.bar_id == MenuBoard.bar_id, Bar.status == BarStatus.ACTIVE)
     )
 
 
-def _selling_entries(session: Session, product_ids: list[UUID]):
-    """(entry with options, product_id, bar, published_at, cover photo id or None) for products on sale on an
-    active bar's current board."""
-    query = on_sale(
-        select(MenuBoardEntry, BarMenuItem.product_id, Bar, MenuBoard.published_at, cover_photo_id())
-    ).where(
+def on_sale(statement: Select) -> Select:
+    """`statement` over the menu board entries customers can buy now (spec 3.10.2): on an active bar's
+    current board and not sold out. The popular whiskies' barCount (3.17.2) and a search's
+    resultCount use it, so a card's "바 N곳" is the number of bars selling it; a search with
+    includeSoldOut also shows the sold-out rows, after these."""
+    return on_current_board(statement).where(BarMenuItem.sold_out_at.is_(None))
+
+
+def _board_entries(session: Session, product_ids: list[UUID], *, include_sold_out: bool):
+    """(entry with options, product_id, bar, published_at, cover photo id or None, sold out) for the
+    products on an active bar's current board; sold-out entries only with `include_sold_out`."""
+    columns = select(
+        MenuBoardEntry,
+        BarMenuItem.product_id,
+        Bar,
+        MenuBoard.published_at,
+        cover_photo_id(),
+        BarMenuItem.sold_out_at.is_not(None),
+    )
+    query = (on_current_board if include_sold_out else on_sale)(columns).where(
         BarMenuItem.product_id.in_(product_ids)
     )
     return session.execute(query.options(selectinload(MenuBoardEntry.options))).all()
@@ -105,12 +113,20 @@ def _active_product(session: Session, product_id: UUID) -> Product | None:
 
 
 def _sort_key(item: SearchResultItem, *, by_distance: bool, exact_product_ids: frozenset[UUID]) -> tuple:
-    """Rows of exact product-alias matches first (they matter in brand results); then distance
-    ascending with a location, else newest menu first; then bar name (spec), then product name and
-    ids so ties always come back in the same order."""
+    """Selling rows before sold-out rows; within each, rows of exact product-alias matches first
+    (they matter in brand results); then distance ascending with a location, else newest menu first;
+    then bar name (spec), then product name and ids so ties always come back in the same order."""
     primary = item.distanceMeters if by_distance else -item.menuUpdatedAt.timestamp()
     exact_first = item.productId not in exact_product_ids
-    return (exact_first, primary, item.barName, item.productDisplayName, str(item.barId), str(item.productId))
+    return (
+        item.soldOut,
+        exact_first,
+        primary,
+        item.barName,
+        item.productDisplayName,
+        str(item.barId),
+        str(item.productId),
+    )
 
 
 def search_bars(
@@ -122,6 +138,7 @@ def search_bars(
     lng: float | None = None,
     limit: int = 50,
     source: SearchSource = SearchSource.INPUT,
+    include_sold_out: bool = False,
     base_url: str,
 ) -> SearchBarsResponse:
     """Search by `query` or by `product_id` (exactly one), then count the search (spec 3.10.6)."""
@@ -135,7 +152,7 @@ def search_bars(
         resolution = resolve_search_query(session, trimmed)
 
     products = {product.id: product for product in resolution.products}
-    rows = _selling_entries(session, list(products)) if products else []
+    rows = _board_entries(session, list(products), include_sold_out=include_sold_out) if products else []
     now = datetime.now(timezone.utc)
 
     items = [
@@ -163,8 +180,9 @@ def search_bars(
                 for option in entry.options
             ],
             menuUpdatedAt=published_at,
+            soldOut=sold_out,
         )
-        for entry, product_id, bar, published_at, cover_id in rows
+        for entry, product_id, bar, published_at, cover_id, sold_out in rows
     ]
     items.sort(
         key=lambda item: _sort_key(
@@ -172,7 +190,8 @@ def search_bars(
         )
     )
 
-    counts = Counter(item.productId for item in items)
+    # Selling rows only: a sold-out row is not a bar that sells the product now.
+    counts = Counter(item.productId for item in items if not item.soldOut)
     matched = [
         MatchedProductResponse(
             productId=product.id,

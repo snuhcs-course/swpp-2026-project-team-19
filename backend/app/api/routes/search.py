@@ -53,7 +53,11 @@ router = APIRouter(prefix="/api/search", tags=["search"])
         "A `productId` search skips these steps: `product` with that product when it is active, "
         "otherwise `none` (also for an unknown id, never `404`). `query` is then null.\n\n"
         "**Results.** One row per bar x product, for products on an active bar's current menu board and not sold out. "
-        "Rows of products whose alias equals the query come first; within each group, sorted by "
+        "With `includeSoldOut=true`, rows whose item is sold out are returned too, with `soldOut: true`, after "
+        "every selling row; otherwise they are left out and `soldOut` is always false. "
+        "`matchedProducts[].resultCount` counts only selling rows either way. "
+        "Within the selling and the sold-out rows, rows of products whose alias equals the query come first; "
+        "within each group, sorted by "
         "`distanceMeters` when lat/lng are sent, otherwise by `menuUpdatedAt` (newest first); "
         "ties by bar name, then product name. At most `limit` rows; `truncated` tells whether more matched. "
         "`options[].discount` is the same as on the bar menu: only discounts that have not ended, and "
@@ -72,7 +76,7 @@ router = APIRouter(prefix="/api/search", tags=["search"])
         (
             422,
             "`VALIDATION_FAILED`. Format and range errors come together: `productId` `UUID_PARSING`; "
-            "`source` `LITERAL_ERROR`; `lat`/`lng` `FLOAT_PARSING`, `GREATER_THAN_EQUAL` or `LESS_THAN_EQUAL`; "
+            "`source` `LITERAL_ERROR`; `includeSoldOut` `BOOL_PARSING`; `lat`/`lng` `FLOAT_PARSING`, `GREATER_THAN_EQUAL` or `LESS_THAN_EQUAL`; "
             "`limit` `INT_PARSING`, `GREATER_THAN_EQUAL` or `LESS_THAN_EQUAL`. Then one at a time: `productId` "
             "`EXACTLY_ONE_REQUIRED` (both or neither of `query` and `productId`), `query` `BLANK` (only "
             "spaces), `STRING_TOO_LONG` (over 100 characters after trimming), `lat`/`lng` "
@@ -97,6 +101,13 @@ def read_search_bars(
             "card. Only for the search counts; the results do not depend on it."
         ),
     ] = "input",
+    include_sold_out: Annotated[
+        bool,
+        Query(
+            alias="includeSoldOut",
+            description="Also return rows whose item is sold out, marked `soldOut` and after the selling rows",
+        ),
+    ] = False,
     session: Session = Depends(get_session),
     base_url: str = Depends(get_base_url),
 ) -> SearchBarsResponse:
@@ -108,6 +119,7 @@ def read_search_bars(
         lng=lng,
         limit=limit,
         source=SearchSource(source),
+        include_sold_out=include_sold_out,
         base_url=base_url,
     )
 
@@ -119,7 +131,8 @@ def read_search_bars(
     description=(
         "Public; the Authorization header is not read, so every caller gets the same result.\n\n"
         "- Only active products that at least one active bar sells now, not sold out. `barCount` is the "
-        "number of those bars, the same bars a `productId` search shows.\n"
+        "number of those bars, the same bars a `productId` search shows as selling (its sold-out rows with "
+        "`includeSoldOut=true` are not counted).\n"
         "- Products searched at least 3 times in the last 30 Seoul dates (today included, every `source`) "
         "come first, most searched first; ties by `barCount` (most first), `displayName`, `productId`. "
         "The rest of the list is filled with the other products by `barCount`, `displayName`, `productId`.\n"
