@@ -1,21 +1,27 @@
-"""I5-P19 follow-up F: would "drop a whisky line without a price whose OCR box touches the photo's
-edge" catch the neighbour-page lines of 011_mirabeau_03, and what else would it drop? No API call.
+"""I5-P19 facing-page guard: what does the server's guard drop from the recorded answers? No API call.
 
-    python ai/eval/i5_edge_guard_check.py --out ai/runs/2026-11-26_i5_p19_followup/edge_guard.json
+    python ai/eval/i5_edge_guard_check.py --out ai/runs/2026-11-27_i5_pr_prep/edge_guard_check.json
 
-Reads the recorded answers made with hybrid prompt v2.1 (each has the model's rows with their OCR
-`source_lines`) and the OCR line table the server builds from the CLOVA cache (boxes on a 0-1000
-scale of the photo, as in `raw_output.ocr.lines`). For every whisky row without a price:
+The guard (backend/app/extraction/edge_guard.py, EXTRACTION_EDGE_STRIP_PERMILLE, default 100)
+drops a whisky line without a price (a glass/bottle mark or a pour size alone does not count) whose OCR name
+lines lie wholly in the left or right strip of the photo (0-1000 scale). This script runs that
+very function on the recorded answers made with hybrid prompt v2.1, the way the server does:
 
-  box      the union of the boxes of its name lines (the server's `itemSources[].box` also adds the
-           price lines; a row without a price has none)
-  touches  the box reaches within MARGIN of the left, right, top or bottom edge
-  kind     neighbour  one of the 12 lines of the page next to 011_mirabeau_03 (report 10.6)
-           label      the photo's labels have an item of that name (a line of this menu)
-           other      neither
+  1. the OCR line table is rebuilt from the CLOVA cache, as the server builds it (boxes 0-1000);
+  2. the model's answer goes through hybrid_v2.convert_output (the server's conversion);
+  3. edge_guard.drop_edge_rows takes the whisky items and the meta.
 
-The rule drops a row when it has no price and `touches`. It is a proposal: nothing in the server
-does this.
+Every whisky line without a price is sorted into one of three kinds:
+
+  neighbour  one of the 12 lines of the page next to 011_mirabeau_03 (2026-11-21 report 10.6)
+  label      the photo's labels have an item of that name (a line of this menu)
+  other      neither
+
+and the expectation of the PR prep handoff is checked: every neighbour line dropped, no label line
+dropped, nothing else dropped, and the 17 regression photos read through the server code
+(2026-11-25_i5_p19_server_route) scoring the same after the guard (572 of 572). The script exits 1
+when any of these differs. It also prints what a strip of 0, 50, 100, 150 and 200 would drop, for
+the report; the strip is not chosen from this.
 """
 
 from __future__ import annotations
@@ -33,13 +39,16 @@ for _p in ("ai/regression", "ai/eval", "ai/extract", "backend"):
 import i5_model_ladder as ladder  # noqa: E402
 import run_extraction as rx  # noqa: E402
 import score  # noqa: E402
+from app.extraction.edge_guard import DEFAULT_STRIP_PERMILLE, drop_edge_rows, has_price  # noqa: E402
 from app.extraction.hybrid import run_ocr  # noqa: E402
+from app.extraction.hybrid_v2 import WHISKY, convert_output, line_groups  # noqa: E402
 
 RUNS = REPO_ROOT / "ai" / "runs"
-# name, folder, glob, how to get the model's items out of a record
+SERVER_SET = "3.8 Flash, 서버 코드 (11/25)"
+# name, folder, glob, how to get the model's answer out of a record
 SETS = (
     ("3.8 Flash, 평가 스크립트 (11/21)", RUNS / "2026-11-21_i5_row_pairing/regression_38flash_v2_1/google__gemini-3.8-flash/B", "*_r*.json", "raw_text"),
-    ("3.8 Flash, 서버 코드 (11/25)", RUNS / "2026-11-25_i5_p19_server_route", "0*.json", "meta"),
+    (SERVER_SET, RUNS / "2026-11-25_i5_p19_server_route", "0*.json", "meta"),
     ("3.8 Flash, 동시 호출 (11/26)", RUNS / "2026-11-26_i5_a2_p43/concurrent", "0*.json", "meta"),
     ("Sonnet 5.5, 회귀 17장 (11/26)", RUNS / "2026-11-26_i5_p19_followup/regression_sonnet/anthropic__claude-sonnet-5.5/B", "*_r*.json", "raw_text"),
     ("3.7 Flash, 6장 (11/25)", RUNS / "2026-11-25_i5_fallback_ladder/google__gemini-3.7-flash/B", "*_r*.json", "raw_text"),
@@ -49,44 +58,54 @@ SETS = (
 NEIGHBOUR_PHOTO = "011_mirabeau_03"
 NEIGHBOUR_NAMES = ("하이랜드 파크 12년", "하이랜드 파크 캐스크 스트", "하이랜드 파크 5년", "하이랜드 파크 18년",
                    "하이랜드 파크 16년", "글렌킨 12년", "오큰토 아메", "오큰토 12년", "오큰토 쇼비", "오큰토 쓰러", "오큰토 18")
-MARGINS = (0, 5, 10, 20, 30)
-SIDES = ("left", "top", "right", "bottom")
+STRIPS = (0, 50, 100, 150, 200)
+EXPECTED = {"neighbour": (60, 60), "label": (0, 7), "other_dropped": 0, "server_score": (572, 572)}
+SCORE_KEYS = ("ok", "wrong", "missing", "name_only", "extra")
 
 
-def items_of(record: dict, how: str) -> list[dict] | None:
+def answer_text(record: dict, how: str) -> str | None:
     if how == "meta":
         raw = (record.get("meta") or {}).get("rawOutput")
-        return raw["items"] if raw else None
-    return json.loads(record["raw_text"])["items"] if record.get("raw_text") else None
+        return json.dumps(raw, ensure_ascii=False) if raw else None
+    return record.get("raw_text") or None
 
 
 def stem_of(path: Path) -> str:
     return path.stem.rsplit("_r", 1)[0] if "_r" in path.stem[-4:] else path.stem
 
 
-def sides_touched(box: list[int], margin: int) -> list[str]:
-    x0, y0, x1, y1 = box
-    return [side for side, near in zip(SIDES, (x0 <= margin, y0 <= margin, x1 >= 1000 - margin, y1 >= 1000 - margin)) if near]
+def kept_rows(text: str, dropped_orders: set[int]) -> list[dict]:
+    """The scored whisky rows (i5_model_ladder.parse_rows format) of the lines the guard kept.
+
+    convert_output numbers the whisky items in the order of the whisky line groups, so item k is
+    group k; a dropped item's rows are left out."""
+    groups = [g for g in line_groups(json.loads(text)["items"]) if g[0]["category"] == WHISKY]
+    return [{k: row[k] for k in ("raw_name", "price_krw", "pour_ml", "unit")}
+            for order, group in enumerate(groups, start=1) if order not in dropped_orders for row in group]
 
 
 def main(argv=None) -> int:
     from extract import data_dir as default_data_dir
     import i5_row_pairing
+    import i5_server_route_regression as server_route
+    import regression
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--out", type=Path)
     args = ap.parse_args(argv)
     data_dir = default_data_dir()
     fixtures = i5_row_pairing.known_photos(data_dir)
-    tables: dict[str, dict] = {}
+    ladder.FIXTURES = fixtures
+    ladder.PHOTOS = tuple((Path(fx["photo"]["file"]).stem, "regression") for fx in regression.load_fixtures()) + server_route.EXTRA_PHOTOS
+    score_labels = ladder.load_labels()
+    tables: dict[str, list[dict]] = {}
     labels: dict[str, set[str]] = {}
 
-    def table(stem: str) -> dict:
+    def table(stem: str) -> list[dict]:
         if stem not in tables:
             photo = fixtures[stem]["photo"]
             path = data_dir / photo["photo_dir"] / photo["file"]
             cache = json.loads((data_dir / "ocr_cache" / f"{path.stem}__table-off.json").read_text(encoding="utf-8"))
-            ocr = run_ocr(path.read_bytes(), rx.MIME_TYPES[path.suffix.lower()], rx.REPLAY_CLOVA, rx.ReplayOcr(cache))
-            tables[stem] = {row["id"]: row["box"] for row in ocr["table"]}
+            tables[stem] = run_ocr(path.read_bytes(), rx.MIME_TYPES[path.suffix.lower()], rx.REPLAY_CLOVA, rx.ReplayOcr(cache))["table"]
         return tables[stem]
 
     def label_names(stem: str) -> set[str]:
@@ -100,62 +119,95 @@ def main(argv=None) -> int:
             labels[stem] = {score.normalize(item["raw_name"]) for item in items}
         return labels[stem]
 
-    report = {"sets": {}, "rows": []}
+    report = {"strip_permille": DEFAULT_STRIP_PERMILLE, "sets": {}, "rows": [], "by_strip": {}}
+    server = {"before": Counter(), "after": Counter()}
     for name, folder, pattern, how in SETS:
-        paths = sorted(folder.glob(pattern))
-        records = whisky = no_price = 0
-        for path in paths:
+        records = whisky_rows = whisky_items = without_price = 0
+        for path in sorted(folder.glob(pattern)):
             if path.name == "summary.json":
                 continue
-            items = items_of(json.loads(path.read_text(encoding="utf-8")), how)
-            if items is None:
+            text = answer_text(json.loads(path.read_text(encoding="utf-8")), how)
+            if text is None:
                 continue
             records += 1
             stem = stem_of(path)
-            boxes = table(stem)
-            for item in items:
-                if item.get("category", "whisky") != "whisky":
+            whisky_rows += sum(1 for row in json.loads(text)["items"] if row["category"] == WHISKY)
+            converted = convert_output(text, table(stem))
+            whisky_items += len(converted["items"])
+            meta = {"itemSources": converted["itemSources"], "ocr": {"lines": table(stem)}}
+            by_strip = {strip: {row["itemOrder"]: row for row in drop_edge_rows(converted["items"], meta, strip)[1]["droppedEdgeRows"]}
+                        for strip in STRIPS}
+            # every dropped line has no price (the guard's rule), so every one is among these rows
+            sources = {s["itemOrder"]: s for s in converted["itemSources"]}
+            for item in converted["items"]:
+                if has_price(item):
                     continue
-                whisky += 1
-                if item["price_krw"] is not None:
-                    continue
-                no_price += 1
-                lines = [boxes[i] for i in item["source_lines"]["name"] if i in boxes]
-                box = [min(b[0] for b in lines), min(b[1] for b in lines), max(b[2] for b in lines), max(b[3] for b in lines)] if lines else None
-                if stem == NEIGHBOUR_PHOTO and item["raw_name"] in NEIGHBOUR_NAMES:
+                without_price += 1
+                if stem == NEIGHBOUR_PHOTO and item["rawText"] in NEIGHBOUR_NAMES:
                     kind = "neighbour"
-                elif score.normalize(item["raw_name"]) in label_names(stem):
+                elif score.normalize(item["rawText"]) in label_names(stem):
                     kind = "label"
                 else:
                     kind = "other"
-                report["rows"].append({"set": name, "record": path.name, "photo": stem, "name": item["raw_name"],
-                                       "unit": item["unit"], "kind": kind, "box": box,
-                                       "touches": {m: sides_touched(box, m) if box else [] for m in MARGINS}})
-        report["sets"][name] = {"records": records, "whisky_rows": whisky, "rows_without_price": no_price}
+                source = sources[item["itemOrder"]]
+                report["rows"].append({
+                    "set": name, "record": path.name, "photo": stem, "name": item["rawText"], "kind": kind,
+                    "nameLines": source["nameLines"], "priceLines": source["priceLines"], "box": source["box"],
+                    "dropped": {strip: item["itemOrder"] in by_strip[strip] for strip in STRIPS},
+                })
+            if name == SERVER_SET:
+                labels_of = score_labels[stem]
+                for when, dropped in (("before", set()), ("after", set(by_strip[DEFAULT_STRIP_PERMILLE]))):
+                    s = ladder.score_rows(labels_of, kept_rows(text, dropped))
+                    for key in SCORE_KEYS:
+                        server[when][key] += s[key]
+                    server[when]["cells"] += sum(score.price_checked(g) for g in labels_of)
+        report["sets"][name] = {"records": records, "whisky_rows": whisky_rows, "whisky_items": whisky_items,
+                                "items_without_price": without_price}
+    report["server_score"] = {when: dict(c) for when, c in server.items()}
 
-    print("| 기록 묶음 | 기록 | 위스키 행 | 가격 없는 행 | 그중 옆 페이지 줄 | 정답에 있는 줄 | 그 밖 |")
-    print("|---|---|---|---|---|---|---|")
+    print("| 기록 묶음 | 기록 | 위스키 행 (모델) | 위스키 줄 (서버 변환) | 가격 없는 줄 | 옆 페이지 | 정답에 있음 | 그 밖 |")
+    print("|---|---|---|---|---|---|---|---|")
     for name, info in report["sets"].items():
         kinds = Counter(row["kind"] for row in report["rows"] if row["set"] == name)
-        print(f"| {name} | {info['records']} | {info['whisky_rows']} | {info['rows_without_price']} | {kinds['neighbour']} | {kinds['label']} | {kinds['other']} |")
-    print("\n| 가장자리 여유 (0~1000 눈금) | 옆 페이지 줄 중 버려짐 | 정답에 있는 줄 중 버려짐 | 그 밖의 줄 중 버려짐 |")
-    print("|---|---|---|---|")
+        print(f"| {name} | {info['records']} | {info['whisky_rows']:,} | {info['whisky_items']:,} | {info['items_without_price']} | "
+              f"{kinds['neighbour']} | {kinds['label']} | {kinds['other']} |")
     totals = Counter(row["kind"] for row in report["rows"])
-    report["by_margin"] = {}
-    for margin in MARGINS:
-        dropped = Counter(row["kind"] for row in report["rows"] if row["touches"][margin])
-        report["by_margin"][margin] = dict(dropped)
-        print(f"| {margin} | {dropped['neighbour']} / {totals['neighbour']} | {dropped['label']} / {totals['label']} | {dropped['other']} / {totals['other']} |")
-    print("\nneighbour rows: right edge x1 values", sorted({row["box"][2] for row in report["rows"] if row["kind"] == "neighbour" and row["box"]}),
-          "| without a box:", sum(1 for row in report["rows"] if row["kind"] == "neighbour" and not row["box"]))
-    print("\nrows without a price that are not neighbour-page lines:")
-    seen = Counter((row["set"], row["photo"], row["name"], row["kind"], str(row["box"]), str(row["touches"][10])) for row in report["rows"] if row["kind"] != "neighbour")
-    for (set_name, photo, row_name, kind, box, touch), n in sorted(seen.items()):
-        print(f"  {set_name} | {photo} | {row_name} | {kind} | box {box} | touches(10) {touch} | x{n}")
+    print(f"\ntotal: records {sum(s['records'] for s in report['sets'].values())}, whisky rows "
+          f"{sum(s['whisky_rows'] for s in report['sets'].values()):,}, lines without a price {len(report['rows'])} {dict(totals)}")
+    print("\n| 띠 너비 (0~1000 눈금) | 옆 페이지 줄 중 버려짐 | 정답에 있는 줄 중 버려짐 | 그 밖의 줄 중 버려짐 |")
+    print("|---|---|---|---|")
+    for strip in STRIPS:
+        dropped = Counter(row["kind"] for row in report["rows"] if row["dropped"][strip])
+        report["by_strip"][strip] = dict(dropped)
+        mark = " (기본값)" if strip == DEFAULT_STRIP_PERMILLE else ""
+        print(f"| {strip}{mark} | {dropped['neighbour']} / {totals['neighbour']} | {dropped['label']} / {totals['label']} | "
+              f"{dropped['other']} / {totals['other']} |")
+
+    print(f"\nlines without a price (strip {DEFAULT_STRIP_PERMILLE}):")
+    seen = Counter((row["set"], row["photo"], row["name"], row["kind"], str(row["box"]), str(row["priceLines"]),
+                    row["dropped"][DEFAULT_STRIP_PERMILLE]) for row in report["rows"])
+    for (set_name, photo, row_name, kind, box, price_lines, dropped), n in sorted(seen.items()):
+        print(f"  {set_name} | {photo} | {row_name} | {kind} | box {box} price lines {price_lines} | "
+              f"{'DROPPED' if dropped else 'kept'} | x{n}")
+
+    s = report["server_score"]
+    print(f"\nserver-code set: before {s['before']}, after {s['after']}")
+
+    at = report["by_strip"][DEFAULT_STRIP_PERMILLE]
+    got = {"neighbour": (at.get("neighbour", 0), totals["neighbour"]), "label": (at.get("label", 0), totals["label"]),
+           "other_dropped": at.get("other", 0), "server_score": (s["after"]["ok"], s["after"]["cells"])}
+    problems = [f"{key}: expected {EXPECTED[key]}, got {got[key]}" for key in EXPECTED if got[key] != EXPECTED[key]]
+    if s["after"] != s["before"]:
+        problems.append(f"server_score changed: {s['before']} -> {s['after']}")
+    report["expected"], report["got"], report["problems"] = EXPECTED, got, problems
+    print("\nexpectation:", "MET" if not problems else "NOT MET")
+    for problem in problems:
+        print("  " + problem)
     if args.out:
         args.out.parent.mkdir(parents=True, exist_ok=True)
         args.out.write_bytes(json.dumps(report, ensure_ascii=False, indent=1).encode("utf-8"))
-    return 0
+    return 1 if problems else 0
 
 
 if __name__ == "__main__":

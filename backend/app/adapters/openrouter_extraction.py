@@ -20,6 +20,12 @@ no spending limit of its own); over it, photos start at the Gemini API and
 
 When the OCR step fails, the photo goes through the Gemini-only extractor (lite model), as it does
 for HybridMenuExtractor, and `raw_output["hybridFallback"]` records why.
+
+Whatever route read the photo, the whisky lines of a facing page cut off at its left or right edge
+are dropped before the lines are stored and matched (app.extraction.edge_guard,
+EXTRACTION_EDGE_STRIP_PERMILLE); `raw_output["droppedEdgeRows"]` keeps them. The Gemini-only
+fallback has no OCR lines, so nothing is dropped there, and a PDF page read from its text layer
+skips the guard (`edge_guard=False`): a text layer holds one page only.
 """
 
 import logging
@@ -31,6 +37,7 @@ from app.adapters.hybrid_extraction import in_menu_order
 from typing import Any
 
 from app.extraction.clova import ClovaOCRError, ClovaSettings, load_clova_settings
+from app.extraction.edge_guard import drop_edge_rows
 from app.extraction.routed import (
     PROMPTS,
     AllRoutesFailedError,
@@ -69,10 +76,12 @@ class OpenRouterMenuExtractor:
     def extract(self, image: bytes, content_type: str, filename: str | None) -> ExtractionResult:
         return self.extract_with(image, content_type, self.clova, None)
 
-    def extract_with(self, image: bytes, content_type: str, clova: ClovaSettings, ocr_client: Any) -> ExtractionResult:
+    def extract_with(self, image: bytes, content_type: str, clova: ClovaSettings, ocr_client: Any,
+                     *, edge_guard: bool = True) -> ExtractionResult:
         """`extract` with the OCR step given: `ocr_client` answers the OCR call in CLOVA's format.
         A PDF page with a text layer is read this way (app.adapters.pdf_routed_extraction), without
-        a CLOVA call; everything after the OCR step is the same as for a photo."""
+        a CLOVA call and with `edge_guard=False`; everything else after the OCR step is the same as
+        for a photo."""
         filename = None
         try:
             result = extract_menu_routed(image, content_type, clova, self.route, self.breaker,
@@ -89,7 +98,10 @@ class OpenRouterMenuExtractor:
         except extraction.ExtractionError as error:  # UnsupportedImageError (before any call)
             raise ExtractionError(_message(error)) from error
 
-        payload, meta = in_menu_order(result["items"], result["meta"])
+        items, meta = result["items"], result["meta"]
+        if edge_guard:
+            items, meta = drop_edge_rows(items, meta, self.route.edge_strip_permille)
+        payload, meta = in_menu_order(items, meta)
         try:
             items = parse_extraction_response({"items": payload})
         except ExtractionError as error:

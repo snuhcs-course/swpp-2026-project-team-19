@@ -13,9 +13,11 @@ and leaves the same record: `raw_output["route"]`, tokens, `costUsd`, `latencyMs
 `raw_output["pdf"]` = {"page", "kind", "textLayer"} as the other PDF extractor writes it.
 
 - a scanned page is a picture: it goes through `OpenRouterMenuExtractor.extract` unchanged (one
-  CLOVA OCR call, then the ladder; the Gemini-only fallback when OCR fails);
+  CLOVA OCR call, then the ladder; the Gemini-only fallback when OCR fails), the facing-page guard
+  included (app.extraction.edge_guard: a scan of an open book can show the next page's edge);
 - a text page skips CLOVA: its lines come from the PDF's text layer and
-  `raw_output["ocr"]["provider"]` is "pdf-text-layer". No OCR call is made for it.
+  `raw_output["ocr"]["provider"]` is "pdf-text-layer". No OCR call is made for it, and the
+  facing-page guard is off: a text layer holds the lines of its own page only.
 
 `pdf_extractor_for` picks the PDF extractor that matches the server's extractor, so
 MENU_EXTRACTOR=gemini with EXTRACTION_MODE=hybrid keeps `PdfMenuExtractor` exactly as it was.
@@ -58,7 +60,8 @@ class RoutedPdfMenuExtractor:
         text_page = page.kind == "text"
         try:
             if text_page:
-                result = self.openrouter.extract_with(page.image, page.mime_type, _TEXT_LAYER_SETTINGS, TextLayerOcr(page))
+                result = self.openrouter.extract_with(page.image, page.mime_type, _TEXT_LAYER_SETTINGS, TextLayerOcr(page),
+                                                      edge_guard=False)
             else:
                 result = self.openrouter.extract(page.image, page.mime_type, None)
         except ExtractionError as error:

@@ -55,6 +55,7 @@ from pydantic import ValidationError
 from app.extraction import gemini, openrouter
 from app.extraction.clova import ClovaSettings
 from app.extraction.config import ExtractionSettings, _positive, load_settings
+from app.extraction.edge_guard import DEFAULT_STRIP_PERMILLE, load_strip_permille
 from app.extraction.errors import ExtractionConfigError, InvalidModelOutputError, ModelCallError
 from app.extraction.hybrid import run_ocr, user_text
 from app.extraction.hybrid_v2 import HybridExtractionV2, convert_output
@@ -85,6 +86,9 @@ class RouteSettings:
     breaker_failures: int = 3
     breaker_cooldown_s: float = 600
     daily_paid_limit: int = 300
+    # Left and right strips (0-1000) where a whisky line with no option is a facing page's line
+    # (app.extraction.edge_guard); 0 turns the guard off. Applied by the adapter, not by this module.
+    edge_strip_permille: int = DEFAULT_STRIP_PERMILLE
 
 
 class PaidBudget(Protocol):
@@ -115,6 +119,7 @@ def load_route_settings() -> RouteSettings:
         breaker_failures=_positive("OPENROUTER_BREAKER_FAILURES", RouteSettings.breaker_failures, int),
         breaker_cooldown_s=_positive("OPENROUTER_BREAKER_COOLDOWN_S", RouteSettings.breaker_cooldown_s, float),
         daily_paid_limit=_positive("OPENROUTER_DAILY_PHOTO_LIMIT", RouteSettings.daily_paid_limit, int),
+        edge_strip_permille=load_strip_permille(),
     )
 
 
