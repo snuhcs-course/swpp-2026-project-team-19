@@ -1,6 +1,6 @@
 # I5 가격 행 밀림 조사: hybrid 프롬프트 v1 / v2 / v3 (2026-11-21)
 
-이 문서만 읽고 판단할 수 있게 썼다. 수치는 전부 이 폴더의 기록에서 다시 계산할 수 있다.
+이 문서만 읽고 판단할 수 있게 썼다. 수치는 전부 이 폴더의 기록에서 다시 계산할 수 있다. (기록은 커밋하지 않고 진우 PC에 보관)
 작성: Claude Code (박진우 지시). Gemini 호출 43회(9 + 34), CLOVA 0회. 커밋·push 없음.
 
 1~6절은 프롬프트(v1/v2/v3) 실험, **7절은 그 뒤에 한 "코드로 행 맞추기" 측정(API 0회)** 이다. 7절은 따로 읽어도 된다. **8절은 모델 등급 비교(flash-lite, Haiku 5.5, Gemini 3.8 Flash; OpenRouter 사용)** 이다. 3단계(Sonnet 5.5)는 돌리지 않기로 했다. **9절은 Gemini 3.8 Flash를 회귀 17장으로 넓힌 측정**, **10절은 프롬프트 한 문장을 고친 v2.1로 미라보_02 제목 빠짐을 다시 잰 것**이다.
@@ -172,9 +172,9 @@ P12(2026-10-14) OCR 파싱 프롬프트 v3에서 처음 들어왔다. `ai/runs/a
 |---|---|
 | `backend/app/extraction/hybrid_prompt_v3.md` | v3 프롬프트 |
 | `ai/eval/i5_row_pairing.py` | 실행 스크립트 (`--check`는 API 0회) |
-| `ai/runs/2026-11-21_i5_row_pairing/{v1,v2,v3}/014_tale_07_r{1,2,3}.json` | 3.1절 기록 9개 |
-| `ai/runs/2026-11-21_i5_row_pairing/regression/{v2,v3}/<stem>_r1.json` | 3.3절 기록 34개 |
-| `ai/runs/2026-11-21_i5_row_pairing/regression_run.log` | 34회 실행 로그 |
+| `ai/runs/2026-11-21_i5_row_pairing/{v1,v2,v3}/014_tale_07_r{1,2,3}.json` | 3.1절 기록 9개 (기록은 커밋하지 않고 진우 PC에 보관) |
+| `ai/runs/2026-11-21_i5_row_pairing/regression/{v2,v3}/<stem>_r1.json` | 3.3절 기록 34개 (기록은 커밋하지 않고 진우 PC에 보관) |
+| `ai/runs/2026-11-21_i5_row_pairing/regression_run.log` | 34회 실행 로그 (기록은 커밋하지 않고 진우 PC에 보관) |
 | `ai/runs/2026-11-17_p46/hybrid_v2_i3/014_tale_07_r{1,2,3}.json` | P46 v2 기록 (11-18) |
 | `../_outgoing/p30_run/out/2026-10-30_p30/hybrid_i3/014_tale_07_r{1,2,3}.json` | P30 v1 기록 (11-04) |
 | `../_outgoing/v2_price_pairing_handoff.md` | 이 작업의 인계 문서 |
@@ -374,11 +374,11 @@ LLM의 칸 값: LLM 출력 항목을 `score.py match_photo`(관대, unit 포함)
 | 경로 | 내용 |
 |---|---|
 | `ai/eval/i5_row_align.py` | 측정 스크립트. `--sets dev`, `--sets i3 --i3-once`, `--llm 이름=기록폴더`, `--photo <photo_id> --dump`(줄과 짝 출력) |
-| `ai/runs/2026-11-21_i5_row_pairing/row_align_dev.json` | I1·I2 결과: 사진별 요약, 열별 직선(a, 어긋남, 확신), 칸별 판정, LLM 비교 |
-| `ai/runs/2026-11-21_i5_row_pairing/row_align_i3.json` | I3 결과 (같은 형식) |
-| `ai/runs/2026-11-21_i5_row_pairing/row_align_i3_stdout.txt` | I3 실행 출력 |
+| `ai/runs/2026-11-21_i5_row_pairing/row_align_dev.json` | I1·I2 결과: 사진별 요약, 열별 직선(a, 어긋남, 확신), 칸별 판정, LLM 비교 (기록은 커밋하지 않고 진우 PC에 보관) |
+| `ai/runs/2026-11-21_i5_row_pairing/row_align_i3.json` | I3 결과 (같은 형식) (기록은 커밋하지 않고 진우 PC에 보관) |
+| `ai/runs/2026-11-21_i5_row_pairing/row_align_i3_stdout.txt` | I3 실행 출력 (기록은 커밋하지 않고 진우 PC에 보관) |
 
-비교에 쓴 LLM 기록: `ai/runs/2026-10-14_e2e/hybrid_val_v1`, `hybrid_test_v1`, `ai/runs/2026-10-17_p47/hybrid_final_v1`, 이 폴더의 `regression/{v2,v3}`와 `{v1,v2,v3}`, `ai/runs/2026-11-17_p46/hybrid_v2_i3`, `../_outgoing/p30_run/out/2026-10-30_p30/hybrid_i3`.
+비교에 쓴 LLM 기록: `ai/runs/2026-10-14_e2e/hybrid_val_v1`, `hybrid_test_v1`, `ai/runs/2026-10-17_p47/hybrid_final_v1`, 이 폴더의 `regression/{v2,v3}`와 `{v1,v2,v3}`, `ai/runs/2026-11-17_p46/hybrid_v2_i3`, `../_outgoing/p30_run/out/2026-10-30_p30/hybrid_i3`. (기록은 커밋하지 않고 진우 PC에 보관)
 
 ## 8. 모델 등급 사다리: 어느 모델부터 가격이 안 무너지나
 
@@ -438,7 +438,7 @@ LLM의 칸 값: LLM 출력 항목을 `score.py match_photo`(관대, unit 포함)
 
 **호출.** 0단계는 서버의 요청 생성 코드(`build_request`)로 Gemini에 직접. 1·2단계는 OpenRouter chat completions(system = 프롬프트, user = 글 + 이미지). 출력 상한 `max_tokens: 20000`(추론 포함). 실행 순서는 회차 → 사진 → A, B.
 
-**재시도.** 통신 실패나 형식 실패일 때만 1회. 가격이 틀린 답은 다시 부르지 않는다. 두 번 다 응답이 없으면(503) 기록을 만들지 않고 `transport_failures.jsonl`에 남긴 뒤 멈추고, 같은 명령으로 이어서 돌린다.
+**재시도.** 통신 실패나 형식 실패일 때만 1회. 가격이 틀린 답은 다시 부르지 않는다. 두 번 다 응답이 없으면(503) 기록을 만들지 않고 `transport_failures.jsonl`에 남긴 뒤 멈추고, 같은 명령으로 이어서 돌린다. (기록은 커밋하지 않고 진우 PC에 보관)
 
 **채점.** `ai/eval/score.py`의 `match_photo`(엄격 → 관대, 같은 unit)로 정답 항목과 출력 행을 1:1 대응한다. B는 `category`가 `whisky`인 행만 채점한다. 가격은 원 단위로 정확히 같아야 맞음이다.
 
@@ -622,10 +622,10 @@ LLM의 칸 값: LLM 출력 항목을 `score.py match_photo`(관대, unit 포함)
 |---|---|
 | `ai/eval/i5_model_ladder.py` | 실행·채점. `--stage N --check`(API 0회), `--stage N`(실행, 있는 기록은 건너뜀), `--stage N --report`(채점만) |
 | `ai/eval/i5_price_from_lines.py` | 8.8절. `--detail`로 기록별 출력 |
-| `ai/runs/2026-11-21_i5_row_pairing/ladder/<모델>/{A,B}/<stem>_r<k>.json` | 기록. 모델 폴더: `gemini-3.5-flash-lite`, `anthropic__claude-haiku-5.5`, `google__gemini-3.8-flash` (각 30개) |
-| `…/ladder/gemini-3.5-flash-lite/transport_failures.jsonl` | 응답이 없던 호출(503) 12건 |
-| `…/ladder/stage0_run.log`, `stage1_run.log`, `stage2_run.log` | 실행 출력 |
-| `ai/runs/2026-11-21_i5_row_pairing/price_from_lines.json` | 8.8절 결과: 기록별 배수, 득표, 전후 채점, 남은 틀린 칸 |
+| `ai/runs/2026-11-21_i5_row_pairing/ladder/<모델>/{A,B}/<stem>_r<k>.json` | 기록. 모델 폴더: `gemini-3.5-flash-lite`, `anthropic__claude-haiku-5.5`, `google__gemini-3.8-flash` (각 30개) (기록은 커밋하지 않고 진우 PC에 보관) |
+| `…/ladder/gemini-3.5-flash-lite/transport_failures.jsonl` | 응답이 없던 호출(503) 12건 (기록은 커밋하지 않고 진우 PC에 보관) |
+| `…/ladder/stage0_run.log`, `stage1_run.log`, `stage2_run.log` | 실행 출력 (기록은 커밋하지 않고 진우 PC에 보관) |
+| `ai/runs/2026-11-21_i5_row_pairing/price_from_lines.json` | 8.8절 결과: 기록별 배수, 득표, 전후 채점, 남은 틀린 칸 (기록은 커밋하지 않고 진우 PC에 보관) |
 
 기록 한 개의 주요 필드: `model`, `route`, `reasoning`, `condition`, `prompt_file`, `prompt_sha256`, `image_sha256`, `rows`(채점한 행), `raw_text`(모델 답 원문), `input_tokens`, `output_tokens`, `thought_tokens`, `latency_ms`, `cost_usd`, `usage_raw`(OpenRouter usage 그대로), `provider`, `attempts`, `format_retry`, `failures`(실패한 시도의 종류·토큰·비용).
 
@@ -796,10 +796,10 @@ LLM의 칸 값: LLM 출력 항목을 `score.py match_photo`(관대, unit 포함)
 |---|---|
 | `ai/eval/i5_model_ladder.py` | `--stage 2 --photos regression --max-tokens 48000 --cost-limit 5.2 [--conditions A|B]`로 실행. `--report`는 채점만 |
 | `ai/eval/i5_regression_compare.py` | flash-lite와 나란히 채점(9.3, 9.5, 9.6절의 표). API 0회 |
-| `ai/runs/2026-11-21_i5_row_pairing/regression_38flash/google__gemini-3.8-flash/{A,B}/<stem>_r<k>.json` | 기록 102개 (12개는 `reused_from` 표시) |
-| `…/regression_38flash/compare.json` | 사진별·회차별 점수, 합계, 비용·지연, 기준에 걸린 사진의 틀린 칸 |
-| `…/regression_38flash/run_A.log`, `run_B.log` | 실행 출력 (끝의 `ZeroDivisionError`는 정답 칸 0인 사진에서 요약 출력이 낸 것으로, 기록과 무관하며 고쳤다) |
-| `ai/runs/2026-11-21_i5_row_pairing/regression/v2/<stem>_r1.json` | 비교한 flash-lite 기록 (3.3절) |
+| `ai/runs/2026-11-21_i5_row_pairing/regression_38flash/google__gemini-3.8-flash/{A,B}/<stem>_r<k>.json` | 기록 102개 (12개는 `reused_from` 표시) (기록은 커밋하지 않고 진우 PC에 보관) |
+| `…/regression_38flash/compare.json` | 사진별·회차별 점수, 합계, 비용·지연, 기준에 걸린 사진의 틀린 칸 (기록은 커밋하지 않고 진우 PC에 보관) |
+| `…/regression_38flash/run_A.log`, `run_B.log` | 실행 출력 (끝의 `ZeroDivisionError`는 정답 칸 0인 사진에서 요약 출력이 낸 것으로, 기록과 무관하며 고쳤다) (기록은 커밋하지 않고 진우 PC에 보관) |
+| `ai/runs/2026-11-21_i5_row_pairing/regression/v2/<stem>_r1.json` | 비교한 flash-lite 기록 (3.3절) (기록은 커밋하지 않고 진우 PC에 보관) |
 
 ## 10. 프롬프트 한 문장 수정(v2.1)으로 미라보_02 제목 빠짐 고치기
 
@@ -993,12 +993,12 @@ v2.1 r1은 미라보_03에서 72행을 냈다. 60행은 정답 60칸과 전부 �
 | `backend/app/extraction/hybrid_prompt_v2_1.md` | v2 사본에서 두 곳만 바꾼 프롬프트 (untracked) |
 | `ai/eval/i5_model_ladder.py` | `--prompt-b <파일>`, `--runs`, `--only <stem>` 옵션 추가. 실행: `--stage 2 --photos regression --conditions B --prompt-b backend/app/extraction/hybrid_prompt_v2_1.md --max-tokens 48000 --cost-limit 2.0` |
 | `ai/eval/i5_title_fix_check.py` | 10.4, 10.5, 10.7절의 표 (API 0회) |
-| `ai/runs/2026-11-21_i5_row_pairing/regression_38flash_v2_1/google__gemini-3.8-flash/B/<stem>_r<k>.json` | 기록 19개 |
-| `…/regression_38flash_v2_1/check.json` | 줄 단위 비교, 17장 점수, 정답과 다른 이름·남는 행, 매칭 결과 |
+| `ai/runs/2026-11-21_i5_row_pairing/regression_38flash_v2_1/google__gemini-3.8-flash/B/<stem>_r<k>.json` | 기록 19개 (기록은 커밋하지 않고 진우 PC에 보관) |
+| `…/regression_38flash_v2_1/check.json` | 줄 단위 비교, 17장 점수, 정답과 다른 이름·남는 행, 매칭 결과 (기록은 커밋하지 않고 진우 PC에 보관) |
 
 ### 10.10 추가 확인: 미라보_03을 v2.1로 1회 더 (같은 조건)
 
-10.6절의 새 행 12개가 반복되는지 보려고 미라보_03만 v2.1로 한 번 더 돌렸다(`011_mirabeau_03_r2.json`, 프롬프트 sha256 `b14b09b4…`, 호출 1회, $0.0713, 89.8초, 추론 11,310 토큰).
+10.6절의 새 행 12개가 반복되는지 보려고 미라보_03만 v2.1로 한 번 더 돌렸다(`011_mirabeau_03_r2.json`, 프롬프트 sha256 `b14b09b4…`, 호출 1회, $0.0713, 89.8초, 추론 11,310 토큰). (기록은 커밋하지 않고 진우 PC에 보관)
 
 | 회차 | 출력 행 | 맞음/틀림/누락/이름만 | 남는 행 | 가격 없는 행 |
 |---|---|---|---|---|
@@ -1152,9 +1152,9 @@ v2.1 r1은 미라보_03에서 72행을 냈다. 60행은 정답 60칸과 전부 �
 | `ai/runs/2026-11-25_i5_fallback_ladder/preregistration.md` | 사전 등록 (첫 호출 전 커밋) |
 | `ai/eval/i5_fallback_ladder.py` | 실행·채점. `--check`(API 0회), 실행(있는 기록은 건너뜀), `--report`(채점만) |
 | `ai/eval/test_i5_fallback_ladder.py` | 통과 기준, 제목 확인, 비용 상한 테스트 (API 0회) |
-| `ai/runs/2026-11-25_i5_fallback_ladder/<모델>/B/<stem>_r<k>.json` | 기록 54개. 모델 폴더: `google__gemini-3.7-flash`, `openai__gpt-6.1-terra`, `anthropic__claude-sonnet-5.5` |
-| `…/summary.json`, `report_stdout.md` | 채점 결과 (회차별 점수, 틀린 칸, 제목 20줄, 비용·지연, 판정) |
-| `…/run_gemini-3.7-flash.log`, `run_gpt-6.1-terra.log`, `run_claude-sonnet-5.5.log` | 실행 출력 |
+| `ai/runs/2026-11-25_i5_fallback_ladder/<모델>/B/<stem>_r<k>.json` | 기록 54개. 모델 폴더: `google__gemini-3.7-flash`, `openai__gpt-6.1-terra`, `anthropic__claude-sonnet-5.5` (기록은 커밋하지 않고 진우 PC에 보관) |
+| `…/summary.json`, `report_stdout.md` | 채점 결과 (회차별 점수, 틀린 칸, 제목 20줄, 비용·지연, 판정) (기록은 커밋하지 않고 진우 PC에 보관) |
+| `…/run_gemini-3.7-flash.log`, `run_gpt-6.1-terra.log`, `run_claude-sonnet-5.5.log` | 실행 출력 (기록은 커밋하지 않고 진우 PC에 보관) |
 
 ### 11.11 AI 사용 내역
 
@@ -1234,6 +1234,6 @@ Claude Code가 한 일: 작업 트리 준비, 사전 등록 문서와 실행·�
 
 | 경로 | 내용 |
 |---|---|
-| `ai/runs/2026-11-26_i5_p19_followup/regression_sonnet/anthropic__claude-sonnet-5.5/B/<stem>_r1.json` | 기록 17개 |
-| `…/regression_sonnet/summary.json`, `run.log` | 사진별 점수(세 묶음), 틀린 칸, 비용·지연, 실행 출력 |
+| `ai/runs/2026-11-26_i5_p19_followup/regression_sonnet/anthropic__claude-sonnet-5.5/B/<stem>_r1.json` | 기록 17개 (기록은 커밋하지 않고 진우 PC에 보관) |
+| `…/regression_sonnet/summary.json`, `run.log` | 사진별 점수(세 묶음), 틀린 칸, 비용·지연, 실행 출력 (기록은 커밋하지 않고 진우 PC에 보관) |
 | `ai/eval/i5_sonnet_regression_report.py` | 채점과 비교 (API 0회). 실행 명령은 파일 머리말에 있다 |

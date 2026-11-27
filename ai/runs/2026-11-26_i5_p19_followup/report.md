@@ -246,7 +246,7 @@ WHERE completed_at >= '<오늘 KST 자정>'
 - 규칙은 이 기록에서 옆 페이지 줄을 다 잡지만, 옆 페이지 줄이 나온 사진은 미라보_03 한 장뿐이다. 다른 메뉴판의 옆 페이지가 어디에 걸리는지는 모른다.
 - 비스듬하게 찍어 메뉴 줄이 가장자리에 닿는 사진에서는, 모델이 가격을 못 읽은 진짜 줄을 같이 버린다. "오른쪽·왼쪽 끝에 좁게 걸린 상자"처럼 좁히면 줄일 수 있겠지만 대 볼 사례가 tale_07 하나다.
 - 버리지 않고 검수 화면에서 "가장자리에 걸린 줄"로 표시만 하는 방법도 있다. 검수 부담은 남지만 진짜 줄을 잃지 않는다.
-- 결과를 보고 프롬프트를 고치지 않았다. 계산 스크립트: `ai/eval/i5_edge_guard_check.py`, 결과: `edge_guard.json`.
+- 결과를 보고 프롬프트를 고치지 않았다. 계산 스크립트: `ai/eval/i5_edge_guard_check.py`, 결과: `edge_guard.json`. (기록은 커밋하지 않고 진우 PC에 보관)
 
 ## G. PDF 경로를 새 추출 경로와 한도에 맞추기
 
@@ -355,7 +355,7 @@ WHERE completed_at >= '<오늘 KST 자정>'
 | `backend/app/adapters/pdf_guards.py` | 새 추출기에 페이지 제한을 거는 연결, 경로를 내려간 호출까지 세기, OpenRouter 시간 초과 분류 |
 | `backend/scripts/run_uat_inputs.py` | `--extractor openrouter`, `--pdf-page-attempts`, 페이지 기록에 경로·토큰·청구액 |
 | `backend/tests/test_pdf_routed_extraction.py` | 테스트 26개 (가짜 응답): 0~4단계, 가드, 페이지 수 세기, 두 한도 |
-| `ai/runs/2026-11-26_i5_p19_followup/uat_pdf/openrouter/`, `hybrid_flash_lite/` | 실제 실행 기록 |
+| `ai/runs/2026-11-26_i5_p19_followup/uat_pdf/openrouter/`, `hybrid_flash_lite/` | 실제 실행 기록 (기록은 커밋하지 않고 진우 PC에 보관) |
 
 **테스트 환경.** PDF 테스트는 `pypdfium2`가 필요한데 이 PC의 venv에 없었다. 프로젝트가 고정한 버전(5.13.0)을 임시 폴더에 설치해 돌렸다(venv는 건드리지 않았다). PDF 관련 기존 테스트 121개가 통과했고, `test_pdf_extraction.py`의 5개는 Windows의 환경변수 길이 제한 때문에 실행되지 않았다(테스트 이름에 PDF 바이트가 들어가서 생기는 문제로, 이번 변경과 무관하다).
 
@@ -363,9 +363,9 @@ WHERE completed_at >= '<오늘 KST 자정>'
 
 | 경로 | 내용 |
 |---|---|
-| `ai/eval/i5_route_stage_check.py`, `stage_check/` | D: 단계별 실제 호출과 기록 (`sonnet.json`, `lite.json`, `direct_attempt{1,2,3}_503.json`, `gemini_models.json`) |
-| `ai/eval/i5_sonnet_regression_report.py`, `regression_sonnet/` | E: 기록 17개, `summary.json`, `run.log` |
-| `ai/eval/i5_edge_guard_check.py`, `edge_guard.json` | F: 가장자리 규칙 계산 |
+| `ai/eval/i5_route_stage_check.py`, `stage_check/` | D: 단계별 실제 호출과 기록 (`sonnet.json`, `lite.json`, `direct_attempt{1,2,3}_503.json`, `gemini_models.json`) (기록은 커밋하지 않고 진우 PC에 보관) |
+| `ai/eval/i5_sonnet_regression_report.py`, `regression_sonnet/` | E: 기록 17개, `summary.json`, `run.log` (기록은 커밋하지 않고 진우 PC에 보관) |
+| `ai/eval/i5_edge_guard_check.py`, `edge_guard.json` | F: 가장자리 규칙 계산 (기록은 커밋하지 않고 진우 PC에 보관) |
 
 ## AI 사용 내역 (C~G)
 

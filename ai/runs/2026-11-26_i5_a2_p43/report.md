@@ -143,7 +143,7 @@
 | `backend/app/schemas/request_limit.py`, `app/api/routes/request_limits.py`, `app/admin/static/` | 초기화의 새 종류 |
 | `backend/app/main.py` | 서버 시작 때 설정값 검사 |
 | `backend/tests/test_menu_photo_limit.py`, `test_extraction_concurrency.py`, `conftest.py`, `test_openapi.py` | 테스트 |
-| `ai/eval/i5_concurrent_imports_check.py`, `ai/runs/2026-11-26_i5_a2_p43/concurrent/` | 실제 동시 호출의 실행 스크립트, 기록 6개, `summary.json`, `run.log` |
+| `ai/eval/i5_concurrent_imports_check.py`, `ai/runs/2026-11-26_i5_a2_p43/concurrent/` | 실제 동시 호출의 실행 스크립트, 기록 6개, `summary.json`, `run.log` (기록은 커밋하지 않고 진우 PC에 보관) |
 | `docs/frontend_backend_api_spec.md`, `backend/README.md`, `.env.example`, `deploy/env.production.example`, `DEPLOY.md` | 스펙과 설정 문서 |
 
 ## 5. AI 사용 내역
