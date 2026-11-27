@@ -54,12 +54,17 @@ def paid_photos_query(since: datetime) -> Select[tuple[int]]:
 
     A run that succeeded has the route in `raw_output.route`; a run that failed after OpenRouter
     answered (an answer that is not valid output is still billed) has it in `raw_output.output.route`
-    (menu_import_processing puts the extractor's raw output under `output`).
+    (menu_import_processing puts the extractor's raw output under `output`). A run read by another
+    stage, or by none, after an OpenRouter attempt that may have been billed has
+    `route.paidAttempt: true` (app.extraction.routed) and is counted too.
     """
     stage = ExtractionRun.raw_output["route"]["stage"].as_integer()
     failed_stage = ExtractionRun.raw_output["output"]["route"]["stage"].as_integer()
+    paid = ExtractionRun.raw_output["route"]["paidAttempt"].as_boolean()
+    failed_paid = ExtractionRun.raw_output["output"]["route"]["paidAttempt"].as_boolean()
     return select(func.count()).select_from(ExtractionRun).where(
-        ExtractionRun.completed_at >= since, or_(stage.in_(PAID_STAGES), failed_stage.in_(PAID_STAGES))
+        ExtractionRun.completed_at >= since,
+        or_(stage.in_(PAID_STAGES), failed_stage.in_(PAID_STAGES), paid.is_(True), failed_paid.is_(True)),
     )
 
 

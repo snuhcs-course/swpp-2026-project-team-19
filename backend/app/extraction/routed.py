@@ -247,8 +247,17 @@ def extract_menu_routed(
     raise AllRoutesFailedError(
         "every extraction route failed: " + "; ".join(_reason(s) for s in skipped),
         attempts=sum(s.get("attempts", 0) for s in skipped),
-        route={"stage": 4, "path": None, "model": None, "provider": None, "skipped": skipped},
+        route=_paid({"stage": 4, "path": None, "model": None, "provider": None, "skipped": skipped}),
     )
+
+
+def _paid(route: dict[str, Any]) -> dict[str, Any]:
+    """`route` with `paidAttempt: true` when a skipped OpenRouter attempt may have been billed (a cut
+    answer, or a request given up before its answer), so app.services.paid_photo_budget counts the
+    photo again after a restart even though another stage read it (or none did)."""
+    if any(s.get("billedUsd") is not None or s.get("abandonedAttempts") for s in route["skipped"]):
+        return {**route, "paidAttempt": True}
+    return route
 
 
 def _skip(stage: int, error: ModelCallError) -> dict[str, Any]:
@@ -354,8 +363,8 @@ def _finish(meta: dict[str, Any], call: dict[str, Any], skipped: list[dict[str, 
             table: list[dict[str, Any]]) -> dict[str, Any]:
     stage = call["stage"]
     meta.update(call["meta"], model=call["model"], status=call["status"],
-                route={"stage": stage, "path": PATHS[stage], "model": call["model"], "provider": call["provider"],
-                       "skipped": skipped})
+                route=_paid({"stage": stage, "path": PATHS[stage], "model": call["model"],
+                             "provider": call["provider"], "skipped": skipped}))
     logger.log(
         logging.INFO if stage == 0 else logging.WARNING,
         "extraction route stage=%d path=%s model=%s provider=%s input_tokens=%s output_tokens=%s "

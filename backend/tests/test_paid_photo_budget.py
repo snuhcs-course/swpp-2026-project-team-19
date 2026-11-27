@@ -93,6 +93,17 @@ def test_only_runs_read_through_openrouter_today_are_counted(runs):
     assert count(runs) == 3
 
 
+def test_runs_read_elsewhere_after_an_openrouter_attempt_that_may_have_been_billed_are_counted(runs):
+    store(runs, {"route": {**route(2)["route"], "paidAttempt": True}})        # cut answer or timeout, then stage 2
+    store(runs, {"route": {**route(3)["route"], "paidAttempt": True}})
+    store(runs, {"route": {**route(3)["route"], "paidAttempt": False}})       # not counted
+    store(runs, {"error": "ExtractionError", "message": "x",
+                 "output": {"attempts": 3, "route": {"stage": 4, "skipped": [], "paidAttempt": True}}},
+          status=PipelineStatus.FAILED)
+
+    assert count(runs) == 3
+
+
 def test_the_day_is_the_kst_day(runs):
     store(runs, route(0), completed_at=MIDNIGHT - timedelta(seconds=1))  # 23:59:59 KST yesterday
     store(runs, route(0), completed_at=MIDNIGHT)                         # 00:00:00 KST today
@@ -108,6 +119,8 @@ def test_the_query_on_postgresql_reads_the_route_out_of_the_json_column():
     assert "extraction_runs.completed_at >= '2026-11-25 15:00:00+00:00'" in sql
     assert "CAST(((extraction_runs.raw_output -> 'route') ->> 'stage') AS INTEGER) IN (0, 1)" in sql
     assert "CAST((((extraction_runs.raw_output -> 'output') -> 'route') ->> 'stage') AS INTEGER) IN (0, 1)" in sql
+    assert "CAST(((extraction_runs.raw_output -> 'route') ->> 'paidAttempt') AS BOOLEAN) IS true" in sql
+    assert "CAST((((extraction_runs.raw_output -> 'output') -> 'route') ->> 'paidAttempt') AS BOOLEAN) IS true" in sql
 
 
 # ---- the budget ----
@@ -249,7 +262,7 @@ def test_a_cut_answer_that_was_billed_keeps_its_place_when_the_second_call_fails
     meta = read(http, budget)
 
     assert meta["route"]["stage"] == 2 and budget.used() == 1  # the cut answer was paid for: no refund
-    assert meta["route"]["skipped"][0]["billedUsd"] == 0.2
+    assert meta["route"]["skipped"][0]["billedUsd"] == 0.2 and meta["route"]["paidAttempt"] is True
     assert meta["route"]["skipped"][0]["reason"] == "ModelCallError"
 
 
@@ -272,7 +285,7 @@ def test_a_photo_whose_call_was_abandoned_at_the_wall_clock_cap_keeps_its_place(
         release.set()
 
     assert meta["route"]["stage"] == 2 and budget.used() == 1
-    assert meta["route"]["skipped"][0]["abandonedAttempts"] == 1
+    assert meta["route"]["skipped"][0]["abandonedAttempts"] == 1 and meta["route"]["paidAttempt"] is True
 
 
 def test_a_photo_whose_call_was_cut_at_the_read_timeout_keeps_its_place():
@@ -286,12 +299,24 @@ def test_a_photo_whose_call_was_cut_at_the_read_timeout_keeps_its_place():
     assert meta["route"]["skipped"][0]["abandonedAttempts"] == 1
 
 
+def test_a_photo_no_route_read_after_a_billed_attempt_is_marked_for_the_recount():
+    route_ = replace(ROUTE, openrouter=replace(ROUTE.openrouter, max_attempts=1))
+    gem = gemini_fake(direct=RuntimeError("down"), lite=RuntimeError("down"))
+
+    with pytest.raises(routed.AllRoutesFailedError) as caught:
+        extract_menu_routed(jpeg(), "image/jpeg", CLOVA, route_, CircuitBreaker(),
+                            budget=DailyPaidBudget(5, lambda since: 0, Clock()),
+                            http_client=FakeHttp(httpx.ReadTimeout("read timed out")), gemini_client=gem)
+
+    assert caught.value.route["stage"] == 4 and caught.value.route["paidAttempt"] is True
+
+
 def test_a_failed_call_without_a_billed_answer_still_gives_its_place_back():
     http, budget = FakeHttp(failed(503)), DailyPaidBudget(5, lambda since: 0, Clock())
 
     meta = read(http, budget)
 
-    assert budget.used() == 0 and "billedUsd" not in meta["route"]["skipped"][0]
+    assert budget.used() == 0 and "billedUsd" not in meta["route"]["skipped"][0] and "paidAttempt" not in meta["route"]
 
 
 def test_the_photo_after_the_last_place_is_the_first_one_sent_to_the_gemini_api():
