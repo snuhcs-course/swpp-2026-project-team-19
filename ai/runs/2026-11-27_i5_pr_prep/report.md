@@ -8,7 +8,7 @@
 - **B (커밋):** 옆 페이지 줄 가드를 넣었다. 처음 규칙("옵션 0개")으로는 B.3에서 기대값과 달라 멈췄고(옆 페이지 줄 24개가 잔 표시만 있는 줄), 진우 결정으로 "가격 없는 위스키 줄"로 고친 뒤 **60/60, 0/7, 572/572, 그 밖 0**으로 기대값과 같다. 띠 너비는 바꾸지 않았다. 새 테스트 42개, 손댄 모듈 4개 커버리지 100%.
 - **C (커밋):** `pr_draft.md`.
 - **D (커밋):** Gemini 직접 호출 10회(13:34). `gemini-3.8-flash` 503 5/5, `gemini-3.5-flash-lite` 200 5/5.
-- **F:** 히스토리 정리(진우 요청 2). 아래 F절.
+- **F:** 히스토리 정리. 정리 전 상태는 `backup/i5-p19-before-rewrite`(push 금지). 이 브랜치의 모든 커밋에서 기록 388개를 걷어냈다. 커밋 17개의 순서·메시지·작성자·작성/커밋 날짜는 그대로이고, 최종 트리는 정리 전과 같다. 해시가 바뀌었고 표는 F절. 이 마지막 커밋에서 보고서와 `pr_draft.md`의 옛 해시를 새 해시로 고쳤다.
 - 호출 수: **OpenRouter 0, CLOVA 0, Gemini 10**(D, 무료 키).
 - push하지 않았고 PR도 만들지 않았다.
 
@@ -158,7 +158,7 @@
 - Summary와 Route 절에 옆 페이지 줄 가드 한 줄씩, Evidence 표에 가드 한 줄(60/60, 0/7, 572/572, 한계 한 문장)과 D의 결과 한 줄.
 - 테스트 수: 백엔드 1,428 통과(옛 초안 1,242), AI 394 통과·1 실패(Windows 전용), `test_edge_guard.py` 42개 추가.
 - "Not verified"의 stage 2 문장을 D 결과로 바꾸고, Deploy에 `EXTRACTION_EDGE_STRIP_PERMILLE`(선택)을 넣었다. 보고서 목록에 이 보고서를 넣었다.
-- 커밋 수와 이 브랜치의 해시(`afe127c0` 등)는 히스토리 정리 뒤 새 값으로 고쳤다(F).
+- 커밋 수(18)와 이 브랜치의 해시(`afe127c0` → `e2fa7874`)는 히스토리 정리 뒤 새 값으로 고쳤다(F).
 - 끝줄 `🤖 Generated with [Claude Code](https://claude.com/claude-code)`는 그대로다.
 - PR 템플릿(`.github/pull_request_template.md`)의 절 이름과는 아직 다르다(원본 초안 형식 그대로). 올릴 때 템플릿에 옮겨야 한다.
 
@@ -176,6 +176,60 @@
 - 3단계는 정상이다.
 - 출력 파일에 키 값이 없는 것을 확인했다(키 문자열 검색 0건).
 
+## F. 히스토리 정리 (진우 요청)
+
+### F.1 한 일
+
+1. 정리 전 상태를 `backup/i5-p19-before-rewrite`(`344b42f5`)로 남겼다. **push하지 않는다.**
+2. `git filter-branch --index-filter "git rm --cached --ignore-unmatch --pathspec-from-file=<목록>" -- origin/main..HEAD`. 목록은 A에서 뺀 것과 같은 388개 경로다. 이 브랜치의 커밋들이 `ai/runs/` 아래에 추가한 `.md`가 아닌 파일 전부이고, 그중 `origin/main`에 있는 것은 0개다.
+   - 범위는 `origin/main..HEAD`(17개)뿐이다. 바탕 커밋 `54a0bf26`과 main의 커밋은 건드리지 않았다.
+   - 커밋을 합치거나 빼지 않았다(`--prune-empty` 안 씀). 빈 커밋이 된 것도 없다.
+   - filter-branch가 만드는 `refs/original/...`은 백업 브랜치와 같은 커밋이라 지웠다.
+3. 디스크의 기록 파일은 그대로다(예: `2026-11-26_i5_p19_followup/edge_guard.json`).
+
+### F.2 확인
+
+| 확인 | 결과 |
+|---|---|
+| `git log --name-only origin/main..HEAD -- ai/runs`에서 `.md`가 아닌 파일 | **0개** |
+| 17개 커밋 각각의 트리에 388개 경로 중 하나라도 있는지 | **0** |
+| `git diff backup/i5-p19-before-rewrite HEAD` | **비어 있음** (0줄) |
+| 커밋 순서, 작성자, 작성 날짜, 커밋 날짜, 제목 (`git log --format='%an|%ad|%cd|%s'`) | 정리 전과 **같음** |
+| 커밋 메시지 본문 전체 | 정리 전과 **같음** (md5 같음) |
+| 테스트 (정리 뒤) | 백엔드 1428 통과·1940 건너뜀·실패 0, AI 394 통과·1 실패(Windows 전용, 전과 같음) |
+
+- 통과 기준을 호출 전에 커밋한 순서도 그대로 남았다. P18의 "Fix the photos, condition and pass criterion ... before any call"(`e2fa7874`)이 "Run the fallback model ladder (54 calls)"(`ff17f6b4`)보다 앞이다.
+- A 커밋(`41d43982`)은 이제 388개를 지우는 변경이 없다(처음부터 없었으므로). `.gitignore`와 보고서 표시만 남았다. 메시지는 지시대로 바꾸지 않아서 "git rm --cached"라는 설명이 그대로 있다.
+- 바꿀 수 없어서 남은 옛 해시: P18 사다리 실행 커밋(`ff17f6b4`)의 메시지 본문에 `afe127c0`이 있다(메시지는 그대로 둔다). 새 해시는 `e2fa7874`다.
+
+### F.3 옛 해시 → 새 해시
+
+| # | 옛 해시 | 새 해시 | 제목 |
+|---|---|---|---|
+| 1 | `63148315` | `79895cc1` | I5: Bring the 2026-11-21 model ladder, its records and hybrid prompt v2.1 to this branch |
+| 2 | `afe127c0` | `e2fa7874` | I5-P18: Fix the photos, condition and pass criterion of the fallback model ladder before any call |
+| 3 | `48bc012f` | `ff17f6b4` | I5-P18: Run the fallback model ladder (54 calls) and report it as section 11 |
+| 4 | `70db01e2` | `d8ee22fb` | I5-P18: Record the decision to put claude-sonnet-5.5 in the fallback models array |
+| 5 | `10b5156e` | `0118b03f` | I5-P19: Add menu extraction through OpenRouter with a fallback ladder to the Gemini API |
+| 6 | `439aa0be` | `dd8b1002` | I5-P19: Run the 17 regression photos through the server's OpenRouter route and report the comparison |
+| 7 | `e825ec5a` | `828a03d4` | I5-A2: Limit the menu photos one user may upload per day (30 by default) |
+| 8 | `51f54d30` | `10fc50cf` | I5-P43: Check that menu imports processed at the same time do not hold each other up |
+| 9 | `4857da3e` | `71bba5d7` | I5-P43: Run three imports at the same time through the server's extraction code with real calls |
+| 10 | `48170149` | `e75a93b8` | I5-P19: Correct the key assumption: one course-issued OpenRouter key, no key limit |
+| 11 | `1bed96e4` | `4ed72b54` | I5-P19: Add a server-wide daily limit on photos read through OpenRouter that survives a restart |
+| 12 | `27936f76` | `ab03b417` | I5-P19: Let PDF pages take the OpenRouter route ladder and count against the same limits |
+| 13 | `2c63ba1e` | `c548907c` | I5-P19: Report the follow-up checks: credits, real calls per stage, Sonnet on 17 photos, edge guard, PDFs |
+| 14 | `d8b589d8` | `59b390a1` | I5-P19: Record the decision to keep claude-sonnet-5.5 in the fallback models array |
+| 15 | `0d08d2e0` | `41d43982` | I5-P19: Stop tracking the run records of this branch; keep the reports only |
+| 16 | `5d830205` | `26952b6f` | I5-P19: Drop whisky lines of a facing page cut off at the photo's left or right edge |
+| 17 | `344b42f5` | `392a77a5` | I5-P19: Draft the PR description and probe the Gemini API routes directly |
+| 18 | – | (이 커밋) | I5-P19: Point the reports at the rewritten commit hashes |
+
+보고서에서 고친 곳: `2026-11-21_i5_row_pairing/report.md`(`afe127c0` → `e2fa7874`), `2026-11-25_i5_p19_server_route/report.md`(`10b5156e` → `0118b03f`), `2026-11-26_i5_a2_p43/report.md`(`e825ec5a` → `828a03d4`), `2026-11-26_i5_p19_followup/report.md`(`48170149` → `e75a93b8`), `pr_draft.md`(`afe127c0` → `e2fa7874`). 이 보고서는 위 표와 F.1의 `344b42f5`(백업)만 옛 해시로 적는다.
+
 ## AI 사용 내역
 
-Claude Code(Opus 5.5)가 한 일: 기록 파일 목록 뽑기와 추적 해제, 보고서 37곳 표시, `.gitignore`, 가드 코드 초안, 확인 스크립트 고치기와 실행, 원인 진단(모델 기록에서 가격 없는 위스키 행의 unit 확인), 이 보고서. 검증: A 전후 테스트 수 비교, `git diff --stat`, `git check-ignore`, 확인 스크립트가 지시 문서의 기록 수(114)·행 수(5,024)·상자 값과 같은 값을 내는지. 약 1시간, API 호출 0회.
+Claude Code(Opus 5.5)가 한 일: 기록 파일 목록 뽑기와 추적 해제, 보고서 37곳 표시, `.gitignore`, 가드 코드와 테스트 42개·fixture, 설정 문서, 확인 스크립트 고치기와 실행, 첫 규칙의 불일치 원인 진단(모델 기록에서 가격 없는 위스키 행의 unit 확인), PR 초안, 직접 호출 스크립트와 실행, 히스토리 정리와 확인, 이 보고서.
+사람이 정한 것(진우): 가드 규칙을 "가격 없는 위스키 줄"로(B.0), 히스토리 정리.
+검증: A·B·F 전후 테스트 수 비교, 손댄 모듈 커버리지, `git diff --stat`, `git check-ignore`, 확인 스크립트가 지시 문서의 기록 수(114)·행 수(5,024)·상자 값과 같은 값을 내는지, 직접 호출 출력에 키가 없는지, 정리 전후 트리·메타데이터 비교.
+호출: OpenRouter 0, CLOVA 0, Gemini 10(D). 약 2시간 30분.

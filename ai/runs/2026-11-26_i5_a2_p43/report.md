@@ -14,7 +14,7 @@
 
 ## 1. A2: 계정당 하루 사진 한도
 
-커밋 `e825ec5a`.
+커밋 `828a03d4`.
 
 - I4-A6의 하루 한도 장치(`app/services/request_limits.py`)에 종류 하나(`menu_import_photos`)를 더했다. 새 장치는 만들지 않았다.
 - **접수한 사진 수로 센다.** `POST /api/bars/{barId}/menu-imports`가 `202`로 접수될 때 그 요청의 사진 수만큼 한 번 센다.

@@ -1,6 +1,6 @@
 # I5-P19: 서버 추출 경로를 OpenRouter로 (2026-11-25)
 
-지시 문서: `../_outgoing/i5_p19_a2_fallback_handoff.md` 2단계. 브랜치 `feature/i5-p19-openrouter-extraction`, 구현 커밋 `10b5156e`. push하지 않았다.
+지시 문서: `../_outgoing/i5_p19_a2_fallback_handoff.md` 2단계. 브랜치 `feature/i5-p19-openrouter-extraction`, 구현 커밋 `0118b03f`. push하지 않았다.
 
 ## 0. 진우가 확인할 기본값
 

@@ -37,7 +37,7 @@ Server menu extraction moves from `gemini-3.5-flash-lite` (Gemini API, free key)
 | Check | Photos | Result | Cost |
 |---|---|---|---|
 | Model ladder (11/21), 5 hard photos × 3 runs | 5 | Only Gemini 3.8 Flash with OCR lines had 0 wrong prices and 0 missing cells (4,290 cells) | $1.437 |
-| Fallback ladder (P18, 11/25), criterion committed before any call (`afe127c0`) | 6 × 3 | Only Sonnet 5.5 passed (0 wrong of 990). Gemini 3.7 Flash and GPT-6.1 Terra failed | $2.387 |
+| Fallback ladder (P18, 11/25), criterion committed before any call (`e2fa7874`) | 6 × 3 | Only Sonnet 5.5 passed (0 wrong of 990). Gemini 3.7 Flash and GPT-6.1 Terra failed | $2.387 |
 | Server code, regression set (P19, 11/25) | 17 | 572/572 correct, 0 wrong, 0 missing (flash-lite + v2: 552 correct, 6 wrong, 13 missing). Median 35.1 s, p95 55.9 s, $0.0281 per photo | $0.478 |
 | Sonnet 5.5 on the regression set (11/26) | 17 | 557/572, 6 wrong prices (one photo at a tenth), 4 missing bottler titles. Kept as stage 1 by Jinwoo's decision | $0.983 |
 | Three concurrent imports (P43, 11/26) | 3 × 2 | Did not block each other: 69.7 s wall clock for 144.8 s of calls; 135/135 correct | $0.125 |

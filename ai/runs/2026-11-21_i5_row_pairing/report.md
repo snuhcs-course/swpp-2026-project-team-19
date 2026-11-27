@@ -1011,7 +1011,7 @@ v2.1 r1은 미라보_03에서 72행을 냈다. 60행은 정답 60칸과 전부 �
 
 ## 11. 대체 모델 사다리 (I5-P18, 2026-11-25)
 
-`google/gemini-3.8-flash`가 OpenRouter에서 전부 실패할 때 `models` 배열로 넘겨도 되는 모델을 골랐다. 사진·조건·통과 기준은 첫 호출 전에 커밋했다(`ai/runs/2026-11-25_i5_fallback_ladder/preregistration.md`, 커밋 `afe127c0`). 결과를 보고 프롬프트·기준·코드를 고치지 않았다.
+`google/gemini-3.8-flash`가 OpenRouter에서 전부 실패할 때 `models` 배열로 넘겨도 되는 모델을 골랐다. 사진·조건·통과 기준은 첫 호출 전에 커밋했다(`ai/runs/2026-11-25_i5_fallback_ladder/preregistration.md`, 커밋 `e2fa7874`). 결과를 보고 프롬프트·기준·코드를 고치지 않았다.
 
 ### 11.1 한눈에
 
