@@ -275,6 +275,17 @@ def test_a_photo_whose_call_was_abandoned_at_the_wall_clock_cap_keeps_its_place(
     assert meta["route"]["skipped"][0]["abandonedAttempts"] == 1
 
 
+def test_a_photo_whose_call_was_cut_at_the_read_timeout_keeps_its_place():
+    route = replace(ROUTE, openrouter=replace(ROUTE.openrouter, max_attempts=1))
+    budget = DailyPaidBudget(5, lambda since: 0, Clock())
+
+    meta = extract_menu_routed(jpeg(), "image/jpeg", CLOVA, route, CircuitBreaker(), budget=budget,
+                               http_client=FakeHttp(httpx.ReadTimeout("read timed out")), gemini_client=gemini_fake())["meta"]
+
+    assert meta["route"]["stage"] == 2 and budget.used() == 1
+    assert meta["route"]["skipped"][0]["abandonedAttempts"] == 1
+
+
 def test_a_failed_call_without_a_billed_answer_still_gives_its_place_back():
     http, budget = FakeHttp(failed(503)), DailyPaidBudget(5, lambda since: 0, Clock())
 

@@ -321,6 +321,23 @@ def test_a_refused_call_after_an_abandoned_attempt_is_marked_too():
     assert caught.value.abandoned_attempts == 1 and caught.value.attempts == 2
 
 
+def test_an_attempt_cut_at_the_read_timeout_is_marked_abandoned_too():
+    http = FakeHttp(httpx.ReadTimeout("read timed out"), failed(503))
+
+    with pytest.raises(extraction.ModelCallError, match="gave up after 3 attempts") as caught:
+        openrouter.call_with_retries(replace(OPENROUTER, max_attempts=3), body(), http)
+
+    assert caught.value.abandoned_attempts == 1  # the 503s were answers: not counted
+
+
+@pytest.mark.parametrize("error", [httpx.ConnectTimeout("connect timed out"), httpx.ConnectError("refused")])
+def test_an_attempt_that_never_reached_openrouter_is_not_marked(error):
+    with pytest.raises(extraction.ModelCallError) as caught:
+        openrouter.call_with_retries(replace(OPENROUTER, max_attempts=2), body(), FakeHttp(error))
+
+    assert not hasattr(caught.value, "abandoned_attempts")
+
+
 def test_a_call_without_an_abandoned_attempt_is_not_marked():
     with pytest.raises(extraction.ModelCallError) as caught:
         openrouter.call_with_retries(replace(OPENROUTER, max_attempts=2), body(), FakeHttp(failed(503)))

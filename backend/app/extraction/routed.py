@@ -218,7 +218,7 @@ def extract_menu_routed(
             call = _call_openrouter(route.openrouter, prompt, ocr, http_client)
         except ModelCallError as error:
             billed = getattr(error, "billed_usd", None)  # a cut answer arrived and was billed first
-            # a POST given up at the wall-clock cap still runs and may be billed: keep the place
+            # a request given up before its answer (wall-clock cap, read timeout) may be billed: keep the place
             abandoned = getattr(error, "abandoned_attempts", 0)
             if budget is not None and billed is None and not abandoned:
                 budget.refund(reserved)  # OpenRouter did not answer: the photo was not read through it

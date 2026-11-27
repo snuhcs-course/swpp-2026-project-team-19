@@ -147,9 +147,11 @@ def call_with_retries(settings: OpenRouterSettings, body: dict[str, Any], client
     Raises OpenRouterCreditError on HTTP 402 and ModelCallError on any other failure that is not
     transient or that outlasts the retries.
 
-    An attempt given up at the wall-clock cap (HardTimeout) is abandoned, not cancelled: its POST
-    goes on in its thread and may still be answered and billed. The error then carries
-    `abandoned_attempts`, so the caller can keep the photo's place in the daily paid budget.
+    An attempt sent and given up before its answer may still be billed: one given up at the
+    wall-clock cap (HardTimeout) is abandoned, not cancelled, and its POST goes on in its thread;
+    one cut at the read timeout (httpx.ReadTimeout) closed the connection, but OpenRouter may have
+    started the generation. The error then carries `abandoned_attempts` (how many such attempts),
+    so the caller keeps the photo's place in the daily paid budget.
     """
     attempts = abandoned = 0
     while True:
@@ -161,7 +163,7 @@ def call_with_retries(settings: OpenRouterSettings, body: dict[str, Any], client
         except ModelCallError as exc:  # raised by _checked without the attempt count
             raise _with_abandoned(type(exc)(str(exc), attempts=attempts), abandoned) from exc
         except (_Transient, HardTimeout, httpx.TimeoutException, httpx.NetworkError) as exc:
-            abandoned += isinstance(exc, HardTimeout)
+            abandoned += isinstance(exc, (HardTimeout, httpx.ReadTimeout))
             if attempts >= settings.max_attempts:
                 raise _with_abandoned(ModelCallError(
                     f"gave up after {attempts} attempts; last error {type(exc).__name__}: {exc}", attempts=attempts
