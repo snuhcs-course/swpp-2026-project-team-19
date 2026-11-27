@@ -1,6 +1,6 @@
 // Operator dashboard for owner applications (API spec 3.11.4, 3.11.6-3.11.8, 3.11.13).
-// The menu item check tab (3.18) is in checks.js and the request count reset tab (3.11.19) in limits.js;
-// both use the helpers here.
+// The menu item check tab (3.18) is in checks.js, the bar tab (3.4, 3.6, 3.7, 3.11.10) in bars.js and the
+// request count reset tab (3.11.19) in limits.js; they use the helpers here.
 // Data from the API is always put on the page as text (textContent), never as HTML.
 "use strict";
 
@@ -179,7 +179,8 @@ async function api(method, path, body, retried = false) {
   throw new ApiError(response.status, data);
 }
 
-// Approve and reject record the operator, who needs a users row; GET /api/me creates it (3.11.7).
+// Approve, reject and removing a bar's owner record the operator, who needs a users row; GET /api/me
+// creates it (3.11.7, 3.11.10).
 async function withUsersRow(call) {
   try {
     return await call();
@@ -230,6 +231,7 @@ function clearDashboard() {
   $("load-more").hidden = true;
   closeDetail();
   clearChecks();
+  clearBars();
   clearLimits();
 }
 
@@ -268,6 +270,7 @@ async function start() {
   showView("dashboard");
   loadList(true);
   if (location.hash === "#checks") selectTab("checks");
+  else if (location.hash === "#bars") selectTab("bars");
   else if (location.hash === "#limits") selectTab("limits");
 }
 

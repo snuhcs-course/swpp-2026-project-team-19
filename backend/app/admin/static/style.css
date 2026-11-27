@@ -178,6 +178,10 @@ button.candidate:hover { border-color: var(--accent); }
 
 .badge.open { color: var(--warn-text); border-color: var(--warn-text); background: var(--warn-bg); }
 .badge.resolved { color: var(--ok); border-color: var(--ok); }
+/* The bar tab (bars.js). */
+.badge.bar-active { color: var(--ok); border-color: var(--ok); }
+.badge.bar-inactive { color: var(--danger); border-color: var(--danger); }
+.list td.wrap { white-space: normal; }
 .list td.badges { white-space: normal; }
 .list td.badges .badge { margin: 1px 2px 1px 0; }
 .bar-filter { margin-bottom: 8px; }
