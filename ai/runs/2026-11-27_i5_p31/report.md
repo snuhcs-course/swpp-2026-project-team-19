@@ -39,14 +39,14 @@
 
 ### 0.1 커밋 나누기
 
-11/21 "위스키 아님" 작업의 커밋 안 된 수정 19개를 네 커밋으로 나눴다(rebase 뒤 해시).
+11/21 "위스키 아님" 작업의 커밋 안 된 수정 19개를 네 커밋으로 나눴다. 해시는 #221 위로 rebase한 뒤의 것이다(맨 끝 절).
 
 | 커밋 | 내용 |
 |---|---|
-| `c70bad06` | 카탈로그 v2.4(잭다니엘 애플), 오드비 정답 1줄, 하네스의 dev 예외 삭제, 회귀 fixture·baseline, 고정값 테스트(`test_review_states`, `test_mixed_report`, `test_i3_match_eval`의 digest·`gold_for`), P30 동결 해제 목록에 카탈로그, 정답 수정 후 `mixed_report.*` |
-| `8fffff10` | `kind_hint`(`types.py`), `flag_non_whisky`(`llm_layer.py`), 임베딩 단계에서 유지(`embedding.py`), `menu_import_processing.py` 호출부, 백엔드 테스트 3개 파일, P30 동결 해제 목록에 `llm_layer.py` |
-| `1854938d` | 하네스 `--flag-non-whisky`와 `not_whisky` 지표, 그 테스트, `ai/eval/i5_kind_table.py` |
-| `491d4057` (옛 `73bac2a6`) | 11/21 보고서, `kind_*.md`, `ai_usage_log.md`. dev M3a 캐시(`cache_dev_r1`, `cache_dev_r2`, 각 26개)도 넣었으나 히스토리 정리(맨 끝 절)에서 걷어냈다(디스크에만 있음) |
+| `9e1d3c89` (옛 `c70bad06`) | 카탈로그 v2.4(잭다니엘 애플), 오드비 정답 1줄, 하네스의 dev 예외 삭제, 회귀 fixture·baseline, 고정값 테스트(`test_review_states`, `test_mixed_report`, `test_i3_match_eval`의 digest·`gold_for`), P30 동결 해제 목록에 카탈로그, 정답 수정 후 `mixed_report.*` |
+| `b52114ad` (옛 `8fffff10`) | `kind_hint`(`types.py`), `flag_non_whisky`(`llm_layer.py`), 임베딩 단계에서 유지(`embedding.py`), `menu_import_processing.py` 호출부, 백엔드 테스트 3개 파일, P30 동결 해제 목록에 `llm_layer.py` |
+| `1a7ebc76` (옛 `1854938d`) | 하네스 `--flag-non-whisky`와 `not_whisky` 지표, 그 테스트, `ai/eval/i5_kind_table.py` |
+| `b8208a2b` (옛 `73bac2a6`, `491d4057`) | 11/21 보고서, `kind_*.md`, `ai_usage_log.md`. dev M3a 캐시(`cache_dev_r1`, `cache_dev_r2`, 각 26개)도 넣었으나 히스토리 정리(맨 끝 절)에서 걷어냈다(디스크에만 있음) |
 
 - 한 파일에 두 작업이 섞인 `i3_match_eval.py`, `test_i3_match_eval.py`, `p30_extract.py`, `test_p30_extract.py`는 hunk 단위로 나눴다. `p30_extract.py`의 해제 목록은 ①에서 카탈로그만, ②에서 `llm_layer.py`를 더한 상태로 들어간다.
 - 추적 안 되는 `ai/eval/i5_*.py` 7개 중 이 작업 것은 `i5_kind_table.py` 하나다(11/21 보고서와 사용 기록 기준). 나머지 6개(`i5_model_ladder`, `i5_price_from_lines`, `i5_regression_compare`, `i5_row_align`, `i5_row_pairing`, `i5_title_fix_check`)는 행 맞추기 작업(`2026-11-21_i5_row_pairing`) 것이라 그대로 두었다. 그중 `i5_model_ladder.py`, `i5_row_pairing.py`는 P19 브랜치에도 같은 이름으로 있다.
@@ -330,7 +330,7 @@ foreach ($r in 1,2,3) { foreach ($c in "full","ops") {
 
 **처음 잰 결과는 틀렸다.** 하네스가 `ProductInfo`를 직접 만들어 받아 주는 연수가 비어 있었다(I3 "글렌모렌지 12 라산타"가 틀린 후보로 바뀌어 Top-1 500 → 499로 나옴). 원인이 하네스 쪽임을 확인하고 하네스가 표를 채우게 고친 뒤 다시 쟀다. 아래가 고친 뒤 결과다. 규칙·정답·카탈로그는 결과를 보고 고치지 않았다.
 
-**전후 비교 (v2.5 → v2.6, 규칙만 + 서버 단계, API 0회).** 기준(v2.5)은 1단계 커밋 전 HEAD(`a20b6fec`, 옛 `d0b692d6`)에서 다시 쟀고 밤 결과(`step1/1b_off_*`, `age_1a_*`)와 줄 단위로 같았다. 줄별 표는 `day_step1/{name,age}_*_diff.md`.
+**전후 비교 (v2.5 → v2.6, 규칙만 + 서버 단계, API 0회).** 기준(v2.5)은 1단계 커밋 전 HEAD(`5aea7246`, 옛 `d0b692d6`, `a20b6fec`)에서 다시 쟀고 밤 결과(`step1/1b_off_*`, `age_1a_*`)와 줄 단위로 같았다. 줄별 표는 `day_step1/{name,age}_*_diff.md`.
 
 | | 바뀐 줄 | Top-1 | FM | 틀린 확인 권장 | hard/photo (규칙 / 서버 뒤) | confirm/choose/register/wrong (서버 뒤) |
 |---|---|---|---|---|---|---|
@@ -367,7 +367,7 @@ foreach ($r in 1,2,3) { foreach ($c in "full","ops") {
 - 결과: 백엔드 1184 통과, 1941 건너뜀(DB 필요), 실패 0(`pypdfium2`가 없어 수집 안 되는 3개 파일 제외, 밤과 같음). `ai` 전체 394개 중 393 통과, 1 실패는 11/21부터의 `test_reencoded_ocr_cache_without_provenance_stops`(Windows 경로 구분자).
 - 커버리지(분기 포함): `accepted_ages.py`, `types.py`, `pick_check.py`, `linking_guards.py`, `llm_layer.py` 100%. `resolve.py` 94.9%, `staged.py` 97.9%, `memory_catalog.py` 96.1%이고 빠진 줄은 이번에 바꾼 줄이 아니다. `db_catalog.py`는 DB 테스트가 건너뛰어 23.6%(밤과 같음).
 
-커밋: `2eb17f37` (옛 `34fca19e`).
+커밋: `82ca8011` (옛 `34fca19e`, `2eb17f37`).
 
 ### 낮 2단계: 매칭 재평가 (Gemini 무료 키 14회)
 
@@ -489,6 +489,8 @@ foreach ($r in 1,2,3) { foreach ($c in "full","ops") {
 
 ## 히스토리 정리 (2026-11-27 낮, push 없음)
 
+이 절의 해시는 정리 직후의 것이다. 지금 해시는 아래 표의 "rebase 뒤" 열이다.
+
 `origin/main..HEAD`의 각 커밋에서 `ai/runs` 아래 `.md`가 아닌 실행 기록을 걷어냈다(OpenRouter 브랜치와 같은 방식). 디스크의 파일은 지우지 않았다.
 
 - **정리 전 상태:** 브랜치 `backup/i5-m3a-before-rewrite`(= 옛 `fa402fc9`). push하지 않는다.
@@ -497,21 +499,24 @@ foreach ($r in 1,2,3) { foreach ($c in "full","ops") {
 - **방법:** 임시 브랜치에서 `git filter-branch --index-filter`(위 캐시 폴더만 `git rm --cached`), 빈 커밋 정리 없음. 그 뒤 체크아웃된 브랜치를 `git reset --mixed`로 옮겨 작업 폴더를 건드리지 않았다. 커밋 순서, 메시지, 작성자·커미터와 날짜는 그대로다(옛·새 로그를 비교해 같음을 확인). 메시지에 "dev M3a caches"(`491d4057`), "keeps the M3a caches"(`42576ffe`)라고 적힌 것도 지시대로 그대로 두었다.
 - **`.gitignore`:** `/ai/runs/2026-11-21_i5_not_whisky/**/*.{json,jsonl,log,txt}`, 같은 형태의 `2026-11-27_i5_p31`, 예외 `!/ai/runs/2026-11-21_i5_not_whisky/mixed_report.json`(커밋 `fc569125`).
 
-| 옛 해시 | 새 해시 | 커밋 |
-|---|---|---|
-| `c70bad06` | `c70bad06` (같음) | I5: Add Jack Daniel's Tennessee Apple to catalog v2.4 and score it as a whisky |
-| `8fffff10` | `8fffff10` (같음) | I5: Let the LLM layer note a line it reads as not a whisky (flag off by default) |
-| `1854938d` | `1854938d` (같음) | I5: Measure the not-whisky note in the matching harness (--flag-non-whisky) |
-| `73bac2a6` | `491d4057` | I5: Record the not-whisky work (report, kind tables, dev M3a caches, AI usage) |
-| `79da3c30` | `95d7af06` | I5-P59: Set the current Glenmorangie ages in catalog v2.5 |
-| `6b2700c8` | `fcd3cb78` | I5-P59: Add the missingAge linking guard for confirmed lines without an age (off by default) |
-| `f92b7c3f` | `bf4a5895` | I5-P59: Pin how brand + age only lines are matched, and scan them |
-| `d0b692d6` | `a20b6fec` | I5-P59: Report the night run (steps 0-4), the PR draft and the AI usage |
-| `34fca19e` | `2eb17f37` | I5-P59: Accept the older Glenmorangie ages and set Lasanta to 15 (catalog v2.6) |
-| `47b2b727` | `42576ffe` | I5-P31: Re-run the matching evaluation on catalog v2.6, report the day run and the PR draft |
-| `8ad7c2e5` | `855979b9` | I5-P59: Name Glenmorangie Nectar D'Or after its current bottle, The Nectar (catalog v2.7) |
-| `fa402fc9` | `a296fb95` | I5-P59: Let an article of the edition name fit the product ("더 넥타" -> The Nectar) |
-| (새) | `fc569125` | I5: Keep the run records of the matching runs on the runner's PC |
+| 옛 해시 | 정리 뒤 | rebase 뒤 (#221 위) | 커밋 |
+|---|---|---|---|
+| `c70bad06` | `c70bad06` (같음) | `9e1d3c89` | I5: Add Jack Daniel's Tennessee Apple to catalog v2.4 and score it as a whisky |
+| `8fffff10` | `8fffff10` (같음) | `b52114ad` | I5: Let the LLM layer note a line it reads as not a whisky (flag off by default) |
+| `1854938d` | `1854938d` (같음) | `1a7ebc76` | I5: Measure the not-whisky note in the matching harness (--flag-non-whisky) |
+| `73bac2a6` | `491d4057` | `b8208a2b` | I5: Record the not-whisky work (report, kind tables, dev M3a caches, AI usage) |
+| `79da3c30` | `95d7af06` | `9b219628` | I5-P59: Set the current Glenmorangie ages in catalog v2.5 |
+| `6b2700c8` | `fcd3cb78` | `4f31fd63` | I5-P59: Add the missingAge linking guard for confirmed lines without an age (off by default) |
+| `f92b7c3f` | `bf4a5895` | `4a3f44aa` | I5-P59: Pin how brand + age only lines are matched, and scan them |
+| `d0b692d6` | `a20b6fec` | `5aea7246` | I5-P59: Report the night run (steps 0-4), the PR draft and the AI usage |
+| `34fca19e` | `2eb17f37` | `82ca8011` | I5-P59: Accept the older Glenmorangie ages and set Lasanta to 15 (catalog v2.6) |
+| `47b2b727` | `42576ffe` | `bb7803c4` | I5-P31: Re-run the matching evaluation on catalog v2.6, report the day run and the PR draft |
+| `8ad7c2e5` | `855979b9` | `92a65584` | I5-P59: Name Glenmorangie Nectar D'Or after its current bottle, The Nectar (catalog v2.7) |
+| `fa402fc9` | `a296fb95` | `44294cda` | I5-P59: Let an article of the edition name fit the product ("더 넥타" -> The Nectar) |
+| (새) | `fc569125` | `2d79211b` | I5: Keep the run records of the matching runs on the runner's PC |
+| (정리 뒤 커밋) | `b6c0f2e9` | `22054b45` | I5-P59: Point the report at the rewritten commits and redo the PR draft on the template |
+| (정리 뒤 커밋) | `affaac19` | `527c7ccc` | I5-P59: Record in the PR draft that the Glenmorangie ages and name were checked |
+| (정리 뒤 커밋) | `54fc4d0f` | `10a0f700` | I5-P59: Fix three review findings in the measurement scripts |
 
 앞의 세 커밋은 캐시가 없어 트리와 부모가 같으므로 해시가 그대로다.
 
@@ -522,3 +527,17 @@ foreach ($r in 1,2,3) { foreach ($c in "full","ops") {
 - 깨끗한 checkout(`git worktree`, 실행 기록 없음)에서 테스트: 백엔드 1189 통과, 1941 건너뜀, 실패 0. `ai` 392 통과, 1 건너뜀(CLOVA 키 없음, 그 worktree에 `.env`가 없어서), 1 실패(11/21부터의 `test_reencoded_ocr_cache_without_provenance_stops`). 걷어낸 캐시를 읽는 테스트는 없다.
 - 남은 추적 안 되는 파일 중 이 두 폴더의 것은 `step1/1c_age_only_before.md` 하나다(밤 실행에서 커밋하지 않은 것, 그대로 둠).
 - `pr_draft.md`는 `.github/pull_request_template.md`의 절(Task and why, What changed, Contract and scope, Verification, Notes for reviewers, After merge)로 다시 썼고, 매칭 규칙 문서(`docs/menu_ai_matching_flow.md`)를 고친 것을 적었다.
+
+## main 위로 rebase (2026-11-27 저녁, #221 머지 뒤)
+
+OpenRouter 추출 PR(#221)이 main에 머지(`f3af49c6`)되어 PR #222가 충돌 상태가 됐다.
+
+- Auto-fix 알림을 받고 먼저 `origin/main`을 merge해 push했다(`1b6ac4ed`). 진우 지시로 이를 rebase로 바꿨다. merge 커밋은 버리고, 브랜치 커밋 16개를 `origin/main` 위에 다시 올려 `--force-with-lease`(lease `1b6ac4ed`)로 push했다. push 직후 head는 `10a0f700`(리뷰 수정 커밋)였고, 이 해시 갱신 커밋이 그 위에 온다.
+- **충돌:** `fc569125`(이제 `2d79211b`)의 `.gitignore` 하나. main의 실행 기록 블록(OpenRouter·fallback 폴더)을 먼저 두고 이 브랜치 블록을 뒤에 두어 양쪽을 다 남겼다. 다른 충돌은 없었다.
+- **merge가 막힌 것:** 추적 안 되던 로컬 파일 5개가 main이 새로 넣는 경로와 겹쳤다. 작업 공간 `bottlemap-p14/_backup/untracked_before_merge_pr222/`로 옮겼다(3개는 main 것과 같고, `2026-11-21_i5_row_pairing/report.md`, `2026-11-27_direct_probe.md`는 다르다).
+- **확인:**
+  - 최종 트리가 merge 커밋 `1b6ac4ed`와 같다.
+  - 커밋 수, 메시지, 작성자, 날짜는 rebase 전과 같고, merge 커밋은 없다.
+  - `git check-ignore`로 보니 `mixed_report.json`은 추적되고, 두 브랜치의 실행 폴더 JSON은 무시된다.
+  - 테스트: 백엔드 1363 통과, 1941 건너뜀, 실패 0. `test_pdf_*.py`, `test_edge_guard.py`, `test_run_uat_inputs.py`는 로컬에 `pypdfium2`가 없어 불러오지 못했고 CI가 돌린다. `ai`는 410 통과, 1 실패(원래 있던 `test_reencoded_ocr_cache_without_provenance_stops`).
+- **백업:** rebase 전 상태는 로컬 브랜치 `backup/i5-m3a-before-rebase`(= `1b6ac4ed`)에 있다. push하지 않는다. 원격에 `backup/*` 브랜치는 없다.

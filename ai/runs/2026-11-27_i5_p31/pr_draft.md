@@ -1,10 +1,10 @@
 # I5-P59/P31: Glenmorangie ages and names (catalog v2.4-v2.7, accepted older ages), an article rule, an optional missing-age guard, and the not-whisky note
 
-> Draft. Not opened. Base: `main` at `0fae9345`. Branch `feature/i5-m3a-not-whisky` (local commits only). Sections follow `.github/pull_request_template.md`.
+> Opened as #222. Base: `main` at `f3af49c6` (after #221). Branch `feature/i5-m3a-not-whisky`. Sections follow `.github/pull_request_template.md`.
 
 ## Task and why
 
-I5-P59 (matching rule fixes from the I4 AI backlog) and I5-P31 (matching re-evaluation), with the I5 "not a whisky" note from 2026-11-21/22. Glenmorangie changed the ages and names on its bottles, and bars pour old and new bottles side by side: menu lines written with either age or name should match the one product, and the owner should confirm fewer lines. Independent of the OpenRouter extraction PR (`feature/i5-p19-openrouter-extraction`); the end-to-end measurement with that extraction comes after it is on `main`.
+I5-P59 (matching rule fixes from the I4 AI backlog) and I5-P31 (matching re-evaluation), with the I5 "not a whisky" note from 2026-11-21/22. Glenmorangie changed the ages and names on its bottles, and bars pour old and new bottles side by side: menu lines written with either age or name should match the one product, and the owner should confirm fewer lines. Rebased on `main` after the OpenRouter extraction PR (#221). The end-to-end measurement with that extraction is not part of this PR (see Not verified).
 
 ## What changed
 
@@ -58,13 +58,14 @@ Tests:
 
 - New: `backend/tests/test_accepted_ages.py` (26), `backend/tests/test_linking_guards.py` (missingAge), `backend/tests/test_resolve_staged.py` (brand + age only lines, the article rule), `ai/eval/test_i5_p59.py`, tests for `kind_hint` and the harness options. Fixed value: the I3 asis catalog digest for v2.7.
 - In a clean checkout of this branch (no run records on disk): backend 1189 passed, 1941 skipped (need a database), 0 failed (`tests/test_pdf_*.py` and `test_run_uat_inputs.py` not collected: no `pypdfium2` locally). `ai`: 392 passed, 1 skipped (CLOVA keys not set), 1 failed: `test_reencoded_ocr_cache_without_provenance_stops` (a Windows path separator), failing before this branch. Regression check on the 15 photos: pass.
+- After the rebase onto #221 (same final tree as a merge of `main`): backend 1363 passed, 1941 skipped, 0 failed (`tests/test_pdf_*.py`, `test_edge_guard.py` and `test_run_uat_inputs.py` not collected locally: no `pypdfium2`; CI runs them). `ai`: 410 passed, 1 failed (the same Windows path test).
 - Coverage (branches): `accepted_ages.py`, `linking_guards.py`, `pick_check.py`, `llm_layer.py`, `types.py` 100%, `staged.py` 97%; the measurement scripts 95% together.
 
 Not verified:
 
 - The tests that need a database (one new: the database catalogs fill the accepted ages); menu import with real extracted ages or with `MATCHING_MISSING_AGE_GUARD=true`.
 - The Glenmorangie ages and the new name were checked against trade press on 2026-11-27 (The Original 12, Lasanta 15 since 2025, Quinta Ruban 14, The Nectar 16). The older age of Nectar D'Or is reported differently by source, so no older age is accepted for it.
-- The end-to-end run with Gemini 3.8 Flash extraction (about $0.92 per run of 33 photos): after the OpenRouter extraction PR is on `main`.
+- The end-to-end run with Gemini 3.8 Flash extraction (about $0.92 per run of 33 photos): not run. The OpenRouter extraction is now on `main` (#221), so it can follow this PR.
 
 ## Notes for reviewers (optional)
 
@@ -72,7 +73,7 @@ Not verified:
 - The article rule needs another word of the line to fit the product: the first version (an article always fits) put The Nectar on "글렌모렌지 더 시그넷", and a test now pins that it does not.
 - `ai/eval/match_eval.py` (the frozen pre-P47 harness) does not fill the accepted ages; changing it would release another file from the P30 freeze.
 - `test_server_steps_add_candidates_and_never_confirm` failed once in seven runs on the 11/27 night run (cause unknown) and not since.
-- `.gitignore`: both this branch and the OpenRouter branch append a block at the end; the second to merge resolves a small conflict by keeping both.
+- `.gitignore`: the rebase onto #221 kept both run-record blocks at the end, the OpenRouter folders first, then this branch's.
 
 ## After merge
 
