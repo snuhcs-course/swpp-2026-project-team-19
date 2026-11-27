@@ -6,6 +6,7 @@ from pathlib import Path
 from uuid import UUID
 
 from app.core.normalize import normalize
+from app.matching.accepted_ages import accepted_ages
 from app.matching.types import ProductInfo
 
 
@@ -44,6 +45,7 @@ class InMemoryCatalog:
     @classmethod
     def from_seed(cls, path: str | Path, exclude_sources: Collection[str] = ()) -> "InMemoryCatalog":
         """Load `catalog_v1_draft.json`. Inactive products (`is_active: false`) are skipped.
+        Accepted ages come from `accepted_ages.py` by product id, as in `DbCatalog`.
 
         Aliases whose `sources` all appear in `exclude_sources` are dropped, e.g. to
         evaluate without the menu spellings collected from the evaluation bars.
@@ -68,6 +70,7 @@ class InMemoryCatalog:
                     age_years=row.get("age_years"),
                     edition_name=row.get("edition_name"),
                     brand_id=UUID(row["brand_id"]) if row.get("brand_id") else None,
+                    accepted_ages=accepted_ages(product_id),
                 )
             )
             aliases.extend(

@@ -163,7 +163,13 @@ FROZEN_MATCHING = {
 # 2026-11-17 (I4-P46): ai/eval/i3_match_eval.py too. It gained the ops catalog, bar groups and
 # --server-steps; its asis and full catalogs and its rules and LLM results are as before (the
 # recorded I3 asis digest is pinned in test_i3_match_eval.py).
-RELEASED_MATCHING = ("backend/app/matching/staged.py", "ai/eval/i3_match_eval.py")
+# 2026-11-21 (I5, Jinwoo Park): ai/catalog/catalog_v2_service.json too. The I3 set and the catalog
+# are development data from now on; v2.4 adds Jack Daniel's Tennessee Apple (flavoured whiskeys are
+# served as whisky).
+# 2026-11-22 (I5): backend/app/matching/llm_layer.py too: it gained the "not a whisky" note
+# (flag_non_whisky, off by default; with the flag off its results are as before).
+RELEASED_MATCHING = ("backend/app/matching/staged.py", "ai/eval/i3_match_eval.py",
+                     "ai/catalog/catalog_v2_service.json", "backend/app/matching/llm_layer.py")
 RUNS = (1, 2, 3)  # freeze 3장: r1-r3
 PHOTO_HASHES = REPO_ROOT / "ai" / "eval" / "i3_photo_sha256.json"
 # SHA-256 (CRLF read as LF) of ai/eval/i3_photo_sha256.json as frozen in 15b1eff (#69). The photo

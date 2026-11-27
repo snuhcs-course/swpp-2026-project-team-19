@@ -123,7 +123,8 @@ def test_gold_for_writes_refs_the_catalog_lacks_as_new(be):
     assert h.gold_for(be, "new:glenfiddich-15", full.key_to_id, dev=False) == "new:glenfiddich-15"
     assert h.gold_for(be, "both:glenfiddich-12|new:glenfiddich-15", asis.key_to_id, dev=False) == \
         "both:glenfiddich-12|new:glenfiddich-15"
-    assert h.gold_for(be, "jack-daniels-apple", asis.key_to_id, dev=True) == "non_whisky"
+    # no dev exception for the flavoured whiskey since 2026-11-21: a product ref like any other
+    assert h.gold_for(be, "jack-daniels-apple", asis.key_to_id, dev=True) == "new:jack-daniels-apple"
     assert h.gold_for(be, "unknown", asis.key_to_id, dev=False) == "unknown"
 
 
@@ -321,10 +322,24 @@ def test_embedded_entries_keep_one_alias_per_normalized_value_like_the_database(
     assert len(ardbeg) <= 2  # the display name and at most one stored alias
 
 
+V2_4_ASIS_DIGEST = "b82cacac24493d0f"
+V2_5_ASIS_DIGEST = "541fb3d457e8d5da"
+V2_6_ASIS_DIGEST = "7f96c66ad6e70e19"
+V2_7_ASIS_DIGEST = "1a4e2469c48baa82"
+
+
 def test_the_i3_asis_catalogs_are_the_recorded_ones(be):
     seed = json.loads((h.REPO_ROOT / "ai" / "catalog" / "catalog_v2_service.json").read_text(encoding="utf-8"))
     digest = h.catalog_digest({bar: h.build_catalog(be, bar, "asis", seed) for bar in I3_BARS})
-    assert digest.startswith(I3_ASIS_DIGEST)
+    # catalog v2.4 (2026-11-21, I5: Jack Daniel's Tennessee Apple added) no longer gives the asis
+    # catalogs I3 and P46 ran with (I3_ASIS_DIGEST, catalog v2.3): numbers from here on are not theirs.
+    # v2.5 (2026-11-27, I5-P59: Glenmorangie ages) is not v2.4 either (V2_4_ASIS_DIGEST, 11/21 runs),
+    # nor is v2.6 (Lasanta 12 -> 15) v2.5 (V2_5_ASIS_DIGEST, the 11/27 night runs), nor v2.7 (The Nectar) v2.6
+    assert not digest.startswith(I3_ASIS_DIGEST)
+    assert not digest.startswith(V2_4_ASIS_DIGEST)
+    assert not digest.startswith(V2_5_ASIS_DIGEST)
+    assert not digest.startswith(V2_6_ASIS_DIGEST)
+    assert digest.startswith(V2_7_ASIS_DIGEST)
 
 
 def test_ops_is_the_catalog_with_the_additions_minus_own_menu_aliases(files, tmp_path):
@@ -373,3 +388,33 @@ def test_server_steps_are_not_for_the_tool_layer(capsys):
         h.parse_args(["--set", "i3", "--catalog", "asis", "--llm", "--llm-mode", "tools", "--cache", "c",
                       "--server-steps", "--json", "x.json"])
     assert "--server-steps is for rules or rules + M3a" in capsys.readouterr().err
+
+
+# ---------- the "not a whisky" note (I5) ----------
+
+def nw_row(kind, llm_kind, base_n=0, n=0, hint=None, target=True, burden="register"):
+    return {"photo_id": "p", "name": f"{kind}-{llm_kind}-{base_n}-{n}", "gold": kind, "kind": kind,
+            "llm_target": target, "llm_kind": llm_kind, "base_n_cand": base_n, "n_cand": n, "kind_hint": hint,
+            "status": "unmatched" if n == 0 else "ambiguous", "burden": burden, "cands": ""}
+
+
+def test_not_whisky_stats_count_the_note_and_the_three_variants_by_gold_class():
+    rows = [
+        nw_row("non_whisky", "non_whisky", hint="non_whisky"),               # cognac: flagged
+        nw_row("non_whisky", "non_whisky", n=1, hint="non_whisky", burden="wrong"),  # embedding added a candidate
+        nw_row("non_whisky", "whisky"),                                      # the LLM missed it
+        nw_row("known", "non_whisky", base_n=1, n=1, burden="confirm"),      # a whisky the rules had a candidate for
+        nw_row("absent", "non_whisky", hint="non_whisky"),                   # a whisky flagged by mistake
+        nw_row("unknown", "unclear"),
+        nw_row("known", None, target=False, n=1, burden="confirmed"),        # confirmed by the rules: never asked
+    ]
+    s = h.not_whisky_stats(rows)
+    assert s["llm_targets"] == {"non_whisky": 3, "whisky": 2, "unknown": 1, "unpaired": 0}
+    assert s["flagged"] == {"non_whisky": 2, "whisky": 1, "unknown": 0, "unpaired": 0}
+    assert s["variant_A"] == {"non_whisky": 2, "whisky": 2, "unknown": 0, "unpaired": 0}
+    assert s["variant_B"] == {"non_whisky": 2, "whisky": 1, "unknown": 0, "unpaired": 0}
+    assert s["variant_C"] == {"non_whisky": 1, "whisky": 1, "unknown": 0, "unpaired": 0}
+    assert s["flagged_by_burden"] == {"register": 2, "wrong": 1}
+    assert (s["no_candidate"], s["no_candidate_not_flagged"]) == (4, 2)
+    assert [x["name"] for x in s["said_not_flagged_lines"]] == ["known-non_whisky-1-1"]
+    assert [x["llm_kind"] for x in s["non_whisky_gold_not_said"]] == ["whisky"]

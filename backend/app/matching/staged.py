@@ -32,6 +32,8 @@ S2  brand + attributes (needs S1), tried only when no alias matched
     - a Latin token of one or two letters ("PX", "XO") fits a product that has it as a whole
       word, and "CS" and "DR" fit Cask Strength and Distiller's Reserve; one that fits no
       product still rules nothing out (I4)
+    - an article ("the", "더") fits a product whose edition name has "The" when another word of
+      the line fits it too ("더 넥타 16Y" -> The Nectar) (I5-P59)
     - words that describe every whisky rather than one edition (the, and, 더, 버번, 싱글몰트,
       캐스크, 오크, 피니시, ...) are left out when they fit none of the products, and if the
       rest then picks one product, or the plain product of that age, it is the only candidate
@@ -350,6 +352,17 @@ def _token_fits(token: str, targets: list[str]) -> bool:
     return len(token) >= min_length and any(token in target for target in targets)
 
 
+# An article on the line ("더 넥타", "The Nectar") fits a product whose edition name has one ("The
+# Nectar", "The Original") when another word of the line fits that product too: there it is part of
+# the name, not a generic word (I5-P59). "더" alone is too short for _token_fits, and alone it says
+# nothing ("글렌모렌지 더 시그넷" is not The Nectar).
+_ARTICLES = frozenset({"the", "더"})
+
+
+def _has_article(product: ProductInfo) -> bool:
+    return "the" in _words(product.edition_name or "")
+
+
 # What a one- or two-letter token stands for on a menu.
 _ABBREVIATIONS = {"cs": ("cask", "strength"), "dr": ("distillers", "reserve")}
 
@@ -537,7 +550,8 @@ def _narrow_brand(
                 products.append(product)
     brand_products = list(products)
     if age is not None:
-        products = [product for product in products if product.age_years == age]
+        # The product's age or an older age of the same bottling (accepted_ages.py).
+        products = [product for product in products if product.fits_age(age)]
     # A number on the line other than the age (year, batch, "#2", "16.1") rules out a product
     # whose name has different numbers. The whole line counts, so a variant that is only the
     # brand ("옥토모어" of "Octomore 16.2 (옥토모어)") keeps the number too.
@@ -557,10 +571,13 @@ def _narrow_brand(
         targets = [*catalog.get_normalized_aliases(product.product_id)]
         if product.edition_name:
             targets.append(normalize(product.edition_name))
-        fits.append((product, [
+        fitted = [
             token for token in tokens
             if _token_fits(token, targets) or (_short_letters(token) and _short_token_fits(token, product))
-        ]))
+        ]
+        if fitted and _has_article(product):
+            fitted = [token for token in tokens if token in fitted or token in _ARTICLES]
+        fits.append((product, fitted))
     fitted_somewhere = {token for _, fitted in fits for token in fitted}
 
     full = [product for product, fitted in fits if len(fitted) == len(tokens)]
@@ -618,6 +635,8 @@ def _narrow_brand(
         evidence: dict[str, Any] = dict(brand_evidence)
         if age is not None:
             evidence["ageMatch"] = age
+            if product.age_years != age:
+                evidence["ageAccepted"] = age
         if fitted:
             evidence["editionMatch"] = fitted
         unfitted = [token for token in tokens if token not in fitted and token not in ignored]

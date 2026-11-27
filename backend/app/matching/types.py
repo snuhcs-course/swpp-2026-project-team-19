@@ -38,6 +38,12 @@ class ProductInfo:
     brand_id: UUID | None = None
     # False for a product nobody has checked yet; a match to it is not confirmed (linking_guards).
     verified: bool = True
+    # Older ages of the same bottling, also taken as its age (accepted_ages.py).
+    accepted_ages: tuple[int, ...] = ()
+
+    def fits_age(self, age: int) -> bool:
+        """Whether a line of age `age` can be this product: its age, or one of its accepted ages."""
+        return age == self.age_years or age in self.accepted_ages
 
 
 @dataclass(frozen=True)
@@ -58,6 +64,10 @@ class ResolutionResult:
     proposed_product_id: UUID | None = None
     # For "multi": one exact_match result per product, in menu order (proposed_product_id is None).
     parts: tuple["ResolutionResult", ...] = ()
+    # "non_whisky": the LLM layer read the line as not a whisky and the rules had no candidate for it
+    # (llm_layer, off by default). A note for the reviewer only: status, candidates and the review
+    # state are as without it, and nothing stores or returns it yet.
+    kind_hint: Literal["non_whisky"] | None = None
 
 
 class CatalogLookup(Protocol):

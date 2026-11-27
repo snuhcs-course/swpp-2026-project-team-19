@@ -28,13 +28,24 @@ A product whose edition is only a category word ("Four Roses Bourbon") counts as
 plain bottling. A name the brand rules cannot read, and a brand with nothing to confuse the
 product with, stay confirmed.
 
+missingAge (I5-P59), off unless `missing_age=True` (menu import: MATCHING_MISSING_AGE_GUARD=true).
+The line has no age and the product has one ("Ardbeg Anthology" confirmed as Ardbeg Anthology 14,
+the false merge of I3 and I4): a bar may pour a sibling the catalog does not have. The line has an
+age when its name has a one- or two-digit number that is not part of a longer number, a strength,
+a volume or a price ("12년", "12Y", "Glenfiddich 12", "라프로익10"; not "14.1", "2025", "700ml"), or
+when extraction gave one (`line_age`). Off by default until the numbers are reviewed
+(ai/runs/2026-11-27_i5_p31/report.md 1b).
+
 The rules themselves (staged.py) are not changed: they are frozen for the I3 evaluation
 (ai/docs/i3_eval_freeze.md 4.5), and the guards only ever take a confirmation away.
 """
 
+import os
+import re
 from dataclasses import replace
 
 from app.matching.staged import (
+    _MEASURE,
     BILINGUAL_SEPARATOR,
     _find_brand,
     _parenthesis_variants,
@@ -48,7 +59,8 @@ _CATEGORY_WORDS = frozenset({"bourbon", "whisky", "whiskey"})
 
 
 def apply_linking_guards(name: str | None, result: ResolutionResult, catalog: CatalogLookup, *,
-                         incomplete_names: bool = False) -> ResolutionResult:
+                         incomplete_names: bool = False, missing_age: bool = False,
+                         line_age: int | None = None) -> ResolutionResult:
     if result.status != "exact_match" or result.proposed_product_id is None or not result.candidates:
         return result
     product = catalog.get_product(result.proposed_product_id)
@@ -60,6 +72,8 @@ def apply_linking_guards(name: str | None, result: ResolutionResult, catalog: Ca
     kind = incomplete_name(name or "", product, catalog) if incomplete_names else None
     if kind is not None:
         evidence["incompleteName"] = kind
+    if missing_age and product.age_years is not None and line_age is None and not has_age(name or ""):
+        evidence["missingAge"] = product.age_years
     if not evidence:
         return result
     first = result.candidates[0]
@@ -96,4 +110,22 @@ def incomplete_name(name: str, product: ProductInfo, catalog: CatalogLookup) -> 
               if pid != product.product_id and (p := catalog.get_product(pid)) is not None]
     if age is None:
         return "brand_only" if others and (product.age_years is not None or _has_edition(product)) else None
-    return "age_only" if _has_edition(product) and any(p.age_years == age for p in others) else None
+    return "age_only" if _has_edition(product) and any(p.fits_age(age) for p in others) else None
+
+
+# A one- or two-digit number on its own: not part of "14.1", "2025" or "1,000".
+_AGE_NUMBER = re.compile(r"(?<![\d.,])\d{1,2}(?![\d.,])")
+
+
+def has_age(name: str) -> bool:
+    """Whether the line names an age (missingAge): a one- or two-digit number once strength, volume,
+    servings and price are left out."""
+    return bool(_AGE_NUMBER.search(_MEASURE.sub(" ", name)))
+
+
+def missing_age_guard_enabled() -> bool:
+    """MATCHING_MISSING_AGE_GUARD=true turns the missingAge guard on in menu import (default false)."""
+    value = (os.getenv("MATCHING_MISSING_AGE_GUARD") or "false").lower()
+    if value not in ("true", "false"):
+        raise RuntimeError(f"MATCHING_MISSING_AGE_GUARD must be true or false, got {value!r}")
+    return value == "true"

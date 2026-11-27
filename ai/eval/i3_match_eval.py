@@ -111,11 +111,23 @@ class Backend:
         self.resolve_staged = importlib.import_module("app.matching.staged").resolve_product_staged
         types = importlib.import_module("app.matching.types")
         self.ExtractedProduct, self.ProductInfo = types.ExtractedProduct, types.ProductInfo
+        try:  # older ages of a product (I5-P59, catalog v2.6); rules code before it has none
+            self.accepted_ages = importlib.import_module("app.matching.accepted_ages").accepted_ages
+        except ModuleNotFoundError:
+            self.accepted_ages = None
         match_eval = importlib.import_module("match_eval")
         self.judge, self.burden_kind, self.gold_refs = match_eval.judge, match_eval.burden_kind, match_eval.gold_refs
 
     def resolve(self, name: str, catalog):
         return self.resolve_staged(self.ExtractedProduct(product_name=name), catalog, STAGES)
+
+
+def product_info(be, pid, display_name: str, age, edition, brand_id):
+    """ProductInfo as the server's catalog gives it, with the accepted ages when the rules code (or a
+    backend object without them, such as p24_embedding_compare's) has them."""
+    accepted = getattr(be, "accepted_ages", None)
+    extra = {"accepted_ages": accepted(pid)} if accepted else {}
+    return be.ProductInfo(pid, display_name, age, edition, brand_id, **extra)
 
 
 def sha256_bytes(data: bytes) -> str:
@@ -281,8 +293,8 @@ def build_catalog(be: Backend, bar: str, variant: str, seed: dict, new_products:
         if p["key"] in drop_prod:
             continue
         key_to_id[p["key"]] = pid
-        products.append(be.ProductInfo(pid, p["display_name"], p.get("age_years"), p.get("edition_name"),
-                                       uuid.UUID(p["brand_id"])))
+        products.append(product_info(be, pid, p["display_name"], p.get("age_years"), p.get("edition_name"),
+                                     uuid.UUID(p["brand_id"])))
         aliases += [(pid, a["alias_text"]) for a in p["aliases"] if keep(a, p)]
     if new_products:
         brand_ids = {b["key"]: uuid.UUID(b["id"]) for b in seed["brands"]}
@@ -296,7 +308,7 @@ def build_catalog(be: Backend, bar: str, variant: str, seed: dict, new_products:
                     brand_aliases.append(alias)
             key_to_id[f"new:{key}"] = pid
             display[pid] = p["display_name"]
-            products.append(be.ProductInfo(pid, p["display_name"], p["age_years"], p["edition_name"], brand_id))
+            products.append(product_info(be, pid, p["display_name"], p["age_years"], p["edition_name"], brand_id))
             aliases.append((pid, p["display_name"]))
     canonical = json.dumps({
         "products": sorted([str(x.product_id), x.display_name, x.age_years, x.edition_name, str(x.brand_id)]
@@ -330,8 +342,6 @@ def gold_for(be: Backend, g: str | None, key_to_id: dict, dev: bool) -> str | No
     if g in (None, "unknown", "non_whisky"):
         return g
     refs = [r.removeprefix("new:") for r in be.gold_refs(g)]
-    if dev and refs == ["jack-daniels-apple"]:  # E8: a flavoured whiskey liqueur, out of scope
-        return "non_whisky"
     refs = [r if r in key_to_id else f"new:{r}" for r in refs]
     return ("both:" if g.startswith("both:") else "") + "|".join(refs)
 
@@ -684,11 +694,14 @@ def run_tools(args, layer, be, seed, new_products, photos, bars, bar_catalogs, t
 
 # ---- the rest of menu import (--server-steps) ---------------------------------------------
 
-def server_steps(photos: list[Photo], bar_catalogs: dict[str, BarCatalog], resolved: dict) -> tuple[dict, dict]:
+def server_steps(photos: list[Photo], bar_catalogs: dict[str, BarCatalog], resolved: dict,
+                 missing_age: bool = False) -> tuple[dict, dict]:
     """`resolved` through what menu import does after the matcher (_resolve_and_draft): the
     embedding candidate step, the linking guards and the stored status. Returns the results and
     what each step changed. The embedding index of a bar holds that bar's catalog texts
-    (display names and kept aliases), as the server indexes what the rule matcher matches."""
+    (display names and kept aliases), as the server indexes what the rule matcher matches.
+    missing_age: the missingAge guard (I5-P59, MATCHING_MISSING_AGE_GUARD=true in menu import); the
+    harness has no extracted age, so the line's age is read from its name only."""
     from dataclasses import replace
     try:
         embedding = importlib.import_module("app.matching.embedding")
@@ -714,14 +727,18 @@ def server_steps(photos: list[Photo], bar_catalogs: dict[str, BarCatalog], resol
                 after = embedding.apply_policy(before, rankings[name], min_similarity=floor, model_id=provider.model_id)
                 if after is not before:
                     counts["embedding_filled" if before.status == "unmatched" else "embedding_reordered"] += 1
-            guarded = guards.apply_linking_guards(name, after, bc.catalog)
+            guard_flag = {"missing_age": True} if missing_age else {}  # an older rules checkout has no guard
+            guarded = guards.apply_linking_guards(name, after, bc.catalog, **guard_flag)
             counts["guard_took_confirmation"] += guarded.status != after.status
+            if "missingAge" in (guarded.candidates[0].evidence if guarded.candidates else {}) and guarded is not after:
+                counts["guard_missing_age"] += 1
             status = review.stored_status(guarded)
             if status != guarded.status:
                 counts[f"stored_{guarded.status}_as_{status}"] += 1
                 guarded = replace(guarded, status=status)
             out[(photo.photo_id, name)] = guarded
-    return out, {"embedding_model": provider.model_id, "embedding_min_similarity": floor, "changed": dict(counts)}
+    return out, {"embedding_model": provider.model_id, "embedding_min_similarity": floor, "missing_age_guard": missing_age,
+                 "changed": dict(counts)}
 
 
 # ---- scoring ------------------------------------------------------------------------------
@@ -734,6 +751,7 @@ def score_line(be: Backend, photo: Photo, name: str, graw: str, r, b, bc: BarCat
         return {"bar": photo.bar, "photo_id": photo.photo_id, "name": name, "gold": None, "kind": "unpaired",
                 "status": r.status, "outcome": None, "burden": None, "confirm_recommended": cr, "cr_source": None,
                 "rank1_gold": False, "n_cand": len(r.candidates), "base_status": b.status, "llm_target": target,
+                "base_n_cand": len(b.candidates), "kind_hint": getattr(r, "kind_hint", None),
                 "cands": " || ".join(bc.display.get(c.product_id, "?") for c in r.candidates[:4])}
     in_cat = lambda ref: ref in bc.key_to_id
     outcome = be.judge(g, r, bc.key_to_id, in_cat)
@@ -757,7 +775,8 @@ def score_line(be: Backend, photo: Photo, name: str, graw: str, r, b, bc: BarCat
            "rule": r.candidates[0].evidence.get("rule") if r.candidates else "",
            "cands": " || ".join(bc.display.get(c.product_id, "?") for c in r.candidates[:4]),
            "gold_display": " | ".join(bc.display[bc.key_to_id[x]] for x in refs_of(be, g) if x in bc.key_to_id),
-           "base_status": b.status, "llm_target": target}
+           "base_status": b.status, "llm_target": target,
+           "base_n_cand": len(b.candidates), "kind_hint": getattr(r, "kind_hint", None)}
     if r is not b and r.candidates and r.candidates[0].method == "llm":
         ev = r.candidates[0].evidence
         row["llm"] = {"english_name": ev.get("englishName"), "via": ev.get("via"),
@@ -793,6 +812,52 @@ def stats(rows: list[dict], photos: int) -> dict:
         "from_register": sum(1 for r in rows if r["base_status"] == "unmatched" and r["status"] != "unmatched"),
         "from_register_gold_in": sum(1 for r in rows if r["base_status"] == "unmatched"
                                      and r["status"] != "unmatched" and r["outcome"] == "ambiguous_ok"),
+    }
+
+
+GOLD_CLASS = {"non_whisky": "non_whisky", "known": "whisky", "absent": "whisky", "unknown": "unknown",
+              "unpaired": "unpaired"}
+
+
+def not_whisky_stats(rows: list[dict]) -> dict:
+    """The "not a whisky" note (I5), by gold class (whisky = a product in or out of the catalog).
+
+    flagged: lines with kind_hint (--flag-non-whisky: the LLM said non_whisky and the rules had no
+    candidate). The variants are counted from `llm_kind` whether or not the flag is on:
+      A  the LLM said non_whisky
+      B  A and no rule candidate (what the flag marks)
+      C  A and no candidate in this section's result (after the embedding step in "server")
+    The burden numbers are not changed by the note; `flagged_by_burden` says which of them carry it.
+    """
+    targets = [r for r in rows if r["llm_target"]]
+
+    def by_class(pick) -> dict:
+        c = Counter(GOLD_CLASS[r["kind"]] for r in targets if pick(r))
+        return {k: c[k] for k in ("non_whisky", "whisky", "unknown", "unpaired")}
+
+    def said(r) -> bool:
+        return r.get("llm_kind") == "non_whisky"
+
+    def line(r) -> dict:
+        return {"photo_id": r["photo_id"], "name": r["name"], "gold": r["gold"], "llm_kind": r.get("llm_kind"),
+                "status": r["status"], "cands": r["cands"]}
+
+    flagged = [r for r in targets if r["kind_hint"] == "non_whisky"]
+    return {
+        "llm_targets": by_class(lambda r: True),
+        "llm_kind": {str(k): by_class(lambda r, k=k: r.get("llm_kind") == k)
+                     for k in ("non_whisky", "whisky", "unclear", None)},
+        "flagged": by_class(lambda r: r["kind_hint"] == "non_whisky"),
+        "variant_A": by_class(said),
+        "variant_B": by_class(lambda r: said(r) and r["base_n_cand"] == 0),
+        "variant_C": by_class(lambda r: said(r) and r["n_cand"] == 0),
+        "flagged_by_burden": dict(Counter(str(r["burden"]) for r in flagged)),
+        "flagged_by_status": dict(Counter(r["status"] for r in flagged)),
+        "no_candidate": sum(r["status"] == "unmatched" for r in rows),
+        "no_candidate_not_flagged": sum(r["status"] == "unmatched" and r["kind_hint"] is None for r in rows),
+        "flagged_lines": [line(r) for r in flagged],
+        "said_not_flagged_lines": [line(r) for r in targets if said(r) and r["kind_hint"] is None],
+        "non_whisky_gold_not_said": [line(r) for r in targets if r["kind"] == "non_whisky" and not said(r)],
     }
 
 
@@ -852,6 +917,12 @@ def parse_args(argv=None):
     ap.add_argument("--tools-fallback", default="gemini-3.5-flash-lite", help="used after a quota error; '' for none")
     ap.add_argument("--tools-stub", action="store_true", help="TEST ONLY: a local stub instead of Gemini")
     ap.add_argument("--additions-file", type=Path, help=f"--catalog ops; default: <rules-repo>/{ADDITIONS_FILE}")
+    ap.add_argument("--flag-non-whisky", action="store_true",
+                    help="I5: the LLM layer marks a line it reads as not a whisky when the rules had no candidate "
+                         "(kind_hint); the not_whisky numbers are written either way")
+    ap.add_argument("--missing-age-guard", action="store_true",
+                    help="I5-P59: with --server-steps, the missingAge linking guard (a confirmed line without an age "
+                         "whose product has one becomes a recommended candidate)")
     ap.add_argument("--server-steps", action="store_true",
                     help="also score the result after the embedding step, the linking guards and the stored status")
     ap.add_argument("--json", type=Path, required=True)
@@ -866,6 +937,8 @@ def parse_args(argv=None):
         ap.error("--extraction is for --set i3")
     if args.server_steps and args.llm and args.llm_mode == "tools":
         ap.error("--server-steps is for rules or rules + M3a")
+    if args.missing_age_guard and not args.server_steps:
+        ap.error("--missing-age-guard needs --server-steps (the guards run there)")
     return args
 
 
@@ -981,13 +1054,22 @@ def main(argv=None) -> dict:
         for photo in photos:
             for name, _ in photo.lines:
                 b = base[(photo.photo_id, name)]
+                flag = {"flag_non_whisky": True} if args.flag_non_whisky else {}  # an older rules checkout has no flag
                 resolved[(photo.photo_id, name)] = (b if b.status in CONFIRMED else engines[photo.bar].resolve(
-                    photo.photo_id, name, bar_catalogs[photo.bar].catalog, b, use_m3b=False))
-        llm_rows = rows_for(resolved)
+                    photo.photo_id, name, bar_catalogs[photo.bar].catalog, b, use_m3b=False, **flag))
+
+        def with_llm_kind(rows: list[dict]) -> list[dict]:
+            for row in rows:
+                t = engines[row["bar"]].translation(row["photo_id"], row["name"]) if row["llm_target"] else None
+                row["llm_kind"] = t["kind"] if t else None
+            return rows
+
+        llm_rows = with_llm_kind(rows_for(resolved))
         final, final_complete = resolved, stop is None and llm.counts["cache_miss"] == 0
         lat = [p["latency_ms"] for p in photo_runs if p.get("latency_ms") is not None]
         result["llm"] = {
             **summarize(llm_rows, photos, missed_known), "rows": llm_rows, "photo_runs": photo_runs,
+            "flag_non_whisky": args.flag_non_whisky, "not_whisky": not_whisky_stats(llm_rows),
             "complete": stop is None and llm.counts["cache_miss"] == 0,
             "stop_reason": stop, "cache": args.cache.as_posix(), "api_calls": llm.api_calls,
             "counts": dict(llm.counts),
@@ -999,9 +1081,12 @@ def main(argv=None) -> dict:
         }
 
     if args.server_steps:
-        served, steps = server_steps(photos, bar_catalogs, final)
-        result["server"] = {**summarize(rows_for(served), photos, missed_known), "rows": rows_for(served),
+        served, steps = server_steps(photos, bar_catalogs, final, missing_age=args.missing_age_guard)
+        served_rows = rows_for(served)
+        result["server"] = {**summarize(served_rows, photos, missed_known), "rows": served_rows,
                             "after": "llm" if final is not base else "rules", "complete": final_complete, **steps}
+        if args.llm and args.llm_mode == "m3a":
+            result["server"]["not_whisky"] = not_whisky_stats(with_llm_kind(served_rows))
 
     args.json.parent.mkdir(parents=True, exist_ok=True)
     args.json.write_text(json.dumps(result, ensure_ascii=False, indent=1, default=str) + "\n", encoding="utf-8")
@@ -1028,6 +1113,14 @@ def print_summary(result: dict) -> None:
               f"  wrong CR {a['wrong_cr']}  accept-err {fmt(a['accept_err_rate'], 4)}"
               f"  hard/photo {fmt(a['hard_per_photo'], 2)}  CR rule {a['cr_rule']['correct']}/{a['cr_rule']['n']}"
               f"  CR LLM {a['cr_llm']['correct']}/{a['cr_llm']['n']}")
+    for matcher in ("llm", "server"):
+        nw = result.get(matcher, {}).get("not_whisky")
+        if nw:
+            f, a, t = nw["flagged"], nw["variant_A"], nw["llm_targets"]
+            print(f"  {matcher:6s} not-whisky note: flagged non-whisky {f['non_whisky']}/{t['non_whisky']}"
+                  f"  whisky {f['whisky']}/{t['whisky']}  unknown {f['unknown']}/{t['unknown']}"
+                  f"  (LLM said non_whisky: {a['non_whisky']}/{a['whisky']}/{a['unknown']})"
+                  f"  no candidate {nw['no_candidate']}, of them not flagged {nw['no_candidate_not_flagged']}")
     if "llm" in result:
         llm = result["llm"]
         print(f"  LLM complete={llm['complete']} api_calls={llm['api_calls']} counts={llm['counts']}"

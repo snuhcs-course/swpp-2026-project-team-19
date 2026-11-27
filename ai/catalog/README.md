@@ -117,7 +117,7 @@ main에는 적재 대상인 `catalog_v2_service.json`과 `bars_v2.json`만 있�
 
 - **새 상품 별칭:** 표준 영문명(`standard`), 그리고 그 상품으로 연결된 메뉴판 인쇄 표기(`menu:<바>`)입니다. 기존 v1 상품에도 그 바의 메뉴 표기를 별칭으로 넣었습니다. 확인된 표기는 모두 별칭으로 넣어 별칭 단계에서 최대한 걸러내는 것이 목표입니다(정답 검수에서 "추정"으로 연결한 줄 포함).
 - **표기 규칙:** `한글 / 영문` 줄은 부분마다 별칭 하나, 괄호 병기(`Ardbeg 10y (아드벡)`, `글렌모렌지(Glenmorangie) 12년 오리지널`)는 인쇄 그대로 한 별칭입니다. 오드비 행사 줄의 꼬리표 ` / 행사`는 별칭에 넣지 않았습니다. `unknown`·`non_whisky`·`both:` 줄은 별칭을 만들지 않습니다.
-- **제외:** `jack-daniels-apple`(Tennessee Apple, 위스키 리큐어)는 비위스키라 넣지 않았습니다(`excluded_non_whisky`).
+- **제외:** `jack-daniels-apple`(Tennessee Apple, 위스키 리큐어)는 비위스키라 넣지 않았습니다(`excluded_non_whisky`). → 2026-11-21 v2.4에서 상품으로 넣었습니다(15장).
 - **id:** v1과 같은 UUIDv5 네임스페이스 `6b1a1f4e-19b0-4c7a-9a7e-b0771e3a0019`. 재료는 `brand:<key>`, `balias:<브랜드 key>:<표기>`, `product:<key>`, `palias:<상품 key>:<표기>`, `bar:<key>`입니다.
 
 ## 9. 적재하지 않는 필드 (v2 추가)
@@ -204,3 +204,54 @@ main에는 적재 대상인 `catalog_v2_service.json`과 `bars_v2.json`만 있�
 - **줄 처리:** `unknown`·`non_whisky` 줄은 건너뜁니다. `both:` 줄(한 줄에 상품 두세 개, 예: `Wild Turkey 81 / 101`)은 각 상품에 그 줄의 옵션을 줍니다(I2 데모에는 없던 경우). 가격이 null인 줄은 옵션 없이 항목만 둡니다.
 - **보류 바를 넣는 법:** 카카오맵에서 주소·좌표를 확인해 `pending_bars`의 항목을 `bars`로 옮기고 생성기를 다시 돌리면 메뉴 파일이 `ai/catalog/`로 나옵니다(`pending_i3/`의 옛 파일은 지움).
 - **적재 순서:** 배포 후 Seed catalog `dry-run` → `apply` → `demo-menus-dry-run` → `demo-menus-apply`. `demo-menus-*`는 기존 데모 4곳(위스키복춘, 미라보, 수이, 오드비)의 메뉴판도 다시 덮어씁니다.
+
+## 15. v2.4 잭다니엘 테네시 애플 (2026-11-21, I5)
+
+플레이버드 위스키도 위스키로 제공하기로 해(박진우, 2026-11-21) `jack-daniels-apple`을 `excluded_non_whisky`에서 빼고 상품으로 넣었습니다. `catalog_v2_service.json`의 `version`은 `catalog_v2_4_service`입니다. 파일 이름은 그대로입니다.
+
+- **상품:** `Jack Daniel's Tennessee Apple` (브랜드 `jack_daniels`, edition `Tennessee Apple`, `sources` 미라보·오드비). 상품 529 → 530, 상품 별칭 4262 → 4271.
+- **별칭 9개:** 표준 영문명 1(`standard`), 메뉴판 표기 2(`menu:미라보` `잭다니엘(Jack Daniel) 애플`, `menu:오드비` `잭다니엘 애플`. 뒤의 것은 앞 표기의 괄호를 뺀 것과 같아 `template:paren-strip`도 출처로 적음), 통상 표기 6(`generated:claude-2026-11-21`: `Jack Daniel's Apple`, `잭 다니엘스 테네시 애플`, `잭다니엘 테네시 애플`, `잭 다니엘스 애플`, `잭다니엘스 애플`, `잭 대니얼스 테네시 애플`). 통상 표기 6개는 웹 검색 없이 Claude가 쓴 것이고 박진우 검수 전입니다.
+- **id:** 8장과 같은 규칙(`product:jack-daniels-apple`, `palias:jack-daniels-apple:<표기>`).
+- **검사:** `check_catalog_v2.py`(브랜치 `i2-catalog-v2`의 것)로 상품 간·브랜드 간 정규화 충돌 0, 무결성 OK.
+- **평가 스냅샷은 그대로입니다.** `catalog_v2_eval_5bars.json`, `catalog_v2_eval_5bars_drop_products.json`은 P47 때의 기록이라 고치지 않았습니다(`excluded_non_whisky`에 그대로 있음).
+- **데모 메뉴 seed는 그대로입니다.** `menu_seed_mirabeau_demo_v1.json`, `menu_seed_odbi_demo_v1.json`에는 이 줄이 없습니다(생성 당시 `non_whisky`·카탈로그에 없는 상품이라 건너뜀). 게시 메뉴에 넣으려면 `build_menu_seeds_demo.py`를 다시 돌려야 합니다.
+- **적재:** 운영 DB에는 아직 넣지 않았습니다(Seed catalog 워크플로).
+
+## 16. v2.5 글렌모렌지 연수 (2026-11-27, I5-P59)
+
+지금 팔리는 병의 연수로 `age_years`를 고쳤습니다. 값은 I4 AI 백로그(2026-11-13) 0절에 적힌 그대로입니다. `version`은 `catalog_v2_5_service`입니다.
+
+| 상품 | 전 | 후 |
+|---|---|---|
+| `glenmorangie-original` (The Original) | 10 | 12 |
+| `glenmorangie-quinta-ruban` | 없음 | 14 |
+| `glenmorangie-lasanta` | 없음 | 12 (옛 병의 연수였음. v2.6에서 15로 고침, 17장) |
+| `glenmorangie-nectar-dor` | 없음 | 16 |
+
+- **별칭은 그대로입니다.** The Original에는 옛 연수 별칭(`Glenmorangie 10`, `글렌모렌지10`, 템플릿 `Glenmorangie The Original Aged 10 Years`, `글렌모렌지 오리지널 10년 숙성`)이 남아 있습니다. 메뉴에 옛 병이 남아 있을 수 있어 지우지 않았습니다.
+- **옛 연수로 적힌 메뉴 줄**("오리지날 10년", "라산타 15Y")은 추출이 연수를 넘기면 연수 불일치(`ageConflict`)로 확정되지 않고 후보로 남습니다. 측정은 `ai/runs/2026-11-27_i5_p31/report.md` 1a절. v2.6부터는 받아 주는 연수로 확정됩니다(17장).
+- 평가 스냅샷(`catalog_v2_eval_5bars*.json`)과 운영 DB는 고치지 않았습니다.
+
+## 17. v2.6 라산타 연수와 받아 주는 연수 (2026-11-27, I5-P59)
+
+박진우 결정(2026-11-27): 연수가 바뀐 병은 옛 병과 새 병을 둘 다 받아 주고, 상품은 하나로 둡니다(바에는 두 병이 섞여 있음). `version`은 `catalog_v2_6_service`입니다.
+
+| 상품 | 대표 연수 (`age_years`, 새 병) | 받아 주는 연수 (옛 병) |
+|---|---|---|
+| `glenmorangie-original` (The Original) | 12 | 10 |
+| `glenmorangie-lasanta` | **15** (v2.5의 12 → 고침, 2025년 병 변경) | 12 |
+| `glenmorangie-quinta-ruban` | 14 | 12 |
+| `glenmorangie-nectar-dor` | 16 | 없음 (옛 연수는 출처가 엇갈려 넣지 않음) |
+
+- **이 파일에서 바뀐 것은 Lasanta의 `age_years`(12 → 15)와 `version`뿐입니다.** 받아 주는 연수는 이 파일이 아니라 매칭 모듈의 표 `backend/app/matching/accepted_ages.py`에 상품 id로 둡니다. 서버는 운영 DB의 상품 행만 읽고(`DbCatalog`, `CatalogSnapshot`), DB 행의 id는 `seed_catalog.py`가 이 파일의 id 그대로 넣으므로, 표를 매칭 모듈에 두면 DB 스키마와 API 응답을 바꾸지 않고 서버에 닿습니다. 평가 하네스(`ai/eval/i3_match_eval.py`)와 `InMemoryCatalog.from_seed`도 같은 표를 씁니다.
+- **동작:** 메뉴 줄의 연수(줄 이름의 것, 추출이 넘긴 `age_years` 모두)가 대표 연수나 받아 주는 연수면 연수가 맞는 것으로 봅니다. 연수 불일치(`ageConflict`)가 아니고, 브랜드 + 연수 단계(S2)도 그 연수로 상품을 찾습니다("글렌모렌지 12" → Original, Lasanta, Quinta Ruban, 12 Calvados 중 고르기). 받아 주는 연수로 맞으면 근거에 `ageAccepted: <연수>`가 남습니다. 업주가 고른 상품 검사(`pick_check`)와 LLM 층의 연수 거부(`age_mismatch`)도 같습니다.
+- **별칭은 그대로입니다.** The Original의 옛 연수 별칭(`Glenmorangie 10`, `글렌모렌지10` 등)은 이제 연수 불일치에 걸리지 않습니다.
+- 평가 스냅샷(`catalog_v2_eval_5bars*.json`)과 운영 DB는 고치지 않았습니다. 옛 하네스 `ai/eval/match_eval.py`의 `load_catalog`(P47 이전 평가, I3 동결 파일)는 받아 주는 연수를 채우지 않습니다.
+- 측정: `ai/runs/2026-11-27_i5_p31/report.md` "낮 실행" 절.
+
+## 18. v2.7 The Nectar (2026-11-27, I5-P59)
+
+병 이름이 "The Nectar"로 바뀌어(박진우 결정, 2026-11-27) `glenmorangie-nectar-dor`의 `display_name`을 `Glenmorangie Nectar D'Or` → `Glenmorangie The Nectar`, `edition_name`을 `Nectar D'Or` → `The Nectar`로 고쳤습니다. `version`은 `catalog_v2_7_service`입니다.
+
+- **key, id, 별칭은 그대로입니다.** 정답 파일과 메뉴 seed가 key·id로 가리키므로 바꾸지 않았습니다. 옛 이름 `Glenmorangie Nectar D'Or`(표준 별칭), `Nectar d'Or`, `글렌모렌지 넥타도르` 등은 별칭으로 남아 옛 병 메뉴 줄도 그대로 확정됩니다. `Glenmorangie The Nectar` 별칭은 원래 있었습니다.
+- 매칭 결과(dev, I3 규칙만·M3a 재평가)는 v2.6과 줄 단위로 같습니다. "글렌모렌지 더 넥타 16Y"는 여전히 후보 1개 + 확인 권장이고, 이유가 에디션 `D'Or`(`editionOnlyInProduct`)에서 일반어 "더"를 빼고 고른 경우(`ignoredWords`, 확정하지 않는 I4 규칙)로 바뀌었습니다.

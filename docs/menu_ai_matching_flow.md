@@ -733,6 +733,8 @@ extracted_options #2
 
 > **일반 단어와 짧은 영문자 토큰 (I4):** S2·S2b의 에디션 토큰 규칙 두 가지. (1) 한두 글자 영문자 토큰(`PX`, `CS`, `DR`)은 별칭 안 어디에 들어 있는지로 맞추지 않고, 상품 표준명의 온전한 단어일 때만 그 상품에 맞는다. `CS`는 Cask Strength, `DR`은 Distillers Reserve로 읽는다(`라프로익 10년 CS` → Laphroaig 10 Cask Strength 확정, `Yamazaki Dr` → Yamazaki Distillers Reserve 확정). 풀어 쓴 단어는 `editionOnlyInProduct` 계산에서도 줄에 있는 것으로 센다. (2) 어느 위스키에나 붙는 단어(`싱글몰트`, `스카치`, `버번`, `캐스크`, `오크`, `피니시`, `single malt`, `the` 등, `staged.py`의 `_GENERIC_TOKENS`)가 그 연수의 어떤 상품에도 맞지 않으면 빼고 본다. 일반 단어만 남아 에디션 없는 상품을 권장하려는 경우에는 그 브랜드의 모든 상품(연수와 숫자로 거르기 전, 적힌 그대로와 어휘집의 영문 모두)을 본다. `Glenfiddich 12 Bourbon`의 `bourbon`은 14년 Bourbon Barrel Reserve에 있으므로, `라프로익 10년 캐스크`의 `캐스크`(cask)는 Cask Strength에 있으므로 에디션 없는 상품을 권장하지 않는다. 일반 단어가 아닌 토큰이 상품 하나를 고른 줄은 브랜드의 다른 상품을 보지 않는다(`글렌알라키 12년 모스카텔 캐스크 피니시` → Moscatel Wood Finish 권장). S2b가 켜져 있고 줄이 확정되지 않았을 때만 적용한다. 남은 토큰에 일반 단어가 아닌 것이 있고 그 토큰들이 상품 하나에 모두 맞으면 그 상품을, 남은 토큰이 없고 연수가 있으면 그 연수의 에디션 없는 상품 하나를 확인 권장(`confirmRecommended`)으로 남기고 뺀 단어를 evidence `ignoredWords`에 적는다(`글렌피딕 12년 싱글몰트` → Glenfiddich 12 권장). 자동 확정(`exact_match`)은 하지 않는다. 다른 메뉴에서는 그 단어가 에디션일 수 있기 때문이다. 연수 없이 일반 단어만 있는 줄은 아무것도 고르지 않고, 어느 상품에 맞는 일반 단어(`Cask Strength`의 `cask`)는 빼지 않는다. `위스키`·`whisky`·`whiskey`는 이 규칙의 대상이 아니다. I3부터 에디션 토큰이 되기 전에 빠지는 중립어라(`_NEUTRAL_TOKENS`) 확정을 막지 않는다(`Glenfiddich 12 Whisky` → Glenfiddich 12 확정, `Glenfiddich 12 Scotch` → 권장). 측정(규칙만, LLM 층 없음): dev 836줄 정답 618 → 623, I3 675줄 470 → 472(as-is), 오매칭과 틀린 권장은 그대로.
 
+> **에디션 이름의 관사 (I5-P59, 2026-11-27):** 줄의 관사(`the`, `더`)는 에디션 이름에 "The"가 있는 상품(`The Nectar`, `The Original`)에서, 같은 줄의 다른 토큰도 그 상품에 맞을 때 그 에디션 이름의 일부로 맞는 것으로 친다(`staged._has_article`). 그래서 위 (2)의 일반 단어로 빠지지 않고 확정을 막지 않는다(`글렌모렌지 더 넥타 16Y` → The Nectar 확정, `브룩라디 더 클래식` → The Classic Laddie 확정). 한글 `더`는 한 글자라 원래 어떤 별칭에도 맞지 않았다. 관사만 있거나 관사 없는 상품을 가리키는 줄(`글렌모렌지 더 시그넷`)은 전과 같다. 측정(규칙만 + 서버 단계, 카탈로그 v2.7): dev 627 → 630, I3 full 500 → 502, ops 511 → 513, 사라진 맞는 확정과 새 오매칭 0.
+
 ```text
 for each extracted_item:
     if extracted_line_type != product:
@@ -1051,6 +1053,7 @@ brand_aliases
 
 - 추출 연수와 후보 연수가 같으면 강한 근거로 기록한다(`ageExact`).
 - 둘 중 하나가 null이면 비교하지 않으며 충돌로 보지 않는다.
+- 받아 주는 연수(I5-P59): 병의 연수가 바뀐 상품은 옛 병의 연수도 그 상품의 연수로 본다(`backend/app/matching/accepted_ages.py`, `ProductInfo.accepted_ages`. The Original 10, Lasanta 12, Quinta Ruban 12). 그 연수는 `ageConflict`가 아니고 근거에 `ageAccepted`를 남긴다. 브랜드 + 연수 단계(S2), 업주가 고른 상품 검사(17장 표 1행)와 LLM 층의 연수 거부도 같다.
 - 둘 다 존재하고 값이 다르면 자동 확정하지 않는다. 후보는 지우지 않고 남기되 `ambiguous`로 두고 `ageConflict`를 기록한다. AI가 연수를 잘못 읽었을 때 운영자가 그 후보를 바로 고를 수 있게 하기 위해서다.
 
 ### 10.2 에디션

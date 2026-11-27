@@ -101,10 +101,13 @@ def _compare_attributes(
     """Record age and edition signals in `evidence`; return True if exact match is not allowed."""
     blocks_exact = False
 
-    # Age: a conflict only when both values exist and differ.
+    # Age: a conflict only when both values exist and differ. An older age of the same bottling
+    # (accepted_ages.py) is no conflict; the evidence says which age matched.
     if item.age_years is not None and product.age_years is not None:
         if item.age_years == product.age_years:
             evidence["ageExact"] = True
+        elif product.fits_age(item.age_years):
+            evidence["ageAccepted"] = item.age_years
         else:
             evidence["ageConflict"] = True
             blocks_exact = True

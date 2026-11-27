@@ -3594,12 +3594,12 @@
         },
         {
           "name": "잭다니엘 애플",
-          "gold": "non_whisky",
-          "kind": "non_whisky",
-          "outcome": "unmatched",
-          "status": "unmatched",
-          "state": "no_candidate",
-          "rank1": null
+          "gold": "jack-daniels-apple",
+          "kind": "known",
+          "outcome": "correct",
+          "status": "exact_match",
+          "state": "confirmed",
+          "rank1": "jack-daniels-apple"
         }
       ],
       "009_오드비_09": [
@@ -7386,12 +7386,12 @@
         },
         {
           "name": "잭다니엘 애플",
-          "gold": "non_whisky",
-          "kind": "non_whisky",
-          "outcome": "unmatched",
-          "status": "unmatched",
-          "state": "no_candidate",
-          "rank1": null
+          "gold": "jack-daniels-apple",
+          "kind": "known",
+          "outcome": "correct",
+          "status": "exact_match",
+          "state": "confirmed",
+          "rank1": "jack-daniels-apple"
         }
       ],
       "009_오드비_09": [

@@ -79,3 +79,16 @@ signing.properties
 /ai/runs/2026-11-27_i5_pr_prep/**/*.jsonl
 /ai/runs/2026-11-27_i5_pr_prep/**/*.log
 /ai/runs/2026-11-27_i5_pr_prep/**/*.txt
+
+# Run records of the I5 matching runs (not-whisky note, P59/P31) stay on the runner's PC (wiki
+# Testing 4.4); only the reports (.md) are committed. mixed_report.json is the expected report
+# that ai/regression/test_mixed_report.py compares with, not a run record.
+/ai/runs/2026-11-21_i5_not_whisky/**/*.json
+/ai/runs/2026-11-21_i5_not_whisky/**/*.jsonl
+/ai/runs/2026-11-21_i5_not_whisky/**/*.log
+/ai/runs/2026-11-21_i5_not_whisky/**/*.txt
+/ai/runs/2026-11-27_i5_p31/**/*.json
+/ai/runs/2026-11-27_i5_p31/**/*.jsonl
+/ai/runs/2026-11-27_i5_p31/**/*.log
+/ai/runs/2026-11-27_i5_p31/**/*.txt
+!/ai/runs/2026-11-21_i5_not_whisky/mixed_report.json
