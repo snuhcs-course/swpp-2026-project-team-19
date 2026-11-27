@@ -63,7 +63,7 @@ Tests:
 Not verified:
 
 - The tests that need a database (one new: the database catalogs fill the accepted ages); menu import with real extracted ages or with `MATCHING_MISSING_AGE_GUARD=true`.
-- The Glenmorangie ages and names themselves (the team's decision, no web check).
+- The Glenmorangie ages and the new name were checked against trade press on 2026-11-27 (The Original 12, Lasanta 15 since 2025, Quinta Ruban 14, The Nectar 16). The older age of Nectar D'Or is reported differently by source, so no older age is accepted for it.
 - The end-to-end run with Gemini 3.8 Flash extraction (about $0.92 per run of 33 photos): after the OpenRouter extraction PR is on `main`.
 
 ## Notes for reviewers (optional)
