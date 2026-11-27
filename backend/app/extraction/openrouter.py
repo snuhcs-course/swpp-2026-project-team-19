@@ -221,10 +221,27 @@ def _checked(response: Any) -> dict[str, Any]:
     choices = data.get("choices")
     if not choices:
         raise _Transient("HTTP 200 without choices")
+    problem = _shape_problem(choices, data.get("usage"))
+    if problem:
+        raise _Transient(f"HTTP 200 with a malformed body: {problem}")
     if choices[0].get("finish_reason") == "error":
         error = choices[0].get("error")
         _fail(_code(error), _describe(response, error))
     return data
+
+
+def _shape_problem(choices: Any, usage: Any) -> str | None:
+    """What in a 200 body `answer` could not read, or None. A malformed body is a failed call, not a crash."""
+    if not isinstance(choices, list) or not isinstance(choices[0], dict):
+        return "choices is not a list of objects"
+    if not isinstance(choices[0].get("message") or {}, dict):
+        return "the choice's message is not an object"
+    if not isinstance(usage or {}, dict) or not isinstance((usage or {}).get("completion_tokens_details") or {}, dict):
+        return "usage is not an object"
+    cost = (usage or {}).get("cost")
+    if cost is not None and (isinstance(cost, bool) or not isinstance(cost, (int, float))):
+        return "usage.cost is not a number"
+    return None
 
 
 def _code(error: Any) -> int:

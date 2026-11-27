@@ -345,6 +345,29 @@ def test_a_call_without_an_abandoned_attempt_is_not_marked():
     assert not hasattr(caught.value, "abandoned_attempts")
 
 
+@pytest.mark.parametrize("reply", [
+    {"choices": [None]},
+    {"choices": "not a list"},
+    {"choices": [{"message": "not an object", "finish_reason": "stop"}]},
+    {"choices": [{"message": {"content": "{}"}, "finish_reason": "stop"}], "usage": ["not", "an", "object"]},
+    {"choices": [{"message": {"content": "{}"}, "finish_reason": "stop"}], "usage": {"completion_tokens_details": 3}},
+    {"choices": [{"message": {"content": "{}"}, "finish_reason": "stop"}], "usage": {"cost": "0.03"}},
+])
+def test_a_malformed_200_body_is_a_failed_call_that_is_retried_not_a_crash(reply, no_waiting):
+    http = FakeHttp(Response(200, reply), ok())
+
+    result = openrouter.call_with_retries(replace(OPENROUTER, max_attempts=2), body(), http)
+
+    assert result.attempts == 2 and len(no_waiting) == 1
+
+
+def test_a_malformed_200_body_every_time_goes_to_the_gemini_api():
+    meta = run(FakeHttp(Response(200, {"choices": [None]})))["meta"]
+
+    assert meta["route"]["stage"] == 2 and meta["route"]["skipped"][0]["reason"] == "ModelCallError"
+    assert "malformed body" in meta["route"]["skipped"][0]["message"]
+
+
 def test_the_default_client_is_httpx(monkeypatch):
     http = FakeHttp(ok())
     monkeypatch.setattr(httpx, "post", http.post)
