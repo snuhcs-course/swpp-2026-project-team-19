@@ -110,7 +110,7 @@ def incomplete_name(name: str, product: ProductInfo, catalog: CatalogLookup) -> 
               if pid != product.product_id and (p := catalog.get_product(pid)) is not None]
     if age is None:
         return "brand_only" if others and (product.age_years is not None or _has_edition(product)) else None
-    return "age_only" if _has_edition(product) and any(p.age_years == age for p in others) else None
+    return "age_only" if _has_edition(product) and any(p.fits_age(age) for p in others) else None
 
 
 # A one- or two-digit number on its own: not part of "14.1", "2025" or "1,000".

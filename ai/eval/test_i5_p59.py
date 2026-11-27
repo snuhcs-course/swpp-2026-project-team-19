@@ -2,6 +2,7 @@
 
 import json
 import sys
+import uuid
 from types import SimpleNamespace
 
 import i3_match_eval as h
@@ -11,15 +12,41 @@ import pytest
 from test_i3_match_eval import be, files  # noqa: F401 (fixtures)
 
 
-# ---------- 1a: catalog v2.5 ----------
+# ---------- 1a: catalog v2.5, v2.6 ----------
 
-def test_catalog_v2_5_has_the_current_glenmorangie_ages():
+def test_catalog_v2_6_has_the_current_glenmorangie_ages():
     seed = json.loads((h.REPO_ROOT / "ai" / "catalog" / "catalog_v2_service.json").read_text(encoding="utf-8"))
     ages = {p["key"]: p["age_years"] for p in seed["products"] if p["key"].startswith("glenmorangie")}
-    assert seed["version"] == "catalog_v2_5_service"
+    assert seed["version"] == "catalog_v2_6_service"
+    # v2.6: Lasanta 12 -> 15 (the bottle changed in 2025)
     assert (ages["glenmorangie-original"], ages["glenmorangie-quinta-ruban"], ages["glenmorangie-lasanta"],
-            ages["glenmorangie-nectar-dor"]) == (12, 14, 12, 16)
+            ages["glenmorangie-nectar-dor"]) == (12, 14, 15, 16)
     assert ages["glenmorangie-18"] == 18 and ages["glenmorangie-signet"] is None  # the others as before
+
+
+# ---------- accepted ages in the harness (v2.6) ----------
+
+def test_the_harness_catalog_has_the_accepted_ages_of_the_rules_code(be):  # noqa: F811
+    seed = json.loads((h.REPO_ROOT / "ai" / "catalog" / "catalog_v2_service.json").read_text(encoding="utf-8"))
+    bc = h.build_catalog(be, "테스트바", "service", seed)
+    ages = {key: bc.catalog.get_product(bc.key_to_id[key]).accepted_ages for key in
+            ("glenmorangie-original", "glenmorangie-lasanta", "glenmorangie-quinta-ruban", "glenmorangie-nectar-dor")}
+    assert ages == {"glenmorangie-original": (10,), "glenmorangie-lasanta": (12,),
+                    "glenmorangie-quinta-ruban": (12,), "glenmorangie-nectar-dor": ()}
+    r = be.resolve("글렌모렌지 12", bc.catalog)
+    assert r.status == "ambiguous"
+    assert {c.product_id for c in r.candidates} == {bc.key_to_id[k] for k in (
+        "glenmorangie-original", "glenmorangie-lasanta", "glenmorangie-quinta-ruban", "glenmorangie-12-calvados")}
+    r = be.resolve("Glenmorangie 15yr", bc.catalog)
+    assert [c.product_id for c in r.candidates] == [bc.key_to_id["glenmorangie-lasanta"]]
+
+
+def test_the_harness_builds_products_without_accepted_ages_for_older_rules_code(be):  # noqa: F811
+    older = SimpleNamespace(ProductInfo=lambda *args, **kwargs: (args, kwargs), accepted_ages=None)
+    assert h.product_info(older, "pid", "X 12", 12, None, "bid") == (("pid", "X 12", 12, None, "bid"), {})
+    bare = SimpleNamespace(ProductInfo=older.ProductInfo)  # no accepted_ages attribute at all
+    assert h.product_info(bare, "pid", "X", None, None, None) == (("pid", "X", None, None, None), {})
+    assert h.product_info(be, uuid.uuid4(), "X", None, None, None).accepted_ages == ()  # a product not in the table
 
 
 def test_brand_and_age_now_reach_the_edition_product_of_that_age(be):  # noqa: F811

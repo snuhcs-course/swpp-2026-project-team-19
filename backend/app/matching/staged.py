@@ -537,7 +537,8 @@ def _narrow_brand(
                 products.append(product)
     brand_products = list(products)
     if age is not None:
-        products = [product for product in products if product.age_years == age]
+        # The product's age or an older age of the same bottling (accepted_ages.py).
+        products = [product for product in products if product.fits_age(age)]
     # A number on the line other than the age (year, batch, "#2", "16.1") rules out a product
     # whose name has different numbers. The whole line counts, so a variant that is only the
     # brand ("옥토모어" of "Octomore 16.2 (옥토모어)") keeps the number too.
@@ -618,6 +619,8 @@ def _narrow_brand(
         evidence: dict[str, Any] = dict(brand_evidence)
         if age is not None:
             evidence["ageMatch"] = age
+            if product.age_years != age:
+                evidence["ageAccepted"] = age
         if fitted:
             evidence["editionMatch"] = fitted
         unfitted = [token for token in tokens if token not in fitted and token not in ignored]

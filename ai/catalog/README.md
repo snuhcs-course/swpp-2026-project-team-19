@@ -225,9 +225,26 @@ main에는 적재 대상인 `catalog_v2_service.json`과 `bars_v2.json`만 있�
 |---|---|---|
 | `glenmorangie-original` (The Original) | 10 | 12 |
 | `glenmorangie-quinta-ruban` | 없음 | 14 |
-| `glenmorangie-lasanta` | 없음 | 12 |
+| `glenmorangie-lasanta` | 없음 | 12 (옛 병의 연수였음. v2.6에서 15로 고침, 17장) |
 | `glenmorangie-nectar-dor` | 없음 | 16 |
 
 - **별칭은 그대로입니다.** The Original에는 옛 연수 별칭(`Glenmorangie 10`, `글렌모렌지10`, 템플릿 `Glenmorangie The Original Aged 10 Years`, `글렌모렌지 오리지널 10년 숙성`)이 남아 있습니다. 메뉴에 옛 병이 남아 있을 수 있어 지우지 않았습니다.
-- **옛 연수로 적힌 메뉴 줄**("오리지날 10년", "라산타 15Y")은 추출이 연수를 넘기면 연수 불일치(`ageConflict`)로 확정되지 않고 후보로 남습니다. 측정은 `ai/runs/2026-11-27_i5_p31/report.md` 1a절.
+- **옛 연수로 적힌 메뉴 줄**("오리지날 10년", "라산타 15Y")은 추출이 연수를 넘기면 연수 불일치(`ageConflict`)로 확정되지 않고 후보로 남습니다. 측정은 `ai/runs/2026-11-27_i5_p31/report.md` 1a절. v2.6부터는 받아 주는 연수로 확정됩니다(17장).
 - 평가 스냅샷(`catalog_v2_eval_5bars*.json`)과 운영 DB는 고치지 않았습니다.
+
+## 17. v2.6 라산타 연수와 받아 주는 연수 (2026-11-27, I5-P59)
+
+박진우 결정(2026-11-27): 연수가 바뀐 병은 옛 병과 새 병을 둘 다 받아 주고, 상품은 하나로 둡니다(바에는 두 병이 섞여 있음). `version`은 `catalog_v2_6_service`입니다.
+
+| 상품 | 대표 연수 (`age_years`, 새 병) | 받아 주는 연수 (옛 병) |
+|---|---|---|
+| `glenmorangie-original` (The Original) | 12 | 10 |
+| `glenmorangie-lasanta` | **15** (v2.5의 12 → 고침, 2025년 병 변경) | 12 |
+| `glenmorangie-quinta-ruban` | 14 | 12 |
+| `glenmorangie-nectar-dor` | 16 | 없음 (옛 연수는 출처가 엇갈려 넣지 않음) |
+
+- **이 파일에서 바뀐 것은 Lasanta의 `age_years`(12 → 15)와 `version`뿐입니다.** 받아 주는 연수는 이 파일이 아니라 매칭 모듈의 표 `backend/app/matching/accepted_ages.py`에 상품 id로 둡니다. 서버는 운영 DB의 상품 행만 읽고(`DbCatalog`, `CatalogSnapshot`), DB 행의 id는 `seed_catalog.py`가 이 파일의 id 그대로 넣으므로, 표를 매칭 모듈에 두면 DB 스키마와 API 응답을 바꾸지 않고 서버에 닿습니다. 평가 하네스(`ai/eval/i3_match_eval.py`)와 `InMemoryCatalog.from_seed`도 같은 표를 씁니다.
+- **동작:** 메뉴 줄의 연수(줄 이름의 것, 추출이 넘긴 `age_years` 모두)가 대표 연수나 받아 주는 연수면 연수가 맞는 것으로 봅니다. 연수 불일치(`ageConflict`)가 아니고, 브랜드 + 연수 단계(S2)도 그 연수로 상품을 찾습니다("글렌모렌지 12" → Original, Lasanta, Quinta Ruban, 12 Calvados 중 고르기). 받아 주는 연수로 맞으면 근거에 `ageAccepted: <연수>`가 남습니다. 업주가 고른 상품 검사(`pick_check`)와 LLM 층의 연수 거부(`age_mismatch`)도 같습니다.
+- **별칭은 그대로입니다.** The Original의 옛 연수 별칭(`Glenmorangie 10`, `글렌모렌지10` 등)은 이제 연수 불일치에 걸리지 않습니다.
+- 평가 스냅샷(`catalog_v2_eval_5bars*.json`)과 운영 DB는 고치지 않았습니다. 옛 하네스 `ai/eval/match_eval.py`의 `load_catalog`(P47 이전 평가, I3 동결 파일)는 받아 주는 연수를 채우지 않습니다.
+- 측정: `ai/runs/2026-11-27_i5_p31/report.md` "낮 실행" 절.

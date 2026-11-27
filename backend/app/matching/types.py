@@ -38,6 +38,12 @@ class ProductInfo:
     brand_id: UUID | None = None
     # False for a product nobody has checked yet; a match to it is not confirmed (linking_guards).
     verified: bool = True
+    # Older ages of the same bottling, also taken as its age (accepted_ages.py).
+    accepted_ages: tuple[int, ...] = ()
+
+    def fits_age(self, age: int) -> bool:
+        """Whether a line of age `age` can be this product: its age, or one of its accepted ages."""
+        return age == self.age_years or age in self.accepted_ages
 
 
 @dataclass(frozen=True)

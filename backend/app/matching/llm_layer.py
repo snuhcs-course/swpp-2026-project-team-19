@@ -295,6 +295,14 @@ class M3Engine:
             self._core[pid] = core_tokens(self.products[pid])
         return self._core[pid]
 
+    def _age_fits(self, pid: UUID, age: int | None, catalog: CatalogLookup) -> bool:
+        """The product's age is `age` (both may be None), or `age` is an older age of the same
+        bottling (`ProductInfo.accepted_ages`)."""
+        if self.products[pid].age_years == age:
+            return True
+        info = catalog.get_product(pid)
+        return age is not None and info is not None and age in info.accepted_ages
+
     def _vetoes(self, name: str, t: dict, pid: UUID, catalog: CatalogLookup) -> tuple[list[str], list[str]]:
         """(veto rule names, short edition tokens the product lacks)."""
         product = self.products[pid]
@@ -305,7 +313,7 @@ class M3Engine:
         elif said is not None and product.bottler != said:
             rules.append("bottler_missing (reverse)")
         age = line_age(name, t)
-        if age is not None and product.age_years != age:
+        if age is not None and not self._age_fits(pid, age, catalog):
             rules.append("age_mismatch")
         owners = {o for variant in (name, *_parenthesis_variants(name))
                   for o in catalog.find_product_ids_by_alias(normalize(variant))}
@@ -348,7 +356,7 @@ class M3Engine:
         have = translation_tokens(t) | (translation_tokens(expanded) if expanded else set())
         for pid in self._catalog_products(catalog):
             core = self._core_tokens(pid)
-            if core and set(core) <= have and self.products[pid].age_years == t.get("age"):
+            if core and set(core) <= have and self._age_fits(pid, t.get("age"), catalog):
                 found.setdefault(pid, []).append("tokens")
         kept, vetoed = self._check(name, t, found, catalog)
         return kept, vetoed, found, english

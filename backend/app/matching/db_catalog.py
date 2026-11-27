@@ -5,6 +5,7 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.matching.accepted_ages import accepted_ages
 from app.matching.llm_layer import ProductMeta, bottler_of
 from app.matching.types import ProductInfo
 from app.models import Brand, BrandAlias, Product, ProductAlias
@@ -45,6 +46,7 @@ class DbCatalog:
                     age_years=product.age_years,
                     edition_name=product.edition_name,
                     brand_id=product.brand_id,
+                    accepted_ages=accepted_ages(product.id),
                 )
                 if product is not None and product.is_active
                 else None
@@ -128,6 +130,7 @@ class CatalogSnapshot:
                 age_years=product.age_years,
                 edition_name=product.edition_name,
                 brand_id=product.brand_id,
+                accepted_ages=accepted_ages(product.id),
             )
             self._brand_products.setdefault(product.brand_id, []).append(product.id)
             bottlers[product.id] = bottler_of(brand_name)

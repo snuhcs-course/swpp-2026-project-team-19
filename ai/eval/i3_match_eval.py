@@ -111,11 +111,23 @@ class Backend:
         self.resolve_staged = importlib.import_module("app.matching.staged").resolve_product_staged
         types = importlib.import_module("app.matching.types")
         self.ExtractedProduct, self.ProductInfo = types.ExtractedProduct, types.ProductInfo
+        try:  # older ages of a product (I5-P59, catalog v2.6); rules code before it has none
+            self.accepted_ages = importlib.import_module("app.matching.accepted_ages").accepted_ages
+        except ModuleNotFoundError:
+            self.accepted_ages = None
         match_eval = importlib.import_module("match_eval")
         self.judge, self.burden_kind, self.gold_refs = match_eval.judge, match_eval.burden_kind, match_eval.gold_refs
 
     def resolve(self, name: str, catalog):
         return self.resolve_staged(self.ExtractedProduct(product_name=name), catalog, STAGES)
+
+
+def product_info(be, pid, display_name: str, age, edition, brand_id):
+    """ProductInfo as the server's catalog gives it, with the accepted ages when the rules code (or a
+    backend object without them, such as p24_embedding_compare's) has them."""
+    accepted = getattr(be, "accepted_ages", None)
+    extra = {"accepted_ages": accepted(pid)} if accepted else {}
+    return be.ProductInfo(pid, display_name, age, edition, brand_id, **extra)
 
 
 def sha256_bytes(data: bytes) -> str:
@@ -281,8 +293,8 @@ def build_catalog(be: Backend, bar: str, variant: str, seed: dict, new_products:
         if p["key"] in drop_prod:
             continue
         key_to_id[p["key"]] = pid
-        products.append(be.ProductInfo(pid, p["display_name"], p.get("age_years"), p.get("edition_name"),
-                                       uuid.UUID(p["brand_id"])))
+        products.append(product_info(be, pid, p["display_name"], p.get("age_years"), p.get("edition_name"),
+                                     uuid.UUID(p["brand_id"])))
         aliases += [(pid, a["alias_text"]) for a in p["aliases"] if keep(a, p)]
     if new_products:
         brand_ids = {b["key"]: uuid.UUID(b["id"]) for b in seed["brands"]}
@@ -296,7 +308,7 @@ def build_catalog(be: Backend, bar: str, variant: str, seed: dict, new_products:
                     brand_aliases.append(alias)
             key_to_id[f"new:{key}"] = pid
             display[pid] = p["display_name"]
-            products.append(be.ProductInfo(pid, p["display_name"], p["age_years"], p["edition_name"], brand_id))
+            products.append(product_info(be, pid, p["display_name"], p["age_years"], p["edition_name"], brand_id))
             aliases.append((pid, p["display_name"]))
     canonical = json.dumps({
         "products": sorted([str(x.product_id), x.display_name, x.age_years, x.edition_name, str(x.brand_id)]

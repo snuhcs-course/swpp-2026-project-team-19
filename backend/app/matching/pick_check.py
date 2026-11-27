@@ -3,7 +3,8 @@
 A reviewer can link a line to any product. The pick goes to the operator check when it does not
 fit the line:
 
-- `ageConflict`: the line's age (`extracted_age_years`) and the product's age are both known and differ.
+- `ageConflict`: the line's age (`extracted_age_years`) and the product's age are both known and differ
+  (an older age of the same bottling, `accepted_ages.py`, is no conflict).
 - `editionNotClosest`: among the products of the picked product's brand whose age fits the line
   (same age, or no age on either side), another product is closer to the line by more than
   EDITION_MARGIN in the embedding (the server's character n-gram TF-IDF over display names and
@@ -75,7 +76,7 @@ def check_pick(
     product = catalog.get_product(product_id)
     if product is None or not (name or "").strip():
         return PickCheck()
-    if line_age is not None and product.age_years is not None and line_age != product.age_years:
+    if line_age is not None and product.age_years is not None and not product.fits_age(line_age):
         return PickCheck(("ageConflict",), {"lineAge": line_age, "productAge": product.age_years})
     family = _family(product, line_age, catalog)
     if len(family) < 2:
@@ -100,7 +101,7 @@ def _family(product: ProductInfo, line_age: int | None, catalog: CatalogLookup) 
     family = []
     for product_id in catalog.get_brand_product_ids(product.brand_id):
         other = catalog.get_product(product_id)
-        if other is not None and (line_age is None or other.age_years in (None, line_age)):
+        if other is not None and (line_age is None or other.age_years is None or other.fits_age(line_age)):
             family.append(other)
     return family if any(p.product_id == product.product_id for p in family) else [*family, product]
 
