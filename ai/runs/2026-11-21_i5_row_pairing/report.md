@@ -1237,3 +1237,5 @@ Claude Code가 한 일: 작업 트리 준비, 사전 등록 문서와 실행·�
 | `ai/runs/2026-11-26_i5_p19_followup/regression_sonnet/anthropic__claude-sonnet-5.5/B/<stem>_r1.json` | 기록 17개 (기록은 커밋하지 않고 진우 PC에 보관) |
 | `…/regression_sonnet/summary.json`, `run.log` | 사진별 점수(세 묶음), 틀린 칸, 비용·지연, 실행 출력 (기록은 커밋하지 않고 진우 PC에 보관) |
 | `ai/eval/i5_sonnet_regression_report.py` | 채점과 비교 (API 0회). 실행 명령은 파일 머리말에 있다 |
+
+**재확인 (2026-11-27):** 복춘_03을 같은 조건으로 3번 더 읽혔더니 병 가격 6칸 1/10은 3회 중 1회(r3)에서만 다시 나왔다. 판정은 "흔들림"이다. 자세한 것은 `ai/runs/2026-11-27_i5_pr_prep/report.md` H절.
