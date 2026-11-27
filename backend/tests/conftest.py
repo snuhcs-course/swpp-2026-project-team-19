@@ -26,6 +26,17 @@ BACKEND_DIR = Path(__file__).resolve().parents[1]
 
 
 @pytest.fixture(autouse=True)
+def roomy_menu_photo_limit(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Keep the daily menu photo limit (I5-A2) out of the way of tests that are not about it.
+
+    The limiter is one per process and temporary-login tokens all share one `sub` (spec 3.11.14), so
+    with the real limit of 30 the uploads of the whole test run would add up and later tests would get
+    `429`. Tests of the limit build their own limiter or set MENU_PHOTO_DAILY_LIMIT themselves.
+    """
+    monkeypatch.setenv("MENU_PHOTO_DAILY_LIMIT", "1000000")
+
+
+@pytest.fixture(autouse=True)
 def mock_extractor(monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
     """Use the mock extractor, no LLM matching layer, no embedding step and no similar-products search
     step even when .env selects gemini or turns them on, so no test calls the real API and matching and

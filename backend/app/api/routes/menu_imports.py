@@ -1,3 +1,5 @@
+from collections.abc import Callable
+from datetime import datetime
 from typing import Annotated
 from uuid import UUID
 
@@ -7,7 +9,13 @@ from sqlalchemy.orm import Session
 
 from app.adapters.extraction import MenuExtractor
 from app.adapters.storage import ImageStorage
-from app.api.deps import get_image_storage, get_matching_llm_layer, get_menu_extractor
+from app.api.deps import (
+    get_clock,
+    get_image_storage,
+    get_matching_llm_layer,
+    get_menu_extractor,
+    get_request_limiter,
+)
 from app.api.permissions import MenuImportId, require_active_bar_manager, require_import_manager
 from app.core.security import Principal, get_current_user
 from app.db.session import get_serializable_session_factory, get_session, get_session_factory
@@ -24,6 +32,7 @@ from app.services.menu_import_processing import SessionFactory, start_processing
 from app.services.menu_import_review import POLL_AFTER_MS, get_menu_import_status
 from app.services.menu_import_upload import ImageUpload, create_menu_import
 from app.services.menu_review_apply import review_and_apply
+from app.services.request_limits import DailyRequestLimiter
 
 router = APIRouter(prefix="/api", tags=["menu imports"])
 
@@ -62,6 +71,12 @@ UploadedImage = Annotated[UploadFile, WithJsonSchema({"type": "string", "format"
             "(`details.menuImportId` is the unfinished import to continue).",
         ),
         (413, "`UPLOAD_TOO_LARGE`: too many photos, or a photo or the total is too large; limits in `details`."),
+        (
+            429,
+            "`RATE_LIMITED`: the photos do not fit in what is left of the caller's daily menu photo limit "
+            "(30 a day by default, reset at midnight KST). Nothing is stored. `details.remaining` is how many "
+            "photos would still fit today, `details.dailyLimit` the limit, `details.retryAfter` the next reset.",
+        ),
         (415, "`UNSUPPORTED_IMAGE_TYPE`: not JPEG or PNG (HEIC included); `details.imageOrder` names the photo."),
         (422, "`VALIDATION_FAILED`: e.g. `Idempotency-Key` or `images` `MISSING`, or an unknown `mode`."),
     ),
@@ -83,6 +98,8 @@ def upload_menu_import(
     session_factory: SessionFactory = Depends(get_session_factory),
     bar: Bar = Depends(require_active_bar_manager),
     principal: Principal = Depends(get_current_user),
+    limiter: DailyRequestLimiter = Depends(get_request_limiter),
+    clock: Callable[[], datetime] = Depends(get_clock),
 ) -> MenuImportAcceptedResponse:
     menu_import, created = create_menu_import(
         session,
@@ -94,6 +111,8 @@ def upload_menu_import(
         mode=mode,
         owner_note=owner_note,
         uploads=[ImageUpload(image.filename, image.content_type, image.file) for image in images],
+        limiter=limiter,
+        clock=clock,
     )
     if created:
         start_processing(

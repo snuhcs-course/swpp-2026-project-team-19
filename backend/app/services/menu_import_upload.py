@@ -1,14 +1,22 @@
 """Accept a menu photo upload: validate, deduplicate retries, store images, and create the import rows.
 
 Order of checks: bar → image count, size and type → idempotency key → bar row lock → the bar
-and the caller again → one unfinished import per bar → store images → insert rows. Processing
-is scheduled by the caller after the commit.
+and the caller again → one unfinished import per bar → the caller's daily photo limit → store
+images → insert rows. Processing is scheduled by the caller after the commit.
+
+The daily photo limit (I5-A2) counts the photos of accepted uploads per caller. It is counted
+here, once, when the upload is accepted: a retry of the same request returns the existing import
+before the count, an upload refused by an earlier check is not counted, and photos read again
+after a restart (import recovery) or by another extraction route are never counted again. When
+storing or inserting fails after the count, the photos are given back.
 """
 
 import hashlib
 import json
 import logging
+from collections.abc import Callable
 from dataclasses import dataclass
+from datetime import datetime
 from typing import BinaryIO
 from uuid import UUID, uuid4
 
@@ -31,6 +39,7 @@ from app.models import (
 )
 from app.services.bar_access import can_manage_bar, forbidden
 from app.services.bar_menu import bar_not_found
+from app.services.request_limits import MENU_IMPORT_PHOTOS, DailyRequestLimiter, acquire_menu_photos
 
 logger = logging.getLogger(__name__)
 
@@ -205,9 +214,17 @@ def create_menu_import(
     mode: ImportMode,
     owner_note: str | None,
     uploads: list[ImageUpload],
+    limiter: DailyRequestLimiter | None = None,
+    clock: Callable[[], datetime] | None = None,
 ) -> tuple[MenuImport, bool]:
     """Returns the import and whether it was created now (False for a retried request). The route
-    has checked that `bar` is active and that the caller may manage it."""
+    has checked that `bar` is active and that the caller may manage it.
+
+    With `limiter` and `clock`, the photos are counted against the caller's daily photo limit and an
+    upload over it is refused with `429 RATE_LIMITED` (the route always passes them). The clock is read
+    when the photos are counted, after the images are checked and the bar row is locked: both can take
+    a while, and a request that arrives just before midnight KST must count against the day it is
+    accepted on."""
     # The API sends null, not an empty string, for "no value".
     if owner_note is not None:
         owner_note = owner_note.strip() or None
@@ -227,6 +244,9 @@ def create_menu_import(
     if not can_manage_bar(session, principal, bar.id):
         raise forbidden()
     check_no_unfinished_import(session, bar.id)
+    counted_day = None
+    if limiter is not None and clock is not None:
+        counted_day = acquire_menu_photos(limiter, principal.subject, len(images), clock())
 
     import_id = uuid4()
     keys = [f"menus/{bar.id}/{import_id}/page-{order}.{image.extension}" for order, image in enumerate(images, start=1)]
@@ -251,6 +271,10 @@ def create_menu_import(
     except Exception as error:
         # Storage and the database share no transaction: undo the stored images by hand.
         session.rollback()
+        if limiter is not None and counted_day is not None:
+            # Nothing was accepted, so the photos do not count (a lost insert race included: the
+            # request that won counted them).
+            limiter.release_units(principal.subject, MENU_IMPORT_PHOTOS, counted_day, len(images))
         for key in saved:
             try:
                 storage.delete(key)

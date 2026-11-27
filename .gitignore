@@ -52,3 +52,30 @@ signing.properties
 *.aab
 *.apk
 /.kotlin/
+
+# Run records of the I5 OpenRouter/fallback runs stay on the runner's PC (wiki Testing 4.4);
+# only the reports (.md) are committed. Older run folders are not affected.
+/ai/runs/2026-11-21_i5_row_pairing/**/*.json
+/ai/runs/2026-11-21_i5_row_pairing/**/*.jsonl
+/ai/runs/2026-11-21_i5_row_pairing/**/*.log
+/ai/runs/2026-11-21_i5_row_pairing/**/*.txt
+/ai/runs/2026-11-25_i5_fallback_ladder/**/*.json
+/ai/runs/2026-11-25_i5_fallback_ladder/**/*.jsonl
+/ai/runs/2026-11-25_i5_fallback_ladder/**/*.log
+/ai/runs/2026-11-25_i5_fallback_ladder/**/*.txt
+/ai/runs/2026-11-25_i5_p19_server_route/**/*.json
+/ai/runs/2026-11-25_i5_p19_server_route/**/*.jsonl
+/ai/runs/2026-11-25_i5_p19_server_route/**/*.log
+/ai/runs/2026-11-25_i5_p19_server_route/**/*.txt
+/ai/runs/2026-11-26_i5_a2_p43/**/*.json
+/ai/runs/2026-11-26_i5_a2_p43/**/*.jsonl
+/ai/runs/2026-11-26_i5_a2_p43/**/*.log
+/ai/runs/2026-11-26_i5_a2_p43/**/*.txt
+/ai/runs/2026-11-26_i5_p19_followup/**/*.json
+/ai/runs/2026-11-26_i5_p19_followup/**/*.jsonl
+/ai/runs/2026-11-26_i5_p19_followup/**/*.log
+/ai/runs/2026-11-26_i5_p19_followup/**/*.txt
+/ai/runs/2026-11-27_i5_pr_prep/**/*.json
+/ai/runs/2026-11-27_i5_pr_prep/**/*.jsonl
+/ai/runs/2026-11-27_i5_pr_prep/**/*.log
+/ai/runs/2026-11-27_i5_pr_prep/**/*.txt

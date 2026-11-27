@@ -1,0 +1,109 @@
+"""Hybrid menu extraction through OpenRouter, with the Gemini API behind it (I5-P19).
+
+Selected with MENU_EXTRACTOR=openrouter. One CLOVA OCR call, then the route ladder of
+app.extraction.routed: OpenRouter (the primary model, then its fallback models), the Gemini API
+direct model, the Gemini API lite model. MENU_EXTRACTOR=gemini is unchanged and stays the way
+back: it never loads this module.
+
+The extracted items are those of HybridMenuExtractor with prompt v2: every line of the menu in
+the printed order, non-whisky lines as product lines of kind `other`.
+
+raw_output is the hybrid meta. `raw_output["route"]` says which stage, model and provider read
+the photo and which stages failed before it; tokens, `costUsd` and `latencyMs` are those of the
+call that answered. The run's `model_name` column is written when the photo is uploaded, before
+any route is known, so it holds the primary model; the model that read the photo is
+`raw_output["model"]`.
+
+`budget` is the server-wide daily limit on photos read through OpenRouter (the team's one key has
+no spending limit of its own); over it, photos start at the Gemini API and
+`raw_output["route"]["skipped"]` says `daily_paid_limit`.
+
+When the OCR step fails, the photo goes through the Gemini-only extractor (lite model), as it does
+for HybridMenuExtractor, and `raw_output["hybridFallback"]` records why.
+
+Whatever route read the photo, the whisky lines of a facing page cut off at its left or right edge
+are dropped before the lines are stored and matched (app.extraction.edge_guard,
+EXTRACTION_EDGE_STRIP_PERMILLE); `raw_output["droppedEdgeRows"]` keeps them. The Gemini-only
+fallback has no OCR lines, so nothing is dropped there, and a PDF page read from its text layer
+skips the guard (`edge_guard=False`): a text layer holds one page only.
+"""
+
+import logging
+
+from app import extraction
+from app.adapters.extraction import ExtractionError, ExtractionResult, parse_extraction_response
+from app.adapters.gemini_extraction import GeminiMenuExtractor, _message
+from app.adapters.hybrid_extraction import in_menu_order
+from typing import Any
+
+from app.extraction.clova import ClovaOCRError, ClovaSettings, load_clova_settings
+from app.extraction.edge_guard import drop_edge_rows
+from app.extraction.routed import (
+    PROMPTS,
+    AllRoutesFailedError,
+    CircuitBreaker,
+    PaidBudget,
+    RouteSettings,
+    extract_menu_routed,
+    load_route_settings,
+)
+from app.models import ExtractionApproach
+
+logger = logging.getLogger(__name__)
+
+
+class OpenRouterMenuExtractor:
+    """One CLOVA OCR call and the first route that answers, per image. Blocking; runs in the background job."""
+
+    approach = ExtractionApproach.OCR_LLM
+    provider = "naver-clova+openrouter"
+
+    def __init__(self, route: RouteSettings | None = None, clova: ClovaSettings | None = None,
+                 breaker: CircuitBreaker | None = None, budget: PaidBudget | None = None) -> None:
+        # Raise extraction.ExtractionConfigError when a variable is missing or invalid.
+        self.route = route or load_route_settings()
+        self.clova = clova or load_clova_settings()
+        self.breaker = breaker or CircuitBreaker(self.route.breaker_failures, self.route.breaker_cooldown_s)
+        # None: no daily limit (tests and evaluation scripts). The server always passes one (app.api.deps).
+        self.budget = budget
+        self.model_name = self.route.openrouter.model
+        self.pipeline_version = (
+            f"bottlemap-menu-hybrid-prompt{PROMPTS[self.route.prompt][0]}"
+            f"-reasoning-{self.route.openrouter.reasoning_effort}"
+        )
+        self.fallback = GeminiMenuExtractor(self.route.lite)
+
+    def extract(self, image: bytes, content_type: str, filename: str | None) -> ExtractionResult:
+        return self.extract_with(image, content_type, self.clova, None)
+
+    def extract_with(self, image: bytes, content_type: str, clova: ClovaSettings, ocr_client: Any,
+                     *, edge_guard: bool = True) -> ExtractionResult:
+        """`extract` with the OCR step given: `ocr_client` answers the OCR call in CLOVA's format.
+        A PDF page with a text layer is read this way (app.adapters.pdf_routed_extraction), without
+        a CLOVA call and with `edge_guard=False`; everything else after the OCR step is the same as
+        for a photo."""
+        filename = None
+        try:
+            result = extract_menu_routed(image, content_type, clova, self.route, self.breaker,
+                                         budget=self.budget, ocr_client=ocr_client)
+        except ClovaOCRError as error:
+            logger.warning("openrouter extraction: CLOVA OCR failed, falling back to Gemini only: %s", error)
+            fallback = self.fallback.extract(image, content_type, filename)
+            return ExtractionResult(items=fallback.items,
+                                    raw_output={**fallback.raw_output, "hybridFallback": {"reason": str(error)}})
+        except extraction.InvalidModelOutputError as error:
+            raise ExtractionError(_message(error), raw_output={**error.meta, "rawText": error.raw_text}) from error
+        except AllRoutesFailedError as error:
+            raise ExtractionError(_message(error), raw_output={"attempts": error.attempts, "route": error.route}) from error
+        except extraction.ExtractionError as error:  # UnsupportedImageError (before any call)
+            raise ExtractionError(_message(error)) from error
+
+        items, meta = result["items"], result["meta"]
+        if edge_guard:
+            items, meta = drop_edge_rows(items, meta, self.route.edge_strip_permille)
+        payload, meta = in_menu_order(items, meta)
+        try:
+            items = parse_extraction_response({"items": payload})
+        except ExtractionError as error:
+            raise ExtractionError(str(error), raw_output=meta) from error
+        return ExtractionResult(items=items, raw_output=meta)
