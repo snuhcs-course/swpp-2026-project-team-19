@@ -7,6 +7,7 @@ import json
 import logging
 import threading
 from dataclasses import replace
+from datetime import UTC, datetime
 from types import SimpleNamespace
 
 import httpx
@@ -25,6 +26,7 @@ from app.extraction.hybrid_v2 import HybridExtractionV2
 from app.extraction.openrouter import OpenRouterCreditError, OpenRouterSettings
 from app.extraction.routed import AllRoutesFailedError, CircuitBreaker, RouteSettings, extract_menu_routed
 from app.models import ExtractionApproach
+from app.services.paid_photo_budget import DailyPaidBudget
 from tests.test_hybrid_extraction_adapter import CLOVA, OCR_RESPONSE, SETTINGS, jpeg
 from tests.test_hybrid_v2_extraction import V2_OUTPUT
 
@@ -374,7 +376,7 @@ def test_an_invalid_setting_is_named_without_leaking_a_key(env, name, value, mes
 
 
 @pytest.mark.parametrize("missing", ["OPENROUTER_API_KEY", "OPENROUTER_EXTRACTION_MODEL", "GEMINI_API_KEY",
-                                     "EXTRACTION_MODEL", "EXTRACTION_THINKING_LEVEL", "EXTRACTION_DIRECT_MODEL",
+                                     "EXTRACTION_MODEL", "EXTRACTION_THINKING_LEVEL",
                                      "CLOVA_OCR_INVOKE_URL", "CLOVA_OCR_SECRET"])
 def test_a_missing_setting_is_named_at_start_up(env, missing):
     set_openrouter_env(env)
@@ -535,6 +537,101 @@ def test_stage_4_every_route_failed(caplog):
     assert error.route["stage"] == 4 and [s["stage"] for s in error.route["skipped"]] == [0, 2, 3]
     assert "extraction route stage=4" in caplog.text
     assert "secret-test-key" not in str(error) and "secret-test-key" not in caplog.text
+
+
+# ---- stage 2 off (EXTRACTION_DIRECT_MODEL empty) ----
+
+NO_DIRECT = replace(ROUTE, direct=None)
+DIRECT_OFF = {"stage": 2, "reason": "direct_disabled"}
+
+
+@pytest.mark.parametrize("value", [None, "", "  "])
+def test_without_a_direct_model_stage_2_is_off_and_the_server_starts(env, value):
+    set_openrouter_env(env)
+    env.delenv("EXTRACTION_DIRECT_MODEL")
+    if value is not None:
+        env.setenv("EXTRACTION_DIRECT_MODEL", value)
+    env.setenv("EXTRACTION_DIRECT_MAX_ATTEMPTS", "1")
+
+    extractor = deps.get_menu_extractor()
+
+    assert isinstance(extractor, OpenRouterMenuExtractor) and extractor.route.direct is None
+    assert extractor.route.lite.model == "gemini-3.5-flash-lite"
+
+
+def test_with_a_direct_model_stage_2_is_on_as_before(env):
+    set_openrouter_env(env)
+
+    route = routed.load_route_settings()
+    meta = run(FakeHttp(failed(402)), route=route)["meta"]
+
+    assert (route.direct.model, route.direct.max_attempts) == (DIRECT, 2)
+    assert (meta["route"]["stage"], meta["route"]["model"]) == (2, DIRECT)
+    assert DIRECT_OFF not in meta["route"]["skipped"]
+
+
+def test_an_invalid_direct_attempts_setting_still_stops_the_server_when_stage_2_is_off(env):
+    set_openrouter_env(env)
+    env.delenv("EXTRACTION_DIRECT_MODEL")
+    env.setenv("EXTRACTION_DIRECT_MAX_ATTEMPTS", "0")
+
+    with pytest.raises(RuntimeError, match="EXTRACTION_DIRECT_MAX_ATTEMPTS must be a positive int"):
+        deps.get_menu_extractor()
+
+
+def test_with_stage_2_off_a_failed_openrouter_call_goes_straight_to_stage_3(caplog):
+    http, gem = FakeHttp(failed(402, "Insufficient credits")), gemini_fake()
+
+    with caplog.at_level(logging.INFO, logger="app.extraction.routed"):
+        meta = run(http, gem, route=NO_DIRECT)["meta"]
+
+    assert (meta["route"]["stage"], meta["route"]["path"], meta["model"]) == (3, "gemini-direct-lite", "gemini-3.5-flash-lite")
+    assert meta["route"]["skipped"] == [
+        {"stage": 0, "reason": "OpenRouterCreditError", "message": "HTTP 402: Insufficient credits", "attempts": 1},
+        DIRECT_OFF]
+    assert [r["model"] for r in gem.requests] == ["gemini-3.5-flash-lite"]  # no stage 2 call
+    assert "stage=3 path=gemini-direct-lite" in caplog.text
+    assert "skipped=0:OpenRouterCreditError,2:direct_disabled" in caplog.text
+
+
+def test_with_stage_2_off_over_the_daily_limit_the_photo_goes_straight_to_stage_3():
+    http, gem = FakeHttp(ok()), gemini_fake()
+    budget = DailyPaidBudget(2, lambda since: 2, lambda: datetime(2026, 11, 26, 3, tzinfo=UTC))
+
+    meta = extract_menu_routed(jpeg(), "image/jpeg", CLOVA, NO_DIRECT, CircuitBreaker(), budget=budget,
+                               http_client=http, gemini_client=gem)["meta"]
+
+    assert http.posts == [] and [r["model"] for r in gem.requests] == ["gemini-3.5-flash-lite"]
+    assert meta["route"]["stage"] == 3
+    assert meta["route"]["skipped"] == [{"stage": 0, "reason": "daily_paid_limit", "limit": 2}, DIRECT_OFF]
+
+
+def test_with_stage_2_off_and_openrouter_paused_the_photo_goes_straight_to_stage_3():
+    breaker = CircuitBreaker(1, 600)
+    breaker.record_failure()
+
+    meta = run(FakeHttp(ok()), route=NO_DIRECT, breaker=breaker)["meta"]
+
+    assert meta["route"]["stage"] == 3
+    assert meta["route"]["skipped"] == [{"stage": 0, "reason": "circuit_open"}, DIRECT_OFF]
+
+
+def test_with_stage_2_off_a_photo_read_at_stage_0_records_nothing_about_stage_2():
+    meta = run(FakeHttp(ok()), route=NO_DIRECT)["meta"]
+
+    assert meta["route"]["stage"] == 0 and meta["route"]["skipped"] == []
+
+
+def test_with_stage_2_off_a_failed_lite_call_fails_the_photo_and_says_stage_2_was_off():
+    http, gem = FakeHttp(failed(402)), gemini_fake(lite=ApiError(503))
+
+    with pytest.raises(AllRoutesFailedError, match="stage 2 direct_disabled; stage 3 ModelCallError") as caught:
+        run(http, gem, route=NO_DIRECT)
+
+    assert caught.value.attempts == 1 + 2  # OpenRouter's one 402, the lite model's two tries
+    assert [s["stage"] for s in caught.value.route["skipped"]] == [0, 2, 3]
+    assert caught.value.route["skipped"][1] == DIRECT_OFF
+    assert [r["model"] for r in gem.requests] == ["gemini-3.5-flash-lite"] * 2
 
 
 # ---- the circuit breaker ----

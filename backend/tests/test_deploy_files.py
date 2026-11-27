@@ -87,4 +87,5 @@ def test_the_template_has_every_setting_the_openrouter_extractor_needs(monkeypat
     assert extractor.route.openrouter.model == "google/gemini-3.8-flash"
     # Only a model that passed the fallback evaluation (ai/runs/2026-11-21_i5_row_pairing/report.md, section 11).
     assert extractor.route.openrouter.fallback_models == ("anthropic/claude-sonnet-5.5",)
-    assert (extractor.route.direct.model, extractor.route.lite.model) == ("gemini-3.8-flash", "gemini-3.5-flash-lite")
+    # Stage 2 (the Gemini API direct model) is off in the template: EXTRACTION_DIRECT_MODEL is empty.
+    assert (extractor.route.direct, extractor.route.lite.model) == (None, "gemini-3.5-flash-lite")

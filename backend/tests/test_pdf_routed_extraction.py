@@ -225,6 +225,18 @@ def test_a_page_under_the_guards_gets_its_limits_on_every_route_and_keeps_the_sh
     assert extractor.openrouter.route.openrouter.max_attempts == 3  # the photo extractor is not changed
 
 
+def test_a_page_keeps_stage_2_off_when_it_is_off_for_photos(make):
+    extractor, _, gem = make(failed(402), route=replace(ROUTE, direct=None))
+
+    limited = extractor.for_page(2, 120.0, 60.0)
+    raw = limited.extract_page(pages("text_menu_design.pdf")[0]).raw_output
+
+    assert limited.openrouter.route.direct is None and limited.openrouter.route.lite.max_attempts == 1
+    assert raw["route"]["stage"] == 3
+    assert raw["route"]["skipped"][1:] == [{"stage": 2, "reason": "direct_disabled"}]
+    assert [r["model"] for r in gem.requests] == ["gemini-3.5-flash-lite"]
+
+
 def test_the_guards_run_every_page_and_count_the_calls_of_every_route(make):
     # page 1: OpenRouter answers on its second attempt; page 2: OpenRouter fails, the Gemini API answers
     extractor, http, gem = make(failed(503), ok(), failed(402))

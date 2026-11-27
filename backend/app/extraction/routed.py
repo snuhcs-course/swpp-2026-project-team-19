@@ -8,8 +8,13 @@ One photo is read by the first route that answers:
 | 1     | OpenRouter, a fallback model (`models` in the same request)     | every provider of the primary failed    |
 | 2     | Gemini API, the direct model (EXTRACTION_DIRECT_MODEL)          | the OpenRouter call failed, is paused,  |
 |       |                                                                | or today's paid photos are used up      |
-| 3     | Gemini API, the lite model (EXTRACTION_MODEL)                   | the stage 2 call failed (e.g. 429)      |
+| 3     | Gemini API, the lite model (EXTRACTION_MODEL)                   | the stage 2 call failed (e.g. 429), or  |
+|       |                                                                | stage 2 is off                          |
 | 4     | none: AllRoutesFailedError, the photo is marked failed          | every call failed                       |
+
+Stage 2 is optional: with EXTRACTION_DIRECT_MODEL empty or unset (`RouteSettings.direct` None) it
+is not tried, the photo goes from stage 0 straight to stage 3, and `route.skipped` records
+`{"stage": 2, "reason": "direct_disabled"}`. With a model set, stage 2 works as before.
 
 Stages 0 and 1 are one request: OpenRouter moves on to the fallback models itself, and the answer's
 `model` tells which stage it was. "The OpenRouter call failed" is any ModelCallError after its
@@ -80,7 +85,7 @@ class AllRoutesFailedError(ModelCallError):
 @dataclass(frozen=True)
 class RouteSettings:
     openrouter: OpenRouterSettings
-    direct: ExtractionSettings  # stage 2
+    direct: ExtractionSettings | None  # stage 2; None turns it off (EXTRACTION_DIRECT_MODEL empty)
     lite: ExtractionSettings  # stage 3
     prompt: str = DEFAULT_PROMPT
     breaker_failures: int = 3
@@ -104,16 +109,15 @@ class PaidBudget(Protocol):
 def load_route_settings() -> RouteSettings:
     """Read every setting of the ladder; raise ExtractionConfigError naming what is missing or invalid."""
     lite = load_settings()  # GEMINI_API_KEY, EXTRACTION_MODEL, EXTRACTION_THINKING_LEVEL
-    direct_model = os.getenv("EXTRACTION_DIRECT_MODEL")
-    if not direct_model:
-        raise ExtractionConfigError("Missing required extraction environment variables: EXTRACTION_DIRECT_MODEL")
+    direct_model = (os.getenv("EXTRACTION_DIRECT_MODEL") or "").strip()  # empty: stage 2 off
+    # A free-tier 429 does not clear in a minute, so stage 2 gives up early and stage 3 takes over.
+    direct_attempts = _positive("EXTRACTION_DIRECT_MAX_ATTEMPTS", 2, int)
     prompt = os.getenv("OPENROUTER_EXTRACTION_PROMPT") or DEFAULT_PROMPT
     if prompt not in PROMPTS:
         raise ExtractionConfigError(f"OPENROUTER_EXTRACTION_PROMPT must be one of {', '.join(PROMPTS)}, got {prompt!r}")
     return RouteSettings(
         openrouter=load_openrouter_settings(),
-        # A free-tier 429 does not clear in a minute, so stage 2 gives up early and stage 3 takes over.
-        direct=replace(lite, model=direct_model, max_attempts=_positive("EXTRACTION_DIRECT_MAX_ATTEMPTS", 2, int)),
+        direct=replace(lite, model=direct_model, max_attempts=direct_attempts) if direct_model else None,
         lite=lite,
         prompt=prompt,
         breaker_failures=_positive("OPENROUTER_BREAKER_FAILURES", RouteSettings.breaker_failures, int),
@@ -213,6 +217,9 @@ def extract_menu_routed(
             return _finish(meta, call, skipped, ocr["table"])
 
     for stage, settings in ((2, route.direct), (3, route.lite)):
+        if settings is None:  # stage 2 is off: no call
+            skipped.append({"stage": stage, "reason": "direct_disabled"})
+            continue
         try:
             call = _call_gemini(stage, settings, prompt, ocr, gemini_client)
         except ModelCallError as error:

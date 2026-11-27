@@ -85,7 +85,8 @@ class RoutedPdfMenuExtractor:
         route = replace(
             source.route,
             openrouter=replace(source.route.openrouter, max_attempts=attempts, **limits),
-            direct=replace(source.route.direct, max_attempts=1, **limits),
+            # stage 2 stays off when it is off for photos
+            direct=replace(source.route.direct, max_attempts=1, **limits) if source.route.direct else None,
             lite=replace(source.route.lite, max_attempts=1, **limits),
         )
         half = ocr_deadline_s / 2
