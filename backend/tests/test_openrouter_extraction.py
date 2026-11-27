@@ -655,6 +655,7 @@ def test_the_breaker_opens_after_three_failures_and_lets_one_call_through_after_
     assert not breaker.allows()
     clock.now += 1
     assert breaker.allows()
+    assert not breaker.allows()  # only one call is let through after the cooldown, the others wait for it
     assert breaker.record_failure() is True and not breaker.allows()  # the call let through failed: paused again
     clock.now += 600
     breaker.record_success()
@@ -679,6 +680,30 @@ def test_a_paused_openrouter_is_skipped_without_a_call_then_tried_again(caplog):
     back = FakeHttp(ok())
     assert run(back, breaker=breaker)["meta"]["route"]["stage"] == 0
     assert run(back, breaker=breaker)["meta"]["route"]["stage"] == 0 and len(back.posts) == 2
+
+
+def test_the_probe_after_the_cooldown_closes_the_breaker_when_it_succeeds():
+    clock = Clock()
+    breaker = CircuitBreaker(1, 600, clock)
+    breaker.record_failure()
+    clock.now += 600
+
+    assert breaker.allows() and not breaker.allows()  # the probe, then a photo that arrives during it
+    breaker.record_success()
+    assert breaker.allows() and breaker.allows()
+
+
+def test_photos_that_arrive_during_the_probe_take_the_gemini_api_without_calling_openrouter():
+    clock = Clock()
+    breaker = CircuitBreaker(1, 600, clock)
+    breaker.record_failure()
+    clock.now += 600
+    assert breaker.allows()  # the probe is under way in another import
+
+    http = FakeHttp(ok())
+    meta = run(http, breaker=breaker)["meta"]
+
+    assert http.posts == [] and meta["route"]["skipped"] == [{"stage": 0, "reason": "circuit_open"}]
 
 
 def test_a_success_between_failures_keeps_the_breaker_closed():

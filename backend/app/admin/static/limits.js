@@ -87,9 +87,9 @@ function resetUser(event) {
 }
 
 function resetAll() {
-  const question = "모든 사용자의 국세청 진위확인과 OCR 요청 수를 초기화할까요? 되돌릴 수 없어요.";
+  const question = "모든 사용자의 국세청 진위확인, OCR, 메뉴 사진 등록 횟수를 초기화할까요? 되돌릴 수 없어요.";
   if (!window.confirm(question)) return;
-  // Every user and both kinds: this button takes no kind (3.11.19).
+  // Every user and every kind: this button takes no kind (3.11.19).
   resetLimits({});
 }
 

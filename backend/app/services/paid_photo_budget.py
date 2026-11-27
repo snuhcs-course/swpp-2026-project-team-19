@@ -13,7 +13,8 @@ or a fallback model) and that ended today (KST) is one paid photo. No table or c
 restart and when the KST day changes, and counted up by one for every photo sent to OpenRouter
 after that. `try_reserve` takes a place before the call, so photos processed at the same time
 cannot pass the limit together; `refund` gives it back when OpenRouter did not answer (nothing was
-read and nothing is stored as a paid run).
+read and nothing is stored as a paid run), but not when a cut answer was billed before the call
+failed (app.extraction.routed).
 
 Over the limit, nothing is refused: app.extraction.routed starts the photo at stage 2 (the Gemini
 API) and records `daily_paid_limit` as the reason stage 0 was skipped. When the count cannot be
@@ -98,19 +99,24 @@ class DailyPaidBudget:
         self._day = today
         return True
 
-    def try_reserve(self) -> bool:
-        """Take one place of today's limit for a photo about to be sent to OpenRouter."""
+    def try_reserve(self) -> date | None:
+        """Take one place of today's limit for a photo about to be sent to OpenRouter.
+
+        Returns the KST day the place was taken from (pass it to `refund`), or None over the limit."""
         with self._lock:
             if not self._sync() or self._count >= self.limit:
-                return False
+                return None
             self._count += 1
-            return True
+            return self._day
 
-    def refund(self) -> None:
-        """Give back the place of a photo OpenRouter did not answer."""
+    def refund(self, day: date) -> None:
+        """Give back the place of a photo OpenRouter did not answer; `day` is what try_reserve returned.
+
+        A place taken on a day that is over is not given back to the new day: the new day's count was
+        loaded anew, so it holds no place of that photo (a call that started before midnight and
+        failed after it must not free a place another photo took today)."""
         with self._lock:
-            # A place taken yesterday is not given back to today (the day's count was loaded anew).
-            if self._day == kst_date(self._clock()) and self._count > 0:
+            if day == self._day == kst_date(self._clock()) and self._count > 0:
                 self._count -= 1
 
     def used(self) -> int | None:

@@ -49,7 +49,7 @@ import threading
 import time
 from collections.abc import Callable
 from dataclasses import dataclass, replace
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from functools import cache
 from pathlib import Path
 from typing import Any, Protocol
@@ -101,9 +101,9 @@ class PaidBudget(Protocol):
 
     limit: int
 
-    def try_reserve(self) -> bool: ...
+    def try_reserve(self) -> date | None: ...
 
-    def refund(self) -> None: ...
+    def refund(self, day: date) -> None: ...
 
 
 def load_route_settings() -> RouteSettings:
@@ -143,8 +143,17 @@ class CircuitBreaker:
         self._open_until: float | None = None
 
     def allows(self) -> bool:
+        """Closed: yes. Paused: no. Cooldown over: yes for one caller, the probe; the pause is
+        renewed at once, so callers that arrive before the probe ends stay on the other routes. The
+        probe's success closes the breaker; its failure pauses it again."""
         with self._lock:
-            return self._open_until is None or self._clock() >= self._open_until
+            if self._open_until is None:
+                return True
+            now = self._clock()
+            if now < self._open_until:
+                return False
+            self._open_until = now + self.cooldown_s
+            return True
 
     def record_success(self) -> None:
         with self._lock:
@@ -195,10 +204,11 @@ def extract_menu_routed(
         "otherItemsDropped": None,
     }
     skipped: list[dict[str, Any]] = []
+    reserved: date | None = None  # the KST day of the place taken in the daily paid budget
 
     if not breaker.allows():
         skipped.append({"stage": 0, "reason": "circuit_open"})
-    elif budget is not None and not budget.try_reserve():
+    elif budget is not None and not (reserved := budget.try_reserve()):
         skipped.append({"stage": 0, "reason": "daily_paid_limit", "limit": budget.limit})
         logger.warning("extraction route stage=0 skipped: daily_paid_limit (today's %d photos through OpenRouter "
                        "are used up, or could not be counted); starting at stage 2", budget.limit)
@@ -206,10 +216,11 @@ def extract_menu_routed(
         try:
             call = _call_openrouter(route.openrouter, prompt, ocr, http_client)
         except ModelCallError as error:
-            if budget is not None:
-                budget.refund()  # OpenRouter did not answer: the photo was not read through it
+            billed = getattr(error, "billed_usd", None)  # a cut answer arrived and was billed first
+            if budget is not None and billed is None:
+                budget.refund(reserved)  # OpenRouter did not answer: the photo was not read through it
             paused = breaker.record_failure()
-            skipped.append(_skip(0, error))
+            skipped.append(_skip(0, error) | ({"billedUsd": billed} if billed is not None else {}))
             logger.warning("extraction route stage=0 failed (%s: %.200s)%s", type(error).__name__, error,
                            f"; OpenRouter is paused for {route.breaker_cooldown_s:.0f}s" if paused else "")
         else:
@@ -245,13 +256,21 @@ def _reason(skip: dict[str, Any]) -> str:
 
 
 def _call_openrouter(settings: OpenRouterSettings, prompt: str, ocr: dict[str, Any], client: Any) -> dict[str, Any]:
-    """Stages 0 and 1. An answer cut at max_tokens is asked for once more; both calls are billed."""
+    """Stages 0 and 1. An answer cut at max_tokens is asked for once more; both calls are billed.
+
+    When the second call fails, the ModelCallError carries `billed_usd` (what the cut answer cost):
+    the photo did cost money, so its place in the daily paid budget is kept."""
     body = openrouter.build_body(settings, prompt, user_text(ocr["table"]), ocr["prepared"], ocr["preparedMime"],
                                  HybridExtractionV2.model_json_schema())
     started_at = datetime.now(UTC).isoformat()
     attempts, cost, truncated = 0, 0.0, 0
     while True:
-        result = openrouter.call_with_retries(settings, body, client)
+        try:
+            result = openrouter.call_with_retries(settings, body, client)
+        except ModelCallError as error:
+            if truncated:
+                error.billed_usd = round(cost, 6)
+            raise
         got = openrouter.answer(result.data)
         attempts += result.attempts
         cost += got["costUsd"] or 0

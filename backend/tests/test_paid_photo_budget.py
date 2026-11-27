@@ -8,6 +8,7 @@ import logging
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
+import httpx
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.dialects import postgresql
@@ -26,6 +27,7 @@ from app.services.paid_photo_budget import (
     paid_photos_query,
     stored_count_loader,
 )
+from app.services.request_limits import KST
 from tests.test_hybrid_extraction_adapter import CLOVA, OCR_RESPONSE, jpeg
 from tests.test_openrouter_extraction import ENV, FALLBACK, PRIMARY, ROUTE, FakeHttp, failed, gemini_fake, ok, set_openrouter_env
 
@@ -121,11 +123,12 @@ def test_the_last_place_is_given_and_the_next_photo_is_over_the_limit():
 def test_a_place_is_given_back_when_openrouter_did_not_answer():
     budget = DailyPaidBudget(1, lambda since: 0, Clock())
 
-    assert budget.try_reserve() and not budget.try_reserve()
-    budget.refund()
-    assert budget.used() == 0 and budget.try_reserve()
-    budget.refund()
-    budget.refund()  # never below zero
+    day = budget.try_reserve()
+    assert day == NOON.astimezone(KST).date() and budget.try_reserve() is None
+    budget.refund(day)
+    assert budget.used() == 0 and budget.try_reserve() == day
+    budget.refund(day)
+    budget.refund(day)  # never below zero
     assert budget.used() == 0
 
 
@@ -147,14 +150,26 @@ def test_the_count_starts_over_when_the_kst_day_changes():
 def test_a_place_taken_yesterday_is_not_given_back_to_today():
     clock = Clock(MIDNIGHT - timedelta(seconds=1))
     budget = DailyPaidBudget(5, lambda since: 0, clock)
-    budget.try_reserve()
+    yesterday = budget.try_reserve()  # a call that started before midnight
 
     clock.now = MIDNIGHT
-    assert budget.try_reserve()
-    budget.refund()
-    budget.refund()
-
+    today = budget.try_reserve()  # a photo after midnight takes today's place
+    assert today != yesterday and budget.used() == 1
+    budget.refund(yesterday)  # the old call fails after midnight: today's place stays taken
+    assert budget.used() == 1
+    budget.refund(today)
     assert budget.used() == 0
+
+
+def test_a_refund_after_the_day_changed_but_before_the_count_was_read_again_gives_nothing_back():
+    clock = Clock(MIDNIGHT - timedelta(seconds=1))
+    budget = DailyPaidBudget(5, lambda since: 1, clock)
+    yesterday = budget.try_reserve()
+
+    clock.now = MIDNIGHT
+    budget.refund(yesterday)  # nothing has read today's count yet
+
+    assert budget.used() == 1  # today's count, as loaded
 
 
 def test_when_the_count_cannot_be_read_the_photo_is_over_the_limit_until_it_can(caplog):
@@ -222,6 +237,27 @@ def test_over_the_limit_the_photo_starts_at_the_gemini_api_and_the_log_says_why(
     assert "extraction route stage=0 skipped: daily_paid_limit" in caplog.text
     assert "stage=2 path=gemini-direct" in caplog.text and "skipped=0:daily_paid_limit" in caplog.text
     assert budget.used() == 2
+
+
+@pytest.mark.parametrize("second", ["http 503", "connection reset"])
+def test_a_cut_answer_that_was_billed_keeps_its_place_when_the_second_call_fails(second):
+    retry = failed(503) if second == "http 503" else httpx.ReadError("connection reset")
+    http = FakeHttp(ok(text='{"items": [', finish="length", cost=0.2), retry)
+    budget = DailyPaidBudget(5, lambda since: 0, Clock())
+
+    meta = read(http, budget)
+
+    assert meta["route"]["stage"] == 2 and budget.used() == 1  # the cut answer was paid for: no refund
+    assert meta["route"]["skipped"][0]["billedUsd"] == 0.2
+    assert meta["route"]["skipped"][0]["reason"] == "ModelCallError"
+
+
+def test_a_failed_call_without_a_billed_answer_still_gives_its_place_back():
+    http, budget = FakeHttp(failed(503)), DailyPaidBudget(5, lambda since: 0, Clock())
+
+    meta = read(http, budget)
+
+    assert budget.used() == 0 and "billedUsd" not in meta["route"]["skipped"][0]
 
 
 def test_the_photo_after_the_last_place_is_the_first_one_sent_to_the_gemini_api():

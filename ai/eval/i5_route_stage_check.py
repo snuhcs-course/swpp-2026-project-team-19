@@ -61,7 +61,7 @@ class RefusingBudget:
     def try_reserve(self) -> bool:
         return False
 
-    def refund(self) -> None:
+    def refund(self, day) -> None:
         pass
 
 
