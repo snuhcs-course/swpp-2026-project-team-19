@@ -31,6 +31,8 @@ DETAIL_FIELDS = {
     "activeMenuImport",
     "currentMenu",
     "owner",
+    "customerPhone",
+    "customerPhoneSource",
     "createdAt",
     "updatedAt",
 }

@@ -363,6 +363,7 @@ BAR_FIELDS = {
     "latitude",
     "longitude",
     "phone",
+    "phoneSource",
     "description",
     "tags",
     "weeklyHours",
@@ -399,7 +400,8 @@ def test_a_bar_with_nothing_optional_still_sends_every_field(client, db_session)
     body = client.get(f"/api/bars/{bar.id}/menu").json()
 
     assert set(body) == BAR_FIELDS
-    assert (body["phone"], body["menuBoardId"], body["menuVersion"], body["publishedAt"], body["items"]) == (
+    assert (body["phone"], body["phoneSource"], body["menuBoardId"], body["menuVersion"], body["publishedAt"], body["items"]) == (
+        None,
         None,
         None,
         None,

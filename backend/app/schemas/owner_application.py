@@ -10,7 +10,7 @@ from datetime import date
 from typing import Annotated, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, field_validator
 from pydantic_core import PydanticCustomError
 
 from app.core.business_number import normalize_business_number
@@ -67,6 +67,11 @@ class BusinessFieldsInput(_Strict):
 
 class _ApplicationInput(BusinessFieldsInput):
     contactPhone: str = Field(min_length=1, max_length=30, description="For the operator to reach the applicant")
+    contactPhonePublic: StrictBool = Field(
+        default=False,
+        description="Consent to show `contactPhone` to customers while the bar has no phone (spec 3.9). "
+        "Given only here and not changed later",
+    )
     applicantNote: str | None = Field(default=None, max_length=500, description="Blank is stored as null")
 
     @field_validator("applicantNote")
@@ -226,6 +231,9 @@ class OwnerApplicationResponse(BaseModel):
         "for the applicant, so an applicant cannot learn whether someone else gave the same number"
     )
     contactPhone: str
+    contactPhonePublic: bool = Field(
+        description="Whether the applicant agreed to show `contactPhone` to customers while the bar has no phone"
+    )
     applicantNote: str | None
     menuPhotos: list[ApplicationMenuPhoto] = Field(
         description="Menu photos in order (spec 3.11.15); empty when none were uploaded or after rejection or cancel"

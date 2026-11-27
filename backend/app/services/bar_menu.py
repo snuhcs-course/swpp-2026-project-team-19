@@ -10,6 +10,7 @@ from app.models import Bar, BarMenuItem, BarStatus, MenuBoard, MenuBoardEntry, M
 from app.schemas.menu import BarMenuResponse, DiscountResponse, MenuItemResponse, MenuOptionResponse
 from app.services.bar_hours import operating_exceptions_by_bar, seoul_today, weekly_hours_by_bar
 from app.services.bar_photo_links import photos_by_bar
+from app.services.customer_phone import customer_phones
 
 
 def bar_not_found(bar_id: str) -> ApiError:
@@ -95,13 +96,15 @@ def get_bar_menu(
         entries = [e for e in entries if e.bar_menu_item.sold_out_at is None]
     now = datetime.now(timezone.utc)
     items = [_item_response(entry, now) for entry in entries]
+    phone, phone_source = customer_phones(session, [bar])[bar.id]
     return BarMenuResponse(
         barId=bar.id,
         name=bar.name,
         address=bar.address,
         latitude=float(bar.latitude),
         longitude=float(bar.longitude),
-        phone=bar.phone,
+        phone=phone,
+        phoneSource=phone_source,
         description=bar.description,
         tags=list(bar.tags),
         weeklyHours=weekly_hours_by_bar(session, [bar.id])[bar.id],

@@ -140,7 +140,9 @@ def read_bar_menu_imports(
         "- `options[].discount` comes only while the discount has not ended (one that has not started yet comes "
         "too); `priceKrw` is always the list price. The app shows the discounted price while "
         "`startsAt <= now < endsAt`.\n"
-        "- `phone`, `optionLabel`, `pourMl` and `discount` are null when missing. Coordinates are WGS84 and never "
+        "- `phone` is the bar's phone or, when it has none, the current owner's contact phone if they agreed to "
+        "show it when applying (`phoneSource`); null when neither.\n"
+        "- `optionLabel`, `pourMl` and `discount` are null when missing. Coordinates are WGS84 and never "
         "null.\n"
         "- Items and their options are sorted by `sortOrder`."
     ),

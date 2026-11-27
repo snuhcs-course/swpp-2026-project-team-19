@@ -165,6 +165,8 @@ def make_application(
     status: OwnerApplicationStatus = OwnerApplicationStatus.PENDING,
     business_registration_number: str = BUSINESS_NUMBER,
     reviewer: User | None = None,
+    contact_phone: str = "010-1234-5678",
+    contact_phone_public: bool = False,
 ) -> BarOwnerApplication:
     """An existing_bar application for `bar`, or a new_bar one without it. An approved new_bar
     application passes `bar` (the bar its approval created) and `application_type`. A reviewed
@@ -184,7 +186,8 @@ def make_application(
         opening_date=date(2020, 3, 2),
         business_verification_result=BusinessVerificationResult.UNAVAILABLE,
         business_checked_at=datetime(2026, 10, 14, 3, tzinfo=timezone.utc),
-        contact_phone="010-1234-5678",
+        contact_phone=contact_phone,
+        contact_phone_public=contact_phone_public,
         status=status,
         reviewed_by_user_id=reviewer.id if reviewed and reviewer is not None else None,
         # Set even without a reviewer, so a test can break the review rule on purpose.
@@ -236,9 +239,25 @@ def make_bar_photo(session: Session, bar: Bar, sort_order: int = 1, content_sha2
     return photo
 
 
-def make_owner(session: Session, user: User, bar: Bar, reviewer: User) -> BarOwner:
+def make_owner(
+    session: Session,
+    user: User,
+    bar: Bar,
+    reviewer: User,
+    *,
+    contact_phone: str = "010-1234-5678",
+    contact_phone_public: bool = False,
+) -> BarOwner:
     """`user` as the current owner of `bar`, through an approved existing_bar application."""
-    application = make_application(session, user, bar, status=OwnerApplicationStatus.APPROVED, reviewer=reviewer)
+    application = make_application(
+        session,
+        user,
+        bar,
+        status=OwnerApplicationStatus.APPROVED,
+        reviewer=reviewer,
+        contact_phone=contact_phone,
+        contact_phone_public=contact_phone_public,
+    )
     owner = BarOwner(bar_id=bar.id, user_id=user.id, application_id=application.id)
     session.add(owner)
     session.flush()

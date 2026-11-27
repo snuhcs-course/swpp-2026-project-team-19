@@ -3,7 +3,7 @@ from uuid import UUID
 from pydantic import BaseModel, Field
 
 from app.models.menu import MenuItemKind
-from app.schemas.bar import BarPhotoResponse
+from app.schemas.bar import PHONE_SOURCE_DESCRIPTION, BarPhotoResponse, PhoneSource
 from app.schemas.bar_hours import OperatingException, WeeklyHours
 from app.schemas.common import Latitude, Longitude, UtcDateTime
 
@@ -55,7 +55,11 @@ class BarMenuResponse(BaseModel):
     address: str
     latitude: Latitude
     longitude: Longitude
-    phone: str | None
+    phone: str | None = Field(
+        description="The bar's phone, or, when it has none, its owner's contact phone if they agreed to show it "
+        "(`phoneSource`). null when neither"
+    )
+    phoneSource: PhoneSource | None = Field(description=PHONE_SOURCE_DESCRIPTION)
     description: str | None = Field(
         description="One-line introduction; may contain line breaks. Show it as plain text, not HTML. null when none"
     )
