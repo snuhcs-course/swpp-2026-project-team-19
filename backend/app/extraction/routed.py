@@ -45,6 +45,7 @@ WARNING for every stage but 0, so photos read by the lite model are found with
 import hashlib
 import logging
 import os
+import re
 import threading
 import time
 from collections.abc import Callable
@@ -280,7 +281,7 @@ def _call_openrouter(settings: OpenRouterSettings, prompt: str, ocr: dict[str, A
         logger.warning("extraction route: the answer of %s was cut at max_tokens=%d; asking once more",
                        got["model"], settings.max_tokens)
     model = got["model"] or settings.model
-    fallback = any(model.startswith(m) for m in settings.fallback_models) and not model.startswith(settings.model)
+    fallback = any(same_model(model, m) for m in settings.fallback_models)
     return {
         "stage": 1 if fallback else 0,
         "model": model,
@@ -306,6 +307,13 @@ def _call_openrouter(settings: OpenRouterSettings, prompt: str, ocr: dict[str, A
             "costUsd": round(cost, 6) if got["costUsd"] is not None else None,
         },
     }
+
+
+def same_model(answered: str, configured: str) -> bool:
+    """The model OpenRouter says answered is `configured`: the same id, or that id with what OpenRouter
+    adds to it, a dated snapshot (`-20261101`) or a variant (`:nitro`). A longer id that only starts
+    with `configured` (`vendor/model-pro` for `vendor/model`) is another model."""
+    return re.fullmatch(re.escape(configured) + r"(?:-\d{8}|:[\w.-]+)?", answered) is not None
 
 
 def _call_gemini(stage: int, settings: ExtractionSettings, prompt: str, ocr: dict[str, Any], client: Any) -> dict[str, Any]:

@@ -487,6 +487,28 @@ def test_the_stage_is_read_from_the_model_that_answered(model, stage):
     assert meta["route"]["stage"] == stage and meta["model"] == (model or PRIMARY)
 
 
+@pytest.mark.parametrize("answered, stage", [
+    ("vendor/model", 0), ("vendor/model-20261101", 0), ("vendor/model:nitro", 0),
+    ("vendor/model-pro", 1), ("vendor/model-pro-20261101", 1), ("vendor/model-pro:floor", 1),
+    ("vendor/model-pro-max", 0),  # neither configured model: read as the primary, as before
+])
+def test_a_fallback_model_whose_id_extends_the_primary_id_is_still_stage_1(answered, stage):
+    settings = replace(OPENROUTER, model="vendor/model", fallback_models=("vendor/model-pro",))
+
+    meta = run(FakeHttp(ok(model=answered)), route=replace(ROUTE, openrouter=settings))["meta"]
+
+    assert meta["route"]["stage"] == stage and meta["model"] == answered
+
+
+@pytest.mark.parametrize("answered, configured, same", [
+    ("a/b", "a/b", True), ("a/b-20261101", "a/b", True), ("a/b:free", "a/b", True),
+    ("a/b-pro", "a/b", False), ("a/b-2026", "a/b", False), ("a/bc", "a/b", False), ("x/a/b", "a/b", False),
+    ("aXb/c", "a.b/c", False), ("a.b/c", "a.b/c", True),  # the configured id is taken literally, not as a pattern
+])
+def test_same_model(answered, configured, same):
+    assert routed.same_model(answered, configured) is same
+
+
 def test_stage_2_out_of_credits_goes_to_the_gemini_api(caplog):
     http, gem = FakeHttp(failed(402, "Insufficient credits")), gemini_fake()
 

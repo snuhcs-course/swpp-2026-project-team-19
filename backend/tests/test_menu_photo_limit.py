@@ -250,9 +250,31 @@ def upload(limiter, photos, *, session=None, storage=None, key="key-1", subject=
         principal=Principal(kind="supabase", subject=subject, claims={}), bar=bar or new_bar(),
         idempotency_key=key, mode=ImportMode.FULL_REPLACE, owner_note=None,
         uploads=[ImageUpload(f"menu-{n}.jpg", "image/jpeg", io.BytesIO(JPEG + bytes([n]))) for n in range(photos)],
-        limiter=limiter, now=now,
+        limiter=limiter, clock=now if callable(now) else (lambda: now),
     )
     return result, session, storage
+
+
+@pytest.mark.parametrize("slow_step", ["check_images", "check_no_unfinished_import"])
+def test_the_photos_count_against_the_day_they_are_accepted_on_not_the_day_the_request_arrived(monkeypatch, slow_step):
+    # The request arrives one second before midnight KST; checking up to 60 MB of images, or waiting
+    # for the bar row lock, takes until after midnight. The clock is read when the photos are counted.
+    clock = {"now": BEFORE_MIDNIGHT}
+    real = getattr(menu_import_upload, slow_step)
+
+    def slow(*args, **kwargs):
+        clock["now"] = AT_MIDNIGHT
+        return real(*args, **kwargs)
+
+    monkeypatch.setattr(menu_import_upload, slow_step, slow)
+    limiter = InMemoryDailyLimiter(daily_limit=5)
+    upload(limiter, 5, now=lambda: BEFORE_MIDNIGHT)  # yesterday's limit is used up
+    clock["now"] = BEFORE_MIDNIGHT
+
+    (_, created), _, _ = upload(limiter, 4, key="key-2", now=lambda: clock["now"])
+
+    assert created  # counted against today, so yesterday's full limit does not refuse it
+    assert used(limiter, now=AT_MIDNIGHT) == 4
 
 
 def test_an_accepted_upload_counts_its_photos():

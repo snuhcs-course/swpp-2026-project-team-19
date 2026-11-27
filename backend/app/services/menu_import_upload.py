@@ -14,6 +14,7 @@ storing or inserting fails after the count, the photos are given back.
 import hashlib
 import json
 import logging
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
 from typing import BinaryIO
@@ -214,13 +215,16 @@ def create_menu_import(
     owner_note: str | None,
     uploads: list[ImageUpload],
     limiter: DailyRequestLimiter | None = None,
-    now: datetime | None = None,
+    clock: Callable[[], datetime] | None = None,
 ) -> tuple[MenuImport, bool]:
     """Returns the import and whether it was created now (False for a retried request). The route
     has checked that `bar` is active and that the caller may manage it.
 
-    With `limiter` and `now`, the photos are counted against the caller's daily photo limit and an
-    upload over it is refused with `429 RATE_LIMITED` (the route always passes them)."""
+    With `limiter` and `clock`, the photos are counted against the caller's daily photo limit and an
+    upload over it is refused with `429 RATE_LIMITED` (the route always passes them). The clock is read
+    when the photos are counted, after the images are checked and the bar row is locked: both can take
+    a while, and a request that arrives just before midnight KST must count against the day it is
+    accepted on."""
     # The API sends null, not an empty string, for "no value".
     if owner_note is not None:
         owner_note = owner_note.strip() or None
@@ -241,8 +245,8 @@ def create_menu_import(
         raise forbidden()
     check_no_unfinished_import(session, bar.id)
     counted_day = None
-    if limiter is not None and now is not None:
-        counted_day = acquire_menu_photos(limiter, principal.subject, len(images), now)
+    if limiter is not None and clock is not None:
+        counted_day = acquire_menu_photos(limiter, principal.subject, len(images), clock())
 
     import_id = uuid4()
     keys = [f"menus/{bar.id}/{import_id}/page-{order}.{image.extension}" for order, image in enumerate(images, start=1)]

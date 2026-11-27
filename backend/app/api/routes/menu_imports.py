@@ -112,7 +112,7 @@ def upload_menu_import(
         owner_note=owner_note,
         uploads=[ImageUpload(image.filename, image.content_type, image.file) for image in images],
         limiter=limiter,
-        now=clock(),
+        clock=clock,
     )
     if created:
         start_processing(
