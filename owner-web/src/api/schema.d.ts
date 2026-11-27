@@ -1139,12 +1139,12 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Reset today's NTS check and certificate OCR counts
-         * @description Operator only. Clears today's counts of the daily limits (at most 30 NTS checks and 5 certificate OCR calls per user) without restarting the server, so the user can call again at once.
+         * Reset today's NTS check, certificate OCR and menu photo counts
+         * @description Operator only. Clears today's counts of the daily limits (at most 30 NTS checks and 5 certificate OCR calls per user, and the daily menu photo limit of spec 4.1) without restarting the server, so the user can call again at once.
          *
-         *     - No body or `{}` clears every user's counts of both kinds.
+         *     - No body or `{}` clears every user's counts of every kind.
          *     - `userId` clears only that user's counts. Counts are kept by token `sub`, so the user is looked up in `users`; a caller without a `users` row is cleared only by a reset of every user.
-         *     - `kind` clears only `business_verification` or `business_certificate_ocr`.
+         *     - `kind` clears only `business_verification`, `business_certificate_ocr` or `menu_import_photos`.
          *     - Checks in order: operator, body fields, the user.
          */
         post: operations["reset_limits_api_request_limits_reset_post"];
@@ -3437,9 +3437,9 @@ export interface components {
             userId?: string | null;
             /**
              * Kind
-             * @description `business_verification` (NTS checks) or `business_certificate_ocr`; both if null
+             * @description `business_verification` (NTS checks), `business_certificate_ocr` or `menu_import_photos` (menu photos uploaded, spec 4.1); every kind if null
              */
-            kind?: ("business_verification" | "business_certificate_ocr") | null;
+            kind?: ("business_verification" | "business_certificate_ocr" | "menu_import_photos") | null;
         };
         /** RequestLimitResetResponse */
         RequestLimitResetResponse: {
@@ -4491,6 +4491,15 @@ export interface operations {
             };
             /** @description `VALIDATION_FAILED`: e.g. `Idempotency-Key` or `images` `MISSING`, or an unknown `mode`. */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description `RATE_LIMITED`: the photos do not fit in what is left of the caller's daily menu photo limit (30 a day by default, reset at midnight KST). Nothing is stored. `details.remaining` is how many photos would still fit today, `details.dailyLimit` the limit, `details.retryAfter` the next reset. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
