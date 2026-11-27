@@ -696,6 +696,8 @@ Authorization: Bearer <access-token>
     "displayName": "김사장",
     "ownerSince": "2026-10-14T05:00:00Z"
   },
+  "customerPhone": "02-000-0000",
+  "customerPhoneSource": "bar",
   "createdAt": "2026-10-01T03:00:00Z",
   "updatedAt": "2026-10-04T09:15:00Z"
 }
@@ -707,7 +709,7 @@ Authorization: Bearer <access-token>
 | `name` | 문자열 | 아니오 | 업장명 |
 | `address` | 문자열 | 아니오 | 층·호수를 포함한 표시용 주소 |
 | `latitude`, `longitude` | 숫자 | 아니오 | 업장 좌표(WGS84). 3.9.4 |
-| `phone` | 문자열 | 예 | 연락처. 없으면 `null` |
+| `phone` | 문자열 | 예 | 매장 전화번호. 업주나 operator가 정한다(3.7). 없으면 `null`. 고객에게 실제로 보이는 번호는 `customerPhone`이다. 수정 화면은 이 값으로 입력 칸을 채운다 |
 | `description` | 문자열 | 예 | 한 줄 소개. 업주나 operator가 정한다(3.7). 고객 화면(3.9)에도 나온다. 없으면 `null` |
 | `defaultPourMl` | 정수 | 예 | 매장 기본 잔 용량(ml). 업주가 매장 정보에서 정한다(3.7). 메뉴 편집과 검수 화면이 잔 옵션의 용량 입력 칸을 미리 채우는 데 쓴다(3.14.2). 서버가 메뉴에 자동으로 적용하지 않으며 고객 화면(3.9)에는 없다. 없으면 `null` |
 | `tags` | 문자열 배열 | 아니오 | 매장 태그. 업주나 operator가 정한 순서대로 최대 5개(3.7). 없으면 `[]` |
@@ -730,6 +732,8 @@ Authorization: Bearer <access-token>
 | `owner.userId` | UUID 문자열 | 아니오 | |
 | `owner.email`, `owner.displayName` | 문자열 | 예 | 3.2와 같다 |
 | `owner.ownerSince` | RFC 3339 문자열 | 아니오 | 업주 신청이 승인된 시각 |
+| `customerPhone` | 문자열 | 예 | 지금 고객에게 보이는 번호. 3.9의 `phone`과 같다. 관리 화면의 "손님에게 보이는 번호" 표시용이며 수정할 수 없다. `phone`이 있으면 `phone`, 없으면 업주가 신청할 때 공개에 동의한 연락처(3.11.2의 `contactPhonePublic`), 둘 다 없으면 `null` |
+| `customerPhoneSource` | `bar` \| `owner_contact` | 예 | `customerPhone`의 출처. 3.9의 `phoneSource`와 같다. `customerPhone`이 `null`이면 `null` |
 | `createdAt`, `updatedAt` | RFC 3339 문자열 | 아니오 | |
 
 오류와 프론트엔드 처리:
@@ -761,7 +765,7 @@ operator와 해당 업장의 현재 업주가 호출할 수 있다. 바꿀 필�
 |---|---|---|
 | `name`, `address` | operator, 업주 | `null`을 보낼 수 없다 |
 | `latitude`, `longitude` | operator, 업주 | 둘을 함께 보낸다. 하나만 보내면 `LAT_LNG_REQUIRED_TOGETHER` |
-| `phone` | operator, 업주 | `null`을 보내면 연락처를 지운다 |
+| `phone` | operator, 업주 | `null`을 보내면 연락처를 지운다. 매장 전화번호가 있으면 고객에게는 항상 이 번호가 보이며, 지우면 업주가 공개에 동의한 연락처가 대신 보일 수 있다(3.9, 3.6의 `customerPhone`) |
 | `description` | operator, 업주 | 한 줄 소개. 앞뒤 공백을 지운 뒤 100자 이하(줄바꿈도 한 글자로 센다). 공백뿐이면 `null`로 저장한다. `null`을 보내면 지운다. 줄바꿈을 허용하며, 서버는 HTML 이스케이프나 금칙어 검사 없이 받은 그대로 저장한다. 업장 수정에서만 받는다. 업장 생성(3.5)과 신청 승인(3.11.7)에서 보내면 `422`이고 `fieldErrors[].code = EXTRA_FORBIDDEN`이다. 새 업장은 `null`이다 |
 | `defaultPourMl` | operator, 업주 | 1~999 정수. `null`을 보내면 지운다. 바꿔도 이미 게시된 메뉴의 용량은 바뀌지 않는다. 업장 수정에서만 받는다. 업장 생성(3.5)과 신청 승인(3.11.7)에서 보내면 `422`이고 `fieldErrors[].code = EXTRA_FORBIDDEN`이다. 새 업장은 `null`이다 |
 | `tags` | operator, 업주 | 매장 태그 전체를 이 배열로 바꾼다. `[]`이면 모두 지우며 `null`은 보낼 수 없다. 최대 5개이고, 태그마다 앞뒤 공백을 지운 뒤 1~24자다. 줄바꿈과 제어 문자는 받지 않는다(`INVALID_CHARACTER`). 대소문자만 다른 태그도 같은 태그로 보며, 중복이면 `DUPLICATE_TAG`다. 서버는 앞뒤 공백만 지우고 대소문자와 순서는 받은 그대로 저장한다. 자유 입력이며 서버가 정한 태그 목록은 없다 |
@@ -850,6 +854,7 @@ GET /api/bars/{barId}/menu
   "latitude": 37.478321,
   "longitude": 126.951234,
   "phone": "02-000-0000",
+  "phoneSource": "bar",
   "description": "싱글몰트 위주의 조용한 바",
   "tags": ["싱글몰트", "조용한 분위기"],
   "weeklyHours": [
@@ -979,7 +984,8 @@ GET /api/bars/{barId}/menu
 | `name` | 문자열 | 아니오 | 업장명 |
 | `address` | 문자열 | 아니오 | 층·호수를 포함한 표시용 주소 |
 | `latitude`, `longitude` | 숫자 | 아니오 | 업장 좌표(WGS84). 3.9.4 |
-| `phone` | 문자열 | 예 | 연락처. 없으면 `null` |
+| `phone` | 문자열 | 예 | 고객이 연락할 번호. 매장 전화번호(3.6의 `phone`)가 있으면 그 번호다. 없으면 현재 업주가 업주 신청에서 고객 공개에 동의한 연락처(3.11.2의 `contactPhonePublic = true`인 `contactPhone`)이며, 둘 다 없으면 `null`이다. 업주가 해제되면(3.11.10) 그 업주의 연락처는 다음 요청부터 나오지 않는다. 승인되지 않은 신청과 동의 항목이 생기기 전에 들어온 신청의 연락처는 보이지 않는다 |
+| `phoneSource` | `bar` \| `owner_contact` | 예 | `phone`의 출처. `bar`는 매장 전화번호, `owner_contact`는 업주 연락처다. `phone`이 `null`이면 `null`. 프론트엔드는 `owner_contact`일 때 "사장님 연락처"처럼 매장 번호가 아님을 표시할 수 있다 |
 | `description` | 문자열 | 예 | 한 줄 소개(3.6과 같다). 줄바꿈이 들어 있을 수 있다. 프론트엔드는 HTML로 해석하지 않고 일반 텍스트로 보여 주며, 표시할 줄 수를 제한할 수 있다. 없으면 `null` |
 | `tags` | 문자열 배열 | 아니오 | 매장 태그(3.6과 같다). 받은 순서대로 보여 준다. 없으면 `[]` |
 | `weeklyHours` | 배열 | 아니오 | 정규 영업시간(3.15.1). 없으면 `[]` |
@@ -1043,6 +1049,7 @@ GET /api/bars/{barId}/menu
   "latitude": 37.478321,
   "longitude": 126.951234,
   "phone": null,
+  "phoneSource": null,
   "description": null,
   "tags": [],
   "weeklyHours": [],
@@ -1057,7 +1064,7 @@ GET /api/bars/{barId}/menu
 
 메뉴판은 있지만 검수에서 모든 항목을 내렸거나 직접 편집으로 모두 지웠으면(3.14.5, 3.14.6), 또는 손님이 볼 때 모든 항목이 품절이면(3.14.8) `menuBoardId`, `menuVersion`, `publishedAt`은 값이 있고 `items`만 `[]`다. 프론트엔드는 "현재 판매 중인 메뉴가 없습니다"를 표시한다.
 
-그 밖에 값이 없을 수 있는 필드는 `phone`, `description`, `operatingException`, 상품에 연결되지 않은 항목의 `productId`, `productName`, `brandId`, `brandName`, `category`, 그리고 `options[].optionLabel`, `options[].pourMl`, `options[].discount`뿐이며 모두 `null`로 온다. `tags`, `weeklyHours`, `photos`는 없으면 `[]`다. 프론트엔드는 해당 표시만 생략하고, 사진이 없으면 기본 이미지를 보여 준다. 업장 이름, 주소, 좌표와 옵션 가격은 항상 값이 있다.
+그 밖에 값이 없을 수 있는 필드는 `phone`과 `phoneSource`, `description`, `operatingException`, 상품에 연결되지 않은 항목의 `productId`, `productName`, `brandId`, `brandName`, `category`, 그리고 `options[].optionLabel`, `options[].pourMl`, `options[].discount`뿐이며 모두 `null`로 온다. `tags`, `weeklyHours`, `photos`는 없으면 `[]`다. 프론트엔드는 해당 표시만 생략하고, 사진이 없으면 기본 이미지를 보여 준다. `phone`은 매장 전화번호도, 고객 공개에 동의한 업주 연락처도 없을 때만 `null`이다(위 필드표). 업장 이름, 주소, 좌표와 옵션 가격은 항상 값이 있다.
 
 #### 3.9.2 메뉴 등록이 진행 중일 때
 
@@ -1492,6 +1499,7 @@ closed      폐업자
   },
   "warnings": [],
   "contactPhone": "010-1234-5678",
+  "contactPhonePublic": false,
   "applicantNote": "대표 본인입니다",
   "menuPhotos": [
     {
@@ -1529,7 +1537,8 @@ closed      폐업자
 | `businessVerification.result` | `BusinessVerificationResult` | 아니오 | 마지막 검증 결과 |
 | `businessVerification.checkedAt` | RFC 3339 문자열 | 아니오 | `result`를 얻은 시각. 신청할 때 `unavailable`이 되었으면 그 시도 시각이다. 다시 검증(3.11.13)이 실패하면 `result`와 함께 바뀌지 않는다 |
 | `warnings` | 배열 | 예 | operator가 승인 전에 확인할 경고(아래 "경고"). 경고가 없으면 `[]`. `businessVerification`과 같은 규칙으로 operator에게만 값이 있고 신청자 본인에게는 `null`이다. operator가 자기 신청을 볼 때도 값이 있다 |
-| `contactPhone` | 문자열 | 아니오 | 운영자가 확인을 위해 연락할 번호 |
+| `contactPhone` | 문자열 | 아니오 | 운영자가 확인을 위해 연락할 번호. `contactPhonePublic`이 `true`이고 신청이 승인되면, 매장 전화번호가 없는 동안 고객에게도 보인다(3.9) |
+| `contactPhonePublic` | 불리언 | 아니오 | 매장 전화번호가 없을 때 `contactPhone`을 고객에게 보여 주는 데 동의했는지. 신청할 때만 정하며 나중에 바꾸는 API는 없다. 동의 항목이 생기기 전에 들어온 신청은 `false`다 |
 | `applicantNote` | 문자열 | 예 | 신청자 메모 |
 | `menuPhotos` | 배열 | 아니오 | 신청에 올린 메뉴판 사진(3.11.15). `imageOrder` 순서이며, 올리지 않았거나 거절·취소로 삭제되었으면 `[]` |
 | `menuPhotos[].imageOrder` | 정수 | 아니오 | 1부터 시작하는 순서 |
@@ -1625,6 +1634,7 @@ Content-Type: application/json
   "representativeName": "김사장",
   "openingDate": "2020-03-02",
   "contactPhone": "010-1234-5678",
+  "contactPhonePublic": false,
   "applicantNote": "대표 본인입니다"
 }
 ```
@@ -1643,6 +1653,7 @@ Content-Type: application/json
   "representativeName": "김사장",
   "openingDate": "2020-03-02",
   "contactPhone": "010-1234-5678",
+  "contactPhonePublic": true,
   "applicantNote": null
 }
 ```
@@ -1659,6 +1670,7 @@ Content-Type: application/json
 | `representativeName` | 예 | 사업자등록증의 대표자 성명 그대로. 앞뒤 공백을 지운 뒤 1~100자 |
 | `openingDate` | 예 | 사업자등록증의 개업연월일. `YYYY-MM-DD` 문자열만 받는다(숫자는 `DATE_TYPE`, 형식 오류는 `DATE_FROM_DATETIME_PARSING`). 한국 시간 기준 오늘보다 뒤이면 `DATE_IN_FUTURE` |
 | `contactPhone` | 예 | 앞뒤 공백을 지운 뒤 1~30자 |
+| `contactPhonePublic` | 아니오 | JSON 불리언만 받는다(`"true"`, `1`, `null`은 `fieldErrors[].code = BOOL_TYPE`). 없으면 `false`. `true`이면 승인 뒤 매장 전화번호가 없는 동안 `contactPhone`을 고객에게 보여 준다(3.9). 신청 화면은 기본으로 체크하지 않은 동의 항목("매장 번호가 없으면 이 번호를 손님에게 보여 줘요")으로 받는다 |
 | `applicantNote` | 아니오 | 500자 이하. 공백뿐이면 `null`로 저장한다 |
 
 길이 규칙이 있는 문자열이 앞뒤 공백을 지운 뒤 비어 있으면 `fieldErrors[].code = STRING_TOO_SHORT`다.
@@ -1874,6 +1886,8 @@ Authorization: Bearer <access-token>
         "displayName": "김사장",
         "ownerSince": "2026-10-14T05:00:00Z"
       },
+      "customerPhone": "02-000-0000",
+      "customerPhoneSource": "bar",
       "createdAt": "2026-10-01T03:00:00Z",
       "updatedAt": "2026-10-04T09:15:00Z"
     }
@@ -1888,7 +1902,7 @@ DELETE /api/bars/{barId}/owner
 Authorization: Bearer <access-token>
 ```
 
-operator만 호출할 수 있다. 요청 본문은 없다. 업장의 현재 업주 관계를 해제하고 `204 No Content`를 반환한다. 기록은 지우지 않고 해제 시각과 해제한 operator를 남긴다. 승인한 업주 신청은 `approved`로 남는다. 해제된 사용자는 다음 요청부터 그 업장의 업주 권한이 없으며, 같은 업장에 다시 업주 신청을 낼 수 있다(3.11.2). 비활성 업장도 해제할 수 있다. 업장에 진행 중인 메뉴 등록 작업은 그대로 남으며 operator나 새 업주가 이어서 처리할 수 있다.
+operator만 호출할 수 있다. 요청 본문은 없다. 업장의 현재 업주 관계를 해제하고 `204 No Content`를 반환한다. 기록은 지우지 않고 해제 시각과 해제한 operator를 남긴다. 승인한 업주 신청은 `approved`로 남는다. 해제된 사용자는 다음 요청부터 그 업장의 업주 권한이 없으며, 같은 업장에 다시 업주 신청을 낼 수 있다(3.11.2). 매장 전화번호가 없어 고객에게 보이던 그 업주의 연락처(3.9)도 다음 요청부터 보이지 않는다. 비활성 업장도 해제할 수 있다. 업장에 진행 중인 메뉴 등록 작업은 그대로 남으며 operator나 새 업주가 이어서 처리할 수 있다.
 
 - 해제는 업장 행을 잠근 뒤 한다(3.14.1). 업장 행을 잠그는 요청(메뉴 등록 작업 생성, 검수 반영, 메뉴 직접 편집, 품절, 판매 정보 확인, 임시 휴무, 매장 사진)은 잠근 뒤 업주 권한을 다시 확인하므로, 해제보다 늦게 잠금을 잡은 이전 업주의 요청은 `403 FORBIDDEN`이다. 같은 업장의 `existing_bar` 신청 승인(3.11.7)과도 차례로 처리된다.
 - 이미 해제한 업장에 다시 보내면 `404 BAR_OWNER_NOT_FOUND`다. 프론트엔드는 응답을 받지 못해 다시 보낸 요청이 이 오류를 받으면 업장 상세(3.6)를 다시 불러 `owner = null`인지 확인한다.
@@ -2259,6 +2273,7 @@ curl -X PUT https://bottlemap.o-r.kr/api/owner-applications/cccccccc-cccc-4ccc-8
   "businessVerification": null,
   "warnings": null,
   "contactPhone": "010-1234-5678",
+  "contactPhonePublic": false,
   "applicantNote": "대표 본인입니다",
   "menuPhotos": [
     {
