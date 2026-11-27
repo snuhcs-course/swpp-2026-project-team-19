@@ -195,14 +195,56 @@ def test_the_operator_deactivates_the_bar(client, db_session, bar, operator):
     assert upload.json()["error"]["code"] == "BAR_NOT_FOUND"
 
 
-@pytest.mark.parametrize("status", ["inactive", "active"])
-def test_an_owner_cannot_change_the_status(client, db_session, bar, owner, status):
-    response = patch(client, owner, bar, {"status": status, "name": "Renamed"})
+def test_the_owner_deactivates_the_bar_and_still_manages_it(client, db_session, bar, owner):
+    response = patch(client, owner, bar, {"status": "inactive", "name": "Renamed"})
 
-    assert response.status_code == 403
-    assert response.json()["error"]["code"] == "FORBIDDEN"
-    stored = reload(db_session, bar)
-    assert (stored.status, stored.name) == (BarStatus.ACTIVE, "관악 위스키 바")
+    assert response.status_code == 200, response.text
+    assert (response.json()["status"], response.json()["name"]) == ("inactive", "Renamed")
+    assert reload(db_session, bar).status == BarStatus.INACTIVE
+    # Customers no longer find it, and it takes no new upload (spec 3.7, 4.4).
+    assert client.get("/api/search/bar-names", params={"query": "Renamed"}).json()["items"] == []
+    assert client.get(f"/api/bars/{bar.id}/menu").json()["error"]["code"] == "BAR_NOT_FOUND"
+    upload = client.post(
+        f"/api/bars/{bar.id}/menu-imports",
+        headers={**owner, "Idempotency-Key": "k"},
+        data={"mode": "full_replace"},
+        files=[("images", ("page.jpg", b"\xff\xd8\xff\xe0jpeg", "image/jpeg"))],
+    )
+    assert upload.json()["error"]["code"] == "BAR_NOT_FOUND"
+    # The owner still sees and manages it.
+    [mine] = client.get("/api/me/bars", headers=owner).json()["items"]
+    assert (mine["barId"], mine["status"]) == (str(bar.id), "inactive")
+    assert client.get(f"/api/bars/{bar.id}", headers=owner).json()["status"] == "inactive"
+    assert client.get(f"/api/bars/{bar.id}/menu", headers=owner).status_code == 200
+
+
+@pytest.mark.parametrize("deactivated_by", ["owner", "operator"])
+def test_the_owner_reactivates_the_bar(client, db_session, bar, owner, operator, deactivated_by):
+    assert patch(client, owner if deactivated_by == "owner" else operator, bar, {"status": "inactive"}).status_code == 200
+
+    response = patch(client, owner, bar, {"status": "active"})
+
+    assert response.status_code == 200, response.text
+    assert response.json()["status"] == "active"
+    assert reload(db_session, bar).status == BarStatus.ACTIVE
+    [found] = client.get("/api/search/bar-names", params={"query": "관악"}).json()["items"]
+    assert found["barId"] == str(bar.id)
+
+
+def test_the_owner_sends_the_status_it_already_has(client, db_session, bar, owner):
+    response = patch(client, owner, bar, {"status": "active"})
+
+    assert response.status_code == 200
+    assert reload(db_session, bar).status == BarStatus.ACTIVE
+
+
+def test_a_former_owner_cannot_change_the_status(client, db_session, bar, owner):
+    assert client.delete(f"/api/bars/{bar.id}/owner", headers=owner).status_code == 204
+
+    response = patch(client, owner, bar, {"status": "inactive"})
+
+    assert (response.status_code, response.json()["error"]["code"]) == (403, "FORBIDDEN")
+    assert reload(db_session, bar).status == BarStatus.ACTIVE
 
 
 @pytest.mark.parametrize(

@@ -69,8 +69,8 @@ function productText(product) {
 
 // ---------- tabs ----------
 
-// The request count reset tab's panel is in limits.js.
-const TABS = ["applications", "checks", "limits"];
+// The request count reset tab's panel is in limits.js and the bar tab's in bars.js.
+const TABS = ["applications", "checks", "bars", "limits"];
 
 function selectTab(name) {
   for (const tab of TABS) {
@@ -82,6 +82,7 @@ function selectTab(name) {
     checks.started = true;
     loadChecks(true);
   }
+  if (name === "bars") startBars();
 }
 
 // Checks hold signed photo URLs, so nothing of them stays after sign-out (like clearDashboard).
@@ -956,6 +957,7 @@ function handleResolveError(check, error, form) {
 
 $("tab-applications").addEventListener("click", () => selectTab("applications"));
 $("tab-checks").addEventListener("click", () => selectTab("checks"));
+$("tab-bars").addEventListener("click", () => selectTab("bars"));
 $("tab-limits").addEventListener("click", () => selectTab("limits"));
 $("check-filters").addEventListener("change", (event) => {
   if (event.target.name !== "status") return;

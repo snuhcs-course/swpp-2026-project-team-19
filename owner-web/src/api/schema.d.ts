@@ -168,7 +168,7 @@ export interface paths {
         options?: never;
         head?: never;
         /**
-         * Edit a bar, or deactivate it
+         * Edit a bar, or deactivate or reactivate it
          * @description Operator or the bar's owner. Send only the fields to change; the response is the bar as in `GET /api/bars/{barId}`. An empty body changes nothing.
          *
          *     - `name` and `address` cannot be null. Surrounding spaces are removed.
@@ -178,7 +178,7 @@ export interface paths {
          *     - `defaultPourMl`: 1-999, null removes it. Only pre-fills glass options in the app; the menu is not changed.
          *     - `tags`: replaces all tags, in display order; `[]` removes them, null is not allowed. Up to 5, each 1-24 characters on one line, unique ignoring case; stored with their case as sent.
          *     - `weeklyHours`: replaces all regular hours; `[]` removes them, null is not allowed. One entry per `dayOfWeek` (1 = Monday); `closed: true` is a day off and takes no times, otherwise `openTime` and `closeTime` are Seoul local `HH:MM` in 5-minute steps, different, and a close earlier than the open ends the next day. A change moves `updatedAt`.
-         *     - `status` (`active` or `inactive`) only by operators; an owner who sends it gets `403`. An inactive bar leaves customer search and takes no new upload.
+         *     - `status`: `active` or `inactive`, by an operator or the owner, applied at once. An inactive bar leaves customer search and the customer bar detail and takes no new upload; its owner still manages it and may set it `active` again.
          *     - The temporary closure is changed with `PUT /api/bars/{barId}/operating-exception`; sending `operatingException` here is `EXTRA_FORBIDDEN`.
          */
         patch: operations["edit_bar_api_bars__barId__patch"];
@@ -195,11 +195,12 @@ export interface paths {
         put?: never;
         post?: never;
         /**
-         * Remove the bar's owner
-         * @description Operator only; inactive bars too. Ends the current owner's ownership of the bar: from their next request they no longer manage it. The record is kept with when and by whom it was revoked, the approved application stays approved, and the former owner may apply again. The bar's unfinished menu import, if any, stays for an operator or the next owner.
+         * Remove the bar's owner, or end your own management of the bar
+         * @description Operator or the bar's current owner; inactive bars too. Ends the current ownership of the bar at once, with no approval step: from their next request the former owner no longer manages it. The record is kept with when and by whom (the operator, or the owner themselves) it was revoked, the approved application stays approved, and the former owner may apply again. The bar's `status` is not changed, and its unfinished menu import, if any, stays for an operator or the next owner.
          *
-         *     - Done under the bar row lock, like menu changes and approvals: a request of the former owner that takes the lock afterwards gets `403`.
-         *     - Checks in order: operator, the caller's users row (the revoker is recorded), the bar, its current owner. Sending it again after a success is `BAR_OWNER_NOT_FOUND`.
+         *     - Done under the bar row lock, like menu changes and approvals: the caller is checked again after taking the lock, so a request of the former owner that takes the lock afterwards gets `403`.
+         *     - Checks in order: the bar, the caller (operator or current owner), the same again under the bar row lock, the caller's users row (the revoker is recorded), the bar's current owner.
+         *     - Sent again after a success, an owner's request is `403` (they are no longer the owner; check `GET /api/me/bars`) and an operator's is `BAR_OWNER_NOT_FOUND`.
          */
         delete: operations["remove_bar_owner_api_bars__barId__owner_delete"];
         options?: never;
@@ -4742,7 +4743,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description `FORBIDDEN`: the caller is neither an operator nor the bar's current owner, or an owner sent `status`. */
+            /** @description `FORBIDDEN`: the caller is neither an operator nor the bar's current owner. */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -4817,7 +4818,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description `FORBIDDEN`: the caller is not an operator. */
+            /** @description `FORBIDDEN`: the caller is neither an operator nor the bar's current owner. */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -4826,7 +4827,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description `USER_NOT_FOUND`: the operator has no users row (only a temporary-login operator can lack one; call `GET /api/me` and retry). `BAR_NOT_FOUND`: no such bar or a malformed id. `BAR_OWNER_NOT_FOUND`: the bar has no current owner. */
+            /** @description `BAR_NOT_FOUND`: no such bar or a malformed id. `USER_NOT_FOUND`: the operator has no users row (only a temporary-login operator can lack one; call `GET /api/me` and retry). `BAR_OWNER_NOT_FOUND`: the bar has no current owner (an operator's request). */
             404: {
                 headers: {
                     [name: string]: unknown;
