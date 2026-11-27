@@ -1,4 +1,4 @@
-# I5-P59/P31: Glenmorangie ages (catalog v2.4-v2.6, accepted older ages), an optional missing-age guard, and the not-whisky note
+# I5-P59/P31: Glenmorangie ages and names (catalog v2.4-v2.7, accepted older ages), an optional missing-age guard, and the not-whisky note
 
 > Draft. Not opened. Base: `main` at `0fae9345`. Branch `feature/i5-m3a-not-whisky` (local commits only).
 
@@ -9,11 +9,12 @@
 - `ResolutionResult.kind_hint` and `LLMLayerConfig.flag_non_whisky` (default `False`, no environment variable). With the flag on, a line the LLM layer reads as `non_whisky` and the rules had no candidate for keeps its result and gets `kind_hint="non_whisky"`. Status, candidates and the review state do not change, and nothing is stored or returned by the API yet.
 - Harness option `--flag-non-whisky` with the `not_whisky` numbers.
 
-**Catalog v2.4 to v2.6** (`ai/catalog/catalog_v2_service.json`, README sections 15-17)
+**Catalog v2.4 to v2.7** (`ai/catalog/catalog_v2_service.json`, README sections 15-18)
 
 - v2.4: Jack Daniel's Tennessee Apple is a product (flavoured whiskeys are served as whisky). The Odbi gold line, the dev harness exception, the regression fixture and the baseline follow.
 - v2.5: `age_years` of the Glenmorangie bottles: The Original 10 -> 12, Quinta Ruban 14, Nectar D'Or 16, Lasanta 12 (the last three were empty).
 - v2.6: Lasanta 12 -> 15 (the bottle changed in 2025; 12 was the old bottle).
+- v2.7: Nectar D'Or under its current bottle name: display name `Glenmorangie The Nectar`, edition `The Nectar`. Key, id and aliases unchanged, so the old name stays an alias. No matching result changes (dev and I3, rules and M3a, line by line).
 
 **Accepted older ages** (`backend/app/matching/accepted_ages.py`, new)
 
@@ -57,9 +58,9 @@ Re-evaluation with the LLM layer (M3a, `gemini-3.1-flash-lite`, `--flag-non-whis
 
 - Every line that changed against 11/21 is a Glenmorangie line. The one false merge is still "Ardbeg Anthology".
 - **Fixed on the test set:** the Glenmorangie ages were set after looking at I3 lines, so the I3 numbers include that fix.
-- One correct confirmation is still a recommendation: "글렌모렌지 더 넥타 16Y" (the product's edition "Nectar D'Or" has "D'Or", the line does not; the bottle is now called "The Nectar"). Not changed here.
+- One correct confirmation is still a recommendation: "글렌모렌지 더 넥타 16Y". On v2.6 the product's edition had "D'Or" and the line did not; on v2.7 (The Nectar) the line's "더" is left out as a generic word, and a product picked after leaving words out is never confirmed (the I4 rule). Not changed here.
 
-API calls for these numbers: Gemini 14 (free key, all first attempts), OpenRouter 0, CLOVA 0.
+API calls for these numbers: Gemini 14 (free key, all first attempts), OpenRouter 0, CLOVA 0. The numbers are those of catalog v2.6; on v2.7 the same runs, re-scored from the same cache (0 new calls), are identical line by line.
 
 ## Flag defaults
 

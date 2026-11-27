@@ -18,7 +18,7 @@ ACCEPTED_AGES: dict[UUID, tuple[int, ...]] = {
     UUID("ec660a60-db4b-5562-ad97-d0349b0be56b"): (10,),  # Glenmorangie The Original: 12, the old bottle 10
     UUID("a2688e71-6071-5151-acf9-af69db359d70"): (12,),  # Glenmorangie Lasanta: 15 since 2025, the old bottle 12
     UUID("59218382-d515-5e3f-b066-1b8662e98f4d"): (12,),  # Glenmorangie Quinta Ruban: 14, the old bottle 12
-    # Glenmorangie Nectar D'Or (16) has none: sources disagree on its older age.
+    # Glenmorangie The Nectar (16, formerly Nectar D'Or) has none: sources disagree on its older age.
 }
 
 

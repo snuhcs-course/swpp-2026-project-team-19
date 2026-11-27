@@ -248,3 +248,10 @@ main에는 적재 대상인 `catalog_v2_service.json`과 `bars_v2.json`만 있�
 - **별칭은 그대로입니다.** The Original의 옛 연수 별칭(`Glenmorangie 10`, `글렌모렌지10` 등)은 이제 연수 불일치에 걸리지 않습니다.
 - 평가 스냅샷(`catalog_v2_eval_5bars*.json`)과 운영 DB는 고치지 않았습니다. 옛 하네스 `ai/eval/match_eval.py`의 `load_catalog`(P47 이전 평가, I3 동결 파일)는 받아 주는 연수를 채우지 않습니다.
 - 측정: `ai/runs/2026-11-27_i5_p31/report.md` "낮 실행" 절.
+
+## 18. v2.7 The Nectar (2026-11-27, I5-P59)
+
+병 이름이 "The Nectar"로 바뀌어(박진우 결정, 2026-11-27) `glenmorangie-nectar-dor`의 `display_name`을 `Glenmorangie Nectar D'Or` → `Glenmorangie The Nectar`, `edition_name`을 `Nectar D'Or` → `The Nectar`로 고쳤습니다. `version`은 `catalog_v2_7_service`입니다.
+
+- **key, id, 별칭은 그대로입니다.** 정답 파일과 메뉴 seed가 key·id로 가리키므로 바꾸지 않았습니다. 옛 이름 `Glenmorangie Nectar D'Or`(표준 별칭), `Nectar d'Or`, `글렌모렌지 넥타도르` 등은 별칭으로 남아 옛 병 메뉴 줄도 그대로 확정됩니다. `Glenmorangie The Nectar` 별칭은 원래 있었습니다.
+- 매칭 결과(dev, I3 규칙만·M3a 재평가)는 v2.6과 줄 단위로 같습니다. "글렌모렌지 더 넥타 16Y"는 여전히 후보 1개 + 확인 권장이고, 이유가 에디션 `D'Or`(`editionOnlyInProduct`)에서 일반어 "더"를 빼고 고른 경우(`ignoredWords`, 확정하지 않는 I4 규칙)로 바뀌었습니다.

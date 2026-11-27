@@ -325,6 +325,7 @@ def test_embedded_entries_keep_one_alias_per_normalized_value_like_the_database(
 V2_4_ASIS_DIGEST = "b82cacac24493d0f"
 V2_5_ASIS_DIGEST = "541fb3d457e8d5da"
 V2_6_ASIS_DIGEST = "7f96c66ad6e70e19"
+V2_7_ASIS_DIGEST = "1a4e2469c48baa82"
 
 
 def test_the_i3_asis_catalogs_are_the_recorded_ones(be):
@@ -333,11 +334,12 @@ def test_the_i3_asis_catalogs_are_the_recorded_ones(be):
     # catalog v2.4 (2026-11-21, I5: Jack Daniel's Tennessee Apple added) no longer gives the asis
     # catalogs I3 and P46 ran with (I3_ASIS_DIGEST, catalog v2.3): numbers from here on are not theirs.
     # v2.5 (2026-11-27, I5-P59: Glenmorangie ages) is not v2.4 either (V2_4_ASIS_DIGEST, 11/21 runs),
-    # nor is v2.6 (Lasanta 12 -> 15) v2.5 (V2_5_ASIS_DIGEST, the 11/27 night runs)
+    # nor is v2.6 (Lasanta 12 -> 15) v2.5 (V2_5_ASIS_DIGEST, the 11/27 night runs), nor v2.7 (The Nectar) v2.6
     assert not digest.startswith(I3_ASIS_DIGEST)
     assert not digest.startswith(V2_4_ASIS_DIGEST)
     assert not digest.startswith(V2_5_ASIS_DIGEST)
-    assert digest.startswith(V2_6_ASIS_DIGEST)
+    assert not digest.startswith(V2_6_ASIS_DIGEST)
+    assert digest.startswith(V2_7_ASIS_DIGEST)
 
 
 def test_ops_is_the_catalog_with_the_additions_minus_own_menu_aliases(files, tmp_path):

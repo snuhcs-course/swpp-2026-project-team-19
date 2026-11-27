@@ -14,14 +14,18 @@ from test_i3_match_eval import be, files  # noqa: F401 (fixtures)
 
 # ---------- 1a: catalog v2.5, v2.6 ----------
 
-def test_catalog_v2_6_has_the_current_glenmorangie_ages():
+def test_catalog_v2_7_has_the_current_glenmorangie_ages_and_names():
     seed = json.loads((h.REPO_ROOT / "ai" / "catalog" / "catalog_v2_service.json").read_text(encoding="utf-8"))
     ages = {p["key"]: p["age_years"] for p in seed["products"] if p["key"].startswith("glenmorangie")}
-    assert seed["version"] == "catalog_v2_6_service"
+    assert seed["version"] == "catalog_v2_7_service"
     # v2.6: Lasanta 12 -> 15 (the bottle changed in 2025)
     assert (ages["glenmorangie-original"], ages["glenmorangie-quinta-ruban"], ages["glenmorangie-lasanta"],
             ages["glenmorangie-nectar-dor"]) == (12, 14, 15, 16)
     assert ages["glenmorangie-18"] == 18 and ages["glenmorangie-signet"] is None  # the others as before
+    # v2.7: Nectar D'Or under the current bottle name; the old name stays an alias
+    nectar = next(p for p in seed["products"] if p["key"] == "glenmorangie-nectar-dor")
+    assert (nectar["display_name"], nectar["edition_name"]) == ("Glenmorangie The Nectar", "The Nectar")
+    assert {"Glenmorangie Nectar D'Or", "Glenmorangie The Nectar"} <= {a["alias_text"] for a in nectar["aliases"]}
 
 
 # ---------- accepted ages in the harness (v2.6) ----------

@@ -1,7 +1,7 @@
 {
-  "version": "catalog_v2_6_service",
+  "version": "catalog_v2_7_service",
   "created": "2026-11-27",
-  "based_on": "catalog_v1_draft + eval/match_gold_v1_1.json new_products + menu names of the held-out bars (labels v1.1: 미라보, Beck, 포레스트) + POST_TEST_ALIASES (match_gold_test_draft.py) + eval/match_gold_final_v1.json new_products and menu names (수이, 오드비) + v2.2 (2026-10-28): menu spellings of 13 app-created duplicate products from the 10/7 위스키복춘 import attached to the real products; brand+age aliases of edition products that hid same-age siblings made non-searchable (matching still uses them); v2.3 (2026-10-28, I3-P17): generated Korean spellings (transliteration, edition-word and word-order variants) from each product's English name, brand, age and edition, kept after a second verification pass; v2.4 (2026-11-21, I5): Jack Daniel's Tennessee Apple (jack-daniels-apple) added as a product and removed from excluded_non_whisky: flavoured whiskeys are served as whisky (decision of Jinwoo Park, 2026-11-21); v2.5 (2026-11-27, I5-P59): age_years of Glenmorangie The Original 10 -> 12, Quinta Ruban 14, Lasanta 12, Nectar D'Or 16 (the current bottlings; were empty), from the I4 AI backlog; v2.6 (2026-11-27, I5-P59): Glenmorangie Lasanta 12 -> 15 (the bottle changed in 2025); the older ages of The Original (10), Lasanta (12) and Quinta Ruban (14 <- 12) are accepted by matching (backend/app/matching/accepted_ages.py, not stored in this file)",
+  "based_on": "catalog_v1_draft + eval/match_gold_v1_1.json new_products + menu names of the held-out bars (labels v1.1: 미라보, Beck, 포레스트) + POST_TEST_ALIASES (match_gold_test_draft.py) + eval/match_gold_final_v1.json new_products and menu names (수이, 오드비) + v2.2 (2026-10-28): menu spellings of 13 app-created duplicate products from the 10/7 위스키복춘 import attached to the real products; brand+age aliases of edition products that hid same-age siblings made non-searchable (matching still uses them); v2.3 (2026-10-28, I3-P17): generated Korean spellings (transliteration, edition-word and word-order variants) from each product's English name, brand, age and edition, kept after a second verification pass; v2.4 (2026-11-21, I5): Jack Daniel's Tennessee Apple (jack-daniels-apple) added as a product and removed from excluded_non_whisky: flavoured whiskeys are served as whisky (decision of Jinwoo Park, 2026-11-21); v2.5 (2026-11-27, I5-P59): age_years of Glenmorangie The Original 10 -> 12, Quinta Ruban 14, Lasanta 12, Nectar D'Or 16 (the current bottlings; were empty), from the I4 AI backlog; v2.6 (2026-11-27, I5-P59): Glenmorangie Lasanta 12 -> 15 (the bottle changed in 2025); the older ages of The Original (10), Lasanta (12) and Quinta Ruban (14 <- 12) are accepted by matching (backend/app/matching/accepted_ages.py, not stored in this file); v2.7 (2026-11-27, I5-P59): Glenmorangie Nectar D'Or renamed to the current bottle name, display_name Glenmorangie The Nectar and edition_name The Nectar (key, id and aliases unchanged; the old name stays an alias) (decision of Jinwoo Park, 2026-11-27)",
   "notes": [
     "ids are UUIDv5(namespace 6b1a1f4e-19b0-4c7a-9a7e-b0771e3a0019, '<kind>:<key>'): stable across rebuilds.",
     "normalized_alias is intentionally omitted: backend normalization function generates it.",
@@ -9823,9 +9823,9 @@
       "brand_id": "851919cc-675b-513d-8541-3cb2d1acfab5",
       "brand_key": "glenmorangie",
       "category": "whisky",
-      "display_name": "Glenmorangie Nectar D'Or",
+      "display_name": "Glenmorangie The Nectar",
       "age_years": 16,
-      "edition_name": "Nectar D'Or",
+      "edition_name": "The Nectar",
       "abv": null,
       "sources": [
         "menu:위스키복춘",
