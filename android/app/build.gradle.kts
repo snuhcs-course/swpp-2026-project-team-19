@@ -6,6 +6,10 @@ plugins {
     id("com.google.firebase.crashlytics") version "3.0.8" apply false
 }
 
+apply(from = rootProject.file("android/versioning.gradle.kts"))
+val appVersionCode = extra["bottlemapVersionCode"] as Int
+val appVersionName = extra["bottlemapVersionName"] as String
+
 // No Firebase SDKs, plugin application or generated configuration in credential-free builds.
 val firebaseEnabled = file("google-services.json").isFile &&
     providers.gradleProperty("BOTTLEMAP_FIREBASE_ENABLED").orNull != "false"
@@ -91,8 +95,8 @@ android {
                 .orElse("https://bottlemap.o-r.kr/privacy").get()))
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = appVersionCode
+        versionName = appVersionName
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "KAKAO_NATIVE_APP_KEY", stringBuildConfigValue(kakaoNativeAppKey))
         buildConfigField("String", "SUPABASE_URL", stringBuildConfigValue(supabaseUrl))
