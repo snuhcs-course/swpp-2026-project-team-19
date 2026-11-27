@@ -27,6 +27,8 @@
 
 - A confirmed line whose name has no age (and extraction gave none) while the product has one becomes one candidate with `confirmRecommended`. An invalid value stops the server at start-up. Harness option `--missing-age-guard`. Kept off: on catalog v2.5 it turned 24 correct confirmations per set into recommendations to remove one false merge (I3 "Ardbeg Anthology").
 
+**An article of the edition name** (`backend/app/matching/staged.py`): an article on the line (`the`, `더`) fits a product whose edition name has "The" (The Nectar, The Original) when another word of the line fits that product too. It is no longer left out as a generic word, so the line can be confirmed ("글렌모렌지 더 넥타 16Y" -> The Nectar, "브룩라디 더 클래식" -> The Classic Laddie). A line with only the article, or naming a product without one ("글렌모렌지 더 시그넷"), is as before. Documented in `docs/menu_ai_matching_flow.md` with the accepted ages.
+
 **Brand + age only lines**: no rule change; tests pin the behaviour (one product of that age -> one unconfirmed candidate, the plain bottling stays confirmed, two products -> a choice).
 
 **Measurement scripts** (API 0): `ai/eval/i5_p59_compare.py` (line-by-line diff of two harness results), `i5_p59_with_age.py` (passes the age read from the line name, as menu import passes the extracted age), `i5_p59_age_only.py` (brand + age only lines).
@@ -45,6 +47,8 @@ Rules + server steps, label input, API 0. Catalog v2.5 -> v2.6 (with accepted ag
 
 No correct confirmation is lost and no false merge is added. With the age passed, I3 is back at the v2.4 Top-1.
 
+Then the article rule (catalog v2.7), same harness: dev 627 -> 630, I3 full 500 -> 502, ops 511 -> 513; FM, wrong CR and hard lines per photo unchanged. The five lines that change are all recommended candidates becoming correct confirmations (four "The Nectar" lines, one "The Classic Laddie").
+
 Re-evaluation with the LLM layer (M3a, `gemini-3.1-flash-lite`, `--flag-non-whisky`): rules + M3a + server steps, label input. Earlier runs: P46 (I4, 2026-11-17, catalog v2.3) and 2026-11-21 (v2.4); on I3 the two are identical.
 
 | | Top-1 | FM | wrong CR | hard lines / photo | confirm / choose / register / wrong | not-whisky note: non-whisky right · whisky wrong · unknown |
@@ -58,9 +62,9 @@ Re-evaluation with the LLM layer (M3a, `gemini-3.1-flash-lite`, `--flag-non-whis
 
 - Every line that changed against 11/21 is a Glenmorangie line. The one false merge is still "Ardbeg Anthology".
 - **Fixed on the test set:** the Glenmorangie ages were set after looking at I3 lines, so the I3 numbers include that fix.
-- One correct confirmation is still a recommendation: "글렌모렌지 더 넥타 16Y". On v2.6 the product's edition had "D'Or" and the line did not; on v2.7 (The Nectar) the line's "더" is left out as a generic word, and a product picked after leaving words out is never confirmed (the I4 rule). Not changed here.
+- With the article rule the same eight runs (18 new Gemini calls) give dev 630 / 804 and I3 502 / 646 (full) and 513 / 646 (ops), FM, wrong CR, hard lines per photo and the not-whisky note as in the table. One other line ("브룩라디 포트샬롯", same photo as "더 클래식") shows another candidate list in three runs because the photo's M3a input changed; it stays a choice with the right product.
 
-API calls for these numbers: Gemini 14 (free key, all first attempts), OpenRouter 0, CLOVA 0. The numbers are those of catalog v2.6; on v2.7 the same runs, re-scored from the same cache (0 new calls), are identical line by line.
+API calls for these numbers: Gemini 14 + 18 with the article rule (free key, all first attempts), OpenRouter 0, CLOVA 0. The numbers are those of catalog v2.6; on v2.7 the same runs, re-scored from the same cache (0 new calls), are identical line by line.
 
 ## Flag defaults
 
@@ -70,8 +74,8 @@ API calls for these numbers: Gemini 14 (free key, all first attempts), OpenRoute
 
 ## Tests
 
-- New: `backend/tests/test_accepted_ages.py` (26: accepted and current ages from extraction and from the line, a third age still conflicting, brand + age candidates, products without accepted ages unchanged, pick check, `incompleteName`, the LLM veto, the table against the catalog file, and the two database catalogs, which needs a database), `backend/tests/test_linking_guards.py` (missingAge), `backend/tests/test_resolve_staged.py` (brand + age only lines), `ai/eval/test_i5_p59.py` (catalog ages, the harness's accepted ages, the three scripts, the harness option). Fixed value: the I3 asis catalog digest for v2.6.
-- Locally: backend 1184 passed, 1941 skipped (need a database), 0 failed (`tests/test_pdf_*.py` and `test_run_uat_inputs.py` not collected: no `pypdfium2`). `ai`: 393 / 394; the one failure (`test_reencoded_ocr_cache_without_provenance_stops`, a Windows path separator) predates this branch. Regression check on the 15 photos: pass, no changed line.
+- New: `backend/tests/test_accepted_ages.py` (26: accepted and current ages from extraction and from the line, a third age still conflicting, brand + age candidates, products without accepted ages unchanged, pick check, `incompleteName`, the LLM veto, the table against the catalog file, and the two database catalogs, which needs a database), `backend/tests/test_linking_guards.py` (missingAge), `backend/tests/test_resolve_staged.py` (brand + age only lines, the article rule), `ai/eval/test_i5_p59.py` (catalog ages, the harness's accepted ages, the three scripts, the harness option). Fixed value: the I3 asis catalog digest for v2.6.
+- Locally: backend 1189 passed, 1941 skipped (need a database), 0 failed (`tests/test_pdf_*.py` and `test_run_uat_inputs.py` not collected: no `pypdfium2`). `ai`: 393 / 394; the one failure (`test_reencoded_ocr_cache_without_provenance_stops`, a Windows path separator) predates this branch. Regression check on the 15 photos: pass, no changed line.
 - Coverage (branches): `accepted_ages.py`, `linking_guards.py`, `pick_check.py`, `llm_layer.py`, `types.py` 100%; the measurement scripts 95% together.
 
 ## Not checked

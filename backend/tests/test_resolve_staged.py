@@ -881,3 +881,46 @@ def test_brand_and_age_confirm_the_plain_bottling_and_find_nothing_for_an_age_th
     plain = resolve_product_staged(ExtractedProduct(product_name="글렌모렌지 18년"), glenmorangie, ALL_STAGES)
     assert plain.status == "exact_match" and plain.proposed_product_id == GM_18  # S2b default product, as before
     assert resolve_product_staged(ExtractedProduct(product_name="Glenmorangie 15yr"), glenmorangie, ALL_STAGES).status == "unmatched"
+
+
+# ---- an article in the edition name (I5-P59) ----
+
+ART_BRAND = _id(600)
+ART_NECTAR, ART_SIGNET, ART_ORIGINAL = (_id(n) for n in range(601, 604))
+
+
+@pytest.fixture
+def with_articles():
+    products = [
+        ProductInfo(ART_NECTAR, "Glenmorangie The Nectar", 16, "The Nectar", brand_id=ART_BRAND),
+        ProductInfo(ART_ORIGINAL, "Glenmorangie The Original", 12, "The Original", brand_id=ART_BRAND),
+        ProductInfo(ART_SIGNET, "Glenmorangie Signet", None, "Signet", brand_id=ART_BRAND),
+    ]
+    aliases = [(p.product_id, p.display_name) for p in products] + [
+        (ART_NECTAR, "글렌모렌지 넥타"), (ART_ORIGINAL, "글렌모렌지 오리지널"), (ART_SIGNET, "글렌모렌지 시그넷"),
+    ]
+    return InMemoryCatalog(products, aliases, [(ART_BRAND, "Glenmorangie"), (ART_BRAND, "글렌모렌지")])
+
+
+@pytest.mark.parametrize("name, product", [
+    ("글렌모렌지 더 넥타 16Y", ART_NECTAR),
+    ("글렌모렌지 더 넥타", ART_NECTAR),
+    ("글렌모렌지 더 오리지널 12년", ART_ORIGINAL),
+])
+def test_an_article_of_the_edition_name_is_part_of_it(with_articles, name, product):
+    result = resolve_product_staged(ExtractedProduct(product_name=name), with_articles, ALL_STAGES)
+    assert result.status == "exact_match" and result.proposed_product_id == product
+    assert result.candidates[0].evidence["editionMatch"][0] == "더"
+    assert "ignoredWords" not in result.candidates[0].evidence
+
+
+def test_an_article_beside_a_product_without_one_is_still_a_generic_word(with_articles):
+    # "더" fits The Nectar only beside a word that fits The Nectar, so here it is left out as before
+    result = resolve_product_staged(ExtractedProduct(product_name="글렌모렌지 더 시그넷"), with_articles, ALL_STAGES)
+    _one_recommended(result, ART_SIGNET, ["더"])
+
+
+def test_an_article_alone_picks_nothing(with_articles):
+    result = resolve_product_staged(ExtractedProduct(product_name="글렌모렌지 더"), with_articles, ALL_STAGES)
+    assert result.status != "exact_match"
+    assert ART_NECTAR not in {c.product_id for c in result.candidates if c.evidence.get("editionMatch")}
