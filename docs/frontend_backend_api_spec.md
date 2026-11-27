@@ -121,11 +121,11 @@ GET 활성 업장 전체 조회 (3.19)
 | `POST /api/owner-applications/{applicationId}/cancel`, `PUT /api/owner-applications/{applicationId}/menu-photos`, `PUT`과 `DELETE /api/owner-applications/{applicationId}/cover-photo` | | 본인 신청만 | 본인 신청만 | 본인 신청만 |
 | `GET /api/owner-applications`, `POST .../approve`, `POST .../reject`, `POST .../verify-business` | | | | O |
 | `POST /api/request-limits/reset` | | | | O |
-| `DELETE /api/bars/{barId}/owner` | | | | O |
+| `DELETE /api/bars/{barId}/owner` | | | O | O |
 | `GET /api/menu-item-checks`, `POST /api/menu-item-checks/{checkId}/resolve` | | | | O |
 | `GET /api/bars`, `POST /api/bars`(지금은 구현하지 않음, 3.5) | | | | O |
 | `GET /api/bars/{barId}` | | | O | O |
-| `PATCH /api/bars/{barId}` | | | O (`status` 제외) | O |
+| `PATCH /api/bars/{barId}` | | | O | O |
 | `GET /api/bars/{barId}/menu-imports`, `POST /api/bars/{barId}/menu-imports` | | | O | O |
 | `POST /api/bars/{barId}/menu/items`, `PUT .../menu/items/{barMenuItemId}`, `DELETE .../menu/items/{barMenuItemId}`, `POST /api/bars/{barId}/menu/reset` | | | O | O |
 | `PUT /api/bars/{barId}/menu/items/{barMenuItemId}/sold-out`, `POST /api/bars/{barId}/menu/confirm` | | | O | O |
@@ -770,7 +770,7 @@ operator와 해당 업장의 현재 업주가 호출할 수 있다. 바꿀 필�
 | `defaultPourMl` | operator, 업주 | 1~999 정수. `null`을 보내면 지운다. 바꿔도 이미 게시된 메뉴의 용량은 바뀌지 않는다. 업장 수정에서만 받는다. 업장 생성(3.5)과 신청 승인(3.11.7)에서 보내면 `422`이고 `fieldErrors[].code = EXTRA_FORBIDDEN`이다. 새 업장은 `null`이다 |
 | `tags` | operator, 업주 | 매장 태그 전체를 이 배열로 바꾼다. `[]`이면 모두 지우며 `null`은 보낼 수 없다. 최대 5개이고, 태그마다 앞뒤 공백을 지운 뒤 1~24자다. 줄바꿈과 제어 문자는 받지 않는다(`INVALID_CHARACTER`). 대소문자만 다른 태그도 같은 태그로 보며, 중복이면 `DUPLICATE_TAG`다. 서버는 앞뒤 공백만 지우고 대소문자와 순서는 받은 그대로 저장한다. 자유 입력이며 서버가 정한 태그 목록은 없다 |
 | `weeklyHours` | operator, 업주 | 정규 영업시간 전체를 이 배열로 바꾼다. 형식과 규칙은 3.15.1. `[]`이면 영업시간 정보가 없는 상태가 되며 `null`은 보낼 수 없다 |
-| `status` | operator만 | `active` 또는 `inactive`. 업주가 보내면 `403 FORBIDDEN` |
+| `status` | operator, 업주 | `active` 또는 `inactive`. 승인 단계 없이 바로 반영한다. 업주는 비활성 업장도 계속 관리하며(3.6, 3.11.9) 다시 `active`로 바꿀 수 있다. operator가 비활성화한 업장도 같다. 바꾼 사람은 기록하지 않는다 |
 
 - `address`를 바꿀 때는 `latitude`와 `longitude`도 함께 보낸다. 주소만 보내면 `422`이고 `fieldErrors[].code = COORDINATES_REQUIRED`다. 주소 없이 좌표만 바꿔 위치를 보정할 수는 있다.
 - `tags`와 `weeklyHours`도 `description`, `defaultPourMl`처럼 업장 수정에서만 받는다. 업장 생성(3.5)과 신청 승인(3.11.7)에서 보내면 `422`이고 `fieldErrors[].code = EXTRA_FORBIDDEN`이다. 새 업장은 둘 다 `[]`이다.
@@ -780,12 +780,12 @@ operator와 해당 업장의 현재 업주가 호출할 수 있다. 바꿀 필�
 - 빈 본문 `{}`이면 아무것도 바꾸지 않고 현재 값을 반환한다.
 - 응답은 `200 OK`이며 본문은 3.6과 같은 형식이다.
 
-업장을 물리 삭제하는 API는 두지 않는다. 운영 중단은 operator가 `status = inactive`로 처리해 메뉴 등록과 이미지 이력을 유지한다. 비활성 업장은 고객 검색과 고객용 업장 상세에서 빠지고, 새 메뉴 등록을 받지 않는다(4.4).
+업장을 물리 삭제하는 API는 두지 않는다. 운영 중단은 operator나 업주가 `status = inactive`로 처리해 메뉴 등록과 이미지 이력을 유지한다. 비활성 업장은 고객 검색과 고객용 업장 상세에서 빠지고, 새 메뉴 등록을 받지 않는다(4.4).
 
 | HTTP | code | 발생 조건 | 프론트엔드 처리 |
 |---|---|---|---|
 | `401` | `UNAUTHENTICATED` | 3.1.5 | 3.1.5 |
-| `403` | `FORBIDDEN` | operator도 해당 업장의 업주도 아님, 또는 업주가 `status`를 보냄 | 3.1.5 |
+| `403` | `FORBIDDEN` | operator도 해당 업장의 업주도 아님 | 3.1.5 |
 | `404` | `BAR_NOT_FOUND` | 업장이 없거나 `barId`가 UUID 형식이 아님 | 업장 목록으로 이동 |
 | `422` | `VALIDATION_FAILED` | 필드 규칙 위반, `LAT_LNG_REQUIRED_TOGETHER`, `COORDINATES_REQUIRED`, `INVALID_CHARACTER`, `DUPLICATE_TAG`, 영업시간 규칙 위반(3.15.1) | `fieldErrors` 표시 |
 
@@ -1895,31 +1895,32 @@ Authorization: Bearer <access-token>
 }
 ```
 
-#### 3.11.10 업주 해제
+#### 3.11.10 업주 해제와 업주 본인의 관리 종료
 
 ```http
 DELETE /api/bars/{barId}/owner
 Authorization: Bearer <access-token>
 ```
 
-operator만 호출할 수 있다. 요청 본문은 없다. 업장의 현재 업주 관계를 해제하고 `204 No Content`를 반환한다. 기록은 지우지 않고 해제 시각과 해제한 operator를 남긴다. 승인한 업주 신청은 `approved`로 남는다. 해제된 사용자는 다음 요청부터 그 업장의 업주 권한이 없으며, 같은 업장에 다시 업주 신청을 낼 수 있다(3.11.2). 매장 전화번호가 없어 고객에게 보이던 그 업주의 연락처(3.9)도 다음 요청부터 보이지 않는다. 비활성 업장도 해제할 수 있다. 업장에 진행 중인 메뉴 등록 작업은 그대로 남으며 operator나 새 업주가 이어서 처리할 수 있다.
+operator와 해당 업장의 현재 업주가 호출할 수 있다. operator는 업주를 해제하고, 업주는 그 업장의 관리를 스스로 끝낸다. 요청 본문은 없다. 승인 단계 없이 업장의 현재 업주 관계를 바로 해제하고 `204 No Content`를 반환한다. 기록은 지우지 않고 해제 시각과 해제한 사람(operator, 또는 업주 본인)을 남긴다. 승인한 업주 신청은 `approved`로 남는다. 해제된 사용자는 다음 요청부터 그 업장의 업주 권한이 없고 `GET /api/me/bars`(3.11.9)에서도 그 업장이 빠지며, 같은 업장에 다시 업주 신청을 낼 수 있다(3.11.2). 매장 전화번호가 없어 고객에게 보이던 그 업주의 연락처(3.9)도 다음 요청부터 보이지 않는다. 비활성 업장도 해제할 수 있다. 해제해도 업장의 `status`는 바뀌지 않는다. 업장을 닫거나 숨기려면 3.7의 `status`를 따로 바꾼다. 업장에 진행 중인 메뉴 등록 작업은 그대로 남으며 operator나 새 업주가 이어서 처리할 수 있다.
 
-- 해제는 업장 행을 잠근 뒤 한다(3.14.1). 업장 행을 잠그는 요청(메뉴 등록 작업 생성, 검수 반영, 메뉴 직접 편집, 품절, 판매 정보 확인, 임시 휴무, 매장 사진)은 잠근 뒤 업주 권한을 다시 확인하므로, 해제보다 늦게 잠금을 잡은 이전 업주의 요청은 `403 FORBIDDEN`이다. 같은 업장의 `existing_bar` 신청 승인(3.11.7)과도 차례로 처리된다.
-- 이미 해제한 업장에 다시 보내면 `404 BAR_OWNER_NOT_FOUND`다. 프론트엔드는 응답을 받지 못해 다시 보낸 요청이 이 오류를 받으면 업장 상세(3.6)를 다시 불러 `owner = null`인지 확인한다.
+- 해제는 업장 행을 잠근 뒤 하고, 잠근 뒤 호출자 권한을 다시 확인한다(3.14.1). 업장 행을 잠그는 요청(메뉴 등록 작업 생성, 검수 반영, 메뉴 직접 편집, 품절, 판매 정보 확인, 임시 휴무, 매장 사진, 업주 해제)은 잠근 뒤 업주 권한을 다시 확인하므로, 해제보다 늦게 잠금을 잡은 이전 업주의 요청은 `403 FORBIDDEN`이다. 같은 업장의 `existing_bar` 신청 승인(3.11.7)과도 차례로 처리된다.
+- 업주가 응답을 받지 못해 다시 보내면 이미 업주가 아니므로 `403 FORBIDDEN`이다. operator가 이미 해제한 업장에 다시 보내면 `404 BAR_OWNER_NOT_FOUND`다.
 
-백엔드는 다음 순서로 확인하고, 처음 걸린 단계의 오류를 반환한다.
+백엔드는 다음 순서로 확인하고, 처음 걸린 단계의 오류를 반환한다. 다른 operator 또는 업주 API처럼 업장을 먼저 확인하므로(2.2), 업장이 없으면 호출자와 관계없이 `404 BAR_NOT_FOUND`다.
 
-1. 호출자가 operator인지 (`403 FORBIDDEN`, 2.2)
-2. 호출자의 `users` 행 (`404 USER_NOT_FOUND`). 해제한 operator를 기록해야 하기 때문이다. 3.11.7과 같다
-3. 업장 (`404 BAR_NOT_FOUND`)
-4. 업장 행을 잠근 뒤 현재 업주 (`404 BAR_OWNER_NOT_FOUND`)
+1. 업장 (`404 BAR_NOT_FOUND`)
+2. 호출자가 operator이거나 그 업장의 현재 업주인지 (`403 FORBIDDEN`, 2.2). 이미 해제된 이전 업주는 업주가 아니다
+3. 업장 행을 잠근 뒤 2를 다시 확인 (`403 FORBIDDEN`)
+4. 호출자의 `users` 행 (`404 USER_NOT_FOUND`). 해제한 사람을 기록해야 하기 때문이다. 3.11.7과 같으며, 행이 없을 수 있는 것은 임시 로그인 operator뿐이다
+5. 현재 업주 (`404 BAR_OWNER_NOT_FOUND`). 업주 본인은 3을 통과했으므로 operator만 받는다
 
 | HTTP | code | 발생 조건 | 프론트엔드 처리 |
 |---|---|---|---|
-| `403` | `FORBIDDEN` | operator가 아님 | 3.1.5 |
+| `403` | `FORBIDDEN` | operator도 그 업장의 현재 업주도 아님. 이미 해제된 이전 업주와, 응답을 받지 못해 다시 보낸 업주의 요청도 포함 | 업주 화면은 `GET /api/me/bars`를 다시 불러 그 업장이 빠졌으면 성공으로 본다. 그 밖에는 3.1.5 |
 | `404` | `USER_NOT_FOUND` | 호출한 operator의 `users` 행이 없음 | `GET /api/me` 호출 후 같은 요청 재시도 |
 | `404` | `BAR_NOT_FOUND` | 업장이 없거나 `barId`가 UUID 형식이 아님 | 업장 목록으로 이동 |
-| `404` | `BAR_OWNER_NOT_FOUND` | 업장에 현재 업주가 없음 | 업장 상세(3.6) 재조회 |
+| `404` | `BAR_OWNER_NOT_FOUND` | operator의 요청인데 업장에 현재 업주가 없음 | 업장 상세(3.6) 재조회 |
 
 #### 3.11.11 업장 이름 검색
 
@@ -2437,7 +2438,7 @@ curl -X PUT https://bottlemap.o-r.kr/api/owner-applications/cccccccc-cccc-4ccc-8
 | `DELETE /api/bars/{barId}/owner` (업주가 없는 업장) | `401` | `403` | `403` | `404` |
 | `GET /api/me/bars` | `401` | `200` (`items = []`) | `200` (본인 업장만) | `200` (`items = []`) |
 
-`POST /api/owner-applications`의 `201`은 각자 자기 신청을 만든 결과다. operator가 아닌 호출자는 대상이 없거나 끝난 신청에도 `403`을 받는다(2.2의 검사 순서).
+`DELETE /api/bars/{barId}/owner`는 업주가 없는 업장에 보낸 결과다. 그 업장의 현재 업주가 보내면 `204`이고, 업장이 없으면 누구든 `404 BAR_NOT_FOUND`다(3.11.10). `POST /api/owner-applications`의 `201`은 각자 자기 신청을 만든 결과다. operator가 아닌 호출자는 대상이 없거나 끝난 신청에도 `403`을 받는다(2.2의 검사 순서).
 
 #### 3.11.19 요청 수 초기화
 
@@ -5530,10 +5531,10 @@ API가 보내는 오류는 예상하지 못한 서버 오류(`500 INTERNAL_ERROR
 |---|---|---|---|
 | `400` | `INVALID_REQUEST` | JSON 또는 multipart 형식 오류 | 요청 구성 확인 |
 | `401` | `UNAUTHENTICATED` | 토큰 없음, 만료, 서명·claim 오류 (3.1.5) | 세션 갱신 후 한 번 재시도. 실패하면 로그인 이동 |
-| `403` | `FORBIDDEN` | 권한이 없는 API 호출: operator 전용 API, 업주가 아닌 업장·작업의 관리 API, 업주의 `status` 변경 (2.2) | 접근 차단 |
+| `403` | `FORBIDDEN` | 권한이 없는 API 호출: operator 전용 API, 업주가 아닌 업장·작업의 관리 API (2.2) | 접근 차단 |
 | `404` | `BAR_NOT_FOUND` | 업장이 없음, `barId` 형식 오류, operator나 업주가 아닌 호출자의 비활성 업장 조회 (3.6, 3.9) | 안내 후 이전 화면 이동 |
 | `404` | `OWNER_APPLICATION_NOT_FOUND` | 업주 신청이 없거나 조회 권한이 없음 (3.11) | 신청 목록 재조회 |
-| `404` | `BAR_OWNER_NOT_FOUND` | 업주 해제 대상 업장에 현재 업주가 없음 (3.11.10) | 업장 상세 재조회 |
+| `404` | `BAR_OWNER_NOT_FOUND` | operator의 업주 해제 대상 업장에 현재 업주가 없음 (3.11.10) | 업장 상세 재조회 |
 | `404` | `MENU_IMPORT_NOT_FOUND` | 등록 작업이 없음 | 작업 목록 이동 |
 | `404` | `MENU_ITEM_NOT_FOUND` | 직접 수정, 삭제할 항목이 현재 메뉴판에 없음. `details.barMenuItemId` (3.14) | 메뉴 다시 조회 |
 | `404` | `MENU_ITEM_CHECK_NOT_FOUND` | 운영자가 처리할 메뉴 항목 확인이 없음. `details.checkId` (3.18.3) | 확인 목록 다시 조회 |

@@ -306,7 +306,7 @@ Table bar_owners {
   application_id uuid [not null, unique, ref: - bar_owner_applications.id]
   created_at timestamptz [not null, note: 'When the application was approved']
   revoked_at timestamptz
-  revoked_by_user_id uuid [ref: > users.id, note: 'The operator who revoked the ownership; set exactly when revoked_at is']
+  revoked_by_user_id uuid [ref: > users.id, note: 'Who revoked the ownership: the operator, or the owner themselves; set exactly when revoked_at is']
 
   indexes {
     bar_id [note: 'Unique where revoked_at is null: at most one current owner per bar']

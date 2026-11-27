@@ -386,8 +386,8 @@ AI가 반환한 최초 분류는 `extracted_items.extracted_line_type`에 변경
 | `user_id` | `uuid`, NOT NULL, FK → `users.id` | 업주 사용자 ID | 한 사용자는 여러 업장의 업주가 될 수 있다. |
 | `application_id` | `uuid`, NOT NULL, UNIQUE, FK → `bar_owner_applications.id` | 승인한 신청 ID | 이 관계를 만든 신청이다. 신청 하나는 관계 하나만 만든다. |
 | `created_at` | `timestamptz`, NOT NULL | `2026-10-14T05:00:00Z` | 승인으로 관계가 시작된 시각이다. |
-| `revoked_at` | `timestamptz`, nullable | `null` | 운영자가 관계를 해제한 시각이다. `null`이면 현재 업주다. |
-| `revoked_by_user_id` | `uuid`, nullable, FK → `users.id` | 운영자 ID | 관계를 해제한 운영자다. |
+| `revoked_at` | `timestamptz`, nullable | `null` | 관계가 해제된 시각이다. 운영자가 해제하거나 업주가 스스로 관리를 끝낸 시각이다. `null`이면 현재 업주다. |
+| `revoked_by_user_id` | `uuid`, nullable, FK → `users.id` | 운영자 또는 업주 본인 ID | 관계를 해제한 사람이다. 운영자가 해제하면 그 운영자, 업주가 스스로 관리를 끝내면 업주 본인이다(API 3.11.10). |
 
 **핵심 제약:** 한 업장에는 현재 업주(`revoked_at`이 `null`인 행)가 최대 한 명이다. PostgreSQL 부분 unique 인덱스(`bar_id` WHERE `revoked_at IS NULL`)와 승인, 해제 시 업장 행 잠금으로 보장한다. 해제는 행을 지우지 않고 `revoked_at`을 기록해 이력을 남기며, `revoked_at`과 `revoked_by_user_id`는 함께 값이 있거나 함께 `null`이다. 업주가 되어도 `users.user_type`은 바뀌지 않는다.
 
