@@ -146,8 +146,12 @@ def call_with_retries(settings: OpenRouterSettings, body: dict[str, Any], client
 
     Raises OpenRouterCreditError on HTTP 402 and ModelCallError on any other failure that is not
     transient or that outlasts the retries.
+
+    An attempt given up at the wall-clock cap (HardTimeout) is abandoned, not cancelled: its POST
+    goes on in its thread and may still be answered and billed. The error then carries
+    `abandoned_attempts`, so the caller can keep the photo's place in the daily paid budget.
     """
-    attempts = 0
+    attempts = abandoned = 0
     while True:
         attempts += 1
         t0 = time.perf_counter()
@@ -155,12 +159,13 @@ def call_with_retries(settings: OpenRouterSettings, body: dict[str, Any], client
             data = _checked(_post_with_deadline(client or httpx, body, settings))
             break
         except ModelCallError as exc:  # raised by _checked without the attempt count
-            raise type(exc)(str(exc), attempts=attempts) from exc
+            raise _with_abandoned(type(exc)(str(exc), attempts=attempts), abandoned) from exc
         except (_Transient, HardTimeout, httpx.TimeoutException, httpx.NetworkError) as exc:
+            abandoned += isinstance(exc, HardTimeout)
             if attempts >= settings.max_attempts:
-                raise ModelCallError(
+                raise _with_abandoned(ModelCallError(
                     f"gave up after {attempts} attempts; last error {type(exc).__name__}: {exc}", attempts=attempts
-                ) from exc
+                ), abandoned) from exc
             wait = min(60, 5 * 2 ** (attempts - 1))
             logger.warning(
                 "openrouter retry %d/%d after %s: %.120s (wait %ds)",
@@ -168,6 +173,12 @@ def call_with_retries(settings: OpenRouterSettings, body: dict[str, Any], client
             )
             sleep(wait)
     return CallResult(data, attempts, round((time.perf_counter() - t0) * 1000))
+
+
+def _with_abandoned(error: ModelCallError, abandoned: int) -> ModelCallError:
+    if abandoned:
+        error.abandoned_attempts = abandoned
+    return error
 
 
 def _post_with_deadline(client: Any, body: dict[str, Any], settings: OpenRouterSettings) -> Any:

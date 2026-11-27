@@ -5,6 +5,7 @@ database (only the extraction_runs table), so they run without PostgreSQL; the P
 the query is checked as text. OpenRouter and Gemini are fakes; no test calls a real API."""
 
 import logging
+from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
@@ -250,6 +251,28 @@ def test_a_cut_answer_that_was_billed_keeps_its_place_when_the_second_call_fails
     assert meta["route"]["stage"] == 2 and budget.used() == 1  # the cut answer was paid for: no refund
     assert meta["route"]["skipped"][0]["billedUsd"] == 0.2
     assert meta["route"]["skipped"][0]["reason"] == "ModelCallError"
+
+
+def test_a_photo_whose_call_was_abandoned_at_the_wall_clock_cap_keeps_its_place():
+    import threading
+
+    release = threading.Event()
+
+    class Hung:
+        def post(self, url, **kwargs):
+            release.wait(5)  # the POST goes on after the cap: it may still be answered and billed
+            return ok()
+
+    route = replace(ROUTE, openrouter=replace(ROUTE.openrouter, max_attempts=1, wall_timeout_s=0.05))
+    budget = DailyPaidBudget(5, lambda since: 0, Clock())
+    try:
+        meta = extract_menu_routed(jpeg(), "image/jpeg", CLOVA, route, CircuitBreaker(), budget=budget,
+                                   http_client=Hung(), gemini_client=gemini_fake())["meta"]
+    finally:
+        release.set()
+
+    assert meta["route"]["stage"] == 2 and budget.used() == 1
+    assert meta["route"]["skipped"][0]["abandonedAttempts"] == 1
 
 
 def test_a_failed_call_without_a_billed_answer_still_gives_its_place_back():

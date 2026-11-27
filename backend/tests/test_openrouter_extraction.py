@@ -283,6 +283,51 @@ def test_a_call_that_hangs_is_given_up_at_the_wall_clock_cap():
         release.set()
 
 
+class HangsFirst:
+    """The first POST hangs until released; later POSTs answer from `then`."""
+
+    def __init__(self, *then):
+        self.release, self.then, self.posts = threading.Event(), list(then), 0
+
+    def post(self, url, **kwargs):
+        self.posts += 1
+        if self.posts == 1:
+            self.release.wait(5)
+            return ok()
+        return self.then.pop(0) if len(self.then) > 1 else self.then[0]
+
+
+def test_an_attempt_given_up_at_the_wall_clock_cap_is_marked_abandoned():
+    client = HangsFirst(failed(503))
+    settings = replace(OPENROUTER, max_attempts=2, wall_timeout_s=0.05)
+    try:
+        with pytest.raises(extraction.ModelCallError, match="gave up after 2 attempts") as caught:
+            openrouter.call_with_retries(settings, body(), client)
+    finally:
+        client.release.set()
+
+    assert caught.value.abandoned_attempts == 1  # the first POST still runs in its thread
+
+
+def test_a_refused_call_after_an_abandoned_attempt_is_marked_too():
+    client = HangsFirst(failed(400, "bad request"))
+    settings = replace(OPENROUTER, max_attempts=3, wall_timeout_s=0.05)
+    try:
+        with pytest.raises(extraction.ModelCallError, match="HTTP 400") as caught:
+            openrouter.call_with_retries(settings, body(), client)
+    finally:
+        client.release.set()
+
+    assert caught.value.abandoned_attempts == 1 and caught.value.attempts == 2
+
+
+def test_a_call_without_an_abandoned_attempt_is_not_marked():
+    with pytest.raises(extraction.ModelCallError) as caught:
+        openrouter.call_with_retries(replace(OPENROUTER, max_attempts=2), body(), FakeHttp(failed(503)))
+
+    assert not hasattr(caught.value, "abandoned_attempts")
+
+
 def test_the_default_client_is_httpx(monkeypatch):
     http = FakeHttp(ok())
     monkeypatch.setattr(httpx, "post", http.post)

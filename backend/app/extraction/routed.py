@@ -218,10 +218,13 @@ def extract_menu_routed(
             call = _call_openrouter(route.openrouter, prompt, ocr, http_client)
         except ModelCallError as error:
             billed = getattr(error, "billed_usd", None)  # a cut answer arrived and was billed first
-            if budget is not None and billed is None:
+            # a POST given up at the wall-clock cap still runs and may be billed: keep the place
+            abandoned = getattr(error, "abandoned_attempts", 0)
+            if budget is not None and billed is None and not abandoned:
                 budget.refund(reserved)  # OpenRouter did not answer: the photo was not read through it
             paused = breaker.record_failure()
-            skipped.append(_skip(0, error) | ({"billedUsd": billed} if billed is not None else {}))
+            skipped.append(_skip(0, error) | ({"billedUsd": billed} if billed is not None else {})
+                           | ({"abandonedAttempts": abandoned} if abandoned else {}))
             logger.warning("extraction route stage=0 failed (%s: %.200s)%s", type(error).__name__, error,
                            f"; OpenRouter is paused for {route.breaker_cooldown_s:.0f}s" if paused else "")
         else:
