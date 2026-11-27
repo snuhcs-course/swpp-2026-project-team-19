@@ -91,6 +91,38 @@ on the deployed server.
 
 ## CI / verification
 
+### Build versions (I5-P28)
+
+Every Gradle invocation that configures `:app` allocates a new `versionCode`:
+the greater of UTC seconds since 2020-01-01 and the previous local code + 1.
+All APK/AAB variants in that invocation share the code. The locked counter lives
+in the ignored root `.gradle/bottlemap/version-code`, survives `clean`, and also
+prevents reuse after clock rollback or a rapid rebuild. Configuration-cache
+validation allocates a fresh value too; code gaps after sync, tests or failed
+builds are expected. A malformed/exhausted counter fails the build.
+
+`versionName` defaults to `0.1.0` in `versioning.gradle.kts`. Change that default
+for the next public release, or pass `-PBOTTLEMAP_VERSION_NAME=0.1.1` explicitly.
+Use the Android Git tag `android/v0.1.1` for that name, on the release commit.
+If HEAD has any `android/v*` tags, a name mismatch fails configuration. Untagged
+development builds remain supported. Fetch release tags before preparing a
+release; a source ZIP without Git metadata is not a supported build input.
+The Gradle log prints the name, allocated code and expected release tag; the
+packaged values are also in `app/build/outputs/apk/debug/output-metadata.json`.
+
+The counter is local to a checkout, not a global release-number service.
+Use one release publishing source, build releases in order, and check that a
+new artifact's code exceeds the last distributed code. Separate machines or
+checkouts building in the same second can allocate the same code; do not
+publish both. Preserve the counter when rebuilding after clock rollback.
+
+An upgrade requires the same application ID **and signing certificate** as the
+installed APK. Use `installDebug` without uninstalling or clearing app data;
+check the installed name/code before and after and verify sign-in, local drafts
+and customer/owner flows on Galaxy S23. An APK signature failure must be solved
+with the original signing key, not by deleting the user's data. Store-signed
+installations must be updated through their matching signing/distribution path.
+
 From the repository root:
 
 ```powershell
