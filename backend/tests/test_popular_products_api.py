@@ -163,6 +163,13 @@ def test_bar_count_is_the_number_of_bars_a_product_id_search_shows(client, db_se
     assert card["barCount"] == 2
     assert len(search["items"]) == search["matchedProducts"][0]["resultCount"] == card["barCount"]
 
+    # A search that also lists sold-out rows shows the sold-out bar, but neither count includes it.
+    params = {"productId": card["productId"], "includeSoldOut": "true"}
+    with_sold_out = client.get("/api/search/bars", params=params).json()
+    assert [i["soldOut"] for i in with_sold_out["items"]] == [False, False, True]
+    assert with_sold_out["matchedProducts"][0]["resultCount"] == 2
+    assert popular(client)[0]["barCount"] == 2
+
 
 def test_inactive_products_are_left_out(client, db_session, brand):
     retired = product(db_session, brand, "Retired", is_active=False)

@@ -737,10 +737,11 @@ Table bar_menu_items {
   Checks: (product_id IS NULL) = (name_key IS NOT NULL); kind = 'other' implies product_id IS NULL.
   PostgreSQL treats null product_id values as distinct, so the (bar_id, product_id) unique index still holds.
   Membership in the bar's current menu board decides whether the item is on the menu: linked means on the board;
-  unlinked means retained but not on the board. Customers see a linked item only while it is not sold out.
+  unlinked means retained but not on the board. Customers see a linked item in the bar menu only while it is not sold out.
   No separate visibility status is stored.
-  Sold-out is stock state: a sold-out item stays on the board, but customers and search do not see it;
-  only the owner and operators see it, marked as sold out.
+  Sold-out is stock state: a sold-out item stays on the board, but customers do not see it in the bar menu;
+  only the owner and operators see it there, marked as sold out. Customer search leaves it out by default and
+  lists it marked as sold out, after the selling bars, only with includeSoldOut=true (API spec 3.10.2).
   It lives here because bar_menu_items rows survive board rewrites, while board entries do not.
   '''
 }

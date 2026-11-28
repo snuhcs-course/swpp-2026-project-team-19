@@ -4,7 +4,7 @@ from datetime import datetime, timedelta, timezone
 import pytest
 from sqlalchemy import select
 
-from app.models import BarMenuItem, BarStatus, MenuBoardEntry
+from app.models import BarMenuItem, BarStatus, MenuBoardEntry, ProductSearchCount
 from app.services.search import distance_meters
 from tests.auth_support import connection_error, new_signing_key
 from tests.factories import make_bar, make_brand, make_product, publish_menu
@@ -69,6 +69,7 @@ def test_exact_alias_search_returns_bar_rows(client, db_session, glenfiddich):
                 {"optionLabel": "병", "pourMl": None, "priceKrw": 200000, "discount": None, "sortOrder": 2},
             ],
             "menuUpdatedAt": "2026-10-04T09:15:00Z",
+            "soldOut": False,
         }
     ]
 
@@ -224,6 +225,167 @@ def test_sold_out_items_are_left_out_for_every_caller(client, db_session, glenfi
     assert len(search(client, query="글렌피딕 12년")["items"]) == 2
 
 
+# ---- includeSoldOut: sold-out rows after the selling rows (spec 3.10.2) ----
+
+
+def sell_at(db_session, product, *bars, published_at=T0):
+    for bar in bars:
+        publish_menu(db_session, bar, [(product, "글렌피딕 12년", [("잔", 30, 17000)])], published_at=published_at)
+
+
+def mark_sold_out(db_session, bar, sold_out_at=T0):
+    item = db_session.scalar(select(BarMenuItem).where(BarMenuItem.bar_id == bar.id))
+    item.sold_out_at = sold_out_at
+    db_session.flush()
+    return item
+
+
+def rows(body):
+    return [(i["barName"], i["soldOut"]) for i in body["items"]]
+
+
+@pytest.mark.parametrize("params", [{}, {"includeSoldOut": "false"}], ids=["not sent", "false"])
+def test_without_include_sold_out_sold_out_bars_are_left_out(client, db_session, glenfiddich, params):
+    selling, sold_out = make_bar(db_session, "Selling"), make_bar(db_session, "Sold out")
+    sell_at(db_session, glenfiddich[12], selling, sold_out)
+    mark_sold_out(db_session, sold_out)
+
+    body = search(client, query="글렌피딕 12년", **params)
+
+    assert rows(body) == [("Selling", False)]
+    assert (body["matchedProducts"][0]["resultCount"], body["truncated"]) == (1, False)
+
+
+@pytest.mark.parametrize("location", [{}, ORIGIN], ids=["no location", "with location"])
+def test_sold_out_bars_come_after_every_selling_bar(client, db_session, glenfiddich, location):
+    # The sold-out bar is the nearest and has the newest menu, so it would come first by either order.
+    newest_nearest = make_bar(db_session, "A Sold out", latitude="37.478000", longitude="126.951000")
+    near_selling = make_bar(db_session, "B Near", latitude="37.488000", longitude="126.951000")
+    far_selling = make_bar(db_session, "C Far", latitude="37.498000", longitude="126.951000")
+    far_sold_out = make_bar(db_session, "D Far sold out", latitude="37.508000", longitude="126.951000")
+    sell_at(db_session, glenfiddich[12], newest_nearest, published_at=T0 + timedelta(days=2))
+    sell_at(db_session, glenfiddich[12], near_selling, published_at=T0 + timedelta(days=1))
+    sell_at(db_session, glenfiddich[12], far_selling, far_sold_out, published_at=T0)
+    mark_sold_out(db_session, newest_nearest)
+    mark_sold_out(db_session, far_sold_out)
+
+    body = search(client, query="글렌피딕 12년", includeSoldOut="true", **location)
+
+    # Each group keeps the usual order: nearest first with a location, newest menu (then name) without.
+    assert rows(body) == [
+        ("B Near", False),
+        ("C Far", False),
+        ("A Sold out", True),
+        ("D Far sold out", True),
+    ]
+    assert body["matchedProducts"][0]["resultCount"] == 2
+
+
+def test_a_sold_out_row_carries_the_same_bar_product_and_options(client, db_session, glenfiddich):
+    selling, sold_out = make_bar(db_session, "Selling"), make_bar(db_session, "Sold out")
+    sell_at(db_session, glenfiddich[12], selling, sold_out)
+    mark_sold_out(db_session, sold_out)
+
+    before = search(client, query="글렌피딕 12년", includeSoldOut="true")["items"]
+    mark_sold_out(db_session, sold_out, None)
+    after = search(client, query="글렌피딕 12년", includeSoldOut="true")["items"]
+
+    [sold_out_row] = [i for i in before if i["soldOut"]]
+    [same_row_selling] = [i for i in after if i["barId"] == str(sold_out.id)]
+    assert set(sold_out_row) == ITEM_FIELDS
+    assert {**sold_out_row, "soldOut": False} == same_row_selling
+
+
+def test_a_product_only_sold_out_still_has_rows(client, db_session, glenfiddich):
+    sold_out = make_bar(db_session, "Sold out")
+    sell_at(db_session, glenfiddich[12], sold_out)
+    mark_sold_out(db_session, sold_out)
+
+    assert search(client, query="글렌피딕 12년")["items"] == []
+    body = search(client, query="글렌피딕 12년", includeSoldOut="true")
+
+    assert rows(body) == [("Sold out", True)]
+    assert (body["matchedProducts"][0]["resultCount"], body["truncated"]) == (0, False)
+    by_id = search(client, productId=str(glenfiddich[12].id), includeSoldOut="true")
+    assert by_id["items"] == body["items"]
+
+
+def test_limit_keeps_the_selling_rows_first(client, db_session, glenfiddich):
+    sold_out_bars = [make_bar(db_session, f"A Sold out {n}") for n in range(2)]
+    selling_bars = [make_bar(db_session, f"B Selling {n}") for n in range(2)]
+    sell_at(db_session, glenfiddich[12], *sold_out_bars, *selling_bars)
+    for bar in sold_out_bars:
+        mark_sold_out(db_session, bar)
+
+    two = search(client, query="글렌피딕 12년", includeSoldOut="true", limit=2)
+    three = search(client, query="글렌피딕 12년", includeSoldOut="true", limit=3)
+
+    assert (rows(two), two["truncated"]) == ([("B Selling 0", False), ("B Selling 1", False)], True)
+    assert rows(three)[2:] == [("A Sold out 0", True)]
+    assert three["truncated"] is True
+    assert two["matchedProducts"][0]["resultCount"] == 2
+
+
+def test_putting_an_item_back_on_sale_makes_its_row_selling_again(client, db_session, glenfiddich):
+    first, second = make_bar(db_session, "A Bar"), make_bar(db_session, "B Bar")
+    sell_at(db_session, glenfiddich[12], first, second)
+    mark_sold_out(db_session, first)
+    assert rows(search(client, query="글렌피딕 12년", includeSoldOut="true")) == [("B Bar", False), ("A Bar", True)]
+
+    mark_sold_out(db_session, first, None)
+
+    assert rows(search(client, query="글렌피딕 12년", includeSoldOut="true")) == [("A Bar", False), ("B Bar", False)]
+
+
+def test_include_sold_out_keeps_every_other_exclusion(client, db_session, glenfiddich):
+    closed = make_bar(db_session, "Closed", status=BarStatus.INACTIVE)
+    sell_at(db_session, glenfiddich[12], closed)
+    mark_sold_out(db_session, closed)
+    dropped = make_bar(db_session, "Dropped")
+    # Sold out before it left the board.
+    db_session.add(BarMenuItem(bar_id=dropped.id, product_id=glenfiddich[12].id, sold_out_at=T0))
+    db_session.flush()
+
+    body = search(client, query="글렌피딕 12년", includeSoldOut="true")
+
+    assert (body["items"], body["matchedProducts"][0]["resultCount"]) == ([], 0)
+
+
+def test_brand_search_with_sold_out_rows_keeps_the_exact_product_first_in_each_group(client, db_session, yoichi):
+    for name, product, sold_out in [
+        ("A Ten", "10", False),
+        ("B Ten sold out", "10", True),
+        ("C Malt", "single malt", False),
+        ("D Malt sold out", "single malt", True),
+    ]:
+        bar = make_bar(db_session, name)
+        publish_menu(db_session, bar, [(yoichi[product], "요이치", [(None, 30, 1)])], published_at=T0)
+        if sold_out:
+            mark_sold_out(db_session, bar)
+
+    body = search(client, query="요이치", includeSoldOut="true")
+
+    assert rows(body) == [
+        ("C Malt", False),
+        ("A Ten", False),
+        ("D Malt sold out", True),
+        ("B Ten sold out", True),
+    ]
+    assert [p["resultCount"] for p in body["matchedProducts"]] == [1, 1]
+
+
+def test_include_sold_out_does_not_change_what_is_counted(client, db_session, glenfiddich):
+    sold_out = make_bar(db_session, "Sold out")
+    sell_at(db_session, glenfiddich[12], sold_out)
+    mark_sold_out(db_session, sold_out)
+
+    search(client, query="글렌피딕 12년", includeSoldOut="true")
+    search(client, query="글렌피딕 12년")
+
+    counts = db_session.scalars(select(ProductSearchCount.search_count)).all()
+    assert counts == [2]
+
+
 def test_brand_search_lists_the_exact_product_first(client, db_session, yoichi):
     # The 10 is sold nearer, but the customer typed the Single Malt's name.
     near = make_bar(db_session, "Near Bar", latitude="37.488000", longitude="126.951000")
@@ -315,6 +477,7 @@ def test_query_of_exactly_100_characters_after_trimming_is_accepted(client, db_s
         ({"query": "x", "lat": 0, "lng": -181}, "lng", "GREATER_THAN_EQUAL"),
         ({"query": "x", "limit": 0}, "limit", "GREATER_THAN_EQUAL"),
         ({"query": "x", "limit": 101}, "limit", "LESS_THAN_EQUAL"),
+        ({"query": "x", "includeSoldOut": "abc"}, "includeSoldOut", "BOOL_PARSING"),
     ],
 )
 def test_invalid_input_returns_validation_failed(client, params, path, code):
@@ -540,6 +703,7 @@ ITEM_FIELDS = {
     "menuDisplayName",
     "options",
     "menuUpdatedAt",
+    "soldOut",
 }
 OPTION_FIELDS = {"optionLabel", "pourMl", "priceKrw", "discount", "sortOrder"}
 

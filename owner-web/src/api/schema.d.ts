@@ -358,7 +358,7 @@ export interface paths {
          * Mark a menu item sold out, or back on sale
          * @description Operator or the bar's owner. Accepted while the bar has an unfinished import, since neither changes the menu's content: `menuVersion` does not go up and `publishedAt` stays.
          *
-         *     - The whole item goes sold out, not single options. Customers no longer see it in the bar menu or in search; operators and the owner get it in place with `soldOut: true`.
+         *     - The whole item goes sold out, not single options. Customers no longer see it in the bar menu; operators and the owner get it in place with `soldOut: true`. Customer search leaves it out unless it is called with `includeSoldOut=true`, which lists it with `soldOut: true` after the selling bars.
          *     - It sets a value, so sending the same request again gives the same result (`200`).
          *     - It stays while the item is on the menu, through edits and review publishes, and clears when the item leaves the menu.
          *     - The response is the menu as in `GET /api/bars/{barId}/menu`, sold-out items included.
@@ -536,7 +536,7 @@ export interface paths {
          *
          *     A `productId` search skips these steps: `product` with that product when it is active, otherwise `none` (also for an unknown id, never `404`). `query` is then null.
          *
-         *     **Results.** One row per bar x product, for products on an active bar's current menu board and not sold out. Rows of products whose alias equals the query come first; within each group, sorted by `distanceMeters` when lat/lng are sent, otherwise by `menuUpdatedAt` (newest first); ties by bar name, then product name. At most `limit` rows; `truncated` tells whether more matched. `options[].discount` is the same as on the bar menu: only discounts that have not ended, and `priceKrw` is always the list price.
+         *     **Results.** One row per bar x product, for products on an active bar's current menu board and not sold out. With `includeSoldOut=true`, rows whose item is sold out are returned too, with `soldOut: true`, after every selling row; otherwise they are left out and `soldOut` is always false. `matchedProducts[].resultCount` counts only selling rows either way. Within the selling and the sold-out rows, rows of products whose alias equals the query come first; within each group, sorted by `distanceMeters` when lat/lng are sent, otherwise by `menuUpdatedAt` (newest first); ties by bar name, then product name. At most `limit` rows; `truncated` tells whether more matched. `options[].discount` is the same as on the bar menu: only discounts that have not ended, and `priceKrw` is always the list price.
          *
          *     **Empty results** are `200`: `matchedProducts: []` means the name was not recognized (or the product of `productId` is gone); `items: []` with products means no bar currently sells them.
          *
@@ -562,7 +562,7 @@ export interface paths {
          * The popular whiskies for the customer home screen
          * @description Public; the Authorization header is not read, so every caller gets the same result.
          *
-         *     - Only active products that at least one active bar sells now, not sold out. `barCount` is the number of those bars, the same bars a `productId` search shows.
+         *     - Only active products that at least one active bar sells now, not sold out. `barCount` is the number of those bars, the same bars a `productId` search shows as selling (its sold-out rows with `includeSoldOut=true` are not counted).
          *     - Products searched at least 3 times in the last 30 Seoul dates (today included, every `source`) come first, most searched first; ties by `barCount` (most first), `displayName`, `productId`. The rest of the list is filled with the other products by `barCount`, `displayName`, `productId`.
          *     - Search counts are not sent.
          *     - No product sold anywhere is `200` with `items: []`; hide the section then.
@@ -2693,7 +2693,7 @@ export interface components {
             editionName: string | null;
             /**
              * Resultcount
-             * @description Result rows for this product before `limit` is applied; 0 when no bar sells it now
+             * @description Selling result rows for this product before `limit` is applied, sold-out rows not counted; 0 when no bar sells it now
              */
             resultCount: number;
         };
@@ -3799,7 +3799,7 @@ export interface components {
             matchedProducts: components["schemas"]["MatchedProductResponse"][];
             /**
              * Items
-             * @description One row per bar x product. Empty with non-empty matchedProducts means the product was recognized but no active bar currently sells it.
+             * @description One row per bar x product, selling rows first, then sold-out rows (includeSoldOut only). Empty with non-empty matchedProducts means the product was recognized but no active bar currently sells it (nor has it sold out, with includeSoldOut).
              */
             items: components["schemas"]["SearchResultItem"][];
             /**
@@ -3890,6 +3890,11 @@ export interface components {
              * @description When this bar's current menu was published
              */
             menuUpdatedAt: string;
+            /**
+             * Soldout
+             * @description True when the bar has this item on its menu but sold out; only with includeSoldOut=true. Sold-out rows come after every selling row
+             */
+            soldOut: boolean;
         };
         /** SelectExistingProduct */
         SelectExistingProduct: {
@@ -6023,6 +6028,8 @@ export interface operations {
                 limit?: number;
                 /** @description Where the search started: the search box, a recent search, or a popular-whisky card. Only for the search counts; the results do not depend on it. */
                 source?: "input" | "recent" | "popular";
+                /** @description Also return rows whose item is sold out, marked `soldOut` and after the selling rows */
+                includeSoldOut?: boolean;
             };
             header?: never;
             path?: never;
@@ -6039,7 +6046,7 @@ export interface operations {
                     "application/json": components["schemas"]["SearchBarsResponse"];
                 };
             };
-            /** @description `VALIDATION_FAILED`. Format and range errors come together: `productId` `UUID_PARSING`; `source` `LITERAL_ERROR`; `lat`/`lng` `FLOAT_PARSING`, `GREATER_THAN_EQUAL` or `LESS_THAN_EQUAL`; `limit` `INT_PARSING`, `GREATER_THAN_EQUAL` or `LESS_THAN_EQUAL`. Then one at a time: `productId` `EXACTLY_ONE_REQUIRED` (both or neither of `query` and `productId`), `query` `BLANK` (only spaces), `STRING_TOO_LONG` (over 100 characters after trimming), `lat`/`lng` `LAT_LNG_REQUIRED_TOGETHER`, `query` `NOT_SEARCHABLE` (nothing left after normalization). */
+            /** @description `VALIDATION_FAILED`. Format and range errors come together: `productId` `UUID_PARSING`; `source` `LITERAL_ERROR`; `includeSoldOut` `BOOL_PARSING`; `lat`/`lng` `FLOAT_PARSING`, `GREATER_THAN_EQUAL` or `LESS_THAN_EQUAL`; `limit` `INT_PARSING`, `GREATER_THAN_EQUAL` or `LESS_THAN_EQUAL`. Then one at a time: `productId` `EXACTLY_ONE_REQUIRED` (both or neither of `query` and `productId`), `query` `BLANK` (only spaces), `STRING_TOO_LONG` (over 100 characters after trimming), `lat`/`lng` `LAT_LNG_REQUIRED_TOGETHER`, `query` `NOT_SEARCHABLE` (nothing left after normalization). */
             422: {
                 headers: {
                     [name: string]: unknown;

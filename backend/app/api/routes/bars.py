@@ -549,8 +549,9 @@ _STATUS_RULES = (
     summary="Mark a menu item sold out, or back on sale",
     description=(
         _STATUS_RULES
-        + "\n\n- The whole item goes sold out, not single options. Customers no longer see it in the bar menu "
-        "or in search; operators and the owner get it in place with `soldOut: true`.\n"
+        + "\n\n- The whole item goes sold out, not single options. Customers no longer see it in the bar menu; "
+        "operators and the owner get it in place with `soldOut: true`. Customer search leaves it out unless it "
+        "is called with `includeSoldOut=true`, which lists it with `soldOut: true` after the selling bars.\n"
         "- It sets a value, so sending the same request again gives the same result (`200`).\n"
         "- It stays while the item is on the menu, through edits and review publishes, and clears when the "
         "item leaves the menu.\n"
