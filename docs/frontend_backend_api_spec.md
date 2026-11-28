@@ -1263,7 +1263,8 @@ options
           "sortOrder": 2
         }
       ],
-      "menuUpdatedAt": "2026-10-04T09:15:00Z"
+      "menuUpdatedAt": "2026-10-04T09:15:00Z",
+      "soldOut": false
     },
     {
       "barId": "33333333-3333-4333-8333-333333333333",
@@ -1285,7 +1286,8 @@ options
           "sortOrder": 1
         }
       ],
-      "menuUpdatedAt": "2026-10-02T11:00:00Z"
+      "menuUpdatedAt": "2026-10-02T11:00:00Z",
+      "soldOut": false
     }
   ],
   "truncated": false
